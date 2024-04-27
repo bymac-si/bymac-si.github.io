@@ -13,24 +13,15 @@
 
         // Obtener los parámetros de la URL
 	var comanda = obtenerParametro('COMANDA');
-        var producto = obtenerParametro('producto');
-        var cantidad = obtenerParametro('cantidad');
-        var precio = obtenerParametro('precio');
 
         // Escribir la información en el documento HTML
         window.onload = function() {
 	    document.getElementById('comanda').innerHTML = comanda;
-            document.getElementById('producto').innerHTML = producto;
-            document.getElementById('cantidad').innerHTML = cantidad;
-            document.getElementById('precio').innerHTML = precio;
         };
     </script>
 </head>
 <body>
     <h1>Ticket de Venta</h1>
     <p><strong>Comanda:</strong> <span id="comanda"></span></p>
-    <p><strong>Producto:</strong> <span id="producto"></span></p>
-    <p><strong>Cantidad:</strong> <span id="cantidad"></span></p>
-    <p><strong>Precio:</strong> <span id="precio"></span></p>
 </body>
 </html>
