@@ -13,15 +13,18 @@
 
         // Obtener los parámetros de la URL
 	var comanda = obtenerParametro('COMANDA');
+	    var mesero = obtenerparametro('MESERO');
 
         // Escribir la información en el documento HTML
         window.onload = function() {
 	    document.getElementById('comanda').innerHTML = comanda;
+	    document.getElementById('mesero').innerHTML = mesero;
         };
     </script>
 </head>
 <body>
     <h1>Ticket de Venta</h1>
     <p><strong>Comanda:</strong> <span id="comanda"></span></p>
+    <p><strong>Mesero:</strong> <span id="mesero"></span></p>
 </body>
 </html>
