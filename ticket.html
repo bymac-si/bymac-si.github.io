@@ -5,6 +5,26 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Comanda &lt;&lt;[comanda]&gt;&gt; </title>
+        <script>
+            // Función para obtener parámetros de la URL
+            function obtenerParametro(nombre) {
+                nombre = nombre.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+                var regex = new RegExp('[\\?&]' + nombre + '=([^&#]*)');
+                var resultados = regex.exec(location.search);
+                return resultados === null ? '' : decodeURIComponent(resultados[1].replace(/\+/g, ' '));
+            }
+    
+            // Obtener los parámetros de la URL
+        var comanda = obtenerParametro('COMANDA');
+        var fecha = obtenerParametro('FECHA');
+        
+    
+            // Escribir la información en el documento HTML
+            window.onload = function() {
+            document.getElementById('comanda').innerHTML = comanda;
+            document.getElementById('fecha').innerHTML = fecha;
+            };
+        </script>
   <style type="text/css" media="print">
   @page {
         display:block;
@@ -69,26 +89,7 @@
   <script src="script.js"></script>
   <script src="./ConectorEscposAndroid.js" type="text/javascript"></script>
   <script src="./main.js" type="text/javascript"></script>
-  <script>
-        // Función para obtener parámetros de la URL
-        function obtenerParametro(nombre) {
-            nombre = nombre.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-            var regex = new RegExp('[\\?&]' + nombre + '=([^&#]*)');
-            var resultados = regex.exec(location.search);
-            return resultados === null ? '' : decodeURIComponent(resultados[1].replace(/\+/g, ' '));
-        }
-
-        // Obtener los parámetros de la URL
-	var comanda = obtenerParametro('COMANDA');
-	var fecha = obtenerParametro('FECHA');
-	
-
-        // Escribir la información en el documento HTML
-        window.onload = function() {
-	    document.getElementById('comanda').innerHTML = comanda;
-	    document.getElementById('fecha').innerHTML = fecha;
-        };
-    </script>
+  
 </head>
 <body>
     <h1>Ticket de Venta</h1>
