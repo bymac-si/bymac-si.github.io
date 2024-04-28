@@ -15,12 +15,14 @@
             }
     
             // Obtener los parámetros de la URL
+        var logo = obtenerParametro('Logo');
         var comanda = obtenerParametro('COMANDA');
         var fecha = obtenerParametro('FECHA');
         
     
             // Escribir la información en el documento HTML
             window.onload = function() {
+            document.getElementById('logo').innerHTML =logo;
             document.getElementById('comanda').innerHTML = comanda;
             document.getElementById('fecha').innerHTML = fecha;
             };
@@ -93,6 +95,7 @@
 </head>
 <body>
     <h2 style="color:red;">Ticket de Venta</h2>
+    <p><span id='logo'></span></p>
     <h1  class="btn btn-dark">Comanda: <span id="comanda"></span></h1>
     <p><strong>Fecha:</strong> <span id="fecha"></span></p>
     
