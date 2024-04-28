@@ -17,16 +17,14 @@
             // Obtener los parámetros de la URL
         var comanda = obtenerParametro('COMANDA');
         var fecha = obtenerParametro('FECHA');
-        var cantidad = obtenerParametro('CANTIDAD');
-        var producto = obtenerParametro('PRODUCTO')
+        var resumen = obtenerParametro('resumen')
         
     
             // Escribir la información en el documento HTML
             window.onload = function() {
             document.getElementById('comanda').innerHTML = comanda;
             document.getElementById('fecha').innerHTML = fecha;
-            document.getElementById('cantidad').innerHTML = cantidad;
-            document.getElementById('producto').innerHTML = producto;
+            document.getElementById('resumen').innerHTML = resumen;
             };
         </script>
   <style type="text/css" media="print">
@@ -128,22 +126,7 @@
             <p class="fs-3"><i class="fa-regular fa-file-lines fs-3"></i> Comanda: <span id="comanda" class="fs-3"></span></p>
             <p class="fs-3"><i class="fa-regular fa-calendar fs-3"></i> Fecha: <span id="fecha" class="fs-3"></span></p>  
             
-            <table class="table table-sm">
-                  <thead>
-                  <th scope="col" class="cantidad">CANT.</th>
-                  <th scope="col" class="producto">PRODUCTO</th>
-                  <th scope="col" class="precio text-end ps-2">SUBTOTAL</th>
-                  </thead>
-                          <tbody>
-                                 <tr>
-                  <td class="cantidad fw-bold"><span id="cantidad"></span></td>
-                               <td class="producto fw-bold" id="producto"></td> 
-                                  <td class="precio text-end ps-2 fw-bold">$ &lt;&lt;[COSTO]&gt;&gt;</td>
-                              </tr>
-                              <tr>
-                                    <td class="cantidad fw-bold"></td><td class=" fw-bold" colspan="2">&lt;&lt;[OBSERVACIONES]&gt;&gt;</td></tr>
-                                     </tbody>
-                      </table> 
+            <p id="resumen"></p> 
             </div> 
       </div>
 </div>
