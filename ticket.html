@@ -17,7 +17,8 @@
             // Obtener los parámetros de la URL
         var comanda = obtenerParametro('COMANDA');
         var fecha = obtenerParametro('FECHA');
-        var cantidad =obtenerParametro('CANTIDAD');
+        var cantidad = obtenerParametro('CANTIDAD');
+        var producto = obtenerParametro('PRODUCTO')
         
     
             // Escribir la información en el documento HTML
@@ -25,6 +26,7 @@
             document.getElementById('comanda').innerHTML = comanda;
             document.getElementById('fecha').innerHTML = fecha;
             document.getElementById('cantidad').innerHTML = cantidad;
+            document.getElementById('producto').innerHTML = producto;
             };
         </script>
   <style type="text/css" media="print">
@@ -135,12 +137,11 @@
                           <tbody>
                                  <tr>
                   <td class="cantidad fw-bold"><span id="cantidad"></span></td>
-                               <td class="producto fw-bold">&lt;&lt;[PRODUCTO]&gt;&gt;</td> 
+                               <td class="producto fw-bold" id="producto"></td> 
                                   <td class="precio text-end ps-2 fw-bold">$ &lt;&lt;[COSTO]&gt;&gt;</td>
                               </tr>
                               <tr>
                                     <td class="cantidad fw-bold"></td><td class=" fw-bold" colspan="2">&lt;&lt;[OBSERVACIONES]&gt;&gt;</td></tr>
-                              <p>&lt;&lt;End&gt;&gt;</p>
                                      </tbody>
                       </table> 
             </div> 
