@@ -29,6 +29,7 @@
                 // Mostrar cada línea del resumen en un párrafo separado
                 lineasResumen.forEach(function(linea) {
                     var parrafo = document.createElement('p');
+                    parrafo.classList.add('fs-4');
                     parrafo.innerHTML = linea;
                     document.getElementById('resumen').appendChild(parrafo);
                 });
