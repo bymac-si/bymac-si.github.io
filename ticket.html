@@ -21,13 +21,14 @@
         
             // Convertir la cadena resumen en un array separado por saltos de línea
             var lineasResumen = resumen.split('\n');
+            var resumenSinComa = lineasResumen.join('');
         
             // Escribir la información en el documento HTML
             window.onload = function() {
                 document.getElementById('comanda').innerHTML = comanda;
                 document.getElementById('fecha').innerHTML = fecha;
                 // Mostrar cada línea del resumen en un párrafo separado
-                lineasResumen.forEach(function(linea) {
+                resumenSinComa.forEach(function(linea) {
                     var parrafo = document.createElement('p');
                     parrafo.classList.add('fs-5', 'text-uppercase', 'text-start');
                     parrafo.innerHTML = linea;
@@ -134,7 +135,7 @@
             <p class="fs-3"><i class="fa-regular fa-file-lines fs-3"></i> Comanda: <span id="comanda" class="fs-3"></span></p>
             <p class="fs-3"><i class="fa-regular fa-calendar fs-3"></i> Fecha: <span id="fecha" class="fs-3"></span></p>  
             
-            <p>,<span id="resumen" class="fs-4"></span> </p>
+            <span id="resumen" class="fs-4"></span>
             </div> 
       </div>
 </div>
