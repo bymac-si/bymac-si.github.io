@@ -28,7 +28,7 @@
                 document.getElementById('fecha').innerHTML = fecha;
                 // Mostrar cada línea del resumen en un párrafo separado
                 lineasResumen.forEach(function(linea) {
-                    var parrafo = document.createElement('p class="fs-4"');
+                    var parrafo = document.createElement('p');
                     parrafo.innerHTML = linea;
                     document.getElementById('resumen').appendChild(parrafo);
                 });
@@ -89,6 +89,9 @@
   .printbutton {
               cursor: pointer;
           }
+  #resumen p{
+      size: 1.3em;
+  }
   </style>
   <link rel="stylesheet" href="bootstrap-print.min.css" media="print">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
