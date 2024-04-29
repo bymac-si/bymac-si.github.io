@@ -28,7 +28,7 @@
                 document.getElementById('fecha').innerHTML = fecha;
                 // Mostrar cada línea del resumen en un párrafo separado
                 lineasResumen.forEach(function(linea) {
-                    var parrafo = document.createElement('p');
+                    var parrafo = document.createElement('li');
                     parrafo.innerHTML = linea;
                     document.getElementById('resumen').appendChild(parrafo);
                 });
