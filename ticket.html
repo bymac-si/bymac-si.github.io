@@ -22,6 +22,7 @@
             var subtotal = obtenerParametro('subtotal');
             var propina = obtenerParametro('propina');
             var total = obtenerParametro('total');
+            var domicilio = obtenerParametro('domicilio');
         
             // Convertir la cadena resumen en un array separado por saltos de línea
             var lineasResumen = resumen.split('\n');
@@ -40,6 +41,7 @@
                 document.getElementById('subtotal').innerHTML = subtotal;
                 document.getElementById('propina').innerHTML = propina;
                 document.getElementById('total').innerHTML = total;
+                document.getElementById('domicilio').innerHTML = domicilio;
                 });
             };
         </script>
