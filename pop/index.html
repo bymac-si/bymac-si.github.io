@@ -3,30 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AppSheet Data Fetcher</title>
-</head>
-<body>
-  <h1>Datos de AppSheet</h1>
-  <ul id="data-list"></ul>
-
-  <script>
-    async function fetchData() {
-      try {
-        const response = await fetch('https://script.google.com/macros/s/AKfycbwOrRxhTNRXXkuYKyxis-PzDDlsaG7LMY5mk9jVU1641yVTcODF0nF-T2JhqYixgC8T/exec');
-        const data = await response.json();
-        const dataList = document.getElementById('data-list');
-        
-        data.forEach(item => {
-          const listItem = document.createElement('li');
-          listItem.textContent = JSON.stringify(item);
-          dataList.appendChild(listItem);
-        });
-      } catch (error) {
-        console.error('Error al obtener datos:', error);
+    <title>Order Form</title>
+    <script>
+      async function sendOrder(event) {
+        event.preventDefault();
+  
+        const items = Array.from(document.querySelectorAll('.item')).map(item => ({
+          name: item.querySelector('.name').value,
+          quantity: item.querySelector('.quantity').value,
+          type: item.querySelector('.type').value
+        }));
+  
+        const order = { items };
+  
+        try {
+          const response = await fetch('https://script.google.com/macros/s/AKfycbwolSmQO7Yta9L8XGCDoRisO6mT-L1jKwNd9nmslUmOxXZrYXUWM1jHM7BLYzueL8qG/exec', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(order)
+          });
+  
+          const result = await response.text();
+          alert(result);
+        } catch (error) {
+          console.error('Error sending order:', error);
+        }
       }
-    }
-
-    fetchData();
-  </script>
-</body>
-</html>
+  
+      function addItem() {
+        const itemContainer = document.createElement('div');
+        itemContainer.className = 'item';
+        itemContainer.innerHTML = `
+          <input type="text" class="name" placeholder="Item name" />
+          <input type="number" class="quantity" placeholder="Quantity" />
+          <select class="type">
+            <option value="food">Food</option>
+            <option value="drink">Drink</option>
+          </select>
+        `;
+        document.getElementById('items').appendChild(itemContainer);
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Order Form</h1>
+    <form onsubmit="sendOrder(event)">
+      <div id="items" class="items">
+        <div class="item">
+          <input type="text" class="name" placeholder="Item name" />
+          <input type="number" class="quantity" placeholder="Quantity" />
+          <select class="type">
+            <option value="food">Food</option>
+            <option value="drink">Drink</option>
+          </select>
+        </div>
+      </div>
+      <button type="button" onclick="addItem()">Add Item</button>
+      <button type="submit">Send Order</button>
+    </form>
+  </body>
+  </html>
