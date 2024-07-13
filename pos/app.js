@@ -1,12 +1,15 @@
-function jsonpCallback(data) {
-    const appDiv = document.getElementById('app');
-    appDiv.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
-  }
-  
-  function fetchData() {
+function fetchData() {
     const date = document.getElementById('dateInput').value;
-    const script = document.createElement('script');
-    script.src = `https://script.google.com/macros/s/AKfycbzXVOyaP01RJychikKUxxVbdbsSXHMDf_q3WE4jTw5obWbfyrfImYGJVzxv0iFIKwKh/exec?callback=jsonpCallback&date=${date}`;
-    document.body.appendChild(script);
+    fetch(`https://script.google.com/macros/s/AKfycbxMnY82_hfEulJWPLpggGTUbFXR4pgYaQhY-nKq2U8-gBXDHLcqhGKh1ZJKrUm5PBofQQ/exec?date=${date}`)
+      .then(response => response.json())
+      .then(data => {
+        const appDiv = document.getElementById('app');
+        if (data && data.length > 0) {
+          appDiv.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        } else {
+          appDiv.innerHTML = '<p>No se encontraron registros para la fecha especificada.</p>';
+        }
+      })
+      .catch(error => console.error('Error:', error));
   }
   
