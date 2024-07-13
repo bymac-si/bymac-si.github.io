@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Orders</title>
+  <style>
+    .nav-link {
+      cursor: pointer;
+    }
+    * {
+        margin: 0; padding: 0; box-sizing: border-box;
+    }
+    body {
+font-family: 'Arial', sans-serif;
+/* Add a subtle background color and center content */
+html, body {
+height: 100%;
+background-color: #f00f00; display: flex;
+justify-content: center; align-items: center;
+}
+a {
+text-decoration: none;
+color: #007BFF;
+/* Create a responsive, centered container */
+• container {
+max-width: 800px; margin: 0 auto; padding: 20px;
+background-color: #fff;
+box-shadow: 0 2px 5px gba(0, 0, 0, 0.1); border-radius: 5px;
+/* Style buttons with a modern look */
+button {
+background-color: #007BFF; color: #fff; border: none;
+border-nadius: 5px;
+padding: 10px 20px; cursor: pointer;
+transition: background-color 0.3s;
+}
+button: hover {
+background-color: #0056b3;
+/* Add responsive design for mobile devices */
+@media (max-width: 768px) {
+container {
+padding: 10px;
+}
+button {
+padding: 8px 16px;
+}
+/* Highlight important elements with a soft shadow */ highlight t
+box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+  </style>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <script>
+    async function fetchOrders() {
+      let response = await fetch('https://script.google.com/macros/s/AKfycbzjgd0ZzLWR3zKsAnrt9CtNjRFtg0jQcU8bIc1yjUqgo7EQeQ2cBZwxvqDoRMlXmo8/exec?action=readOrders');
+      let result = await response.json();
+      if (result.status === 'success') {
+        // Handle the fetched data
+        console.log(result.data);
+      } else {
+        console.error(result.message);
+      }
+    }
+
+    async function createOrder() {
+      let order = {
+        action: 'createOrder',
+        OrderID: document.getElementById('orderID').value,
+        Item: document.getElementById('item').value,
+        Quantity: document.getElementById('quantity').value,
+        TableNumber: document.getElementById('tableNumber').value,
+        OrderStatus: document.getElementById('orderStatus').value
+      };
+
+      let response = await fetch('https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec', {
+method: ‘POST’,
+headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+body: new URLSearchParams(order)
+});
+let result = await response.json();
+  if (result.status === 'success') {
+    // Refresh the list
+    fetchOrders();
+  } else {
+    console.error(result.message);
+  }
+}
+</script>
+</head>
+<body>
+  <div class="container">
+    <h2>Orders</h2>
+    <form onsubmit="createOrder(); return false;">
+      <div class="form-group">
+        <label for="orderID">Order ID</label>
+        <input type="text" class="form-control" id="orderID" required>
+      </div>
+      <div class="form-group">
+        <label for="item">Item</label>
+        <input type="text" class="form-control" id="item" required>
+      </div>
+      <div class="form-group">
+        <label for="quantity">Quantity</label>
+        <input type="number" class="form-control" id="quantity" required>
+      </div>
+      <div class="form-group">
+        <label for="tableNumber">Table Number</label>
+        <input type="text" class="form-control" id="tableNumber" required>
+      </div>
+      <div class="form-group">
+        <label for="orderStatus">Order Status</label>
+        <input type="text" class="form-control" id="orderStatus" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', fetchOrders);
+  </script>
+</body>
+</html>

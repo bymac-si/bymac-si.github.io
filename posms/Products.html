@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Products</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <script>
+    async function fetchProducts() {
+      let response = await fetch('https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec?action=readProducts');
+      let result = await response.json();
+      if (result.status === 'success') {
+        // Handle the fetched data
+        console.log(result.data);
+      } else {
+        console.error(result.message);
+      }
+    }
+
+    async function createProduct() {
+      let product = {
+        action: 'createProduct',
+        ProductID: document.getElementById('productID').value,
+        ProductName: document.getElementById('productName').value,
+        Price: document.getElementById('price').value
+      };
+
+      let response = await fetch('https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(product)
+      });
+
+      let result = await response.json();
+      if (result.status === 'success') {
+        // Refresh the list
+        fetchProducts();
+      } else {
+        console.error(result.message);
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h2>Products</h2>
+    <form onsubmit="createProduct(); return false;">
+      <div class="form-group">
+        <label for="productID">Product ID</label>
+        <input type="text" class="form-control" id="productID" required>
+      </div>
+      <div class="form-group">
+        <label for="productName">Product Name</label>
+        <input type="text" class="form-control" id="productName" required>
+      </div>
+      <div class="form-group">
+        <label for="price">Price</label>
+        <input type="number" class="form-control" id="price" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', fetchProducts);
+  </script>
+</body>
+</html>
