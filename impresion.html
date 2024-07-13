@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impresión ESC/POS</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qz-tray/2.1.1/qz-tray.js"></script>
+</head>
+<body>
+    <h1>Imprimir Recibo</h1>
+    <button onclick="printReceipt()">Imprimir</button>
+
+    <script>
+        function printReceipt() {
+            // Conectar a QZ Tray
+            qz.websocket.connect().then(() => {
+                console.log("Conectado a QZ Tray");
+
+                // Comandos ESC/POS
+                let config = qz.configs.create("POS-80"); // Cambia esto por el nombre de tu impresora
+                let data = [
+                    '\x1B' + '\x40',              // Resetea la impresora
+                    'Hola, Mundo!\n',             // Texto a imprimir
+                    '\x1B' + '\x69'               // Corte de papel
+                ];
+
+                // Enviar comandos a la impresora
+                return qz.print(config, data);
+            }).catch((err) => {
+                console.error("Error al conectar con QZ Tray:", err);
+            }).finally(() => {
+                // Desconectar de QZ Tray
+                qz.websocket.disconnect();
+            });
+        }
+
+        // Inicializar QZ Tray
+        qz.api.setPromiseType(window.Promise);
+        qz.api.setSha256Type(data => {
+            return crypto.subtle.digest("SHA-256", new TextEncoder("utf-8").encode(data)).then(hash => {
+                return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, "0")).join("");
+            });
+        });
+    </script>
+</body>
+</html>
