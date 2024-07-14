@@ -7,3 +7,69 @@ body {
 input, button {
   margin: 10px;
 }
+* {
+  font-size: 8px;
+
+}
+
+.cuadro{
+  border: 2px solid black;
+  margin: 2px;
+  padding-bottom: 5px;
+  margin-bottom:10px;
+
+}
+
+th {
+  border-top: 1px solid black;
+
+}
+
+td.producto,
+th.producto {
+  width: 75px;
+  max-width: 75px;
+}
+
+td.cantidad,
+th.cantidad {
+  width: 40px;
+  max-width: 40px;
+  word-break: break-all;
+}
+
+td.precio,
+th.precio {
+  width: 40px;
+  max-width: 40px;
+  word-break: break-all;
+}
+
+.centrado {
+  text-align: center;
+  align-content: center;
+}
+
+.ticket {
+  width: 155px;
+  max-width: 155px;
+}
+
+img {
+  max-width: inherit;
+  width: inherit;
+}
+
+@media print {
+  .oculto-impresion,
+  .oculto-impresion * {
+      display: none !important;
+  }
+  img {
+      width: 4cm;
+  }
+
+  @page {
+      size: 57mm 400mm; /*medidas en tamaño*/
+    }
+}
