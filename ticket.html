@@ -4,46 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Precuenta</title>
-        <script>
-            // Función para obtener parámetros de la URL
-            function obtenerParametro(nombre) {
-                nombre = nombre.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-                var regex = new RegExp('[\\?&]' + nombre + '=([^&#]*)');
-                var resultados = regex.exec(location.search);
-                return resultados === null ? '' : decodeURIComponent(resultados[1].replace(/\+/g, ' '));
-            }
-        
-            // Obtener los parámetros de la URL
-            var comanda = obtenerParametro('COMANDA');
-            var fecha = obtenerParametro('FECHA');
-            var resumen = obtenerParametro('resumen');
-            var cliente = obtenerParametro('cliente');
-            var subtotal = obtenerParametro('subtotal');
-            var propina = obtenerParametro('propina');
-            var total = obtenerParametro('total');
-            var domicilio = obtenerParametro('domicilio');
-        
-            // Convertir la cadena resumen en un array separado por saltos de línea
-            var lineasResumen = resumen.split('\n');
-        
-            // Escribir la información en el documento HTML
-            window.onload = function() {
-                document.getElementById('comanda').innerHTML = comanda;
-                document.getElementById('fecha').innerHTML = fecha;
-                // Mostrar cada línea del resumen en un párrafo separado
-                lineasResumen.forEach(function(linea) {
-                    var parrafo = document.createElement('p');
-                    parrafo.classList.add('fs-5', 'text-uppercase', 'text-start');
-                    parrafo.innerHTML = linea;
-                    document.getElementById('resumen').appendChild(parrafo);
-                document.getElementById('cliente').innerHTML = cliente;
-                document.getElementById('subtotal').innerHTML = subtotal;
-                document.getElementById('propina').innerHTML = propina;
-                document.getElementById('total').innerHTML = total;
-                document.getElementById('domicilio').innerHTML = domicilio;
-                });
-            };
-        </script>
+       
   <style type="text/css" media="print">
   @page {
         display:block;
@@ -173,6 +134,47 @@
       </div>
 </div>
 </center>
+<script>
+      // Función para obtener parámetros de la URL
+      function obtenerParametro(nombre) {
+          nombre = nombre.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+          var regex = new RegExp('[\\?&]' + nombre + '=([^&#]*)');
+          var resultados = regex.exec(location.search);
+          return resultados === null ? '' : decodeURIComponent(resultados[1].replace(/\+/g, ' '));
+      }
+  
+      // Obtener los parámetros de la URL
+      var comanda = obtenerParametro('COMANDA');
+      var fecha = obtenerParametro('FECHA');
+      var resumen = obtenerParametro('resumen');
+      var cliente = obtenerParametro('cliente');
+      var subtotal = obtenerParametro('subtotal');
+      var propina = obtenerParametro('propina');
+      var total = obtenerParametro('total');
+      var domicilio = obtenerParametro('domicilio');
+  
+      // Convertir la cadena resumen en un array separado por saltos de línea
+      var lineasResumen = resumen.split('\n');
+  
+      // Escribir la información en el documento HTML
+      window.onload = function() {
+          document.getElementById('comanda').innerHTML = comanda;
+          document.getElementById('fecha').innerHTML = fecha;
+          // Mostrar cada línea del resumen en un párrafo separado
+          lineasResumen.forEach(function(linea) {
+              var parrafo = document.createElement('p');
+              parrafo.classList.add('fs-5', 'text-uppercase', 'text-start');
+              parrafo.innerHTML = linea;
+              document.getElementById('resumen').appendChild(parrafo);
+          document.getElementById('cliente').innerHTML = cliente;
+          document.getElementById('subtotal').innerHTML = subtotal;
+          document.getElementById('propina').innerHTML = propina;
+          document.getElementById('total').innerHTML = total;
+          document.getElementById('domicilio').innerHTML = domicilio;
+          });
+      };
+  </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>
+
