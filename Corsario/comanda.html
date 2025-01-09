@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Comanda</title>
+       
+  <style type="text/css" media="print">
+  @page {
+        display:block;
+        width:80mm;
+  }
+  table {
+        width:75mm;
+  }
+  img {
+        width: 37mm;
+  }
+  .oculto-impresion,
+  .oculto-impresion * {
+        display: none !important;
+  }
+  * {
+        font-size: 10px;
+  }
+  .cuadro{
+        border: 2px solid black;
+        margin: 2px;
+        padding-bottom: 1px;
+        margin-bottom:10px;
+        margin-right: 5px;
+        
+  }
+  </style>
+  <style type="text/css" media="screen">
+  body{
+        display:block;
+        width:302px;
+        font-size: 11px;
+  }
+  
+  table{
+        width:300px;
+        margin-right: 10px;
+  }
+  * {
+        font-size: 10px;
+  
+  }
+  
+  .cuadro{
+        border: 2px solid black;
+        margin: 2px;
+        padding-top: 2px;
+        padding-bottom: 1px;
+        margin-bottom:10px;
+        margin-right: 5px;
+        
+  }
+  .printbutton {
+              cursor: pointer;
+          }
+  </style>
+  <link rel="stylesheet" href="bootstrap-print.min.css" media="print">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <script src="https://kit.fontawesome.com/3eaaca7ef6.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js"></script>
+  <script src="./ConectorEscposAndroid.js" type="text/javascript"></script>
+  <script src="./main.js" type="text/javascript"></script>
+  <script>
+      window.onload = function () {
+              print();
+          };
+</script>
+</head>
+<body class="fw-bold">
+<center id="ticket"> 
+<div class="container">
+      <div class="row justify-content-center">
+            <div class="col-12 justify-content-center">
+                  <img src="logo_corsario_bn.png" width="110px"><br><br>
+           
+            <p class="fs-3"><i class="fa-regular fa-file-lines fs-3"></i> Comanda: <span id="comanda" class="fs-3"></span></p>
+            <p class="fs-3"><i class="fa-regular fa-calendar fs-3"></i> Fecha: <span id="fecha" class="fs-3"></span></p>  
+            <p class="fs-3"><i class="fa-solid fa-chair fs-3"></i> Mesa: <span id="cliente" class="fs-3"></span></p>  
+            <p class="fs-3 fw-bolder"><i class="fa-solid fa-fish-fins fs-3"></i> Cocina</p>
+              <hr>
+            <span id="resumen" class="fs-4"></span>
+            <hr>
+            <p class="fs-3 fw-bolder"><i class="fa-solid fa-martini-glass-citrus fs-3   "></i> Barra</p>
+        <hr>
+      <span id="resumen" class="fs-4"></span>
+      <hr>
+         <br>
+      </div>
+</div>
+</center>
+<script>
+      // Función para obtener parámetros de la URL
+      function obtenerParametro(nombre) {
+          nombre = nombre.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+          var regex = new RegExp('[\\?&]' + nombre + '=([^&#]*)');
+          var resultados = regex.exec(location.search);
+          return resultados === null ? '' : decodeURIComponent(resultados[1].replace(/\+/g, ' '));
+      }
+  
+      // Obtener los parámetros de la URL
+      var comanda = obtenerParametro('COMANDA');
+      var fecha = obtenerParametro('FECHA');
+      var resumen = obtenerParametro('resumen');
+      var cliente = obtenerParametro('cliente');
+      var subtotal = obtenerParametro('subtotal');
+      var propina = obtenerParametro('propina');
+      var total = obtenerParametro('total');
+      var domicilio = obtenerParametro('domicilio');
+  
+      // Convertir la cadena resumen en un array separado por saltos de línea
+      var lineasResumen = resumen.split('\n');
+  
+      // Escribir la información en el documento HTML
+      window.onload = function() {
+          document.getElementById('comanda').innerHTML = comanda;
+          document.getElementById('fecha').innerHTML = fecha;
+          // Mostrar cada línea del resumen en un párrafo separado
+          lineasResumen.forEach(function(linea) {
+              var parrafo = document.createElement('p');
+              parrafo.classList.add('fs-5', 'text-uppercase', 'text-start');
+              parrafo.innerHTML = linea;
+              document.getElementById('resumen').appendChild(parrafo);
+          document.getElementById('cliente').innerHTML = cliente;
+          document.getElementById('subtotal').innerHTML = subtotal;
+          document.getElementById('propina').innerHTML = propina;
+          document.getElementById('total').innerHTML = total;
+          document.getElementById('domicilio').innerHTML = domicilio;
+          });
+      };
+  </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
+
