@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impresión Directa</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qz-tray/2.2.1/qz-tray.js"></script>
+</head>
+<body>
+    <div id="ticket" style="display: none;">
+        <div>=== El Corsario ===</div>
+        <div>Comanda - Cocina</div>
+        <div>Fecha: {{fecha}}</div>
+        <div>Mesa: {{mesa}}</div>
+        <div>Cliente: {{cliente}}</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cant.</th>
+                    <th>Obs.</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#items}}
+                <tr>
+                    <td>{{producto}}</td>
+                    <td>{{cantidad}}</td>
+                    <td>{{observaciones}}</td>
+                </tr>
+                {{/items}}
+            </tbody>
+        </table>
+        <div>====================</div>
+    </div>
+
+    <button onclick="printTicket()">Imprimir Ticket</button>
+
+    <script>
+        // Datos del ticket (puedes obtenerlos dinámicamente)
+        const data = {
+            fecha: new Date().toLocaleString(),
+            mesa: "Mesa 5",
+            cliente: "Juan Pérez",
+            items: [
+                { producto: "Filete", cantidad: 2, observaciones: "Bien cocido" },
+                { producto: "Ensalada", cantidad: 1, observaciones: "Sin aderezo" },
+            ]
+        };
+
+        function renderTicket() {
+            // Renderiza el ticket dinámicamente (puedes usar una librería como Mustache.js)
+            let template = document.getElementById("ticket").innerHTML;
+            return template
+                .replace("{{fecha}}", data.fecha)
+                .replace("{{mesa}}", data.mesa)
+                .replace("{{cliente}}", data.cliente)
+                .replace("{{#items}}", data.items.map(item => `
+                    <tr>
+                        <td>${item.producto}</td>
+                        <td>${item.cantidad}</td>
+                        <td>${item.observaciones}</td>
+                    </tr>`).join(""));
+        }
+
+        async function printTicket() {
+            const content = renderTicket();
+
+            // Inicializa QZ Tray
+            if (!qz.websocket.isActive()) {
+                await qz.websocket.connect();
+            }
+
+            const config = qz.configs.create("EPSON_TM-T20II"); // Cambia al nombre de tu impresora
+
+            // Añadir comandos ESC/POS (corte de papel)
+            const commands = [
+                content,
+                "\x1B\x69" // Comando de corte automático
+            ];
+
+            // Enviar comandos a la impresora
+            qz.print(config, commands).catch(err => console.error(err));
+        }
+    </script>
+</body>
+</html>

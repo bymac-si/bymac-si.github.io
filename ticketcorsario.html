@@ -115,10 +115,10 @@
               <hr>
             <span id="resumen" class="fs-4"></span>
             <hr>
-            <p class="text-end fw-bolder fs-4" style="margin-right: 5px;">SUBTOTAL: $ <span id="subtotal" class="text-end fw-bolder fs-4"></span></p>
+            <p class="text-end fw-bolder fs-4" style="margin-right: 5px;">SUBTOTAL: $ <span id="total" class="text-end fw-bolder fs-4"></span></p>
             <p class="text-end fw-bolder" style="margin-right: 5px;"><span id="propina" class="text-end fw-bolder fs-4"></span></p>
-            <p class="text-end fw-bolder fs-4" style="margin-right: 5px;">DOMICILIO: $ <span id="domicilio" class="text-end fw-bolder fs-4"></span></p>
-          <p class="text-end fw-bolder fs-4" style="margin-right: 5px;">TOTAL A PAGAR: $ <span id="total" class="text-end fw-bolder fs-4"></span></p>
+            <p class="text-end fw-bolder fs-4" style="margin-right: 5px;">PROPINA: $ <span id="propina" class="text-end fw-bolder fs-4"></span></p>
+          <p class="text-end fw-bolder fs-4" style="margin-right: 5px;">TOTAL A PAGAR: $ <span id="apagar" class="text-end fw-bolder fs-4"></span></p>
          <br>
          <div class="modal-footer justify-content-center"><br>
          <p class="fw-bold fs-5">
@@ -145,7 +145,7 @@
       var subtotal = obtenerParametro('subtotal');
       var propina = obtenerParametro('propina');
       var total = obtenerParametro('total');
-      var domicilio = obtenerParametro('domicilio');
+      var apagar = obtenerParametro('apagar');
   
       // Convertir la cadena resumen en un array separado por saltos de línea
       var lineasResumen = resumen.split('\n');
