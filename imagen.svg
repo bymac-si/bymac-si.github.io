@@ -1,0 +1,57 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMax meet">
+  <rect stroke="null" id="svg_1" height="1000" width="1000" y="0" x="-24" fill="%23fff"/>
+  <rect stroke="%23081b4b" rx="3" stroke-width="1" id="svg_20" height="290" width="390" y="10" x="5" fill="%23274d8b" filter="url(%23shadow-filter)"/>
+  <rect stroke="%23081b4b" stroke-width="2" id="svg_40" height="76" rx="5" width="380" y="65" x="10" fill="%23081b4b" filter="url(%23shadow-filter)"/>
+<rect stroke="%23081b4b" stroke-width="2" id="svg_40" height="76" rx="5" width="380" y="149" x="10" fill="%23ffffff" filter="url(%23shadow-filter)"/>
+<rect stroke="%23081b4b" stroke-width="2" id="svg_30" height="52" rx="5" width="380" y="233" x="10" fill="%230a2773" filter="url(%23shadow-filter)"/>
+<svg x="27" y="40">
+<rect stroke="%23081b4b" rx="3" stroke-width="1" id="svg_20" height="7" width="300" y="10" x="25" fill="%23fff" filter="url(%23shadow-filter)"/>
+</svg>
+  <defs>
+    <filter x="-50%" y="-10%" width="200%" height="200%" filterUnits="objectBoundingBox" id="shadow-filter">
+      <feOffset dx="1" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"/>
+      <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"/>
+      <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.7 0" in="shadowBlurOuter1" type="matrix" result="shadowMatrixOuter1"/>
+      <feMerge>
+        <feMergeNode in="shadowMatrixOuter1"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+<svg x="10" y="240.7" width="40" height="40" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+    <path fill="%23fff" d="M22 3v4c-1.848 0-3.613.332-5.266.91l-.527-1.148l.902-.403l-.812-1.828l-3.652 1.625l.812 1.828l.922-.41l.512 1.106a16.126 16.126 0 0 0-3.043 1.988l-.786-.836l.727-.668l-1.351-1.476l-2.946 2.707l1.352 1.476l.742-.684l.805.848a15.929 15.929 0 0 0-2.446 3.395l-1.082-.535l.45-.883l-1.782-.907l-1.812 3.567l1.781.906l.457-.902l1.145.57A15.912 15.912 0 0 0 6.05 22H4v6h24V3zm2 2h2v17H8.05C8.563 14.727 14.595 9 22 9h2zm-6 6.953a2.001 2.001 0 0 0-1 3.735V20h5v-2h-3v-2.316a1.998 1.998 0 0 0-1-3.73zM6 24h20v2H6z"/>
+</svg>
+
+<svg x="15"  y="71" width="60" height="60" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+    <g fill="%23fff">
+        <path fill-rule="evenodd" d="M11 15a4 4 0 1 0 0-8a4 4 0 0 0 0 8zm5-4a5 5 0 1 1-10 0a5 5 0 0 1 10 0z"/>
+        <path d="M9.438 11.944c.047.596.518 1.06 1.363 1.116v.44h.375v-.443c.875-.061 1.386-.529 1.386-1.207c0-.618-.39-.936-1.09-1.1l-.296-.07v-1.2c.376.043.614.248.671.532h.658c-.047-.575-.54-1.024-1.329-1.073V8.5h-.375v.45c-.747.073-1.255.522-1.255 1.158c0 .562.378.92 1.007 1.066l.248.061v1.272c-.384-.058-.639-.27-.696-.563h-.668zm1.36-1.354c-.369-.085-.569-.26-.569-.522c0-.294.216-.514.572-.578v1.1h-.003zm.432.746c.449.104.655.272.655.569c0 .339-.257.571-.709.614v-1.195l.054.012z"/>
+        <path d="M1 0a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h4.083c.058-.344.145-.678.258-1H3a2 2 0 0 0-2-2V3a2 2 0 0 0 2-2h10a2 2 0 0 0 2 2v3.528c.38.34.717.728 1 1.154V1a1 1 0 0 0-1-1H1z"/>
+        <path d="M9.998 5.083L10 5a2 2 0 1 0-3.132 1.65a5.982 5.982 0 0 1 3.13-1.567z"/>
+    </g>
+</svg>
+<svg x="15" y="103" width="70" height="70" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" stroke="%23ffffff" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="13" height="7" x=".5" y="6.5" rx="1" />
+        <path d="M3.5 2v2M7 .5V4m3.5-2v2"/>
+        <circle cx="7" cy="10" r="1.5"/>
+    </g>
+</svg>
+<svg x="15" y="153" width="70" height="70" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" stroke="%231d7640" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="13" height="9.5" x=".5" y="2.25" rx="1"/>
+        <path d="M.5 5.75h13m-4 3.5H11"/>
+    </g>
+</svg>
+<svg x="13" y="185" width="36" height="36" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+    <path fill="none" stroke="%231d7640" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 20h8M3 13h26m-6 7h2M5 7C4 7 3 8 3 9v14c0 1 1 2 2 2h22c1 0 2-1 2-2V9c0-1-1-2-2-2H5Z"/>
+</svg>
+  <text font-weight="bold" stroke="null" xml:space="preserve" text-anchor="start" font-family="arial" font-size="30" id="svg_200" y="40" x="60.5" stroke-width="0" fill="%23fff" filter="url(%23shadow-filter)">Resumen de Ventas</text>
+  <text xml:space="preserve" text-anchor="start" font-family="arial" font-size="25" id="svg_11" y="94" x="60" stroke="null" fill="%23ffffff">'& Concatenate("Efectivo: ",text([EFECTIVO])) &'</text>
+  <text xml:space="preserve" text-anchor="start" font-family="arial" font-size="25" id="svg_11" y="131" x="60" stroke="null" fill="%23ffffff">'& Concatenate("Transferencia: ",text([TRANSFERENCIA])) &'</text>
+  <text xml:space="preserve" text-anchor="start" font-family="arial" font-size="25" id="svg_12" y="178" x="60" stroke="null" fill="%231d7640">'& concatenate("Crédito: ",Text([credito])) &'</text>
+  <text xml:space="preserve" text-anchor="start" font-family="arial" font-size="25" id="svg_12" y="214" x="60" stroke="null" fill="%231d7640">'& concatenate("Débito: ",Text([debito])) &'</text>
+  <text font-weight="bold"  xml:space="preserve" text-anchor="start" font-family="arial" font-size="25" id="svg_13" y="270" x="60" stroke="null" fill="%23ffffff">'& concatenate("Venta Total Día: ",text([VENTA TOTAL])) &'</text>
+
+</svg>
