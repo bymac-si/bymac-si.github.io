@@ -166,6 +166,13 @@
               document.getElementById('domicilio').innerHTML = domicilio;
               document.getElementById('mesa').innerHTML= mesa;
           });
+            // Imprimir automáticamente
+        window.print();
+
+// Cerrar la ventana después de imprimir
+window.onafterprint = function() {
+    window.close();
+};
       };
   </script>
    <script>
