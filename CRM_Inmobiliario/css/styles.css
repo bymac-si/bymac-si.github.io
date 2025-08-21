@@ -1,0 +1,141 @@
+/* General */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f7f7f7;
+  color: #1A2B48;
+  margin: 0;
+  padding: 0;
+}
+
+/* Navbar */
+header {
+  background: #fff;
+  padding: 15px 40px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 30px;
+  border-bottom: 1px solid #eee;
+}
+
+header a {
+  color: #1A2B48;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-decoration: none;
+}
+
+header a:hover {
+  color: #B46A55;
+}
+
+header .btn-outline {
+  border: 1px solid #B46A55;
+  color: #B46A55;
+  padding: 6px 16px;
+  border-radius: 3px;
+  transition: all 0.3s;
+}
+
+header .btn-outline:hover {
+  background: #B46A55;
+  color: #fff;
+}
+
+/* Botones */
+button {
+  font-size: 14px;
+  border-radius: 3px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-primary {
+  background: #1A2B48;
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: #2c3e70;
+}
+
+.btn-outline {
+  border: 1px solid #1A2B48;
+  color: #1A2B48;
+  background: transparent;
+}
+
+.btn-outline:hover {
+  background: #1A2B48;
+  color: white;
+}
+
+/* Tablas */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+th {
+  background: #f2f2f2;
+  padding: 12px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1A2B48;
+}
+
+td {
+  padding: 10px 12px;
+  font-size: 14px;
+  border-bottom: 1px solid #eee;
+}
+
+tr:nth-child(even) {
+  background: #fafafa;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.active {
+  display: flex;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  width: 400px;
+  border-radius: 5px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.modal-content h2 {
+  margin-bottom: 15px;
+  font-size: 18px;
+  color: #1A2B48;
+}
+
+.modal-content input,
+.modal-content select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  margin-bottom: 12px;
+  border-radius: 3px;
+}

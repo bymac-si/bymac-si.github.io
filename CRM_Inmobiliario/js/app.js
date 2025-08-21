@@ -16,3 +16,7 @@ async function appSheetCRUD(tabla, action, rows){
 
 async function fetchData(tabla){ return await appSheetCRUD(tabla,"Find",[]); }
 function formatearFecha(f){ if(!f) return ""; const d=new Date(f); return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`; }
+function formatoPrecio(valor){
+  if(!valor) return "$0";
+  return "$" + new Intl.NumberFormat("es-CL").format(valor);
+}

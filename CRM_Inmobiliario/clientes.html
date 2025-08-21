@@ -3,12 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <title>CRM - Clientes</title>
+<link rel="stylesheet" href="css/styles.css">
+<script src="https://cdn.tailwindcss.com"></scr
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="js/app.js"></script>
 </head>
 <body class="bg-gray-100 p-6">
 
 <header class="bg-gray-200 p-4 flex gap-4 mb-4">
+<img fetchpriority="high" width="150" src="https://santajosefinaspa.cl/wp-content/uploads/2025/03/cropped-propuesta-logo-santa-josefina-Photoroom.png" alt=" ">
   <a href="index.html">Dashboard</a>
   <a href="clientes.html" class="font-bold">Clientes</a>
   <a href="propiedades.html">Propiedades</a>
@@ -25,6 +28,7 @@
 <th class="p-2">Nombre</th>
 <th class="p-2">Email</th>
 <th class="p-2">Teléfono</th>
+<th class="p-2">Interés</th>
 <th class="p-2">Canal</th>
 <th class="p-2">Segmento</th>
 <th class="p-2">Estado</th>
@@ -43,6 +47,7 @@
 <div><label>Nombre</label><input type="text" id="clienteNombre" class="w-full border rounded px-2 py-1" required></div>
 <div><label>Email</label><input type="email" id="clienteEmail" class="w-full border rounded px-2 py-1"></div>
 <div><label>Teléfono</label><input type="text" id="clienteTelefono" class="w-full border rounded px-2 py-1"></div>
+<div><label>Interés</label><input type="text" id="clienteInteres" class="w-full border rounded px-2 py-1"></div>
 <div><label>Canal</label><input type="text" id="clienteCanal" class="w-full border rounded px-2 py-1"></div>
 <div><label>Segmento</label><input type="text" id="clienteSegmento" class="w-full border rounded px-2 py-1"></div>
 <div><label>Estado</label><input type="text" id="clienteEstado" class="w-full border rounded px-2 py-1"></div>
@@ -63,6 +68,7 @@ async function cargarClientes(){
       <td class="p-2">${c.Nombre}</td>
       <td class="p-2">${c.Email}</td>
       <td class="p-2">${c.Telefono}</td>
+      <td class="p-2">${c.Interes}</td>
       <td class="p-2">${c.Canal}</td>
       <td class="p-2">${c.Segmento}</td>
       <td class="p-2">${c.Estado}</td>
@@ -84,6 +90,7 @@ function abrirFormCliente(id){
     document.getElementById("clienteNombre").value = c.Nombre;
     document.getElementById("clienteEmail").value = c.Email;
     document.getElementById("clienteTelefono").value = c.Telefono;
+    document.getElementById("clienteInteres").value = c.Interes;
     document.getElementById("clienteCanal").value = c.Canal;
     document.getElementById("clienteSegmento").value = c.Segmento;
     document.getElementById("clienteEstado").value = c.Estado;
@@ -99,6 +106,7 @@ formCliente.onsubmit = async function(e){
     Nombre: document.getElementById("clienteNombre").value,
     Email: document.getElementById("clienteEmail").value,
     Telefono: document.getElementById("clienteTelefono").value,
+    Interes: document.getElementById("clienteInteres").value,
     Canal: document.getElementById("clienteCanal").value,
     Segmento: document.getElementById("clienteSegmento").value,
     Estado: document.getElementById("clienteEstado").value

@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <title>CRM - Marketing</title>
-<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="css/styles.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="js/app.js"></script>
 </head>
 <body class="bg-gray-100 p-6">
 
 <header class="bg-gray-200 p-4 flex gap-4 mb-4">
+<img fetchpriority="high" width="150" src="https://santajosefinaspa.cl/wp-content/uploads/2025/03/cropped-propuesta-logo-santa-josefina-Photoroom.png" alt=" ">
   <a href="index.html">Dashboard</a>
   <a href="clientes.html">Clientes</a>
   <a href="propiedades.html">Propiedades</a>
@@ -42,7 +43,7 @@ async function cargarMarketing(){
   document.getElementById("tablaMarketing").innerHTML = marketingGlobal.map(m=>`
     <tr class="border-b">
       <td class="p-2">${m.Canal}</td>
-      <td class="p-2">$${m.Inversion}</td>
+      <td class="p-2">${formatoPrecio(m.Inversion)}</td>
       <td class="p-2">${m["Clientes Captados"]}</td>
       <td class="p-2">${m.Leads}</td>
     </tr>
