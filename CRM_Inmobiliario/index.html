@@ -26,13 +26,24 @@
   </div>
 
   <!-- Tabla de Propiedades -->
+  
   <h2 class="text-2xl font-bold mb-2">🏠 Propiedades</h2>
+  <div class="mb-4">
+    <label for="filtroEstado" class="block mb-2">Filtrar por Estado:</label>
+    <select id="filtroEstado" class="p-2 rounded border" onchange="filtrarPropiedades()">
+      <option value="Todos">Todos</option>
+      <option value="Disponible">Disponible</option>
+      <option value="Reservada">Reservada</option>
+      <option value="Vendida">Vendida</option>
+    </select>
+  </div>
   <table class="w-full bg-white rounded-2xl shadow">
     <thead>
       <tr class="bg-gray-200 text-left">
         <th class="p-2">Dirección</th>
         <th class="p-2">Precio</th>
         <th class="p-2">Estado</th>
+        <th class="p-2">Foto</th>
       </tr>
     </thead>
     <tbody id="tablaPropiedades"></tbody>
@@ -83,6 +94,7 @@
               <td class="p-2">${p.Dirección}</td>
               <td class="p-2">$${p.Precio}</td>
               <td class="p-2 font-bold ${color}">${p.Estado}</td>
+              <td><img src="${p.Foto}" class="w-20 h-20 rounded"></td>
             </tr>`;
         }).join("");
       } catch (error) {
@@ -93,5 +105,82 @@
 
     cargarDashboard();
   </script>
+  <script>
+let propiedadesGlobal = [];
+
+async function cargarPropiedades() {
+  propiedadesGlobal = await fetchData("Propiedades");
+  renderTabla(propiedadesGlobal);
+}
+
+function filtrarPropiedades() {
+  const estado = document.getElementById("filtroEstado").value;
+  const filtradas = estado === "Todos" ? propiedadesGlobal : propiedadesGlobal.filter(p => p.Estado === estado);
+  renderTabla(filtradas);
+}
+
+function renderTabla(lista) {
+  const tabla = document.getElementById("tablaPropiedades");
+  tabla.innerHTML = lista.map(p => `
+    <tr>
+      <td>${p.Dirección}</td>
+      <td>$${p.Precio}</td>
+      <td>${p.Estado}</td>
+    </tr>
+  `).join("");
+}
+cargarPropiedades();
+</script>
+<br>
+<h2 class="text-2xl font-bold mb-2">📊 KPIs</h2>
+<br>
+ <h1>Rendimiento de captación por canal</h1>
+<div class="max-w-sm mx-auto">
+  <canvas id="graficoMarketing"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+async function cargarGraficoMarketing() {
+  const marketing = await fetchData("Marketing");
+
+  // Agrupar clientes captados por canal
+  const canales = {};
+  marketing.forEach(m => {
+    const canal = m.Canal || "Sin Canal";
+    const clientes = parseInt(m["Clientes Captados"] || 0);
+    canales[canal] = (canales[canal] || 0) + clientes;
+  });
+
+  // Renderizar gráfico
+  new Chart(document.getElementById("graficoMarketing"), {
+    type: "bar",  // puedes cambiar a "pie"
+    data: {
+      labels: Object.keys(canales),
+      datasets: [{
+        label: "Clientes Captados",
+        data: Object.values(canales),
+        backgroundColor: ["#3B82F6","#FACC15","#22C55E","#EF4444","#A855F7"]
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+// Llamar la función al cargar
+cargarGraficoMarketing();
+</script>
+
+
+
 </body>
 </html>
