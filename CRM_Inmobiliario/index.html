@@ -25,6 +25,20 @@
     </div>
   </div>
 
+  <!-- Tabla Fechas de Visitas -->
+<h2 class="text-2xl font-bold mb-2">📅 Fechas de Próximas Visitas</h2>
+<table class="w-full bg-white rounded-2xl shadow">
+  <thead>
+    <tr class="bg-gray-200 text-left">
+      <th class="p-2">Cliente</th>
+      <th class="p-2">Propiedad</th>
+      <th class="p-2">Fecha Visita</th>
+    </tr>
+  </thead>
+  <tbody id="tablaVisitas"></tbody>
+</table>
+<br>
+
   <!-- Tabla de Propiedades -->
   
   <h2 class="text-2xl font-bold mb-2">🏠 Propiedades</h2>
@@ -179,8 +193,113 @@ async function cargarGraficoMarketing() {
 // Llamar la función al cargar
 cargarGraficoMarketing();
 </script>
+<!-- Gráfico Marketing -->
+<div class="max-w-sm mx-auto mb-8">
+  <canvas id="graficoMarketing"></canvas>
+</div>
+
+<!-- Tabla Clientes Captados -->
+<h2 class="text-2xl font-bold mb-2">👥 Clientes Captados por Canal</h2>
+<table class="w-full bg-white rounded-2xl shadow mb-8">
+  <thead>
+    <tr class="bg-gray-200 text-left">
+      <th class="p-2">Canal</th>
+      <th class="p-2">Clientes Captados</th>
+    </tr>
+  </thead>
+  <tbody id="tablaMarketing"></tbody>
+</table>
 
 
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+async function cargarGraficoYTablas() {
+  // === MARKETING ===
+  const marketing = await fetchData("Marketing");
+  const canales = {};
+  marketing.forEach(m => {
+    const canal = m.Canal || "Sin Canal";
+    const clientes = parseInt(m["Clientes Captados"] || 0);
+    canales[canal] = (canales[canal] || 0) + clientes;
+  });
+
+  // Render gráfico
+  new Chart(document.getElementById("graficoMarketing"), {
+    type: "bar",
+    data: {
+      labels: Object.keys(canales),
+      datasets: [{
+        label: "Clientes Captados",
+        data: Object.values(canales),
+        backgroundColor: ["#3B82F6","#FACC15","#22C55E","#EF4444","#A855F7"]
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+
+  // Render tabla Marketing
+  const tablaMarketing = document.getElementById("tablaMarketing");
+  tablaMarketing.innerHTML = Object.entries(canales).map(([canal, total]) => `
+    <tr class="border-b">
+      <td class="p-2">${canal}</td>
+      <td class="p-2 font-bold text-blue-600">${total}</td>
+    </tr>
+  `).join("");
+
+  // === VISITAS ===
+  const visitas = await fetchData("Visitas");
+  const tablaVisitas = document.getElementById("tablaVisitas");
+  tablaVisitas.innerHTML = visitas.map(v => `
+    <tr class="border-b">
+      <td class="p-2">${v.Cliente}</td>
+      <td class="p-2">${v.Propiedad}</td>
+      <td class="p-2">${v["Fecha Visita"]}</td>
+    </tr>
+  `).join("");
+}
+
+cargarGraficoYTablas();
+</script>
+
+<script>
+function formatearFecha(fechaISO) {
+  if (!fechaISO) return "";
+  const fecha = new Date(fechaISO);
+  const dia = String(fecha.getDate()).padStart(2, "0");
+  const mes = String(fecha.getMonth() + 1).padStart(2, "0"); // Mes empieza en 0
+  const anio = fecha.getFullYear();
+  return `${dia}/${mes}/${anio}`;
+}
+
+async function cargarVisitasConNombres() {
+  const clientes = await fetchData("Clientes");
+  const propiedades = await fetchData("Propiedades");
+  const visitas = await fetchData("Visitas");
+
+  const clientesMap = {};
+  clientes.forEach(c => clientesMap[c.ID] = c.Nombre);
+
+  const propiedadesMap = {};
+  propiedades.forEach(p => propiedadesMap[p.ID] = p.Dirección);
+
+  const tablaVisitas = document.getElementById("tablaVisitas");
+  tablaVisitas.innerHTML = visitas.map(v => `
+    <tr class="border-b">
+      <td class="p-2">${clientesMap[v.Cliente] || "⚠️ Sin nombre"}</td>
+      <td class="p-2">${propiedadesMap[v.Propiedad] || "⚠️ Sin dirección"}</td>
+      <td class="p-2">${formatearFecha(v["Fecha Visita"])}</td>
+    </tr>
+  `).join("");
+}
+
+cargarVisitasConNombres();
+</script>
 
 </body>
 </html>
