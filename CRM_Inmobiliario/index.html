@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CRM Inmobiliario - Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-100 p-6">
+  <h1 class="text-3xl font-bold mb-6">📊 CRM Inmobiliario - Dashboard</h1>
+
+  <!-- KPIs -->
+  <div class="grid grid-cols-3 gap-4 mb-6">
+    <div id="kpiClientes" class="p-4 rounded-2xl shadow bg-blue-100 text-center">
+      <p class="text-lg font-semibold">Clientes</p>
+      <p class="text-2xl font-bold" id="totalClientes">0</p>
+    </div>
+    <div id="kpiPropiedades" class="p-4 rounded-2xl shadow bg-green-100 text-center">
+      <p class="text-lg font-semibold">Disponibles</p>
+      <p class="text-2xl font-bold" id="propDisponibles">0</p>
+    </div>
+    <div id="kpiVisitas" class="p-4 rounded-2xl shadow bg-yellow-100 text-center">
+      <p class="text-lg font-semibold">Visitas Hoy</p>
+      <p class="text-2xl font-bold" id="visitasHoy">0</p>
+    </div>
+  </div>
+
+  <!-- Tabla de Propiedades -->
+  <h2 class="text-2xl font-bold mb-2">🏠 Propiedades</h2>
+  <table class="w-full bg-white rounded-2xl shadow">
+    <thead>
+      <tr class="bg-gray-200 text-left">
+        <th class="p-2">Dirección</th>
+        <th class="p-2">Precio</th>
+        <th class="p-2">Estado</th>
+      </tr>
+    </thead>
+    <tbody id="tablaPropiedades"></tbody>
+  </table>
+
+  <script>
+    const APP_ID = "TU_APP_ID";   // <-- cambia por tu App ID de AppSheet
+    const API_KEY = "TU_API_KEY"; // <-- cambia por tu Access Key
+
+    async function fetchData(table) {
+      const url = `https://api.appsheet.com/api/v2/apps/${APP_ID}/tables/${table}/Action`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "ApplicationAccessKey": API_KEY,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ "Action": "Find", "Properties": {}, "Rows": [] })
+      });
+      return response.json();
+    }
+
+    async function cargarDashboard() {
+      // Clientes
+      const clientes = await fetchData("Clientes");
+      document.getElementById("totalClientes").textContent = clientes.length;
+
+      // Propiedades
+      const propiedades = await fetchData("Propiedades");
+      const disponibles = propiedades.filter(p => p.Estado === "Disponible");
+      document.getElementById("propDisponibles").textContent = disponibles.length;
+
+      // Visitas de hoy
+      const visitas = await fetchData("Visitas");
+      const hoy = new Date().toISOString().split("T")[0];
+      const visitasHoy = visitas.filter(v => v["Fecha Visita"] === hoy);
+      document.getElementById("visitasHoy").textContent = visitasHoy.length;
+
+      // Render tabla propiedades con colores condicionales
+      const tabla = document.getElementById("tablaPropiedades");
+      tabla.innerHTML = propiedades.map(p => {
+        let color = p.Estado === "Disponible" ? "text-green-600" :
+                    p.Estado === "Reservada" ? "text-yellow-600" : "text-red-600";
+        return `
+          <tr class="border-b">
+            <td class="p-2">${p.Dirección}</td>
+            <td class="p-2">$${p.Precio}</td>
+            <td class="p-2 font-bold ${color}">${p.Estado}</td>
+          </tr>`;
+      }).join("");
+    }
+
+    cargarDashboard();
+  </script>
+</body>
+</html>
