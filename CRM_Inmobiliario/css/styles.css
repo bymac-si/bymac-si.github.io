@@ -139,3 +139,17 @@ tr:nth-child(even) {
   margin-bottom: 12px;
   border-radius: 3px;
 }
+.chart-container {
+  position: relative;
+  width: 100%;         /* ocupa todo el ancho del contenedor */
+  max-width: 600px;    /* opcional: límite en pantallas grandes */
+  margin: 0 auto;      /* centra el gráfico */
+  height: auto;        /* altura flexible */
+  max-height: 250px;   /* límite máximo de alto */
+  padding: 10px;
+}
+
+#graficoMarketing {
+  width: 100% !important;
+  height: 100% !important;
+}

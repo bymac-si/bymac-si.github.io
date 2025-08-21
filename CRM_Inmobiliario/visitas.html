@@ -2,108 +2,149 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>CRM - Visitas</title>
+<title>CRM Inmobiliario - Visitas</title>
 <link rel="stylesheet" href="css/styles.css">
-<script src="https://cdn.tailwindcss.com"></script>
 <script src="js/app.js"></script>
+<script>
+  requireAuth(); // redirige a login.html si no hay sesión
+</script>
 </head>
-<body class="bg-gray-100 p-6">
+<body>
 
-<header class="bg-gray-200 p-4 flex gap-4 mb-4">
-  <img fetchpriority="high" width="150" src="https://santajosefinaspa.cl/wp-content/uploads/2025/03/cropped-propuesta-logo-santa-josefina-Photoroom.png" alt=" ">
-  <a href="index.html">Dashboard</a>
+<!-- NAV -->
+<header>
+  <a href="index.html" style="font-weight:700;"><img fetchpriority="high" width="150" src="https://santajosefinaspa.cl/wp-content/uploads/2025/03/cropped-propuesta-logo-santa-josefina-Photoroom.png" alt=" "></a>
+  <a href="dashboard.html">Dashboard</a>
   <a href="clientes.html">Clientes</a>
-  <a href="propiedades.html">Propiedades</a>
-  <a href="visitas.html" class="font-bold">Visitas</a>
+  <a href="propiedades.html" class="font-bold">Propiedades</a>
+  <a href="visitas.html">Visitas</a>
   <a href="marketing.html">Marketing</a>
+  <a href="index.html#contacto" class="btn-outline">Habla con un especialista</a>
+  <a href="#" class="btn-outline" onclick="logout()">Salir</a>
 </header>
 
-<h1 class="text-2xl font-bold mb-4">Visitas</h1>
-<button onclick="abrirFormVisita()" class="mb-2 px-4 py-2 bg-yellow-500 text-white rounded">+ Nueva Visita</button>
+<!-- CONTENIDO -->
+<main style="padding:40px;">
+  <h1 style="font-size:28px; font-weight:600; color:#1A2B48; margin-bottom:20px;">
+    Gestión de Visitas
+  </h1>
 
-<table class="w-full bg-white rounded shadow">
-<thead>
-<tr class="bg-gray-200 text-left">
-<th class="p-2">Cliente</th>
-<th class="p-2">Propiedad</th>
-<th class="p-2">Fecha Visita</th>
-<th class="p-2">Acciones</th>
-</tr>
-</thead>
-<tbody id="tablaVisitas"></tbody>
-</table>
+  <button onclick="abrirFormVisita()" class="btn-primary" style="margin-bottom:20px;">
+    + Nueva Visita
+  </button>
 
-<!-- Modal Visita -->
-<div id="modalVisita" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
-<div class="bg-white p-6 rounded shadow w-96">
-<h2 class="text-xl font-bold mb-4" id="modalTitleVisita">Nueva Visita</h2>
-<form id="formVisita" class="space-y-3">
-<input type="hidden" id="visitaID">
-<div><label>Cliente</label><select id="visitaCliente" class="w-full border rounded px-2 py-1"></select></div>
-<div><label>Propiedad</label><select id="visitaPropiedad" class="w-full border rounded px-2 py-1"></select></div>
-<div><label>Fecha Visita</label><input type="date" id="visitaFecha" class="w-full border rounded px-2 py-1"></div>
-<div class="flex justify-end gap-2">
-<button type="button" onclick="cerrarModalVisita()" class="px-4 py-2 bg-gray-300 rounded">Cancelar</button>
-<button type="submit" class="px-4 py-2 bg-yellow-500 text-white rounded">Guardar</button>
+  <table>
+    <thead>
+      <tr>
+        <th>Cliente</th>
+        <th>Propiedad</th>
+        <th>Fecha Visita</th>
+        <th>Agente</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="tablaVisitas"></tbody>
+  </table>
+</main>
+
+<!-- MODAL -->
+<div id="modalVisita" class="modal">
+  <div class="modal-content">
+    <h2 id="modalTitleVisita">Nueva Visita</h2>
+    <form id="formVisita">
+      <input type="hidden" id="visitaID">
+
+      <label>Cliente</label>
+      <select id="visitaCliente" required></select>
+
+      <label>Propiedad</label>
+      <select id="visitaPropiedad" required></select>
+
+      <label>Fecha</label>
+      <input type="date" id="visitaFecha" required>
+
+      <label>Agente</label>
+      <input type="text" id="visitaAgente" placeholder="Agente">
+
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
+        <button type="button" onclick="cerrarModalVisita()" class="btn-outline">Cancelar</button>
+        <button type="submit" class="btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
 </div>
-</form>
-</div></div>
 
 <script>
 let visitasGlobal=[], clientesGlobal=[], propiedadesGlobal=[];
 
+function formatoFecha(fecha){
+  if(!fecha) return "";
+  const d = new Date(fecha);
+  return d.toLocaleDateString("es-CL"); // dd/mm/yyyy
+}
+
 async function cargarVisitas(){
-  visitasGlobal = await fetchData("Visitas");
   clientesGlobal = await fetchData("Clientes");
   propiedadesGlobal = await fetchData("Propiedades");
+  visitasGlobal = await fetchData("Visitas");
 
-  const clientesMap = {}, propiedadesMap = {};
-  clientesGlobal.forEach(c=>clientesMap[c.ID]=c.Nombre);
-  propiedadesGlobal.forEach(p=>propiedadesMap[p.ID]=p.Dirección);
+  // Llenar dropdowns
+  document.getElementById("visitaCliente").innerHTML = clientesGlobal.map(c=>
+    `<option value="${c.ID}">${c.Nombre}</option>`
+  ).join("");
 
-  document.getElementById("tablaVisitas").innerHTML = visitasGlobal.map(v=>`
-    <tr class="border-b">
-      <td class="p-2">${clientesMap[v.Cliente]||"⚠️ Sin nombre"}</td>
-      <td class="p-2">${propiedadesMap[v.Propiedad]||"⚠️ Sin dirección"}</td>
-      <td class="p-2">${formatearFecha(v["Fecha Visita"])}</td>
-      <td class="p-2">
-        <button onclick="abrirFormVisita('${v.ID}')" class="px-2 py-1 bg-yellow-400 rounded">Editar</button>
-        <button onclick="eliminarVisita('${v.ID}')" class="px-2 py-1 bg-red-500 text-white rounded">Eliminar</button>
-      </td>
-    </tr>
-  `).join("");
+  document.getElementById("visitaPropiedad").innerHTML = propiedadesGlobal.map(p=>
+    `<option value="${p.ID}">${p.Direccion}</option>`
+  ).join("");
 
-  // Dropdowns
-  document.getElementById("visitaCliente").innerHTML = clientesGlobal.map(c=>`<option value="${c.ID}">${c.Nombre}</option>`).join("");
-  document.getElementById("visitaPropiedad").innerHTML = propiedadesGlobal.map(p=>`<option value="${p.ID}">${p.Dirección}</option>`).join("");
+  // Mostrar tabla
+  document.getElementById("tablaVisitas").innerHTML = visitasGlobal.map(v=>{
+    const cliente = clientesGlobal.find(c=>c.ID===v.ClienteID);
+    const propiedad = propiedadesGlobal.find(p=>p.ID===v.PropiedadID);
+    return `
+      <tr>
+        <td>${cliente?cliente.Nombre:"-"}</td>
+        <td>${propiedad?propiedad.Direccion:"-"}</td>
+        <td>${formatoFecha(v["Fecha Visita"])}</td>
+        <td>${v.Agente||""}</td>
+        <td>
+          <button onclick="abrirFormVisita('${v.ID}')" class="btn-outline">Editar</button>
+          <button onclick="eliminarVisita('${v.ID}')" class="btn-primary">Eliminar</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
 }
 
-// Modal Visita
 const modalVisita = document.getElementById("modalVisita");
 const formVisita = document.getElementById("formVisita");
+
 function abrirFormVisita(id){
-  document.getElementById("modalTitleVisita").textContent=id?"Editar Visita":"Nueva Visita";
+  document.getElementById("modalTitleVisita").textContent = id?"Editar Visita":"Nueva Visita";
   if(id){
     const v = visitasGlobal.find(x=>x.ID===id);
-    document.getElementById("visitaID").value=v.ID;
-    document.getElementById("visitaCliente").value=v.Cliente;
-    document.getElementById("visitaPropiedad").value=v.Propiedad;
-    document.getElementById("visitaFecha").value=v["Fecha Visita"];
+    document.getElementById("visitaID").value = v.ID;
+    document.getElementById("visitaCliente").value = v.ClienteID;
+    document.getElementById("visitaPropiedad").value = v.PropiedadID;
+    document.getElementById("visitaFecha").value = v["Fecha Visita"];
+    document.getElementById("visitaAgente").value = v.Agente;
   } else formVisita.reset();
-  modalVisita.classList.remove("hidden");
+  modalVisita.classList.add("active");
 }
-function cerrarModalVisita(){ modalVisita.classList.add("hidden"); }
+
+function cerrarModalVisita(){ modalVisita.classList.remove("active"); }
 
 formVisita.onsubmit = async function(e){
   e.preventDefault();
   const id = document.getElementById("visitaID").value;
   const data = {
-    ID: id||undefined,
-    Cliente: document.getElementById("visitaCliente").value,
-    Propiedad: document.getElementById("visitaPropiedad").value,
-    "Fecha Visita": document.getElementById("visitaFecha").value
+    ID: id || undefined,
+    ClienteID: document.getElementById("visitaCliente").value,
+    PropiedadID: document.getElementById("visitaPropiedad").value,
+    "Fecha Visita": document.getElementById("visitaFecha").value,
+    Agente: document.getElementById("visitaAgente").value
   };
-  try{
+  try {
     if(id) await appSheetCRUD("Visitas","Edit",[data]);
     else await appSheetCRUD("Visitas","Add",[data]);
     cerrarModalVisita();

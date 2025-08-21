@@ -1,78 +1,110 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>CRM Inmobiliario - Dashboard</title>
-<link rel="stylesheet" href="css/styles.css">
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="js/app.js"></script>
-<style>img:is([sizes="auto" i], [sizes^="auto," i]) { contain-intrinsic-size: 3000px 1500px }</style>
-<link rel="stylesheet" id="classified-ads-css" href="https://santajosefinaspa.cl/wp-content/plugins/classified-ads/public/css/classified-ads-public.css?ver=1.0.0" media="all">
+  <meta charset="UTF-8">
+  <title>Santa Josefina SpA - Gestión Inmobiliaria</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/app.js"></script>
 </head>
-<body class="bg-gray-100 p-6">
+<body>
 
 <!-- NAV -->
-<header class="bg-gray-200 p-4 flex gap-4 mb-4">
-  <img fetchpriority="high" width="150" src="https://santajosefinaspa.cl/wp-content/uploads/2025/03/cropped-propuesta-logo-santa-josefina-Photoroom.png" alt=" ">
-  <a href="index.html" class="font-bold">Dashboard</a>
-  <a href="clientes.html">Clientes</a>
-  <a href="propiedades.html">Propiedades</a>
-  <a href="visitas.html">Visitas</a>
-  <a href="marketing.html">Marketing</a>
+<header>
+<a href="index.html" style="font-weight:700;"><img fetchpriority="high" width="150" src="https://santajosefinaspa.cl/wp-content/uploads/2025/03/cropped-propuesta-logo-santa-josefina-Photoroom.png" alt=" "></a>  <a href="#propiedades">Propiedades</a>
+  <a href="#servicios">Servicios</a>
+  <a href="#copropiedad">Copropiedades</a>
+  <a href="#contacto">Contacto</a>
+  <a href="dashboard.html" class="btn-outline">Acceso Corporativo</a>
 </header>
 
-<!-- KPIs -->
-<h1 class="text-2xl font-bold mb-6">Panel de Control</h1>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-  <div class="bg-white p-4 rounded shadow text-center">
-    <h2 class="text-lg font-semibold">Total Clientes</h2>
-    <p id="kpiClientes" class="text-2xl font-bold text-blue-500">0</p>
+<!-- HERO -->
+<section style="display:flex;align-items:center;justify-content:space-between;padding:60px; background:#f7f7f7;">
+  <div style="max-width:50%;">
+    <h2 style="color:#B46A55; font-size:16px; margin-bottom:10px;">Gestión Inmobiliaria Integral</h2>
+    <h1 style="font-size:42px; color:#1A2B48; margin-bottom:20px;">Conectamos personas y propiedades</h1>
+    <p style="color:#555; margin-bottom:20px;">
+      Venta, arriendo y administración de propiedades en todo Chile.  
+      Soluciones innovadoras para inversionistas, familias y comunidades.
+    </p>
+    <a href="#contacto" class="btn-primary">Habla con un especialista</a>
   </div>
-  <div class="bg-white p-4 rounded shadow text-center">
-    <h2 class="text-lg font-semibold">Propiedades Disponibles</h2>
-    <p id="kpiPropiedades" class="text-2xl font-bold text-green-500">0</p>
+  <div>
+    <img src="https://via.placeholder.com/420x350" alt="Inmobiliaria Santa Josefina" style="border-radius:8px;">
   </div>
-  <div class="bg-white p-4 rounded shadow text-center">
-    <h2 class="text-lg font-semibold">Visitas Hoy</h2>
-    <p id="kpiVisitas" class="text-2xl font-bold text-yellow-500">0</p>
-  </div>
-</div>
+</section>
 
-<!-- Chart -->
-<div class="bg-white p-4 rounded shadow max-w-2xl">
-  <h2 class="text-lg font-bold mb-2">Clientes captados por canal</h2>
+<!-- PROPIEDADES DISPONIBLES -->
+<section id="propiedades" style="padding:60px;">
+  <h2 style="font-size:28px; margin-bottom:20px; color:#1A2B48;">Propiedades Disponibles</h2>
+  <div id="listaPropiedades" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px;"></div>
+</section>
 
-  <div class="max-w-sm mx-auto mb-8">
-<canvas id="graficoMarketing"></canvas>
-</div>
-</div>
+<!-- SERVICIOS -->
+<section id="servicios" style="padding:60px; background:#fafafa;">
+  <h2 style="font-size:28px; margin-bottom:20px; color:#1A2B48;">Nuestros Servicios</h2>
+  <ul style="line-height:1.8; color:#444;">
+    <li>Compra y venta de propiedades residenciales y comerciales.</li>
+    <li>Arriendos y gestión integral para inversionistas.</li>
+    <li>Asesoría legal y financiera en transacciones inmobiliarias.</li>
+    <li>Promoción y marketing digital de propiedades.</li>
+  </ul>
+</section>
+
+<!-- ADMINISTRACIÓN DE COPROPIEDADES -->
+<section id="copropiedad" style="padding:60px;">
+  <h2 style="font-size:28px; margin-bottom:20px; color:#1A2B48;">Administración de Copropiedades</h2>
+  <p style="color:#444; max-width:800px;">
+    Con la entrada en vigencia de la <strong>Ley N°21.442 de Copropiedad Inmobiliaria</strong>,  
+    ofrecemos un servicio de administración profesional de condominios y edificios,  
+    asegurando transparencia, eficiencia y cumplimiento normativo.  
+  </p>
+  <ul style="line-height:1.8; margin-top:15px; color:#444;">
+    <li>Gestión financiera y contable con reportes claros a la comunidad.</li>
+    <li>Mantención preventiva y correctiva de áreas comunes.</li>
+    <li>Implementación de protocolos de seguridad y convivencia.</li>
+    <li>Asesoría legal en conflictos de copropiedad.</li>
+    <li>Plataforma digital para comunicación con residentes.</li>
+  </ul>
+</section>
+
+<!-- CONTACTO -->
+<section id="contacto" style="padding:60px; background:#fafafa;">
+  <h2 style="font-size:28px; margin-bottom:20px; color:#1A2B48;">Contacto</h2>
+  <form style="max-width:500px; display:flex; flex-direction:column; gap:15px;">
+    <input type="text" placeholder="Nombre completo" required>
+    <input type="email" placeholder="Correo electrónico" required>
+    <input type="tel" placeholder="Teléfono">
+    <textarea placeholder="Escribe tu consulta..." rows="4" required></textarea>
+    <button type="submit" class="btn-primary">Enviar</button>
+  </form>
+</section>
+
+<!-- FOOTER -->
+<footer style="padding:30px; background:#1A2B48; color:white; text-align:center;">
+  <p>&copy; 2025 Santa Josefina SpA - Gestión Inmobiliaria Integral</p>
+</footer>
 
 <script>
-async function cargarDashboard(){
-  // KPIs
-  const clientes = await fetchData("Clientes");
+// Cargar propiedades disponibles desde AppSheet
+async function cargarPropiedadesLanding(){
   const propiedades = await fetchData("Propiedades");
-  const visitas = await fetchData("Visitas");
-  const hoy = new Date().toISOString().split("T")[0];
-
-  document.getElementById("kpiClientes").textContent = clientes.length;
-  document.getElementById("kpiPropiedades").textContent = propiedades.length;
-  document.getElementById("kpiVisitas").textContent = visitas.filter(v=>v["Fecha Visita"]===hoy).length;
-
-  // Marketing Chart
-  const marketing = await fetchData("Marketing");
-  const etiquetas = marketing.map(m=>m.Canal);
-  const captados = marketing.map(m=>m["Clientes Captados"]);
-
-  new Chart(document.getElementById("graficoMarketing"),{
-    type:"bar",
-    data:{labels:etiquetas,datasets:[{label:"Clientes Captados",data:captados,backgroundColor:"#3B82F6"}]},
-    options:{responsive:true,maintainAspectRatio:false}
-  });
+  const disponibles = propiedades.filter(p=>p.Estado==="Disponible");
+  document.getElementById("listaPropiedades").innerHTML = disponibles.map(p=>`
+    <div style="background:white; border-radius:5px; box-shadow:0 2px 5px rgba(0,0,0,0.05); overflow:hidden;">
+      <img src="${p.Imagen}" alt="Propiedad" style="width:100%; height:180px; object-fit:cover;">
+      <div style="padding:15px;">
+        <h3 style="font-size:18px; margin-bottom:5px; color:#1A2B48;">${p.Direccion}</h3>
+        <p style="color:#777;">${p.Tipo}</p>
+        <p style="font-weight:bold; color:#B46A55; margin:10px 0;">
+          ${"$"+new Intl.NumberFormat("es-CL").format(p.Precio)}
+        </p>
+        <a href="#contacto" class="btn-outline">Más información</a>
+      </div>
+    </div>
+  `).join("");
 }
-
-cargarDashboard();
+cargarPropiedadesLanding();
 </script>
+
 </body>
 </html>
