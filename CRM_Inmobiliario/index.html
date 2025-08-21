@@ -39,8 +39,9 @@
   </table>
 
   <script>
-    const APP_ID = "247b67e5-5b42-49a5-92a1-16c4357f5c7";   // <-- cambia por tu App ID de AppSheet
-    const API_KEY = "V2-bKT1n-onhYX-SHl8K-zPPx8-6QwfJ-pp9Pi-UIrcy-gcLGM"; // <-- cambia por tu Access Key
+    // ✅ Tus credenciales de AppSheet
+    const APP_ID = "247b67e5-5b42-49a5-92a1-16c4357f5c7e";
+    const API_KEY = "V2-bKT1n-onhYX-SHl8K-zPPx8-6QwfJ-pp9Pi-UIrcy-gcLGM";
 
     async function fetchData(table) {
       const url = `https://api.appsheet.com/api/v2/apps/${APP_ID}/tables/${table}/Action`;
@@ -56,33 +57,38 @@
     }
 
     async function cargarDashboard() {
-      // Clientes
-      const clientes = await fetchData("Clientes");
-      document.getElementById("totalClientes").textContent = clientes.length;
+      try {
+        // Clientes
+        const clientes = await fetchData("Clientes");
+        document.getElementById("totalClientes").textContent = clientes.length;
 
-      // Propiedades
-      const propiedades = await fetchData("Propiedades");
-      const disponibles = propiedades.filter(p => p.Estado === "Disponible");
-      document.getElementById("propDisponibles").textContent = disponibles.length;
+        // Propiedades
+        const propiedades = await fetchData("Propiedades");
+        const disponibles = propiedades.filter(p => p.Estado === "Disponible");
+        document.getElementById("propDisponibles").textContent = disponibles.length;
 
-      // Visitas de hoy
-      const visitas = await fetchData("Visitas");
-      const hoy = new Date().toISOString().split("T")[0];
-      const visitasHoy = visitas.filter(v => v["Fecha Visita"] === hoy);
-      document.getElementById("visitasHoy").textContent = visitasHoy.length;
+        // Visitas de hoy
+        const visitas = await fetchData("Visitas");
+        const hoy = new Date().toISOString().split("T")[0];
+        const visitasHoy = visitas.filter(v => v["Fecha Visita"] === hoy);
+        document.getElementById("visitasHoy").textContent = visitasHoy.length;
 
-      // Render tabla propiedades con colores condicionales
-      const tabla = document.getElementById("tablaPropiedades");
-      tabla.innerHTML = propiedades.map(p => {
-        let color = p.Estado === "Disponible" ? "text-green-600" :
-                    p.Estado === "Reservada" ? "text-yellow-600" : "text-red-600";
-        return `
-          <tr class="border-b">
-            <td class="p-2">${p.Dirección}</td>
-            <td class="p-2">$${p.Precio}</td>
-            <td class="p-2 font-bold ${color}">${p.Estado}</td>
-          </tr>`;
-      }).join("");
+        // Render tabla propiedades con colores condicionales
+        const tabla = document.getElementById("tablaPropiedades");
+        tabla.innerHTML = propiedades.map(p => {
+          let color = p.Estado === "Disponible" ? "text-green-600" :
+                      p.Estado === "Reservada" ? "text-yellow-600" : "text-red-600";
+          return `
+            <tr class="border-b">
+              <td class="p-2">${p.Dirección}</td>
+              <td class="p-2">$${p.Precio}</td>
+              <td class="p-2 font-bold ${color}">${p.Estado}</td>
+            </tr>`;
+        }).join("");
+      } catch (error) {
+        console.error("Error cargando datos:", error);
+        alert("❌ No se pudo cargar el Dashboard. Revisa tu API Key o App ID.");
+      }
     }
 
     cargarDashboard();
