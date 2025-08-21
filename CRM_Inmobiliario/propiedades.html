@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>CRM - Propiedades</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="js/app.js"></script>
+</head>
+<body class="bg-gray-100 p-6">
+
+<header class="bg-gray-200 p-4 flex gap-4 mb-4">
+  <a href="index.html">Dashboard</a>
+  <a href="clientes.html">Clientes</a>
+  <a href="propiedades.html" class="font-bold">Propiedades</a>
+  <a href="visitas.html">Visitas</a>
+  <a href="marketing.html">Marketing</a>
+</header>
+
+<h1 class="text-2xl font-bold mb-4">Propiedades</h1>
+<button onclick="abrirFormPropiedad()" class="mb-2 px-4 py-2 bg-green-500 text-white rounded">+ Nueva Propiedad</button>
+
+<table class="w-full bg-white rounded shadow">
+<thead>
+<tr class="bg-gray-200 text-left">
+<th class="p-2">Título</th>
+<th class="p-2">Tipo</th>
+<th class="p-2">Dirección</th>
+<th class="p-2">Precio</th>
+<th class="p-2">Agente</th>
+<th class="p-2">Estado</th>
+<th class="p-2">Foto</th>
+<th class="p-2">Acciones</th>
+</tr>
+</thead>
+<tbody id="tablaPropiedades"></tbody>
+</table>
+
+<!-- Modal Propiedad -->
+<div id="modalPropiedad" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+<div class="bg-white p-6 rounded shadow w-96">
+<h2 class="text-xl font-bold mb-4" id="modalTitlePropiedad">Nueva Propiedad</h2>
+<form id="formPropiedad" class="space-y-3">
+<input type="hidden" id="propiedadID">
+<div><label>Título</label><input type="text" id="propTitulo" class="w-full border rounded px-2 py-1" required></div>
+<div><label>Tipo</label><input type="text" id="propTipo" class="w-full border rounded px-2 py-1"></div>
+<div><label>Dirección</label><input type="text" id="propDireccion" class="w-full border rounded px-2 py-1"></div>
+<div><label>Precio</label><input type="number" id="propPrecio" class="w-full border rounded px-2 py-1"></div>
+<div><label>Agente</label><input type="text" id="propAgente" class="w-full border rounded px-2 py-1"></div>
+<div><label>Estado</label><input type="text" id="propEstado" class="w-full border rounded px-2 py-1"></div>
+<div><label>Foto URL (AppSheet)</label><input type="text" id="propFoto" class="w-full border rounded px-2 py-1"></div>
+<div class="flex justify-end gap-2">
+<button type="button" onclick="cerrarModalPropiedad()" class="px-4 py-2 bg-gray-300 rounded">Cancelar</button>
+<button type="submit" class="px-4 py-2 bg-green-500 text-white rounded">Guardar</button>
+</div>
+</form>
+</div></div>
+
+<script>
+let propiedadesGlobal=[];
+async function cargarPropiedades(){
+  propiedadesGlobal = await fetchData("Propiedades");
+  document.getElementById("tablaPropiedades").innerHTML = propiedadesGlobal.map(p=>`
+    <tr class="border-b">
+      <td class="p-2">${p.Titulo}</td>
+      <td class="p-2">${p.Tipo}</td>
+      <td class="p-2">${p.Dirección}</td>
+      <td class="p-2">${p.Precio}</td>
+      <td class="p-2">${p.Agente}</td>
+      <td class="p-2">${p.Estado}</td>
+      <td class="p-2"><img src="${p.Foto}" class="h-12 w-20 object-cover"></td>
+      <td class="p-2">
+        <button onclick="abrirFormPropiedad('${p.ID}')" class="px-2 py-1 bg-yellow-400 rounded">Editar</button>
+        <button onclick="eliminarPropiedad('${p.ID}')" class="px-2 py-1 bg-red-500 text-white rounded">Eliminar</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+// Modal Propiedad
+const modalPropiedad = document.getElementById("modalPropiedad");
+const formPropiedad = document.getElementById("formPropiedad");
+function abrirFormPropiedad(id){
+  document.getElementById("modalTitlePropiedad").textContent=id?"Editar Propiedad":"Nueva Propiedad";
+  if(id){
+    const p = propiedadesGlobal.find(x=>x.ID===id);
+    document.getElementById("propiedadID").value=p.ID;
+    document.getElementById("propTitulo").value=p.Titulo;
+    document.getElementById("propTipo").value=p.Tipo;
+    document.getElementById("propDireccion").value=p.Dirección;
+    document.getElementById("propPrecio").value=p.Precio;
+    document.getElementById("propAgente").value=p.Agente;
+    document.getElementById("propEstado").value=p.Estado;
+    document.getElementById("propFoto").value=p.Foto;
+  } else formPropiedad.reset();
+  modalPropiedad.classList.remove("hidden");
+}
+function cerrarModalPropiedad(){ modalPropiedad.classList.add("hidden"); }
+
+formPropiedad.onsubmit = async function(e){
+  e.preventDefault();
+  const id = document.getElementById("propiedadID").value;
+  const data = {
+    ID: id||undefined,
+    Titulo: document.getElementById("propTitulo").value,
+    Tipo: document.getElementById("propTipo").value,
+    Dirección: document.getElementById("propDireccion").value,
+    Precio: Number(document.getElementById("propPrecio").value),
+    Agente: document.getElementById("propAgente").value,
+    Estado: document.getElementById("propEstado").value,
+    Foto: document.getElementById("propFoto").value
+  };
+  try {
+    if(id) await appSheetCRUD("Propiedades","Edit",[data]);
+    else await appSheetCRUD("Propiedades","Add",[data]);
+    cerrarModalPropiedad();
+    location.reload();
+  } catch(err){ alert("Error: "+err.message); }
+}
+
+async function eliminarPropiedad(id){
+  if(!confirm("¿Eliminar esta propiedad?")) return;
+  await appSheetCRUD("Propiedades","Delete",[{"ID":id}]);
+  location.reload();
+}
+
+cargarPropiedades();
+</script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>CRM - Visitas</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="js/app.js"></script>
+</head>
+<body class="bg-gray-100 p-6">
+
+<header class="bg-gray-200 p-4 flex gap-4 mb-4">
+  <a href="index.html">Dashboard</a>
+  <a href="clientes.html">Clientes</a>
+  <a href="propiedades.html">Propiedades</a>
+  <a href="visitas.html" class="font-bold">Visitas</a>
+  <a href="marketing.html">Marketing</a>
+</header>
+
+<h1 class="text-2xl font-bold mb-4">Visitas</h1>
+<button onclick="abrirFormVisita()" class="mb-2 px-4 py-2 bg-yellow-500 text-white rounded">+ Nueva Visita</button>
+
+<table class="w-full bg-white rounded shadow">
+<thead>
+<tr class="bg-gray-200 text-left">
+<th class="p-2">Cliente</th>
+<th class="p-2">Propiedad</th>
+<th class="p-2">Fecha Visita</th>
+<th class="p-2">Acciones</th>
+</tr>
+</thead>
+<tbody id="tablaVisitas"></tbody>
+</table>
+
+<!-- Modal Visita -->
+<div id="modalVisita" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+<div class="bg-white p-6 rounded shadow w-96">
+<h2 class="text-xl font-bold mb-4" id="modalTitleVisita">Nueva Visita</h2>
+<form id="formVisita" class="space-y-3">
+<input type="hidden" id="visitaID">
+<div><label>Cliente</label><select id="visitaCliente" class="w-full border rounded px-2 py-1"></select></div>
+<div><label>Propiedad</label><select id="visitaPropiedad" class="w-full border rounded px-2 py-1"></select></div>
+<div><label>Fecha Visita</label><input type="date" id="visitaFecha" class="w-full border rounded px-2 py-1"></div>
+<div class="flex justify-end gap-2">
+<button type="button" onclick="cerrarModalVisita()" class="px-4 py-2 bg-gray-300 rounded">Cancelar</button>
+<button type="submit" class="px-4 py-2 bg-yellow-500 text-white rounded">Guardar</button>
+</div>
+</form>
+</div></div>
+
+<script>
+let visitasGlobal=[], clientesGlobal=[], propiedadesGlobal=[];
+
+async function cargarVisitas(){
+  visitasGlobal = await fetchData("Visitas");
+  clientesGlobal = await fetchData("Clientes");
+  propiedadesGlobal = await fetchData("Propiedades");
+
+  const clientesMap = {}, propiedadesMap = {};
+  clientesGlobal.forEach(c=>clientesMap[c.ID]=c.Nombre);
+  propiedadesGlobal.forEach(p=>propiedadesMap[p.ID]=p.Dirección);
+
+  document.getElementById("tablaVisitas").innerHTML = visitasGlobal.map(v=>`
+    <tr class="border-b">
+      <td class="p-2">${clientesMap[v.Cliente]||"⚠️ Sin nombre"}</td>
+      <td class="p-2">${propiedadesMap[v.Propiedad]||"⚠️ Sin dirección"}</td>
+      <td class="p-2">${formatearFecha(v["Fecha Visita"])}</td>
+      <td class="p-2">
+        <button onclick="abrirFormVisita('${v.ID}')" class="px-2 py-1 bg-yellow-400 rounded">Editar</button>
+        <button onclick="eliminarVisita('${v.ID}')" class="px-2 py-1 bg-red-500 text-white rounded">Eliminar</button>
+      </td>
+    </tr>
+  `).join("");
+
+  // Dropdowns
+  document.getElementById("visitaCliente").innerHTML = clientesGlobal.map(c=>`<option value="${c.ID}">${c.Nombre}</option>`).join("");
+  document.getElementById("visitaPropiedad").innerHTML = propiedadesGlobal.map(p=>`<option value="${p.ID}">${p.Dirección}</option>`).join("");
+}
+
+// Modal Visita
+const modalVisita = document.getElementById("modalVisita");
+const formVisita = document.getElementById("formVisita");
+function abrirFormVisita(id){
+  document.getElementById("modalTitleVisita").textContent=id?"Editar Visita":"Nueva Visita";
+  if(id){
+    const v = visitasGlobal.find(x=>x.ID===id);
+    document.getElementById("visitaID").value=v.ID;
+    document.getElementById("visitaCliente").value=v.Cliente;
+    document.getElementById("visitaPropiedad").value=v.Propiedad;
+    document.getElementById("visitaFecha").value=v["Fecha Visita"];
+  } else formVisita.reset();
+  modalVisita.classList.remove("hidden");
+}
+function cerrarModalVisita(){ modalVisita.classList.add("hidden"); }
+
+formVisita.onsubmit = async function(e){
+  e.preventDefault();
+  const id = document.getElementById("visitaID").value;
+  const data = {
+    ID: id||undefined,
+    Cliente: document.getElementById("visitaCliente").value,
+    Propiedad: document.getElementById("visitaPropiedad").value,
+    "Fecha Visita": document.getElementById("visitaFecha").value
+  };
+  try{
+    if(id) await appSheetCRUD("Visitas","Edit",[data]);
+    else await appSheetCRUD("Visitas","Add",[data]);
+    cerrarModalVisita();
+    location.reload();
+  } catch(err){ alert("Error: "+err.message); }
+}
+
+async function eliminarVisita(id){
+  if(!confirm("¿Eliminar esta visita?")) return;
+  await appSheetCRUD("Visitas","Delete",[{"ID":id}]);
+  location.reload();
+}
+
+cargarVisitas();
+</script>
+</body>
+</html>

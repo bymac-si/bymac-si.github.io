@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>CRM - Clientes</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="js/app.js"></script>
+</head>
+<body class="bg-gray-100 p-6">
+
+<header class="bg-gray-200 p-4 flex gap-4 mb-4">
+  <a href="index.html">Dashboard</a>
+  <a href="clientes.html" class="font-bold">Clientes</a>
+  <a href="propiedades.html">Propiedades</a>
+  <a href="visitas.html">Visitas</a>
+  <a href="marketing.html">Marketing</a>
+</header>
+
+<h1 class="text-2xl font-bold mb-4">Clientes</h1>
+<button onclick="abrirFormCliente()" class="mb-2 px-4 py-2 bg-blue-500 text-white rounded">+ Nuevo Cliente</button>
+
+<table class="w-full bg-white rounded shadow">
+<thead>
+<tr class="bg-gray-200 text-left">
+<th class="p-2">Nombre</th>
+<th class="p-2">Email</th>
+<th class="p-2">Teléfono</th>
+<th class="p-2">Canal</th>
+<th class="p-2">Segmento</th>
+<th class="p-2">Estado</th>
+<th class="p-2">Acciones</th>
+</tr>
+</thead>
+<tbody id="tablaClientes"></tbody>
+</table>
+
+<!-- Modal Cliente -->
+<div id="modalCliente" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+<div class="bg-white p-6 rounded shadow w-96">
+<h2 class="text-xl font-bold mb-4" id="modalTitleCliente">Nuevo Cliente</h2>
+<form id="formCliente" class="space-y-3">
+<input type="hidden" id="clienteID">
+<div><label>Nombre</label><input type="text" id="clienteNombre" class="w-full border rounded px-2 py-1" required></div>
+<div><label>Email</label><input type="email" id="clienteEmail" class="w-full border rounded px-2 py-1"></div>
+<div><label>Teléfono</label><input type="text" id="clienteTelefono" class="w-full border rounded px-2 py-1"></div>
+<div><label>Canal</label><input type="text" id="clienteCanal" class="w-full border rounded px-2 py-1"></div>
+<div><label>Segmento</label><input type="text" id="clienteSegmento" class="w-full border rounded px-2 py-1"></div>
+<div><label>Estado</label><input type="text" id="clienteEstado" class="w-full border rounded px-2 py-1"></div>
+<div class="flex justify-end gap-2">
+<button type="button" onclick="cerrarModalCliente()" class="px-4 py-2 bg-gray-300 rounded">Cancelar</button>
+<button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">Guardar</button>
+</div>
+</form>
+</div></div>
+
+<script>
+let clientesGlobal=[];
+
+async function cargarClientes(){
+  clientesGlobal = await fetchData("Clientes");
+  document.getElementById("tablaClientes").innerHTML = clientesGlobal.map(c=>`
+    <tr class="border-b">
+      <td class="p-2">${c.Nombre}</td>
+      <td class="p-2">${c.Email}</td>
+      <td class="p-2">${c.Telefono}</td>
+      <td class="p-2">${c.Canal}</td>
+      <td class="p-2">${c.Segmento}</td>
+      <td class="p-2">${c.Estado}</td>
+      <td class="p-2">
+        <button onclick="abrirFormCliente('${c.ID}')" class="px-2 py-1 bg-yellow-400 rounded">Editar</button>
+        <button onclick="eliminarCliente('${c.ID}')" class="px-2 py-1 bg-red-500 text-white rounded">Eliminar</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+const modalCliente = document.getElementById("modalCliente");
+const formCliente = document.getElementById("formCliente");
+function abrirFormCliente(id){
+  document.getElementById("modalTitleCliente").textContent = id?"Editar Cliente":"Nuevo Cliente";
+  if(id){
+    const c = clientesGlobal.find(x=>x.ID===id);
+    document.getElementById("clienteID").value = c.ID;
+    document.getElementById("clienteNombre").value = c.Nombre;
+    document.getElementById("clienteEmail").value = c.Email;
+    document.getElementById("clienteTelefono").value = c.Telefono;
+    document.getElementById("clienteCanal").value = c.Canal;
+    document.getElementById("clienteSegmento").value = c.Segmento;
+    document.getElementById("clienteEstado").value = c.Estado;
+  } else formCliente.reset();
+  modalCliente.classList.remove("hidden");
+}
+function cerrarModalCliente(){ modalCliente.classList.add("hidden"); }
+formCliente.onsubmit = async function(e){
+  e.preventDefault();
+  const id = document.getElementById("clienteID").value;
+  const data = {
+    ID: id || undefined,
+    Nombre: document.getElementById("clienteNombre").value,
+    Email: document.getElementById("clienteEmail").value,
+    Telefono: document.getElementById("clienteTelefono").value,
+    Canal: document.getElementById("clienteCanal").value,
+    Segmento: document.getElementById("clienteSegmento").value,
+    Estado: document.getElementById("clienteEstado").value
+  };
+  try {
+    if(id) await appSheetCRUD("Clientes","Edit",[data]);
+    else await appSheetCRUD("Clientes","Add",[data]);
+    cerrarModalCliente();
+    location.reload(); // <-- REFRESCA página
+  } catch(err){ alert("Error: "+err.message); }
+}
+
+async function eliminarCliente(id){
+  if(!confirm("¿Eliminar este cliente?")) return;
+  await appSheetCRUD("Clientes","Delete",[{"ID":id}]);
+  location.reload();
+}
+
+cargarClientes();
+</script>
+</body>
+</html>
