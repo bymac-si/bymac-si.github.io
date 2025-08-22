@@ -104,6 +104,29 @@ async function cargarPropiedadesLanding(){
 }
 cargarPropiedadesLanding();
 </script>
+<script>
+const formContacto = document.getElementById("formContacto");
 
+formContacto.onsubmit = async (e)=>{
+  e.preventDefault();
+
+  const payload = {
+    Nombre:   document.getElementById("contactoNombre").value.trim(),
+    Email:    document.getElementById("contactoEmail").value.trim(),
+    Telefono: document.getElementById("contactoTelefono").value.trim(),
+    Mensaje:  document.getElementById("contactoMensaje").value.trim(),
+    Fecha:    new Date().toISOString()
+  };
+
+  try {
+    await appSheetCRUD("Contactos","Add",[payload]); 
+    formContacto.reset();
+    document.getElementById("msgConfirmacion").style.display = "block";
+  } catch(err){
+    alert("Error al guardar: " + (err.message || err));
+    console.error(err);
+  }
+};
+</script>
 </body>
 </html>

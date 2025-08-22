@@ -156,3 +156,9 @@ tr:nth-child(even) {
 .modal { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.5); }
 .modal .modal-content { background:#fff; padding:20px; border-radius:6px; max-width:520px; width:100%; }
 .modal.active { display:flex; }
+
+/* Footer */
+footer a{
+  color: white;
+  text-align: center;
+}

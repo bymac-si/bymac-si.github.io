@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CRM Inmobiliario - Contactos</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/app.js"></script>
+  <script>
+    requireAuth();
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async ()=>{
+      // Cargar Header
+      const headerResp = await fetch("header.html");
+      document.getElementById("header").innerHTML = await headerResp.text();
+
+      // Cargar Footer
+      const footerResp = await fetch("footer.html");
+      document.getElementById("footer").innerHTML = await footerResp.text();
+    });
+  </script>
+</head>
+<body>
+
+<!-- NAV -->
+<div id="header"></div>
+
+<!-- CONTENIDO -->
+<main style="padding:40px;">
+  <h1 style="font-size:28px; font-weight:600; color:#1A2B48; margin-bottom:20px;">
+    Seguimiento de Contactos
+  </h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Email</th>
+        <th>Teléfono</th>
+        <th>Estado</th>
+        <th>Fecha</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="tablaContactos"></tbody>
+  </table>
+</main>
+
+<!-- MODAL FORM -->
+<div id="modalContacto" class="modal">
+  <div class="modal-content">
+    <h2 id="modalTitleContacto">Editar Contacto</h2>
+    <form id="formContacto">
+      <input type="hidden" id="contactoID">
+      <label for="contactoNombre">Nombre</label>
+      <input type="text" id="contactoNombre" required>
+      <label for="contactoEmail">Email</label>
+      <input type="email" id="contactoEmail">
+      <label for="contactoTelefono">Teléfono</label>
+      <input type="text" id="contactoTelefono">
+      <label for="contactoEstado">Estado</label>
+      <select id="contactoEstado">
+        <option value="Nuevo">Nuevo</option>
+        <option value="Lead">Lead</option>
+        <option value="Cliente">Cliente</option>
+        <option value="Descartado">Descartado</option>
+      </select>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:12px;">
+        <button type="button" onclick="cerrarModalContacto()" class="btn-outline">Cancelar</button>
+        <button type="submit" class="btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL DETALLE -->
+<div id="modalDetalle" class="modal">
+  <div class="modal-content">
+    <h2>Detalle Contacto</h2>
+    <div id="detalleContenido"></div>
+    <div style="margin-top:15px; text-align:right;">
+      <button type="button" onclick="cerrarModalDetalle()" class="btn-primary">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<script>
+let contactosGlobal=[];
+let KEY_NAME="ID";
+
+function formatearFecha(iso){
+  if(!iso) return "";
+  const d=new Date(iso);
+  return d.toLocaleDateString("es-CL");
+}
+
+async function cargarContactos(){
+  contactosGlobal = await fetchData("Contactos");
+  if(contactosGlobal.length) KEY_NAME=getKeyName(contactosGlobal[0]);
+
+  const tbody=document.getElementById("tablaContactos");
+  tbody.innerHTML = contactosGlobal.map(c=>{
+    const key=getKeyVal(c);
+    return `
+      <tr>
+        <td>${c.Nombre ?? ""}</td>
+        <td>${c.Email ?? ""}</td>
+        <td>${c.Telefono ?? ""}</td>
+        <td>${c.Estado ?? "Nuevo"}</td>
+        <td>${formatearFecha(c.Fecha)}</td>
+        <td>
+          <button class="btn-outline btn-ver" data-id="${key}">Ver</button>
+          <button class="btn-outline btn-edit" data-id="${key}">Editar</button>
+          <button class="btn-primary" onclick="eliminarContacto('${key}')">Eliminar</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  tbody.onclick=(e)=>{
+    const ver=e.target.closest(".btn-ver");
+    const edit=e.target.closest(".btn-edit");
+    if(ver) abrirDetalleContacto(ver.dataset.id);
+    if(edit) abrirFormContacto(edit.dataset.id);
+  };
+}
+
+// --- Modal Form ---
+const modal=document.getElementById("modalContacto");
+const form=document.getElementById("formContacto");
+
+function abrirFormContacto(id){
+  document.getElementById("modalTitleContacto").textContent=id?"Editar Contacto":"Nuevo Contacto";
+  if(id){
+    const c=contactosGlobal.find(x=>String(getKeyVal(x))===String(id));
+    if(!c){alert("No encontrado");return;}
+    document.getElementById("contactoID").value=id;
+    document.getElementById("contactoNombre").value=c.Nombre ?? "";
+    document.getElementById("contactoEmail").value=c.Email ?? "";
+    document.getElementById("contactoTelefono").value=c.Telefono ?? "";
+    document.getElementById("contactoEstado").value=c.Estado ?? "Nuevo";
+  }else{
+    form.reset();
+    document.getElementById("contactoID").value="";
+  }
+  modal.classList.add("active");
+}
+function cerrarModalContacto(){modal.classList.remove("active");}
+
+form.onsubmit=async(e)=>{
+  e.preventDefault();
+  const id=document.getElementById("contactoID").value||undefined;
+  const payload={
+    ...(id?{[KEY_NAME]:id}:{}),
+    Nombre:document.getElementById("contactoNombre").value.trim(),
+    Email:document.getElementById("contactoEmail").value.trim().toLowerCase(),
+    Telefono:document.getElementById("contactoTelefono").value.trim(),
+    Estado:document.getElementById("contactoEstado").value
+  };
+  try{
+    if(id) await appSheetCRUD("Contactos","Edit",[payload]);
+    else await appSheetCRUD("Contactos","Add",[payload]);
+    cerrarModalContacto();
+    location.reload();
+  }catch(err){alert("Error: "+(err.message||err));}
+};
+
+async function eliminarContacto(id){
+  if(!confirm("¿Eliminar este contacto?")) return;
+  await appSheetCRUD("Contactos","Delete",[{[KEY_NAME]:id}]);
+  location.reload();
+}
+
+// --- Modal Detalle ---
+const modalDetalle=document.getElementById("modalDetalle");
+const detalleContenido=document.getElementById("detalleContenido");
+
+function abrirDetalleContacto(id){
+  const c=contactosGlobal.find(x=>String(getKeyVal(x))===String(id));
+  if(!c){alert("No encontrado");return;}
+  detalleContenido.innerHTML=`
+    <p><b>Nombre:</b> ${c.Nombre ?? ""}</p>
+    <p><b>Email:</b> ${c.Email ?? ""}</p>
+    <p><b>Teléfono:</b> ${c.Telefono ?? ""}</p>
+    <p><b>Estado:</b> ${c.Estado ?? "Nuevo"}</p>
+    <p><b>Fecha:</b> ${formatearFecha(c.Fecha)}</p>
+  `;
+  modalDetalle.classList.add("active");
+}
+function cerrarModalDetalle(){modalDetalle.classList.remove("active");}
+
+cargarContactos();
+</script>
+</body>
+</html>

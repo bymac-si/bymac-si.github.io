@@ -1,27 +1,29 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>CRM Inmobiliario - Visitas</title>
-<link rel="stylesheet" href="css/styles.css">
-<script src="js/app.js"></script>
-<script>
-  requireAuth(); // redirige a login.html si no hay sesión
-</script>
+  <meta charset="UTF-8">
+  <title>CRM Inmobiliario - Visitas</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/app.js"></script>
+  <script>
+    requireAuth();
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async ()=>{
+      // Cargar Header
+      const headerResp = await fetch("header.html");
+      document.getElementById("header").innerHTML = await headerResp.text();
+
+      // Cargar Footer
+      const footerResp = await fetch("footer.html");
+      document.getElementById("footer").innerHTML = await footerResp.text();
+    });
+  </script>
 </head>
 <body>
 
 <!-- NAV -->
-<header>
-  <a href="index.html" style="font-weight:700;"><img fetchpriority="high" width="150" src="img/logo_santajosefina.png" alt=" "></a>
-  <a href="dashboard.html">Dashboard</a>
-  <a href="clientes.html">Clientes</a>
-  <a href="propiedades.html" class="font-bold">Propiedades</a>
-  <a href="visitas.html">Visitas</a>
-  <a href="marketing.html">Marketing</a>
-  <a href="index.html#contacto" class="btn-outline">Habla con un especialista</a>
-  <a href="#" class="btn-outline" onclick="logout()">Salir</a>
-</header>
+<div id="header"></div>
 
 <!-- CONTENIDO -->
 <main style="padding:40px;">
@@ -38,7 +40,7 @@
       <tr>
         <th>Cliente</th>
         <th>Propiedad</th>
-        <th>Fecha Visita</th>
+        <th>Fecha</th>
         <th>Agente</th>
         <th>Acciones</th>
       </tr>
@@ -47,26 +49,21 @@
   </table>
 </main>
 
-<!-- MODAL -->
+<!-- MODAL FORM -->
 <div id="modalVisita" class="modal">
   <div class="modal-content">
     <h2 id="modalTitleVisita">Nueva Visita</h2>
     <form id="formVisita">
       <input type="hidden" id="visitaID">
-
-      <label>Cliente</label>
+      <label for="visitaCliente">Cliente</label>
       <select id="visitaCliente" required></select>
-
-      <label>Propiedad</label>
+      <label for="visitaPropiedad">Propiedad</label>
       <select id="visitaPropiedad" required></select>
-
-      <label>Fecha</label>
+      <label for="visitaFecha">Fecha</label>
       <input type="date" id="visitaFecha" required>
-
-      <label>Agente</label>
+      <label for="visitaAgente">Agente</label>
       <input type="text" id="visitaAgente" placeholder="Agente">
-
-      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:12px;">
         <button type="button" onclick="cerrarModalVisita()" class="btn-outline">Cancelar</button>
         <button type="submit" class="btn-primary">Guardar</button>
       </div>
@@ -74,186 +71,134 @@
   </div>
 </div>
 
+<!-- MODAL DETALLE -->
+<div id="modalDetalle" class="modal">
+  <div class="modal-content">
+    <h2>Detalle Visita</h2>
+    <div id="detalleContenido"></div>
+    <div style="margin-top:15px; text-align:right;">
+      <button type="button" onclick="cerrarModalDetalle()" class="btn-primary">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="footer"></div>
+
 <script>
-// ================= Utils =================
+let visitasGlobal=[], clientesGlobal=[], propiedadesGlobal=[];
+let KEY_NAME="ID";
+
+// Helpers
 function formatearFecha(iso){
   if(!iso) return "";
-  return new Date(iso).toLocaleDateString("es-CL");
+  const d=new Date(iso);
+  return d.toLocaleDateString("es-CL");
 }
-
-// Detecta el nombre de la KEY de la tabla (ID, Key, "Row ID", etc.)
-function getKeyName(obj){
-  const candidates = ["ID","Id","Key","Row ID","RowID","_ComputedKey","_RowNumber"];
-  return candidates.find(k => Object.prototype.hasOwnProperty.call(obj, k)) || "ID";
-}
-// Obtiene el valor de key de una fila
-function getKeyVal(row){
-  const k = getKeyName(row);
-  return row[k];
-}
-
-// Obtiene campo con múltiples alias posibles
-function pick(row, aliases){
-  for(const a of aliases){
-    if (Object.prototype.hasOwnProperty.call(row, a)) return row[a];
-  }
-  return undefined;
-}
-
-// ================= Estado =================
-let visitasGlobal=[], clientesGlobal=[], propiedadesGlobal=[];
-let KEY_NAME = "ID";
 
 async function cargarVisitas(){
-  // Carga datos
-  visitasGlobal      = await fetchData("Visitas");
-  clientesGlobal     = await fetchData("Clientes");
-  propiedadesGlobal  = await fetchData("Propiedades");
+  visitasGlobal = await fetchData("Visitas");
+  clientesGlobal = await fetchData("Clientes");
+  propiedadesGlobal = await fetchData("Propiedades");
+  if(visitasGlobal.length) KEY_NAME = getKeyName(visitasGlobal[0]);
 
-  if (visitasGlobal.length) KEY_NAME = getKeyName(visitasGlobal[0]);
+  const clientesMap={}, propiedadesMap={};
+  clientesGlobal.forEach(c=>clientesMap[getKeyVal(c)] = c.Nombre);
+  propiedadesGlobal.forEach(p=>propiedadesMap[getKeyVal(p)] = p["Dirección"] ?? p.Direccion ?? "");
 
-  // Mapas para mostrar nombres
-  const clientesMap = Object.create(null);
-  const propiedadesMap = Object.create(null);
-
-  clientesGlobal.forEach(c => { clientesMap[c.ID] = c.Nombre; });
-  propiedadesGlobal.forEach(p => { propiedadesMap[p.ID] = p["Dirección"] ?? p.Direccion ?? p["Direccion"]; });
-
-  // Render tabla (usando data-id con la key real)
-  const rowsHtml = visitasGlobal.map(v => {
-    const clienteId   = pick(v, ["Cliente","ClienteID","Cliente Id","Cliente_Id"]);
-    const propiedadId = pick(v, ["Propiedad","PropiedadID","Propiedad Id","Propiedad_Id"]);
-    const fechaVal    = pick(v, ["Fecha Visita","FechaVisita","Fecha"]);
-
-    const key = getKeyVal(v);
+  const tbody=document.getElementById("tablaVisitas");
+  tbody.innerHTML = visitasGlobal.map(v=>{
+    const key=getKeyVal(v);
     return `
       <tr>
-        <td>${clientesMap[clienteId] ?? "⚠️ Sin nombre"}</td>
-        <td>${propiedadesMap[propiedadId] ?? "⚠️ Sin dirección"}</td>
-        <td>${formatearFecha(fechaVal)}</td>
-        <td>${v.Agente ?? "No asignado"}</td>
+        <td>${clientesMap[v.Cliente]||"—"}</td>
+        <td>${propiedadesMap[v.Propiedad]||"—"}</td>
+        <td>${formatearFecha(v["Fecha"] ?? v["Fecha Visita"])}</td>
+        <td>${v.Agente ?? ""}</td>
         <td>
-          <button type="button" class="btn-outline btn-edit" data-id="${key}">Editar</button>
-          <button type="button" class="btn-primary" onclick="eliminarVisita('${key}')">Eliminar</button>
+          <button class="btn-outline btn-ver" data-id="${key}">Ver</button>
+          <button class="btn-outline btn-edit" data-id="${key}">Editar</button>
+          <button class="btn-primary" onclick="eliminarVisita('${key}')">Eliminar</button>
         </td>
       </tr>
     `;
   }).join("");
 
-  document.getElementById("tablaVisitas").innerHTML = rowsHtml;
+  // Dropdowns
+  document.getElementById("visitaCliente").innerHTML = clientesGlobal.map(c=>`<option value="${getKeyVal(c)}">${c.Nombre}</option>`).join("");
+  document.getElementById("visitaPropiedad").innerHTML = propiedadesGlobal.map(p=>`<option value="${getKeyVal(p)}">${p["Dirección"] ?? ""}</option>`).join("");
 
-  // Delegación de eventos para Editar (más fiable que inline)
-  const tbody = document.getElementById("tablaVisitas");
-  tbody.onclick = (e) => {
-    const btn = e.target.closest(".btn-edit");
-    if (!btn) return;
-    const id = btn.dataset.id;
-    abrirFormVisita(id);
+  // Delegación
+  tbody.onclick = (e)=>{
+    const ver=e.target.closest(".btn-ver");
+    const edit=e.target.closest(".btn-edit");
+    if(ver) abrirDetalleVisita(ver.dataset.id);
+    if(edit) abrirFormVisita(edit.dataset.id);
   };
-
-  // Dropdowns del modal
-  document.getElementById("visitaCliente").innerHTML =
-    clientesGlobal.map(c => `<option value="${c.ID}">${c.Nombre}</option>`).join("");
-
-  document.getElementById("visitaPropiedad").innerHTML =
-    propiedadesGlobal.map(p => `<option value="${p.ID}">${p["Dirección"] ?? p.Direccion ?? p["Direccion"]}</option>`).join("");
 }
 
-// ================= Modal =================
-const modalVisita = document.getElementById("modalVisita");
-const formVisita  = document.getElementById("formVisita");
+// --- Modal Form ---
+const modal=document.getElementById("modalVisita");
+const form=document.getElementById("formVisita");
 
 function abrirFormVisita(id){
-  try{
-    document.getElementById("modalTitleVisita").textContent = id ? "Editar Visita" : "Nueva Visita";
-
-    if(id){
-      const v = visitasGlobal.find(x => String(getKeyVal(x)) === String(id));
-      if(!v){ alert("No se encontró la visita."); return; }
-
-      const clienteId   = pick(v, ["Cliente","ClienteID","Cliente Id","Cliente_Id"]) ?? "";
-      const propiedadId = pick(v, ["Propiedad","PropiedadID","Propiedad Id","Propiedad_Id"]) ?? "";
-      const fechaVal    = pick(v, ["Fecha Visita","FechaVisita","Fecha"]) ?? "";
-      const agenteVal   = v.Agente ?? "";
-
-      // set hidden id
-      document.getElementById("visitaID").value = id;
-
-      // Selecciones (si la opción no existe en el select, se inyecta para mostrarla)
-      const selCli  = document.getElementById("visitaCliente");
-      if (clienteId && ![...selCli.options].some(o => o.value == clienteId)) {
-        const opt = document.createElement("option");
-        opt.value = clienteId;
-        opt.textContent = (clientesGlobal.find(c=>c.ID==clienteId)?.Nombre) || `Cliente ${clienteId}`;
-        selCli.appendChild(opt);
-      }
-      selCli.value = clienteId;
-
-      const selProp = document.getElementById("visitaPropiedad");
-      if (propiedadId && ![...selProp.options].some(o => o.value == propiedadId)) {
-        const p = propiedadesGlobal.find(x=>x.ID==propiedadId);
-        const opt = document.createElement("option");
-        opt.value = propiedadId;
-        opt.textContent = p ? (p["Dirección"] ?? p.Direccion ?? p["Direccion"]) : `Propiedad ${propiedadId}`;
-        selProp.appendChild(opt);
-      }
-      selProp.value = propiedadId;
-
-      document.getElementById("visitaFecha").value  = fechaVal;
-      document.getElementById("visitaAgente").value = agenteVal;
-    } else {
-      formVisita.reset();
-      document.getElementById("visitaID").value = "";
-    }
-
-    modalVisita.classList.add("active"); // abre modal (usa .active en tu CSS)
-  }catch(err){
-    console.error("abrirFormVisita error:", err);
-    alert("No se pudo abrir el editor: " + (err.message || err));
+  document.getElementById("modalTitleVisita").textContent = id ? "Editar Visita":"Nueva Visita";
+  if(id){
+    const v=visitasGlobal.find(x=>String(getKeyVal(x))===String(id));
+    if(!v){alert("No encontrada");return;}
+    document.getElementById("visitaID").value=id;
+    document.getElementById("visitaCliente").value=v.Cliente;
+    document.getElementById("visitaPropiedad").value=v.Propiedad;
+    document.getElementById("visitaFecha").value=v["Fecha"] ?? v["Fecha Visita"];
+    document.getElementById("visitaAgente").value=v.Agente ?? "";
+  }else{
+    form.reset();
+    document.getElementById("visitaID").value="";
   }
+  modal.classList.add("active");
 }
+function cerrarModalVisita(){modal.classList.remove("active");}
 
-function cerrarModalVisita(){ modalVisita.classList.remove("active"); }
-
-// ================= Guardar / Eliminar =================
-formVisita.onsubmit = async (e) => {
+form.onsubmit=async(e)=>{
   e.preventDefault();
-  const id  = document.getElementById("visitaID").value || undefined;
-  const cli = document.getElementById("visitaCliente").value;
-  const pro = document.getElementById("visitaPropiedad").value;
-
-  // Enviamos ambas variantes para cubrir nombres diferentes en AppSheet
-  const payload = {
-    ...(id ? { [KEY_NAME]: id } : {}),
-    Cliente: cli, ClienteID: cli,
-    Propiedad: pro, PropiedadID: pro,
-    "Fecha Visita": document.getElementById("visitaFecha").value,
-    Agente: document.getElementById("visitaAgente").value
+  const id=document.getElementById("visitaID").value||undefined;
+  const payload={
+    ...(id?{[KEY_NAME]:id}:{}),
+    Cliente:document.getElementById("visitaCliente").value,
+    Propiedad:document.getElementById("visitaPropiedad").value,
+    "Fecha":document.getElementById("visitaFecha").value,
+    Agente:document.getElementById("visitaAgente").value
   };
-
   try{
     if(id) await appSheetCRUD("Visitas","Edit",[payload]);
-    else   await appSheetCRUD("Visitas","Add",[payload]);
+    else await appSheetCRUD("Visitas","Add",[payload]);
     cerrarModalVisita();
     location.reload();
-  }catch(err){
-    console.error("Guardar visita error:", err);
-    alert("Error al guardar: " + (err.message || err));
-  }
+  }catch(err){alert("Error: "+(err.message||err));}
 };
 
 async function eliminarVisita(id){
   if(!confirm("¿Eliminar esta visita?")) return;
-  try{
-    await appSheetCRUD("Visitas","Delete",[{ [KEY_NAME]: id }]);
-    location.reload();
-  }catch(err){
-    console.error("Eliminar visita error:", err);
-    alert("Error al eliminar: " + (err.message || err));
-  }
+  await appSheetCRUD("Visitas","Delete",[{[KEY_NAME]:id}]);
+  location.reload();
 }
 
-// ================= Init =================
+// --- Modal Detalle ---
+const modalDetalle=document.getElementById("modalDetalle");
+const detalleContenido=document.getElementById("detalleContenido");
+
+function abrirDetalleVisita(id){
+  const v=visitasGlobal.find(x=>String(getKeyVal(x))===String(id));
+  if(!v){alert("No encontrada");return;}
+  detalleContenido.innerHTML=`
+    <p><b>Cliente:</b> ${clientesGlobal.find(c=>getKeyVal(c)===v.Cliente)?.Nombre || "—"}</p>
+    <p><b>Propiedad:</b> ${propiedadesGlobal.find(p=>getKeyVal(p)===v.Propiedad)?.["Dirección"] || "—"}</p>
+    <p><b>Fecha:</b> ${formatearFecha(v["Fecha"] ?? v["Fecha Visita"])}</p>
+    <p><b>Agente:</b> ${v.Agente ?? ""}</p>
+  `;
+  modalDetalle.classList.add("active");
+}
+function cerrarModalDetalle(){modalDetalle.classList.remove("active");}
+
 cargarVisitas();
 </script>
 </body>
