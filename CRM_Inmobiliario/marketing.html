@@ -10,8 +10,7 @@
 
 <!-- NAV -->
 <header>
-  <a href="index.html" style="font-weight:700;"><img fetchpriority="high" width="150" src="https://santajosefinaspa.cl/wp-content/uploads/2025/03/cropped-propuesta-logo-santa-josefina-Photoroom.png" alt=" "></a>
-  <a href="dashboard.html">Dashboard</a>
+    <a href="index.html" style="font-weight:700;"><img fetchpriority="high" width="150" src="img/logo_santajosefina.png" alt=" "></a><a href="dashboard.html">Dashboard</a>
   <a href="clientes.html">Clientes</a>
   <a href="propiedades.html" class="font-bold">Propiedades</a>
   <a href="visitas.html">Visitas</a>
@@ -48,8 +47,11 @@
     <h2 id="modalTitleMarketing">Nueva Campaña</h2>
     <form id="formMarketing">
       <input type="hidden" id="marketingID">
+      <label for="marketingCanal">Canal (Ej: Redes Sociales)</label>
       <input type="text" id="marketingCanal" placeholder="Canal (Ej: Redes Sociales)" required>
+      <label for="marketingClientes">Clientes Captados</label>
       <input type="number" id="marketingClientes" placeholder="Clientes Captados">
+      <label for="marketingPresupuesto">Presupuesto ($)</label>
       <input type="number" id="marketingPresupuesto" placeholder="Presupuesto ($)">
       <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
         <button type="button" onclick="cerrarModalMarketing()" class="btn-outline">Cancelar</button>
@@ -60,66 +62,90 @@
 </div>
 
 <script>
-// Función para formatear dinero
-function formatoCLP(valor){
-  if(!valor) return "$0";
-  return "$" + new Intl.NumberFormat("es-CL").format(valor);
-}
+requireAuth();
+
+function formatoCLP(v){ return "$" + new Intl.NumberFormat("es-CL").format(Number(v||0)); }
 
 let marketingGlobal=[];
+let KEY_NAME="ID";
 
 async function cargarMarketing(){
   marketingGlobal = await fetchData("Marketing");
-  document.getElementById("tablaMarketing").innerHTML = marketingGlobal.map(m=>`
-    <tr>
-      <td>${m.Canal}</td>
-      <td>${m["Clientes Captados"]}</td>
-      <td>${formatoCLP(m.Presupuesto)}</td>
-      <td>
-        <button onclick="abrirFormMarketing('${m.ID}')" class="btn-outline">Editar</button>
-        <button onclick="eliminarMarketing('${m.ID}')" class="btn-primary">Eliminar</button>
-      </td>
-    </tr>
-  `).join("");
+  if (marketingGlobal.length) KEY_NAME = getKeyName(marketingGlobal[0]);
+
+  const tbody = document.getElementById("tablaMarketing");
+  tbody.innerHTML = marketingGlobal.map(m=>{
+    const key = getKeyVal(m);
+    const canal = m.Canal ?? "";
+    const clientes = m["Clientes Captados"] ?? m.Clientes ?? 0;
+    const presupuesto = formatoCLP(m.Presupuesto);
+    return `
+      <tr>
+        <td>${canal}</td>
+        <td>${clientes}</td>
+        <td>${presupuesto}</td>
+        <td>
+          <button type="button" class="btn-outline btn-edit" data-id="${key}">Editar</button>
+          <button type="button" class="btn-primary" onclick="eliminarMarketing('${key}')">Eliminar</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  // Delegación
+  tbody.onclick = (e)=>{
+    const btn = e.target.closest(".btn-edit");
+    if(!btn) return;
+    abrirFormMarketing(btn.dataset.id);
+  };
 }
 
-const modalMarketing = document.getElementById("modalMarketing");
-const formMarketing = document.getElementById("formMarketing");
+// Modal
+const modal = document.getElementById("modalMarketing");
+const form  = document.getElementById("formMarketing");
 
 function abrirFormMarketing(id){
-  document.getElementById("modalTitleMarketing").textContent = id?"Editar Campaña":"Nueva Campaña";
+  document.getElementById("modalTitleMarketing").textContent = id ? "Editar Campaña" : "Nueva Campaña";
   if(id){
-    const m = marketingGlobal.find(x=>x.ID===id);
-    document.getElementById("marketingID").value = m.ID;
-    document.getElementById("marketingCanal").value = m.Canal;
-    document.getElementById("marketingClientes").value = m["Clientes Captados"];
-    document.getElementById("marketingPresupuesto").value = m.Presupuesto;
-  } else formMarketing.reset();
-  modalMarketing.classList.add("active");
+    const m = marketingGlobal.find(x => String(getKeyVal(x)) === String(id));
+    if(!m){ alert("No se encontró la campaña"); return; }
+    document.getElementById("marketingID").value = id;
+    document.getElementById("marketingCanal").value = m.Canal ?? "";
+    document.getElementById("marketingClientes").value = m["Clientes Captados"] ?? m.Clientes ?? 0;
+    document.getElementById("marketingPresupuesto").value = m.Presupuesto ?? 0;
+  } else {
+    form.reset();
+    document.getElementById("marketingID").value = "";
+  }
+  modal.classList.add("active");
 }
+function cerrarModalMarketing(){ modal.classList.remove("active"); }
 
-function cerrarModalMarketing(){ modalMarketing.classList.remove("active"); }
-
-formMarketing.onsubmit = async function(e){
+form.onsubmit = async (e)=>{
   e.preventDefault();
-  const id = document.getElementById("marketingID").value;
-  const data = {
-    ID: id || undefined,
-    Canal: document.getElementById("marketingCanal").value,
-    "Clientes Captados": parseInt(document.getElementById("marketingClientes").value||0),
-    Presupuesto: parseInt(document.getElementById("marketingPresupuesto").value||0)
+  const id = document.getElementById("marketingID").value || undefined;
+
+  // Enviamos ambas variantes para el campo de clientes por si el nombre difiere
+  const clientesVal = parseInt(document.getElementById("marketingClientes").value || 0, 10);
+  const payload = {
+    ...(id ? { [KEY_NAME]: id } : {}),
+    Canal: document.getElementById("marketingCanal").value.trim(),
+    "Clientes Captados": clientesVal,
+    Clientes: clientesVal,
+    Presupuesto: parseInt(document.getElementById("marketingPresupuesto").value || 0, 10)
   };
-  try {
-    if(id) await appSheetCRUD("Marketing","Edit",[data]);
-    else await appSheetCRUD("Marketing","Add",[data]);
+
+  try{
+    if(id) await appSheetCRUD("Marketing","Edit",[payload]);
+    else   await appSheetCRUD("Marketing","Add",[payload]);
     cerrarModalMarketing();
     location.reload();
-  } catch(err){ alert("Error: "+err.message); }
-}
+  }catch(err){ alert("Error: " + (err.message || err)); }
+};
 
 async function eliminarMarketing(id){
   if(!confirm("¿Eliminar esta campaña?")) return;
-  await appSheetCRUD("Marketing","Delete",[{"ID":id}]);
+  await appSheetCRUD("Marketing","Delete",[{[KEY_NAME]:id}]);
   location.reload();
 }
 

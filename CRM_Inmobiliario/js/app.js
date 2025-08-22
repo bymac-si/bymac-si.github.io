@@ -93,3 +93,19 @@ function requireRole(roles = []){
     window.location.href = 'dashboard.html';
   }
 }
+// ===== Helpers Comunes =====
+function formatearFecha(iso){
+  if(!iso) return "";
+  return new Date(iso).toLocaleDateString("es-CL");
+}
+function getKeyName(obj){
+  const cands = ["ID","Id","Key","Row ID","RowID","_ComputedKey","_RowNumber"];
+  return cands.find(k => Object.prototype.hasOwnProperty.call(obj, k)) || "ID";
+}
+function getKeyVal(row){ return row[getKeyName(row)]; }
+function pick(row, aliases){
+  for(const a of aliases){
+    if (Object.prototype.hasOwnProperty.call(row, a)) return row[a];
+  }
+  return undefined;
+}
