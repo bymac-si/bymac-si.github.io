@@ -4,44 +4,56 @@
   <meta charset="UTF-8">
   <title>Santa Josefina SpA - Gestión Inmobiliaria</title>
   <link rel="stylesheet" href="css/styles.css">
+  <style>
+  </style>
   <script src="js/app.js"></script>
 </head>
 <body>
 
 <!-- NAV -->
-<header>
-  <a href="index.html" style="font-weight:700;"><img fetchpriority="high" width="150" src="img/logo_santajosefina.png" alt=" "></a>  <a href="#servicios">Servicios</a>
-  <a href="#copropiedad">Copropiedades</a>
-  <a href="#contacto">Contacto</a>
-  <a href="dashboard.html" class="btn-outline">Acceso Corporativo</a>
+<header class="main-header">
+  <div class="navbar">
+    <!-- Logo -->
+    <a href="index.html" class="logo" >
+      <img src="img/logo_santajosefina.png" alt="Logo Santa Josefina" style="width: 140px; height: auto;">
+    </a>
+
+    <!-- Links -->
+    <nav class="nav-links">
+      <a href="#servicios">Servicios</a>
+      <a href="#copropiedad">Copropiedades</a>
+      <a href="#contacto">Contacto</a>
+      <a href="dashboard.html" class="btn-outline">Acceso Corporativo</a>
+    </nav>
+  </div>
 </header>
 
 <!-- HERO -->
-<section style="display:flex;align-items:center;justify-content:space-between;padding:60px; background:#f7f7f7;">
-  <div style="max-width:50%;">
+<section class="hero">
+  <div>
     <h2 style="color:#B46A55; font-size:16px; margin-bottom:10px;">Gestión Inmobiliaria Integral</h2>
-    <h1 style="font-size:42px; color:#1A2B48; margin-bottom:20px;">Conectamos personas y propiedades</h1>
+    <h1 style="font-size:42px; margin-bottom:20px;">Conectamos personas y propiedades</h1>
     <p style="color:#555; margin-bottom:20px;">
-      Venta, arriendo y administración de propiedades en todo Chile.  
+      Venta, arriendo y administración de propiedades en todo Chile.<br>
       Soluciones innovadoras para inversionistas, familias y comunidades.
     </p>
     <a href="#contacto" class="btn-primary">Habla con un especialista</a>
   </div>
   <div>
-    <img src="img/conecta2.png" alt="Inmobiliaria Santa Josefina" style="border-radius:8px;max-width:500px;">
+    <img src="img/conecta2.png" alt="Inmobiliaria Santa Josefina">
   </div>
 </section>
 
-<!-- PROPIEDADES DISPONIBLES -->
-<section id="propiedades" style="padding:60px;">
-  <h2 style="font-size:28px; margin-bottom:20px; color:#1A2B48;">Propiedades Disponibles</h2>
-  <div id="listaPropiedades" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px;"></div>
+<!-- PROPIEDADES -->
+<section id="propiedades">
+  <h2>Propiedades Disponibles</h2>
+  <div id="listaPropiedades"></div>
 </section>
 
 <!-- SERVICIOS -->
-<section id="servicios" style="padding:60px; background:#fafafa;">
-  <h2 style="font-size:28px; margin-bottom:20px; color:#1A2B48;">Nuestros Servicios</h2>
-  <ul style="line-height:1.8; color:#444;">
+<section id="servicios" style="background:#fafafa;">
+  <h2>Nuestros Servicios</h2>
+  <ul style="max-width:800px; text-align:left; line-height:1.8; color:#444;">
     <li>Compra y venta de propiedades residenciales y comerciales.</li>
     <li>Arriendos y gestión integral para inversionistas.</li>
     <li>Asesoría legal y financiera en transacciones inmobiliarias.</li>
@@ -49,15 +61,14 @@
   </ul>
 </section>
 
-<!-- ADMINISTRACIÓN DE COPROPIEDADES -->
-<section id="copropiedad" style="padding:60px;">
-  <h2 style="font-size:28px; margin-bottom:20px; color:#1A2B48;">Administración de Copropiedades</h2>
-  <p style="color:#444; max-width:800px;">
-    Con la entrada en vigencia de la <strong>Ley N°21.442 de Copropiedad Inmobiliaria</strong>,  
-    ofrecemos un servicio de administración profesional de condominios y edificios,  
-    asegurando transparencia, eficiencia y cumplimiento normativo.  
+<!-- COPROPIEDAD -->
+<section id="copropiedad">
+  <h2>Administración de Copropiedades</h2>
+  <p style="max-width:800px; color:#444;">
+    Con la entrada en vigencia de la <strong>Ley N°21.442 de Copropiedad Inmobiliaria</strong>, 
+    ofrecemos un servicio de administración profesional de condominios y edificios, asegurando transparencia, eficiencia y cumplimiento normativo.
   </p>
-  <ul style="line-height:1.8; margin-top:15px; color:#444;">
+  <ul style="max-width:800px; text-align:left; line-height:1.8; color:#444; margin-top:15px;">
     <li>Gestión financiera y contable con reportes claros a la comunidad.</li>
     <li>Mantención preventiva y correctiva de áreas comunes.</li>
     <li>Implementación de protocolos de seguridad y convivencia.</li>
@@ -67,19 +78,22 @@
 </section>
 
 <!-- CONTACTO -->
-<section id="contacto" style="padding:60px; background:#fafafa;">
-  <h2 style="font-size:28px; margin-bottom:20px; color:#1A2B48;">Contacto</h2>
-  <form style="max-width:500px; display:flex; flex-direction:column; gap:15px;">
-    <input type="text" placeholder="Nombre completo" required>
-    <input type="email" placeholder="Correo electrónico" required>
-    <input type="tel" placeholder="Teléfono">
-    <textarea placeholder="Escribe tu consulta..." rows="4" required></textarea>
+<section id="contacto" style="background:#fafafa;">
+  <h2>Contacto</h2>
+  <form id="formContacto">
+    <input id="contactoNombre" type="text" placeholder="Nombre completo" required>
+    <input id="contactoEmail" type="email" placeholder="Correo electrónico" required>
+    <input id="contactoTelefono" type="tel" placeholder="Teléfono">
+    <textarea id="contactoMensaje" placeholder="Escribe tu consulta..." rows="4" required></textarea>
     <button type="submit" class="btn-primary">Enviar</button>
   </form>
+  <p id="msgConfirmacion" style="display:none; color:green; margin-top:15px;">
+    ¡Gracias! Tu mensaje ha sido enviado.
+  </p>
 </section>
 
 <!-- FOOTER -->
-<footer style="padding:30px; background:#1A2B48; color:white; text-align:center;">
+<footer>
   <p>&copy; 2025 Santa Josefina SpA - Gestión Inmobiliaria Integral</p>
 </footer>
 
@@ -89,10 +103,10 @@ async function cargarPropiedadesLanding(){
   const propiedades = await fetchData("Propiedades");
   const disponibles = propiedades.filter(p=>p.Estado==="Disponible");
   document.getElementById("listaPropiedades").innerHTML = disponibles.map(p=>`
-    <div style="background:white; border-radius:5px; box-shadow:0 2px 5px rgba(0,0,0,0.05); overflow:hidden;">
+    <div>
       <img src="${p.Imagen}" alt="Propiedad" style="width:100%; height:180px; object-fit:cover;">
       <div style="padding:15px;">
-        <h3 style="font-size:18px; margin-bottom:5px; color:#1A2B48;">${p.Direccion}</h3>
+        <h3 style="font-size:18px; margin-bottom:5px;">${p.Direccion}</h3>
         <p style="color:#777;">${p.Tipo}</p>
         <p style="font-weight:bold; color:#B46A55; margin:10px 0;">
           ${"$"+new Intl.NumberFormat("es-CL").format(p.Precio)}
@@ -103,27 +117,24 @@ async function cargarPropiedadesLanding(){
   `).join("");
 }
 cargarPropiedadesLanding();
-</script>
-<script>
-const formContacto = document.getElementById("formContacto");
 
-formContacto.onsubmit = async (e)=>{
+// Contacto
+const formContacto=document.getElementById("formContacto");
+formContacto.onsubmit=async(e)=>{
   e.preventDefault();
-
-  const payload = {
-    Nombre:   document.getElementById("contactoNombre").value.trim(),
-    Email:    document.getElementById("contactoEmail").value.trim(),
-    Telefono: document.getElementById("contactoTelefono").value.trim(),
-    Mensaje:  document.getElementById("contactoMensaje").value.trim(),
-    Fecha:    new Date().toISOString()
+  const payload={
+    Nombre:document.getElementById("contactoNombre").value.trim(),
+    Email:document.getElementById("contactoEmail").value.trim(),
+    Telefono:document.getElementById("contactoTelefono").value.trim(),
+    Mensaje:document.getElementById("contactoMensaje").value.trim(),
+    Fecha:new Date().toISOString()
   };
-
-  try {
-    await appSheetCRUD("Contactos","Add",[payload]); 
+  try{
+    await appSheetCRUD("Contactos","Add",[payload]);
     formContacto.reset();
-    document.getElementById("msgConfirmacion").style.display = "block";
-  } catch(err){
-    alert("Error al guardar: " + (err.message || err));
+    document.getElementById("msgConfirmacion").style.display="block";
+  }catch(err){
+    alert("Error al guardar: "+(err.message||err));
     console.error(err);
   }
 };
