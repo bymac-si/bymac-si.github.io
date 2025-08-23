@@ -57,12 +57,16 @@
       <input type="hidden" id="visitaID">
       <label for="visitaCliente">Cliente</label>
       <select id="visitaCliente" required></select>
+
       <label for="visitaPropiedad">Propiedad</label>
       <select id="visitaPropiedad" required></select>
+
       <label for="visitaFecha">Fecha</label>
       <input type="date" id="visitaFecha" required>
+
       <label for="visitaAgente">Agente</label>
       <input type="text" id="visitaAgente" placeholder="Agente">
+
       <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:12px;">
         <button type="button" onclick="cerrarModalVisita()" class="btn-outline">Cancelar</button>
         <button type="submit" class="btn-primary">Guardar</button>
@@ -102,8 +106,8 @@ async function cargarVisitas(){
   if(visitasGlobal.length) KEY_NAME = getKeyName(visitasGlobal[0]);
 
   const clientesMap={}, propiedadesMap={};
-  clientesGlobal.forEach(c=>clientesMap[getKeyVal(c)] = c.Nombre);
-  propiedadesGlobal.forEach(p=>propiedadesMap[getKeyVal(p)] = p["Dirección"] ?? p.Direccion ?? "");
+  clientesGlobal.forEach(c => clientesMap[getKeyVal(c)] = c.Nombre);
+  propiedadesGlobal.forEach(p => propiedadesMap[getKeyVal(p)] = p.Direccion ?? "");
 
   const tbody=document.getElementById("tablaVisitas");
   tbody.innerHTML = visitasGlobal.map(v=>{
@@ -112,7 +116,7 @@ async function cargarVisitas(){
       <tr>
         <td>${clientesMap[v.Cliente]||"—"}</td>
         <td>${propiedadesMap[v.Propiedad]||"—"}</td>
-        <td>${formatearFecha(v["Fecha"] ?? v["Fecha Visita"])}</td>
+        <td>${formatearFecha(v["Fecha Visita"])}</td>
         <td>${v.Agente ?? ""}</td>
         <td>
           <button class="btn-outline btn-ver" data-id="${key}">Ver</button>
@@ -124,8 +128,10 @@ async function cargarVisitas(){
   }).join("");
 
   // Dropdowns
-  document.getElementById("visitaCliente").innerHTML = clientesGlobal.map(c=>`<option value="${getKeyVal(c)}">${c.Nombre}</option>`).join("");
-  document.getElementById("visitaPropiedad").innerHTML = propiedadesGlobal.map(p=>`<option value="${getKeyVal(p)}">${p["Dirección"] ?? ""}</option>`).join("");
+  document.getElementById("visitaCliente").innerHTML =
+    clientesGlobal.map(c=>`<option value="${getKeyVal(c)}">${c.Nombre}</option>`).join("");
+  document.getElementById("visitaPropiedad").innerHTML =
+    propiedadesGlobal.map(p=>`<option value="${getKeyVal(p)}">${p.Direccion ?? ""}</option>`).join("");
 
   // Delegación
   tbody.onclick = (e)=>{
@@ -148,7 +154,7 @@ function abrirFormVisita(id){
     document.getElementById("visitaID").value=id;
     document.getElementById("visitaCliente").value=v.Cliente;
     document.getElementById("visitaPropiedad").value=v.Propiedad;
-    document.getElementById("visitaFecha").value=v["Fecha"] ?? v["Fecha Visita"];
+    document.getElementById("visitaFecha").value=v["Fecha Visita"];
     document.getElementById("visitaAgente").value=v.Agente ?? "";
   }else{
     form.reset();
@@ -165,15 +171,19 @@ form.onsubmit=async(e)=>{
     ...(id?{[KEY_NAME]:id}:{}),
     Cliente:document.getElementById("visitaCliente").value,
     Propiedad:document.getElementById("visitaPropiedad").value,
-    "Fecha":document.getElementById("visitaFecha").value,
+    "Fecha Visita":document.getElementById("visitaFecha").value,
     Agente:document.getElementById("visitaAgente").value
   };
+  console.log("Payload Visita:", payload); // debug
   try{
     if(id) await appSheetCRUD("Visitas","Edit",[payload]);
-    else await appSheetCRUD("Visitas","Add",[payload]);
+    else   await appSheetCRUD("Visitas","Add",[payload]);
     cerrarModalVisita();
     location.reload();
-  }catch(err){alert("Error: "+(err.message||err));}
+  }catch(err){
+    alert("Error: "+(err.message||err));
+    console.error(err);
+  }
 };
 
 async function eliminarVisita(id){
@@ -191,14 +201,15 @@ function abrirDetalleVisita(id){
   if(!v){alert("No encontrada");return;}
   detalleContenido.innerHTML=`
     <p><b>Cliente:</b> ${clientesGlobal.find(c=>getKeyVal(c)===v.Cliente)?.Nombre || "—"}</p>
-    <p><b>Propiedad:</b> ${propiedadesGlobal.find(p=>getKeyVal(p)===v.Propiedad)?.["Dirección"] || "—"}</p>
-    <p><b>Fecha:</b> ${formatearFecha(v["Fecha"] ?? v["Fecha Visita"])}</p>
+    <p><b>Propiedad:</b> ${propiedadesGlobal.find(p=>getKeyVal(p)===v.Propiedad)?.Direccion || "—"}</p>
+    <p><b>Fecha:</b> ${formatearFecha(v["Fecha Visita"])}</p>
     <p><b>Agente:</b> ${v.Agente ?? ""}</p>
   `;
   modalDetalle.classList.add("active");
 }
 function cerrarModalDetalle(){modalDetalle.classList.remove("active");}
 
+// Inicializar
 cargarVisitas();
 </script>
 </body>

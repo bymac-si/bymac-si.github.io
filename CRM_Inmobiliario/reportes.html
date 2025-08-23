@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CRM - Reportes Gastos Comunes</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/app.js"></script>
+  <script>requireAuth();</script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async ()=>{
+      document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
+      document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+    });
+  </script>
+</head>
+<body>
+<div id="header"></div>
+
+<main style="padding:40px;">
+  <h1 class="page-title">Reporte de Gastos Comunes</h1>
+
+  <label>Seleccione Copropiedad:</label>
+  <select id="reporteCopro"></select>
+
+  <h2>Total de Gastos: <span id="totalGastos">$0</span></h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Unidad</th>
+        <th>Propietario</th>
+        <th>Alicuota (%)</th>
+        <th>Prorrateo</th>
+      </tr>
+    </thead>
+    <tbody id="tablaReporte"></tbody>
+  </table>
+</main>
+
+<div id="footer"></div>
+
+<script>
+let copros=[], unidades=[], gastos=[], coprops=[];
+
+async function cargarReporte(){
+  [copros, unidades, gastos, coprops] = await Promise.all([
+    fetchData("Copropiedades"),
+    fetchData("Unidades"),
+    fetchData("Gastos"),
+    fetchData("Copropietarios")
+  ]);
+  reporteCopro.innerHTML = copros.map(c=>`<option value="${getKeyVal(c)}">${c.Nombre}</option>`).join("");
+  reporteCopro.addEventListener("change", renderReporte);
+}
+
+function renderReporte(){
+  const coproID=reporteCopro.value;
+  const unidadesC=unidades.filter(u=>String(u.CopropiedadID)===String(coproID));
+  const gastosC=gastos.filter(g=>String(g.CopropiedadID)===String(coproID));
+  const total=gastosC.reduce((acc,g)=>acc+(parseFloat(g.Monto)||0),0);
+  totalGastos.textContent=formatoPrecio(total);
+
+  tablaReporte.innerHTML=unidadesC.map(u=>{
+    const prop = coprops.find(p=>getKeyVal(p)===u.PropietarioID);
+    const cuota=(parseFloat(u.Alicuota)||0)/100*total;
+    return `
+      <tr>
+        <td>${u.Numero}</td>
+        <td>${prop?.Nombre||"—"}</td>
+        <td>${u.Alicuota||0}</td>
+        <td>${formatoPrecio(cuota)}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+cargarReporte();
+</script>
+</body>
+</html>

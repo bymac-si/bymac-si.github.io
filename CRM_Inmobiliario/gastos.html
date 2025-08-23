@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CRM - Gastos</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/app.js"></script>
+  <script>requireAuth();</script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async ()=>{
+      document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
+      document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+    });
+  </script>
+</head>
+<body>
+<div id="header"></div>
+
+<main style="padding:40px;">
+  <h1 class="page-title">Gastos Comunes</h1>
+
+  <button class="btn-primary" onclick="abrirFormGasto()">+ Nuevo Gasto</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Copropiedad</th>
+        <th>Proveedor</th>
+        <th>Tipo</th>
+        <th>Monto</th>
+        <th>Fecha</th>
+        <th>Notas</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="tablaGastos"></tbody>
+  </table>
+</main>
+
+<!-- Modal Gasto -->
+<div id="modalGasto" class="modal">
+  <div class="modal-content">
+    <h2 id="modalTitleGasto">Nuevo Gasto</h2>
+    <form id="formGasto">
+      <input type="hidden" id="gastoID">
+      <label>Copropiedad</label>
+      <select id="gastoCopro" required></select>
+      <label>Proveedor</label>
+      <input id="gastoProveedor" required>
+      <label>Tipo</label>
+      <input id="gastoTipo" required>
+      <label>Monto</label>
+      <input type="number" id="gastoMonto" required>
+      <label>Fecha</label>
+      <input type="date" id="gastoFecha" required>
+      <label>Notas</label>
+      <textarea id="gastoNotas"></textarea>
+      <div style="text-align:right; margin-top:12px;">
+        <button type="button" onclick="cerrarModalGasto()" class="btn-outline">Cancelar</button>
+        <button type="submit" class="btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<script>
+let gastos=[], copros=[], KEY_NAME="ID";
+
+async function cargarGastos(){
+  [copros, gastos] = await Promise.all([
+    fetchData("Copropiedades"),
+    fetchData("Gastos")
+  ]);
+  if(gastos.length) KEY_NAME = getKeyName(gastos[0]);
+
+  gastoCopro.innerHTML = copros.map(c=>`<option value="${getKeyVal(c)}">${c.Nombre}</option>`).join("");
+
+  tablaGastos.innerHTML = gastos.map(g=>{
+    const key=getKeyVal(g);
+    return `
+      <tr>
+        <td>${copros.find(c=>getKeyVal(c)===g.CopropiedadID)?.Nombre||"—"}</td>
+        <td>${g.Proveedor||""}</td>
+        <td>${g.Tipo||""}</td>
+        <td>${formatoPrecio(g.Monto)}</td>
+        <td>${formatearFecha(g.Fecha)}</td>
+        <td>${g.Notas||""}</td>
+        <td>
+          <button class="btn-outline" onclick="abrirFormGasto('${key}')">Editar</button>
+          <button class="btn-primary" onclick="eliminarGasto('${key}')">Eliminar</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function abrirFormGasto(id){
+  modalTitleGasto.textContent = id ? "Editar Gasto" : "Nuevo Gasto";
+  if(id){
+    const g=gastos.find(x=>String(getKeyVal(x))===String(id));
+    gastoID.value=id;
+    gastoCopro.value=g.CopropiedadID;
+    gastoProveedor.value=g.Proveedor||"";
+    gastoTipo.value=g.Tipo||"";
+    gastoMonto.value=g.Monto||0;
+    gastoFecha.value=g.Fecha||"";
+    gastoNotas.value=g.Notas||"";
+  } else formGasto.reset();
+  modalGasto.classList.add("active");
+}
+function cerrarModalGasto(){ modalGasto.classList.remove("active"); }
+
+formGasto.onsubmit=async e=>{
+  e.preventDefault();
+  const id=gastoID.value||undefined;
+  const payload={
+    ...(id?{[KEY_NAME]:id}:{}),
+    CopropiedadID:gastoCopro.value,
+    Proveedor:gastoProveedor.value,
+    Tipo:gastoTipo.value,
+    Monto:parseFloat(gastoMonto.value)||0,
+    Fecha:gastoFecha.value,
+    Notas:gastoNotas.value
+  };
+  if(id) await appSheetCRUD("Gastos","Edit",[payload]);
+  else   await appSheetCRUD("Gastos","Add",[payload]);
+  cerrarModalGasto(); location.reload();
+};
+
+async function eliminarGasto(id){
+  if(!confirm("¿Eliminar gasto?")) return;
+  await appSheetCRUD("Gastos","Delete",[{[KEY_NAME]:id}]);
+  location.reload();
+}
+
+cargarGastos();
+</script>
+</body>
+</html>

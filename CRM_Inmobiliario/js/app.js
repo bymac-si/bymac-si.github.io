@@ -1,34 +1,81 @@
-// AppSheet Config
-const APP_ID="247b67e5-5b42-49a5-92a1-16c4357f5c7e";
-const API_KEY="V2-bKT1n-onhYX-SHl8K-zPPx8-6QwfJ-pp9Pi-UIrcy-gcLGM";
+// =====================
+// Configuración AppSheet
+// =====================
+const APP_ID = "247b67e5-5b42-49a5-92a1-16c4357f5c7e";
+const API_KEY = "V2-bKT1n-onhYX-SHl8K-zPPx8-6QwfJ-pp9Pi-UIrcy-gcLGM";
 
-async function appSheetCRUD(tabla, action, rows){
-  const url=`https://api.appsheet.com/api/v2/apps/${APP_ID}/tables/${tabla}/Action`;
-  return await fetch(url,{
-    method:"POST",
-    headers:{
-      "ApplicationAccessKey":API_KEY,
-      "Content-Type":"application/json"
+// CRUD genérico contra AppSheet
+async function appSheetCRUD(tabla, action, rows, properties = {}) {
+  const url = `https://api.appsheet.com/api/v2/apps/${APP_ID}/tables/${tabla}/Action`;
+  const body = { Action: action, Properties: properties, Rows: rows };
+
+  console.log("➡️ Enviando a AppSheet:", { tabla, action, rows, properties });
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "ApplicationAccessKey": API_KEY,
+      "Content-Type": "application/json"
     },
-    body: JSON.stringify({Action:action,Properties:{},Rows:rows})
-  }).then(r=>r.json());
+    body: JSON.stringify(body)
+  });
+
+  const text = await res.text();
+  console.log("⬅️ Respuesta AppSheet:", text);
+
+  if (!res.ok) throw new Error(text);
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
 }
 
-async function fetchData(tabla){ return await appSheetCRUD(tabla,"Find",[]); }
-function formatearFecha(f){ if(!f) return ""; const d=new Date(f); return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`; }
-function formatoPrecio(valor){
-  if(!valor) return "$0";
+// Traer todos los datos de una tabla
+async function fetchData(tabla) {
+  return await appSheetCRUD(tabla, "Find", [], {
+    Selector: `Filter(${tabla}, true)`
+  });
+}
+
+// =====================
+// Helpers comunes
+// =====================
+function formatearFecha(iso) {
+  if (!iso) return "";
+  return new Date(iso).toLocaleDateString("es-CL");
+}
+
+function formatoPrecio(valor) {
+  if (!valor) return "$0";
   return "$" + new Intl.NumberFormat("es-CL").format(valor);
 }
+
+function getKeyName(obj) {
+  const cands = ["ID","Id","Key","Row ID","RowID","_ComputedKey","_RowNumber"];
+  return cands.find(k => Object.prototype.hasOwnProperty.call(obj, k)) || "ID";
+}
+
+function getKeyVal(row) {
+  return row[getKeyName(row)];
+}
+
+function pick(row, aliases) {
+  for (const a of aliases) {
+    if (Object.prototype.hasOwnProperty.call(row, a)) return row[a];
+  }
+  return undefined;
+}
+
 // =====================
 // AUTENTICACIÓN (MVP)
-// Tabla AppSheet: "Usuarios" con columnas recomendadas:
-//   ID (Key), Email (Text), Nombre (Text), Rol (Text), PasswordHash (Text)
-//   * PasswordHash = SHA-256 del password en minúsculas (o el que definas)
+// Tabla AppSheet: "Usuarios"
+// Columnas recomendadas: ID (Key), Email, Nombre, Rol, PasswordHash
 // =====================
 
 // Hash SHA-256 usando Web Crypto API
-async function sha256(text){
+async function sha256(text) {
   const enc = new TextEncoder().encode(text);
   const buf = await crypto.subtle.digest('SHA-256', enc);
   const arr = Array.from(new Uint8Array(buf));
@@ -36,41 +83,40 @@ async function sha256(text){
 }
 
 // Obtiene user auth desde localStorage
-function getAuthUser(){
-  try{ return JSON.parse(localStorage.getItem('auth_user')); }
-  catch(_){ return null; }
+function getAuthUser() {
+  try { return JSON.parse(localStorage.getItem('auth_user')); }
+  catch(_) { return null; }
 }
 
 // Guarda sesión
-function setAuthUser(user){
+function setAuthUser(user) {
   localStorage.setItem('auth_user', JSON.stringify(user));
 }
 
 // Cierra sesión
-function logout(){
+function logout() {
   localStorage.removeItem('auth_user');
   window.location.href = 'login.html';
 }
 
 // Protege páginas internas
-function requireAuth(){
+function requireAuth() {
   const u = getAuthUser();
-  if(!u){ window.location.href = 'login.html'; }
+  if (!u) { window.location.href = 'login.html'; }
 }
 
 // Login contra AppSheet (tabla "Usuarios")
-async function loginWithAppSheet(email, password){
-  // Trae todos los usuarios (MVP). Para producción, filtra por email en el backend.
+async function loginWithAppSheet(email, password) {
   const usuarios = await fetchData("Usuarios");
   const u = usuarios.find(x => (x.Email||'').toLowerCase() === email);
 
-  if(!u){ throw new Error('Usuario no encontrado.'); }
+  if (!u) { throw new Error('Usuario no encontrado.'); }
 
   // Compara hash
   const providedHash = await sha256(password);
   const storedHash   = (u.PasswordHash||'').toLowerCase();
 
-  if(providedHash !== storedHash){
+  if (providedHash !== storedHash) {
     throw new Error('Contraseña inválida.');
   }
 
@@ -85,27 +131,11 @@ async function loginWithAppSheet(email, password){
 }
 
 // Opcional: verificación de rol
-function requireRole(roles = []){
+function requireRole(roles = []) {
   const u = getAuthUser();
-  if(!u) { window.location.href = 'login.html'; return; }
-  if(roles.length && !roles.includes(u.rol)){
+  if (!u) { window.location.href = 'login.html'; return; }
+  if (roles.length && !roles.includes(u.rol)) {
     alert('No tienes permisos para acceder a esta sección.');
     window.location.href = 'dashboard.html';
   }
-}
-// ===== Helpers Comunes =====
-function formatearFecha(iso){
-  if(!iso) return "";
-  return new Date(iso).toLocaleDateString("es-CL");
-}
-function getKeyName(obj){
-  const cands = ["ID","Id","Key","Row ID","RowID","_ComputedKey","_RowNumber"];
-  return cands.find(k => Object.prototype.hasOwnProperty.call(obj, k)) || "ID";
-}
-function getKeyVal(row){ return row[getKeyName(row)]; }
-function pick(row, aliases){
-  for(const a of aliases){
-    if (Object.prototype.hasOwnProperty.call(row, a)) return row[a];
-  }
-  return undefined;
 }

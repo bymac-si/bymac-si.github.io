@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CRM - Copropietarios</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/app.js"></script>
+  <script>requireAuth();</script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async ()=>{
+      document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
+      document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+    });
+  </script>
+</head>
+<body>
+<div id="header"></div>
+
+<main style="padding:40px;">
+  <h1 class="page-title">Copropietarios</h1>
+
+  <button class="btn-primary" style="margin:20px 0;" onclick="abrirFormCoprop()">+ Nuevo Copropietario</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Copropiedad</th>
+        <th>Nombre</th>
+        <th>RUT</th>
+        <th>Email</th>
+        <th>Telefono</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="tablaCoprops"></tbody>
+  </table>
+</main>
+
+<!-- MODAL FORM -->
+<div id="modalCoprop" class="modal">
+  <div class="modal-content">
+    <h2 id="modalTitleCoprop">Nuevo Copropietario</h2>
+    <form id="formCoprop">
+      <input type="hidden" id="copropID">
+      <label>Copropiedad</label>
+      <select id="copropCopro" required></select>
+
+      <label>Nombre</label>
+      <input id="copropNombre" required>
+
+      <label>RUT</label>
+      <input id="copropRUT">
+
+      <label>Email</label>
+      <input id="copropEmail" type="email">
+
+      <label>Telefono</label>
+      <input id="copropTelefono">
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:12px;">
+        <button type="button" class="btn-outline" onclick="cerrarModalCoprop()">Cancelar</button>
+        <button type="submit" class="btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL DETALLE -->
+<div id="modalDetalle" class="modal">
+  <div class="modal-content">
+    <h2>Detalle Copropietario</h2>
+    <div id="detalleContenido"></div>
+    <div style="text-align:right;margin-top:12px;">
+      <button class="btn-primary" onclick="cerrarModalDetalle()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<script>
+let copros=[], coprops=[]; 
+let KEY_NAME="ID";
+
+async function cargar(){
+  [copros, coprops] = await Promise.all([
+    fetchData("Copropiedades"),
+    fetchData("Copropietarios")
+  ]);
+  if(coprops.length) KEY_NAME = getKeyName(coprops[0]);
+
+  const coproMap={}; copros.forEach(c=> coproMap[getKeyVal(c)] = c.Nombre);
+
+  // combos
+  document.getElementById("copropCopro").innerHTML = copros
+    .map(c=>`<option value="${getKeyVal(c)}">${c.Nombre}</option>`).join("");
+
+  const tbody = document.getElementById("tablaCoprops");
+  tbody.innerHTML = coprops.map(p=>{
+    const key = getKeyVal(p);
+    return `
+      <tr>
+        <td>${coproMap[p.CopropiedadID]||"—"}</td>
+        <td>${p.Nombre||""}</td>
+        <td>${p.RUT||""}</td>
+        <td>${p.Email||""}</td>
+        <td>${p.Telefono||""}</td>
+        <td>
+          <button class="btn-outline btn-ver" data-id="${key}">Ver</button>
+          <button class="btn-outline btn-edit" data-id="${key}">Editar</button>
+          <button class="btn-primary" onclick="eliminarCoprop('${key}')">Eliminar</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  tbody.onclick = (e)=>{
+    const ver = e.target.closest(".btn-ver");
+    const edit = e.target.closest(".btn-edit");
+    if(ver) abrirDetalleCoprop(ver.dataset.id);
+    if(edit) abrirFormCoprop(edit.dataset.id);
+  };
+}
+
+// MODAL FORM
+const modal = document.getElementById("modalCoprop");
+const form  = document.getElementById("formCoprop");
+
+function abrirFormCoprop(id){
+  document.getElementById("modalTitleCoprop").textContent = id ? "Editar Copropietario" : "Nuevo Copropietario";
+  if(id){
+    const p = coprops.find(x=> String(getKeyVal(x))===String(id));
+    if(!p) return alert("No encontrado");
+    copropID.value = id;
+    copropCopro.value = p.CopropiedadID;
+    copropNombre.value = p.Nombre || "";
+    copropRUT.value = p.RUT || "";
+    copropEmail.value = p.Email || "";
+    copropTelefono.value = p.Telefono || "";
+  }else{ form.reset(); copropID.value=""; }
+  modal.classList.add("active");
+}
+function cerrarModalCoprop(){ modal.classList.remove("active"); }
+
+form.onsubmit = async (e)=>{
+  e.preventDefault();
+  const id = copropID.value || undefined;
+  const payload = {
+    ...(id ? { [KEY_NAME]: id } : {}),
+    CopropiedadID: copropCopro.value,
+    Nombre: copropNombre.value.trim(),
+    RUT: copropRUT.value.trim(),
+    Email: copropEmail.value.trim().toLowerCase(),
+    Telefono: copropTelefono.value.trim()
+  };
+  try{
+    if(id) await appSheetCRUD("Copropietarios","Edit",[payload]);
+    else   await appSheetCRUD("Copropietarios","Add",[payload]);
+    cerrarModalCoprop(); location.reload();
+  }catch(err){ alert("Error: " + (err.message||err)); }
+};
+
+async function eliminarCoprop(id){
+  if(!confirm("¿Eliminar este copropietario?")) return;
+  await appSheetCRUD("Copropietarios","Delete",[{[KEY_NAME]:id}]);
+  location.reload();
+}
+
+// MODAL DETALLE
+const modalDetalle = document.getElementById("modalDetalle");
+const detalleContenido = document.getElementById("detalleContenido");
+function abrirDetalleCoprop(id){
+  const p = coprops.find(x=> String(getKeyVal(x))===String(id));
+  if(!p) return alert("No encontrado");
+  const copro = copros.find(c=> String(getKeyVal(c))===String(p.CopropiedadID));
+  detalleContenido.innerHTML = `
+    <p><b>Copropiedad:</b> ${copro?.Nombre || "—"}</p>
+    <p><b>Nombre:</b> ${p.Nombre||""}</p>
+    <p><b>RUT:</b> ${p.RUT||""}</p>
+    <p><b>Email:</b> ${p.Email||""}</p>
+    <p><b>Telefono:</b> ${p.Telefono||""}</p>
+  `;
+  modalDetalle.classList.add("active");
+}
+function cerrarModalDetalle(){ modalDetalle.classList.remove("active"); }
+
+cargar();
+</script>
+</body>
+</html>

@@ -38,10 +38,13 @@
   <table>
     <thead>
       <tr>
+        <th>Título</th>
         <th>Dirección</th>
         <th>Tipo</th>
         <th>Precio</th>
         <th>Estado</th>
+        <th>Propietario</th>
+        <th>Agente</th>
         <th>Imagen</th>
         <th>Acciones</th>
       </tr>
@@ -56,17 +59,23 @@
     <h2 id="modalTitlePropiedad">Nueva Propiedad</h2>
     <form id="formPropiedad">
       <input type="hidden" id="propiedadID">
+      <label for="propiedadTitulo">Título</label>
+      <input type="text" id="propiedadTitulo" placeholder="Ej: Casa en Providencia" required>
       <label for="propiedadDireccion">Dirección</label>
       <input type="text" id="propiedadDireccion" placeholder="Dirección" required>
       <label for="propiedadTipo">Tipo (Casa, Depto, etc.)</label>
-      <input type="text" id="propiedadTipo" placeholder="Tipo (Casa, Depto, etc.)">
+      <input type="text" id="propiedadTipo">
       <label for="propiedadPrecio">Precio</label>
       <input type="number" id="propiedadPrecio" placeholder="Precio">
       <label for="propiedadEstado">Estado (Disponible, Vendida)</label>
-      <input type="text" id="propiedadEstado" placeholder="Estado (Disponible, Vendida)">
+      <input type="text" id="propiedadEstado">
+      <label for="propiedadPropietario">Propietario</label>
+      <input type="text" id="propiedadPropietario">
+      <label for="propiedadAgente">Agente</label>
+      <input type="text" id="propiedadAgente">
       <label for="propiedadImagen">URL Imagen</label>
       <input type="text" id="propiedadImagen" placeholder="URL Imagen">
-      <div style="display:flex; justify-content:flex-end; gap:10px;">
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:12px;">
         <button type="button" onclick="cerrarModalPropiedad()" class="btn-outline">Cancelar</button>
         <button type="submit" class="btn-primary">Guardar</button>
       </div>
@@ -92,6 +101,13 @@ let propiedadesGlobal=[];
 let KEY_NAME="ID";
 
 function formatoCLP(v){ return "$" + new Intl.NumberFormat("es-CL").format(Number(v||0)); }
+function fechaHoyDDMMYYYY(){
+  const d=new Date();
+  const dia=String(d.getDate()).padStart(2,'0');
+  const mes=String(d.getMonth()+1).padStart(2,'0');
+  const año=d.getFullYear();
+  return `${dia}/${mes}/${año}`;
+}
 
 async function cargarPropiedades(){
   propiedadesGlobal = await fetchData("Propiedades");
@@ -100,18 +116,16 @@ async function cargarPropiedades(){
   const tbody = document.getElementById("tablaPropiedades");
   tbody.innerHTML = propiedadesGlobal.map(p=>{
     const key = getKeyVal(p);
-    const direccion = p["Dirección"] ?? p.Direccion ?? p["Direccion"] ?? "";
-    const tipo = p.Tipo ?? "";
-    const precio = formatoCLP(p.Precio);
-    const estado = p.Estado ?? "";
-    const imagen = p.ImagenURL ?? p.Imagen ?? "";
     return `
       <tr>
-        <td>${direccion}</td>
-        <td>${tipo}</td>
-        <td>${precio}</td>
-        <td>${estado}</td>
-        <td>${imagen ? `<img src="${imagen}" alt="Foto" style="width:80px;border-radius:4px;">` : "—"}</td>
+        <td>${p.Titulo ?? ""}</td>
+        <td>${p.Direccion ?? ""}</td>
+        <td>${p.Tipo ?? ""}</td>
+        <td>${formatoCLP(p.Precio)}</td>
+        <td>${p.Estado ?? ""}</td>
+        <td>${p.Propietario ?? ""}</td>
+        <td>${p.Agente ?? ""}</td>
+        <td>${p.ImagenURL ? `<img src="${p.ImagenURL}" style="width:80px;border-radius:4px;">` : "—"}</td>
         <td>
           <button type="button" class="btn-outline btn-ver" data-id="${key}">Ver</button>
           <button type="button" class="btn-outline btn-edit" data-id="${key}">Editar</button>
@@ -121,7 +135,6 @@ async function cargarPropiedades(){
     `;
   }).join("");
 
-  // Delegación
   tbody.onclick = (e)=>{
     const btnVer = e.target.closest(".btn-ver");
     const btnEdit = e.target.closest(".btn-edit");
@@ -140,11 +153,14 @@ function abrirFormPropiedad(id){
     const p = propiedadesGlobal.find(x => String(getKeyVal(x)) === String(id));
     if(!p){ alert("No se encontró la propiedad"); return; }
     document.getElementById("propiedadID").value = id;
-    document.getElementById("propiedadDireccion").value = p["Dirección"] ?? p.Direccion ?? p["Direccion"] ?? "";
+    document.getElementById("propiedadTitulo").value = p.Titulo ?? "";
+    document.getElementById("propiedadDireccion").value = p.Direccion ?? "";
     document.getElementById("propiedadTipo").value = p.Tipo ?? "";
     document.getElementById("propiedadPrecio").value = p.Precio ?? 0;
     document.getElementById("propiedadEstado").value = p.Estado ?? "";
-    document.getElementById("propiedadImagen").value = p.ImagenURL ?? p.Imagen ?? "";
+    document.getElementById("propiedadPropietario").value = p.Propietario ?? "";
+    document.getElementById("propiedadAgente").value = p.Agente ?? "";
+    document.getElementById("propiedadImagen").value = p.ImagenURL ?? "";
   } else {
     form.reset();
     document.getElementById("propiedadID").value = "";
@@ -153,25 +169,36 @@ function abrirFormPropiedad(id){
 }
 function cerrarModalPropiedad(){ modal.classList.remove("active"); }
 
-form.onsubmit = async (e)=>{
+form.onsubmit = async function(e){
   e.preventDefault();
   const id = document.getElementById("propiedadID").value || undefined;
+  const hoy = fechaHoyDDMMYYYY();
+
   const payload = {
     ...(id ? { [KEY_NAME]: id } : {}),
-    "Dirección": document.getElementById("propiedadDireccion").value.trim(),
+    Direccion: document.getElementById("propiedadDireccion").value.trim(),
+    Titulo: document.getElementById("propiedadTitulo").value.trim(),
     Tipo: document.getElementById("propiedadTipo").value.trim(),
-    Precio: Number(document.getElementById("propiedadPrecio").value || 0),
+    Precio: parseFloat(document.getElementById("propiedadPrecio").value) || 0,
     Estado: document.getElementById("propiedadEstado").value.trim(),
-    ImagenURL: document.getElementById("propiedadImagen").value.trim(),
-    Imagen: document.getElementById("propiedadImagen").value.trim()
+    Propietario: document.getElementById("propiedadPropietario").value.trim(),
+    Agente: document.getElementById("propiedadAgente").value.trim(),
+    "Fecha Captacion": id 
+        ? (propiedadesGlobal.find(x => String(getKeyVal(x)) === String(id))?.["Fecha Captacion"] || hoy) 
+        : hoy,
+    ImagenURL: document.getElementById("propiedadImagen").value.trim() || null
   };
-  try{
+
+  try {
     if(id) await appSheetCRUD("Propiedades","Edit",[payload]);
     else   await appSheetCRUD("Propiedades","Add",[payload]);
     cerrarModalPropiedad();
     location.reload();
-  }catch(err){ alert("Error: "+(err.message||err)); }
-};
+  } catch(err){ 
+    alert("Error: " + (err.message || err)); 
+    console.error(err);
+  }
+}
 
 async function eliminarPropiedad(id){
   if(!confirm("¿Eliminar esta propiedad?")) return;
@@ -187,10 +214,14 @@ function abrirDetallePropiedad(id){
   const p = propiedadesGlobal.find(x => String(getKeyVal(x)) === String(id));
   if(!p){ alert("No se encontró la propiedad"); return; }
   detalleContenido.innerHTML = `
-    <p><b>Dirección:</b> ${p["Dirección"] ?? p.Direccion ?? ""}</p>
+    <p><b>Título:</b> ${p.Titulo ?? ""}</p>
+    <p><b>Dirección:</b> ${p.Direccion ?? ""}</p>
     <p><b>Tipo:</b> ${p.Tipo ?? ""}</p>
     <p><b>Precio:</b> ${formatoCLP(p.Precio)}</p>
     <p><b>Estado:</b> ${p.Estado ?? ""}</p>
+    <p><b>Propietario:</b> ${p.Propietario ?? ""}</p>
+    <p><b>Agente:</b> ${p.Agente ?? ""}</p>
+    <p><b>Fecha Captación:</b> ${p["Fecha Captacion"] ?? ""}</p>
     <p><b>Imagen:</b><br>${p.ImagenURL ? `<img src="${p.ImagenURL}" style="width:200px;border-radius:8px;">` : "—"}</p>
   `;
   modalDetalle.classList.add("active");

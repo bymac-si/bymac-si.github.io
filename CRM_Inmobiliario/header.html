@@ -1,13 +1,78 @@
-<!-- header.html -->
-<header>
-  <a href="index.html" style="font-weight:700;">
-    <img fetchpriority="high" width="150" src="img/logo_santajosefina.png" alt=" ">
-  </a>
-  <a href="dashboard.html">Dashboard</a>
-  <a href="clientes.html">Clientes</a>
-  <a href="propiedades.html">Propiedades</a>
-  <a href="visitas.html">Visitas</a>
-  <a href="marketing.html">Marketing</a>
-  <a href="contactos.html">Contactos</a>
-  <a href="#" class="btn-outline" onclick="logout()">Salir</a>
+<header class="main-header">
+  <nav class="navbar">
+    <!-- Botón toggle para sidebar (visible en móvil) -->
+    <button id="mobileToggle" class="mobile-toggle">☰</button>
+
+    <!-- Logo -->
+    <a href="index.html" class="logo">
+      <img src="img/logo_santajosefina.png" width="140" alt="Logo">
+    </a>
+
+    <!-- Links principales -->
+    <ul class="nav-links">
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="clientes.html">Clientes</a></li>
+      <li><a href="propiedades.html">Propiedades</a></li>
+      <li><a href="visitas.html">Visitas</a></li>
+      <li><a href="marketing.html">Marketing</a></li>
+
+      <!-- Submenú de Administración -->
+      <li class="dropdown">
+        <a href="#">Administración de Condominios ▾</a>
+        <ul class="dropdown-menu">
+          <li><a href="copropiedades.html">Copropiedades</a></li>
+          <li><a href="copropietarios.html">Copropietarios</a></li>
+          <li><a href="unidades.html">Unidades</a></li>
+          <li><a href="gastos.html">Gastos</a></li>
+          <li><a href="reportes.html">Reportes</a></li>
+        </ul>
+      </li>
+
+      <!-- Botón salir -->
+      <li><a href="#" onclick="logout()" class="btn-outline">Salir</a></li>
+    </ul>
+  </nav>
 </header>
+
+<!-- Sidebar -->
+<aside id="sidebar" class="sidebar hidden">
+  <ul class="sidebar-menu">
+    <li><a href="dashboard.html">Dashboard</a></li>
+    <li><a href="clientes.html">Clientes</a></li>
+    <li><a href="propiedades.html">Propiedades</a></li>
+    <li><a href="visitas.html">Visitas</a></li>
+    <li><a href="marketing.html">Marketing</a></li>
+    <li class="submenu">
+      <a href="#">Administración de Condominios ▾</a>
+      <ul>
+        <li><a href="copropiedades.html">Copropiedades</a></li>
+        <li><a href="copropietarios.html">Copropietarios</a></li>
+        <li><a href="unidades.html">Unidades</a></li>
+        <li><a href="gastos.html">Gastos</a></li>
+        <li><a href="reportes.html">Reportes</a></li>
+      </ul>
+    </li>
+    <li><a href="#" onclick="logout()" class="btn-outline">Salir</a></li>
+  </ul>
+</aside>
+
+<!-- Overlay -->
+<div id="overlay" class="overlay hidden"></div>
+
+<script>
+const sidebar=document.getElementById("sidebar");
+const mobileBtn=document.getElementById("mobileToggle");
+const overlay=document.getElementById("overlay");
+
+// Abrir/cerrar sidebar en móvil
+mobileBtn.addEventListener("click", ()=>{
+  sidebar.classList.toggle("active");
+  overlay.classList.toggle("hidden");
+});
+
+// Cerrar sidebar si se hace clic en overlay
+overlay.addEventListener("click", ()=>{
+  sidebar.classList.remove("active");
+  overlay.classList.add("hidden");
+});
+</script>
