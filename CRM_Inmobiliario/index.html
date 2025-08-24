@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <title>Santa Josefina SpA - Gestión Inmobiliaria</title>
   <link rel="stylesheet" href="css/styles.css">
-  <style>
-  </style>
   <script src="js/app.js"></script>
 </head>
 <body>
@@ -14,7 +12,7 @@
 <header class="main-header">
   <div class="navbar">
     <!-- Logo -->
-    <a href="index.html" class="logo" >
+    <a href="index.html" class="logo">
       <img src="img/logo_santajosefina.png" alt="Logo Santa Josefina" style="width: 140px; height: auto;">
     </a>
 
@@ -98,6 +96,15 @@
 </footer>
 
 <script>
+// Formatea fecha como DD-MM-YYYY
+function fechaHoyTexto(){
+  const d = new Date();
+  const dd = String(d.getDate()).padStart(2,"0");
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const yyyy = d.getFullYear();
+  return `${dd}-${mm}-${yyyy}`;
+}
+
 // Cargar propiedades disponibles desde AppSheet
 async function cargarPropiedadesLanding(){
   const propiedades = await fetchData("Propiedades");
@@ -123,13 +130,16 @@ const formContacto=document.getElementById("formContacto");
 formContacto.onsubmit=async(e)=>{
   e.preventDefault();
   const payload={
-    Nombre:document.getElementById("contactoNombre").value.trim(),
-    Email:document.getElementById("contactoEmail").value.trim(),
-    Telefono:document.getElementById("contactoTelefono").value.trim(),
-    Mensaje:document.getElementById("contactoMensaje").value.trim(),
-    Fecha:new Date().toISOString()
+    Nombre:   document.getElementById("contactoNombre").value.trim(),
+    Email:    document.getElementById("contactoEmail").value.trim(),
+    Telefono: document.getElementById("contactoTelefono").value.trim(),
+    Mensaje:  document.getElementById("contactoMensaje").value.trim(),
+    Fecha:    fechaHoyTexto(),
+    Estado:   "Nuevo",
+    Notas:    ""
   };
   try{
+    console.log("Payload enviado a AppSheet:", payload);
     await appSheetCRUD("Contactos","Add",[payload]);
     formContacto.reset();
     document.getElementById("msgConfirmacion").style.display="block";

@@ -17,13 +17,9 @@
 <div id="header"></div>
 
 <main style="padding:40px;">
-  <h1 class="page-title">Proveedores</h1>
+  <h1 class="page-title">Gestión de Proveedores</h1>
 
-  <div style="display:flex;gap:12px;align-items:center;margin:12px 0;">
-    <label>Copropiedad</label>
-    <select id="filtroCopro" onchange="renderTabla()"></select>
-    <button class="btn-primary" onclick="abrirFormProv()">+ Nuevo Proveedor</button>
-  </div>
+  <button class="btn-primary" onclick="abrirFormProveedor()">+ Nuevo Proveedor</button>
 
   <table>
     <thead>
@@ -33,41 +29,41 @@
         <th>RUT</th>
         <th>Giro</th>
         <th>Email</th>
-        <th>Telefono</th>
+        <th>Teléfono</th>
         <th>Acciones</th>
       </tr>
     </thead>
-    <tbody id="tablaProvs"></tbody>
+    <tbody id="tablaProveedores"></tbody>
   </table>
 </main>
 
 <!-- MODAL FORM -->
-<div id="modalProv" class="modal">
+<div id="modalProveedor" class="modal">
   <div class="modal-content">
-    <h2 id="modalTitleProv">Nuevo Proveedor</h2>
-    <form id="formProv">
-      <input type="hidden" id="provID">
+    <h2 id="modalTitleProveedor">Nuevo Proveedor</h2>
+    <form id="formProveedor">
+      <input type="hidden" id="proveedorID">
 
       <label>Copropiedad</label>
-      <select id="provCopro" required></select>
+      <select id="proveedorCopro" required></select>
 
       <label>Nombre</label>
-      <input id="provNombre" required>
+      <input type="text" id="proveedorNombre" required>
 
       <label>RUT</label>
-      <input id="provRUT">
+      <input type="text" id="proveedorRUT">
 
       <label>Giro</label>
-      <input id="provGiro">
+      <input type="text" id="proveedorGiro">
 
       <label>Email</label>
-      <input id="provEmail" type="email">
+      <input type="email" id="proveedorEmail">
 
-      <label>Telefono</label>
-      <input id="provTelefono">
+      <label>Teléfono</label>
+      <input type="text" id="proveedorTelefono">
 
-      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:12px;">
-        <button type="button" class="btn-outline" onclick="cerrarModalProv()">Cancelar</button>
+      <div style="text-align:right; margin-top:12px;">
+        <button type="button" onclick="cerrarModalProveedor()" class="btn-outline">Cancelar</button>
         <button type="submit" class="btn-primary">Guardar</button>
       </div>
     </form>
@@ -79,8 +75,8 @@
   <div class="modal-content">
     <h2>Detalle Proveedor</h2>
     <div id="detalleContenido"></div>
-    <div style="text-align:right;margin-top:12px;">
-      <button class="btn-primary" onclick="cerrarModalDetalle()">Cerrar</button>
+    <div style="margin-top:15px; text-align:right;">
+      <button type="button" onclick="cerrarModalDetalle()" class="btn-primary">Cerrar</button>
     </div>
   </div>
 </div>
@@ -88,124 +84,98 @@
 <div id="footer"></div>
 
 <script>
-let copros=[], provs=[]; 
-let KEY_NAME="ID";
+let proveedores=[], copros=[], KEY_NAME="ID";
 
-async function cargar(){
-  [copros, provs] = await Promise.all([
+async function cargarProveedores(){
+  [copros, proveedores] = await Promise.all([
     fetchData("Copropiedades"),
     fetchData("Proveedores")
   ]);
-  if(provs.length) KEY_NAME = getKeyName(provs[0]);
+  if(proveedores.length) KEY_NAME=getKeyName(proveedores[0]);
 
-  filtroCopro.innerHTML = copros.map(c=>`<option value="${getKeyVal(c)}">${c.Nombre}</option>`).join("");
-  provCopro.innerHTML = filtroCopro.innerHTML;
+  const coprosMap={};
+  copros.forEach(c=>coprosMap[getKeyVal(c)] = c.Nombre);
 
-  renderTabla();
-}
-function coproName(id){ const c = copros.find(x=> String(getKeyVal(x))===String(id)); return c?.Nombre||"—"; }
-
-function renderTabla(){
-  const sel = filtroCopro.value;
-  const lista = provs.filter(p=> String(p.CopropiedadID)===String(sel));
-  tablaProvs.innerHTML = lista.map(p=>{
-    const key = getKeyVal(p);
+  tablaProveedores.innerHTML = proveedores.map(p=>{
+    const key=getKeyVal(p);
     return `
       <tr>
-        <td>${coproName(p.CopropiedadID)}</td>
+        <td>${coprosMap[p.CopropiedadID] || "—"}</td>
         <td>${p.Nombre||""}</td>
         <td>${p.RUT||""}</td>
         <td>${p.Giro||""}</td>
         <td>${p.Email||""}</td>
         <td>${p.Telefono||""}</td>
         <td>
-          <button class="btn-outline btn-ver" data-id="${key}">Ver</button>
-          <button class="btn-outline btn-edit" data-id="${key}">Editar</button>
-          <button class="btn-primary" onclick="eliminarProv('${key}')">Eliminar</button>
+          <button class="btn-outline" onclick="abrirDetalleProveedor('${key}')">Ver</button>
+          <button class="btn-outline" onclick="abrirFormProveedor('${key}')">Editar</button>
+          <button class="btn-primary" onclick="eliminarProveedor('${key}')">Eliminar</button>
         </td>
       </tr>
     `;
   }).join("");
 
-  tablaProvs.onclick = (e)=>{
-    const ver=e.target.closest(".btn-ver");
-    const edit=e.target.closest(".btn-edit");
-    if(ver) abrirDetalleProv(ver.dataset.id);
-    if(edit) abrirFormProv(edit.dataset.id);
-  };
+  // dropdown copropiedades en modal
+  proveedorCopro.innerHTML = copros.map(c=>`<option value="${getKeyVal(c)}">${c.Nombre}</option>`).join("");
 }
 
-// ---- Modal Form ----
-const modal = document.getElementById("modalProv");
-const form  = document.getElementById("formProv");
-
-function abrirFormProv(id){
-  document.getElementById("modalTitleProv").textContent = id ? "Editar Proveedor" : "Nuevo Proveedor";
+function abrirFormProveedor(id){
+  modalTitleProveedor.textContent = id ? "Editar Proveedor" : "Nuevo Proveedor";
   if(id){
-    const p = provs.find(x=> String(getKeyVal(x))===String(id));
-    if(!p) return alert("No encontrado");
-    provID.value = id;
-    provCopro.value = p.CopropiedadID;
-    provNombre.value = p.Nombre||"";
-    provRUT.value = p.RUT||"";
-    provGiro.value = p.Giro||"";
-    provEmail.value = p.Email||"";
-    provTelefono.value = p.Telefono||"";
-  }else{
-    form.reset();
-    provID.value="";
-    provCopro.value = filtroCopro.value;
-  }
-  modal.classList.add("active");
+    const p = proveedores.find(x=>String(getKeyVal(x))===String(id));
+    if(!p) return;
+    proveedorID.value=id;
+    proveedorCopro.value=p.CopropiedadID||"";
+    proveedorNombre.value=p.Nombre||"";
+    proveedorRUT.value=p.RUT||"";
+    proveedorGiro.value=p.Giro||"";
+    proveedorEmail.value=p.Email||"";
+    proveedorTelefono.value=p.Telefono||"";
+  } else formProveedor.reset();
+  modalProveedor.classList.add("active");
 }
-function cerrarModalProv(){ modal.classList.remove("active"); }
+function cerrarModalProveedor(){ modalProveedor.classList.remove("active"); }
 
-form.onsubmit = async (e)=>{
+formProveedor.onsubmit=async e=>{
   e.preventDefault();
-  const id = provID.value || undefined;
-  const payload = {
-    ...(id ? { [KEY_NAME]: id } : {}),
-    CopropiedadID: provCopro.value,
-    Nombre: provNombre.value.trim(),
-    RUT: provRUT.value.trim(),
-    Giro: provGiro.value.trim(),
-    Email: provEmail.value.trim().toLowerCase(),
-    Telefono: provTelefono.value.trim()
+  const id=proveedorID.value||undefined;
+  const payload={
+    ...(id?{[KEY_NAME]:id}:{}),
+    CopropiedadID:proveedorCopro.value,
+    Nombre:proveedorNombre.value.trim(),
+    RUT:proveedorRUT.value.trim(),
+    Giro:proveedorGiro.value.trim(),
+    Email:proveedorEmail.value.trim(),
+    Telefono:proveedorTelefono.value.trim()
   };
-  try{
-    if(id) await appSheetCRUD("Proveedores","Edit",[payload]);
-    else   await appSheetCRUD("Proveedores","Add",[payload]);
-    cerrarModalProv();
-    location.reload();
-  }catch(err){ alert("Error: " + (err.message||err)); }
+  if(id) await appSheetCRUD("Proveedores","Edit",[payload]);
+  else   await appSheetCRUD("Proveedores","Add",[payload]);
+  cerrarModalProveedor(); location.reload();
 };
 
-// ---- Detalle / Eliminar ----
-const modalDetalle = document.getElementById("modalDetalle");
-const detalleContenido = document.getElementById("detalleContenido");
-
-function abrirDetalleProv(id){
-  const p = provs.find(x=> String(getKeyVal(x))===String(id));
-  if(!p) return alert("No encontrado");
-  detalleContenido.innerHTML = `
-    <p><b>Copropiedad:</b> ${coproName(p.CopropiedadID)}</p>
-    <p><b>Nombre:</b> ${p.Nombre||""}</p>
-    <p><b>RUT:</b> ${p.RUT||""}</p>
-    <p><b>Giro:</b> ${p.Giro||""}</p>
-    <p><b>Email:</b> ${p.Email||""}</p>
-    <p><b>Telefono:</b> ${p.Telefono||""}</p>
-  `;
-  modalDetalle.classList.add("active");
-}
-function cerrarModalDetalle(){ modalDetalle.classList.remove("active"); }
-
-async function eliminarProv(id){
+async function eliminarProveedor(id){
   if(!confirm("¿Eliminar este proveedor?")) return;
   await appSheetCRUD("Proveedores","Delete",[{[KEY_NAME]:id}]);
   location.reload();
 }
 
-cargar();
+function abrirDetalleProveedor(id){
+  const p=proveedores.find(x=>String(getKeyVal(x))===String(id));
+  if(!p) return;
+  const copro = copros.find(c=>String(getKeyVal(c))===String(p.CopropiedadID));
+  detalleContenido.innerHTML=`
+    <p><b>Copropiedad:</b> ${copro?.Nombre||"—"}</p>
+    <p><b>Nombre:</b> ${p.Nombre||""}</p>
+    <p><b>RUT:</b> ${p.RUT||""}</p>
+    <p><b>Giro:</b> ${p.Giro||""}</p>
+    <p><b>Email:</b> ${p.Email||""}</p>
+    <p><b>Teléfono:</b> ${p.Telefono||""}</p>
+  `;
+  modalDetalle.classList.add("active");
+}
+function cerrarModalDetalle(){ modalDetalle.classList.remove("active"); }
+
+cargarProveedores();
 </script>
 </body>
 </html>

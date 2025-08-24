@@ -4,34 +4,34 @@
     <button id="mobileToggle" class="mobile-toggle">☰</button>
 
     <!-- Logo -->
-    <a href="index.html" class="logo">
-      <img src="img/logo_santajosefina.png" width="140" alt="Logo">
+    <a href="dashboard.html" class="logo">
+      <img src="img/logo_santajosefina.png" alt="Logo Santa Josefina" style="width:140px; height:auto;">
     </a>
 
-    <!-- Links principales -->
-    <ul class="nav-links">
-      <li><a href="dashboard.html">Dashboard</a></li>
-      <li><a href="clientes.html">Clientes</a></li>
-      <li><a href="propiedades.html">Propiedades</a></li>
-      <li><a href="visitas.html">Visitas</a></li>
-      <li><a href="marketing.html">Marketing</a></li>
+    <!-- Links -->
+    <nav class="nav-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="clientes.html">Clientes</a>
+      <a href="propiedades.html">Propiedades</a>
+      <a href="visitas.html">Visitas</a>
+      <a href="marketing.html">Marketing</a>
 
-      <!-- Submenú de Administración -->
-      <li class="dropdown">
+      <!-- Submenú Administración de Condominios -->
+      <div class="dropdown">
         <a href="#">Administración de Condominios ▾</a>
         <ul class="dropdown-menu">
-          <li><a href="copropiedades.html">Copropiedades</a></li>
           <li><a href="copropietarios.html">Copropietarios</a></li>
           <li><a href="unidades.html">Unidades</a></li>
+          <li><a href="proveedores.html">Proveedores</a></li> <!-- NUEVO -->
           <li><a href="gastos.html">Gastos</a></li>
           <li><a href="reportes.html">Reportes</a></li>
         </ul>
-      </li>
+      </div>
 
       <!-- Botón salir -->
-      <li><a href="#" onclick="logout()" class="btn-outline">Salir</a></li>
-    </ul>
-  </nav>
+      <a href="#" class="btn-outline" onclick="logout()">Salir</a>
+    </nav>
+  </div>
 </header>
 
 <!-- Sidebar -->
