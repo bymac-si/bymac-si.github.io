@@ -1,13 +1,19 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>CRM - Reportes Gastos Comunes</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/styles.css" />
   <script src="js/app.js"></script>
   <script>requireAuth();</script>
+
+  <!-- Exportadores -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
   <script>
-    document.addEventListener("DOMContentLoaded", async ()=>{
+    document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
       document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
     });
@@ -19,11 +25,35 @@
 <main style="padding:40px;">
   <h1 class="page-title">Reporte de Gastos Comunes</h1>
 
-  <label>Seleccione Copropiedad:</label>
-  <select id="reporteCopro"></select>
+  <div style="display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end; margin-bottom:20px;">
+    <div>
+      <label for="reporteCopro"><b>Copropiedad:</b></label><br />
+      <select id="reporteCopro"></select>
+    </div>
+
+    <div>
+      <label for="reporteMes"><b>Mes (MM-YYYY):</b></label><br />
+      <select id="reporteMes"></select>
+    </div>
+
+    <div style="min-width:280px;">
+      <label for="destinatarios"><b>Destinatarios:</b></label><br />
+      <select id="destinatarios" multiple size="5" style="min-width:280px;"></select>
+      <div style="margin-top:6px; display:flex; gap:8px;">
+        <button class="btn-outline" type="button" onclick="seleccionarTodosDestinatarios(true)">Seleccionar todos</button>
+        <button class="btn-outline" type="button" onclick="seleccionarTodosDestinatarios(false)">Quitar selección</button>
+      </div>
+    </div>
+
+    <div style="margin-left:auto; display:flex; gap:8px;">
+      <button onclick="window.print()" class="btn-outline">🖨 Imprimir</button>
+      <button onclick="generarYEnviarPDF()" class="btn-primary">📄 Generar y Enviar Reporte</button>
+    </div>
+  </div>
 
   <h2>Total de Gastos: <span id="totalGastos">$0</span></h2>
 
+  <h3 style="margin-top:20px;">Prorrateo por Unidad</h3>
   <table>
     <thead>
       <tr>
@@ -35,43 +65,127 @@
     </thead>
     <tbody id="tablaReporte"></tbody>
   </table>
+
+  <div id="desgloseWrapper" style="margin-top:40px;"></div>
 </main>
 
 <div id="footer"></div>
 
 <script>
-let copros=[], unidades=[], gastos=[], coprops=[];
+let copros=[], unidades=[], gastosComunes=[], copropietarios=[], gastos=[];
+let ultimoDesgloseRef = null;
 
 async function cargarReporte(){
-  [copros, unidades, gastos, coprops] = await Promise.all([
+  [copros, unidades, gastosComunes, copropietarios, gastos] = await Promise.all([
     fetchData("Copropiedades"),
     fetchData("Unidades"),
-    fetchData("Gastos"),
-    fetchData("Copropietarios")
+    fetchData("GastosComunes"),   // 🔹 nombre corregido
+    fetchData("Copropietarios"),
+    fetchData("Gastos")
   ]);
-  reporteCopro.innerHTML = copros.map(c=>`<option value="${getKeyVal(c)}">${c.Nombre}</option>`).join("");
-  reporteCopro.addEventListener("change", renderReporte);
+
+  reporteCopro.innerHTML = copros.map(c =>
+    `<option value="${getKeyVal(c)}">${c.Nombre}</option>`
+  ).join("");
+
+  reporteCopro.addEventListener("change", ()=>{
+    cargarMeses();
+    poblarDestinatarios();
+  });
+
+  cargarMeses();
+  poblarDestinatarios();
+}
+
+function cargarMeses(){
+  const coproID = reporteCopro.value;
+  const meses = gastosComunes
+    .filter(gc => String(gc.CopropiedadID) === String(coproID))
+    .map(gc => gc.Mes);
+
+  const mesesUnicos = [...new Set(meses)].sort((a,b)=>{
+    const [ma,ya] = (a||"").split("-").map(Number);
+    const [mb,yb] = (b||"").split("-").map(Number);
+    return (ya - yb) || (ma - mb);
+  });
+
+  reporteMes.innerHTML = mesesUnicos.map(m => `<option value="${m}">${m}</option>`).join("");
+  reporteMes.onchange = renderReporte;
+  renderReporte();
+}
+
+function poblarDestinatarios(){
+  const coproID = reporteCopro.value;
+  const correos = new Set();
+
+  copropietarios
+    .filter(cp => String(cp.CopropiedadID) === String(coproID))
+    .forEach(cp => {
+      const mail = (cp.Email || cp.Correo || "").trim().toLowerCase();
+      if(mail) correos.add(mail);
+    });
+
+  const copro = copros.find(c => String(getKeyVal(c)) === String(coproID));
+  const posiblesAdmin = [(copro?.EmailAdmin||"").trim(), (copro?.AdministradorEmail||"").trim(), (copro?.Correo||"").trim()]
+    .filter(Boolean).map(x => x.toLowerCase());
+  posiblesAdmin.forEach(m => { if(m) correos.add(m); });
+
+  destinatarios.innerHTML = [...correos].sort().map(mail => `<option value="${mail}">${mail}</option>`).join("");
+}
+
+function seleccionarTodosDestinatarios(todos){
+  const sel = document.getElementById("destinatarios");
+  [...sel.options].forEach(opt => opt.selected = !!todos);
 }
 
 function renderReporte(){
-  const coproID=reporteCopro.value;
-  const unidadesC=unidades.filter(u=>String(u.CopropiedadID)===String(coproID));
-  const gastosC=gastos.filter(g=>String(g.CopropiedadID)===String(coproID));
-  const total=gastosC.reduce((acc,g)=>acc+(parseFloat(g.Monto)||0),0);
-  totalGastos.textContent=formatoPrecio(total);
+  const coproID = reporteCopro.value;
+  const mesSel = reporteMes.value;
 
-  tablaReporte.innerHTML=unidadesC.map(u=>{
-    const prop = coprops.find(p=>getKeyVal(p)===u.PropietarioID);
-    const cuota=(parseFloat(u.Alicuota)||0)/100*total;
+  const gc = gastosComunes.find(x =>
+    String(x.CopropiedadID) === String(coproID) && String(x.Mes) === String(mesSel)
+  );
+  const total = gc ? parseFloat(gc.TotalGastos) : 0;
+  totalGastos.textContent = formatoPrecio(total);
+
+  const unidadesC = unidades.filter(u => String(u.CopropiedadID) === String(coproID));
+  tablaReporte.innerHTML = unidadesC.map(u=>{
+    const prop = copropietarios.find(p => getKeyVal(p) === u.PropietarioID);
+    const cuota = (parseFloat(u.Alicuota)||0)/100 * total;
     return `
       <tr>
         <td>${u.Numero}</td>
-        <td>${prop?.Nombre||"—"}</td>
-        <td>${u.Alicuota||0}</td>
+        <td>${prop?.Nombre || "—"}</td>
+        <td>${u.Alicuota || 0}</td>
         <td>${formatoPrecio(cuota)}</td>
       </tr>
     `;
   }).join("");
+
+  const gastosMes = gastos.filter(g =>
+    String(g.CopropiedadID) === String(coproID) &&
+    String(g.Mes) === String(mesSel)
+  );
+
+  const desglose = {};
+  gastosMes.forEach(g=>{
+    const tipo = g.TipoGasto || "Sin clasificar";
+    desglose[tipo] = (desglose[tipo] || 0) + (parseFloat(g.Monto)||0);
+  });
+
+  const wrapper = document.getElementById("desgloseWrapper");
+  wrapper.innerHTML = `
+    <h3>Desglose de Gastos (${mesSel})</h3>
+    <table id="tablaDesglose">
+      <thead><tr><th>Tipo de Gasto</th><th>Monto</th></tr></thead>
+      <tbody>
+        ${Object.entries(desglose).map(([tipo,monto])=>`
+          <tr><td>${tipo}</td><td>${formatoPrecio(monto)}</td></tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+  ultimoDesgloseRef = { mesSel, coproID, coproNombre: (copros.find(c=>String(getKeyVal(c))===String(coproID))?.Nombre || ""), total };
 }
 
 cargarReporte();
