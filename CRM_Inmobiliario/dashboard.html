@@ -67,7 +67,7 @@ async function cargarDashboard(){
 
   document.getElementById("kpiClientes").textContent = clientes.length;
   document.getElementById("kpiPropiedades").textContent = propiedades.length;
-  document.getElementById("kpiVisitas").textContent = visitas.filter(v=>v["Fecha Visita"]===hoy).length;
+  document.getElementById("kpiVisitas").textContent = visitas.length;
 
   // Marketing Chart
   const marketing = await fetchData("Marketing");
