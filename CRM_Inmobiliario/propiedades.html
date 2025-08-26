@@ -10,11 +10,8 @@
 </script>
 <script>
   document.addEventListener("DOMContentLoaded", async ()=>{
-    // Cargar Header
     const headerResp = await fetch("header.html");
     document.getElementById("header").innerHTML = await headerResp.text();
-
-    // Cargar Footer
     const footerResp = await fetch("footer.html");
     document.getElementById("footer").innerHTML = await footerResp.text();
   });
@@ -22,10 +19,8 @@
 </head>
 <body>
 
-<!-- NAV -->
 <div id="header"></div>
 
-<!-- CONTENIDO -->
 <main style="padding:40px;">
   <h1 style="font-size:28px; font-weight:600; color:#1A2B48; margin-bottom:20px;">
     Gestión de Propiedades
@@ -60,22 +55,22 @@
     <form id="formPropiedad">
       <input type="hidden" id="propiedadID">
       <label for="propiedadTitulo">Título</label>
-      <input type="text" id="propiedadTitulo" placeholder="Ej: Casa en Providencia" required>
+      <input type="text" id="propiedadTitulo" required>
       <label for="propiedadDireccion">Dirección</label>
-      <input type="text" id="propiedadDireccion" placeholder="Dirección" required>
-      <label for="propiedadTipo">Tipo (Casa, Depto, etc.)</label>
+      <input type="text" id="propiedadDireccion" required>
+      <label for="propiedadTipo">Tipo</label>
       <input type="text" id="propiedadTipo">
       <label for="propiedadPrecio">Precio</label>
-      <input type="number" id="propiedadPrecio" placeholder="Precio">
-      <label for="propiedadEstado">Estado (Disponible, Vendida)</label>
+      <input type="number" id="propiedadPrecio">
+      <label for="propiedadEstado">Estado</label>
       <input type="text" id="propiedadEstado">
       <label for="propiedadPropietario">Propietario</label>
       <input type="text" id="propiedadPropietario">
       <label for="propiedadAgente">Agente</label>
       <input type="text" id="propiedadAgente">
       <label for="propiedadImagen">URL Imagen</label>
-      <input type="text" id="propiedadImagen" placeholder="URL Imagen">
-      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:12px;">
+      <input type="text" id="propiedadImagen">
+      <div style="margin-top:12px; text-align:right;">
         <button type="button" onclick="cerrarModalPropiedad()" class="btn-outline">Cancelar</button>
         <button type="submit" class="btn-primary">Guardar</button>
       </div>
@@ -97,17 +92,12 @@
 <div id="footer"></div>
 
 <script>
-let propiedadesGlobal=[];
-let KEY_NAME="ID";
+let propiedadesGlobal = [];
+let KEY_NAME = "ID";
 
 function formatoCLP(v){ return "$" + new Intl.NumberFormat("es-CL").format(Number(v||0)); }
-function fechaHoyDDMMYYYY(){
-  const d=new Date();
-  const dia=String(d.getDate()).padStart(2,'0');
-  const mes=String(d.getMonth()+1).padStart(2,'0');
-  const año=d.getFullYear();
-  return `${dia}/${mes}/${año}`;
-}
+// Fecha en formato ISO (YYYY-MM-DD)
+function hoyISO(){ return new Date().toISOString().split("T")[0]; }
 
 async function cargarPropiedades(){
   propiedadesGlobal = await fetchData("Propiedades");
@@ -144,49 +134,45 @@ async function cargarPropiedades(){
 }
 
 // --- Modal Form ---
-const modal = document.getElementById("modalPropiedad");
-const form  = document.getElementById("formPropiedad");
-
 function abrirFormPropiedad(id){
   document.getElementById("modalTitlePropiedad").textContent = id ? "Editar Propiedad" : "Nueva Propiedad";
   if(id){
     const p = propiedadesGlobal.find(x => String(getKeyVal(x)) === String(id));
     if(!p){ alert("No se encontró la propiedad"); return; }
-    document.getElementById("propiedadID").value = id;
-    document.getElementById("propiedadTitulo").value = p.Titulo ?? "";
-    document.getElementById("propiedadDireccion").value = p.Direccion ?? "";
-    document.getElementById("propiedadTipo").value = p.Tipo ?? "";
-    document.getElementById("propiedadPrecio").value = p.Precio ?? 0;
-    document.getElementById("propiedadEstado").value = p.Estado ?? "";
-    document.getElementById("propiedadPropietario").value = p.Propietario ?? "";
-    document.getElementById("propiedadAgente").value = p.Agente ?? "";
-    document.getElementById("propiedadImagen").value = p.ImagenURL ?? "";
+    propiedadID.value = id;
+    propiedadTitulo.value = p.Titulo ?? "";
+    propiedadDireccion.value = p.Direccion ?? "";
+    propiedadTipo.value = p.Tipo ?? "";
+    propiedadPrecio.value = p.Precio ?? 0;
+    propiedadEstado.value = p.Estado ?? "";
+    propiedadPropietario.value = p.Propietario ?? "";
+    propiedadAgente.value = p.Agente ?? "";
+    propiedadImagen.value = p.ImagenURL ?? "";
   } else {
-    form.reset();
-    document.getElementById("propiedadID").value = "";
+    formPropiedad.reset();
+    propiedadID.value = "";
   }
-  modal.classList.add("active");
+  modalPropiedad.classList.add("active");
 }
-function cerrarModalPropiedad(){ modal.classList.remove("active"); }
+function cerrarModalPropiedad(){ modalPropiedad.classList.remove("active"); }
 
-form.onsubmit = async function(e){
+formPropiedad.onsubmit = async function(e){
   e.preventDefault();
-  const id = document.getElementById("propiedadID").value || undefined;
-  const hoy = fechaHoyDDMMYYYY();
+  const id = propiedadID.value || undefined;
 
   const payload = {
     ...(id ? { [KEY_NAME]: id } : {}),
-    Direccion: document.getElementById("propiedadDireccion").value.trim(),
-    Titulo: document.getElementById("propiedadTitulo").value.trim(),
-    Tipo: document.getElementById("propiedadTipo").value.trim(),
-    Precio: parseFloat(document.getElementById("propiedadPrecio").value) || 0,
-    Estado: document.getElementById("propiedadEstado").value.trim(),
-    Propietario: document.getElementById("propiedadPropietario").value.trim(),
-    Agente: document.getElementById("propiedadAgente").value.trim(),
+    Direccion: propiedadDireccion.value.trim(),
+    Titulo: propiedadTitulo.value.trim(),
+    Tipo: propiedadTipo.value.trim(),
+    Precio: parseFloat(propiedadPrecio.value) || 0,
+    Estado: propiedadEstado.value.trim(),
+    Propietario: propiedadPropietario.value.trim(),
+    Agente: propiedadAgente.value.trim(),
     "Fecha Captacion": id 
-        ? (propiedadesGlobal.find(x => String(getKeyVal(x)) === String(id))?.["Fecha Captacion"] || hoy) 
-        : hoy,
-    ImagenURL: document.getElementById("propiedadImagen").value.trim() || null
+    ? (propiedadesGlobal.find(x => String(getKeyVal(x)) === String(id))?.["Fecha Captacion"] || hoyISO()) 
+    : hoyISO(),
+    ImagenURL: propiedadImagen.value.trim() || null
   };
 
   try {
@@ -200,6 +186,7 @@ form.onsubmit = async function(e){
   }
 }
 
+// --- Eliminar ---
 async function eliminarPropiedad(id){
   if(!confirm("¿Eliminar esta propiedad?")) return;
   await appSheetCRUD("Propiedades","Delete",[{[KEY_NAME]:id}]);
@@ -207,9 +194,6 @@ async function eliminarPropiedad(id){
 }
 
 // --- Modal Detalle ---
-const modalDetalle = document.getElementById("modalDetalle");
-const detalleContenido = document.getElementById("detalleContenido");
-
 function abrirDetallePropiedad(id){
   const p = propiedadesGlobal.find(x => String(getKeyVal(x)) === String(id));
   if(!p){ alert("No se encontró la propiedad"); return; }
@@ -221,7 +205,7 @@ function abrirDetallePropiedad(id){
     <p><b>Estado:</b> ${p.Estado ?? ""}</p>
     <p><b>Propietario:</b> ${p.Propietario ?? ""}</p>
     <p><b>Agente:</b> ${p.Agente ?? ""}</p>
-    <p><b>Fecha Captación:</b> ${p["Fecha Captacion"] ?? ""}</p>
+    <p><b>Fecha Captación:</b> ${p.FechaCaptacion ?? ""}</p>
     <p><b>Imagen:</b><br>${p.ImagenURL ? `<img src="${p.ImagenURL}" style="width:200px;border-radius:8px;">` : "—"}</p>
   `;
   modalDetalle.classList.add("active");
