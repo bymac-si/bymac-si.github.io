@@ -113,13 +113,15 @@ async function cargarPropiedadesLanding(){
     <div>
       <img src="${p.ImagenURL}" alt="Propiedad" style="width:100%; height:180px; object-fit:cover;">
       <div style="padding:15px;">
-        <h3 style="font-size:18px; margin-bottom:5px;">${p.Direccion}</h3>
+        <h3 style="font-size:18px; margin-bottom:5px;">${p.Titulo}</h3>
         <p style="color:#777;">${p.Tipo}</p>
         <p style="font-weight:bold; color:#B46A55; margin:10px 0;">
           ${"$"+new Intl.NumberFormat("es-CL").format(p.Precio)}
+          <br><br>
         </p>
         <a href="#contacto" class="btn-outline">Más información</a>
       </div>
+      <br>  
     </div>
   `).join("");
 }
