@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CRM - Dashboard Copropiedades</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="assets/js/app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>requireAuth();</script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async ()=>{
+      document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
+      document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+    });
+  </script>
+</head>
+<body>
+<div id="header"></div>
+
+<main style="padding:40px;">
+  <h1 class="page-title">Dashboard Copropiedades</h1>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+    <!-- Gastos por categoría -->
+    <div class="card">
+      <h2>Gastos por Categoría</h2>
+      <canvas id="chartGastosCategoria" height="200"></canvas>
+    </div>
+
+    <!-- Alícuotas vs Metros -->
+    <div class="card">
+      <h2>Alicuotas vs Metros</h2>
+      <canvas id="chartAlicuotas" height="200"></canvas>
+    </div>
+
+    <!-- Evolución mensual de gastos -->
+    <div class="card" style="grid-column:span 2;">
+      <h2>Evolución de Gastos Comunes</h2>
+      <canvas id="chartEvolucion" height="120"></canvas>
+    </div>
+  </div>
+</main>
+
+<div id="footer"></div>
+
+<script>
+let gastos=[], unidades=[];
+
+async function cargarDashboard(){
+  [gastos, unidades] = await Promise.all([
+    fetchData("Gastos"),
+    fetchData("Unidades")
+  ]);
+
+  renderGastosCategoria();
+  renderAlicuotasVsMetros();
+  renderEvolucionGastos();
+}
+
+// 1. Gastos por categoría
+function renderGastosCategoria(){
+  const categorias={};
+  gastos.forEach(g=> categorias[g.Tipo] = (categorias[g.Tipo]||0)+(parseFloat(g.Monto)||0) );
+  new Chart(document.getElementById("chartGastosCategoria"),{
+    type:"pie",
+    data:{
+      labels:Object.keys(categorias),
+      datasets:[{data:Object.values(categorias)}]
+    }
+  });
+}
+
+// 2. Alícuotas vs Metros
+function renderAlicuotasVsMetros(){
+  const labels=unidades.map(u=>u.Numero);
+  const data=unidades.map(u=>({x:parseFloat(u.Metros)||0,y:parseFloat(u.Alicuota)||0}));
+  new Chart(document.getElementById("chartAlicuotas"),{
+    type:"scatter",
+    data:{datasets:[{label:"Unidades",data:data}]},
+    options:{
+      scales:{x:{title:{display:true,text:"Metros²"}},y:{title:{display:true,text:"Alicuota (%)"}}}
+    }
+  });
+}
+
+// 3. Evolución de gastos comunes
+function renderEvolucionGastos(){
+  const mensual={};
+  gastos.forEach(g=>{
+    if(!g.Fecha) return;
+    const d=new Date(g.Fecha);
+    const mes=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    mensual[mes]=(mensual[mes]||0)+(parseFloat(g.Monto)||0);
+  });
+  const labels=Object.keys(mensual).sort();
+  const data=labels.map(m=>mensual[m]);
+  new Chart(document.getElementById("chartEvolucion"),{
+    type:"line",
+    data:{labels:labels,datasets:[{label:"Gastos",data:data,fill:true}]}
+  });
+}
+
+cargarDashboard();
+</script>
+</body>
+</html>

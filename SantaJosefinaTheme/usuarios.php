@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<title>CRM Inmobiliario - Administración de Usuarios</title>
+<link rel="stylesheet" href="assets/css/styles.css" />
+<script src="assets/js/app.js"></script>
+<script>
+  requireAuth();
+</script>
+  <script>
+  document.addEventListener("DOMContentLoaded", async ()=>{
+    // Cargar Header
+    const headerResp = await fetch("header.html");
+    document.getElementById("header").innerHTML = await headerResp.text();
+
+    // Cargar Footer
+    const footerResp = await fetch("footer.html");
+    document.getElementById("footer").innerHTML = await footerResp.text();
+  });
+</script>
+</head>
+<body>
+
+<!-- NAV -->
+<div id="header"></div>
+
+
+<!-- CONTENIDO -->
+<main style="padding:40px;">
+  <h1 style="font-size:28px; font-weight:600; color:#1A2B48; margin-bottom:20px;">
+    Administración de Usuarios
+  </h1>
+
+  <div style="display:flex; gap:10px; align-items:center; margin-bottom:16px;">
+    <button onclick="abrirFormUsuario()" class="btn-primary">+ Nuevo Usuario</button>
+    <input id="filtro" type="text" placeholder="Buscar por nombre o email..." style="flex:1; padding:8px; border:1px solid #e5e7eb; border-radius:4px;">
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>Nombre</th>
+        <th>Rol</th>
+        <th>Activo</th>
+        <th style="width:260px;">Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="tablaUsuarios"></tbody>
+  </table>
+</main>
+
+<!-- MODAL: Crear/Editar Usuario -->
+<div id="modalUsuario" class="modal">
+  <div class="modal-content">
+    <h2 id="modalTitleUsuario">Nuevo Usuario</h2>
+    <form id="formUsuario">
+      <input type="hidden" id="usuarioID">
+      <input type="email" id="usuarioEmail" placeholder="Correo corporativo" required>
+      <input type="text" id="usuarioNombre" placeholder="Nombre completo" required>
+
+      <select id="usuarioRol" required>
+        <option value="Colaborador">Colaborador</option>
+        <option value="Admin">Admin</option>
+      </select>
+
+      <select id="usuarioActivo">
+        <option value="true">Activo</option>
+        <option value="false">Inactivo</option>
+      </select>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:12px;">
+        <button type="button" onclick="cerrarModalUsuario()" class="btn-outline">Cancelar</button>
+        <button type="submit" class="btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: Reset Password -->
+<div id="modalPassword" class="modal">
+  <div class="modal-content">
+    <h2 id="modalTitlePassword">Restablecer contraseña</h2>
+    <form id="formPassword">
+      <input type="hidden" id="passwordUserID">
+      <input type="password" id="nuevoPassword" placeholder="Nueva contraseña" required>
+      <input type="password" id="confirmPassword" placeholder="Confirmar contraseña" required>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:12px;">
+        <button type="button" onclick="cerrarModalPassword()" class="btn-outline">Cancelar</button>
+        <button type="submit" class="btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+<div id="footer"></div>
+
+<script>
+// ==== Guardas de acceso (requiere Admin) ====
+requireAuth();
+requireRole(['Admin']); // Solo Admin puede entrar aquí
+
+// Mostrar usuario conectado
+const au = getAuthUser();
+if(au){ document.getElementById('whoami').textContent = `Conectado como ${au.nombre || au.email} · ${au.rol}`; }
+
+// ==== Estado ====
+let usuariosGlobal = [];
+const tbody = document.getElementById('tablaUsuarios');
+const filtro = document.getElementById('filtro');
+
+// ==== Carga inicial ====
+async function cargarUsuarios(){
+  usuariosGlobal = await fetchData("Usuarios");
+  renderTabla();
+}
+
+function renderTabla(){
+  const q = (filtro.value || '').toLowerCase();
+  const data = usuariosGlobal.filter(u =>
+    (u.Email||'').toLowerCase().includes(q) || (u.Nombre||'').toLowerCase().includes(q)
+  );
+
+  tbody.innerHTML = data.map(u => `
+    <tr>
+      <td>${(u.Email||'').toLowerCase()}</td>
+      <td>${u.Nombre||''}</td>
+      <td>${u.Rol||'Colaborador'}</td>
+      <td>${coerceBool(u.Activo) ? 'Sí' : 'No'}</td>
+      <td>
+        <button class="btn-outline" onclick="abrirFormUsuario('${u.ID}')">Editar</button>
+        <button class="btn-outline" onclick="abrirResetPassword('${u.ID}')">Reset Pass</button>
+        <button class="btn-primary" onclick="eliminarUsuario('${u.ID}')">Eliminar</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function coerceBool(v){
+  if (typeof v === 'boolean') return v;
+  if (typeof v === 'string') return v.toLowerCase() === 'true' || v === '1' || v.toLowerCase() === 'yes' || v.toLowerCase() === 'si';
+  if (typeof v === 'number') return v === 1;
+  return false;
+}
+
+filtro.addEventListener('input', renderTabla);
+
+// ==== Modal Usuario (Add/Edit) ====
+const modalUsuario = document.getElementById('modalUsuario');
+const formUsuario  = document.getElementById('formUsuario');
+
+function abrirFormUsuario(id){
+  document.getElementById('modalTitleUsuario').textContent = id ? 'Editar Usuario' : 'Nuevo Usuario';
+  if(id){
+    const u = usuariosGlobal.find(x => x.ID === id);
+    document.getElementById('usuarioID').value = u.ID;
+    document.getElementById('usuarioEmail').value = (u.Email||'').toLowerCase();
+    document.getElementById('usuarioNombre').value = u.Nombre || '';
+    document.getElementById('usuarioRol').value = u.Rol || 'Colaborador';
+    document.getElementById('usuarioActivo').value = coerceBool(u.Activo) ? 'true' : 'false';
+  } else {
+    formUsuario.reset();
+    document.getElementById('usuarioRol').value = 'Colaborador';
+    document.getElementById('usuarioActivo').value = 'true';
+    document.getElementById('usuarioID').value = '';
+  }
+  modalUsuario.classList.add('active');
+}
+function cerrarModalUsuario(){ modalUsuario.classList.remove('active'); }
+
+formUsuario.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('usuarioID').value;
+  const payload = {
+    ID: id || undefined,
+    Email: document.getElementById('usuarioEmail').value.trim().toLowerCase(),
+    Nombre: document.getElementById('usuarioNombre').value.trim(),
+    Rol: document.getElementById('usuarioRol').value,
+    Activo: document.getElementById('usuarioActivo').value === 'true'
+  };
+  try{
+    if(id) await appSheetCRUD('Usuarios','Edit',[payload]);
+    else   await appSheetCRUD('Usuarios','Add',[payload]);
+    cerrarModalUsuario();
+    location.reload();
+  }catch(err){
+    alert('Error al guardar: ' + (err.message || err));
+  }
+});
+
+// ==== Modal Reset Password ====
+const modalPassword = document.getElementById('modalPassword');
+const formPassword  = document.getElementById('formPassword');
+
+function abrirResetPassword(id){
+  const u = usuariosGlobal.find(x => x.ID === id);
+  if(!u){ return alert('Usuario no encontrado'); }
+  document.getElementById('modalTitlePassword').textContent = `Restablecer contraseña de ${u.Email}`;
+  document.getElementById('passwordUserID').value = id;
+  formPassword.reset();
+  modalPassword.classList.add('active');
+}
+
+function cerrarModalPassword(){ modalPassword.classList.remove('active'); }
+
+formPassword.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('passwordUserID').value;
+  const pass1 = document.getElementById('nuevoPassword').value;
+  const pass2 = document.getElementById('confirmPassword').value;
+
+  if(pass1.length < 6){ return alert('La contraseña debe tener al menos 6 caracteres.'); }
+  if(pass1 !== pass2){ return alert('Las contraseñas no coinciden.'); }
+
+  try{
+    const hash = await sha256(pass1);
+    await appSheetCRUD('Usuarios','Edit',[{ ID:id, PasswordHash: hash }]);
+    cerrarModalPassword();
+    alert('Contraseña actualizada.');
+  }catch(err){
+    alert('Error al actualizar contraseña: ' + (err.message || err));
+  }
+});
+
+// ==== Eliminar ====
+async function eliminarUsuario(id){
+  if(!confirm('¿Eliminar este usuario?')) return;
+  try{
+    await appSheetCRUD('Usuarios','Delete',[{ ID:id }]);
+    location.reload();
+  }catch(err){
+    alert('Error al eliminar: ' + (err.message || err));
+  }
+}
+
+// ==== Inicio ====
+cargarUsuarios();
+</script>
+</body>
+</html>

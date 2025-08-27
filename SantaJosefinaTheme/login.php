@@ -67,7 +67,7 @@
 
       try{
         await loginWithAppSheet(email, pass);    // definido en js/app.js (más abajo)
-        window.location.href = "dhttps://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/dashboard.php"; // éxito
+        window.location.href = "https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/dashboard.php"; // éxito
       }catch(err){
         errorBox.textContent = err.message || 'No fue posible iniciar sesión.';
         errorBox.style.display='block';
