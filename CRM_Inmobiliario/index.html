@@ -65,6 +65,7 @@
   <p style="max-width:800px; color:#444;">
     Con la entrada en vigencia de la <strong>Ley N°21.442 de Copropiedad Inmobiliaria</strong>, 
     ofrecemos un servicio de administración profesional de condominios y edificios, asegurando transparencia, eficiencia y cumplimiento normativo.
+    <br>Estamos en proceso de inscripción en el Registro Nacional de Administradores de Copropiedades del Minvu.
   </p>
   <ul style="max-width:800px; text-align:left; line-height:1.8; color:#444; margin-top:15px;">
     <li>Gestión financiera y contable con reportes claros a la comunidad.</li>
@@ -115,6 +116,8 @@ async function cargarPropiedadesLanding(){
       <div style="padding:15px;">
         <h3 style="font-size:18px; margin-bottom:5px;">${p.Titulo}</h3>
         <p style="color:#777;">${p.Tipo}</p>
+        <p style="color:#777;font-size:0.75em">${p.Comuna}</p>
+        <p style="color:#777;font-size:0.75em">${p.Region}</p>
         <p style="font-weight:bold; color:#B46A55; margin:10px 0;">
           ${"$"+new Intl.NumberFormat("es-CL").format(p.Precio)}
           <br><br>
