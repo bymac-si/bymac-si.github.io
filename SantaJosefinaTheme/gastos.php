@@ -6,6 +6,7 @@
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="assets/js/app.js"></script>
   <script>requireAuth();</script>
+  <script src="assets/js/gastos-comunes.js"></script>
 </head>
 <body>
 <div id="header"></div>
@@ -108,19 +109,32 @@ function cerrarForm(){ modalG.classList.remove("active"); }
 formG.onsubmit = async (e)=>{
   e.preventDefault();
   const id = gID.value || undefined;
+
+  // Construir Mes desde la fecha
+  const fecha = gFecha.value;
+  const d = new Date(fecha);
+  const mes = String(d.getMonth()+1).padStart(2,'0') + "-" + d.getFullYear();
+
   const payload = {
     ...(id?{[KEY_NAME]:id}:{}),
     CopropiedadID: gCopro.value,
     ProveedorID: gProv.value,
     TipoGasto: gTipo.value.trim(),
     Monto: parseFloat(gMonto.value)||0,
-    Fecha: gFecha.value,
+    Fecha: fecha,
     Documento: gDocumento.value.trim(),
-    Observaciones: gObs.value.trim()
+    Observaciones: gObs.value.trim(),
+    Mes: mes
   };
+
   if(id) await appSheetCRUD("Gastos","Edit",[payload]);
   else   await appSheetCRUD("Gastos","Add",[payload]);
-  cerrarForm(); location.reload();
+
+  // 🔹 Sincronizar GastosComunes
+  await actualizarGastosComunes(gCopro.value, mes);
+
+  cerrarForm();
+  location.reload();
 };
 
 async function eliminar(id){

@@ -118,6 +118,7 @@ async function cargarPropiedadesLanding(){
         <p style="color:#777;">${p.Tipo}</p>
         <p style="color:#777;font-size:0.75em">${p.Comuna}</p>
         <p style="color:#777;font-size:0.75em">${p.Region}</p>
+        <p style="color:#777;font-size:0.75em">${p.Metros}</p>
         <p style="font-weight:bold; color:#B46A55; margin:10px 0;">
           ${"$"+new Intl.NumberFormat("es-CL").format(p.Precio)}
           <br><br>
