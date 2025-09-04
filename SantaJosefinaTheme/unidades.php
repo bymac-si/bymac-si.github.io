@@ -16,7 +16,13 @@
 
   <table style="margin-top:16px;">
     <thead>
-      <tr><th>Copropiedad</th><th>N°</th><th>Propietario</th><th>Alicuota (%)</th><th>Acciones</th></tr>
+      <tr>
+        <th>Copropiedad</th>
+        <th>N°</th>
+        <th>Propietario</th>
+        <th>Alicuota (%)</th>
+        <th>Acciones</th>
+      </tr>
     </thead>
     <tbody id="tablaU"></tbody>
   </table>
@@ -27,10 +33,15 @@
     <h2 id="modalTitle">Nueva Unidad</h2>
     <form id="formU">
       <input type="hidden" id="uID">
-      <label>Copropiedad</label><select id="uCopro" required></select>
-      <label>Número</label><input id="uNumero" required>
-      <label>Propietario</label><select id="uPropietario" required></select>
-      <label>Alicuota (%)</label><input type="number" id="uAlicuota" min="0" step="0.01">
+      <label>Copropiedad</label>
+      <select id="uCopro" required></select>
+      <label>Número</label>
+      <input id="uNumero" required>
+      <label>Propietario</label>
+      <select id="uPropietario" required></select>
+      <label>Alicuota (%)</label>
+      <!-- 🔹 Permitimos 3 decimales -->
+      <input type="number" id="uAlicuota" min="0" step="0.001">
       <div style="text-align:right;margin-top:10px;">
         <button type="button" class="btn-outline" onclick="cerrarForm()">Cancelar</button>
         <button class="btn-primary">Guardar</button>
@@ -61,13 +72,14 @@ async function cargar(){
   copros.forEach(c=>coproMap[getKeyVal(c)] = c.Nombre);
   cops.forEach(c=>copropMap[getKeyVal(c)] = c.Nombre);
 
+  // 🔹 Mostrar siempre 3 decimales en la tabla
   tablaU.innerHTML = units.map(u=>{
     const key=getKeyVal(u);
     return `<tr>
       <td>${coproMap[u.CopropiedadID]||"—"}</td>
       <td>${u.Numero||""}</td>
       <td>${copropMap[u.PropietarioID]||"—"}</td>
-      <td>${u.Alicuota||0}</td>
+      <td>${(parseFloat(u.Alicuota)||0).toFixed(3)}</td>
       <td>
         <button class="btn-outline" onclick="abrirForm('${key}')">Editar</button>
         <button class="btn-primary" onclick="eliminar('${key}')">Eliminar</button>
@@ -88,8 +100,11 @@ function abrirForm(id){
     uCopro.value=u.CopropiedadID;
     uNumero.value=u.Numero||"";
     uPropietario.value=u.PropietarioID;
-    uAlicuota.value=u.Alicuota||0;
-  }else{ formU.reset(); uID.value=""; }
+    uAlicuota.value=(parseFloat(u.Alicuota)||0).toFixed(3);
+  }else{
+    formU.reset();
+    uID.value="";
+  }
   modalU.classList.add("active");
 }
 function cerrarForm(){ modalU.classList.remove("active"); }
@@ -102,7 +117,8 @@ formU.onsubmit = async (e)=>{
     CopropiedadID: uCopro.value,
     Numero: uNumero.value.trim(),
     PropietarioID: uPropietario.value,
-    Alicuota: parseFloat(uAlicuota.value)||0
+    // 🔹 Guardar siempre con 3 decimales
+    Alicuota: parseFloat(parseFloat(uAlicuota.value).toFixed(3)) || 0
   };
   if(id) await appSheetCRUD("Unidades","Edit",[payload]);
   else   await appSheetCRUD("Unidades","Add",[payload]);

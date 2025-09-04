@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>CRM Inmobiliario - Dashboard</title>
 <link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/js/app.js"></script>
 <script>
@@ -21,28 +22,28 @@
   });
 </script>
 </head>
-<body>
+<body style="max-width:1200px; margin: 0 auto;">
 
 <!-- NAV -->
 <div id="header"></div>
 
 <!-- CONTENIDO -->
-<main style="padding:40px;">
+<main style="padding:40px;" class="container-fluid">
   <h1 style="font-size:28px; font-weight:600; color:#1A2B48; margin-bottom:20px;">
     Panel de Control
   </h1>
 
   <!-- KPIs -->
   <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; margin-bottom:40px;">
-    <div style="background:white; padding:20px; border-radius:5px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+    <div style="background:#ffcc00; padding:20px; border-radius:5px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
       <h2 style="font-size:16px; color:#555;">Total Clientes</h2>
       <p id="kpiClientes" style="font-size:28px; font-weight:bold; color:#1A2B48;">0</p>
     </div>
-    <div style="background:white; padding:20px; border-radius:5px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+    <div style="background:#ffcc33; padding:20px; border-radius:5px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
       <h2 style="font-size:16px; color:#555;">Propiedades Disponibles</h2>
       <p id="kpiPropiedades" style="font-size:28px; font-weight:bold; color:#1A2B48;">0</p>
     </div>
-    <div style="background:white; padding:20px; border-radius:5px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+    <div style="background:#ffcc66; padding:20px; border-radius:5px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
       <h2 style="font-size:16px; color:#555;">Visitas Hoy</h2>
       <p id="kpiVisitas" style="font-size:28px; font-weight:bold; color:#1A2B48;">0</p>
     </div>
@@ -84,6 +85,8 @@ async function cargarDashboard(){
 cargarDashboard();
 </script>
 <div id="footer"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
 
 </body>
 </html>
