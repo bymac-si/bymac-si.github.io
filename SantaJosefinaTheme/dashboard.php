@@ -44,7 +44,7 @@
       <p id="kpiPropiedades" style="font-size:28px; font-weight:bold; color:#1A2B48;">0</p>
     </div>
     <div style="background:#ffcc66; padding:20px; border-radius:5px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
-      <h2 style="font-size:16px; color:#555;">Visitas Hoy</h2>
+      <h2 style="font-size:16px; color:#555;">Visitas Agendadas</h2>
       <p id="kpiVisitas" style="font-size:28px; font-weight:bold; color:#1A2B48;">0</p>
     </div>
   </div>

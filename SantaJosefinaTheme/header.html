@@ -1,15 +1,16 @@
 <header class="main-header">
-  <nav class="navbar">
-    <!-- Botón toggle para sidebar (visible en móvil) -->
-    <button id="mobileToggle" class="mobile-toggle">☰</button>
+  <nav class="navbar container-fluid">
+    <!-- Toggle (si en algún momento quieres volver a usar sidebar, hoy no hace nada) -->
+    <button id="mobileToggle" class="mobile-toggle" style="display:none;">☰</button>
 
     <!-- Logo -->
-    <a href="index.php" class="logo">
-      <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/logo_santajosefina.png" alt="Logo Santa Josefina" style="width:140px; height:auto;">
+    <a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/index.php" class="logo">
+      <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/logo_santajosefina.png"
+           alt="Logo Santa Josefina" style="width:140px;height:auto;">
     </a>
 
-    <!-- Links -->
-    <nav class="nav-links">
+    <!-- Menú principal -->
+    <nav class="nav-links" id="navLinks">
       <a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/dashboard.php">Dashboard</a>
       <a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/clientes.php">Clientes</a>
       <a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/propiedades.php">Propiedades</a>
@@ -18,7 +19,7 @@
 
       <!-- Submenú Administración de Condominios -->
       <div class="dropdown">
-        <a href="#">Administración de Condominios ▾</a>
+        <a href="#">Condominios ▾</a>
         <ul class="dropdown-menu">
           <li><a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/copropietarios.php">Copropietarios</a></li>
           <li><a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/copropiedades.php">Comunidades</a></li>
@@ -29,52 +30,27 @@
         </ul>
       </div>
 
-      <!-- Botón salir -->
+      <!-- Agentes: visible para todos -->
+      <a id="linkAgentes" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/usuarios.php?tipo=agentes">Agentes</a>
+
+      <!-- Usuarios: solo Admin (oculto por defecto) -->
+      <a id="linkUsuarios" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/usuarios.php?tipo=usuarios" style="display:none;">Usuarios</a>
+
+      <!-- Salir -->
       <a href="#" class="btn-outline" onclick="logout()">Salir</a>
     </nav>
   </nav>
 </header>
 
-<!-- Sidebar -->
-<aside id="sidebar" class="sidebar hidden">
-  <ul class="sidebar-menu">
-    <li><a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/dashboard.php">Dashboard</a></li>
-    <li><a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/clientes.php">Clientes</a></li>
-    <li><a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/propiedades.php">Propiedades</a></li>
-    <li><a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/visitas.php">Visitas</a></li>
-    <li><a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/marketing.php">Marketing</a></li>
-    <li class="submenu">
-      <a href="#">Administración de Condominios ▾</a>
-      <ul>
-        <li><a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/copropietarios.php">Copropietarios</a></li>
-          <li><a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/copropiedades.php">Comunidades</a></li>
-          <li><a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/unidades.php">Unidades</a></li>
-          <li><a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/proveedores.php">Proveedores</a></li>
-          <li><a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/gastos.php">Gastos</a></li>
-          <li><a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/reportes.php">Reportes</a></li>
-      </ul>
-    </li>
-    <li><a href="#" onclick="logout()" class="btn-outline">Salir</a></li>
-  </ul>
-</aside>
-
-<!-- Overlay -->
-<div id="overlay" class="overlay hidden"></div>
-
 <script>
-const sidebar=document.getElementById("sidebar");
-const mobileBtn=document.getElementById("mobileToggle");
-const overlay=document.getElementById("overlay");
-
-// Abrir/cerrar sidebar en móvil
-mobileBtn.addEventListener("click", ()=>{
-  sidebar.classList.toggle("active");
-  overlay.classList.toggle("hidden");
-});
-
-// Cerrar sidebar si se hace clic en overlay
-overlay.addEventListener("click", ()=>{
-  sidebar.classList.remove("active");
-  overlay.classList.add("hidden");
-});
+  // Muestra el link "Usuarios" solo si el usuario logueado es Admin
+  document.addEventListener('DOMContentLoaded', () => {
+    const au = getAuthUser && getAuthUser();
+    const adminLink = document.getElementById('linkUsuarios');
+    if (au && (au.rol || '').toLowerCase() === 'admin') {
+      adminLink.style.display = '';
+    } else {
+      adminLink.remove(); // o déjalo hidden si prefieres
+    }
+  });
 </script>
