@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="css/styles.css">
 <script src="js/app.js"></script>
 </head>
-<body>
+<body style="max-width:1200px; margin: 0 auto;">
 
 <!-- NAV -->
 <header>

@@ -20,7 +20,7 @@
   });
 </script>
 </head>
-<body>
+<body style="max-width:1200px; margin: 0 auto;">
 
 <!-- NAV -->
 <div id="header"></div>

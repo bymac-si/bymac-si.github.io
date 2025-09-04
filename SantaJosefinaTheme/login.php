@@ -15,7 +15,7 @@
     .err{color:#b42318;background:#fee4e2;border:1px solid #fda29b;padding:8px 10px;border-radius:4px;margin-bottom:10px;display:none}
   </style>
 </head>
-<body>
+<body style="max-width:1200px; margin: 0 auto;">
   <!-- NAV -->
 <header class="main-header">
   <div class="navbar">

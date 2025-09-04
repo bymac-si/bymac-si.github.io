@@ -7,14 +7,14 @@
   <script src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/js/app.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 </head>
-<body>
+<body style="max-width:1200px; margin: 0 auto;">
 
 <!-- NAV -->
 <header class="main-header">
-  <div class="navbar">
+  <div class="navbar container-fluid">
     <!-- Logo -->
-    <a href="index.php" class="logo">
-      <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/logo_santajosefina.png" alt="Logo Santa Josefina" style="width: 140px; height: auto;">
+    <a class="navbar-brand" href="index.php">
+      <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/logo_santajosefina.png" alt="Logo Santa Josefina" style="width: 140px; height: auto;" class="d-inline-block align-text-middle">
     </a>
 
     <!-- Links -->

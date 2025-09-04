@@ -7,7 +7,7 @@
   <script src="assets/js/app.js"></script>
   <script>requireAuth();</script>
 </head>
-<body>
+<body style="max-width:1200px; margin: 0 auto;">
 <div id="header"></div>
 
 <main style="padding:40px;">

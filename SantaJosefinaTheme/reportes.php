@@ -25,7 +25,7 @@
     .info-copro { margin-bottom:15px; font-size:14px; color:#444; }
   </style>
 </head>
-<body>
+<body style="max-width:1200px; margin: 0 auto;">
 <div id="header"></div>
 
 <main style="padding:40px;">
