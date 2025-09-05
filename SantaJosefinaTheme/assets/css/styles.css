@@ -18,19 +18,19 @@ header a {
 }
 
 header a:hover {
-  color: #B46A55;
+  color: #801d17;
 }
 
 header .btn-outline {
-  border: 1px solid #B46A55;
-  color: #B46A55;
+  border: 1px solid #801d17;
+  color: #801d17;
   padding: 6px 16px;
   border-radius: 3px;
   transition: all 0.3s;
 }
 
 header .btn-outline:hover {
-  background: #B46A55;
+  background: #801d17;
   color: #fff;
 }
 
@@ -330,12 +330,12 @@ header nav a {
 
     /* --- Botones --- */
     .btn-primary {
-      background:#B46A55; color:#fff; border:none; padding:12px; 
+      background:#801d17; color:#fff; border:none; padding:12px; 
       border-radius:4px; cursor:pointer; text-decoration:none;
       text-align:center;
     }
     .btn-outline {
-      border:1px solid #B46A55; color:#B46A55; padding:10px 15px;
+      border:1px solid #801d17; color:#801d17; padding:10px 15px;
       border-radius:4px; text-decoration:none;
     }
 
@@ -380,7 +380,7 @@ header nav a {
 /* Responsive */
 @media(max-width:768px){
   .nav-links {
-    display:none; /* luego podemos hacer hamburguesa si quieres */
+    display:none; 
   }
 }
 .logo {

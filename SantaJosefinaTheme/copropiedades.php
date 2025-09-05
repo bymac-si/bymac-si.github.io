@@ -96,7 +96,7 @@ async function cargarCopros(){
         <td>${c.Direccion ?? ""}</td>
         <td>${c.Comuna ?? ""}</td>
         <td>${c.Ciudad ?? ""}</td>
-        <td>${formatoCLP(c.FondoReserva)}</td>
+        <td>${c.FondoReserva ?? ""}%</td>
         <td>
           <button class="btn-outline btn-ver" data-id="${key}">Ver</button>
           <button class="btn-outline btn-edit" data-id="${key}">Editar</button>

@@ -79,7 +79,7 @@
 
 <!-- CONTACTO -->
 <section id="contacto" style="background:#fafafa;">
-  <h2>Contacto</h2>
+  <h2>Formulario de Contacto</h2>
   <form id="formContacto">
     <input id="contactoNombre" type="text" placeholder="Nombre completo" required>
     <input id="contactoEmail" type="email" placeholder="Correo electrónico" required>
