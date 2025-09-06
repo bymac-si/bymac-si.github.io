@@ -8,15 +8,12 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-doughnutlabel-rebourne"></script>
 <script src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/js/app.js"></script>
-<script>
-  requireAuth();
-</script>
+<script>requireAuth();</script>
 <script>
   document.addEventListener("DOMContentLoaded", async ()=>{
-    const headerResp = await fetch("header.html");
-    document.getElementById("header").innerHTML = await headerResp.text();
-    const footerResp = await fetch("footer.html");
-    document.getElementById("footer").innerHTML = await footerResp.text();
+    document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
+    document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+    cargarDashboard();
   });
 </script>
 <style>
@@ -31,9 +28,24 @@
   display:inline-block; width:250px; height:250px; margin:20px;
   text-align:center;
 }
-.gauge-detail{
-  font-size:14px; color:#555; margin-top:4px;
+.gauge-detail{font-size:14px; color:#555; margin-top:4px;}
+/* Spinner estilo card */
+.spinner-backdrop{
+  position:fixed; inset:0; background:rgba(255,255,255,0.85);
+  display:flex; align-items:center; justify-content:center; z-index:9999;
 }
+.spinner-card{
+  background:#fff; padding:18px 22px; border:1px solid #e5e7eb; border-radius:8px;
+  box-shadow:0 6px 18px rgba(0,0,0,.08); text-align:center; min-width:260px;
+  color:#1A2B48; font-weight:600;
+}
+.spinner{
+  width:28px; height:28px; border-radius:50%;
+  border:3px solid #eee; border-top-color:#B46A55;
+  margin:0 auto 10px auto; animation:spin 0.9s linear infinite;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
+.hidden{ display:none !important; }
 </style>
 </head>
 <body style="max-width:1200px; margin: 0 auto;">
@@ -55,28 +67,12 @@
 
   <!-- Gráficos -->
   <div class="row g-4">
-    <div class="col-md-6">
-      <div class="card p-3">
-        <h2>Embudo de Ventas</h2>
-        <canvas id="graficoEmbudo"></canvas>
-      </div>
-    </div>
-    <div class="col-md-6">
-      <div class="card p-3">
-        <h2>Clientes captados por canal</h2>
-        <canvas id="graficoMarketing"></canvas>
-      </div>
-    </div>
-    <div class="col-md-6">
-      <div class="card p-3">
-        <h2>Tareas por Estado</h2>
-        <canvas id="graficoTareasEstado"></canvas>
-      </div>
-    </div>
+    <div class="col-md-6"><div class="card p-3"><h2>Embudo de Ventas</h2><canvas id="graficoEmbudo"></canvas></div></div>
+    <div class="col-md-6"><div class="card p-3"><h2>Clientes captados por canal</h2><canvas id="graficoMarketing"></canvas></div></div>
+    <div class="col-md-6"><div class="card p-3"><h2>Tareas por Estado</h2><canvas id="graficoTareasEstado"></canvas></div></div>
     <div class="col-md-12">
       <div class="card p-3">
         <h2>Cumplimiento de Tareas por Agente</h2>
-        <!-- Gauge Global -->
         <div style="text-align:center; margin-bottom:30px;">
           <div class="gauge-container">
             <canvas id="gaugeGlobal"></canvas>
@@ -84,129 +80,133 @@
             <p id="detalleGlobal" class="gauge-detail"></p>
           </div>
         </div>
-        <!-- Gauges por usuario -->
         <div id="gaugesUsuarios" style="display:flex;flex-wrap:wrap;justify-content:center;"></div>
-		  <p>
-			  
-		  </p>
-		  <p>
-			  
-		  </p>
       </div>
     </div>
   </div>
 </main>
 
+<!-- SPINNER -->
+<div id="pageSpinner" class="spinner-backdrop hidden" aria-hidden="true">
+  <div class="spinner-card">
+    <div class="spinner"></div>
+    <div id="spinnerText">Cargando Dashboard...</div>
+  </div>
+</div>
+
 <div id="footer"></div>
 
 <script>
-// Normaliza el estado
 function normalizarEstado(e){
   if(!e) return "";
   return e.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
 }
-
-// Color dinámico según % cumplimiento
 function getGaugeColor(pct){
-  if(pct >= 70) return "#66cc66"; // Verde
-  if(pct >= 40) return "#ffcc00"; // Amarillo
-  return "#ff6666"; // Rojo
+  if(pct >= 70) return "#66cc66";
+  if(pct >= 40) return "#ffcc00";
+  return "#ff6666";
 }
+function showSpinner(msg){
+  const sp=document.getElementById('pageSpinner');
+  const txt=document.getElementById('spinnerText');
+  if(msg) txt.textContent=msg;
+  sp.classList.remove('hidden');
+}
+function hideSpinner(){ document.getElementById('pageSpinner').classList.add('hidden'); }
 
 async function cargarDashboard(){
-  const clientes = await fetchData("Clientes");
-  const propiedades = await fetchData("Propiedades");
-  const visitas = await fetchData("Visitas");
-  const tareas = await fetchData("Tareas");
-  const marketing = await fetchData("Marketing");
-  const agentes = await fetchData("Agentes");
+  try{
+    showSpinner("Cargando Dashboard...");
+    const [clientes, propiedades, visitas, tareas, marketing, agentes] = await Promise.all([
+      fetchData("Clientes"),
+      fetchData("Propiedades"),
+      fetchData("Visitas"),
+      fetchData("Tareas"),
+      fetchData("Marketing"),
+      fetchData("Agentes")
+    ]);
 
-  const agenteMap = {};
-  agentes.forEach(a => agenteMap[a.ID] = a.Nombre);
+    const agenteMap = {}; agentes.forEach(a => agenteMap[a.ID] = a.Nombre);
 
-  // KPIs
-  document.getElementById("kpiClientes").textContent = clientes.length;
-  document.getElementById("kpiPropiedades").textContent = propiedades.length;
-  document.getElementById("kpiVisitas").textContent = visitas.length;
-  document.getElementById("kpiTareasPendientes").textContent = tareas.filter(t=>normalizarEstado(t.Estado)!=="completada").length;
+    // KPIs
+    kpiClientes.textContent = clientes.length;
+    kpiPropiedades.textContent = propiedades.length;
+    kpiVisitas.textContent = visitas.length;
+    kpiTareasPendientes.textContent = tareas.filter(t=>normalizarEstado(t.Estado)!=="completada").length;
 
-  // Embudo
-  const etapas = ["Prospecto","En Negociación","Reservado","Vendido"];
-  const conteo = etapas.map(et => clientes.filter(c=>c.Estado===et).length);
-  new Chart(document.getElementById("graficoEmbudo"),{
-    type:"bar",
-    data:{labels:etapas,datasets:[{data:conteo,backgroundColor:["#ffcc00","#ff9933","#66ccff","#66cc66"]}]},
-    options:{indexAxis:"y",plugins:{legend:{display:false}}}
-  });
+    // Embudo
+    const etapas = ["Prospecto","En Negociación","Reservado","Vendido"];
+    const conteo = etapas.map(et => clientes.filter(c=>c.Estado===et).length);
+    new Chart(graficoEmbudo,{
+      type:"bar",
+      data:{labels:etapas,datasets:[{data:conteo,backgroundColor:["#ffcc00","#ff9933","#66ccff","#66cc66"]}]},
+      options:{indexAxis:"y",plugins:{legend:{display:false}}}
+    });
 
-  // Marketing
-  new Chart(document.getElementById("graficoMarketing"),{
-    type:"bar",
-    data:{labels:marketing.map(m=>m.Canal),
-          datasets:[{data:marketing.map(m=>m["Clientes Captados"]),backgroundColor:"#B46A55"}]},
-    options:{responsive:true,plugins:{legend:{display:false}}}
-  });
+    // Marketing
+    new Chart(graficoMarketing,{
+      type:"bar",
+      data:{labels:marketing.map(m=>m.Canal),
+            datasets:[{data:marketing.map(m=>m["Clientes Captados"]),backgroundColor:["#ffcc00","#ff9933","#66ccff","#66cc66","#B46A55"]}]},
+      options:{responsive:true,plugins:{legend:{display:false}}}
+    });
 
-  // Tareas por estado
-  const estados = ["pendiente","en progreso","completada"];
-  const etiquetasEstados = ["Pendiente","En Progreso","Completada"];
-  const conteoTareas = estados.map(est => tareas.filter(t => normalizarEstado(t.Estado) === est).length);
-  new Chart(document.getElementById("graficoTareasEstado"),{
-    type:"pie",
-    data:{labels:etiquetasEstados,datasets:[{data:conteoTareas,backgroundColor:["#ffcc66","#66ccff","#66cc66"]}]}
-  });
+    // Tareas por estado
+    const estados = ["pendiente","en progreso","completada"];
+    const etiquetasEstados = ["Pendiente","En Progreso","Completada"];
+    const conteoTareas = estados.map(est => tareas.filter(t => normalizarEstado(t.Estado) === est).length);
+    new Chart(graficoTareasEstado,{
+      type:"pie",
+      data:{labels:etiquetasEstados,datasets:[{data:conteoTareas,backgroundColor:["#ffcc66","#66ccff","#66cc66"]}]}
+    });
 
-  // ===== Cumplimiento Global =====
-  const totalGlobal = tareas.length;
-  const doneGlobal = tareas.filter(t=>normalizarEstado(t.Estado)==="completada").length;
-  const pctGlobal = totalGlobal ? Math.round((doneGlobal/totalGlobal)*100) : 0;
-  new Chart(document.getElementById("gaugeGlobal"),{
-    type:"doughnut",
-    data:{datasets:[{data:[pctGlobal,100-pctGlobal],backgroundColor:[getGaugeColor(pctGlobal),"#e0e0e0"],borderWidth:0}]},
-    options:{
-      rotation:-90,
-      circumference:180,
-      cutout:"70%",
-      plugins:{legend:{display:false},doughnutLabel:{labels:[{text:pctGlobal+"%",font:{size:24}}]}}
-    }
-  });
-  document.getElementById("detalleGlobal").textContent = `${doneGlobal}/${totalGlobal} tareas`;
-
-  // ===== Cumplimiento por usuario =====
-  const usuarios = [...new Set(tareas.map(t=>t.AgenteID))];
-  const gaugesDiv = document.getElementById("gaugesUsuarios");
-  gaugesDiv.innerHTML = "";
-  usuarios.forEach(u=>{
-    const total = tareas.filter(t=>t.AgenteID===u).length;
-    const done = tareas.filter(t=>t.AgenteID===u && normalizarEstado(t.Estado)==="completada").length;
-    const pct = total ? Math.round((done/total)*100) : 0;
-
-    const div = document.createElement("div");
-    div.className="gauge-container";
-    div.innerHTML=`
-      <canvas id="gauge_${u}"></canvas>
-      <p style="font-weight:bold;">${agenteMap[u]||"Sin asignar"}</p>
-      <p class="gauge-detail">${done}/${total} tareas</p>
-    `;
-    gaugesDiv.appendChild(div);
-
-    new Chart(document.getElementById(`gauge_${u}`),{
+    // Cumplimiento Global
+    const totalGlobal = tareas.length;
+    const doneGlobal = tareas.filter(t=>normalizarEstado(t.Estado)==="completada").length;
+    const pctGlobal = totalGlobal ? Math.round((doneGlobal/totalGlobal)*100) : 0;
+    new Chart(gaugeGlobal,{
       type:"doughnut",
-      data:{datasets:[{data:[pct,100-pct],backgroundColor:[getGaugeColor(pct),"#e0e0e0"],borderWidth:0}]},
+      data:{datasets:[{data:[pctGlobal,100-pctGlobal],backgroundColor:[getGaugeColor(pctGlobal),"#e0e0e0"],borderWidth:0}]},
       options:{
-        rotation:-90,
-        circumference:180,
-        cutout:"70%",
-        plugins:{legend:{display:false},doughnutLabel:{labels:[{text:pct+"%",font:{size:24}}]}}
+        rotation:-90,circumference:180,cutout:"70%",
+        plugins:{legend:{display:false},doughnutLabel:{labels:[{text:pctGlobal+"%",font:{size:24}}]}}
       }
     });
-  });
-}
+    detalleGlobal.textContent = `${doneGlobal}/${totalGlobal} tareas`;
 
-cargarDashboard();
+    // Gauges por usuario
+    const usuarios = [...new Set(tareas.map(t=>t.AgenteID))];
+    gaugesUsuarios.innerHTML = "";
+    usuarios.forEach(u=>{
+      const total = tareas.filter(t=>t.AgenteID===u).length;
+      const done = tareas.filter(t=>t.AgenteID===u && normalizarEstado(t.Estado)==="completada").length;
+      const pct = total ? Math.round((done/total)*100) : 0;
+
+      const div = document.createElement("div");
+      div.className="gauge-container";
+      div.innerHTML=`
+        <canvas id="gauge_${u}"></canvas>
+        <p style="font-weight:bold;">${agenteMap[u]||"Sin asignar"}</p>
+        <p class="gauge-detail">${done}/${total} tareas</p>
+      `;
+      gaugesUsuarios.appendChild(div);
+
+      new Chart(document.getElementById(`gauge_${u}`),{
+        type:"doughnut",
+        data:{datasets:[{data:[pct,100-pct],backgroundColor:[getGaugeColor(pct),"#e0e0e0"],borderWidth:0}]},
+        options:{
+          rotation:-90,circumference:180,cutout:"70%",
+          plugins:{legend:{display:false},doughnutLabel:{labels:[{text:pct+"%",font:{size:24}}]}}
+        }
+      });
+    });
+
+  }catch(err){
+    alert("Error al cargar dashboard: " + (err.message||err));
+  }finally{ hideSpinner(); }
+}
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>

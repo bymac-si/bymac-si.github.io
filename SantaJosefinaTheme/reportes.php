@@ -74,9 +74,12 @@
 
 <!-- Print-Friendly -->
 <div id="printArea">
+  <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/logo_santajosefina.png"
+           alt="Logo Santa Josefina" style="width:140px;height:auto;">
   <p> <span style="font-size:1.5em;">Santa Josefina SpA</span>
   <br>RUT: 77.233.573-3
   <br>Administración de Edificios y Condominios</p>
+	<br><br>
   <div style="text-align:center; margin-bottom:20px;">
     <h1>Informe de Gastos Comunes</h1>
     <h2 id="printCopro"></h2>

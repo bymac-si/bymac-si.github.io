@@ -6,6 +6,7 @@
   <link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css">
   <script src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/js/app.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
 </head>
 <body style="max-width:1200px; margin: 0 auto;">
 
@@ -95,16 +96,48 @@
 <div id="modalPropiedad" class="modal">
   <div class="modal-content">
     <span onclick="cerrarModal()" style="float:right;cursor:pointer;">&times;</span>
-    <h2 id="detalleTitulo"></h2>
+    <h1 id="detalleTitulo" style="font-size:24px; font-weight:bold;"></h1>
     <img id="detalleImagen" src="" alt="Imagen propiedad" style="width:100%;max-height:250px;object-fit:cover;border-radius:6px;margin-bottom:10px;">
     <p><b>Tipo:</b> <span id="detalleTipo"></span></p>
     <p><b>Comuna:</b> <span id="detalleComuna"></span></p>
     <p><b>Región:</b> <span id="detalleRegion"></span></p>
     <p><b>Precio:</b> <span id="detallePrecio"></span></p>
-    <p><b>Metros Cuadrados Construidos:</b> <span id="detalleMetrosConstruidos"></span></p>
-    <p><b>Metros Cuadrados Totales:</b> <span id="detalleMetrosTotales"></span></p>
-    <p><b>Dormitorios:</b> <span id="detalleDormitorios"></span></p>
-    <p><b>Baños:</b> <span id="detalleBanos"></span></p>
+    <div class="card shadow-sm mb-4">
+  <div class="card-header bg-warning text-dark fw-bold">
+    Detalles de la Propiedad
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-bordered mb-0">
+      <tbody>
+        <tr>
+          <th style="width:75%;">
+			  <img src="assets/img/plan.svg" alt="Metros Construidos" style="width:24px; vertical-align:middle; margin-right:6px;">Metros Cuadrados Construidos</th>
+          <td id="detalleMetrosConstruidos" style="text-align:center;"></td>
+        </tr>
+        <tr>
+          <th>
+			  <img src="assets/img/area.svg" alt="Metros Totales" style="width:24px; vertical-align:middle; margin-right:6px;"> 
+            Metros Cuadrados Totales</th>
+          <td id="detalleMetrosTotales" style="text-align:center;"></td>
+        </tr>
+        <tr>
+          <th>
+            <img src="assets/img/bed.svg" alt="Dormitorios" style="width:24px; vertical-align:middle; margin-right:6px;">
+            Dormitorios
+          </th>
+          <td id="detalleDormitorios" style="text-align:center;"></td>
+        </tr>
+        <tr>
+          <th>
+            <img src="assets/img/bathroom.svg" alt="Baños" style="width:24px; vertical-align:middle; margin-right:6px;">
+            Baños
+          </th>
+          <td id="detalleBanos" style="text-align:center;"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
     <div style="margin-top:15px;text-align:right;">
       <button class="btn-outline" onclick="cerrarModal()">Cerrar</button>
     </div>

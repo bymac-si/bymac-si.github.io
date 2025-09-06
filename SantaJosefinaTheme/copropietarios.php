@@ -6,6 +6,25 @@
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="assets/js/app.js"></script>
   <script>requireAuth();</script>
+  <style>
+    /* Spinner tipo card */
+    .spinner-backdrop{
+      position:fixed; inset:0; background:rgba(255,255,255,0.85);
+      display:flex; align-items:center; justify-content:center; z-index:9999;
+    }
+    .spinner-card{
+      background:#fff; padding:18px 22px; border:1px solid #e5e7eb; border-radius:8px;
+      box-shadow:0 6px 18px rgba(0,0,0,.08); text-align:center; min-width:260px;
+      color:#1A2B48; font-weight:600;
+    }
+    .spinner{
+      width:28px; height:28px; border-radius:50%;
+      border:3px solid #eee; border-top-color:#B46A55;
+      margin:0 auto 10px auto; animation:spin 0.9s linear infinite;
+    }
+    @keyframes spin{ to{ transform:rotate(360deg); } }
+    .hidden{ display:none !important; }
+  </style>
 </head>
 <body style="max-width:1200px; margin: 0 auto;">
 <div id="header"></div>
@@ -22,6 +41,15 @@
   </table>
 </main>
 
+<!-- SPINNER -->
+<div id="pageSpinner" class="spinner-backdrop hidden" aria-hidden="true">
+  <div class="spinner-card">
+    <div class="spinner"></div>
+    <div id="spinnerText">Cargando Copropietarios...</div>
+  </div>
+</div>
+
+<!-- MODAL -->
 <div id="modalCo" class="modal">
   <div class="modal-content">
     <h2 id="modalTitle">Nuevo Copropietario</h2>
@@ -46,31 +74,46 @@
 document.addEventListener("DOMContentLoaded", async ()=>{
   document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
   document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+  cargar();
 });
 
 let copros=[], cops=[], KEY_NAME="ID";
 
+function showSpinner(msg){
+  const sp=document.getElementById('pageSpinner');
+  const txt=document.getElementById('spinnerText');
+  if(msg) txt.textContent=msg;
+  sp.classList.remove('hidden');
+}
+function hideSpinner(){ document.getElementById('pageSpinner').classList.add('hidden'); }
+
 async function cargar(){
-  [copros, cops] = await Promise.all([ fetchData("Copropiedades"), fetchData("Copropietarios") ]);
-  if(cops.length) KEY_NAME = getKeyName(cops[0]);
+  try{
+    showSpinner("Cargando Copropietarios...");
+    [copros, cops] = await Promise.all([ fetchData("Copropiedades"), fetchData("Copropietarios") ]);
+    if(cops.length) KEY_NAME = getKeyName(cops[0]);
 
-  const coproMap={}; copros.forEach(c=>coproMap[getKeyVal(c)] = c.Nombre);
-  tablaCo.innerHTML = cops.map(r=>{
-    const key=getKeyVal(r);
-    return `<tr>
-      <td>${coproMap[r.CopropiedadID]||"—"}</td>
-      <td>${r.Nombre||""}</td>
-      <td>${r.RUT||""}</td>
-      <td>${r.Email||""}</td>
-      <td>${r.Telefono||""}</td>
-      <td>
-        <button class="btn-outline" onclick="abrirForm('${key}')">Editar</button>
-        <button class="btn-primary" onclick="eliminar('${key}')">Eliminar</button>
-      </td>
-    </tr>`;
-  }).join("");
+    const coproMap={}; copros.forEach(c=>coproMap[getKeyVal(c)] = c.Nombre);
+    tablaCo.innerHTML = cops.map(r=>{
+      const key=getKeyVal(r);
+      return `<tr>
+        <td>${coproMap[r.CopropiedadID]||"—"}</td>
+        <td>${r.Nombre||""}</td>
+        <td>${r.RUT||""}</td>
+        <td>${r.Email||""}</td>
+        <td>${r.Telefono||""}</td>
+        <td>
+          <button class="btn-outline" onclick="abrirForm('${key}')">Editar</button>
+          <button class="btn-primary" onclick="eliminar('${key}')">Eliminar</button>
+        </td>
+      </tr>`;
+    }).join("");
 
-  coCopro.innerHTML = copros.map(c=>`<option value="${getKeyVal(c)}">${c.Nombre}</option>`).join("");
+    coCopro.innerHTML = copros.map(c=>`<option value="${getKeyVal(c)}">${c.Nombre}</option>`).join("");
+  }catch(err){
+    console.error(err);
+    tablaCo.innerHTML=`<tr><td colspan="6" style="color:#b91c1c;">Error al cargar</td></tr>`;
+  }finally{ hideSpinner(); }
 }
 
 function abrirForm(id){
@@ -100,18 +143,26 @@ formCo.onsubmit = async (e)=>{
     Email: coEmail.value.trim(),
     Telefono: coTelefono.value.trim()
   };
-  if(id) await appSheetCRUD("Copropietarios","Edit",[payload]);
-  else   await appSheetCRUD("Copropietarios","Add",[payload]);
-  cerrarForm(); location.reload();
+  try{
+    showSpinner("Guardando...");
+    if(id) await appSheetCRUD("Copropietarios","Edit",[payload]);
+    else   await appSheetCRUD("Copropietarios","Add",[payload]);
+    cerrarForm(); location.reload();
+  }catch(err){
+    alert("Error: " + (err.message||err));
+  }finally{ hideSpinner(); }
 };
 
 async function eliminar(id){
   if(!confirm("¿Eliminar?")) return;
-  await appSheetCRUD("Copropietarios","Delete",[{[KEY_NAME]:id}]);
-  location.reload();
+  try{
+    showSpinner("Eliminando...");
+    await appSheetCRUD("Copropietarios","Delete",[{[KEY_NAME]:id}]);
+    location.reload();
+  }catch(err){
+    alert("Error: " + (err.message||err));
+  }finally{ hideSpinner(); }
 }
-
-cargar();
 </script>
 </body>
 </html>
