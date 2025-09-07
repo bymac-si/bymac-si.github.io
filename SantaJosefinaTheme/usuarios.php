@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <title>CRM Inmobiliario - Administración</title>
-<link rel="stylesheet" href="assets/css/styles.css" />
-<script src="assets/js/app.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-doughnutlabel-rebourne"></script>
+<script src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/js/app.js"></script>
 <script>
   requireAuth();
 </script>
@@ -97,9 +100,9 @@
       <label>Título</label>
       <input type="text" id="tareaTitulo" required>
 
-      <label>Descripción</label>
+      <label>Descripción</label><br>
       <textarea id="tareaDescripcion" rows="3"></textarea>
-
+<br><br>
       <label>Estado</label>
       <select id="tareaEstado">
         <option value="Pendiente">Pendiente</option>
@@ -117,7 +120,7 @@
       <label>Fecha Límite</label>
       <input type="date" id="tareaFechaLimite">
 
-      <label>Comentarios</label>
+      <label>Comentarios</label><br>
       <textarea id="tareaComentarios" rows="2"></textarea>
 
       <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:12px;">

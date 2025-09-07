@@ -24,10 +24,7 @@
 .kpi-card h2{font-size:16px; color:#555;}
 .kpi-card p{font-size:28px; font-weight:bold; color:#1A2B48;}
 .card h2{font-size:18px; font-weight:600; margin-bottom:10px; color:#1A2B48;}
-.gauge-container{
-  display:inline-block; width:250px; height:250px; margin:20px;
-  text-align:center;
-}
+.gauge-container{ display:inline-block; width:250px; height:250px; margin:20px; text-align:center; }
 .gauge-detail{font-size:14px; color:#555; margin-top:4px;}
 /* Spinner estilo card */
 .spinner-backdrop{
@@ -46,6 +43,9 @@
 }
 @keyframes spin{ to{ transform:rotate(360deg); } }
 .hidden{ display:none !important; }
+.badge-agent{
+  display:inline-block; padding:2px 8px; border-radius:12px; color:#fff; font-size:12px;
+}
 </style>
 </head>
 <body style="max-width:1200px; margin: 0 auto;">
@@ -60,28 +60,63 @@
   <!-- KPIs -->
   <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; margin-bottom:40px;">
     <div class="kpi-card" style="background-color:#ddcc99;"><h2>Total Clientes</h2><p id="kpiClientes">0</p></div>
-    <div class="kpi-card" style="background-color:#ffcc99;"><h2>Propiedades Disponibles</h2><p id="kpiPropiedades">0</p></div>
+    <div class="kpi-card" style="background-color:#ffcc00;"><h2>Propiedades Disponibles</h2><p id="kpiPropiedades">0</p></div>
     <div class="kpi-card" style="background-color:#eecc77;"><h2>Visitas Agendadas</h2><p id="kpiVisitas">0</p></div>
     <div class="kpi-card" style="background-color:#ddbb77;"><h2>Tareas Pendientes</h2><p id="kpiTareasPendientes">0</p></div>
+  </div>
+
+  <!-- Tabla de Visitas Futuras -->
+  <div class="card p-3" style="margin-bottom:40px;">
+    <h2>Visitas Próximas</h2>
+    <table style="width:100%; margin-top:12px; border-collapse:collapse;">
+      <thead>
+        <tr>
+          <th style="text-align:left; padding:8px;">Cliente</th>
+          <th style="text-align:left; padding:8px;">Propiedad</th>
+          <th style="text-align:left; padding:8px;">Fecha</th>
+          <th style="text-align:left; padding:8px;">Agente</th>
+        </tr>
+      </thead>
+      <tbody id="tablaVisitasFuturas"></tbody>
+    </table>
   </div>
 
   <!-- Gráficos -->
   <div class="row g-4">
     <div class="col-md-6"><div class="card p-3"><h2>Embudo de Ventas</h2><canvas id="graficoEmbudo"></canvas></div></div>
     <div class="col-md-6"><div class="card p-3"><h2>Clientes captados por canal</h2><canvas id="graficoMarketing"></canvas></div></div>
+    
     <div class="col-md-6"><div class="card p-3"><h2>Tareas por Estado</h2><canvas id="graficoTareasEstado"></canvas></div></div>
-    <div class="col-md-12">
-      <div class="card p-3">
-        <h2>Cumplimiento de Tareas por Agente</h2>
-        <div style="text-align:center; margin-bottom:30px;">
-          <div class="gauge-container">
-            <canvas id="gaugeGlobal"></canvas>
-            <p><b>Global</b></p>
-            <p id="detalleGlobal" class="gauge-detail"></p>
-          </div>
+    <div class="col-md-6"><div class="card p-3"><h2>Tareas Pendientes por Agente</h2><canvas id="graficoTareasAgente"></canvas></div></div>
+  </div>
+
+  <!-- Tabla de Tareas Pendientes -->
+  <div class="card p-3" style="margin:40px 0;">
+    <h2>Tareas Pendientes</h2>
+    <table style="width:100%; margin-top:12px; border-collapse:collapse;">
+      <thead>
+        <tr>
+          <th style="text-align:left; padding:8px;">Título</th>
+          <th style="text-align:left; padding:8px;">Agente</th>
+          <th style="text-align:left; padding:8px;">Estado</th>
+          <th style="text-align:left; padding:8px;">Fecha Límite</th>
+        </tr>
+      </thead>
+      <tbody id="tablaTareasPendientes"></tbody>
+    </table>
+  </div>
+
+  <div class="col-md-12">
+    <div class="card p-3">
+      <h2>Cumplimiento de Tareas por Agente</h2>
+      <div style="text-align:center; margin-bottom:30px;">
+        <div class="gauge-container">
+          <canvas id="gaugeGlobal"></canvas>
+          <p><b>Global</b></p>
+          <p id="detalleGlobal" class="gauge-detail"></p>
         </div>
-        <div id="gaugesUsuarios" style="display:flex;flex-wrap:wrap;justify-content:center;"></div>
       </div>
+      <div id="gaugesUsuarios" style="display:flex;flex-wrap:wrap;justify-content:center;"></div>
     </div>
   </div>
 </main>
@@ -100,6 +135,11 @@
 function normalizarEstado(e){
   if(!e) return "";
   return e.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
+}
+function formatearFechaCL(fechaISO){
+  if(!fechaISO) return "";
+  const d=new Date(fechaISO);
+  return d.toLocaleDateString("es-CL",{day:"2-digit",month:"2-digit",year:"numeric"});
 }
 function getGaugeColor(pct){
   if(pct >= 70) return "#66cc66";
@@ -126,43 +166,100 @@ async function cargarDashboard(){
       fetchData("Agentes")
     ]);
 
-    const agenteMap = {}; agentes.forEach(a => agenteMap[a.ID] = a.Nombre);
+    const clienteMap={}; clientes.forEach(c=>clienteMap[c.ID]=c.Nombre);
+    const propMap={}; propiedades.forEach(p=>propMap[p.ID]=p.Direccion);
+    const agenteMap={}; agentes.forEach(a=>agenteMap[a.ID]=a.Nombre);
 
-    // KPIs
+    // === Colores fijos dinámicos por agente ===
+    const baseColors = ["#ffcc00","#66ccff","#66cc66","#ff9966","#cc99ff","#B46A55","#ffaa33","#33cccc","#9999ff","#ff6699"];
+    const colorAgente={};
+    agentes.forEach((a,i)=>{ colorAgente[a.ID]=baseColors[i%baseColors.length]; });
+
+    // === KPIs ===
     kpiClientes.textContent = clientes.length;
     kpiPropiedades.textContent = propiedades.length;
-    kpiVisitas.textContent = visitas.length;
-    kpiTareasPendientes.textContent = tareas.filter(t=>normalizarEstado(t.Estado)!=="completada").length;
 
-    // Embudo
+    const hoy = new Date(); hoy.setHours(0,0,0,0);
+    const visitasFuturas = visitas.filter(v=>{
+      const f=new Date(v.Fecha || v["Fecha Visita"]);
+      return !isNaN(f) && f>=hoy;
+    });
+    kpiVisitas.textContent = visitasFuturas.length;
+    kpiTareasPendientes.textContent = tareas.filter(t=>normalizarEstado(t["Estado"])!=="completada").length;
+
+    // === Tabla Visitas Futuras ===
+    const tbody = document.getElementById("tablaVisitasFuturas");
+    tbody.innerHTML = visitasFuturas.length
+      ? visitasFuturas.map(v=>{
+          const fecha = formatearFechaCL(v.Fecha || v["Fecha Visita"]);
+          return `<tr>
+            <td style="padding:6px;">${clienteMap[v.Cliente]||"—"}</td>
+            <td style="padding:6px;">${propMap[v.Propiedad]||"—"}</td>
+            <td style="padding:6px;">${fecha}</td>
+            <td style="padding:6px;">${agenteMap[v.Agente]||v.Agente||"—"}</td>
+          </tr>`;
+        }).join("")
+      : `<tr><td colspan="4" style="text-align:center; color:#888; padding:10px;">No hay visitas próximas</td></tr>`;
+
+    // === Embudo ===
     const etapas = ["Prospecto","En Negociación","Reservado","Vendido"];
-    const conteo = etapas.map(et => clientes.filter(c=>c.Estado===et).length);
+    const conteo = etapas.map(et => clientes.filter(c=>c["Estado"]===et).length);
     new Chart(graficoEmbudo,{
       type:"bar",
       data:{labels:etapas,datasets:[{data:conteo,backgroundColor:["#ffcc00","#ff9933","#66ccff","#66cc66"]}]},
       options:{indexAxis:"y",plugins:{legend:{display:false}}}
     });
 
-    // Marketing
+    // === Marketing ===
     new Chart(graficoMarketing,{
       type:"bar",
-      data:{labels:marketing.map(m=>m.Canal),
-            datasets:[{data:marketing.map(m=>m["Clientes Captados"]),backgroundColor:["#ffcc00","#ff9933","#66ccff","#66cc66","#B46A55"]}]},
+      data:{
+        labels:marketing.map(m=>m["Canal"]),
+        datasets:[{
+          data:marketing.map(m=>m["Clientes Captados"] || m["Clientes"] || 0),
+          backgroundColor:baseColors
+        }]
+      },
       options:{responsive:true,plugins:{legend:{display:false}}}
     });
 
-    // Tareas por estado
+    // === Tareas por estado ===
     const estados = ["pendiente","en progreso","completada"];
     const etiquetasEstados = ["Pendiente","En Progreso","Completada"];
-    const conteoTareas = estados.map(est => tareas.filter(t => normalizarEstado(t.Estado) === est).length);
+    const conteoTareas = estados.map(est => tareas.filter(t => normalizarEstado(t["Estado"]) === est).length);
     new Chart(graficoTareasEstado,{
       type:"pie",
       data:{labels:etiquetasEstados,datasets:[{data:conteoTareas,backgroundColor:["#ffcc66","#66ccff","#66cc66"]}]}
     });
 
-    // Cumplimiento Global
+    // === Tareas PENDIENTES por agente ===
+    const pendientes = tareas.filter(t=>normalizarEstado(t["Estado"])!=="completada");
+    const agentesUnicos = [...new Set(pendientes.map(t=>t.AgenteID))];
+    const etiquetasAgentes = agentesUnicos.map(a=>agenteMap[a]||"Sin asignar");
+    const conteoAgentes = agentesUnicos.map(a=>pendientes.filter(t=>t.AgenteID===a).length);
+    const coloresAgentes = agentesUnicos.map(a=>colorAgente[a]||"#ccc");
+    new Chart(graficoTareasAgente,{
+      type:"pie",
+      data:{labels:etiquetasAgentes,datasets:[{data:conteoAgentes,backgroundColor:coloresAgentes}]}
+    });
+
+    // === Tabla Tareas Pendientes ===
+    const tbodyTar = document.getElementById("tablaTareasPendientes");
+    tbodyTar.innerHTML = pendientes.length
+      ? pendientes.map(t=>{
+          const color = colorAgente[t.AgenteID]||"#999";
+          return `<tr>
+            <td style="padding:6px;">${t["Título"]||"—"}</td>
+            <td style="padding:6px;"><span class="badge-agent" style="background:${color};">${agenteMap[t.AgenteID]||"Sin asignar"}</span></td>
+            <td style="padding:6px;">${t["Estado"]||"Pendiente"}</td>
+            <td style="padding:6px;">${formatearFechaCL(t.FechaLimite||t["Fecha Límite"])}</td>
+          </tr>`;
+        }).join("")
+      : `<tr><td colspan="4" style="text-align:center; color:#888; padding:10px;">No hay tareas pendientes</td></tr>`;
+
+    // === Cumplimiento Global ===
     const totalGlobal = tareas.length;
-    const doneGlobal = tareas.filter(t=>normalizarEstado(t.Estado)==="completada").length;
+    const doneGlobal = tareas.filter(t=>normalizarEstado(t["Estado"])==="completada").length;
     const pctGlobal = totalGlobal ? Math.round((doneGlobal/totalGlobal)*100) : 0;
     new Chart(gaugeGlobal,{
       type:"doughnut",
@@ -174,19 +271,19 @@ async function cargarDashboard(){
     });
     detalleGlobal.textContent = `${doneGlobal}/${totalGlobal} tareas`;
 
-    // Gauges por usuario
+    // === Gauges por usuario ===
     const usuarios = [...new Set(tareas.map(t=>t.AgenteID))];
     gaugesUsuarios.innerHTML = "";
     usuarios.forEach(u=>{
       const total = tareas.filter(t=>t.AgenteID===u).length;
-      const done = tareas.filter(t=>t.AgenteID===u && normalizarEstado(t.Estado)==="completada").length;
+      const done = tareas.filter(t=>t.AgenteID===u && normalizarEstado(t["Estado"])==="completada").length;
       const pct = total ? Math.round((done/total)*100) : 0;
 
       const div = document.createElement("div");
       div.className="gauge-container";
       div.innerHTML=`
         <canvas id="gauge_${u}"></canvas>
-        <p style="font-weight:bold;">${agenteMap[u]||"Sin asignar"}</p>
+        <p style="font-weight:bold; color:${colorAgente[u]||"#333"};">${agenteMap[u]||"Sin asignar"}</p>
         <p class="gauge-detail">${done}/${total} tareas</p>
       `;
       gaugesUsuarios.appendChild(div);

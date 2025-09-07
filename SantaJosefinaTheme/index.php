@@ -3,10 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <title>Santa Josefina SpA - Gestión Inmobiliaria</title>
-  <link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css">
-  <script src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/js/app.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css">
+  <script src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/js/app.js"></script>
+<style>
+.carousel-item {
+  transition: opacity 4s ease-in-out !important;
+}
+</style>
 </head>
 <body style="max-width:1200px; margin: 0 auto;">
 
@@ -39,8 +44,23 @@
     </p>
     <a href="#contacto" class="btn-primary">Habla con un especialista</a>
   </div>
-  <div>
-    <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/conecta2.png" alt="Inmobiliaria Santa Josefina">
+
+  <!-- Carrusel con fade -->
+  <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" style="max-width:500px;">
+    <div class="carousel-inner">
+      <div class="carousel-item active" data-bs-interval="4000">
+        <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/corporativo6.png" class="d-block w-100" alt="Corporativa 1">
+      </div>
+      <div class="carousel-item" data-bs-interval="4000">
+        <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/corporativo5.png" class="d-block w-100" alt="Corporativa">
+      </div>
+      <div class="carousel-item" data-bs-interval="4000">
+        <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/corporativo7.png" class="d-block w-100" alt="Corporativa 2">
+      </div>
+      <div class="carousel-item" data-bs-interval="4000">
+        <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/corporativo8.png" class="d-block w-100" alt="Corporativa 3">
+      </div>
+    </div>
   </div>
 </section>
 
@@ -231,6 +251,6 @@ formContacto.onsubmit=async(e)=>{
   }
 };
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
 </body>
 </html>
