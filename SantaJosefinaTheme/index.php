@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Santa Josefina SpA - Gestión Inmobiliaria</title>
+  <title>Santa Josefina SpA - Gestión Inmobiliaria Integral</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css">
@@ -46,18 +46,18 @@
   </div>
 
   <!-- Carrusel con fade -->
-  <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" style="max-width:500px;">
+  <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="2500" style="max-width:500px;">
     <div class="carousel-inner">
-      <div class="carousel-item active" data-bs-interval="4000">
+      <div class="carousel-item active" >
         <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/corporativo6.png" class="d-block w-100" alt="Corporativa 1">
       </div>
-      <div class="carousel-item" data-bs-interval="4000">
+      <div class="carousel-item">
         <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/corporativo5.png" class="d-block w-100" alt="Corporativa">
       </div>
-      <div class="carousel-item" data-bs-interval="4000">
+      <div class="carousel-item">
         <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/corporativo7.png" class="d-block w-100" alt="Corporativa 2">
       </div>
-      <div class="carousel-item" data-bs-interval="4000">
+      <div class="carousel-item">
         <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/corporativo8.png" class="d-block w-100" alt="Corporativa 3">
       </div>
     </div>
@@ -131,25 +131,25 @@
       <tbody>
         <tr>
           <th style="width:75%;">
-			  <img src="assets/img/plan.svg" alt="Metros Construidos" style="width:24px; vertical-align:middle; margin-right:6px;">Metros Cuadrados Construidos</th>
+			  <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/plan.svg" alt="Metros Construidos" style="width:24px; vertical-align:middle; margin-right:6px;">Metros Cuadrados Construidos</th>
           <td id="detalleMetrosConstruidos" style="text-align:center;"></td>
         </tr>
         <tr>
           <th>
-			  <img src="assets/img/area.svg" alt="Metros Totales" style="width:24px; vertical-align:middle; margin-right:6px;"> 
+			  <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/area.svg" alt="Metros Totales" style="width:24px; vertical-align:middle; margin-right:6px;"> 
             Metros Cuadrados Totales</th>
           <td id="detalleMetrosTotales" style="text-align:center;"></td>
         </tr>
         <tr>
           <th>
-            <img src="assets/img/bed.svg" alt="Dormitorios" style="width:24px; vertical-align:middle; margin-right:6px;">
+            <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/bed.svg" alt="Dormitorios" style="width:24px; vertical-align:middle; margin-right:6px;">
             Dormitorios
           </th>
           <td id="detalleDormitorios" style="text-align:center;"></td>
         </tr>
         <tr>
           <th>
-            <img src="assets/img/bathroom.svg" alt="Baños" style="width:24px; vertical-align:middle; margin-right:6px;">
+            <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/bathroom.svg" alt="Baños" style="width:24px; vertical-align:middle; margin-right:6px;">
             Baños
           </th>
           <td id="detalleBanos" style="text-align:center;"></td>

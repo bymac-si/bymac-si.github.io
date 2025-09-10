@@ -21,8 +21,7 @@
 <div id="header"></div>
 
 <main style="padding:40px;">
-  <h1 class="page-title">Reporte de Gastos Comunes</h1>
-
+  <h2 class="page-title">Reporte de Gastos Comunes</h2>
   <!-- Filtros -->
   <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;">
     <div>
@@ -41,7 +40,7 @@
 
   <!-- Encabezado Web -->
   <div id="encabezadoWeb" style="margin-bottom:20px;">
-    <h2 id="webCopro"></h2>
+    <h3 id="webCopro"></h3>
     <p id="webDir"></p>
     <p><b>RUT:</b> <span id="webRUT"></span></p>
     <h3>Mes: <span id="webMes"></span></h3>
@@ -75,23 +74,23 @@
 <!-- Print-Friendly -->
 <div id="printArea">
   <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/logo_santajosefina.png"
-           alt="Logo Santa Josefina" style="width:140px;height:auto;">
-  <p> <span style="font-size:1.5em;">Santa Josefina SpA</span>
-  <br>RUT: 77.233.573-3
-  <br>Administración de Edificios y Condominios</p>
+           alt="Logo Santa Josefina" style="width:140px;height:auto;padding-bottom:-50px;">
+  <p style="position: relative; top: -40px;"> <span style="font: size 1.1em;">Santa Josefina SpA</span>
+  <br><span style="font-size: 0.7em;">RUT: 77.233.573-3
+  <br>Administración de Edificios y Condominios</p></span>
 	<br><br>
-  <div style="text-align:center; margin-bottom:20px;">
-    <h1>Informe de Gastos Comunes</h1>
-    <h2 id="printCopro"></h2>
-    <h3 id="printDir"></h3>
+  <div style="text-align:center; margin-bottom:20px;position: relative; top: -20px;">
+    <h2>Informe de Gastos Comunes</h2>
+    <h3 id="printCopro"></h3>
+    <h4 id="printDir"></h4>
     <p><b>RUT:</b> <span id="printRUT"></span></p>
-    <h3>Mes: <span id="printMes"></span></h3>
+    <h4>Mes: <span id="printMes"></span></h4>
   </div>
-  <h2>Total de Gastos: <span id="totalGastosPrint">$0</span></h2>
-  <h3>Aporte Fondo de Reserva: <span id="aporteFRPrint">$0</span></h3>
-  <h2>Total a Pagar: <span id="totalFinalPrint">$0</span></h2>
+  <h3>Total de Gastos: <span id="totalGastosPrint">$0</span></h3>
+  <h4>Aporte Fondo de Reserva: <span id="aporteFRPrint">$0</span></h4>
+  <h3>Total a Pagar: <span id="totalFinalPrint">$0</span></h3>
 
-  <h3>Prorrateo por Unidad</h3>
+  <h4>Prorrateo por Unidad</h4>
   <table>
     <thead>
       <tr>
@@ -227,7 +226,7 @@ function renderReporte(){
 
   function renderDesglose(wrapperId){
     document.getElementById(wrapperId).innerHTML=`
-      <h3>Desglose de Gastos (${mesTexto})</h3>
+      <h4>Desglose de Gastos (${mesTexto})</h4>
       ${Object.entries(desglose).map(([tipo,data])=>`
         <div class="categoria-separador"></div>
         <h4>${tipo}: ${formatoEntero(data.total)}</h4>

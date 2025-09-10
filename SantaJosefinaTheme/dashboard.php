@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <title>CRM Inmobiliario - Dashboard</title>
-<link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-doughnutlabel-rebourne"></script>
 <script src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/js/app.js"></script>
@@ -21,8 +21,8 @@
   background:#ffefc2; padding:20px; border-radius:5px;
   text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.05);
 }
-.kpi-card h2{font-size:16px; color:#555;}
-.kpi-card p{font-size:28px; font-weight:bold; color:#1A2B48;}
+.kpi-card h2{font-size:20px; color:#555;}
+.kpi-card p{font-size:48px; font-weight:bold; color:#1A2B48;}
 .card h2{font-size:18px; font-weight:600; margin-bottom:10px; color:#1A2B48;}
 .gauge-container{ display:inline-block; width:250px; height:250px; margin:20px; text-align:center; }
 .gauge-detail{font-size:14px; color:#555; margin-top:4px;}
@@ -58,11 +58,11 @@
   </h1>
 
   <!-- KPIs -->
-  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; margin-bottom:40px;">
-    <div class="kpi-card" style="background-color:#ddcc99;"><h2>Total Clientes</h2><p id="kpiClientes">0</p></div>
-    <div class="kpi-card" style="background-color:#ffcc00;"><h2>Propiedades Disponibles</h2><p id="kpiPropiedades">0</p></div>
-    <div class="kpi-card" style="background-color:#eecc77;"><h2>Visitas Agendadas</h2><p id="kpiVisitas">0</p></div>
-    <div class="kpi-card" style="background-color:#ddbb77;"><h2>Tareas Pendientes</h2><p id="kpiTareasPendientes">0</p></div>
+  <div id="kpiContainer" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; margin-bottom:40px;">
+    <div class="kpi-card"><h2>Total Clientes</h2><p id="kpiClientes">0</p></div>
+    <div class="kpi-card"><h2>Propiedades Disponibles</h2><p id="kpiPropiedades">0</p></div>
+    <div class="kpi-card"><h2>Visitas Agendadas</h2><p id="kpiVisitas">0</p></div>
+    <div class="kpi-card"><h2>Tareas Pendientes</h2><p id="kpiTareasPendientes">0</p></div>
   </div>
 
   <!-- Tabla de Visitas Futuras -->
@@ -170,12 +170,20 @@ async function cargarDashboard(){
     const propMap={}; propiedades.forEach(p=>propMap[p.ID]=p.Direccion);
     const agenteMap={}; agentes.forEach(a=>agenteMap[a.ID]=a.Nombre);
 
-    // === Colores fijos dinámicos por agente ===
-    const baseColors = ["#ffcc00","#66ccff","#66cc66","#ff9966","#cc99ff","#B46A55","#ffaa33","#33cccc","#9999ff","#ff6699"];
+    // === Paleta de colores unificada ===
+    const baseColors = ["#ffcc00","#ff9933","#66cc66","#66ccff","#B46A55"];
+
+    // === KPIs dinámicos con la misma paleta ===
+    const kpiCards = document.querySelectorAll("#kpiContainer .kpi-card");
+    kpiCards.forEach((card, i)=>{
+      card.style.backgroundColor = baseColors[i % baseColors.length];
+    });
+
+    // === Colores fijos por agente ===
     const colorAgente={};
     agentes.forEach((a,i)=>{ colorAgente[a.ID]=baseColors[i%baseColors.length]; });
 
-    // === KPIs ===
+    // === KPIs valores ===
     kpiClientes.textContent = clientes.length;
     kpiPropiedades.textContent = propiedades.length;
 
@@ -183,7 +191,7 @@ async function cargarDashboard(){
     const visitasFuturas = visitas.filter(v=>{
       const f=new Date(v.Fecha || v["Fecha Visita"]);
       return !isNaN(f) && f>=hoy;
-    });
+    }).sort((a,b)=> new Date(a.Fecha||a["Fecha Visita"]) - new Date(b.Fecha||b["Fecha Visita"]));
     kpiVisitas.textContent = visitasFuturas.length;
     kpiTareasPendientes.textContent = tareas.filter(t=>normalizarEstado(t["Estado"])!=="completada").length;
 
@@ -206,7 +214,7 @@ async function cargarDashboard(){
     const conteo = etapas.map(et => clientes.filter(c=>c["Estado"]===et).length);
     new Chart(graficoEmbudo,{
       type:"bar",
-      data:{labels:etapas,datasets:[{data:conteo,backgroundColor:["#ffcc00","#ff9933","#66ccff","#66cc66"]}]},
+      data:{labels:etapas,datasets:[{data:conteo,backgroundColor:baseColors.slice(0,etapas.length)}]},
       options:{indexAxis:"y",plugins:{legend:{display:false}}}
     });
 
@@ -229,7 +237,7 @@ async function cargarDashboard(){
     const conteoTareas = estados.map(est => tareas.filter(t => normalizarEstado(t["Estado"]) === est).length);
     new Chart(graficoTareasEstado,{
       type:"pie",
-      data:{labels:etiquetasEstados,datasets:[{data:conteoTareas,backgroundColor:["#ffcc66","#66ccff","#66cc66"]}]}
+      data:{labels:etiquetasEstados,datasets:[{data:conteoTareas,backgroundColor:baseColors.slice(0,3)}]}
     });
 
     // === Tareas PENDIENTES por agente ===
