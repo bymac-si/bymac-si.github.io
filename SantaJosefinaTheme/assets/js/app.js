@@ -4,12 +4,15 @@
 const APP_ID = "247b67e5-5b42-49a5-92a1-16c4357f5c7e";
 const API_KEY = "V2-bKT1n-onhYX-SHl8K-zPPx8-6QwfJ-pp9Pi-UIrcy-gcLGM";
 
+// =====================
 // CRUD genérico contra AppSheet
+// =====================
+
 async function appSheetCRUD(tabla, action, rows, properties = {}) {
   const url = `https://api.appsheet.com/api/v2/apps/${APP_ID}/tables/${tabla}/Action`;
   const body = { Action: action, Properties: properties, Rows: rows };
 
-  console.log("➡️ Enviando a AppSheet:", { tabla, action, rows, properties });
+  console.log("➡️ Enviando a AppSheet");
 
   const res = await fetch(url, {
     method: "POST",
@@ -21,7 +24,7 @@ async function appSheetCRUD(tabla, action, rows, properties = {}) {
   });
 
   const text = await res.text();
-  console.log("⬅️ Respuesta AppSheet:", text);
+  console.log("⬅️ Respuesta AppSheet");
 
   if (!res.ok) throw new Error(text);
 
@@ -32,7 +35,10 @@ async function appSheetCRUD(tabla, action, rows, properties = {}) {
   }
 }
 
+// =====================
 // Traer todos los datos de una tabla
+// =====================
+
 async function fetchData(tabla) {
   return await appSheetCRUD(tabla, "Find", [], {
     Selector: `Filter(${tabla}, true)`
@@ -42,6 +48,7 @@ async function fetchData(tabla) {
 // =====================
 // Helpers comunes
 // =====================
+
 function formatearFecha(iso) {
   if (!iso) return "";
   return new Date(iso).toLocaleDateString("es-CL");
@@ -74,45 +81,64 @@ function pick(row, aliases) {
 // Columnas recomendadas: ID (Key), Email, Nombre, Rol, PasswordHash
 // =====================
 
+// =====================
 // Hash SHA-256 usando Web Crypto API
+// =====================
 async function sha256(text) {
   const enc = new TextEncoder().encode(text);
   const buf = await crypto.subtle.digest('SHA-256', enc);
   const arr = Array.from(new Uint8Array(buf));
   return arr.map(b => b.toString(16).padStart(2, '0')).join('');
 }
-
+// =====================
 // Obtiene user auth desde localStorage
+// =====================
+
 function getAuthUser() {
   try { return JSON.parse(localStorage.getItem('auth_user')); }
   catch(_) { return null; }
 }
 
+// =====================
 // Guarda sesión
+// =====================
+
 function setAuthUser(user) {
   localStorage.setItem('auth_user', JSON.stringify(user));
 }
 
+// =====================
 // Cierra sesión
+// =====================
+
 function logout() {
   localStorage.removeItem('auth_user');
   window.location.href = 'https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/login.php';
 }
 
+// =====================
 // Protege páginas internas
+// =====================
+
 function requireAuth() {
   const u = getAuthUser();
   if (!u) { window.location.href = 'https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/login.php'; }
 }
 
+// =====================
 // Login contra AppSheet (tabla "Usuarios")
+// =====================
+
 async function loginWithAppSheet(email, password) {
   const usuarios = await fetchData("Usuarios");
   const u = usuarios.find(x => (x.Email||'').toLowerCase() === email);
 
   if (!u) { throw new Error('Usuario no encontrado.'); }
 
+  // =====================
   // Compara hash
+  // =====================
+
   const providedHash = await sha256(password);
   const storedHash   = (u.PasswordHash||'').toLowerCase();
 
@@ -120,7 +146,10 @@ async function loginWithAppSheet(email, password) {
     throw new Error('Contraseña inválida.');
   }
 
+  // =====================
   // Éxito: guarda sesión mínima
+  // =====================
+
   setAuthUser({
     email: u.Email,
     nombre: u.Nombre || '',
@@ -130,7 +159,10 @@ async function loginWithAppSheet(email, password) {
   return true;
 }
 
+// =====================
 // Opcional: verificación de rol
+// =====================
+
 function requireRole(roles = []) {
   const u = getAuthUser();
   if (!u) { window.location.href = 'https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/login.php'; return; }
