@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>CRM - Copropietarios</title>
-  <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="assets/js/app.js"></script>
+  <link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css">
+  <script src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/js/app.js"></script>
   <script>requireAuth();</script>
   <style>
     /* Spinner tipo card */
@@ -61,7 +61,7 @@
       <label>Email</label><input id="coEmail" type="email">
       <label>Teléfono</label><input id="coTelefono">
       <div style="text-align:right;margin-top:10px;">
-        <button type="button" class="btn-outline" onclick="cerrarForm()">Cancelar</button>
+        <button type="button" class="btn-primary" onclick="cerrarForm()">Cancelar</button>
         <button class="btn-primary">Guardar</button>
       </div>
     </form>
@@ -72,8 +72,8 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", async ()=>{
-  document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
-  document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+  document.getElementById("header").innerHTML = await (await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/header.html")).text();
+  document.getElementById("footer").innerHTML = await (await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/footer.html")).text();
   cargar();
 });
 
@@ -103,7 +103,7 @@ async function cargar(){
         <td>${r.Email||""}</td>
         <td>${r.Telefono||""}</td>
         <td>
-          <button class="btn-outline" onclick="abrirForm('${key}')">Editar</button>
+          <button class="btn-primary" onclick="abrirForm('${key}')">Editar</button>
           <button class="btn-primary" onclick="eliminar('${key}')">Eliminar</button>
         </td>
       </tr>`;

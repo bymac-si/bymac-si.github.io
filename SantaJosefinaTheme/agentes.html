@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>CRM - Agentes</title>
-  <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="assets/js/app.js"></script>
+  <link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css">
+  <script src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/js/app.js"></script>
   <script>requireAuth();</script>
 </head>
 <body>
@@ -12,7 +12,7 @@
 
 <main style="padding:40px;">
   <h1 class="page-title">Gestión de Agentes</h1>
-  <button class="btn-primary" onclick="abrirFormAgente()">+ Nuevo Agente</button>
+  <button class="btn-primary" onclick="abrirFormAgente()">Nuevo Agente</button>
 
   <table style="margin-top:16px;">
     <thead>
@@ -37,7 +37,7 @@
       <label>Email</label><input type="email" id="agenteEmail" required>
       <label>Teléfono</label><input type="text" id="agenteTelefono">
       <div style="text-align:right;margin-top:10px;">
-        <button type="button" class="btn-outline" onclick="cerrarFormAgente()">Cancelar</button>
+        <button type="button" class="btn-primary" onclick="cerrarFormAgente()">Cancelar</button>
         <button class="btn-primary">Guardar</button>
       </div>
     </form>
@@ -48,7 +48,7 @@
 <div id="modalTareas" class="modal">
   <div class="modal-content">
     <h2>Tareas de <span id="nombreAgenteTareas"></span></h2>
-    <button class="btn-primary" onclick="abrirFormTarea()">+ Nueva Tarea</button>
+    <button class="btn-primary" onclick="abrirFormTarea()">Nueva Tarea</button>
     <table style="margin-top:12px;">
       <thead>
         <tr><th>Título</th><th>Estado</th><th>Prioridad</th><th>Fecha Límite</th><th>Acciones</th></tr>
@@ -56,7 +56,7 @@
       <tbody id="tablaTareas"></tbody>
     </table>
     <div style="text-align:right;margin-top:15px;">
-      <button type="button" class="btn-outline" onclick="cerrarModalTareas()">Cerrar</button>
+      <button type="button" class="btn-primary" onclick="cerrarModalTareas()">Cerrar</button>
     </div>
   </div>
 </div>
@@ -83,7 +83,7 @@
       </select>
       <label>Fecha Límite</label><input type="date" id="tareaFechaLimite">
       <div style="text-align:right;margin-top:10px;">
-        <button type="button" class="btn-outline" onclick="cerrarFormTarea()">Cancelar</button>
+        <button type="button" class="btn-primary" onclick="cerrarFormTarea()">Cancelar</button>
         <button class="btn-primary">Guardar</button>
       </div>
     </form>
@@ -97,8 +97,8 @@ let agentes=[], tareas=[], KEY_AGENTE="ID", KEY_TAREA="ID";
 let agenteActual=null;
 
 document.addEventListener("DOMContentLoaded", async ()=>{
-  document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
-  document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+  document.getElementById("header").innerHTML = await (await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/header.html")).text();
+  document.getElementById("footer").innerHTML = await (await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/footer.html")).text();
   cargarAgentes();
 });
 
@@ -117,8 +117,8 @@ async function cargarAgentes(){
       <td>${a.Email||""}</td>
       <td>${a.Telefono||""}</td>
       <td>
-        <button class="btn-outline" onclick="abrirFormAgente('${key}')">Editar</button>
-        <button class="btn-outline" onclick="abrirModalTareas('${key}')">Tareas</button>
+        <button class="btn-primary" onclick="abrirFormAgente('${key}')">Editar</button>
+        <button class="btn-primary" onclick="abrirModalTareas('${key}')">Tareas</button>
         <button class="btn-primary" onclick="eliminarAgente('${key}')">Eliminar</button>
       </td>
     </tr>`;
@@ -179,7 +179,7 @@ function renderTareas(){
       <td>${t.Prioridad||""}</td>
       <td>${t.FechaLimite||""}</td>
       <td>
-        <button class="btn-outline" onclick="abrirFormTarea('${key}')">Editar</button>
+        <button class="btn-primary" onclick="abrirFormTarea('${key}')">Editar</button>
         <button class="btn-primary" onclick="eliminarTarea('${key}')">Eliminar</button>
       </td>
     </tr>`;

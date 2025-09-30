@@ -8,9 +8,9 @@
   <script>requireAuth();</script>
   <script>
     document.addEventListener("DOMContentLoaded", async ()=>{
-      const headerResp = await fetch("header.html");
+      const headerResp = await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/header.html");
       document.getElementById("header").innerHTML = await headerResp.text();
-      const footerResp = await fetch("footer.html");
+      const footerResp = await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/footer.html");
       document.getElementById("footer").innerHTML = await footerResp.text();
     });
   </script>
@@ -57,7 +57,7 @@
       <label>Reglamento URL</label><input id="coproReglamento">
       <label>Libro Actas URL</label><input id="coproLibro">
       <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:12px;">
-        <button type="button" class="btn-outline" onclick="cerrarModalCopro()">Cancelar</button>
+        <button type="button" class="btn-primary" onclick="cerrarModalCopro()">Cancelar</button>
         <button type="submit" class="btn-primary">Guardar</button>
       </div>
     </form>
@@ -98,8 +98,8 @@ async function cargarCopros(){
         <td>${c.Ciudad ?? ""}</td>
         <td>${c.FondoReserva ?? ""}%</td>
         <td>
-          <button class="btn-outline btn-ver" data-id="${key}">Ver</button>
-          <button class="btn-outline btn-edit" data-id="${key}">Editar</button>
+          <button class="btn-primary btn-ver" data-id="${key}">Ver</button>
+          <button class="btn-primary btn-edit" data-id="${key}">Editar</button>
           <button class="btn-primary" onclick="eliminarCopro('${key}')">Eliminar</button>
         </td>
       </tr>

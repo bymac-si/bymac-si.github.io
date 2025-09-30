@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <title>CRM - Dashboard Copropiedades</title>
-  <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="assets/js/app.js"></script>
+  <link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css">
+  <script src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/js/app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>requireAuth();</script>
   <script>
     document.addEventListener("DOMContentLoaded", async ()=>{
-      document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
-      document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+      document.getElementById("header").innerHTML = await (await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/header.html")).text();
+      document.getElementById("footer").innerHTML = await (await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/footer.html")).text();
     });
   </script>
 </head>

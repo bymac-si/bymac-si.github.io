@@ -3,20 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <title>CRM Inmobiliario - Propiedades</title>
-<link rel="stylesheet" href="css/styles.css">
-<script src="js/app.js"></script>
+<link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css">
+<script src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/js/app.js"></script>
 </head>
 <body style="max-width:1200px; margin: 0 auto;">
 
 <!-- NAV -->
 <header>
-  <a href="index.html" style="font-weight:700;">Santa Josefina SpA</a>
-  <a href="dashboard.html">Dashboard</a>
-  <a href="clientes.html">Clientes</a>
-  <a href="propiedades.html" class="font-bold">Propiedades</a>
-  <a href="visitas.html">Visitas</a>
-  <a href="marketing.html">Marketing</a>
-  <a href="index.html#contacto" class="btn-outline">Habla con un especialista</a>
+  <a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/index.html" style="font-weight:700;">Santa Josefina SpA</a>
+  <a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/dashboard.html">Dashboard</a>
+  <a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/clientes.html">Clientes</a>
+  <a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/propiedades.html" class="font-bold">Propiedades</a>
+  <a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/visitas.html">Visitas</a>
+  <a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/marketing.html">Marketing</a>
+  <a href="index.html#contacto" class="btn-primary">Habla con un especialista</a>
 </header>
 
 <!-- CONTENIDO -->
@@ -56,7 +56,7 @@
       <input type="text" id="propiedadEstado" placeholder="Estado (Disponible, Vendida)">
       <input type="text" id="propiedadImagen" placeholder="URL Imagen (AppSheet)">
       <div style="display:flex; justify-content:flex-end; gap:10px;">
-        <button type="button" onclick="cerrarModalPropiedad()" class="btn-outline">Cancelar</button>
+        <button type="button" onclick="cerrarModalPropiedad()" class="btn-primary">Cancelar</button>
         <button type="submit" class="btn-primary">Guardar</button>
       </div>
     </form>
@@ -82,7 +82,7 @@ async function cargarPropiedades(){
       <td>${p.Estado}</td>
       <td><img src="${p.Imagen}" alt="Foto" style="width:80px; border-radius:4px;"></td>
       <td>
-        <button onclick="abrirFormPropiedad('${p.ID}')" class="btn-outline">Editar</button>
+        <button onclick="abrirFormPropiedad('${p.ID}')" class="btn-primary">Editar</button>
         <button onclick="eliminarPropiedad('${p.ID}')" class="btn-primary">Eliminar</button>
       </td>
     </tr>

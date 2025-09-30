@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Contrato de Corretaje de Propiedades</title>
-  <link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css">
-  <script src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/js/app.js"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <script src="/assets/js/app.js"></script>
   <script>requireAuth();</script>
   <style>
     body { max-width:1200px; margin:0 auto; color:#1A2B48; }
@@ -108,7 +108,7 @@
   <!-- Contrato -->
   <div class="contrato" id="areaContrato">
     <div style="font-size:0.8em;">
-      <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/logo_santajosefina.png" alt="Logo Santa Josefina" style="width:140px; position:relative; top:-50px;" class="logo-print">
+      <img src="/assets/img/logo_santajosefina.png" alt="Logo Santa Josefina" style="width:140px; position:relative; top:-50px;" class="logo-print">
       <div class="small muted logo-print" style="position:relative; top:-75px;">Corretaje de Propiedades</div>
     </div>
 

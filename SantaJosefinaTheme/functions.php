@@ -84,7 +84,7 @@ add_action('init', 'sj_block_sensitive_files');
 function sj_login_logo() { ?>
     <style type="text/css">
         body.login div#login h1 a {
-            background-image: url('https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/logo_santajosefina.png');
+            background-image: url('/assets/img/logo_santajosefina.png');
             background-size: contain;
             width: 250px;
             height: 100px;

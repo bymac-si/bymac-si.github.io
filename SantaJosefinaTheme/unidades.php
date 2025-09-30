@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>CRM - Unidades</title>
-  <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="assets/js/app.js"></script>
+  <link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css">
+  <script src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/js/app.js"></script>
   <script>requireAuth();</script>
 </head>
 <body style="max-width:1200px; margin: 0 auto;">
@@ -12,7 +12,7 @@
 
 <main style="padding:40px;">
   <h1 class="page-title">Unidades</h1>
-  <button class="btn-primary" onclick="abrirForm()">+ Nueva Unidad</button>
+  <button class="btn-primary" onclick="abrirForm()">Nueva Unidad</button>
 
   <table style="margin-top:16px;">
     <thead>
@@ -43,7 +43,7 @@
       <!-- 🔹 Permitimos 3 decimales -->
       <input type="number" id="uAlicuota" min="0" step="0.001">
       <div style="text-align:right;margin-top:10px;">
-        <button type="button" class="btn-outline" onclick="cerrarForm()">Cancelar</button>
+        <button type="button" class="btn-primary" onclick="cerrarForm()">Cancelar</button>
         <button class="btn-primary">Guardar</button>
       </div>
     </form>
@@ -54,8 +54,8 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", async ()=>{
-  document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
-  document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+  document.getElementById("header").innerHTML = await (await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/header.html")).text();
+  document.getElementById("footer").innerHTML = await (await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/footer.html")).text();
 });
 
 let copros=[], units=[], cops=[], KEY_NAME="ID";
@@ -81,7 +81,7 @@ async function cargar(){
       <td>${copropMap[u.PropietarioID]||"—"}</td>
       <td>${(parseFloat(u.Alicuota)||0).toFixed(3)}</td>
       <td>
-        <button class="btn-outline" onclick="abrirForm('${key}')">Editar</button>
+        <button class="btn-primary" onclick="abrirForm('${key}')">Editar</button>
         <button class="btn-primary" onclick="eliminar('${key}')">Eliminar</button>
       </td>
     </tr>`;

@@ -65,7 +65,7 @@
       </div>
 
       <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:12px;">
-        <button type="button" onclick="cerrarModalEntidad()" class="btn-outline">Cancelar</button>
+        <button type="button" onclick="cerrarModalEntidad()" class="btn-primary">Cancelar</button>
         <button type="submit" class="btn-primary">Guardar</button>
       </div>
     </form>
@@ -77,14 +77,14 @@
   <div class="modal-content">
     <h2 id="modalTitleTareas">Tareas del Agente</h2>
     <div style="margin-bottom:10px;">
-      <button id="btnNuevaTarea" class="btn-primary">+ Nueva Tarea</button>
+      <button id="btnNuevaTarea" class="btn-primary">Nueva Tarea</button>
     </div>
     <table>
       <thead><tr><th>Título</th><th>Estado</th><th>Prioridad</th><th>Fecha Límite</th><th>Acciones</th></tr></thead>
       <tbody id="tablaTareas"></tbody>
     </table>
     <div style="margin-top:12px; text-align:right;">
-      <button type="button" onclick="cerrarModalTareas()" class="btn-outline">Cerrar</button>
+      <button type="button" onclick="cerrarModalTareas()" class="btn-primary">Cerrar</button>
     </div>
   </div>
 </div>
@@ -124,7 +124,7 @@
       <textarea id="tareaComentarios" rows="2"></textarea>
 
       <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:12px;">
-        <button type="button" class="btn-outline" onclick="cerrarFormTarea()">Cancelar</button>
+        <button type="button" class="btn-primary" onclick="cerrarFormTarea()">Cancelar</button>
         <button type="submit" class="btn-primary">Guardar</button>
       </div>
     </form>
@@ -145,8 +145,8 @@ let agenteActivoID=null;
 
 // ==== Inicialización ====
 document.addEventListener("DOMContentLoaded", async ()=>{
-  document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
-  document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+  document.getElementById("header").innerHTML = await (await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/header.html")).text();
+  document.getElementById("footer").innerHTML = await (await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/footer.html")).text();
 
   document.getElementById("tituloPagina").textContent = (tipo==="agentes") ? "Gestión de Agentes" : "Administración de Usuarios";
   document.getElementById("camposUsuario").style.display = (tipo==="usuarios")?"block":"none";
@@ -192,7 +192,7 @@ function renderTabla(){
         <td>${e.Rol||"Colaborador"}</td>
         <td>${e.Activo||"NO"}</td>
         <td>
-          <button class="btn-outline" onclick="abrirFormEntidad('${id}')">Editar</button>
+          <button class="btn-primary" onclick="abrirFormEntidad('${id}')">Editar</button>
           <button class="btn-primary" onclick="eliminarEntidad('${id}')">Eliminar</button>
         </td>
       </tr>`;
@@ -203,8 +203,8 @@ function renderTabla(){
         <td>${e.Telefono||""}</td>
         <td>${e.Activo||"NO"}</td>
         <td>
-          <button class="btn-outline" onclick="abrirFormEntidad('${id}')">Editar</button>
-          <button class="btn-outline" onclick="abrirModalTareas('${id}')">Tareas</button>
+          <button class="btn-primary" onclick="abrirFormEntidad('${id}')">Editar</button>
+          <button class="btn-primary" onclick="abrirModalTareas('${id}')">Tareas</button>
           <button class="btn-primary" onclick="eliminarEntidad('${id}')">Eliminar</button>
         </td>
       </tr>`;
@@ -292,7 +292,7 @@ function renderTareas(){
       <td>${t.Prioridad||""}</td>
       <td>${t.FechaLimite||""}</td>
       <td>
-        <button class="btn-outline" onclick="abrirFormTarea('${agenteActivoID}','${t.ID}')">Editar</button>
+        <button class="btn-primary" onclick="abrirFormTarea('${agenteActivoID}','${t.ID}')">Editar</button>
         <button class="btn-primary" onclick="eliminarTarea('${t.ID}')">Eliminar</button>
       </td>
     </tr>

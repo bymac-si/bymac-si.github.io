@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>CRM - Visitas</title>
-  <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="assets/js/app.js"></script>
+  <link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css">
+  <script src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/js/app.js"></script>
   <script>requireAuth();</script>
 </head>
 <body style="max-width:1200px; margin: 0 auto;">
@@ -32,7 +32,7 @@
       <label>Fecha</label><input type="date" id="visitaFecha" required>
       <label>Agente</label><input id="visitaAgente">
       <div style="text-align:right;margin-top:10px;">
-        <button type="button" class="btn-outline" onclick="cerrarModalVisita()">Cancelar</button>
+        <button type="button" class="btn-primary" onclick="cerrarModalVisita()">Cancelar</button>
         <button class="btn-primary">Guardar</button>
       </div>
     </form>
@@ -53,8 +53,8 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", async ()=>{
-  document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
-  document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+  document.getElementById("header").innerHTML = await (await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/header.html")).text();
+  document.getElementById("footer").innerHTML = await (await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/footer.html")).text();
 });
 
 let visitas=[], clientes=[], propiedades=[], KEY_NAME="ID";
@@ -81,8 +81,8 @@ async function cargarVisitas(){
       <td>${formatearFechaISO(v.Fecha||v["Fecha Visita"])}</td>
       <td>${v.Agente||""}</td>
       <td>
-        <button class="btn-outline btn-ver" data-id="${key}">Ver</button>
-        <button class="btn-outline btn-edit" data-id="${key}">Editar</button>
+        <button class="btn-primary btn-ver" data-id="${key}">Ver</button>
+        <button class="btn-primary btn-edit" data-id="${key}">Editar</button>
         <button class="btn-primary" onclick="eliminarVisita('${key}')">Eliminar</button>
       </td>
     </tr>`;

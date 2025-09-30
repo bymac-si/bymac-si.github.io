@@ -22,15 +22,15 @@ header a:hover {
 }
 
 header .btn-outline {
-  border: 1px solid #801d17;
-  color: #801d17;
+  border: 1px solid #9e9789;
+  color: #cd241c;
   padding: 6px 16px;
   border-radius: 3px;
   transition: all 0.3s;
 }
 
 header .btn-outline:hover {
-  background: #801d17;
+  background: #cd241c;
   color: #fff;
 }
 
@@ -50,17 +50,17 @@ button {
 }
 
 .btn-primary:hover {
-  background: #2c3e70;
+  background: #cd241c;
 }
 
 .btn-outline {
-  border: 1px solid #1a2b48;
+  border: 1px solid #9e9789;
   color: #1a2b48;
   background: transparent;
 }
 
 .btn-outline:hover {
-  background: #1a2b48;
+  background: #cd241c;
   color: white;
 }
 
@@ -392,7 +392,7 @@ header nav a {
 
 /* --- Botones --- */
 .btn-primary {
-  background: #801d17;
+  background: #1a2b48;
   color: #fff;
   border: none;
   padding: 12px;
@@ -402,8 +402,8 @@ header nav a {
   text-align: center;
 }
 .btn-outline {
-  border: 1px solid #801d17;
-  color: #801d17;
+  border: 1px solid #9e9789;
+  color: #cd241c;
   padding: 10px 15px;
   border-radius: 4px;
   text-decoration: none;

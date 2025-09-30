@@ -12,7 +12,7 @@
 
 <main style="padding:40px;">
   <h1 class="page-title">Gestión de Clientes</h1>
-  <button class="btn-primary" onclick="abrirFormCliente()">+ Nuevo Cliente</button>
+  <button class="btn-primary" onclick="abrirFormCliente()">Nuevo Cliente</button>
 
   <table style="margin-top:16px;">
     <thead>
@@ -36,7 +36,7 @@
       <label>Segmento</label><input id="clienteSegmento">
       <label>Estado</label><input id="clienteEstado">
       <div style="text-align:right;margin-top:10px;">
-        <button type="button" class="btn-outline" onclick="cerrarModalCliente()">Cancelar</button>
+        <button type="button" class="btn-primary" onclick="cerrarModalCliente()">Cancelar</button>
         <button class="btn-primary">Guardar</button>
       </div>
     </form>
@@ -47,8 +47,8 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", async ()=>{
-  document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
-  document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+  document.getElementById("header").innerHTML = await (await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/header.html")).text();
+  document.getElementById("footer").innerHTML = await (await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/footer.html")).text();
 });
 
 let clientesGlobal=[], KEY_NAME="ID";
@@ -67,7 +67,7 @@ async function cargarClientes(){
       <td>${c.Segmento||""}</td>
       <td>${c.Estado||""}</td>
       <td>
-        <button class="btn-outline btn-edit" data-id="${key}">Editar</button>
+        <button class="btn-primary btn-edit" data-id="${key}">Editar</button>
         <button class="btn-primary" onclick="eliminarCliente('${key}')">Eliminar</button>
       </td>
     </tr>`;

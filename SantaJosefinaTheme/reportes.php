@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>CRM - Reportes Gastos Comunes</title>
-  <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="assets/js/app.js"></script>
+  <link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css">
+  <script src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/js/app.js"></script>
   <script>requireAuth();</script>
   <style>
     /* Print-Friendly oculto por defecto */
@@ -33,7 +33,7 @@
       <select id="reporteMes"></select>
     </div>
     <div style="margin-left:auto;display:flex;gap:8px;">
-      <button class="btn-outline" onclick="window.print()">🖨 Imprimir</button>
+      <button class="btn-primary" onclick="window.print()">Imprimir</button>
     </div>
   </div>
    <div class="categoria-separador"></div>
@@ -111,8 +111,8 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", async ()=>{
-  document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
-  document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+  document.getElementById("header").innerHTML = await (await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/header.html")).text();
+  document.getElementById("footer").innerHTML = await (await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/footer.html")).text();
   cargarReporte();
 });
 

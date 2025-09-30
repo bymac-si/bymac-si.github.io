@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <title>CRM Inmobiliario - Propiedades</title>
-<link rel="stylesheet" href="assets/css/styles.css">
-<script src="assets/js/app.js"></script>
+<link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css">
+<script src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/js/app.js"></script>
 <script>requireAuth();</script>
 </head>
 <body style="max-width:1200px; margin: 0 auto;">
@@ -47,7 +47,7 @@
       <label>Agente</label><input id="propiedadAgente">
       <label>URL Imagen</label><input id="propiedadImagen">
       <div style="text-align:right;margin-top:10px;">
-        <button type="button" onclick="cerrarModalPropiedad()" class="btn-outline">Cancelar</button>
+        <button type="button" onclick="cerrarModalPropiedad()" class="btn-primary">Cancelar</button>
         <button class="btn-primary">Guardar</button>
       </div>
     </form>
@@ -69,8 +69,8 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", async ()=>{
-  document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
-  document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+  document.getElementById("header").innerHTML = await (await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/header.html")).text();
+  document.getElementById("footer").innerHTML = await (await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/footer.html")).text();
 });
 
 let propiedadesGlobal=[], KEY_NAME="ID";
@@ -93,8 +93,8 @@ async function cargarPropiedades(){
       <td>${p.Agente||""}</td>
       <td>${p.ImagenURL?`<img src="${p.ImagenURL}" style="width:80px;border-radius:4px;">`:"—"}</td>
       <td>
-        <button class="btn-outline btn-ver" data-id="${key}">Ver</button>
-        <button class="btn-outline btn-edit" data-id="${key}">Editar</button>
+        <button class="btn-primary btn-ver" data-id="${key}">Ver</button>
+        <button class="btn-primary btn-edit" data-id="${key}">Editar</button>
         <button class="btn-primary" onclick="eliminarPropiedad('${key}')">Eliminar</button>
       </td>
     </tr>`;

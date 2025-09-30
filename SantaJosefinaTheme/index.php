@@ -28,7 +28,7 @@
       <a href="#servicios">Servicios</a>
       <a href="#copropiedad">Copropiedades</a>
       <a href="#contacto">Contacto</a>
-      <a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/dashboard.php" class="btn-outline">Acceso Corporativo</a>
+      <a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/dashboard.php" class="btn-primary" style="color: #fff;">Acceso Corporativo</a>
     </nav>
   </div>
 </header>
@@ -131,25 +131,25 @@
       <tbody>
         <tr>
           <th style="width:75%;">
-			  <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/plan.svg" alt="Metros Construidos" style="width:24px; vertical-align:middle; margin-right:6px;">Metros Cuadrados Construidos</th>
+			  <img src="/assets/img/plan.svg" alt="Metros Construidos" style="width:24px; vertical-align:middle; margin-right:6px;">Metros Cuadrados Construidos</th>
           <td id="detalleMetrosConstruidos" style="text-align:center;"></td>
         </tr>
         <tr>
           <th>
-			  <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/area.svg" alt="Metros Totales" style="width:24px; vertical-align:middle; margin-right:6px;"> 
+			  <img src="/assets/img/area.svg" alt="Metros Totales" style="width:24px; vertical-align:middle; margin-right:6px;"> 
             Metros Cuadrados Totales</th>
           <td id="detalleMetrosTotales" style="text-align:center;"></td>
         </tr>
         <tr>
           <th>
-            <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/bed.svg" alt="Dormitorios" style="width:24px; vertical-align:middle; margin-right:6px;">
+            <img src="/assets/img/bed.svg" alt="Dormitorios" style="width:24px; vertical-align:middle; margin-right:6px;">
             Dormitorios
           </th>
           <td id="detalleDormitorios" style="text-align:center;"></td>
         </tr>
         <tr>
           <th>
-            <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/bathroom.svg" alt="Baños" style="width:24px; vertical-align:middle; margin-right:6px;">
+            <img src="/assets/img/bathroom.svg" alt="Baños" style="width:24px; vertical-align:middle; margin-right:6px;">
             Baños
           </th>
           <td id="detalleBanos" style="text-align:center;"></td>
@@ -159,7 +159,7 @@
   </div>
 </div>
     <div style="margin-top:15px;text-align:right;">
-      <button class="btn-outline" onclick="cerrarModal()">Cerrar</button>
+      <button class="btn-primary" onclick="cerrarModal()">Cerrar</button>
     </div>
   </div>
 </div>
@@ -195,8 +195,8 @@ async function cargarPropiedadesLanding(){
         <p style="font-weight:bold; color:#B46A55; margin:10px 0;">
           ${"$"+new Intl.NumberFormat("es-CL").format(p.Precio)}
         </p><br>
-        <a href="javascript:abrirModal(${i})" class="btn-outline">Ver detalle</a>
-        <a href="#contacto" class="btn-outline">Solicita más información</a>
+        <a href="javascript:abrirModal(${i})" class="btn-primary">Ver detalle</a>
+        <a href="#contacto" class="btn-primary">Solicita más información</a>
 <br><br>
       </div>
     </div>

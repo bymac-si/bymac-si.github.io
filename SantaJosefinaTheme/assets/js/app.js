@@ -113,7 +113,7 @@ function setAuthUser(user) {
 
 function logout() {
   localStorage.removeItem('auth_user');
-  window.location.href = 'https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/login.php';
+  window.location.href = '/login.php';
 }
 
 // =====================
@@ -122,7 +122,7 @@ function logout() {
 
 function requireAuth() {
   const u = getAuthUser();
-  if (!u) { window.location.href = 'https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/login.php'; }
+  if (!u) { window.location.href = '/login.php'; }
 }
 
 // =====================
@@ -165,9 +165,12 @@ async function loginWithAppSheet(email, password) {
 
 function requireRole(roles = []) {
   const u = getAuthUser();
-  if (!u) { window.location.href = 'https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/login.php'; return; }
+  if (!u) { window.location.href = '/login.php'; return; }
   if (roles.length && !roles.includes(u.rol)) {
     alert('No tienes permisos para acceder a esta sección.');
-    window.location.href = 'https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/dashboard.php';
+    window.location.href = '/dashboard.php';
   }
 }
+window.sendEmail = async ({to, subject, html, attachments}) => {
+  // Llama a tu API / correo transaccional y retorna cuando esté enviado.
+};

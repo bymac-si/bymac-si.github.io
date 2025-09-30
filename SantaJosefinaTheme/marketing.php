@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <title>CRM Inmobiliario - Marketing</title>
-<link rel="stylesheet" href="assets/css/styles.css">
-<script src="assets/js/app.js"></script>
+<link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css">
+<script src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/js/app.js"></script>
 <script>
   requireAuth();
 </script>
   <script>
   document.addEventListener("DOMContentLoaded", async ()=>{
     // Cargar Header
-    const headerResp = await fetch("header.html");
+    const headerResp = await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/header.html");
     document.getElementById("header").innerHTML = await headerResp.text();
 
     // Cargar Footer
@@ -62,7 +62,7 @@
       <label for="marketingPresupuesto">Presupuesto ($)</label>
       <input type="number" id="marketingPresupuesto" placeholder="Presupuesto ($)">
       <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
-        <button type="button" onclick="cerrarModalMarketing()" class="btn-outline">Cancelar</button>
+        <button type="button" onclick="cerrarModalMarketing()" class="btn-primary">Cancelar</button>
         <button type="submit" class="btn-primary">Guardar</button>
       </div>
     </form>
@@ -93,7 +93,7 @@ async function cargarMarketing(){
         <td>${clientes}</td>
         <td>${presupuesto}</td>
         <td>
-          <button type="button" class="btn-outline btn-edit" data-id="${key}">Editar</button>
+          <button type="button" class="btn-primary btn-edit" data-id="${key}">Editar</button>
           <button type="button" class="btn-primary" onclick="eliminarMarketing('${key}')">Eliminar</button>
         </td>
       </tr>

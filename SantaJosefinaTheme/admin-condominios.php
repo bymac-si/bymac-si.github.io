@@ -93,8 +93,8 @@
       </div>
     </div>
     <div class="btns">
-      <button class="btn-outline" onclick="window.location.reload()">🔄 Actualizar</button>
-      <button class="btn-primary" onclick="imprimir()">🖨 Imprimir Contrato</button>
+      <button class="btn-primary" onclick="window.location.reload()">Actualizar</button>
+      <button class="btn-primary" onclick="imprimir()">Imprimir Contrato</button>
     </div>
   </div>
 
@@ -192,8 +192,8 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", async ()=>{
-  document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
-  document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+  document.getElementById("header").innerHTML = await (await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/header.html")).text();
+  document.getElementById("footer").innerHTML = await (await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/footer.html")).text();
   await cargarDatos();
 });
 
