@@ -6,61 +6,6 @@
   <link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css">
   <script src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/js/app.js"></script>
   <script>requireAuth();</script>
-  <style>
-    body { max-width: 1200px; margin: 0 auto; color:#1A2B48; }
-    .container { padding: 40px; }
-    h1.page-title{ font-size:28px; font-weight:700; margin-bottom:16px; }
-    h2.section-title{ font-size:18px; font-weight:700; margin:18px 0 8px; }
-    .muted{ color:#555; }
-    .grid { display:grid; gap:10px; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); }
-    .card { background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:18px; }
-    .row { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; }
-    .row > * { flex: 1 1 220px; }
-    .label { font-weight:600; display:block; margin-bottom:4px; }
-    input, select { font-weight:400; width:90%; padding:10px; border:1px solid #d1d5db; border-radius:6px; }
-    .btns { display:flex; gap:8px; justify-content:flex-end; margin-top:12px; }
-    .badge { display:inline-block; padding:2px 8px; border-radius:999px; background:#f4f4f5; font-size:12px; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace; }
-
-    table { width:100%; border-collapse:collapse; }
-    th, td { padding:8px; border-bottom:1px solid #e5e7eb; text-align:left; }
-    th { background:#fafafa; }
-
-    .contrato { background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:8px; }
-    .contrato p { line-height:1.6; margin: 10px 0; text_align:justify; }
-    .firma-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:36px; }
-    .firma-box { text-align:center; padding-top:36px; }
-    .firma-line { border-top:1px solid #111; margin-top:40px; padding-top:6px; }
-    .small { font-size:12px; }
-
-    /* Spinner estilo card */
-    .spinner-backdrop{
-      position:fixed; inset:0; background:rgba(255,255,255,0.85);
-      display:flex; align-items:center; justify-content:center; z-index:9999;
-    }
-    .spinner-card{
-      background:#fff; padding:18px 22px; border:1px solid #e5e7eb; border-radius:8px;
-      box-shadow:0 6px 18px rgba(0,0,0,.08); text-align:center; min-width:260px;
-      color:#1A2B48; font-weight:600;
-    }
-    .spinner{
-      width:28px; height:28px; border-radius:50%;
-      border:3px solid #eee; border-top-color:#B46A55;
-      margin:0 auto 10px auto; animation:spin 0.9s linear infinite;
-    }
-    .logo-print { visibility: hidden; }
-    @keyframes spin{ to{ transform:rotate(360deg); } }
-    .hidden{ display:none !important; }
-
-    /* Impresión US Letter y ocultar header/footer al imprimir */
-    @page { size: Letter; margin: 20mm; }
-    @media print {
-      #header, #footer, .no-print { display:none !important; }
-      body { max-width: 100%; }
-      .contrato { border:none; }
-      .logo-print {visibility: visible;}
-    }
-  </style>
 </head>
 <body>
 <div id="header" class="no-print"></div>
@@ -73,23 +18,23 @@
     <div class="row">
       <div>
         <label class="label">Copropiedad</label>
-        <select id="selCopro"></select>
+        <select id="selCopro" style="height: 37px; font-size: 14px;"></select>
       </div>
       <div>
         <label class="label">Comuna</label>
-        <input id="inpComuna" readonly>
+        <input id="inpComuna" readonly style="width: 90%;font-size: 14px;">
       </div>
       <div>
         <label class="label">Factor Comuna (TablaTarifas)</label>
-        <input id="inpFactor" class="mono" readonly>
+        <input id="inpFactor" class="mono" readonly style="width: 90%;font-size: 14px;">
       </div>
       <div>
         <label class="label">N° Unidades</label>
-        <input id="inpUnidades" class="mono" readonly>
+        <input id="inpUnidades" class="mono" readonly style="width: 90%;font-size: 14px;">
       </div>
       <div>
         <label class="label">UTM (CLP)</label>
-        <input id="inpUTM" class="mono" placeholder="Ej: 67.000" inputmode="decimal">
+        <input id="inpUTM" class="mono" placeholder="Ej: 67.000" inputmode="decimal" style="width: 98%;font-size: 14px;">
       </div>
     </div>
     <div class="btns">
@@ -122,60 +67,63 @@
   </div>
 
   <!-- Contrato -->
-  <div class="contrato logo-print" id="areaContrato">
+  <div class="contrato print-only logo-print print-section" id="areaContrato">
     <div style="font-size:0.8em;">
       <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/logo_santajosefina.png" alt="Logo Santa Josefina" style="width: 140px; position: relative; top: -50px;" class="logo-print">
       <div>
         <div class="small muted logo-print" style="position:relative; top:-75px;">Administración de Edificios y Condominios</div>
       </div><br>
       <div style="position:relative; top:-75px;">
-      <h3 class="page-title" style="text-align:center;">Contrato de Administración de Condominios</h3>
+      <h3 class="page-title" style="text-align:center;line-height: 1.5em;">Contrato de Administración de Condominios</h3>
     
-    <hr style="border:none; border-top:1px solid #e5e7eb; margin:10px 0 18px;">
+      <hr style="border:none; border-top:1px solid #e5e7eb; margin:10px 0 18px;">
 
-    <p><b>Entre:</b> <span id="c_razon">[Nombre de la Comunidad]</span>, RUT <span id="c_rut">[RUT]</span>, con domicilio en <span id="c_dir">[Dirección]</span>, comuna de <span id="c_comuna">[Comuna]</span> (en adelante, la “Comunidad”); y <b>Santa Josefina SpA</b>, RUT 77.233.573-3, con domicilio en Santiago, (en adelante, el “Administrador”), se celebra el presente <b>Contrato de Administración de Condominio</b>, sujeto a las siguientes cláusulas:</p>
+      <p>En Santiago a <span id="c_fecha_hoy" style="font-weight: bold;">[Fecha]</span>, entre: <b>
+        <span id="c_razon">[Nombre de la Comunidad]</span></b>, RUT <span id="c_rut" style="font-weight: bold;">[RUT]</span>, con domicilio en <span id="c_dir" style="font-weight: bold;">[Dirección]</span>, 
+        comuna de <span id="c_comuna" style="font-weight: bold;">[Comuna]</span> (en adelante, la “Comunidad”); y <b>Santa Josefina SpA</b>, RUT 77.233.573-3, con domicilio en Santiago, (en adelante, el “Administrador”), 
+        se celebra el presente <b>Contrato de Administración de Condominio</b>, sujeto a las siguientes cláusulas:</p>
 
-    <h3 class="section-title">Primera: Objeto</h3>
-    <p>La Comunidad contrata al Administrador para la administración integral del condominio <span id="c_razon_2">[Nombre de la Comunidad]</span>, ubicado en <span id="c_dir_2">[Dirección]</span>, conformado por <span id="c_unidades">[Nº Unidades]</span> unidades.</p>
+      <h3 class="stitle">Primera: Objeto</h3>
+      <p>La Comunidad contrata al Administrador para la administración integral del condominio <span id="c_razon_2" style="font-weight: bold;">[Nombre de la Comunidad]</span>, ubicado en <span id="c_dir_2" style="font-weight: bold;">[Dirección]</span>, conformado por <span id="c_unidades" style="font-weight: bold;">[Nº Unidades]</span> unidades.</p>
 
-    <h3 class="section-title">Segunda: Honorarios</h3>
-    <p>Los honorarios mensuales del Administrador se calcularán conforme a la siguiente regla:</p>
-    <ul>
-      <li><b>Si el condominio tiene 20 unidades o menos:</b> <span class="mono">FactorComuna × 1,75 × UTM</span>.</li>
-      <li><b>Si el condominio tiene más de 20 unidades:</b> <span class="mono">(NºUnidades – 20) × FactorComuna × 1,80 × UTM × 0,013</span>.</li>
-    </ul>
-    <p>Para este contrato, la comuna es <b><span id="c_comuna_2">[Comuna]</span></b>, con factor <b><span id="c_factor">[Factor]</span></b>, y UTM vigente de <b><span id="c_utm">[UTM]</span></b>.</p>
-    <table style="margin:10px 0 6px; font-size:0.65em;">
-      <tr><th style="width:180px;">Neto (CLP)</th>       <td id="c_monto_neto" class="mono" style="text-align:right;">[Neto]</td></tr>
-      <tr><th>IVA 19%</th>                               <td id="c_monto_iva"  class="mono" style="text-align:right;">[IVA]</td></tr>
-      <tr><th>Total a pagar</th>                         <td id="c_monto_tot"  class="mono" style="text-align:right;">[Total]</td></tr>
-    </table>
+      <h3 class="stitle">Segunda: Honorarios</h3>
+      <p>Los honorarios mensuales del Administrador se calcularán conforme a la siguiente regla:</p>
+      <ul>
+        <li><b>Si el condominio tiene 20 unidades o menos:</b> <span class="mono">FactorComuna × 1,75 × UTM</span>.</li>
+        <li><b>Si el condominio tiene más de 20 unidades:</b> <span class="mono">(NºUnidades – 20) × FactorComuna × 1,80 × UTM × 0,013</span>.</li>
+      </ul>
+      <p>Para este contrato, la comuna es <b><span id="c_comuna_2">[Comuna]</span></b>, con factor <b><span id="c_factor">[Factor]</span></b>, y UTM vigente de <b><span id="c_utm">[UTM]</span></b>.</p>
+      <table style="margin:10px 0 6px; font-size:0.65em;">
+        <tr><th style="width:180px;">Neto (CLP)</th>       <td id="c_monto_neto" class="mono" style="text-align:right;">[Neto]</td></tr>
+        <tr><th>IVA 19%</th>                               <td id="c_monto_iva"  class="mono" style="text-align:right;">[IVA]</td></tr>
+        <tr><th>Total a pagar</th>                         <td id="c_monto_tot"  class="mono" style="text-align:right;">[Total]</td></tr>
+      </table>
 
-    <h3 class="section-title">Tercera: Obligaciones del Administrador</h3>
-    <p>El Administrador realizará la gestión operativa, financiera y administrativa del condominio, de acuerdo con la Ley N°21.442 y su reglamento, incluyendo, entre otras, la elaboración de presupuestos, recaudación de gastos comunes, pago a proveedores, mantención preventiva y correctiva, y rendición periódica a la comunidad.</p>
+      <h3 class="stitle">Tercera: Obligaciones del Administrador</h3>
+      <p>El Administrador realizará la gestión operativa, financiera y administrativa del condominio, de acuerdo con la <b>Ley N°21.442</b> y su reglamento, incluyendo, entre otras, la elaboración de presupuestos, recaudación de gastos comunes, pago a proveedores, mantención preventiva y correctiva, y rendición periódica a la comunidad.</p>
 
-    <h3 class="section-title">Cuarta: Plazo</h3>
-    <p>El presente contrato tendrá una duración de 12 meses, renovable automáticamente por iguales períodos, salvo aviso en contrario con 30 días de anticipación.</p>
+      <h3 class="stitle">Cuarta: Plazo</h3>
+      <p>El presente contrato tendrá una duración de <b>12 meses</b>, renovable automáticamente por iguales períodos, salvo aviso en contrario con 30 días de anticipación.</p>
 
-    <h3 class="section-title">Quinta: Terminación</h3>
-    <p>Cualquiera de las partes podrá poner término por incumplimiento grave de la otra, mediando comunicación por escrito y otorgando un plazo de 10 días para subsanar.</p>
+      <h3 class="stitle">Quinta: Terminación</h3>
+      <p>Cualquiera de las partes podrá poner término por incumplimiento grave de la otra, mediando comunicación por escrito y otorgando un plazo de 10 días para subsanar.</p>
 
-    <h3 class="section-title">Sexta: Domicilio</h3>
-    <p>Para todos los efectos legales, las partes fijan su domicilio en la ciudad de Santiago.</p>
-
-    <div class="firma-grid">
-      <div class="firma-box">
-        <div class="firma-line"></div>
-        <div><b>Representante Comunidad</b></div>
-        <div class="small muted" id="c_razon_firma">[Nombre de la Comunidad]</div>
+      <h3 class="stitle">Sexta: Domicilio</h3>
+      <p>Para todos los efectos legales, las partes fijan su domicilio en la ciudad de Santiago.</p>
+      <br><br><br><br><br><br>
+      <div class="firma-grid">
+        <div class="firma-box">
+          <div class="firma-line"></div>
+          <div><b>Representante Comunidad</b></div>
+          <div class="small muted" id="c_razon_firma">[Nombre de la Comunidad]</div>
+        </div>
+        <div class="firma-box" style="text-align: right;position:relative; top:-35px;">
+          <div class="firma-line"></div>
+          <div><b>Santa Josefina SpA</b></div>
+          <div class="small muted">RUT 77.233.573-3</div>
+        </div>
       </div>
-      <div class="firma-box">
-        <div class="firma-line"></div>
-        <div><b>Santa Josefina SpA</b></div>
-        <div class="small muted">RUT 77.233.573-3</div>
       </div>
-    </div>
-</div>
     </div>
   </div>
 </main>
@@ -194,8 +142,23 @@
 document.addEventListener("DOMContentLoaded", async ()=>{
   document.getElementById("header").innerHTML = await (await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/header.html")).text();
   document.getElementById("footer").innerHTML = await (await fetch("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/footer.html")).text();
+
+  // Escribir la fecha con formato "dd de mmmm de yyyy"
+  const nodoFecha = document.getElementById("c_fecha_hoy");
+  if(nodoFecha) nodoFecha.textContent = fechaHoyTexto();
+
   await cargarDatos();
 });
+
+// Fecha "dd de mmmm de yyyy" (mes en español)
+function fechaHoyTexto(){
+  const d = new Date();
+  const dd = String(d.getDate()).padStart(2,"0");
+  const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  const mmmm = meses[d.getMonth()];
+  const yyyy = d.getFullYear();
+  return `${dd} de ${mmmm} de ${yyyy}`;
+}
 
 function showSpinner(msg){
   const sp=document.getElementById('pageSpinner');

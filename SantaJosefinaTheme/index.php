@@ -131,25 +131,25 @@
       <tbody>
         <tr>
           <th style="width:75%;">
-			  <img src="/assets/img/plan.svg" alt="Metros Construidos" style="width:24px; vertical-align:middle; margin-right:6px;">Metros Cuadrados Construidos</th>
+			  <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/plan.svg" alt="Metros Construidos" style="width:24px; vertical-align:middle; margin-right:6px;">Metros Cuadrados Construidos</th>
           <td id="detalleMetrosConstruidos" style="text-align:center;"></td>
         </tr>
         <tr>
           <th>
-			  <img src="/assets/img/area.svg" alt="Metros Totales" style="width:24px; vertical-align:middle; margin-right:6px;"> 
+			  <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/area.svg" alt="Metros Totales" style="width:24px; vertical-align:middle; margin-right:6px;"> 
             Metros Cuadrados Totales</th>
           <td id="detalleMetrosTotales" style="text-align:center;"></td>
         </tr>
         <tr>
           <th>
-            <img src="/assets/img/bed.svg" alt="Dormitorios" style="width:24px; vertical-align:middle; margin-right:6px;">
+            <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/bed.svg" alt="Dormitorios" style="width:24px; vertical-align:middle; margin-right:6px;">
             Dormitorios
           </th>
           <td id="detalleDormitorios" style="text-align:center;"></td>
         </tr>
         <tr>
           <th>
-            <img src="/assets/img/bathroom.svg" alt="Baños" style="width:24px; vertical-align:middle; margin-right:6px;">
+            <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/bathroom.svg" alt="Baños" style="width:24px; vertical-align:middle; margin-right:6px;">
             Baños
           </th>
           <td id="detalleBanos" style="text-align:center;"></td>
