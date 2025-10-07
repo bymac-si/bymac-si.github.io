@@ -83,11 +83,13 @@
 
   <!-- Gráficos -->
   <div class="row g-4">
-    <div class="col-md-6"><div class="card p-3"><h2>Embudo de Ventas</h2><canvas id="graficoEmbudo"></canvas></div></div>
-    <div class="col-md-6"><div class="card p-3"><h2>Clientes captados por canal</h2><canvas id="graficoMarketing"></canvas></div></div>
-    
-    <div class="col-md-6"><div class="card p-3"><h2>Tareas por Estado</h2><canvas id="graficoTareasEstado"></canvas></div></div>
-    <div class="col-md-6"><div class="card p-3"><h2>Tareas Pendientes por Agente</h2><canvas id="graficoTareasAgente"></canvas></div></div>
+
+    <div class="col-6"><div class="card p-3"><h2>Embudo de Ventas</h2><canvas id="graficoEmbudo"></canvas></div></div>
+    <div class="col-6"><div class="card p-3"><h2>Clientes captados por canal</h2><canvas id="graficoMarketing"></canvas></div></div>
+  </div>
+  <div class="row g-4" style="margin:20px -10px;">
+    <div class="col-6"><div class="card p-3"><h2>Tareas por Estado</h2><canvas id="graficoTareasEstado"></canvas></div></div>
+    <div class="col-6"><div class="card p-3"><h2>Tareas Pendientes por Agente</h2><canvas id="graficoTareasAgente"></canvas></div></div>
   </div>
 
   <!-- Tabla de Tareas Pendientes -->
@@ -116,7 +118,7 @@
           <p id="detalleGlobal" class="gauge-detail"></p>
         </div>
       </div>
-      <div id="gaugesUsuarios" style="display:flex;flex-wrap:wrap;justify-content:center;"></div>
+      <div id="gaugesUsuarios" style="display:flex;flex-wrap:wrap;justify-content:center; padding: 0 0 60px 0;"></div>
     </div>
   </div>
 </main>

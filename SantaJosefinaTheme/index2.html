@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Santa Josefina SpA — Administración de Condominios</title>
+  <meta name="description" content="Gestión inmobiliaria integral. Administración de Edificios y Condominios adheridos a la Ley 21.442. Transparencia, proyección y disponibilidad." />
+  <link rel="preload" as="image" href="/assets/img/administracion-hero.png">
+  <style>
+    :root{
+      --brand:#1A2B48;
+      --accent:#E74E35;      /* puedes ajustar al rojo del logo */
+      --muted:#5B5B5B;
+      --bg:#ffffff;
+      --shadow:0 10px 30px rgba(0,0,0,.15);
+      --max:1200px;
+    }
+    *{box-sizing:border-box}
+    html,body{
+        margin:0;
+        padding:0
+    }
+    body{
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif; 
+        color:var(--brand); 
+        background:var(--bg);
+    }
+    img{max-width:100%; 
+        height:auto; 
+        display:block
+    }
+    a{
+        color:var(--accent); 
+        text-decoration:none
+    }
+    .container{
+        max-width:var(--max); 
+        margin:0 auto; 
+        padding:0 20px}
+
+    /* Header */
+    .site-header{
+        inset-inline:0; 
+        top:0; 
+        z-index:20; 
+        background:transparent;
+    }
+    .header-inner{
+        display:flex; 
+        align-items:center; 
+        justify-content:flex-end;
+    }
+    .logo{height:200px; 
+        width:auto; 
+        filter: drop-shadow(2px 2px 10px gray); 
+        z-index: 20;
+        position: absolute;
+        top: 10px; 
+        left: 1200px;
+    }
+
+    /* Hero */
+    .hero{
+      position:relative; 
+      min-height:135vh; 
+      display:grid; 
+      place-items:center;
+      top:-350px; /* ajustar según el logo */
+      background:url("/assets/img/administracion-hero.png") center/cover no-repeat;
+      isolation:isolate;
+    }
+    .hero::after{
+      content:""; 
+      position:absolute; 
+      inset:0;
+      z-index:-1;
+    }
+    .hero-content{
+        color:#fff; 
+        text-shadow:0 4px 16px rgba(0,0,0,.35); 
+        width:100%;
+    }
+    .hero-title{
+      font-weight:900; 
+      letter-spacing:.5px; 
+      line-height:.95;
+      font-size: clamp(36px, 6vw, 72px);
+      max-width:16ch; 
+      margin:0;
+    }
+    .hero-cta{
+        margin-top:18px; 
+        display:flex; 
+        gap:12px; 
+        flex-wrap:wrap
+    }
+    .btn{
+      display:inline-flex; 
+      align-items:center; 
+      gap:10px; 
+      border-radius:999px; 
+      padding:12px 20px;
+      font-weight:700; 
+      border:2px solid #fff; 
+      color:#fff; 
+      background:transparent;
+    }
+    .btn--solid{
+        background:#fff; 
+        color:var(--brand); 
+        border-color:#fff
+    }
+    .btn:focus{
+        outline:3px solid rgba(255,255,255,.6); 
+        outline-offset:2px
+    }
+
+    /* Features (círculos) */
+    .features{
+        padding:48px 0 20px;
+    }
+    .features-grid{
+      display:grid; 
+      gap:28px; 
+      grid-template-columns:repeat(12,1fr); 
+      align-items:start;
+    }
+    .circles{
+      grid-column:1 / span 12; 
+      display:flex; 
+      gap:70px; 
+      flex-wrap:wrap; 
+      align-items:center;
+      position: relative;
+      top: -650px;
+    }
+    .circle{
+      width:min(270px); 
+      aspect-ratio:1/1; 
+      border-radius:999px; 
+      overflow:hidden; 
+      box-shadow:var(--shadow); 
+      background:#fff;
+      border:6px solid #000;
+    }
+    .circle img{
+        width:100%; 
+        height:100%; 
+        object-fit:cover;
+    }
+    .features-copy{
+        grid-column:1 / span 12; 
+        color:var(--brand);
+        position: relative;
+        top: -600px;
+        left: 250px;
+        width: min(800px, 100%);
+    }
+    .kicker{
+        font-size:14px; 
+        letter-spacing:.08em; 
+        text-transform:uppercase; 
+        color:var(--muted); 
+        margin:0 0 8px;
+    }
+    .h2{
+        font-size: clamp(26px, 3.2vw, 40px); 
+        margin:0 0 12px; 
+        line-height:1.15;
+        width: 800px;
+    }
+    .list{
+        display:grid; 
+        gap:16px; 
+        margin:18px 0 0;
+    }
+    .item b{
+        display:block; 
+        margin-bottom:6px;
+    }
+
+    /* Servicios + texto a la derecha como afiche */
+    .services{
+      display:grid; 
+      gap:28px; 
+      grid-template-columns:1.1fr .9fr; 
+      align-items:start;
+      padding:18px 0 64px; 
+      border-top:1px solid #eee; 
+      margin-top:14px;
+    }
+    .services h3{
+        font-size: clamp(28px, 3.2vw, 42px); 
+        margin:0 0 6px;
+    }
+    .services p{
+        color:var(--muted); 
+        margin:8px 0;
+    }
+    .contact{
+      display:grid; 
+      gap:10px; 
+      align-content:start; 
+      font-size:16px;
+      padding:18px; 
+      border:1px solid #eee; 
+      border-radius:12px; 
+      box-shadow:0 6px 20px rgba(0,0,0,.06);
+    }
+    .contact a{
+        font-weight:700;
+    }
+    .contact .hint{
+        color:var(--muted); 
+        font-size:14px;
+    }
+
+    /* Footer */
+    footer{
+        border-top:1px solid #eee; 
+        padding:24px 0 40px; 
+        color:var(--muted); 
+        font-size:14px;
+        text-align:center;
+    }
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .features-grid{
+        grid-template-columns:1fr;
+    }
+      .circles{
+        justify-content:center;
+      }
+      .features-copy{
+        grid-column:auto;
+      }
+      .services{
+        grid-template-columns:1fr;
+        gap:18px;
+      }
+      .site-header .header-inner{
+        justify-content:space-between;
+        padding:0 10px;}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header" id="siteHeader" aria-label="Cabecera">
+    <div class="header-inner container">
+      <!-- puedes poner menú a la izquierda si lo necesitas -->
+      <img class="logo" src="/assets/img/logo_santajosefina.png" alt="Santa Josefina SpA" loading="lazy" />
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero" role="banner" aria-label="Portada">
+    <div class="container hero-content" style="margin-top:80px">
+      <h1 class="hero-title">SU EDIFICIO EN LAS MEJORES MANOS</h1>
+      <div class="hero-cta">
+        <a class="btn btn--solid" href="#contacto">Contáctanos</a>
+        <a class="btn btn--solid" href="#servicios" aria-label="Ir a Servicios">Conoce nuestros servicios</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Círculos + texto -->
+  <section class="features container">
+    <div class="features-grid">
+      <div class="circles">
+        <figure class="circle" aria-label="Ciudad 1">
+          <img src="/assets/img/circ-1.jpg" alt="Paisaje urbano" loading="lazy">
+        </figure>
+        <figure class="circle" aria-label="Ciudad 2" style="position: relative; top: -120px;">
+          <img src="/assets/img/circ-2.jpg" alt="Edificio y cúpula" loading="lazy">
+        </figure>
+        <figure class="circle" aria-label="Ciudad 3" style="position: relative; top: -230px;">
+          <img src="/assets/img/circ-3.jpg" alt="Parque empresarial" loading="lazy">
+        </figure>
+      </div>
+
+      <div class="features-copy">
+        <p class="kicker">lo que nos define</p>
+
+        <div class="list">
+          <div class="item">
+            <b class="h2">Trasparencia</b>
+            <p>Entregamos una gestión transparente en la administración y ejecución de los gastos comunes.</p>
+          </div>
+          <div class="item">
+            <b class="h2">Proyección</b>
+            <p>Podemos estimar presupuestos para proyectar el gasto común en períodos semestrales, anuales o bianuales.</p>
+          </div>
+          <div class="item">
+            <b class="h2">Disponibilidad</b>
+            <p>Contamos con expertos en la Ley 21.442 de Copropiedad Inmobiliaria, con tiempo completo para su comunidad.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Servicios + bloque de texto similar al afiche -->
+  <section id="servicios" class="container services" style="position: relative; top: -500px;">
+    <div>
+      <h3>Servicios Especializados</h3>
+      <p>Santa Josefina SpA Gestión Inmobiliaria integral se especializa en la
+        Administración de Edificios y Condominios Horizontales acogidos a la Ley 21.442
+        de Copropiedad Inmobiliaria, lo que nos permite brindar a su comunidad el apoyo y
+        las ventajas que ninguna otra empresa del mercado está en condiciones de ofrecer.</p>
+    </div>
+
+    <aside id="contacto" class="contact">
+      <strong>Hablemos hoy</strong>
+      <a href="tel:+56998647190">+56 9 9864 7190</a>
+      <a href="mailto:marcos.castro@santajosefinaspa.cl">marcos.castro@santajosefinaspa.cl</a>
+      <a href="https://www.santajosefinaspa.cl" target="_blank" rel="noopener">www.santajosefinaspa.cl</a>
+      <span class="hint">Respuesta en horario hábil</span>
+      <a class="btn btn--solid" href="mailto:marcos.castro@santajosefinaspa.cl?subject=Consulta%20Landing%20Santa%20Josefina">Solicitar propuesta</a>
+    </aside>
+  </section>
+
+  <footer>
+    <div class="container">
+      © <span id="y">2025</span> Santa Josefina SpA · Administración de Edificios y Condominios
+    </div>
+  </footer>
+
+  <script>
+    // Header translucido al hacer scroll
+    const head = document.getElementById('siteHeader');
+    const onScroll = () => head.classList.toggle('scrolled', window.scrollY > 8);
+    document.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+
+    // Año dinámico
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

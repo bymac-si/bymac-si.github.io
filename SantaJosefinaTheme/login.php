@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <title>Acceso Corporativo — Santa Josefina SpA</title>
-  <link rel="stylesheet" href="assets/css/styles.css" />
-  <script src="assets/js/app.js"></script>
+  <link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css" />
+  <script src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/js/app.js"></script>
   <style>
     .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f7f7f7}
     .auth-card{background:#fff;width:360px;padding:28px;border-radius:6px;box-shadow:0 8px 30px rgba(0,0,0,.08)}

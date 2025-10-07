@@ -1,256 +1,380 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Santa Josefina SpA - Gestión Inmobiliaria Integral</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-	<link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Bootstrap (ok conservar) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+  <!-- Tu theme -->
+  <link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css">
   <script src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/js/app.js"></script>
-<style>
-.carousel-item {
-  transition: opacity 4s ease-in-out !important;
-}
-</style>
+
+  <style>
+    :root{
+      --brand:#1A2B48;
+      --accent:#E74E35;        /* ajusta al rojo del logo si deseas */
+      --muted:#5B5B5B;
+      --line:#e5e7eb;
+      --max:1200px;
+      --shadow:0 10px 30px rgba(0,0,0,.15);
+    }
+    html,body{margin:0;padding:0}
+    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; color:var(--brand); background:#fff; max-width:1200px; margin:0 auto;}
+    a{text-decoration:none}
+    img{max-width:100%; height:auto; display:block}
+    .container-narrow{max-width:var(--max); padding:0 20px; margin:0 auto}
+
+    li{
+      list-style-type: square;
+      font-weight: 900;
+      text-align: left;
+    }
+
+    /* HEADER */
+    .main-header{position:fixed; inset-inline:0; top:0; z-index:30; background:rgba(255, 255, 255, 0.75); transition:background .25s, box-shadow .25s}
+    .main-header.scrolled{background:rgba(255,255,255,.75); backdrop-filter: saturate(160%) blur(6px); box-shadow:0 2px 12px rgba(0,0,0,.08)}
+    .navbar.container-fluid{max-width:var(--max); margin:0 auto; padding:10px 20px; display:flex; align-items:center; justify-content:space-between}
+    .nav-links a{margin-left:16px; color:var(--brand); font-weight:600}
+    .btn-primary{background:var(--accent); border-color:var(--accent); padding:.6rem 1rem; border-radius:999px; font-weight:700}
+    .btn-primary:hover{filter:brightness(.95)}
+
+    /* HERO */
+    .hero{
+      position:relative; min-height:78vh; display:grid; place-items:center; padding:100px 0 60px;
+      background:url("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/administracion-hero.png") center/cover no-repeat; /* <-- usa tu imagen del afiche */
+      isolation:isolate;
+    }
+    .hero::after{content:""; position:absolute; inset:0; z-index:-1;}
+    .hero-wrap{color:#fff; text-shadow:2px 4px 8px rgba(0,0,0,.55);}
+    .hero-kicker{color:#fff; font-weight:700; letter-spacing:.06em; text-transform:uppercase; margin-bottom:6px}
+    .hero-title{font-weight:900; line-height:.95; font-size: clamp(36px, 6vw, 64px); max-width:1200px; margin:0 0 14px}
+    .hero-cta{display:flex; gap:12px; flex-wrap:wrap}
+
+    /* BLOQUE CÍRCULOS + TEXTO */
+    .features{padding:48px 0 20px}
+    .features-grid{display:grid; gap:60px; grid-template-columns:repeat(12,1); align-items:start}
+    .circles{grid-column:1 / span 7; display:flex; gap:60px; flex-wrap:wrap; align-items:center}
+    .circle{width:min(240px, 45vw); aspect-ratio:1/1; border-radius:999px; overflow:hidden; border:15px solid #fff; }
+    .circle img{width:100%; height:100%; object-fit:cover}
+    .features-copy{grid-column:8 / -1}
+    .kicker{font-size:14px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 8px}
+    .h2{font-size: clamp(26px, 3.2vw, 40px); margin:0 0 12px; line-height:1.15}
+    .list{display:grid; gap:16px; margin:18px 0 0}
+    .item b{display:block; margin-bottom:6px}
+
+    /* PROPIEDADES (GRID) */
+    #propiedades{padding:50px 0}
+    #propiedades h2{font-weight:800; margin:0 0 18px}
+    #listaPropiedades{display:grid; grid-template-columns:repeat(2,minmax(360px,1fr)); gap:30px}
+    #listaPropiedades > div{border:0px solid var(--line); border-radius:12px; overflow:hidden; box-shadow:0 6px 18px rgba(0,0,0,.06)}
+    #listaPropiedades .card-body{padding:14px}
+
+    /* SERVICIOS + CONTACTO */
+    #servicios{padding:44px 0; background:#fafafa}
+    .services{display:grid; gap:28px; grid-template-columns:1.1fr .9fr; align-items:start}
+    .contact{
+      display:grid; 
+      gap:10px; 
+      align-content:start; 
+      font-size:16px;
+      padding:18px; 
+      border:1px solid #eee; 
+      border-radius:12px; 
+      box-shadow:0 6px 20px rgba(0,0,0,.06);
+    }
+    .contact a{
+        font-weight:700;
+    }
+    .contact .hint{
+        color:var(--muted); 
+        font-size:14px;
+    }
+
+    /* COPROPIEDAD */
+    #copropiedad{padding:50px 0}
+    #copropiedad h2{font-weight:800; margin-bottom:10px}
+
+    /* CONTACTO FORM */
+    #contacto{padding:44px 0; background:#fafafa}
+    #formContacto{display:grid; gap:10px; max-width:640px}
+    #formContacto input,#formContacto textarea{border:1px solid var(--line); border-radius:10px; padding:10px}
+
+    /* MODAL (custom, ya que no usas el de Bootstrap aquí) */
+    .modal{display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000; align-items:center; justify-content:center}
+    .modal.active{display:flex}
+    .modal-content{background:#fff; width:min(700px,92vw); border-radius:12px; padding:16px; box-shadow:var(--shadow)}
+    .modal-content .btn-primary{float:right}
+
+    /* FOOTER */
+    footer{border-top:1px solid #eee; padding:24px 0 40px; color:#fff; font-size:14px}
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .features-grid{grid-template-columns:1fr}
+      .features-copy{grid-column:auto}
+      .services{grid-template-columns:1fr}
+    }
+  </style>
 </head>
-<body style="max-width:1200px; margin: 0 auto;">
+<body>
 
 <!-- NAV -->
-<header class="main-header">
+<header class="main-header" id="mainHeader">
   <div class="navbar container-fluid">
     <!-- Logo -->
-    <a class="navbar-brand" href="index.php">
-      <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/logo_santajosefina.png" alt="Logo Santa Josefina" style="width: 140px; height: auto;" class="d-inline-block align-text-middle">
+    <a class="navbar-brand" href="index.php" aria-label="Inicio">
+      <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/logo_santajosefina.png" alt="Santa Josefina" style="width: 140px; height: auto;">
     </a>
-
     <!-- Links -->
-    <nav class="nav-links">
+    <nav class="nav-links d-none d-md-block">
       <a href="#servicios">Servicios</a>
       <a href="#copropiedad">Copropiedades</a>
       <a href="#contacto">Contacto</a>
-      <a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/dashboard.php" class="btn-primary" style="color: #fff;">Acceso Corporativo</a>
+      <a href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/dashboard.php" class="btn btn-primary text-white">Acceso Corporativo</a>
     </nav>
   </div>
 </header>
 
 <!-- HERO -->
 <section class="hero">
-  <div>
-    <h2 style="color:#B46A55; font-size:16px; margin-bottom:10px;">Gestión Inmobiliaria Integral</h2>
-    <h1 style="font-size:42px; margin-bottom:20px;">Nuestra misión es conectar personas y propiedades</h1>
-    <p style="color:#555; margin-bottom:20px;">
-      Venta, arriendo y administración de propiedades en todo Chile.<br>
-      Soluciones innovadoras para inversionistas, familias y comunidades.
-    </p>
-    <a href="#contacto" class="btn-primary">Habla con un especialista</a>
+  <div class="container-narrow hero-wrap" style="margin-top:60px">
+    <div class="hero-kicker">Gestión Inmobiliaria Integral</div>
+    <h1 class="hero-title">SU PROPIEDAD EN LAS MEJORES MANOS</h1>
+    <p class="mb-3" style="max-width:60ch">Venta, arriendo y administración de propiedades en todo Chile. Soluciones para inversionistas, familias y comunidades.</p>
+    <div class="hero-cta">
+      <a href="#contacto" class="btn btn-primary">Habla con un especialista</a>
+      <a href="#propiedades" class="btn btn-primary">Ver Propiedades</a>
+    </div>
   </div>
+</section>
 
-  <!-- Carrusel con fade -->
-  <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="2500" style="max-width:500px;">
-    <div class="carousel-inner">
-      <div class="carousel-item active" >
-        <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/corporativo6.png" class="d-block w-100" alt="Corporativa 1">
-      </div>
-      <div class="carousel-item">
-        <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/corporativo5.png" class="d-block w-100" alt="Corporativa">
-      </div>
-      <div class="carousel-item">
-        <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/corporativo7.png" class="d-block w-100" alt="Corporativa 2">
-      </div>
-      <div class="carousel-item">
-        <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/corporativo8.png" class="d-block w-100" alt="Corporativa 3">
+<!-- CÍRCULOS + TEXTO -->
+<section class="features container-narrow">
+  <div class="features-grid">
+    <div class="circles" aria-hidden="true">
+      <figure class="circle" style="position: relative; top:-170px;">
+        <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/circ-1.jpg" alt="Paisaje urbano"><!-- reemplaza -->
+      </figure>
+      <figure class="circle" style="position: relative; top:-250px;">
+        <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/circ-2.jpg" alt="Edificio y cúpula"><!-- reemplaza -->
+      </figure>
+      <figure class="circle" style="position: relative; top:-330px;">
+        <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/circ-3.jpg" alt="Parque empresarial"><!-- reemplaza -->
+      </figure>
+    </div>
+    <div class="features-copy" style="position: relative; top:-220px;">
+      <p class="kicker">lo que nos define</p>
+      <h2 class="h2">Transparencia • Proyección • Disponibilidad</h2>
+      <div class="list">
+        <div class="item">
+          <b>TRANSPARENCIA</b>
+          <p>Gestión transparente en la administración y ejecución de los gastos comunes.</p>
+        </div>
+        <div class="item">
+          <b>PROYECCIÓN</b>
+          <p>Estimamos presupuestos para proyectar el gasto común en períodos semestrales, anuales o bianuales.</p>
+        </div>
+        <div class="item">
+          <b>DISPONIBILIDAD</b>
+          <p>Equipo experto en la Ley 21.442, con tiempo dedicado para su comunidad.</p>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- PROPIEDADES -->
-<section id="propiedades">
+<section id="propiedades" class="container-narrow" style="position: relative; top:-200px; margin-bottom:-100px;">
   <h2>Propiedades Disponibles</h2>
   <div id="listaPropiedades"></div>
 </section>
 
-<!-- SERVICIOS -->
-<section id="servicios" style="background:#fafafa;">
-  <h2>Nuestros Servicios</h2>
-  <ul style="max-width:800px; text-align:left; line-height:1.8; color:#444;">
-    <li>Compra y venta de propiedades residenciales y comerciales.</li>
-    <li>Arriendos y gestión integral para inversionistas.</li>
-    <li>Asesoría legal y financiera en transacciones inmobiliarias.</li>
-    <li>Promoción y marketing digital de propiedades.</li>
-  </ul>
+<!-- SERVICIOS + CONTACTO TARJETA -->
+<section id="servicios">
+  <div class="container-narrow services">
+    <div>
+      <h2>Servicios Especializados</h2>
+      <p class="text-muted">Santa Josefina SpA se especializa en la Administración de Edificios y Condominios Horizontales acogidos a la Ley 21.442 de Copropiedad Inmobiliaria, brindando a su comunidad apoyo y ventajas diferenciales.</p>
+      <ul class="text-muted">
+        <li>Compra y venta de propiedades residenciales y comerciales.</li>
+        <li>Arriendos y gestión integral para inversionistas.</li>
+        <li>Asesoría legal y financiera en transacciones.</li>
+        <li>Promoción y marketing digital de propiedades.</li>
+      </ul>
+    </div>
+     <aside id="contacto" class="contact">
+      <strong>Hablemos hoy</strong>
+      <a href="tel:+56998647190">+56 9 9864 7190</a>
+      <a href="mailto:marcos.castro@santajosefinaspa.cl">marcos.castro@santajosefinaspa.cl</a>
+      <a href="https://www.santajosefinaspa.cl" target="_blank" rel="noopener">www.santajosefinaspa.cl</a>
+      <span class="hint">Respuesta en horario hábil</span>
+      <a class="btn btn-primary" style="width: 50%; margin: 0 auto;" href="mailto:marcos.castro@santajosefinaspa.cl?subject=Consulta%20Landing%20Santa%20Josefina">Solicitar propuesta</a>
+    </aside>
+  </div>
 </section>
 
 <!-- COPROPIEDAD -->
-<section id="copropiedad">
+<section id="copropiedad" class="container-narrow">
   <h2>Administración de Copropiedades</h2>
-  <p style="max-width:800px; color:#444;">
-    Con la entrada en vigencia de la <strong>Ley N°21.442 de Copropiedad Inmobiliaria</strong>, 
-    ofrecemos un servicio de administración profesional de condominios y edificios, asegurando transparencia, eficiencia y cumplimiento normativo.
-    <br>Estamos certificados e inscritos en el Registro Nacional de Administradores de Copropiedades del Minvu.
+  <p class="text-muted" style="max-width:800px">
+    Con la entrada en vigencia de la <strong>Ley N°21.442 de Copropiedad Inmobiliaria</strong>, ofrecemos administración profesional de condominios y edificios, asegurando transparencia, eficiencia y cumplimiento normativo. Inscritos en el Registro Nacional de Administradores del Minvu.
   </p>
-  <ul style="max-width:800px; text-align:left; line-height:1.8; color:#444; margin-top:15px;">
+  <ul class="text-muted" style="max-width:800px">
     <li>Gestión financiera y contable con reportes claros a la comunidad.</li>
     <li>Mantención preventiva y correctiva de áreas comunes.</li>
-    <li>Implementación de protocolos de seguridad y convivencia.</li>
+    <li>Protocolos de seguridad y convivencia.</li>
     <li>Asesoría legal en conflictos de copropiedad.</li>
     <li>Plataforma digital para comunicación con residentes.</li>
   </ul>
 </section>
 
-<!-- CONTACTO -->
-<section id="contacto" style="background:#fafafa;">
-  <h2>Formulario de Contacto</h2>
+<!-- CONTACTO FORM -->
+<section class="container-narrow" style="padding:44px 0">
+  <h2>Contáctenos</h2>
   <form id="formContacto">
     <input id="contactoNombre" type="text" placeholder="Nombre completo" required>
     <input id="contactoEmail" type="email" placeholder="Correo electrónico" required>
     <input id="contactoTelefono" type="tel" placeholder="Teléfono">
     <textarea id="contactoMensaje" placeholder="Escribe tu consulta..." rows="4" required></textarea>
-    <button type="submit" class="btn-primary">Enviar</button>
+    <button type="submit" class="btn btn-primary">Enviar</button>
   </form>
-  <p id="msgConfirmacion" style="display:none; color:green; margin-top:15px;">
-    ¡Gracias! Tu mensaje ha sido enviado.
-  </p>
+  <p id="msgConfirmacion" style="display:none; color:green; margin-top:15px;">¡Gracias! Tu mensaje ha sido enviado.</p>
 </section>
+
 <!-- Modal Detalle Propiedad -->
-<div id="modalPropiedad" class="modal">
+<div id="modalPropiedad" class="modal" aria-hidden="true">
   <div class="modal-content">
-    <span onclick="cerrarModal()" style="float:right;cursor:pointer;">&times;</span>
-    <h1 id="detalleTitulo" style="font-size:24px; font-weight:bold;"></h1>
+    <button class="btn btn-primary" style="width:50%; margin:0 auto;" onclick="cerrarModal()">Cerrar</button>
+    <h1 id="detalleTitulo" style="font-size:24px; font-weight:bold; margin-top:6px;"></h1>
     <img id="detalleImagen" src="" alt="Imagen propiedad" style="width:100%;max-height:250px;object-fit:cover;border-radius:6px;margin-bottom:10px;">
     <p><b>Tipo:</b> <span id="detalleTipo"></span></p>
     <p><b>Comuna:</b> <span id="detalleComuna"></span></p>
     <p><b>Región:</b> <span id="detalleRegion"></span></p>
     <p><b>Precio:</b> <span id="detallePrecio"></span></p>
-    <div class="card shadow-sm mb-4">
-  <div class="card-header bg-warning text-dark fw-bold">
-    Detalles de la Propiedad
-  </div>
-  <div class="card-body p-0">
-    <table class="table table-bordered mb-0">
-      <tbody>
-        <tr>
-          <th style="width:75%;">
-			  <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/plan.svg" alt="Metros Construidos" style="width:24px; vertical-align:middle; margin-right:6px;">Metros Cuadrados Construidos</th>
-          <td id="detalleMetrosConstruidos" style="text-align:center;"></td>
-        </tr>
-        <tr>
-          <th>
-			  <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/area.svg" alt="Metros Totales" style="width:24px; vertical-align:middle; margin-right:6px;"> 
-            Metros Cuadrados Totales</th>
-          <td id="detalleMetrosTotales" style="text-align:center;"></td>
-        </tr>
-        <tr>
-          <th>
-            <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/bed.svg" alt="Dormitorios" style="width:24px; vertical-align:middle; margin-right:6px;">
-            Dormitorios
-          </th>
-          <td id="detalleDormitorios" style="text-align:center;"></td>
-        </tr>
-        <tr>
-          <th>
-            <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/bathroom.svg" alt="Baños" style="width:24px; vertical-align:middle; margin-right:6px;">
-            Baños
-          </th>
-          <td id="detalleBanos" style="text-align:center;"></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-    <div style="margin-top:15px;text-align:right;">
-      <button class="btn-primary" onclick="cerrarModal()">Cerrar</button>
+    <div class="card shadow-sm mb-3">
+      <div class="card-header bg-warning text-dark fw-bold">Detalles de la Propiedad</div>
+      <div class="card-body p-0">
+        <table class="table table-bordered mb-0">
+          <tbody>
+            <tr>
+              <th style="width:75%;"><img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/plan.svg" alt="" style="width:20px;vertical-align:middle;margin-right:6px;">Metros Cuadrados Construidos</th>
+              <td id="detalleMetrosConstruidos" style="text-align:center;"></td>
+            </tr>
+            <tr>
+              <th><img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/area.svg" alt="" style="width:20px;vertical-align:middle;margin-right:6px;">Metros Cuadrados Totales</th>
+              <td id="detalleMetrosTotales" style="text-align:center;"></td>
+            </tr>
+            <tr>
+              <th><img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/bed.svg" alt="" style="width:20px;vertical-align:middle;margin-right:6px;">Dormitorios</th>
+              <td id="detalleDormitorios" style="text-align:center;"></td>
+            </tr>
+            <tr>
+              <th><img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/bathroom.svg" alt="" style="width:20px;vertical-align:middle;margin-right:6px;">Baños</th>
+              <td id="detalleBanos" style="text-align:center;"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
+
 <!-- FOOTER -->
 <footer>
-  <p>&copy; 2025 Santa Josefina SpA - Gestión Inmobiliaria Integral</p>
+  <div class="container-narrow">
+    © <span id="y">2025</span> Santa Josefina SpA · Administración de Edificios y Condominios
+  </div>
 </footer>
 
 <script>
-// Formatea fecha como DD-MM-YYYY
-function fechaHoyTexto(){
-  const d = new Date();
-  const dd = String(d.getDate()).padStart(2,"0");
-  const mm = String(d.getMonth()+1).padStart(2,"0");
-  const yyyy = d.getFullYear();
-  return `${dd}-${mm}-${yyyy}`;
-}
+  // Header translucido al hacer scroll
+  const h = document.getElementById('mainHeader');
+  const onScroll = ()=> h.classList.toggle('scrolled', window.scrollY>8);
+  document.addEventListener('scroll', onScroll, {passive:true}); onScroll();
 
-let propiedadesGlobal = [];
+  // Año dinámico
+  document.getElementById('y').textContent = new Date().getFullYear();
 
-async function cargarPropiedadesLanding(){
-  propiedadesGlobal = await fetchData("Propiedades");
-  const disponibles = propiedadesGlobal.filter(p=>p.Estado==="Disponible");
-
-  document.getElementById("listaPropiedades").innerHTML = disponibles.map((p,i)=>`
-    <div>
-      <img src="${p.ImagenURL}" alt="Propiedad" style="width:100%; height:180px; object-fit:cover;">
-      <div style="padding:15px;">
-        <h3 style="font-size:18px; margin-bottom:5px;">${p.Titulo}</h3>
-        <p style="color:#777;">${p.Tipo}</p>
-        <p style="color:#777;font-size:0.75em">${p.Comuna}</p>
-        <p style="color:#777;font-size:0.75em">${p.Region}</p>
-        <p style="font-weight:bold; color:#B46A55; margin:10px 0;">
-          ${"$"+new Intl.NumberFormat("es-CL").format(p.Precio)}
-        </p><br>
-        <a href="javascript:abrirModal(${i})" class="btn-primary">Ver detalle</a>
-        <a href="#contacto" class="btn-primary">Solicita más información</a>
-<br><br>
-      </div>
-    </div>
-  `).join("");
-}
-
-// Abrir modal con detalle de la propiedad seleccionada
-function abrirModal(index){
-  const p = propiedadesGlobal[index];
-  document.getElementById("detalleTitulo").textContent = p.Titulo || "Propiedad";
-  document.getElementById("detalleImagen").src = p.ImagenURL || "";
-  document.getElementById("detalleTipo").textContent = p.Tipo || "";
-  document.getElementById("detalleComuna").textContent = p.Comuna || "";
-  document.getElementById("detalleRegion").textContent = p.Region || "";
-  document.getElementById("detallePrecio").textContent = "$"+new Intl.NumberFormat("es-CL").format(p.Precio || 0);
-  document.getElementById("detalleMetrosConstruidos").textContent = p.MetrosConstruidos || "—";
-  document.getElementById("detalleMetrosTotales").textContent = p.MetrosTotales || "—";
-  document.getElementById("detalleDormitorios").textContent = p.Dormitorios || "—";
-  document.getElementById("detalleBanos").textContent = p.Banos || "—";
-
-  document.getElementById("modalPropiedad").classList.add("active");
-}
-
-// Cerrar modal
-function cerrarModal(){
-  document.getElementById("modalPropiedad").classList.remove("active");
-}
-
-cargarPropiedadesLanding();
-
-// Contacto
-const formContacto=document.getElementById("formContacto");
-formContacto.onsubmit=async(e)=>{
-  e.preventDefault();
-  const payload={
-    Nombre:   document.getElementById("contactoNombre").value.trim(),
-    Email:    document.getElementById("contactoEmail").value.trim(),
-    Telefono: document.getElementById("contactoTelefono").value.trim(),
-    Mensaje:  document.getElementById("contactoMensaje").value.trim(),
-    Fecha:    fechaHoyTexto(),
-    Estado:   "Nuevo",
-    Notas:    ""
-  };
-  try{
-    console.log("Payload enviado a AppSheet:", payload);
-    await appSheetCRUD("Contactos","Add",[payload]);
-    formContacto.reset();
-    document.getElementById("msgConfirmacion").style.display="block";
-  }catch(err){
-    alert("Error al guardar: "+(err.message||err));
-    console.error(err);
+  // Fecha (para contacto)
+  function fechaHoyTexto(){
+    const d = new Date();
+    const dd = String(d.getDate()).padStart(2,"0");
+    const mm = String(d.getMonth()+1).padStart(2,"0");
+    const yyyy = d.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
   }
-};
-</script>
 
+  let propiedadesGlobal = [];
+
+  async function cargarPropiedadesLanding(){
+    try{
+      propiedadesGlobal = await fetchData("Propiedades");
+    }catch(e){ propiedadesGlobal = []; }
+    const disponibles = propiedadesGlobal.filter(p=> (p.Estado||"") === "Disponible");
+
+    document.getElementById("listaPropiedades").innerHTML = disponibles.map((p,i)=>`
+      <div>
+        <img src="${p.ImagenURL||''}" alt="Propiedad" style="width:100%; height:180px; object-fit:cover;">
+        <div class="card-body">
+          <h3 style="font-size:18px; margin-bottom:5px;">${p.Titulo||'Propiedad'}</h3>
+          <p class="text-muted small">${p.Tipo||''} · ${p.Comuna||''} · ${p.Region||''}</p>
+          <p class="fw-bold" style="color:#B46A55; margin:8px 0;">
+            ${"$"+new Intl.NumberFormat("es-CL").format(p.Precio||0)}
+          </p>
+          <p class="d-flex gap-2">
+            <a href="javascript:abrirModal(${i})" class="btn btn-primary">Ver detalle</a>
+            <a href="#contacto" class="btn btn-primary">Solicitar info</a>
+          </p>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  // Modal detalle
+  function abrirModal(index){
+    const p = propiedadesGlobal[index] || {};
+    document.getElementById("detalleTitulo").textContent = p.Titulo || "Propiedad";
+    document.getElementById("detalleImagen").src = p.ImagenURL || "";
+    document.getElementById("detalleTipo").textContent = p.Tipo || "";
+    document.getElementById("detalleComuna").textContent = p.Comuna || "";
+    document.getElementById("detalleRegion").textContent = p.Region || "";
+    document.getElementById("detallePrecio").textContent = "$"+new Intl.NumberFormat("es-CL").format(p.Precio || 0);
+    document.getElementById("detalleMetrosConstruidos").textContent = p.MetrosConstruidos || "—";
+    document.getElementById("detalleMetrosTotales").textContent = p.MetrosTotales || "—";
+    document.getElementById("detalleDormitorios").textContent = p.Dormitorios || "—";
+    document.getElementById("detalleBanos").textContent = p.Banos || "—";
+    document.getElementById("modalPropiedad").classList.add("active");
+  }
+  function cerrarModal(){ document.getElementById("modalPropiedad").classList.remove("active"); }
+
+  cargarPropiedadesLanding();
+
+  // Contacto -> AppSheet
+  const formContacto=document.getElementById("formContacto");
+  formContacto.onsubmit=async(e)=>{
+    e.preventDefault();
+    const payload={
+      Nombre:   document.getElementById("contactoNombre").value.trim(),
+      Email:    document.getElementById("contactoEmail").value.trim(),
+      Telefono: document.getElementById("contactoTelefono").value.trim(),
+      Mensaje:  document.getElementById("contactoMensaje").value.trim(),
+      Fecha:    fechaHoyTexto(),
+      Estado:   "Nuevo",
+      Notas:    ""
+    };
+    try{
+      await appSheetCRUD("Contactos","Add",[payload]);
+      formContacto.reset();
+      document.getElementById("msgConfirmacion").style.display="block";
+    }catch(err){
+      alert("Error al guardar: "+(err.message||err));
+      console.error(err);
+    }
+  };
+</script>
 </body>
 </html>
