@@ -1,4 +1,12 @@
 /* General */
+:root{
+      --brand:#1A2B48;
+      --accent:#E74E35;
+      --muted:#5B5B5B;
+      --line:#e5e7eb;
+      --max:1200px;
+      --shadow:0 10px 30px rgba(0,0,0,.15);
+    }
 body {
   font-family: "Segoe UI", sans-serif;
   background-color: #f7f7f7;
@@ -43,15 +51,16 @@ button {
   transition: all 0.3s;
 }
 
-.btn-primary {
-  background: #1a2b48;
-  color: white;
-  border: none;
+.btn-primary{
+  background:var(--accent); 
+  border-color:var(--accent); 
+  padding:.6rem 1rem; 
+  border-radius:999px; 
+  font-weight:700
 }
-
-.btn-primary:hover {
-  background: #cd241c;
-}
+  .btn-primary:hover{
+    filter:brightness(.95)
+  }
 
 .btn-outline {
   border: 1px solid #9e9789;

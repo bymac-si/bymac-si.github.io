@@ -5,25 +5,31 @@
   <title>Santa Josefina SpA - Gestión Inmobiliaria Integral</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Bootstrap (ok conservar) -->
+  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 
-  <!-- Tu theme -->
+  <!-- Theme -->
   <link rel="stylesheet" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/css/styles.css">
   <script src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/js/app.js"></script>
 
   <style>
     :root{
       --brand:#1A2B48;
-      --accent:#E74E35;        /* ajusta al rojo del logo si deseas */
+      --accent:#E74E35;
       --muted:#5B5B5B;
       --line:#e5e7eb;
       --max:1200px;
       --shadow:0 10px 30px rgba(0,0,0,.15);
     }
     html,body{margin:0;padding:0}
-    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; color:var(--brand); background:#fff; max-width:1200px; margin:0 auto;}
+    body{
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+      color:var(--brand);
+      background:#fff;
+      max-width:1200px;
+      margin:0 auto;
+    }
     a{text-decoration:none}
     img{max-width:100%; height:auto; display:block}
     .container-narrow{max-width:var(--max); padding:0 20px; margin:0 auto}
@@ -35,9 +41,9 @@
     }
 
     /* HEADER */
-    .main-header{position:fixed; inset-inline:0; top:0; z-index:30; background:rgba(255, 255, 255, 0.75); transition:background .25s, box-shadow .25s}
-    .main-header.scrolled{background:rgba(255,255,255,.75); backdrop-filter: saturate(160%) blur(6px); box-shadow:0 2px 12px rgba(0,0,0,.08)}
-    .navbar.container-fluid{max-width:var(--max); margin:0 auto; padding:10px 20px; display:flex; align-items:center; justify-content:space-between}
+    .main-header{position:fixed; inset-inline:0; top:0; z-index:30; background:rgba(255, 255, 255, 0.5); transition:background .25s, box-shadow .25s; height: 150px;}
+    .main-header.scrolled{background:rgba(255,255,255,.5); backdrop-filter: saturate(160%) blur(6px); box-shadow:0 2px 12px rgba(0,0,0,.08)}
+    .navbar.container-fluid{max-width:var(--max); margin:0 auto; padding:10px 20px; display:flex; align-items:center; justify-content:space-between; gap:12px}
     .nav-links a{margin-left:16px; color:var(--brand); font-weight:600}
     .btn-primary{background:var(--accent); border-color:var(--accent); padding:.6rem 1rem; border-radius:999px; font-weight:700}
     .btn-primary:hover{filter:brightness(.95)}
@@ -45,7 +51,7 @@
     /* HERO */
     .hero{
       position:relative; min-height:78vh; display:grid; place-items:center; padding:100px 0 60px;
-      background:url("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/administracion-hero.png") center/cover no-repeat; /* <-- usa tu imagen del afiche */
+      background:url("https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/administracion-hero.png") center/cover no-repeat;
       isolation:isolate;
     }
     .hero::after{content:""; position:absolute; inset:0; z-index:-1;}
@@ -72,6 +78,7 @@
     #listaPropiedades{display:grid; grid-template-columns:repeat(2,minmax(360px,1fr)); gap:30px}
     #listaPropiedades > div{border:0px solid var(--line); border-radius:12px; overflow:hidden; box-shadow:0 6px 18px rgba(0,0,0,.06)}
     #listaPropiedades .card-body{padding:14px}
+   
 
     /* SERVICIOS + CONTACTO */
     #servicios{padding:44px 0; background:#fafafa}
@@ -86,13 +93,8 @@
       border-radius:12px; 
       box-shadow:0 6px 20px rgba(0,0,0,.06);
     }
-    .contact a{
-        font-weight:700;
-    }
-    .contact .hint{
-        color:var(--muted); 
-        font-size:14px;
-    }
+    .contact a{font-weight:700;}
+    .contact .hint{color:var(--muted); font-size:14px;}
 
     /* COPROPIEDAD */
     #copropiedad{padding:50px 0}
@@ -103,7 +105,7 @@
     #formContacto{display:grid; gap:10px; max-width:640px}
     #formContacto input,#formContacto textarea{border:1px solid var(--line); border-radius:10px; padding:10px}
 
-    /* MODAL (custom, ya que no usas el de Bootstrap aquí) */
+    /* MODAL (custom) */
     .modal{display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000; align-items:center; justify-content:center}
     .modal.active{display:flex}
     .modal-content{background:#fff; width:min(700px,92vw); border-radius:12px; padding:16px; box-shadow:var(--shadow)}
@@ -112,11 +114,56 @@
     /* FOOTER */
     footer{border-top:1px solid #eee; padding:24px 0 40px; color:#fff; font-size:14px}
 
-    /* Responsive */
-    @media (max-width: 980px){
-      .features-grid{grid-template-columns:1fr}
-      .features-copy{grid-column:auto}
-      .services{grid-template-columns:1fr}
+    /* === Responsive === */
+    @media (max-width: 980px) {
+      body { padding:0; margin:0; max-width:100%; }
+      .container-narrow { padding: 0 12px; }
+
+      /* NAV: ocultar links de escritorio (ya usas d-none d-md-block) */
+      .nav-links { display:none !important; }
+
+      /* HERO: pila y separación uniforme */
+      .hero { padding:100px 20px 60px; text-align:center; background-position:center; background-size:cover; }
+      .hero-wrap { display:flex; flex-direction:column; align-items:center; gap:20px; }
+      .hero-cta { width:100%; display:flex; flex-direction:column; align-items:center; gap:20px; }
+      .hero-cta .btn { width:80%; max-width:420px; }
+
+      /* FEATURES: pila y 20px entre bloques e ítems */
+      .features-grid { display:flex; flex-direction:column; gap:20px; }
+      .features .circles, .features { position:static !important; margin:0 auto; }
+      .features-copy { margin-bottom: 500px; position: relative;top: -400px; margin: 0 auto; }
+      .circles { display:flex; flex-direction:column; align-items:center; gap:20px; }
+      .circle { width:90%; max-width:320px; border-width:8px; margin-top: 120px; margin-left: auto; margin-right: auto;}
+      .list { display:grid; gap:20px; }
+
+      /* PROPIEDADES: 1 columna */
+      #listaPropiedades { grid-template-columns:1fr !important; gap:20px;margin: 0 auto; width: 95%; }
+      #listaPropiedades .btn-primary{margin: 0 auto;}
+
+      /* SERVICIOS + CONTACTO */
+      .services { display:flex; flex-direction:column; gap:20px; }
+      .contact { width:100%; box-shadow:none; border:1px solid #ddd; }
+
+      /* COPROPIEDAD */
+      #copropiedad ul { padding-left:20px; }
+
+      /* FORMULARIO CONTACTO: botón al 80% */
+      #formContacto { width:90%; margin:0 auto; }
+      #formContacto input, #formContacto textarea { width:100%; font-size:16px; }
+      #formContacto .btn { width:80%; max-width:420px; margin:0 auto; display:block; }
+
+      /* Botón del bloque contacto (aside) también al 80% */
+      #contacto .btn { width:80% !important; max-width:420px; margin:0 auto; display:block; }
+
+      /* MODAL */
+      .modal-content { width:92vw; max-height:90vh; overflow-y:auto; }
+
+      /* FOOTER */
+      footer { text-align:center; padding:20px 10px; font-size:13px; }
+      
+      /* Offcanvas: estética de lista */
+      .offcanvas .list-group-item{ border:0; padding:12px 0; font-weight:600; color:var(--brand); }
+      .offcanvas .btn.btn-primary{ border-radius:999px; font-weight:700; }
     }
   </style>
 </head>
@@ -129,7 +176,23 @@
     <a class="navbar-brand" href="index.php" aria-label="Inicio">
       <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/logo_santajosefina.png" alt="Santa Josefina" style="width: 140px; height: auto;">
     </a>
-    <!-- Links -->
+
+    <!-- Botón hamburguesa (solo móvil) -->
+    <button
+      class="btn d-md-none"
+      type="button"
+      aria-label="Abrir menú"
+      data-bs-toggle="offcanvas"
+      data-bs-target="#mobileMenu"
+      aria-controls="mobileMenu"
+      style="display:flex;align-items:center;gap:8px;border:1px solid #ddd;border-radius:10px;padding:8px 12px;background:#fff;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span style="font-weight:600;color:var(--brand);">Menú</span>
+    </button>
+
+    <!-- Links escritorio -->
     <nav class="nav-links d-none d-md-block">
       <a href="#servicios">Servicios</a>
       <a href="#copropiedad">Copropiedades</a>
@@ -138,6 +201,25 @@
     </nav>
   </div>
 </header>
+
+<!-- Menú móvil (Offcanvas Bootstrap) -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel" style="width:80vw;max-width:360px;">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="mobileMenuLabel" style="display:flex;align-items:center;gap:10px;">
+      <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/logo_santajosefina.png" alt="Santa Josefina" style="height:28px;width:auto;">
+      <span style="color:var(--brand);font-weight:800;">Santa Josefina</span>
+    </h5>
+    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+  </div>
+  <div class="offcanvas-body">
+    <nav class="list-group list-group-flush" style="gap:8px;display:grid;">
+      <a class="list-group-item list-group-item-action" href="#servicios">Servicios</a>
+      <a class="list-group-item list-group-item-action" href="#copropiedad">Copropiedades</a>
+      <a class="list-group-item list-group-item-action" href="#contacto">Contacto</a>
+      <a class="btn btn-primary" href="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/dashboard.php">Acceso Corporativo</a>
+    </nav>
+  </div>
+</div>
 
 <!-- HERO -->
 <section class="hero">
@@ -157,13 +239,13 @@
   <div class="features-grid">
     <div class="circles" aria-hidden="true">
       <figure class="circle" style="position: relative; top:-170px;">
-        <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/circ-1.jpg" alt="Paisaje urbano"><!-- reemplaza -->
+        <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/circ-1.jpg" alt="Paisaje urbano">
       </figure>
       <figure class="circle" style="position: relative; top:-250px;">
-        <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/circ-2.jpg" alt="Edificio y cúpula"><!-- reemplaza -->
+        <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/circ-2.jpg" alt="Edificio y cúpula">
       </figure>
       <figure class="circle" style="position: relative; top:-330px;">
-        <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/circ-3.jpg" alt="Parque empresarial"><!-- reemplaza -->
+        <img src="https://santajosefinaspa.cl/wp-content/themes/SantaJosefinaTheme/assets/img/circ-3.jpg" alt="Parque empresarial">
       </figure>
     </div>
     <div class="features-copy" style="position: relative; top:-220px;">
@@ -291,7 +373,7 @@
 </footer>
 
 <script>
-  // Header translucido al hacer scroll
+  // Header translúcido al hacer scroll
   const h = document.getElementById('mainHeader');
   const onScroll = ()=> h.classList.toggle('scrolled', window.scrollY>8);
   document.addEventListener('scroll', onScroll, {passive:true}); onScroll();
@@ -375,6 +457,18 @@
       console.error(err);
     }
   };
+
+  // Cerrar menú móvil al seleccionar una opción
+  document.addEventListener('DOMContentLoaded', function(){
+    const off = document.getElementById('mobileMenu');
+    if (!off) return;
+    off.querySelectorAll('a').forEach(a=>{
+      a.addEventListener('click', ()=>{
+        const inst = bootstrap.Offcanvas.getInstance(off);
+        if(inst) inst.hide();
+      });
+    });
+  });
 </script>
 </body>
 </html>
