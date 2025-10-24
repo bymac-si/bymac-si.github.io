@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CRM - Agentes</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="assets/js/app.js"></script>
+  <script>requireAuth();</script>
+</head>
+<body>
+<div id="header"></div>
+
+<main style="padding:40px;">
+  <h1 class="page-title">Gestión de Agentes</h1>
+  <button class="btn-primary" onclick="abrirFormAgente()">Nuevo Agente</button>
+
+  <table style="margin-top:16px;">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Email</th>
+        <th>Teléfono</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="tablaAgentes"></tbody>
+  </table>
+</main>
+
+<!-- Modal Agente -->
+<div id="modalAgente" class="modal">
+  <div class="modal-content">
+    <h2 id="modalTitleAgente">Nuevo Agente</h2>
+    <form id="formAgente">
+      <input type="hidden" id="agenteID">
+      <label>Nombre</label><input type="text" id="agenteNombre" required>
+      <label>Email</label><input type="email" id="agenteEmail" required>
+      <label>Teléfono</label><input type="text" id="agenteTelefono">
+      <div style="text-align:right;margin-top:10px;">
+        <button type="button" class="btn-primary" onclick="cerrarFormAgente()">Cancelar</button>
+        <button class="btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Tareas -->
+<div id="modalTareas" class="modal">
+  <div class="modal-content">
+    <h2>Tareas de <span id="nombreAgenteTareas"></span></h2>
+    <button class="btn-primary" onclick="abrirFormTarea()">Nueva Tarea</button>
+    <table style="margin-top:12px;">
+      <thead>
+        <tr><th>Título</th><th>Estado</th><th>Prioridad</th><th>Fecha Límite</th><th>Acciones</th></tr>
+      </thead>
+      <tbody id="tablaTareas"></tbody>
+    </table>
+    <div style="text-align:right;margin-top:15px;">
+      <button type="button" class="btn-primary" onclick="cerrarModalTareas()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Form Tarea -->
+<div id="modalTareaForm" class="modal">
+  <div class="modal-content">
+    <h2 id="modalTitleTarea">Nueva Tarea</h2>
+    <form id="formTarea">
+      <input type="hidden" id="tareaID">
+      <label>Título</label><input type="text" id="tareaTitulo" required>
+      <label>Descripción</label><textarea id="tareaDescripcion"></textarea>
+      <label>Estado</label>
+      <select id="tareaEstado">
+        <option>Pendiente</option>
+        <option>En progreso</option>
+        <option>Completada</option>
+      </select>
+      <label>Prioridad</label>
+      <select id="tareaPrioridad">
+        <option>Baja</option>
+        <option>Media</option>
+        <option>Alta</option>
+      </select>
+      <label>Fecha Límite</label><input type="date" id="tareaFechaLimite">
+      <div style="text-align:right;margin-top:10px;">
+        <button type="button" class="btn-primary" onclick="cerrarFormTarea()">Cancelar</button>
+        <button class="btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<script>
+let agentes=[], tareas=[], KEY_AGENTE="ID", KEY_TAREA="ID";
+let agenteActual=null;
+
+document.addEventListener("DOMContentLoaded", async ()=>{
+  document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
+  document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+  cargarAgentes();
+});
+
+async function cargarAgentes(){
+  [agentes, tareas] = await Promise.all([
+    fetchData("Agentes"),
+    fetchData("Tareas")
+  ]);
+  if(agentes.length) KEY_AGENTE=getKeyName(agentes[0]);
+  if(tareas.length) KEY_TAREA=getKeyName(tareas[0]);
+
+  tablaAgentes.innerHTML = agentes.map(a=>{
+    const key=getKeyVal(a);
+    return `<tr>
+      <td>${a.Nombre||""}</td>
+      <td>${a.Email||""}</td>
+      <td>${a.Telefono||""}</td>
+      <td>
+        <button class="btn-primary" onclick="abrirFormAgente('${key}')">Editar</button>
+        <button class="btn-primary" onclick="abrirModalTareas('${key}')">Tareas</button>
+        <button class="btn-primary" onclick="eliminarAgente('${key}')">Eliminar</button>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+/* ---------------- Agentes ---------------- */
+function abrirFormAgente(id){
+  modalTitleAgente.textContent = id ? "Editar Agente":"Nuevo Agente";
+  if(id){
+    const a = agentes.find(x=>String(getKeyVal(x))===String(id));
+    if(!a){ alert("No encontrado"); return; }
+    agenteID.value=id;
+    agenteNombre.value=a.Nombre||"";
+    agenteEmail.value=a.Email||"";
+    agenteTelefono.value=a.Telefono||"";
+  }else{ formAgente.reset(); agenteID.value=""; }
+  modalAgente.classList.add("active");
+}
+function cerrarFormAgente(){ modalAgente.classList.remove("active"); }
+
+formAgente.onsubmit=async(e)=>{
+  e.preventDefault();
+  const id=agenteID.value||undefined;
+  const payload={
+    ...(id?{[KEY_AGENTE]:id}:{}),
+    Nombre:agenteNombre.value.trim(),
+    Email:agenteEmail.value.trim(),
+    Telefono:agenteTelefono.value.trim()
+  };
+  if(id) await appSheetCRUD("Agentes","Edit",[payload]);
+  else   await appSheetCRUD("Agentes","Add",[payload]);
+  cerrarFormAgente(); location.reload();
+};
+
+async function eliminarAgente(id){
+  if(!confirm("¿Eliminar?")) return;
+  await appSheetCRUD("Agentes","Delete",[{[KEY_AGENTE]:id}]);
+  location.reload();
+}
+
+/* ---------------- Tareas ---------------- */
+function abrirModalTareas(agenteID){
+  agenteActual=agentes.find(a=>String(getKeyVal(a))===String(agenteID));
+  nombreAgenteTareas.textContent=agenteActual.Nombre;
+  renderTareas();
+  modalTareas.classList.add("active");
+}
+function cerrarModalTareas(){ modalTareas.classList.remove("active"); }
+
+function renderTareas(){
+  const tareasAgente=tareas.filter(t=>String(t.AgenteID)===String(getKeyVal(agenteActual)));
+  tablaTareas.innerHTML=tareasAgente.map(t=>{
+    const key=getKeyVal(t);
+    return `<tr>
+      <td>${t.Titulo||""}</td>
+      <td>${t.Estado||""}</td>
+      <td>${t.Prioridad||""}</td>
+      <td>${t.FechaLimite||""}</td>
+      <td>
+        <button class="btn-primary" onclick="abrirFormTarea('${key}')">Editar</button>
+        <button class="btn-primary" onclick="eliminarTarea('${key}')">Eliminar</button>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+function abrirFormTarea(id){
+  modalTitleTarea.textContent=id?"Editar Tarea":"Nueva Tarea";
+  if(id){
+    const t=tareas.find(x=>String(getKeyVal(x))===String(id));
+    if(!t){ alert("No encontrada"); return; }
+    tareaID.value=id;
+    tareaTitulo.value=t.Titulo||"";
+    tareaDescripcion.value=t.Descripcion||"";
+    tareaEstado.value=t.Estado||"Pendiente";
+    tareaPrioridad.value=t.Prioridad||"Media";
+    tareaFechaLimite.value=t.FechaLimite||"";
+  }else{ formTarea.reset(); tareaID.value=""; }
+  modalTareaForm.classList.add("active");
+}
+function cerrarFormTarea(){ modalTareaForm.classList.remove("active"); }
+
+formTarea.onsubmit=async(e)=>{
+  e.preventDefault();
+  const id=tareaID.value||undefined;
+  const payload={
+    ...(id?{[KEY_TAREA]:id}:{}),
+    AgenteID:getKeyVal(agenteActual),
+    Titulo:tareaTitulo.value.trim(),
+    Descripcion:tareaDescripcion.value.trim(),
+    Estado:tareaEstado.value,
+    Prioridad:tareaPrioridad.value,
+    FechaLimite:tareaFechaLimite.value
+  };
+  if(id) await appSheetCRUD("Tareas","Edit",[payload]);
+  else   await appSheetCRUD("Tareas","Add",[payload]);
+  cerrarFormTarea(); location.reload();
+};
+
+async function eliminarTarea(id){
+  if(!confirm("¿Eliminar tarea?")) return;
+  await appSheetCRUD("Tareas","Delete",[{[KEY_TAREA]:id}]);
+  location.reload();
+}
+</script>
+</body>
+</html>

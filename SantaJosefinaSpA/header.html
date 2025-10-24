@@ -1,0 +1,56 @@
+<header class="main-header">
+  <nav class="navbar container-fluid">
+    <!-- Toggle (si en algún momento quieres volver a usar sidebar, hoy no hace nada) -->
+    <button id="mobileToggle" class="mobile-toggle" style="display:none;">☰</button>
+
+    <!-- Logo -->
+    <a href="index.html" class="logo">
+      <img src="assets/img/logo_santajosefina.png"
+           alt="Logo Santa Josefina" style="width:140px;height:auto;">
+    </a>
+
+    <!-- Menú principal -->
+    <nav class="nav-links" id="navLinks">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="clientes.html">Clientes</a>
+      <a href="propiedades.html">Propiedades</a>
+      <a href="visitas.html">Visitas</a>
+      <a href="marketing.html">Marketing</a>
+
+      <!-- Submenú Administración de Condominios -->
+      <div class="dropdown">
+        <a href="#">Condominios ▾</a>
+        <ul class="dropdown-menu">
+          <li><a href="copropietarios.html">Copropietarios</a></li>
+          <li><a href="copropiedades.html">Comunidades</a></li>
+          <li><a href="unidades.html">Unidades</a></li>
+          <li><a href="proveedores.html">Proveedores</a></li>
+          <li><a href="gastos.html">Gastos</a></li>
+          <li><a href="reportes.html">Reportes</a></li>
+        </ul>
+      </div>
+
+      <!-- Agentes: visible para todos -->
+      <a id="linkAgentes" href="usuarios.html?tipo=agentes">Agentes</a>
+
+      <!-- Usuarios: solo Admin (oculto por defecto) -->
+      <a id="linkUsuarios" href="usuarios.html?tipo=usuarios" style="display:none;">Usuarios</a>
+
+      <!-- Salir -->
+      <a href="#" class="btn-outline" onclick="logout()">Salir</a>
+    </nav>
+  </nav>
+</header>
+
+<script>
+  // Muestra el link "Usuarios" solo si el usuario logueado es Admin
+  document.addEventListener('DOMContentLoaded', () => {
+    const au = getAuthUser && getAuthUser();
+    const adminLink = document.getElementById('linkUsuarios');
+    if (au && (au.rol || '').toLowerCase() === 'admin') {
+      adminLink.style.display = '';
+    } else {
+      adminLink.remove(); // o déjalo hidden si prefieres
+    }
+  });
+</script>

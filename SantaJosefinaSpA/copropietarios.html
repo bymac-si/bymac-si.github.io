@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CRM - Copropietarios</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="assets/js/app.js"></script>
+  <script>requireAuth();</script>
+  <style>
+    /* Spinner tipo card */
+    .spinner-backdrop{
+      position:fixed; inset:0; background:rgba(255,255,255,0.85);
+      display:flex; align-items:center; justify-content:center; z-index:9999;
+    }
+    .spinner-card{
+      background:#fff; padding:18px 22px; border:1px solid #e5e7eb; border-radius:8px;
+      box-shadow:0 6px 18px rgba(0,0,0,.08); text-align:center; min-width:260px;
+      color:#1A2B48; font-weight:600;
+    }
+    .spinner{
+      width:28px; height:28px; border-radius:50%;
+      border:3px solid #eee; border-top-color:#B46A55;
+      margin:0 auto 10px auto; animation:spin 0.9s linear infinite;
+    }
+    @keyframes spin{ to{ transform:rotate(360deg); } }
+    .hidden{ display:none !important; }
+  </style>
+</head>
+<body style="max-width:1200px; margin: 0 auto;">
+<div id="header"></div>
+
+<main style="padding:40px;">
+  <h1 class="page-title">Copropietarios</h1>
+  <button class="btn-primary" onclick="abrirForm()">+ Nuevo Copropietario</button>
+
+  <table style="margin-top:16px;">
+    <thead>
+      <tr><th>Copropiedad</th><th>Nombre</th><th>RUT</th><th>Email</th><th>Teléfono</th><th>Acciones</th></tr>
+    </thead>
+    <tbody id="tablaCo"></tbody>
+  </table>
+</main>
+
+<!-- SPINNER -->
+<div id="pageSpinner" class="spinner-backdrop hidden" aria-hidden="true">
+  <div class="spinner-card">
+    <div class="spinner"></div>
+    <div id="spinnerText">Cargando Copropietarios...</div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modalCo" class="modal">
+  <div class="modal-content">
+    <h2 id="modalTitle">Nuevo Copropietario</h2>
+    <form id="formCo">
+      <input type="hidden" id="coID">
+      <label>Copropiedad</label><select id="coCopro" required></select>
+      <label>Nombre</label><input id="coNombre" required>
+      <label>RUT</label><input id="coRUT">
+      <label>Email</label><input id="coEmail" type="email">
+      <label>Teléfono</label><input id="coTelefono">
+      <div style="text-align:right;margin-top:10px;">
+        <button type="button" class="btn-primary" onclick="cerrarForm()">Cancelar</button>
+        <button class="btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async ()=>{
+  document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
+  document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+  cargar();
+});
+
+let copros=[], cops=[], KEY_NAME="ID";
+
+function showSpinner(msg){
+  const sp=document.getElementById('pageSpinner');
+  const txt=document.getElementById('spinnerText');
+  if(msg) txt.textContent=msg;
+  sp.classList.remove('hidden');
+}
+function hideSpinner(){ document.getElementById('pageSpinner').classList.add('hidden'); }
+
+async function cargar(){
+  try{
+    showSpinner("Cargando Copropietarios...");
+    [copros, cops] = await Promise.all([ fetchData("Copropiedades"), fetchData("Copropietarios") ]);
+    if(cops.length) KEY_NAME = getKeyName(cops[0]);
+
+    const coproMap={}; copros.forEach(c=>coproMap[getKeyVal(c)] = c.Nombre);
+    tablaCo.innerHTML = cops.map(r=>{
+      const key=getKeyVal(r);
+      return `<tr>
+        <td>${coproMap[r.CopropiedadID]||"—"}</td>
+        <td>${r.Nombre||""}</td>
+        <td>${r.RUT||""}</td>
+        <td>${r.Email||""}</td>
+        <td>${r.Telefono||""}</td>
+        <td>
+          <button class="btn-primary" onclick="abrirForm('${key}')">Editar</button>
+          <button class="btn-primary" onclick="eliminar('${key}')">Eliminar</button>
+        </td>
+      </tr>`;
+    }).join("");
+
+    coCopro.innerHTML = copros.map(c=>`<option value="${getKeyVal(c)}">${c.Nombre}</option>`).join("");
+  }catch(err){
+    console.error(err);
+    tablaCo.innerHTML=`<tr><td colspan="6" style="color:#b91c1c;">Error al cargar</td></tr>`;
+  }finally{ hideSpinner(); }
+}
+
+function abrirForm(id){
+  modalTitle.textContent = id ? "Editar Copropietario" : "Nuevo Copropietario";
+  if(id){
+    const r = cops.find(x=>String(getKeyVal(x))===String(id));
+    if(!r){ alert("No encontrado"); return; }
+    coID.value=id;
+    coCopro.value=r.CopropiedadID;
+    coNombre.value=r.Nombre||"";
+    coRUT.value=r.RUT||"";
+    coEmail.value=r.Email||"";
+    coTelefono.value=r.Telefono||"";
+  }else{ formCo.reset(); coID.value=""; }
+  modalCo.classList.add("active");
+}
+function cerrarForm(){ modalCo.classList.remove("active"); }
+
+formCo.onsubmit = async (e)=>{
+  e.preventDefault();
+  const id = coID.value || undefined;
+  const payload = {
+    ...(id?{[KEY_NAME]:id}:{}),
+    CopropiedadID: coCopro.value,
+    Nombre: coNombre.value.trim(),
+    RUT: coRUT.value.trim(),
+    Email: coEmail.value.trim(),
+    Telefono: coTelefono.value.trim()
+  };
+  try{
+    showSpinner("Guardando...");
+    if(id) await appSheetCRUD("Copropietarios","Edit",[payload]);
+    else   await appSheetCRUD("Copropietarios","Add",[payload]);
+    cerrarForm(); location.reload();
+  }catch(err){
+    alert("Error: " + (err.message||err));
+  }finally{ hideSpinner(); }
+};
+
+async function eliminar(id){
+  if(!confirm("¿Eliminar?")) return;
+  try{
+    showSpinner("Eliminando...");
+    await appSheetCRUD("Copropietarios","Delete",[{[KEY_NAME]:id}]);
+    location.reload();
+  }catch(err){
+    alert("Error: " + (err.message||err));
+  }finally{ hideSpinner(); }
+}
+</script>
+</body>
+</html>

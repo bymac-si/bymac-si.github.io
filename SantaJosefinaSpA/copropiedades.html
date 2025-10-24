@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CRM - Copropiedades</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="assets/js/app.js"></script>
+  <script>requireAuth();</script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async ()=>{
+      const headerResp = await fetch("header.html");
+      document.getElementById("header").innerHTML = await headerResp.text();
+      const footerResp = await fetch("footer.html");
+      document.getElementById("footer").innerHTML = await footerResp.text();
+    });
+  </script>
+</head>
+<body style="max-width:1200px; margin: 0 auto;">
+<div id="header"></div>
+
+<main style="padding:40px;">
+  <h1 style="font-size:28px;font-weight:600;color:#1A2B48;">Copropiedades</h1>
+  <button onclick="abrirFormCopro()" class="btn-primary" style="margin:20px 0;">+ Nueva Copropiedad</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>RUT</th>
+        <th>Direccion</th>
+        <th>Comuna</th>
+        <th>Ciudad</th>
+        <th>Fondo Reserva</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="tablaCopros"></tbody>
+  </table>
+</main>
+
+<!-- MODAL FORM -->
+<div id="modalCopro" class="modal">
+  <div class="modal-content">
+    <h2 id="modalTitleCopro">Nueva Copropiedad</h2>
+    <form id="formCopro">
+      <input type="hidden" id="coproID">
+      <label>Nombre</label><input id="coproNombre" required>
+      <label>RUT</label><input id="coproRUT">
+      <label>Direccion</label><input id="coproDireccion">
+      <label>Comuna</label><input id="coproComuna">
+      <label>Ciudad</label><input id="coproCiudad">
+      <label>Banco</label><input id="coproBanco">
+      <label>Cuenta</label><input id="coproCuenta">
+      <label>Email Admin</label><input id="coproEmailAdmin" type="email">
+      <label>Telefono</label><input id="coproTelefono">
+      <label>Fondo Reserva</label><input id="coproFondo" type="number" step="0.01">
+      <label>Reglamento URL</label><input id="coproReglamento">
+      <label>Libro Actas URL</label><input id="coproLibro">
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:12px;">
+        <button type="button" class="btn-primary" onclick="cerrarModalCopro()">Cancelar</button>
+        <button type="submit" class="btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL DETALLE -->
+<div id="modalDetalle" class="modal">
+  <div class="modal-content">
+    <h2>Detalle Copropiedad</h2>
+    <div id="detalleContenido"></div>
+    <div style="text-align:right;margin-top:12px;">
+      <button class="btn-primary" onclick="cerrarModalDetalle()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<script>
+let coprosGlobal=[], KEY_NAME="ID";
+
+function formatoCLP(v){ return "$" + new Intl.NumberFormat("es-CL").format(Number(v||0)); }
+
+async function cargarCopros(){
+  coprosGlobal = await fetchData("Copropiedades");
+  if (coprosGlobal.length) KEY_NAME = getKeyName(coprosGlobal[0]);
+
+  const tbody = document.getElementById("tablaCopros");
+  tbody.innerHTML = coprosGlobal.map(c=>{
+    const key = getKeyVal(c);
+    return `
+      <tr>
+        <td>${c.Nombre ?? ""}</td>
+        <td>${c.RUT ?? ""}</td>
+        <td>${c.Direccion ?? ""}</td>
+        <td>${c.Comuna ?? ""}</td>
+        <td>${c.Ciudad ?? ""}</td>
+        <td>${c.FondoReserva ?? ""}%</td>
+        <td>
+          <button class="btn-primary btn-ver" data-id="${key}">Ver</button>
+          <button class="btn-primary btn-edit" data-id="${key}">Editar</button>
+          <button class="btn-primary" onclick="eliminarCopro('${key}')">Eliminar</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  tbody.onclick = (e)=>{
+    const ver = e.target.closest(".btn-ver");
+    const edit = e.target.closest(".btn-edit");
+    if (ver) abrirDetalleCopro(ver.dataset.id);
+    if (edit) abrirFormCopro(edit.dataset.id);
+  };
+}
+
+const modal = document.getElementById("modalCopro");
+const form = document.getElementById("formCopro");
+function abrirFormCopro(id){
+  document.getElementById("modalTitleCopro").textContent = id ? "Editar Copropiedad" : "Nueva Copropiedad";
+  if(id){
+    const c = coprosGlobal.find(x => String(getKeyVal(x))===String(id));
+    if(!c) return alert("No encontrada");
+    document.getElementById("coproID").value = id;
+    coproNombre.value = c.Nombre ?? "";
+    coproRUT.value = c.RUT ?? "";
+    coproDireccion.value = c.Direccion ?? "";
+    coproComuna.value = c.Comuna ?? "";
+    coproCiudad.value = c.Ciudad ?? "";
+    coproBanco.value = c.Banco ?? "";
+    coproCuenta.value = c.Cuenta ?? "";
+    coproEmailAdmin.value = c.EmailAdmin ?? "";
+    coproTelefono.value = c.Telefono ?? "";
+    coproFondo.value = c.FondoReserva ?? 0;
+    coproReglamento.value = c.ReglamentoURL ?? "";
+    coproLibro.value = c.LibroActasURL ?? "";
+  }else{
+    form.reset();
+    document.getElementById("coproID").value = "";
+  }
+  modal.classList.add("active");
+}
+function cerrarModalCopro(){ modal.classList.remove("active"); }
+
+form.onsubmit = async (e)=>{
+  e.preventDefault();
+  const id = coproID.value || undefined;
+  const payload = {
+    ...(id ? { [KEY_NAME]: id } : {}),
+    Nombre: coproNombre.value.trim(),
+    RUT: coproRUT.value.trim(),
+    Direccion: coproDireccion.value.trim(),
+    Comuna: coproComuna.value.trim(),
+    Ciudad: coproCiudad.value.trim(),
+    Banco: coproBanco.value.trim(),
+    Cuenta: coproCuenta.value.trim(),
+    EmailAdmin: coproEmailAdmin.value.trim().toLowerCase(),
+    Telefono: coproTelefono.value.trim(),
+    FondoReserva: parseFloat(coproFondo.value) || 0,
+    ReglamentoURL: coproReglamento.value.trim() || null,
+    LibroActasURL: coproLibro.value.trim() || null
+  };
+  try{
+    if(id) await appSheetCRUD("Copropiedades","Edit",[payload]);
+    else   await appSheetCRUD("Copropiedades","Add",[payload]);
+    cerrarModalCopro();
+    location.reload();
+  }catch(err){ alert("Error: " + (err.message||err)); }
+};
+
+async function eliminarCopro(id){
+  if(!confirm("¿Eliminar esta copropiedad?")) return;
+  await appSheetCRUD("Copropiedades","Delete",[{[KEY_NAME]:id}]);
+  location.reload();
+}
+
+const modalDetalle = document.getElementById("modalDetalle");
+const detalleContenido = document.getElementById("detalleContenido");
+function abrirDetalleCopro(id){
+  const c = coprosGlobal.find(x => String(getKeyVal(x))===String(id));
+  if(!c) return alert("No encontrada");
+  detalleContenido.innerHTML = `
+    <p><b>Nombre:</b> ${c.Nombre??""}</p>
+    <p><b>RUT:</b> ${c.RUT??""}</p>
+    <p><b>Direccion:</b> ${c.Direccion??""}</p>
+    <p><b>Comuna:</b> ${c.Comuna??""}</p>
+    <p><b>Ciudad:</b> ${c.Ciudad??""}</p>
+    <p><b>Fondo Reserva:</b> ${formatoCLP(c.FondoReserva)}</p>
+    <p><b>Reglamento:</b> ${c.ReglamentoURL?`<a href="${c.ReglamentoURL}" target="_blank">Ver</a>`:"—"}</p>
+    <p><b>Libro Actas:</b> ${c.LibroActasURL?`<a href="${c.LibroActasURL}" target="_blank">Ver</a>`:"—"}</p>
+  `;
+  modalDetalle.classList.add("active");
+}
+function cerrarModalDetalle(){ modalDetalle.classList.remove("active"); }
+
+cargarCopros();
+</script>
+</body>
+</html>
