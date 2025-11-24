@@ -464,34 +464,54 @@
           </div>
         </div>
         <!-- ===================== -->
-        <!-- 🔹 ETAPAS REGISTRADAS HOY -->
-        <!-- ===================== -->
-        <div class="col-12 mt-2">
-          <div class="card shadow-sm p-3">
-            <h5 class="card-title mb-2">Tags registrados hoy</h5>
-            <p class="small text-muted mb-2" id="msgReporteHoy">
-              Resumen de cambios registrados hoy.
+<!-- 🔹 ETAPAS REGISTRADAS HOY -->
+<!-- ===================== -->
+<div class="col-12 mt-2">
+  <div class="card shadow-sm p-3">
+    <h5 class="card-title mb-2">Tags registrados hoy</h5>
+    <p class="small text-muted mb-2" id="msgReporteHoy">
+      Resumen de cambios registrados hoy (movimientos y liberaciones de etapas).
+    </p>
+
+    <div class="row g-3">
+      <!-- Tabla -->
+      <div class="col-12 col-lg-7">
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead>
+              <tr class="table-light">
+                <th>Etapa / Columna</th>
+                <th>Fecha</th>
+                <th class="text-end">Hoy</th>
+                <th class="text-end">Regularización</th>
+                <th class="text-end">Total TAGs</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyReporteHoy">
+              <tr>
+                <td colspan="5" class="text-muted small">Sin datos para hoy.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Gráfico -->
+      <div class="col-12 col-lg-5">
+        <div class="card shadow-sm border-0">
+          <div class="card-body p-2">
+            <h6 class="card-title mb-1">Movimientos de Tags por etapa</h6>
+            <p class="small text-muted mb-2">
+              Comparación entre hoy vs. regularizaciones.
             </p>
-            <div class="table-responsive">
-              <table class="table table-sm mb-0">
-                <thead>
-                  <tr class="table-light">
-                    <th>Etapa</th>
-                    <th>Fecha</th>
-                    <th class="text-end">Hoy</th>
-                    <th class="text-end">Regularización</th>
-                    <th class="text-end">Total TAGs</th>
-                  </tr>
-                </thead>
-                <tbody id="tbodyReporteHoy">
-                  <tr>
-                    <td colspan="5" class="text-muted small">Sin datos para hoy.</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <canvas id="chartReporteHoy" height="180"></canvas>
           </div>
         </div>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 
       </div> <!-- tab-content -->
@@ -506,7 +526,7 @@
     /*************************************************
      * CONFIG FRONTEND – URL DEL WEBAPP
      *************************************************/
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzrbGhpEso--yauYSgBXQWzY_zGqJZy1B9xqZiJ_AU9s5ynGKcCXMuQS_qL4aSFmHBO/exec'; // <-- pega aquí tu /exec
+    const API_URL = 'https://script.google.com/macros/s/AKfycbx3ehxQx4LRq0kPJFRRAuq5OaMnDArMurEoVVCGTPD6jpMxOnWOdJCUJTfSicWWBysk/exec'; // <-- pega aquí tu /exec
 
     /*************************************************
      * LLAMADAS AL BACKEND
@@ -822,6 +842,7 @@
     let chartLiberados = null;
     let chartFunnel = null;
     let chartAtraso = null;
+    let chartReporteHoy = null;
 
     function cargarDashboard() {
       // KPIs
@@ -876,11 +897,13 @@
     }
     function cargarReporteHoy() {
   const tbody = document.getElementById("tbodyReporteHoy");
-  const msg = document.getElementById("msgReporteHoy");
+  const msg   = document.getElementById("msgReporteHoy");
   if (!tbody || !msg) return;
 
   tbody.innerHTML = `
-    <tr><td colspan="5" class="text-muted small">Cargando...</td></tr>`;
+    <tr>
+      <td colspan="5" class="text-muted small">Cargando...</td>
+    </tr>`;
 
   callApi('reporteChangeLogHoy')
     .then(rows => {
@@ -888,23 +911,32 @@
 
       if (!Array.isArray(rows) || rows.length === 0) {
         tbody.innerHTML = `
-          <tr><td colspan="5" class="text-muted small">Sin registros para hoy.</td></tr>`;
+          <tr>
+            <td colspan="5" class="text-muted small">Sin registros para hoy.</td>
+          </tr>`;
+        // también limpiar gráfico
+        dibujarGraficoReporteHoy([], [], []);
         return;
       }
 
       let html = "";
       let totalHoy = 0, totalAnt = 0, totalTags = 0;
 
-      rows.forEach(r => {
-        const etapa = r.columna || "-";
-        const fechaVal = r.fechaValor || "Sin fecha";
-        const cantHoy = Number(r.hoy || 0);
-        const cantAnt = Number(r.anteriores || 0);
-        const cantTot = Number(r.total || 0);
+      // Datos para el gráfico
+      const labels   = [];
+      const dataHoy  = [];
+      const dataAnt  = [];
 
-        totalHoy += cantHoy;
-        totalAnt += cantAnt;
-        totalTags += cantTot;
+      rows.forEach(r => {
+        const etapa     = r.columna || "-";
+        const fechaVal  = r.fechaValor || "Sin fecha";
+        const cantHoy   = Number(r.hoy || 0);
+        const cantAnt   = Number(r.anteriores || 0);
+        const cantTotal = Number(r.total || 0);
+
+        totalHoy  += cantHoy;
+        totalAnt  += cantAnt;
+        totalTags += cantTotal;
 
         html += `
           <tr>
@@ -912,10 +944,23 @@
             <td class="small">${fechaVal}</td>
             <td class="small text-end">${cantHoy}</td>
             <td class="small text-end">${cantAnt}</td>
-            <td class="small text-end fw-bold">${cantTot}</td>
+            <td class="small text-end fw-bold">${cantTotal}</td>
           </tr>`;
+
+        // Para el gráfico usamos una fila por ETAPA (sumando por etapa)
+        // agrupar por etapa:
+        const idx = labels.indexOf(etapa);
+        if (idx === -1) {
+          labels.push(etapa);
+          dataHoy.push(cantHoy);
+          dataAnt.push(cantAnt);
+        } else {
+          dataHoy[idx] += cantHoy;
+          dataAnt[idx] += cantAnt;
+        }
       });
 
+      // Fila total en la tabla
       html += `
         <tr class="table-light fw-bold">
           <td>Total</td>
@@ -926,13 +971,18 @@
         </tr>`;
 
       tbody.innerHTML = html;
+
+      // Dibujar/actualizar gráfico
+      dibujarGraficoReporteHoy(labels, dataHoy, dataAnt);
     })
     .catch(err => {
       console.error(err);
       tbody.innerHTML = `
         <tr><td colspan="5" class="text-danger small">Error al cargar reporte.</td></tr>`;
+      dibujarGraficoReporteHoy([], [], []);
     });
 }
+
 
 
 
@@ -983,6 +1033,58 @@
         }
       });
     }
+function dibujarGraficoReporteHoy(labels, dataHoy, dataAnt) {
+  const canvas = document.getElementById("chartReporteHoy");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+
+  if (chartReporteHoy) {
+    chartReporteHoy.destroy();
+  }
+
+  if (!labels || labels.length === 0) {
+    // Nada que mostrar, dejamos el canvas vacío
+    chartReporteHoy = null;
+    return;
+  }
+
+  chartReporteHoy = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Hoy",
+          data: dataHoy,
+          borderWidth: 1
+        },
+        {
+          label: "Regularización",
+          data: dataAnt,
+          borderWidth: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      indexAxis: "y",
+      scales: {
+        x: {
+          beginAtZero: true,
+          stacked: true
+        },
+        y: {
+          stacked: true
+        }
+      },
+      plugins: {
+        legend: {
+          position: "bottom"
+        }
+      }
+    }
+  });
+}
 
     /*************************************************
      * INIT
