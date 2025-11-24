@@ -186,7 +186,8 @@
   <main class="container-fluid px-1 px-sm-2 flex-grow-1">
 
     <!-- ENCABEZADO -->
-    <div class="bymac-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+    <div
+      class="bymac-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
       <h1><img src="https://bymac-si.github.io/img/logo_imma.png" alt="IMMA" style="width: 100px;"> Panel MasterBI · Tag
         Spool</h1>
       <div class="text-start text-md-end">
@@ -388,49 +389,49 @@
             <div class="col-12">
               <div class="row g-2">
 
-                <div class="col-6 col-md-2">
+                <div class="col-6">
                   <div class="kpi-box">
                     <div class="kpi-title">Total Spools</div>
                     <div id="kpi-total" class="kpi-value text-primary">-</div>
                   </div>
                 </div>
 
-                <div class="col-6 col-md-2">
+                <div class="col-6">
                   <div class="kpi-box">
-                    <div class="kpi-title">Liberado y/o Despachado</div>
+                    <div class="kpi-title">Despachado</div>
                     <div id="kpi-ok" class="kpi-value kpi-green">-</div>
                   </div>
                 </div>
 
-                <div class="col-6 col-md-2">
+                <div class="col-6">
                   <div class="kpi-box">
-                    <div class="kpi-title">Activos (Excluye Eliminados)</div>
+                    <div class="kpi-title">Tag Activos</div>
                     <div id="kpi-activos" class="kpi-value kpi-blue">-</div>
                   </div>
                 </div>
 
-                <div class="col-6 col-md-2">
+                <div class="col-6">
                   <div class="kpi-box">
-                    <div class="kpi-title">En Proceso (&lt; 30 días)</div>
+                    <div class="kpi-title">&lt; 30 días</div>
                     <div id="kpi-proceso" class="kpi-value kpi-blue">-</div>
                   </div>
                 </div>
 
-                <div class="col-6 col-md-2">
+                <div class="col-6">
                   <div class="kpi-box">
-                    <div class="kpi-title">Pendientes (30 - 60 días)</div>
+                    <div class="kpi-title">30 - 60 días</div>
                     <div id="kpi-pend" class="kpi-value kpi-yellow">-</div>
                   </div>
                 </div>
 
-                <div class="col-6 col-md-2">
+                <div class="col-6">
                   <div class="kpi-box">
-                    <div class="kpi-title">Atrasados (&gt; 60 días)</div>
+                    <div class="kpi-title">&gt; 60 días</div>
                     <div id="kpi-atr" class="kpi-value kpi-red">-</div>
                   </div>
                 </div>
 
-                <div class="col-6 col-md-2">
+                <div class="col-12">
                   <div class="kpi-box">
                     <div class="kpi-title">Eliminados y Obsoletos</div>
                     <div id="kpi-elim" class="kpi-value kpi-muted">-</div>
@@ -441,19 +442,19 @@
             </div>
 
             <!-- Gráficos -->
-            <div class="col-12 col-md-4">
-              <div class="card shadow-sm p-3">
+            <div class="col-12">
+              <div class="card shadow-sm p-2">
                 <h5 class="card-title">Status Fluor</h5>
-                <canvas id="chartLiberados" height="120"></canvas>
+                <canvas id="chartLiberados" height="160"></canvas>
               </div>
             </div>
-            <div class="col-12 col-md-4">
+            <div class="col-6">
               <div class="card shadow-sm p-3">
                 <h5 class="card-title mb-2">Embudo por proceso</h5>
                 <canvas id="chartFunnel" height="160"></canvas>
               </div>
             </div>
-            <div class="col-12 col-md-4">
+            <div class="col-6">
               <div class="card shadow-sm p-3">
                 <h5 class="card-title mb-2">Distribución por días de atraso</h5>
                 <canvas id="chartAtraso" height="160"></canvas>
@@ -462,6 +463,36 @@
 
           </div>
         </div>
+        <!-- ===================== -->
+        <!-- 🔹 ETAPAS REGISTRADAS HOY -->
+        <!-- ===================== -->
+        <div class="col-12 mt-2">
+          <div class="card shadow-sm p-3">
+            <h5 class="card-title mb-2">Tags registrados hoy</h5>
+            <p class="small text-muted mb-2" id="msgReporteHoy">
+              Resumen de cambios registrados hoy.
+            </p>
+            <div class="table-responsive">
+              <table class="table table-sm mb-0">
+                <thead>
+                  <tr class="table-light">
+                    <th>Etapa</th>
+                    <th>Fecha</th>
+                    <th class="text-end">Hoy</th>
+                    <th class="text-end">Regularización</th>
+                    <th class="text-end">Total TAGs</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyReporteHoy">
+                  <tr>
+                    <td colspan="5" class="text-muted small">Sin datos para hoy.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
 
       </div> <!-- tab-content -->
     </div> <!-- card -->
@@ -475,7 +506,7 @@
     /*************************************************
      * CONFIG FRONTEND – URL DEL WEBAPP
      *************************************************/
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzvLWRZACT_b5JUjARUFXBmaQi5zp3KMhtdhaCsBhFivg8nUuWNS1NOq-Y9eYHw8Fo6/exec'  ; // <-- pega aquí tu /exec
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzrbGhpEso--yauYSgBXQWzY_zGqJZy1B9xqZiJ_AU9s5ynGKcCXMuQS_qL4aSFmHBO/exec'; // <-- pega aquí tu /exec
 
     /*************************************************
      * LLAMADAS AL BACKEND
@@ -817,6 +848,9 @@
       callApi('graficoAtrasos')
         .then(data => dibujarGraficoAtrasos(data))
         .catch(onGsError);
+      // 🔹 Nuevo: reporte de etapas de hoy
+      cargarReporteHoy();
+
     }
 
     function dibujarGraficoStatusFluor(data) {
@@ -840,12 +874,73 @@
         }
       });
     }
+    function cargarReporteHoy() {
+  const tbody = document.getElementById("tbodyReporteHoy");
+  const msg = document.getElementById("msgReporteHoy");
+  if (!tbody || !msg) return;
+
+  tbody.innerHTML = `
+    <tr><td colspan="5" class="text-muted small">Cargando...</td></tr>`;
+
+  callApi('reporteChangeLogHoy')
+    .then(rows => {
+      console.log("Reporte hoy:", rows);
+
+      if (!Array.isArray(rows) || rows.length === 0) {
+        tbody.innerHTML = `
+          <tr><td colspan="5" class="text-muted small">Sin registros para hoy.</td></tr>`;
+        return;
+      }
+
+      let html = "";
+      let totalHoy = 0, totalAnt = 0, totalTags = 0;
+
+      rows.forEach(r => {
+        const etapa = r.columna || "-";
+        const fechaVal = r.fechaValor || "Sin fecha";
+        const cantHoy = Number(r.hoy || 0);
+        const cantAnt = Number(r.anteriores || 0);
+        const cantTot = Number(r.total || 0);
+
+        totalHoy += cantHoy;
+        totalAnt += cantAnt;
+        totalTags += cantTot;
+
+        html += `
+          <tr>
+            <td class="small">${etapa}</td>
+            <td class="small">${fechaVal}</td>
+            <td class="small text-end">${cantHoy}</td>
+            <td class="small text-end">${cantAnt}</td>
+            <td class="small text-end fw-bold">${cantTot}</td>
+          </tr>`;
+      });
+
+      html += `
+        <tr class="table-light fw-bold">
+          <td>Total</td>
+          <td></td>
+          <td class="text-end">${totalHoy}</td>
+          <td class="text-end">${totalAnt}</td>
+          <td class="text-end">${totalTags}</td>
+        </tr>`;
+
+      tbody.innerHTML = html;
+    })
+    .catch(err => {
+      console.error(err);
+      tbody.innerHTML = `
+        <tr><td colspan="5" class="text-danger small">Error al cargar reporte.</td></tr>`;
+    });
+}
+
+
 
     function dibujarFunnel(kpi) {
       const ctx = document.getElementById("chartFunnel").getContext("2d");
       if (chartFunnel) chartFunnel.destroy();
 
-      const labels = ["OK", "En proceso", "Pendiente", "Atrasado"];
+      const labels = ["Despachado", "En proceso", "Pendiente", "Atrasado"];
       const valores = [kpi.ok, kpi.proceso, kpi.pend, kpi.atr];
 
       chartFunnel = new Chart(ctx, {
