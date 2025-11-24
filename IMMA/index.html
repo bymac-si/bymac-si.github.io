@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Panel MasterBI · Tag Spool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --bymac-primary: #1a2b48;
+      --bymac-accent: #e74e35;
+      --bymac-bg: #f5f7fb;
+      --green-ok: #2ea043;
+      --blue-proceso: #1a2b48;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px;
+      padding: 8px;
+      background-color: var(--bymac-bg);
+    }
+
+    @media (min-width: 768px) {
+      body {
+        padding: 16px;
+      }
+    }
+
+    .bymac-header {
+      background: linear-gradient(90deg, #a0c0f6, #3c475a);
+      color: #fff;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 12px;
+      box-shadow: 0 12px 30px rgba(10, 20, 40, 0.18);
+      text-shadow: 2px 2px 0px #555;
+    }
+
+    .bymac-header h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .nav-tabs .nav-link {
+      font-size: 16px;
+    }
+
+    .card {
+      border-radius: 10px;
+      border: 1px solid #e1e4ee;
+    }
+
+    .tag-seleccionado {
+      font-weight: bold;
+      color: #0b5394;
+      word-break: break-word;
+    }
+
+    .plano-frame {
+      width: 100%;
+      min-height: clamp(200px, 40vh, 420px);
+      border-radius: 8px;
+      border: 1px solid #e1e4ee;
+    }
+
+    .estado-green {
+      color: var(--green-ok);
+      font-weight: bold;
+    }
+
+    .estado-blue {
+      color: var(--blue-proceso);
+      font-weight: bold;
+    }
+
+    .estado-yellow {
+      color: #b58900;
+      font-weight: bold;
+    }
+
+    .estado-red {
+      color: #d93025;
+      font-weight: bold;
+    }
+
+    .estado-gray {
+      color: #666;
+      font-weight: bold;
+    }
+
+    .kpi-box {
+      padding: 12px;
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid #e1e4ee;
+      text-align: center;
+    }
+
+    .kpi-title {
+      font-size: 14px;
+      color: #666;
+      font-weight: 600;
+    }
+
+    .kpi-value {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .kpi-green {
+      color: var(--green-ok);
+    }
+
+    .kpi-blue {
+      color: var(--blue-proceso);
+    }
+
+    .kpi-yellow {
+      color: #b58900;
+    }
+
+    .kpi-red {
+      color: #d93025;
+    }
+
+    .kpi-muted {
+      color: #888;
+    }
+
+    .msg {
+      font-size: 13px;
+      padding: 4px 6px;
+      border-radius: 6px;
+      display: inline-block;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    .msg.ok {
+      color: #0f5132;
+      background-color: #d1e7dd;
+      border: 1px solid #badbcc;
+    }
+
+    .msg.error {
+      color: #842029;
+      background-color: #f8d7da;
+      border: 1px solid #f5c2c7;
+    }
+
+    .msg.info {
+      color: #055160;
+      background-color: #cff4fc;
+      border: 1px solid #b6effb;
+    }
+
+    .msg.loading {
+      color: #856404;
+      background-color: #fff3cd;
+      border: 1px solid #ffeeba;
+    }
+
+    .alert-fixed {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      min-width: 260px;
+      max-width: 360px;
+      z-index: 1050;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      font-size: 13px;
+    }
+  </style>
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+
+  <main class="container-fluid px-1 px-sm-2 flex-grow-1">
+
+    <!-- ENCABEZADO -->
+    <div class="bymac-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+      <h1><img src="https://bymac-si.github.io/img/logo_imma.png" alt="IMMA" style="width: 100px;"> Panel MasterBI · Tag
+        Spool</h1>
+      <div class="text-start text-md-end">
+        <div style="font-size:18px;font-weight:bold">IMMA · Soluciones en Piping</div>
+        <div style="font-size:10px;opacity:.8">byMAC · Desarrollo Web & Integraciones</div>
+      </div>
+    </div>
+
+    <!-- CARD CONTENEDOR -->
+    <div class="card shadow-sm">
+      <ul class="nav nav-tabs mb-3" id="tabsPanel" role="tablist">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-fechas">Fechas
+            por TAG</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-merge">Merge /
+            Utilidades</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-log">ChangeLog</button>
+        </li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-dashboard">Dashboard
+            KPI</button></li>
+      </ul>
+
+      <div class="tab-content p-3">
+        <!-- TAB 1 — FECHAS POR TAG -->
+        <div class="tab-pane fade show active" id="tab-fechas" role="tabpanel">
+
+          <div class="row g-3 g-md-4">
+
+            <!-- BUSCADOR -->
+            <div class="col-12">
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title mb-2">Buscar TAG SPOOL</h5>
+
+                  <label class="form-label small">Parte del TAG (columna H)</label>
+                  <div class="input-group input-group-sm mb-2">
+                    <input type="text" id="txtBuscar" class="form-control" placeholder="Ej: 29044-005">
+                    <button class="btn btn-primary" onclick="buscarTags()">Buscar</button>
+                  </div>
+
+                  <div class="form-text" style="font-size: .5em;">Se listarán las filas donde la columna H contenga este
+                    texto.</div>
+
+                  <div id="contenedorCoincidencias"
+                    style="max-height:230px; overflow:auto; border:1px solid #e1e4ee; border-radius:6px; padding:4px;"
+                    class="mt-2">
+                    <div class="text-muted small" style="color: #888;">Sin resultados aún.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- SELECCIÓN + ÚLTIMA ETAPA -->
+            <div class="col-12">
+              <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                  <h5 class="card-title mb-3">Selección y última etapa</h5>
+
+                  <p>TAG seleccionado:
+                    <span id="lblTagSel" class="tag-seleccionado">(ninguno)</span>
+                  </p>
+
+                  <p id="lblUltimaEtapa" class="small text-muted mb-1">
+                    Última etapa/fecha: (sin datos)
+                  </p>
+
+                  <p class="small mb-0">
+                    Estado:
+                    <span id="lblEstado" class="estado-gray">SIN INICIO</span>
+                  </p>
+                </div>
+              </div>
+
+              <!-- Registrar fecha -->
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title mb-2">Registrar / editar fecha</h5>
+
+                  <label class="form-label small">Etapa / columna de fecha</label>
+                  <select id="cmbEtapa" class="form-select form-select-sm mb-2"></select>
+
+                  <label class="form-label small">Fecha</label>
+                  <input type="date" id="dtFecha" class="form-control form-control-sm mb-2">
+
+                  <div class="small text-muted mb-2" style="font-size: .5em;">
+                    Si ya existe una fecha, se debe sobrescribir explícitamente.
+                  </div>
+
+                  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+                    <span id="msgEstado" class="msg"></span>
+                    <div class="d-flex gap-1">
+                      <button class="btn btn-secondary btn-sm" onclick="setHoy()">Hoy</button>
+                      <button class="btn btn-primary btn-sm" onclick="guardar(false)">Guardar</button>
+                      <button class="btn btn-danger btn-sm" onclick="guardar(true)">Sobrescribir</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PLANO -->
+            <div class="col-12">
+              <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column">
+                  <h5 class="card-title mb-2">Plano asociado al TAG</h5>
+
+                  <p>TAG seleccionado:
+                    <span id="lblTagSelPlano" class="tag-seleccionado">(ninguno)</span>
+                  </p>
+
+                  <p class="small text-muted" style="font-size: .5em;">
+                    Se buscará en la carpeta de planos usando coincidencia parcial o exacta TAG + ".pdf".
+                  </p>
+
+                  <div id="contenedorPlano" class="flex-grow-1 d-flex flex-column">
+                    <img id="imgPlanoFallback" class="plano-frame mb-2"
+                      src="https://bymac-si.github.io/img/not-found.png" style="object-fit:contain">
+
+                    <iframe id="iframePlano" class="plano-frame d-none mb-2" allow="autoplay"></iframe>
+                  </div>
+
+                  <div id="msgPlano" class="small text-muted mt-1" style="font-size: .7em;">
+                    Selecciona un TAG para ver el plano.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- TAB 2 — MERGE -->
+        <div class="tab-pane fade" id="tab-merge" role="tabpanel">
+          <div class="row g-3">
+            <div class="col-12 col-md-7">
+              <div class="card shadow-sm h-100">
+                <div class="card-body">
+                  <h5 class="card-title mb-2">Merge LOCAL / REMOTO</h5>
+                  <p class="small text-muted">Módulo reservado para futura integración (AppSheet / otros).</p>
+                  <input id="txtRemote" class="form-control form-control-sm mb-2" placeholder="ID o URL remoto">
+                  <span id="msgMerge" class="msg small"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-5">
+              <div class="card shadow-sm h-100">
+                <div class="card-body">
+                  <h5 class="card-title mb-2">Exportar MasterBI a Excel</h5>
+                  <p class="small text-muted">Exportación sin fórmulas (no implementado aún).</p>
+                  <span id="msgExcel" class="msg small"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3 — CHANGELOG -->
+        <div class="tab-pane fade" id="tab-log" role="tabpanel">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title mb-2">Últimos cambios registrados</h5>
+
+              <div class="d-flex justify-content-between">
+                <div class="small text-muted">Historial de cambios recientes.</div>
+                <button class="btn btn-outline-primary btn-sm" onclick="cargarLog()">Recargar</button>
+              </div>
+
+              <div style="max-height:320px; overflow:auto;" class="table-wrapper mt-2">
+                <table class="table table-sm table-striped table-hover mb-0">
+                  <thead>
+                    <tr class="table-light">
+                      <th>FechaHora</th>
+                      <th>Usuario</th>
+                      <th>Hoja</th>
+                      <th>Celda</th>
+                      <th>Columna</th>
+                      <th>TAG</th>
+                      <th>Anterior</th>
+                      <th>Nuevo</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbodyLog">
+                    <tr>
+                      <td colspan="8" class="text-muted small">Sin datos aún.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4 — DASHBOARD KPI -->
+        <div class="tab-pane fade" id="tab-dashboard" role="tabpanel">
+
+          <div class="row g-3">
+
+            <!-- KPIs -->
+            <div class="col-12">
+              <div class="row g-2">
+
+                <div class="col-6 col-md-2">
+                  <div class="kpi-box">
+                    <div class="kpi-title">Total Spools</div>
+                    <div id="kpi-total" class="kpi-value text-primary">-</div>
+                  </div>
+                </div>
+
+                <div class="col-6 col-md-2">
+                  <div class="kpi-box">
+                    <div class="kpi-title">Liberado y/o Despachado</div>
+                    <div id="kpi-ok" class="kpi-value kpi-green">-</div>
+                  </div>
+                </div>
+
+                <div class="col-6 col-md-2">
+                  <div class="kpi-box">
+                    <div class="kpi-title">Activos (Excluye Eliminados)</div>
+                    <div id="kpi-activos" class="kpi-value kpi-blue">-</div>
+                  </div>
+                </div>
+
+                <div class="col-6 col-md-2">
+                  <div class="kpi-box">
+                    <div class="kpi-title">En Proceso (&lt; 30 días)</div>
+                    <div id="kpi-proceso" class="kpi-value kpi-blue">-</div>
+                  </div>
+                </div>
+
+                <div class="col-6 col-md-2">
+                  <div class="kpi-box">
+                    <div class="kpi-title">Pendientes (30 - 60 días)</div>
+                    <div id="kpi-pend" class="kpi-value kpi-yellow">-</div>
+                  </div>
+                </div>
+
+                <div class="col-6 col-md-2">
+                  <div class="kpi-box">
+                    <div class="kpi-title">Atrasados (&gt; 60 días)</div>
+                    <div id="kpi-atr" class="kpi-value kpi-red">-</div>
+                  </div>
+                </div>
+
+                <div class="col-6 col-md-2">
+                  <div class="kpi-box">
+                    <div class="kpi-title">Eliminados y Obsoletos</div>
+                    <div id="kpi-elim" class="kpi-value kpi-muted">-</div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Gráficos -->
+            <div class="col-12 col-md-4">
+              <div class="card shadow-sm p-3">
+                <h5 class="card-title">Status Fluor</h5>
+                <canvas id="chartLiberados" height="120"></canvas>
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="card shadow-sm p-3">
+                <h5 class="card-title mb-2">Embudo por proceso</h5>
+                <canvas id="chartFunnel" height="160"></canvas>
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="card shadow-sm p-3">
+                <h5 class="card-title mb-2">Distribución por días de atraso</h5>
+                <canvas id="chartAtraso" height="160"></canvas>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div> <!-- tab-content -->
+    </div> <!-- card -->
+
+  </main>
+
+  <!-- ALERTA GLOBAL -->
+  <div id="appAlert" class="alert alert-fixed d-none" role="alert"></div>
+
+  <script>
+    /*************************************************
+     * CONFIG FRONTEND – URL DEL WEBAPP
+     *************************************************/
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxl0odxEY5tt5WNt61mbF3ostorZ9lumbaF8R67ocAY_ANujnwM32_hivUUB2Iptbo/exec'  ; // <-- pega aquí tu /exec
+
+    /*************************************************
+     * LLAMADAS AL BACKEND
+     *************************************************/
+    async function callApi(accion, payload = {}) {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8'
+        },
+        body: JSON.stringify({ accion, ...payload })
+      });
+
+      const text = await res.text();
+
+      if (!res.ok) {
+        console.error('Respuesta no OK:', res.status, text);
+        throw new Error('HTTP ' + res.status + ' ' + text);
+      }
+
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        console.error('No se pudo parsear JSON:', text);
+        throw e;
+      }
+    }
+
+    /*************************************************
+     * ALERTAS
+     *************************************************/
+    let alertTimeoutId = null;
+
+    function showAlert(message, type = 'info') {
+      const el = document.getElementById('appAlert');
+      if (!el) {
+        console.log('ALERT:', type, message);
+        return;
+      }
+
+      el.className = 'alert alert-fixed alert-' + type;
+      el.textContent = message;
+      el.classList.remove('d-none');
+
+      if (alertTimeoutId) clearTimeout(alertTimeoutId);
+      alertTimeoutId = setTimeout(() => {
+        el.classList.add('d-none');
+      }, 5000);
+    }
+
+    function onGsError(err) {
+      console.error("Error backend:", err);
+      const msg = (err && err.message) ? err.message : String(err);
+      showAlert("Error al llamar al servidor: " + msg, 'danger');
+    }
+
+    /*************************************************
+     * VARIABLES GLOBALES
+     *************************************************/
+    let filaSeleccionada = null;
+    let tagSeleccionado = "";
+
+    /*************************************************
+     * UTILIDADES
+     *************************************************/
+    function setHoy() {
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      document.getElementById("dtFecha").value = `${yyyy}-${mm}-${dd}`;
+    }
+
+    function cargarColumnas() {
+      const cmb = document.getElementById("cmbEtapa");
+      cmb.innerHTML = '<option value="">-- seleccionar --</option>';
+
+      callApi('getColumnasFechas')
+        .then(lista => {
+          console.log('getColumnasFechas ->', lista);
+
+          if (!Array.isArray(lista)) {
+            showAlert("Formato inesperado en columnas de fecha.", 'warning');
+            return;
+          }
+
+          lista.forEach(et => {
+            const opt = document.createElement("option");
+            opt.value = et;
+            opt.textContent = et;
+            cmb.appendChild(opt);
+          });
+        })
+        .catch(onGsError);
+    }
+
+    /*************************************************
+     * BUSCAR TAG
+     *************************************************/
+    function buscarTags() {
+      const txt = document.getElementById("txtBuscar").value.trim();
+      const cont = document.getElementById("contenedorCoincidencias");
+
+      cont.innerHTML = '<div class="small text-muted">Buscando...</div>';
+      filaSeleccionada = null;
+      tagSeleccionado = "";
+
+      document.getElementById("lblTagSel").textContent = "(ninguno)";
+      document.getElementById("lblUltimaEtapa").textContent = "Última etapa/fecha: (sin datos)";
+      document.getElementById("msgEstado").textContent = "";
+
+      callApi('buscarTag', { texto: txt })
+        .then(res => {
+          if (!res || res.length === 0) {
+            cont.innerHTML = '<div class="text-muted small" style="color: red;">No se encontraron coincidencias.</div>';
+            return;
+          }
+
+          let html = `
+            <table class="table table-sm table-hover mb-0">
+              <thead>
+                <tr><th></th><th>Fila</th><th>TAG</th></tr>
+              </thead>
+              <tbody>
+          `;
+
+          res.forEach(item => {
+            const safeTag = String(item.tag).replace(/"/g, "&quot;");
+            html += `
+              <tr>
+                <td><input type="radio" name="selTag" value="${item.fila}"
+                    data-tag="${safeTag}" onclick="seleccionarTag(this)"></td>
+                <td>${item.fila}</td>
+                <td><span class="badge bg-light text-dark">${safeTag}</span></td>
+              </tr>
+            `;
+          });
+
+          html += "</tbody></table>";
+          cont.innerHTML = html;
+        })
+        .catch(onGsError);
+    }
+
+    /*************************************************
+     * SELECCIONAR TAG
+     *************************************************/
+    function seleccionarTag(radio) {
+      filaSeleccionada = parseInt(radio.value, 10);
+      tagSeleccionado = radio.dataset.tag;
+
+      document.getElementById("lblTagSel").textContent = tagSeleccionado;
+      document.getElementById("lblTagSelPlano").textContent = tagSeleccionado;
+
+      // Última etapa
+      callApi('ultimaEtapa', { fila: filaSeleccionada })
+        .then(res => {
+          let txt = "Última etapa/fecha: ";
+          if (res?.ultimaColumna) {
+            txt += res.ultimaColumna;
+            if (res.fechaTexto) txt += " - " + res.fechaTexto;
+          } else {
+            txt += "(sin datos)";
+          }
+          document.getElementById("lblUltimaEtapa").textContent = txt;
+        })
+        .catch(onGsError);
+
+      // Estado
+      callApi('estadoTag', { fila: filaSeleccionada })
+        .then(res => {
+          const lbl = document.getElementById("lblEstado");
+          lbl.textContent = res?.estado || "SIN INICIO";
+          lbl.className = "estado-" + (res?.color || "gray");
+        })
+        .catch(onGsError);
+
+      // Plano
+      cargarPlano(tagSeleccionado);
+    }
+
+    /*************************************************
+     * PLANO
+     *************************************************/
+    function cargarPlano(tag) {
+      const img = document.getElementById("imgPlanoFallback");
+      const iframe = document.getElementById("iframePlano");
+      const msg = document.getElementById("msgPlano");
+
+      img.classList.remove("d-none");
+      iframe.classList.add("d-none");
+      msg.textContent = "Buscando plano…";
+
+      callApi('vistaPlano', { tag })
+        .then(res => {
+          console.log('vistaPlano ->', res);
+
+          if (res?.ok && res.url) {
+            iframe.src = res.url;
+            iframe.classList.remove("d-none");
+            img.classList.add("d-none");
+            msg.textContent = res.mensaje;
+          } else {
+            iframe.classList.add("d-none");
+            img.classList.remove("d-none");
+            msg.textContent = res?.mensaje || "Plano no encontrado.";
+          }
+        })
+        .catch(onGsError);
+    }
+
+    /*************************************************
+     * GUARDAR FECHA
+     *************************************************/
+    function guardar(overwrite) {
+      const msg = document.getElementById("msgEstado");
+      msg.textContent = "";
+      msg.className = "msg";
+
+      if (!filaSeleccionada) {
+        msg.textContent = "Debe seleccionar un TAG.";
+        msg.classList.add("error");
+        return;
+      }
+
+      const etapa = document.getElementById("cmbEtapa").value;
+      if (!etapa) {
+        msg.textContent = "Debe seleccionar una etapa.";
+        msg.classList.add("error");
+        return;
+      }
+
+      const fechaISO = document.getElementById("dtFecha").value;
+      if (!fechaISO) {
+        msg.textContent = "Debe ingresar una fecha.";
+        msg.classList.add("error");
+        return;
+      }
+
+      msg.textContent = "Guardando…";
+      msg.classList.add("loading");
+
+      callApi('registrarFecha', {
+        fila: filaSeleccionada,
+        etapa,
+        fechaISO,
+        overwrite: !!overwrite
+      })
+        .then(res => {
+          msg.classList.remove("loading");
+          if (!res?.ok) {
+            msg.textContent = res?.msg || "Error al guardar.";
+            msg.classList.add("error");
+          } else {
+            msg.textContent = res.msg;
+            msg.classList.add("ok");
+            showAlert("Fecha registrada correctamente.", "success");
+          }
+        })
+        .catch(err => {
+          msg.classList.remove("loading");
+          msg.textContent = "Error al guardar.";
+          msg.classList.add("error");
+          onGsError(err);
+        });
+    }
+
+    /*************************************************
+     * CHANGELOG
+     *************************************************/
+    function cargarLog() {
+      const tbody = document.getElementById("tbodyLog");
+      tbody.innerHTML = `<tr><td colspan="8">Cargando...</td></tr>`;
+
+      callApi('getChangeLogUltimos', { n: 50 })
+        .then(rows => {
+          console.log('getChangeLogUltimos ->', rows);
+
+          if (!Array.isArray(rows)) {
+            tbody.innerHTML = `<tr><td colspan="8" class="text-muted">Error en formato de datos.</td></tr>`;
+            showAlert("Formato inesperado en ChangeLog.", "warning");
+            return;
+          }
+
+          if (rows.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="text-muted">Sin registros.</td></tr>`;
+            return;
+          }
+
+          let html = "";
+          rows.forEach(r => {
+            html += `
+              <tr>
+                <td class="small">${r.FechaHora || ""}</td>
+                <td class="small">${r.Usuario || ""}</td>
+                <td class="small">${r.Hoja || ""}</td>
+                <td class="small">${r.Celda || ""}</td>
+                <td class="small">${r.CabeceraColumna || ""}</td>
+                <td class="small"><span class="badge bg-secondary">${r.TagSpool || ""}</span></td>
+                <td class="small text-muted">${r.ValorAnterior || ""}</td>
+                <td class="small">${r.ValorNuevo || ""}</td>
+              </tr>
+            `;
+          });
+          tbody.innerHTML = html;
+        })
+        .catch(onGsError);
+    }
+
+    /*************************************************
+     * DASHBOARD KPI + GRÁFICOS
+     *************************************************/
+    let chartLiberados = null;
+    let chartFunnel = null;
+    let chartAtraso = null;
+
+    function cargarDashboard() {
+      // KPIs
+      callApi('dashboardKPIs')
+        .then(kpi => {
+          document.getElementById("kpi-total").textContent = kpi.total;
+          document.getElementById("kpi-ok").textContent = kpi.ok;
+          document.getElementById("kpi-proceso").textContent = kpi.proceso;
+          document.getElementById("kpi-pend").textContent = kpi.pend;
+          document.getElementById("kpi-atr").textContent = kpi.atr;
+          document.getElementById("kpi-elim").textContent = kpi.elim;
+          document.getElementById("kpi-activos").textContent = kpi.activos;
+
+          dibujarFunnel(kpi);
+        })
+        .catch(onGsError);
+
+      // Status Fluor
+      callApi('graficoStatusFluor')
+        .then(data => dibujarGraficoStatusFluor(data))
+        .catch(onGsError);
+
+      // Atrasos
+      callApi('graficoAtrasos')
+        .then(data => dibujarGraficoAtrasos(data))
+        .catch(onGsError);
+    }
+
+    function dibujarGraficoStatusFluor(data) {
+      const ctx = document.getElementById("chartLiberados").getContext("2d");
+      if (chartLiberados) chartLiberados.destroy();
+
+      chartLiberados = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: data.labels || [],
+          datasets: [{
+            label: "STATUS FLUOR",
+            data: data.valores || [],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    function dibujarFunnel(kpi) {
+      const ctx = document.getElementById("chartFunnel").getContext("2d");
+      if (chartFunnel) chartFunnel.destroy();
+
+      const labels = ["OK", "En proceso", "Pendiente", "Atrasado"];
+      const valores = [kpi.ok, kpi.proceso, kpi.pend, kpi.atr];
+
+      chartFunnel = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [{
+            label: "Spools por estado",
+            data: valores,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          scales: { x: { beginAtZero: true } }
+        }
+      });
+    }
+
+    function dibujarGraficoAtrasos(data) {
+      const ctx = document.getElementById("chartAtraso").getContext("2d");
+      if (chartAtraso) chartAtraso.destroy();
+
+      chartAtraso = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: data.labels,
+          datasets: [{
+            label: "Spools por días desde última etapa",
+            data: data.valores,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    /*************************************************
+     * INIT
+     *************************************************/
+    document.addEventListener("DOMContentLoaded", () => {
+      // ping al backend
+      callApi('ping')
+        .then(r => {
+          console.log('PING backend:', r);
+          showAlert('Backend conectado', 'success');
+        })
+        .catch(onGsError);
+
+      setHoy();
+      cargarColumnas();
+      cargarLog();
+
+      let dashboardCargado = false;
+      document.addEventListener("shown.bs.tab", (ev) => {
+        if (ev.target.dataset.bsTarget === "#tab-dashboard" && !dashboardCargado) {
+          dashboardCargado = true;
+          cargarDashboard();
+        }
+      });
+    });
+  </script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
