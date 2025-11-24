@@ -404,43 +404,43 @@
 
                 <div class="col-6 col-lg-3">
                   <div class="kpi-box">
-                    <div class="kpi-title">Liberado y/o Despachado</div>
+                    <div class="kpi-title">Despachado</div>
                     <div id="kpi-ok" class="kpi-value kpi-green">-</div>
                   </div>
                 </div>
 
                 <div class="col-6 col-lg-3">
                   <div class="kpi-box">
-                    <div class="kpi-title">Activos (Excluye Eliminados)</div>
+                    <div class="kpi-title">Tags Válidos</div>
                     <div id="kpi-activos" class="kpi-value kpi-blue">-</div>
-                  </div>
-                </div>
-
-                <div class="col-6 col-lg-3">
-                  <div class="kpi-box">
-                    <div class="kpi-title">Eliminados y Obsoletos</div>
-                    <div id="kpi-elim" class="kpi-value kpi-muted">-</div>
                   </div>
                 </div>
 
                 <div class="col-6 col-lg-4">
                   <div class="kpi-box">
-                    <div class="kpi-title">En Proceso (&lt; 30 días)</div>
+                    <div class="kpi-title">(&lt; 30 días)</div>
                     <div id="kpi-proceso" class="kpi-value kpi-blue">-</div>
                   </div>
                 </div>
 
                 <div class="col-6 col-lg-4">
                   <div class="kpi-box">
-                    <div class="kpi-title">Pendientes (30 - 60 días)</div>
+                    <div class="kpi-title">(30 - 60 días)</div>
                     <div id="kpi-pend" class="kpi-value kpi-yellow">-</div>
                   </div>
                 </div>
 
                 <div class="col-6 col-lg-4">
                   <div class="kpi-box">
-                    <div class="kpi-title">Atrasados (&gt; 60 días)</div>
+                    <div class="kpi-title">(&gt; 60 días)</div>
                     <div id="kpi-atr" class="kpi-value kpi-red">-</div>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="kpi-box">
+                    <div class="kpi-title">Eliminados y Obsoletos</div>
+                    <div id="kpi-elim" class="kpi-value kpi-muted">-</div>
                   </div>
                 </div>
 
@@ -464,7 +464,7 @@
             </div>
             <div class="col-12 col-lg-6">
               <div class="card shadow-sm p-3 h-100">
-                <h5 class="card-title mb-2">Distribución por días de atraso</h5>
+                <h5 class="card-title mb-2">Distribución por días de proceso</h5>
                 <canvas id="chartAtraso" height="160"></canvas>
               </div>
             </div>
@@ -484,10 +484,10 @@
                       <table class="table table-sm mb-0">
                         <thead>
                           <tr class="table-light">
-                            <th>Etapa / Columna</th>
-                            <th>Fecha ValorNuevo</th>
-                            <th class="text-end">Fecha = hoy</th>
-                            <th class="text-end">Fecha &lt; hoy / regularización</th>
+                            <th>Etapa</th>
+                            <th>Fecha/th>
+                            <th class="text-end">Hoy</th>
+                            <th class="text-end">Regularización</th>
                             <th class="text-end">Total TAGs</th>
                           </tr>
                         </thead>
@@ -520,7 +520,7 @@
             <!-- SPOOLS PENDIENTES POR ETAPA -->
             <div class="col-12 mt-3">
               <div class="card shadow-sm p-3">
-                <h5 class="card-title mb-2">Spools pendientes por etapa</h5>
+                <h5 class="card-title mb-2">Spools en proceso por etapa</h5>
                 <p class="small text-muted mb-2" id="msgPendEtapa">
                   Distribución de spools activos sin liberación ni despacho, según su última etapa registrada.
                 </p>
@@ -533,7 +533,7 @@
                         <thead>
                           <tr class="table-light">
                             <th>Etapa</th>
-                            <th class="text-end">Cantidad pendientes</th>
+                            <th class="text-end">Cantidad</th>
                           </tr>
                         </thead>
                         <tbody id="tbodyPendEtapa">
@@ -549,9 +549,9 @@
                   <div class="col-12 col-lg-5">
                     <div class="card shadow-sm border-0">
                       <div class="card-body p-2">
-                        <h6 class="card-title mb-1">Pendientes por etapa</h6>
+                        <h6 class="card-title mb-1">Activos por etapa</h6>
                         <p class="small text-muted mb-2">
-                          Proporción de spools pendientes según última etapa con fecha.
+                          Proporción de spools Activos según última etapa con fecha.
                         </p>
                         <canvas id="chartPendEtapa" height="180"></canvas>
                       </div>
@@ -1183,7 +1183,7 @@
 
           html += `
             <tr class="table-light fw-bold">
-              <td>Total pendientes</td>
+              <td>Total Spools Activos</td>
               <td class="text-end">${total}</td>
             </tr>`;
 
@@ -1194,7 +1194,7 @@
           console.error(err);
           tbody.innerHTML = `
             <tr>
-              <td colspan="2" class="text-danger small">Error al cargar pendientes.</td>
+              <td colspan="2" class="text-danger small">Error al cargar Activos.</td>
             </tr>`;
           dibujarGraficoPendEtapa([], []);
         });
@@ -1219,7 +1219,7 @@
         data: {
           labels,
           datasets: [{
-            label: "Spools pendientes",
+            label: "Spools Activos",
             data: valores,
             borderWidth: 1
           }]
