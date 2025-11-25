@@ -389,17 +389,13 @@
 
         <!-- TAB 4 — DASHBOARD KPI -->
         <div class="tab-pane fade" id="tab-dashboard" role="tabpanel">
-          <!-- Barra superior Dashboard KPI -->
-          <div class="d-flex justify-content-between align-items-center mb-2">
+          <!-- Barra superior del Dashboard KPI -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="mb-0">Dashboard KPI · Informe</h5>
-
             <div class="d-flex gap-2">
-              <!-- Botón para PDF -->
               <button type="button" class="btn btn-outline-secondary btn-sm btn-export-hide" onclick="exportKpiPDF()">
                 Descargar PDF
               </button>
-
-              <!-- (Opcional) botón JPG -->
               <button type="button" class="btn btn-outline-secondary btn-sm btn-export-hide" onclick="exportKpiJPG()">
                 Descargar JPG
               </button>
@@ -1252,8 +1248,8 @@
       });
     }
     /*************************************************
-     * EXPORTAR DASHBOARD KPI A PDF / JPG
-     *************************************************/
+ * EXPORTAR DASHBOARD KPI A PDF / JPG CON CABECERA Y PIE
+ *************************************************/
     async function exportKpiPDF() {
       const { jsPDF } = window.jspdf || {};
       if (!jsPDF) {
@@ -1267,42 +1263,59 @@
         return;
       }
 
-      // Ocultar botones de exportación mientras capturamos
+      // Ocultar los botones antes de capturar
       const exportBtns = dashboard.querySelectorAll(".btn-export-hide");
       exportBtns.forEach(b => b.style.visibility = "hidden");
 
       try {
-        const canvas = await html2canvas(dashboard, {
-          scale: 2,          // mejor calidad
-          useCORS: true
-        });
-
+        // Captura del dashboard
+        const canvas = await html2canvas(dashboard, { scale: 2, useCORS: true });
         const imgData = canvas.toDataURL("image/jpeg", 0.95);
 
-        const pdf = new jsPDF("l", "pt", "a4"); // horizontal, puntos, A4
+        // Crear PDF en formato horizontal
+        const pdf = new jsPDF("l", "pt", "a4");
         const pageWidth = pdf.internal.pageSize.getWidth();
         const pageHeight = pdf.internal.pageSize.getHeight();
 
+        // Cabecera (logo IMMA)
+        const logoUrl = "https://bymac-si.github.io/img/logo_imma.png";
+        const logoWidth = 100;
+        const logoHeight = 40;
+        const logoX = 40;
+        const logoY = 20;
+        pdf.addImage(logoUrl, "PNG", logoX, logoY, logoWidth, logoHeight);
+
+        // Agregar línea divisoria bajo el logo
+        pdf.setDrawColor(150);
+        pdf.line(30, 70, pageWidth - 30, 70);
+
+        // Insertar la imagen del dashboard (ajustada)
         const imgWidth = canvas.width;
         const imgHeight = canvas.height;
-
-        // Escalamos para que quepa en una sola hoja
-        const ratio = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
+        const ratio = Math.min(pageWidth / imgWidth, (pageHeight - 130) / imgHeight);
         const printWidth = imgWidth * ratio;
         const printHeight = imgHeight * ratio;
-
         const marginX = (pageWidth - printWidth) / 2;
-        const marginY = (pageHeight - printHeight) / 2;
+        const marginY = 80;
 
         pdf.addImage(imgData, "JPEG", marginX, marginY, printWidth, printHeight);
 
-        const fecha = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+        // Pie de página
+        pdf.setFont("helvetica", "italic");
+        pdf.setFontSize(10);
+        pdf.setTextColor(80);
+        pdf.text("Desarrollado por Marcos Castro Abarca - 2025",
+          pageWidth / 2, pageHeight - 20, { align: "center" });
+
+        // Guardar el archivo
+        const fecha = new Date().toISOString().slice(0, 10);
         pdf.save(`Dashboard_IMMA_${fecha}.pdf`);
+
       } catch (err) {
         console.error(err);
         alert("Error al generar el PDF: " + err.message);
       } finally {
-        // Volver a mostrar botones
+        // Volver a mostrar los botones
         exportBtns.forEach(b => b.style.visibility = "visible");
       }
     }
@@ -1318,16 +1331,47 @@
       exportBtns.forEach(b => b.style.visibility = "hidden");
 
       try {
-        const canvas = await html2canvas(dashboard, {
-          scale: 2,
-          useCORS: true
+        const canvas = await html2canvas(dashboard, { scale: 2, useCORS: true });
+        const fecha = new Date().toISOString().slice(0, 10);
+        const imgData = canvas.toDataURL("image/jpeg", 0.95);
+
+        // Crear un canvas temporal con logo y pie
+        const finalCanvas = document.createElement("canvas");
+        const ctx = finalCanvas.getContext("2d");
+
+        const headerHeight = 80;
+        const footerHeight = 50;
+        finalCanvas.width = canvas.width;
+        finalCanvas.height = canvas.height + headerHeight + footerHeight;
+
+        // Fondo blanco
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+
+        // Logo
+        const logo = new Image();
+        logo.crossOrigin = "anonymous";
+        logo.src = "https://bymac-si.github.io/img/logo_imma.png";
+        await new Promise(resolve => {
+          logo.onload = () => {
+            ctx.drawImage(logo, 40, 20, 160, 60);
+            resolve();
+          };
         });
 
-        const imgData = canvas.toDataURL("image/jpeg", 0.95);
-        const fecha = new Date().toISOString().slice(0, 10);
+        // Dashboard capturado
+        ctx.drawImage(canvas, 0, headerHeight);
 
+        // Pie de página
+        ctx.font = "20px Helvetica";
+        ctx.fillStyle = "#444";
+        ctx.textAlign = "center";
+        ctx.fillText("Desarrollado por Marcos Castro Abarca - 2025",
+          finalCanvas.width / 2, finalCanvas.height - 20);
+
+        // Descargar
         const link = document.createElement("a");
-        link.href = imgData;
+        link.href = finalCanvas.toDataURL("image/jpeg", 0.95);
         link.download = `Dashboard_IMMA_${fecha}.jpg`;
         document.body.appendChild(link);
         link.click();
