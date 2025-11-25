@@ -200,7 +200,7 @@
 
     <!-- CARD CONTENEDOR -->
     <div class="card shadow-sm">
-      <ul class="nav nav-tabs mb-3" id="tabsPanel" role="tablist">
+      <ul class="nav nav-tabs mb-3" id="tabsPanel" role="tablist" style="font-weight: bolder;">
         <li class="nav-item">
           <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-fechas">Fechas por TAG</button>
         </li>
@@ -389,48 +389,65 @@
 
         <!-- TAB 4 — DASHBOARD KPI -->
         <div class="tab-pane fade" id="tab-dashboard" role="tabpanel">
+          <!-- Barra superior Dashboard KPI -->
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="mb-0">Dashboard KPI · Informe</h5>
+
+            <div class="d-flex gap-2">
+              <!-- Botón para PDF -->
+              <button type="button" class="btn btn-outline-secondary btn-sm btn-export-hide" onclick="exportKpiPDF()">
+                Descargar PDF
+              </button>
+
+              <!-- (Opcional) botón JPG -->
+              <button type="button" class="btn btn-outline-secondary btn-sm btn-export-hide" onclick="exportKpiJPG()">
+                Descargar JPG
+              </button>
+            </div>
+          </div>
+
           <div class="row g-3">
 
             <!-- KPIs -->
             <div class="col-12">
               <div class="row g-2">
 
-                <div class="col-6 col-lg-3">
+                <div class="col-6">
                   <div class="kpi-box">
                     <div class="kpi-title">Total Spools</div>
                     <div id="kpi-total" class="kpi-value text-primary">-</div>
                   </div>
                 </div>
 
-                <div class="col-6 col-lg-3">
+                <div class="col-6">
                   <div class="kpi-box">
                     <div class="kpi-title">Despachado</div>
                     <div id="kpi-ok" class="kpi-value kpi-green">-</div>
                   </div>
                 </div>
 
-                <div class="col-6 col-lg-3">
+                <div class="col-6">
                   <div class="kpi-box">
                     <div class="kpi-title">Tags Válidos</div>
                     <div id="kpi-activos" class="kpi-value kpi-blue">-</div>
                   </div>
                 </div>
 
-                <div class="col-6 col-lg-4">
+                <div class="col-6">
                   <div class="kpi-box">
                     <div class="kpi-title">(&lt; 30 días)</div>
                     <div id="kpi-proceso" class="kpi-value kpi-blue">-</div>
                   </div>
                 </div>
 
-                <div class="col-6 col-lg-4">
+                <div class="col-6">
                   <div class="kpi-box">
                     <div class="kpi-title">(30 - 60 días)</div>
                     <div id="kpi-pend" class="kpi-value kpi-yellow">-</div>
                   </div>
                 </div>
 
-                <div class="col-6 col-lg-4">
+                <div class="col-6">
                   <div class="kpi-box">
                     <div class="kpi-title">(&gt; 60 días)</div>
                     <div id="kpi-atr" class="kpi-value kpi-red">-</div>
@@ -456,13 +473,13 @@
             </div>
 
             <!-- Embudo y Atrasos -->
-            <div class="col-12 col-lg-6">
+            <div class="col-12">
               <div class="card shadow-sm p-3 h-100">
                 <h5 class="card-title mb-2">Embudo por proceso</h5>
                 <canvas id="chartFunnel" height="160"></canvas>
               </div>
             </div>
-            <div class="col-12 col-lg-6">
+            <div class="col-12">
               <div class="card shadow-sm p-3 h-100">
                 <h5 class="card-title mb-2">Distribución por días de proceso</h5>
                 <canvas id="chartAtraso" height="160"></canvas>
@@ -470,7 +487,7 @@
             </div>
 
             <!-- ETAPAS REGISTRADAS HOY -->
-            <div class="col-12 mt-2">
+            <div class="col-12">
               <div class="card shadow-sm p-3">
                 <h5 class="card-title mb-2">Tags registrados hoy</h5>
                 <p class="small text-muted mb-2" id="msgReporteHoy">
@@ -479,7 +496,7 @@
 
                 <div class="row g-3">
                   <!-- Tabla -->
-                  <div class="col-12 col-lg-7">
+                  <div class="col-12">
                     <div class="table-responsive">
                       <table class="table table-sm mb-0">
                         <thead>
@@ -501,7 +518,7 @@
                   </div>
 
                   <!-- Gráfico -->
-                  <div class="col-12 col-lg-5">
+                  <div class="col-12">
                     <div class="card shadow-sm border-0">
                       <div class="card-body p-2">
                         <h6 class="card-title mb-1">Movimientos de Tags por etapa</h6>
@@ -518,7 +535,7 @@
             </div>
 
             <!-- SPOOLS PENDIENTES POR ETAPA -->
-            <div class="col-12 mt-3">
+            <div class="col-12">
               <div class="card shadow-sm p-3">
                 <h5 class="card-title mb-2">Spools en proceso por etapa</h5>
                 <p class="small text-muted mb-2" id="msgPendEtapa">
@@ -527,7 +544,7 @@
 
                 <div class="row g-3">
                   <!-- Tabla -->
-                  <div class="col-12 col-lg-7">
+                  <div class="col-12">
                     <div class="table-responsive">
                       <table class="table table-sm mb-0">
                         <thead>
@@ -546,7 +563,7 @@
                   </div>
 
                   <!-- Gráfico dona -->
-                  <div class="col-12 col-lg-5">
+                  <div class="col-12">
                     <div class="card shadow-sm border-0">
                       <div class="card-body p-2">
                         <h6 class="card-title mb-1">Activos por etapa</h6>
@@ -1234,6 +1251,94 @@
         }
       });
     }
+    /*************************************************
+     * EXPORTAR DASHBOARD KPI A PDF / JPG
+     *************************************************/
+    async function exportKpiPDF() {
+      const { jsPDF } = window.jspdf || {};
+      if (!jsPDF) {
+        alert("No se cargó jsPDF. Revisa el script CDN.");
+        return;
+      }
+
+      const dashboard = document.getElementById("tab-dashboard");
+      if (!dashboard) {
+        alert("No se encontró el contenido del Dashboard.");
+        return;
+      }
+
+      // Ocultar botones de exportación mientras capturamos
+      const exportBtns = dashboard.querySelectorAll(".btn-export-hide");
+      exportBtns.forEach(b => b.style.visibility = "hidden");
+
+      try {
+        const canvas = await html2canvas(dashboard, {
+          scale: 2,          // mejor calidad
+          useCORS: true
+        });
+
+        const imgData = canvas.toDataURL("image/jpeg", 0.95);
+
+        const pdf = new jsPDF("l", "pt", "a4"); // horizontal, puntos, A4
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
+
+        // Escalamos para que quepa en una sola hoja
+        const ratio = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
+        const printWidth = imgWidth * ratio;
+        const printHeight = imgHeight * ratio;
+
+        const marginX = (pageWidth - printWidth) / 2;
+        const marginY = (pageHeight - printHeight) / 2;
+
+        pdf.addImage(imgData, "JPEG", marginX, marginY, printWidth, printHeight);
+
+        const fecha = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+        pdf.save(`Dashboard_IMMA_${fecha}.pdf`);
+      } catch (err) {
+        console.error(err);
+        alert("Error al generar el PDF: " + err.message);
+      } finally {
+        // Volver a mostrar botones
+        exportBtns.forEach(b => b.style.visibility = "visible");
+      }
+    }
+
+    async function exportKpiJPG() {
+      const dashboard = document.getElementById("tab-dashboard");
+      if (!dashboard) {
+        alert("No se encontró el contenido del Dashboard.");
+        return;
+      }
+
+      const exportBtns = dashboard.querySelectorAll(".btn-export-hide");
+      exportBtns.forEach(b => b.style.visibility = "hidden");
+
+      try {
+        const canvas = await html2canvas(dashboard, {
+          scale: 2,
+          useCORS: true
+        });
+
+        const imgData = canvas.toDataURL("image/jpeg", 0.95);
+        const fecha = new Date().toISOString().slice(0, 10);
+
+        const link = document.createElement("a");
+        link.href = imgData;
+        link.download = `Dashboard_IMMA_${fecha}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (err) {
+        console.error(err);
+        alert("Error al generar el JPG: " + err.message);
+      } finally {
+        exportBtns.forEach(b => b.style.visibility = "visible");
+      }
+    }
 
     /*************************************************
      * INIT
@@ -1263,6 +1368,12 @@
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- html2canvas para capturar el dashboard como imagen -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+  <!-- jsPDF para generar el PDF -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
 </body>
 
 </html>
