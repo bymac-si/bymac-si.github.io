@@ -246,7 +246,7 @@
           </div>
 
           <div class="row g-2 mb-3">
-             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Total</div><div id="kpi-total" class="kpi-value">-</div></div></div>
+             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Total Spools</div><div id="kpi-total" class="kpi-value">-</div></div></div>
              <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Liberado/Desp</div><div id="kpi-ok" class="kpi-value kpi-green">-</div></div></div>
              <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Activos</div><div id="kpi-activos" class="kpi-value kpi-blue">-</div></div></div>
              <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">0 - 30 días</div><div id="kpi-proceso" class="kpi-value kpi-blue">-</div></div></div>
@@ -581,7 +581,7 @@
        chartFunnel = new Chart(ctx, {
           type: 'bar',
           data: {
-             labels: ['Total', 'Activos', '0-30 días', '31-60 días', '61+ días'],
+             labels: ['Total Spools', 'Activos', '0-30 días', '31-60 días', '61+ días'],
              datasets: [{
                 label: 'Spools',
                 data: [k.total, k.activos, k.proceso, k.pend, k.atr],
