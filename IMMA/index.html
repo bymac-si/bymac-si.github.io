@@ -214,7 +214,7 @@
 
           </div>
         </div>
-<!--Tab Merge-->
+
         <div class="tab-pane fade" id="tab-merge" role="tabpanel">
           <div class="row g-3">
             
@@ -277,10 +277,26 @@
 
           </div>
         </div>
+
+        <div class="tab-pane fade" id="tab-log" role="tabpanel">
+          <div class="card shadow-sm">
+             <div class="card-body">
+               <div class="d-flex justify-content-between mb-2">
+                 <h5 class="card-title">ChangeLog Reciente</h5>
+                 <button class="btn btn-outline-primary btn-sm" onclick="cargarLog()">Recargar</button>
+               </div>
+               <div class="table-responsive" style="max-height: 400px;">
+                 <table class="table table-sm table-striped small">
+                   <thead><tr><th>Fecha</th><th>Usuario</th><th>Columna</th><th>TAG</th><th>Ant.</th><th>Nuevo</th></tr></thead>
+                   <tbody id="tbodyLog"><tr><td colspan="6">Cargando...</td></tr></tbody>
+                 </table>
+               </div>
+             </div>
+          </div>
         </div>
-        <!--Tab Dashboard-->
-        <div class="tab-pane fade" id="tab-dashboard" role="tabpanel">
-          <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div class="tab-pane fade" id="tab-dashboard" role="tabpanel" style="padding-bottom: 20px;">
+          <div class="d-flex justify-content-between align-items-center mb-3" >
              <div class="d-flex align-items-center gap-2">
                 <h5 class="mb-0">Dashboard KPI</h5>
                 <span id="lblLastUpdate" class="badge bg-light text-dark border fw-normal" style="font-size:0.75em;">
@@ -370,7 +386,9 @@
              </div>
           </div>
 
-        </div> </div>
+        </div> 
+      
+      </div>
     </div>
   </main>
 
@@ -382,7 +400,8 @@
     /*************************************************
      * CONFIG
      *************************************************/
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwX9kM69Q045rne1GQRYMiApN4s9IJ2wLTHHbmN53WR9FwW-TnMR8NPXQnE14Wokv6v/exec';
+    // IMPORTANTE: Asegúrate de que esta URL sea la correcta de tu implementación actual
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwZG33mcdFrzbp91w-mEbQYq2m6ori8SvZRQV_jXDMQYk-Yo2sdXsFsyE2-nthpI5tG/exec';
 
     function callApi(accion, data = {}) {
       const params = new URLSearchParams();
@@ -403,8 +422,6 @@
 
     function onApiError(err) {
       console.error(err);
-      // Quitar alerta intrusiva, mejor log en consola
-      // alert('Error de conexión o servidor:\n' + err.message);
     }
 
     let filaSeleccionada = null;
@@ -417,7 +434,7 @@
       setHoy();
       cargarColumnas();
       cargarLog();
-      startAutoRefresh(); // Iniciar Timer
+      startAutoRefresh(); 
       
       let dashLoaded = false;
       document.addEventListener("shown.bs.tab", (ev) => {
@@ -449,12 +466,10 @@
     }
 
     /*************************************************
-     * AUTO REFRESH (NUEVO)
+     * AUTO REFRESH
      *************************************************/
     function startAutoRefresh() {
-       // Ejecutar cada 60 segundos (60000 ms)
        setInterval(() => {
-          // Verificar si la pestaña activa es el Dashboard
           const activeTab = document.querySelector('#tabsPanel button.active');
           if (activeTab && activeTab.getAttribute('data-bs-target') === '#tab-dashboard') {
              console.log("Auto-refreshing Dashboard...");
@@ -532,9 +547,6 @@
        cargarPlano(tag);
     }
 
-    /*************************************************
-     * PLANOS
-     *************************************************/
     function limpiarPlano(){
        document.getElementById("imgPlanoFallback").classList.remove("d-none");
        document.getElementById("iframePlano").classList.add("d-none");
@@ -564,9 +576,6 @@
        }).catch(e => msg.textContent = "Error al buscar");
     }
 
-    /*************************************************
-     * GUARDAR
-     *************************************************/
     function guardar(overwrite) {
        if(!filaSeleccionada) return alert("Seleccione un TAG");
        const etapa = document.getElementById("cmbEtapa").value;
@@ -593,9 +602,6 @@
          });
     }
 
-    /*************************************************
-     * LOG
-     *************************************************/
     function cargarLog(){
        const tbody = document.getElementById("tbodyLog");
        callApi('getChangeLogUltimos', {n:30}).then(rows => {
@@ -622,26 +628,81 @@
        return v;
     }
 
-    /*************************************************
-     * DASHBOARD
-     *************************************************/
-    let chartFunnel=null, chartStat=null, chartAtr=null, chartRep=null, chartPend=null;
+    // ======================================================
+    // FUNCIONES DE TAB MERGE / UTILIDADES
+    // ======================================================
+    function doMerge() {
+       const txtId = document.getElementById("txtRemote").value.trim();
+       const msg = document.getElementById("msgMerge");
+       const btn = document.getElementById("btnMerge");
+
+       if (!txtId) { alert("Ingresa ID Nube."); return; }
+       if(!confirm("¿Iniciar Merge?")) return;
+
+       btn.disabled = true;
+       msg.textContent = "Procesando..."; msg.className = "msg loading d-block";
+
+       callApi('merge', { nubeId: txtId }).then(res => {
+          btn.disabled = false;
+          msg.textContent = res.ok ? "Éxito: " + res.msg : "Error: " + res.msg;
+          msg.className = res.ok ? "msg ok d-block" : "msg error d-block";
+          if(res.ok) cargarDashboard();
+       }).catch(e => { btn.disabled=false; msg.textContent="Error red"; msg.className="msg error d-block"; });
+    }
+
+    function doExportExcel() {
+       const msg = document.getElementById("msgExcel");
+       const btn = document.getElementById("btnExcel");
+       btn.disabled = true; msg.textContent = "Generando..."; msg.className = "msg loading d-block";
+
+       callApi('exportExcel').then(res => {
+          if (res.ok && res.url) {
+             msg.textContent = "Descargando...";
+             fetch(res.url, { headers: { 'Authorization': 'Bearer ' + res.token } })
+               .then(r => r.blob())
+               .then(blob => {
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a'); a.href = url; a.download = res.filename;
+                  document.body.appendChild(a); a.click(); a.remove();
+                  msg.textContent = "Listo."; msg.className = "msg ok d-block"; btn.disabled = false;
+               });
+          } else {
+             msg.textContent = "Error"; msg.className = "msg error d-block"; btn.disabled = false;
+          }
+       });
+    }
+
+    // ======================================================
+    // DASHBOARD & CHARTS (CORREGIDO: usa cant_ok)
+    // ======================================================
+    let chartFunnel=null, chartStat=null, chartAtr=null, chartRep=null, chartPend=null, chartProm=null;
 
     function cargarDashboard() {
-       callApi('dashboardKPIs').then(k => {
-          document.getElementById("kpi-total").textContent = k.total;
-          document.getElementById("kpi-ok").textContent = k.ok;
-          document.getElementById("kpi-activos").textContent = k.activos;
-          document.getElementById("kpi-proceso").textContent = k.proceso;
-          document.getElementById("kpi-pend").textContent = k.pend;
-          document.getElementById("kpi-atr").textContent = k.atr;
-          
-          dibujarFunnel(k);
-          updateLastRefreshTime(); // Actualizar hora
-       });
+       callApi('dashboardKPIs').then(res => {
+          if (res.ok && res.data) {
+             const k = res.data;
+             document.getElementById("kpi-total").textContent = k.total;
+             // CORRECCION: Usa cant_ok
+             document.getElementById("kpi-ok").textContent = k.cant_ok; 
+             document.getElementById("kpi-activos").textContent = k.activos;
+             document.getElementById("kpi-proceso").textContent = k.proceso;
+             document.getElementById("kpi-pend").textContent = k.pend;
+             document.getElementById("kpi-atr").textContent = k.atr;
+             
+             dibujarFunnel(k);
+             updateLastRefreshTime();
+          } else {
+             console.error("Error KPI:", res.error);
+             document.getElementById("kpi-ok").innerHTML = `<span style="color:red;font-size:12px">${res.error||"Error"}</span>`;
+          }
+       }).catch(e => console.error("Red KPI:", e));
 
-       callApi('graficoStatusFluor').then(d => dibujarBarra(d, 'chartLiberados', 'Status', '#1a2b48'));
-       callApi('graficoAtrasos').then(d => dibujarBarra(d, 'chartAtraso', 'Spools', '#d93025'));
+       callApi('graficoStatusFluor').then(res => {
+          if(res.ok && res.data) dibujarBarra(res.data, 'chartLiberados', 'Status', '#1a2b48');
+       });
+       callApi('graficoAtrasos').then(res => {
+          if(res.ok && res.data) dibujarBarra(res.data, 'chartAtraso', 'Spools', '#d93025');
+       });
        
        cargarReporteHoy();
        cargarPendientes();
@@ -662,10 +723,7 @@
                 backgroundColor: ['#e0e0e0', '#1a2b48', '#3b82f6', '#f59e0b', '#d93025']
              }]
           },
-          options: {
-             indexAxis: 'y',
-             plugins: { legend: {display:false} }
-          }
+          options: { indexAxis: 'y', plugins: { legend: {display:false} } }
        });
     }
 
@@ -689,7 +747,9 @@
     }
 
     function cargarReporteHoy() {
-       callApi('reporteChangeLogHoy').then(rows => {
+       callApi('reporteChangeLogHoy').then(res => {
+          if(!res.ok) return;
+          const rows = res.data;
           const tbody = document.getElementById("tbodyReporteHoy");
           let h = "";
           let labels=[], dHoy=[], dAnt=[];
@@ -712,15 +772,15 @@
                    { label: 'Regul.', data: dAnt, backgroundColor: '#ffc107' }
                 ]
              },
-             options: {
-                scales: { x: {stacked:true}, y:{stacked:true} }
-             }
+             options: { scales: { x: {stacked:true}, y:{stacked:true} } }
           });
        });
     }
 
     function cargarPendientes() {
-       callApi('pendientesPorEtapa').then(rows => {
+       callApi('pendientesPorEtapa').then(res => {
+          if(!res.ok) return;
+          const rows = res.data;
           const tbody = document.getElementById("tbodyPendEtapa");
           let h = "";
           let labels=[], vals=[];
@@ -745,7 +805,9 @@
     }
 
     function cargarPromedios() {
-       callApi('promedioTiemposEtapas').then(rows => {
+       callApi('promedioTiemposEtapas').then(res => {
+          if(!res.ok) return;
+          const rows = res.data;
           const tbody = document.getElementById("tbodyPromEtapas");
           let h = "";
           rows.forEach(r => {
@@ -760,7 +822,7 @@
     }
 
     /*************************************************
-     * EXPORTAR PDF (Multipage + Margen)
+     * EXPORTAR PDF / JPG
      *************************************************/
     async function exportKpiPDF() {
        const { jsPDF } = window.jspdf; 
@@ -771,20 +833,13 @@
        try {
           const canvas = await html2canvas(el, { scale: 2, useCORS: true });
           const imgData = canvas.toDataURL("image/jpeg", 0.95);
-
           const pdf = new jsPDF('p', 'mm', 'letter');
-          const pageWidth = 215.9;
-          const pageHeight = 279.4;
-          const margin = 5; 
-
+          const pageWidth = 215.9; const pageHeight = 279.4; const margin = 5; 
           const contentWidth = pageWidth - (2 * margin);
           const contentHeight = pageHeight - (2 * margin);
-
           const imgWidth = contentWidth; 
           const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-          let heightLeft = imgHeight;
-          let position = margin; 
+          let heightLeft = imgHeight; let position = margin; 
 
           pdf.addImage(imgData, 'JPEG', margin, position, imgWidth, imgHeight);
           heightLeft -= contentHeight;
@@ -795,7 +850,6 @@
              pdf.addImage(imgData, 'JPEG', margin, margin - (imgHeight - heightLeft), imgWidth, imgHeight);
              heightLeft -= contentHeight;
           }
-
           const totalPages = pdf.internal.getNumberOfPages();
           const fecha = new Date().toLocaleDateString();
           for (let i = 1; i <= totalPages; i++) {
@@ -804,101 +858,31 @@
              pdf.setTextColor(150);
              pdf.text(`Página ${i} de ${totalPages} - ${fecha}`, margin, pageHeight - 2);
           }
-
           pdf.save("Dashboard_MasterBI.pdf");
-
-       } catch(e) {
-          console.error(e);
-          alert("Error generando PDF: " + e.message);
-       } finally {
-          btns.forEach(b => b.style.visibility = "visible");
-       }
+       } catch(e) { console.error(e); alert("Error PDF"); } 
+       finally { btns.forEach(b => b.style.visibility = "visible"); }
     }
 
-    /*************************************************
-     * EXPORTAR JPG (Sábana con Margen)
-     *************************************************/
     async function exportKpiJPG() {
        const el = document.getElementById("tab-dashboard");
        const btns = document.querySelectorAll(".btn-export-hide");
        btns.forEach(b => b.style.visibility = "hidden");
-
        try {
           const originalCanvas = await html2canvas(el, { scale: 2, useCORS: true });
           const marginPx = 40; 
-          
           const newCanvas = document.createElement("canvas");
           newCanvas.width = originalCanvas.width + (marginPx * 2);
           newCanvas.height = originalCanvas.height + (marginPx * 2);
-          
           const ctx = newCanvas.getContext("2d");
-          ctx.fillStyle = "#ffffff";
-          ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
+          ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
           ctx.drawImage(originalCanvas, marginPx, marginPx);
-
-          ctx.font = "20px Arial";
-          ctx.fillStyle = "#888888";
-          ctx.fillText("Generado por MasterBI IMMA - " + new Date().toLocaleDateString(), marginPx, newCanvas.height - 10);
-
+          ctx.font = "20px Arial"; ctx.fillStyle = "#888888";
+          ctx.fillText("MasterBI - " + new Date().toLocaleDateString(), marginPx, newCanvas.height - 10);
           const a = document.createElement("a");
-          a.href = newCanvas.toDataURL("image/jpeg", 0.95); 
-          a.download = "Dashboard_MasterBI.jpg";
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-
-       } catch (e) {
-          console.error(e);
-          alert("Error generando JPG: " + e.message);
-       } finally {
-          btns.forEach(b => b.style.visibility = "visible");
-       }
-    }
-    /*************************************************
-     * FUNCIONES TAB MERGE / UTILIDADES
-     *************************************************/
-    
-    // --- MERGE ---
-    function doMerge() {
-       const txtId = document.getElementById("txtRemote").value.trim();
-       const msg = document.getElementById("msgMerge");
-       const btn = document.getElementById("btnMerge");
-
-       if (!txtId) { alert("Ingresa ID Nube."); return; }
-       if(!confirm("¿Iniciar Merge?")) return;
-
-       btn.disabled = true;
-       msg.textContent = "Procesando..."; msg.className = "msg loading d-block";
-
-       callApi('merge', { nubeId: txtId }).then(res => {
-          btn.disabled = false;
-          msg.textContent = res.ok ? "Éxito: " + res.msg : "Error: " + res.msg;
-          msg.className = res.ok ? "msg ok d-block" : "msg error d-block";
-          if(res.ok) cargarDashboard();
-       }).catch(e => { btn.disabled=false; msg.textContent="Error red"; msg.className="msg error d-block"; });
-    }
-
-    // --- EXCEL ---
-    function doExportExcel() {
-       const msg = document.getElementById("msgExcel");
-       const btn = document.getElementById("btnExcel");
-       btn.disabled = true; msg.textContent = "Generando..."; msg.className = "msg loading d-block";
-
-       callApi('exportExcel').then(res => {
-          if (res.ok && res.url) {
-             msg.textContent = "Descargando...";
-             fetch(res.url, { headers: { 'Authorization': 'Bearer ' + res.token } })
-               .then(r => r.blob())
-               .then(blob => {
-                  const url = window.URL.createObjectURL(blob);
-                  const a = document.createElement('a'); a.href = url; a.download = res.filename;
-                  document.body.appendChild(a); a.click(); a.remove();
-                  msg.textContent = "Listo."; msg.className = "msg ok d-block"; btn.disabled = false;
-               });
-          } else {
-             msg.textContent = "Error"; msg.className = "msg error d-block"; btn.disabled = false;
-          }
-       });
+          a.href = newCanvas.toDataURL("image/jpeg", 0.95); a.download = "Dashboard_MasterBI.jpg";
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+       } catch (e) { console.error(e); alert("Error JPG"); } 
+       finally { btns.forEach(b => b.style.visibility = "visible"); }
     }
   </script>
 </body>
