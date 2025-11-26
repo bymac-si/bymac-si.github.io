@@ -2,220 +2,291 @@
 <html lang="es">
 
 <head>
-  <meta charset="UTF-8">
-  <title>Panel MasterBI · Tag Spool</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta charset="UTF-8">
+   <title>Panel MasterBI · Tag Spool</title>
+   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
-  <style>
-    :root {
-      --bymac-primary: #1a2b48;
-      --bymac-accent: #e74e35;
-      --bymac-bg: #f5f7fb;
-      --green-ok: #2ea043;
-      --blue-proceso: #1a2b48;
-    }
-
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      font-size: 14px;
-      padding: 8px;
-      background-color: var(--bymac-bg);
-    }
-
-    .tab {
-      font-weight: 600;
-      color: #1a2b48;
-    }
-    @media (min-width: 768px) {
-      body {
-        padding: 16px;
+   <style>
+      :root {
+         --bymac-primary: #1a2b48;
+         --bymac-accent: #e74e35;
+         --bymac-bg: #f5f7fb;
+         --green-ok: #2ea043;
+         --blue-proceso: #1a2b48;
       }
-    }
 
-    .bymac-header {
-      background: linear-gradient(90deg, #a0c0f6, #3c475a);
-      color: #fff;
-      border-radius: 10px;
-      padding: 14px 18px;
-      margin-bottom: 12px;
-      box-shadow: 0 12px 30px rgba(10, 20, 40, 0.18);
-      text-shadow: 2px 2px 0px #555;
-    }
+      body {
+         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         font-size: 14px;
+         padding: 8px;
+         background-color: var(--bymac-bg);
+      }
 
-    .bymac-header h1 {
-      margin: 0;
-      font-size: 22px;
-    }
+      .tab {
+         font-weight: 600;
+         color: #1a2b48;
+      }
 
-    .card {
-      border-radius: 10px;
-      border: 1px solid #e1e4ee;
-    }
+      @media (min-width: 768px) {
+         body {
+            padding: 16px;
+         }
+      }
 
-    .tag-seleccionado {
-      font-weight: bold;
-      color: #0b5394;
-      word-break: break-word;
-    }
+      .bymac-header {
+         background: linear-gradient(90deg, #a0c0f6, #3c475a);
+         color: #fff;
+         border-radius: 10px;
+         padding: 14px 18px;
+         margin-bottom: 12px;
+         box-shadow: 0 12px 30px rgba(10, 20, 40, 0.18);
+         text-shadow: 2px 2px 0px #555;
+      }
 
-    .plano-frame {
-      width: 100%;
-      min-height: clamp(200px, 40vh, 420px);
-      border-radius: 8px;
-      border: 1px solid #e1e4ee;
-      background: #eee;
-    }
+      .bymac-header h1 {
+         margin: 0;
+         font-size: 22px;
+      }
 
-    /* KPI cards */
-    .kpi-box {
-      padding: 12px;
-      border-radius: 8px;
-      background: #fff;
-      border: 1px solid #e1e4ee;
-      text-align: center;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
+      .card {
+         border-radius: 10px;
+         border: 1px solid #e1e4ee;
+      }
 
-    .kpi-title { font-size: 13px; color: #666; font-weight: 600; margin-bottom: 4px; }
-    .kpi-value { font-size: 24px; font-weight: 800; }
-    
-    .kpi-green { color: var(--green-ok); }
-    .kpi-blue { color: var(--blue-proceso); }
-    .kpi-yellow { color: #b58900; }
-    .kpi-red { color: #d93025; }
-    .kpi-muted { color: #888; }
+      .tag-seleccionado {
+         font-weight: bold;
+         color: #0b5394;
+         word-break: break-word;
+      }
 
-    /* Estados */
-    .estado-green { color: var(--green-ok); font-weight: bold; }
-    .estado-blue { color: var(--blue-proceso); font-weight: bold; }
-    .estado-yellow { color: #b58900; font-weight: bold; }
-    .estado-red { color: #d93025; font-weight: bold; }
-    .estado-gray { color: #666; font-weight: bold; }
+      .plano-frame {
+         width: 100%;
+         min-height: clamp(200px, 40vh, 420px);
+         border-radius: 8px;
+         border: 1px solid #e1e4ee;
+         background: #eee;
+      }
 
-    /* Mensajes */
-    .msg {
-      font-size: 13px; padding: 4px 6px; border-radius: 6px; display: inline-block;
-      margin-top: 4px; font-weight: 600;
-    }
-    .msg.ok { color: #0f5132; background-color: #d1e7dd; border: 1px solid #badbcc; }
-    .msg.error { color: #842029; background-color: #f8d7da; border: 1px solid #f5c2c7; }
-    .msg.loading { color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; }
-  </style>
+      /* KPI cards */
+      .kpi-box {
+         padding: 12px;
+         border-radius: 8px;
+         background: #fff;
+         border: 1px solid #e1e4ee;
+         text-align: center;
+         height: 100%;
+         display: flex;
+         flex-direction: column;
+         justify-content: center;
+      }
+
+      .kpi-title {
+         font-size: 13px;
+         color: #666;
+         font-weight: 600;
+         margin-bottom: 4px;
+      }
+
+      .kpi-value {
+         font-size: 24px;
+         font-weight: 800;
+      }
+
+      .kpi-green {
+         color: var(--green-ok);
+      }
+
+      .kpi-blue {
+         color: var(--blue-proceso);
+      }
+
+      .kpi-yellow {
+         color: #b58900;
+      }
+
+      .kpi-red {
+         color: #d93025;
+      }
+
+      .kpi-muted {
+         color: #888;
+      }
+
+      /* Estados */
+      .estado-green {
+         color: var(--green-ok);
+         font-weight: bold;
+      }
+
+      .estado-blue {
+         color: var(--blue-proceso);
+         font-weight: bold;
+      }
+
+      .estado-yellow {
+         color: #b58900;
+         font-weight: bold;
+      }
+
+      .estado-red {
+         color: #d93025;
+         font-weight: bold;
+      }
+
+      .estado-gray {
+         color: #666;
+         font-weight: bold;
+      }
+
+      /* Mensajes */
+      .msg {
+         font-size: 13px;
+         padding: 4px 6px;
+         border-radius: 6px;
+         display: inline-block;
+         margin-top: 4px;
+         font-weight: 600;
+      }
+
+      .msg.ok {
+         color: #0f5132;
+         background-color: #d1e7dd;
+         border: 1px solid #badbcc;
+      }
+
+      .msg.error {
+         color: #842029;
+         background-color: #f8d7da;
+         border: 1px solid #f5c2c7;
+      }
+
+      .msg.loading {
+         color: #856404;
+         background-color: #fff3cd;
+         border: 1px solid #ffeeba;
+      }
+   </style>
 </head>
 
 <body class="d-flex flex-column min-vh-100">
 
-  <main class="container-fluid px-1 px-sm-2 flex-grow-1">
+   <main class="container-fluid px-1 px-sm-2 flex-grow-1">
 
-    <div class="bymac-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
-      <h1>
-        <img src="https://bymac-si.github.io/img/logo_imma.png" alt="IMMA" style="width: 100px;">
-        Panel MasterBI · Tag Spool
-      </h1>
-      <div class="text-start text-md-end mt-2 mt-md-0">
-        <div style="font-size:18px;font-weight:bold">IMMA · Soluciones en Piping</div>
-        <div style="font-size:10px;opacity:.8">byMAC · Desarrollo Web & Integraciones</div>
+      <div
+         class="bymac-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+         <h1>
+            <img src="https://bymac-si.github.io/img/logo_imma.png" alt="IMMA" style="width: 100px;">
+            Panel MasterBI · Tag Spool
+         </h1>
+         <div class="text-start text-md-end mt-2 mt-md-0">
+            <div style="font-size:18px;font-weight:bold">IMMA · Soluciones en Piping</div>
+            <div style="font-size:10px;opacity:.8">byMAC · Desarrollo Web & Integraciones</div>
+         </div>
       </div>
-    </div>
 
-    <div class="card shadow-sm">
-      <ul class="nav nav-tabs mb-3" id="tabsPanel" role="tablist">
-        <li class="nav-item">
-          <button class="nav-link active tab" data-bs-toggle="tab" data-bs-target="#tab-fechas" type="button">Ingreso de Fechas por TAG</button>
-        </li>
-       <!-- <li class="nav-item">
+      <div class="card shadow-sm">
+         <ul class="nav nav-tabs mb-3" id="tabsPanel" role="tablist">
+            <li class="nav-item">
+               <button class="nav-link active tab" data-bs-toggle="tab" data-bs-target="#tab-fechas"
+                  type="button">Ingreso de Fechas por TAG</button>
+            </li>
+            <!-- <li class="nav-item">
           <button class="nav-link tab" data-bs-toggle="tab" data-bs-target="#tab-merge" type="button">Merge / Utilidades</button>
         </li>
         <li class="nav-item">
           <button class="nav-link tab" data-bs-toggle="tab" data-bs-target="#tab-log" type="button">ChangeLog</button>
         </li>-->
-        <li class="nav-item">
-          <button class="nav-link tab" data-bs-toggle="tab" data-bs-target="#tab-dashboard" type="button">Indicadores de Gestión</button>
-        </li>
-      </ul>
+            <li class="nav-item">
+               <button class="nav-link tab" data-bs-toggle="tab" data-bs-target="#tab-dashboard"
+                  type="button">Indicadores de Gestión</button>
+            </li>
+         </ul>
 
-      <div class="tab-content p-3">
-        
-        <div class="tab-pane fade show active" id="tab-fechas" role="tabpanel">
-          <div class="row g-3">
-            
-            <div class="col-12">
-              <div class="card shadow-sm">
-                <div class="card-body">
-                  <h5 class="card-title mb-2">Buscar TAG SPOOL</h5>
-                  <div class="input-group input-group-sm mb-2">
-                    <input type="text" id="txtBuscar" class="form-control" placeholder="Ej: 29044-005" onkeyup="if(event.key === 'Enter') buscarTags()">
-                    <button class="btn btn-primary" onclick="buscarTags()" id="btnBuscar">Buscar</button>
+         <div class="tab-content p-3">
+
+            <div class="tab-pane fade show active" id="tab-fechas" role="tabpanel">
+               <div class="row g-3">
+
+                  <div class="col-12">
+                     <div class="card shadow-sm">
+                        <div class="card-body">
+                           <h5 class="card-title mb-2">Buscar TAG SPOOL</h5>
+                           <div class="input-group input-group-sm mb-2">
+                              <input type="text" id="txtBuscar" class="form-control" placeholder="Ej: 29044-005"
+                                 onkeyup="if(event.key === 'Enter') buscarTags()">
+                              <button class="btn btn-primary" onclick="buscarTags()" id="btnBuscar">Buscar</button>
+                           </div>
+                           <div id="contenedorCoincidencias" class="mt-2 border rounded p-1"
+                              style="max-height:230px; overflow:auto;">
+                              <div class="text-muted small">Sin resultados aún.</div>
+                           </div>
+                        </div>
+                     </div>
                   </div>
-                  <div id="contenedorCoincidencias" class="mt-2 border rounded p-1" style="max-height:230px; overflow:auto;">
-                    <div class="text-muted small">Sin resultados aún.</div>
+
+                  <div class="col-12 col-md-6">
+                     <div class="card shadow-sm mb-3">
+                        <div class="card-body">
+                           <h5 class="card-title">Estado Tag Selección</h5>
+                           <p>TAG: <span id="lblTagSel" class="tag-seleccionado">(ninguno)</span></p>
+                           <p id="lblUltimaEtapa" class="small text-muted mb-1">Última etapa: -</p>
+                           <p class="small mb-0">Estado: <span id="lblEstado" class="estado-gray">SIN INICIO</span></p>
+                        </div>
+                     </div>
+
+                     <div class="card shadow-sm">
+                        <div class="card-body">
+                           <h5 class="card-title mb-2">Registrar fecha</h5>
+                           <label class="form-label small">Etapa</label>
+                           <select id="cmbEtapa" class="form-select form-select-sm mb-2"></select>
+
+                           <label class="form-label small">Fecha</label>
+                           <input type="date" id="dtFecha" class="form-control form-control-sm mb-2">
+
+                           <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                              <span id="msgEstado" class="msg"></span>
+                              <div class="d-flex gap-1">
+                                 <button class="btn btn-secondary btn-sm" onclick="setHoy()">Hoy</button>
+                                 <button class="btn btn-primary btn-sm" id="btnGuardar"
+                                    onclick="guardar(false)">Guardar</button>
+                                 <button class="btn btn-danger btn-sm" id="btnSobrescribir"
+                                    onclick="guardar(true)">Sobrescribir</button>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
                   </div>
-                </div>
-              </div>
+
+                  <div class="col-12 col-md-6">
+                     <div class="card shadow-sm h-100">
+                        <div class="card-body d-flex flex-column">
+                           <div class="d-flex justify-content-between align-items-center mb-2">
+                              <h5 class="card-title mb-0">Plano asociado</h5>
+                              <a id="btnAbrirPlano" href="#" target="_blank"
+                                 class="btn btn-sm btn-outline-primary d-none">
+                                 <i class="bi bi-box-arrow-up-right"></i> Abrir fuera
+                              </a>
+                           </div>
+
+                           <div class="flex-grow-1 d-flex flex-column justify-content-center bg-light border rounded">
+                              <img id="imgPlanoFallback" class="plano-frame"
+                                 src="https://bymac-si.github.io/img/not-found.png" style="object-fit:contain">
+                              <iframe id="iframePlano" class="plano-frame d-none" allow="autoplay"></iframe>
+                           </div>
+                           <div id="msgPlano" class="small text-muted mt-1 text-center">Selecciona un TAG.</div>
+                        </div>
+                     </div>
+                  </div>
+
+               </div>
             </div>
-
-            <div class="col-12 col-md-6">
-              <div class="card shadow-sm mb-3">
-                <div class="card-body">
-                  <h5 class="card-title">Selección</h5>
-                  <p>TAG: <span id="lblTagSel" class="tag-seleccionado">(ninguno)</span></p>
-                  <p id="lblUltimaEtapa" class="small text-muted mb-1">Última etapa: -</p>
-                  <p class="small mb-0">Estado: <span id="lblEstado" class="estado-gray">SIN INICIO</span></p>
-                </div>
-              </div>
-
-              <div class="card shadow-sm">
-                <div class="card-body">
-                  <h5 class="card-title mb-2">Registrar fecha</h5>
-                  <label class="form-label small">Etapa</label>
-                  <select id="cmbEtapa" class="form-select form-select-sm mb-2"></select>
-
-                  <label class="form-label small">Fecha</label>
-                  <input type="date" id="dtFecha" class="form-control form-control-sm mb-2">
-
-                  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                    <span id="msgEstado" class="msg"></span>
-                    <div class="d-flex gap-1">
-                      <button class="btn btn-secondary btn-sm" onclick="setHoy()">Hoy</button>
-                      <button class="btn btn-primary btn-sm" id="btnGuardar" onclick="guardar(false)">Guardar</button>
-                      <button class="btn btn-danger btn-sm" id="btnSobrescribir" onclick="guardar(true)">Sobrescribir</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12 col-md-6">
-              <div class="card shadow-sm h-100">
-                <div class="card-body d-flex flex-column">
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h5 class="card-title mb-0">Plano asociado</h5>
-                    <a id="btnAbrirPlano" href="#" target="_blank" class="btn btn-sm btn-outline-primary d-none">
-                      <i class="bi bi-box-arrow-up-right"></i> Abrir fuera
-                    </a>
-                  </div>
-
-                  <div class="flex-grow-1 d-flex flex-column justify-content-center bg-light border rounded">
-                     <img id="imgPlanoFallback" class="plano-frame" src="https://bymac-si.github.io/img/not-found.png" style="object-fit:contain">
-                     <iframe id="iframePlano" class="plano-frame d-none" allow="autoplay"></iframe>
-                  </div>
-                  <div id="msgPlano" class="small text-muted mt-1 text-center">Selecciona un TAG.</div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-<!--
+            <!--
         <div class="tab-pane fade" id="tab-merge" role="tabpanel">
           <div class="row g-3">
             
@@ -278,7 +349,7 @@
 
           </div>
         </div>-->
-<!--Tab Changelog
+            <!--Tab Changelog
         <div class="tab-pane fade" id="tab-log" role="tabpanel">
           <div class="card shadow-sm">
              <div class="card-body">
@@ -296,266 +367,319 @@
           </div>
         </div>
 -->
-        <div class="tab-pane fade" id="tab-dashboard" role="tabpanel" style="padding-bottom: 20px;">
-          <div class="d-flex justify-content-between align-items-center mb-3" >
-             <div class="d-flex align-items-center gap-2">
-                <h5 class="mb-0">Indicadores de Gestión</h5>
-                <span id="lblLastUpdate" class="badge bg-light text-dark border fw-normal" style="font-size:0.75em;">
-                  <i class="bi bi-clock-history"></i> Esperando datos...
-                </span>
-             </div>
-             <div class="d-flex gap-2">
-               <h5>Exportar:</h5>
-                <button class="btn btn-secondary btn-sm btn-export-hide" onclick="exportKpiPDF()">PDF</button>
-                <button class="btn btn-secondary btn-sm btn-export-hide" onclick="exportKpiJPG()">JPG</button>
-             </div>
-          </div>
-
-          <div class="row g-2 mb-3">
-             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Total</div><div id="kpi-total" class="kpi-value">-</div></div></div>
-             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Liberado/Desp</div><div id="kpi-ok" class="kpi-value kpi-green">-</div></div></div>
-             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Activos</div><div id="kpi-activos" class="kpi-value kpi-blue">-</div></div></div>
-             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">0-30 días</div><div id="kpi-proceso" class="kpi-value kpi-blue">-</div></div></div>
-             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">31-60 días</div><div id="kpi-pend" class="kpi-value kpi-yellow">-</div></div></div>
-             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">61+ días</div><div id="kpi-atr" class="kpi-value kpi-red">-</div></div></div>
-          </div>
-
-          <div class="row g-3 mb-3">
-             <div class="col-12 col-md-4">
-               <div class="card p-3 h-100">
-                 <h6>Status Fluor</h6>
-                 <canvas id="chartLiberados" height="150"></canvas>
+            <div class="tab-pane fade" id="tab-dashboard" role="tabpanel" style="padding-bottom: 20px;">
+               <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div class="d-flex align-items-center gap-2">
+                     <h5 class="mb-0">Indicadores de Gestión</h5>
+                     <span id="lblLastUpdate" class="badge bg-light text-dark border fw-normal"
+                        style="font-size:0.75em;">
+                        <i class="bi bi-clock-history"></i> Esperando datos...
+                     </span>
+                  </div>
+                  <div class="d-flex gap-2">
+                     <h5>Exportar:</h5>
+                     <button class="btn btn-secondary btn-sm btn-export-hide" onclick="exportKpiPDF()">PDF</button>
+                     <button class="btn btn-secondary btn-sm btn-export-hide" onclick="exportKpiJPG()">JPG</button>
+                  </div>
                </div>
-             </div>
-             <div class="col-12 col-md-4">
-               <div class="card p-3 h-100">
-                 <h6>Embudo por proceso</h6>
-                 <canvas id="chartFunnel" height="150"></canvas>
+
+               <div class="row g-2 mb-3">
+                  <div class="col-6 col-md-3 col-lg-2">
+                     <div class="kpi-box">
+                        <div class="kpi-title">Total</div>
+                        <div id="kpi-total" class="kpi-value">-</div>
+                     </div>
+                  </div>
+                  <div class="col-6 col-md-3 col-lg-2">
+                     <div class="kpi-box">
+                        <div class="kpi-title">Liberado/Desp</div>
+                        <div id="kpi-ok" class="kpi-value kpi-green">-</div>
+                     </div>
+                  </div>
+                  <div class="col-6 col-md-3 col-lg-2">
+                     <div class="kpi-box">
+                        <div class="kpi-title">Activos</div>
+                        <div id="kpi-activos" class="kpi-value kpi-blue">-</div>
+                     </div>
+                  </div>
+                  <div class="col-6 col-md-3 col-lg-2">
+                     <div class="kpi-box">
+                        <div class="kpi-title">0-30 días</div>
+                        <div id="kpi-proceso" class="kpi-value kpi-blue">-</div>
+                     </div>
+                  </div>
+                  <div class="col-6 col-md-3 col-lg-2">
+                     <div class="kpi-box">
+                        <div class="kpi-title">31-60 días</div>
+                        <div id="kpi-pend" class="kpi-value kpi-yellow">-</div>
+                     </div>
+                  </div>
+                  <div class="col-6 col-md-3 col-lg-2">
+                     <div class="kpi-box">
+                        <div class="kpi-title">61+ días</div>
+                        <div id="kpi-atr" class="kpi-value kpi-red">-</div>
+                     </div>
+                  </div>
                </div>
-             </div>
-             <div class="col-12 col-md-4">
-               <div class="card p-3 h-100">
-                 <h6>Días en Proceso</h6>
-                 <canvas id="chartAtraso" height="150"></canvas>
+
+               <div class="row g-3 mb-3">
+                  <div class="col-12 col-md-4">
+                     <div class="card p-3 h-100">
+                        <h6>Status Fluor</h6>
+                        <canvas id="chartLiberados" height="150"></canvas>
+                     </div>
+                  </div>
+                  <div class="col-12 col-md-4">
+                     <div class="card p-3 h-100">
+                        <h6>Embudo por proceso</h6>
+                        <canvas id="chartFunnel" height="150"></canvas>
+                     </div>
+                  </div>
+                  <div class="col-12 col-md-4">
+                     <div class="card p-3 h-100">
+                        <h6>Días en Proceso</h6>
+                        <canvas id="chartAtraso" height="150"></canvas>
+                     </div>
+                  </div>
                </div>
-             </div>
-          </div>
+               <div class="row mb-3">
+                  <div class="col-12">
+                     <div class="card p-3">
+                        <h6>Evolución de Despachos (Por Mes)</h6>
+                        <div style="height: 250px;">
+                           <canvas id="chartDespachosMes"></canvas>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row g-3">
+                  <div class="col-12 col-lg-6">
+                     <div class="card p-3 h-100">
+                        <h6>Tags Registrados Hoy</h6>
+                        <div class="table-responsive">
+                           <table class="table table-sm small mb-0 table-hover">
+                              <thead>
+                                 <tr class="table-light">
+                                    <th>Etapa</th>
+                                    <th>Hoy</th>
+                                    <th>F. Ant.</th>
+                                 </tr>
+                              </thead>
+                              <tbody id="tbodyReporteHoy"></tbody>
+                           </table>
+                        </div>
+                        <canvas id="chartReporteHoy" height="200" class="mt-3"></canvas>
+                     </div>
+                  </div>
 
-          <div class="row g-3">
-             <div class="col-12 col-lg-6">
-                <div class="card p-3 h-100">
-                   <h6>Tag Registrados Hoy</h6>
-                   <div class="table-responsive">
-                      <table class="table table-sm small mb-0 table-hover">
-                         <thead><tr class="table-light"><th>Etapa</th><th>Hoy</th><th>F. Ant.</th></tr></thead>
-                         <tbody id="tbodyReporteHoy"></tbody>
-                      </table>
-                   </div>
-                   <canvas id="chartReporteHoy" height="200" class="mt-3"></canvas>
-                </div>
-             </div>
+                  <div class="col-12 col-lg-6">
+                     <div class="card p-3 h-100">
+                        <h6>Estatus Tags por última etapa</h6>
+                        <div class="row">
+                           <div class="col-6">
+                              <div class="table-responsive">
+                                 <table class="table table-sm small mb-0 table-hover">
+                                    <tbody id="tbodyPendEtapa"></tbody>
+                                 </table>
+                              </div>
+                           </div>
+                           <div class="col-6">
+                              <div style="max-height: 300px; display: flex; align-items: center;">
+                                 <canvas id="chartPendEtapa"></canvas>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
 
-             <div class="col-12 col-lg-6">
-                <div class="card p-3 h-100">
-                   <h6>Estatus Tags por última etapa</h6>
-                   <div class="row">
-                      <div class="col-6">
-                         <div class="table-responsive">
-                            <table class="table table-sm small mb-0 table-hover">
-                               <tbody id="tbodyPendEtapa"></tbody>
-                            </table>
-                         </div>
-                      </div>
-                      <div class="col-6">
-                         <div style="max-height: 300px; display: flex; align-items: center;">
-                            <canvas id="chartPendEtapa"></canvas>
-                         </div>
-                      </div>
-                   </div>
-                </div>
-             </div>
-             
-             <div class="col-12">
-                <div class="card p-3">
-                   <h6>Tiempos promedio entre etapas</h6>
-                   <div class="table-responsive">
-                      <table class="table table-sm small table-striped text-center">
-                         <thead><tr><th>Desde</th><th>Hasta</th><th>Promedio (Días)</th><th>Casos</th></tr></thead>
-                         <tbody id="tbodyPromEtapas"></tbody>
-                      </table>
-                   </div>
-                </div>
-             </div>
-          </div>
+                  <div class="col-12">
+                     <div class="card p-3">
+                        <h6>Tiempos promedio entre etapas</h6>
+                        <div class="table-responsive">
+                           <table class="table table-sm small table-striped text-center">
+                              <thead>
+                                 <tr>
+                                    <th>Desde</th>
+                                    <th>Hasta</th>
+                                    <th>Promedio (Días)</th>
+                                    <th>Casos</th>
+                                 </tr>
+                              </thead>
+                              <tbody id="tbodyPromEtapas"></tbody>
+                           </table>
+                        </div>
+                     </div>
+                  </div>
+               </div>
 
-        </div> 
-      
+            </div>
+
+         </div>
       </div>
-    </div>
-  </main>
+   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <script>
-    /*************************************************
-     * CONFIG
-     *************************************************/
-    // IMPORTANTE: Asegúrate de que esta URL sea la correcta de tu implementación actual
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwt-U1eVgqajh1wDoPwGMuS9l1rjZLNwVKT7SpwwB4CJllDURVjAXCzEADzHBq_Bkfh/exec';
+   <script>
+      /*************************************************
+       * CONFIG
+       *************************************************/
+      // IMPORTANTE: Asegúrate de que esta URL sea la correcta de tu implementación actual
+      const API_URL = 'https://script.google.com/macros/s/AKfycbxhSFnctVhdFpF8vtvmD4Dk6UiqhApMQlVrsvUHv68cEHLsqfT2w-xfzkPJIqos3vE/exec';
 
-    function callApi(accion, data = {}) {
-      const params = new URLSearchParams();
-      params.append('accion', accion);
-      Object.keys(data).forEach(k => {
-        const v = data[k];
-        if (v !== undefined && v !== null) {
-          params.append(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
-        }
-      });
+      function callApi(accion, data = {}) {
+         const params = new URLSearchParams();
+         params.append('accion', accion);
+         Object.keys(data).forEach(k => {
+            const v = data[k];
+            if (v !== undefined && v !== null) {
+               params.append(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
+            }
+         });
 
-      return fetch(API_URL, { method: 'POST', body: params })
-        .then(res => {
-          if (!res.ok) throw new Error('HTTP ' + res.status);
-          return res.json();
-        });
-    }
-
-    function onApiError(err) {
-      console.error(err);
-    }
-
-    let filaSeleccionada = null;
-    let tagSeleccionado = "";
-
-    /*************************************************
-     * INIT & HELPERS
-     *************************************************/
-    document.addEventListener("DOMContentLoaded", () => {
-      setHoy();
-      cargarColumnas();
-      cargarLog();
-      startAutoRefresh(); 
-      
-      let dashLoaded = false;
-      document.addEventListener("shown.bs.tab", (ev) => {
-         if(ev.target.dataset.bsTarget === "#tab-dashboard" && !dashLoaded){
-            dashLoaded = true;
-            cargarDashboard();
-         }
-      });
-    });
-
-    function setHoy() {
-      const d = new Date();
-      const offset = d.getTimezoneOffset() * 60000;
-      const local = new Date(d.getTime() - offset);
-      document.getElementById("dtFecha").value = local.toISOString().slice(0, 10);
-    }
-
-    function cargarColumnas() {
-      const cmb = document.getElementById("cmbEtapa");
-      cmb.innerHTML = '<option value="">Cargando...</option>';
-      
-      callApi('getColumnasFechas').then(res => {
-         // CORRECCIÓN: Validamos que la respuesta sea OK y accedemos a .data
-         if (res.ok && Array.isArray(res.data)) {
-             cmb.innerHTML = '<option value="">-- seleccionar --</option>';
-             
-             res.data.forEach(et => {
-                const opt = document.createElement("option");
-                opt.value = et; 
-                opt.textContent = et;
-                cmb.appendChild(opt);
-             });
-         } else {
-             console.error("Error cargando columnas:", res);
-             cmb.innerHTML = '<option value="">Error al cargar</option>';
-         }
-      }).catch(e => {
-          console.error(e);
-          cmb.innerHTML = '<option value="">Error de conexión</option>';
-      });
-    }
-
-    /*************************************************
-     * AUTO REFRESH
-     *************************************************/
-    function startAutoRefresh() {
-       setInterval(() => {
-          const activeTab = document.querySelector('#tabsPanel button.active');
-          if (activeTab && activeTab.getAttribute('data-bs-target') === '#tab-dashboard') {
-             console.log("Auto-refreshing Dashboard...");
-             cargarDashboard();
-          }
-       }, 60000);
-    }
-
-    function updateLastRefreshTime() {
-       const now = new Date();
-       const timeStr = now.toLocaleTimeString();
-       const lbl = document.getElementById("lblLastUpdate");
-       if(lbl) {
-          lbl.innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> Act: ${timeStr}`;
-       }
-    }
-
-    /*************************************************
-     * BUSQUEDA
-     *************************************************/
-    // --- BUSCADOR CORREGIDO (Lectura de res.data) ---
-    function buscarTags() {
-      const txt = document.getElementById("txtBuscar").value.trim();
-      const cont = document.getElementById("contenedorCoincidencias");
-      const btn = document.getElementById("btnBuscar");
-      
-      // 1. Validación inicial
-      if (!txt) {
-         cont.innerHTML = '<div class="text-muted small">Escribe algo para buscar.</div>';
-         return;
+         return fetch(API_URL, { method: 'POST', body: params })
+            .then(res => {
+               if (!res.ok) throw new Error('HTTP ' + res.status);
+               return res.json();
+            });
       }
 
-      // 2. UI Loading
-      cont.innerHTML = '<div class="small text-primary"><span class="spinner-border spinner-border-sm"></span> Buscando...</div>';
-      btn.disabled = true;
-      
-      // Limpiar selección previa
-      filaSeleccionada = null;
-      tagSeleccionado = "";
-      document.getElementById("lblTagSel").textContent = "(ninguno)";
-      document.getElementById("lblUltimaEtapa").textContent = "-";
-      document.getElementById("msgEstado").textContent = "";
-      limpiarPlano();
+      function onApiError(err) {
+         console.error(err);
+      }
 
-      // 3. Llamada al Servidor
-      callApi('buscarTag', { texto: txt })
-        .then(res => {
-           btn.disabled = false;
+      let filaSeleccionada = null;
+      let tagSeleccionado = "";
 
-           // CASO A: Error reportado por el backend
-           if (!res.ok) {
-              console.error("Error Backend:", res.error);
-              cont.innerHTML = `<div class="text-danger small">Error: ${res.error || 'Desconocido'}</div>`;
-              return;
-           }
+      /*************************************************
+       * INIT & HELPERS
+       *************************************************/
+      document.addEventListener("DOMContentLoaded", () => {
+         setHoy();
+         cargarColumnas();
+         cargarLog();
+         startAutoRefresh();
 
-           // CASO B: Extraer los datos reales
-           const listaTags = res.data; // <--- CORRECCIÓN CLAVE
+         let dashLoaded = false;
+         document.addEventListener("shown.bs.tab", (ev) => {
+            if (ev.target.dataset.bsTarget === "#tab-dashboard" && !dashLoaded) {
+               dashLoaded = true;
+               cargarDashboard();
+            }
+         });
+      });
 
-           // CASO C: Respuesta válida pero vacía
-           if (!Array.isArray(listaTags) || listaTags.length === 0) {
-              cont.innerHTML = '<div class="text-muted small" style="color: #d93025 !important;">No se encontraron coincidencias.</div>';
-              return;
-           }
+      function setHoy() {
+         const d = new Date();
+         const offset = d.getTimezoneOffset() * 60000;
+         const local = new Date(d.getTime() - offset);
+         document.getElementById("dtFecha").value = local.toISOString().slice(0, 10);
+      }
 
-           // CASO D: Éxito - Renderizar Tabla
-           let html = `<table class="table table-sm table-hover mb-0"><tbody>`;
-           listaTags.forEach(item => {
-              // Escapar comillas para evitar errores en el HTML
-              const safeTag = String(item.tag).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
-              
-              html += `
+      function cargarColumnas() {
+         const cmb = document.getElementById("cmbEtapa");
+         cmb.innerHTML = '<option value="">Cargando...</option>';
+
+         callApi('getColumnasFechas').then(res => {
+            // CORRECCIÓN: Validamos que la respuesta sea OK y accedemos a .data
+            if (res.ok && Array.isArray(res.data)) {
+               cmb.innerHTML = '<option value="">-- seleccionar --</option>';
+
+               res.data.forEach(et => {
+                  const opt = document.createElement("option");
+                  opt.value = et;
+                  opt.textContent = et;
+                  cmb.appendChild(opt);
+               });
+            } else {
+               console.error("Error cargando columnas:", res);
+               cmb.innerHTML = '<option value="">Error al cargar</option>';
+            }
+         }).catch(e => {
+            console.error(e);
+            cmb.innerHTML = '<option value="">Error de conexión</option>';
+         });
+      }
+
+      /*************************************************
+       * AUTO REFRESH
+       *************************************************/
+      function startAutoRefresh() {
+         setInterval(() => {
+            const activeTab = document.querySelector('#tabsPanel button.active');
+            if (activeTab && activeTab.getAttribute('data-bs-target') === '#tab-dashboard') {
+               console.log("Auto-refreshing Dashboard...");
+               cargarDashboard();
+            }
+         }, 60000);
+      }
+
+      function updateLastRefreshTime() {
+         const now = new Date();
+         const timeStr = now.toLocaleTimeString();
+         const lbl = document.getElementById("lblLastUpdate");
+         if (lbl) {
+            lbl.innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> Act: ${timeStr}`;
+         }
+      }
+
+      /*************************************************
+       * BUSQUEDA
+       *************************************************/
+      // --- BUSCADOR CORREGIDO (Lectura de res.data) ---
+      function buscarTags() {
+         const txt = document.getElementById("txtBuscar").value.trim();
+         const cont = document.getElementById("contenedorCoincidencias");
+         const btn = document.getElementById("btnBuscar");
+
+         // 1. Validación inicial
+         if (!txt) {
+            cont.innerHTML = '<div class="text-muted small">Escribe algo para buscar.</div>';
+            return;
+         }
+
+         // 2. UI Loading
+         cont.innerHTML = '<div class="small text-primary"><span class="spinner-border spinner-border-sm"></span> Buscando...</div>';
+         btn.disabled = true;
+
+         // Limpiar selección previa
+         filaSeleccionada = null;
+         tagSeleccionado = "";
+         document.getElementById("lblTagSel").textContent = "(ninguno)";
+         document.getElementById("lblUltimaEtapa").textContent = "-";
+         document.getElementById("msgEstado").textContent = "";
+         limpiarPlano();
+
+         // 3. Llamada al Servidor
+         callApi('buscarTag', { texto: txt })
+            .then(res => {
+               btn.disabled = false;
+
+               // CASO A: Error reportado por el backend
+               if (!res.ok) {
+                  console.error("Error Backend:", res.error);
+                  cont.innerHTML = `<div class="text-danger small">Error: ${res.error || 'Desconocido'}</div>`;
+                  return;
+               }
+
+               // CASO B: Extraer los datos reales
+               const listaTags = res.data; // <--- CORRECCIÓN CLAVE
+
+               // CASO C: Respuesta válida pero vacía
+               if (!Array.isArray(listaTags) || listaTags.length === 0) {
+                  cont.innerHTML = '<div class="text-muted small" style="color: #d93025 !important;">No se encontraron coincidencias.</div>';
+                  return;
+               }
+
+               // CASO D: Éxito - Renderizar Tabla
+               let html = `<table class="table table-sm table-hover mb-0"><tbody>`;
+               listaTags.forEach(item => {
+                  // Escapar comillas para evitar errores en el HTML
+                  const safeTag = String(item.tag).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+
+                  html += `
                 <tr style="cursor:pointer" onclick="seleccionarTag(${item.fila}, '${safeTag}')">
                   <td width="30">
                     <input type="radio" name="selTag" value="${item.fila}" style="pointer-events: none;">
@@ -564,438 +688,479 @@
                     <span class="badge bg-light text-dark border">${item.tag}</span>
                   </td>
                 </tr>`;
-           });
-           html += "</tbody></table>";
-           cont.innerHTML = html;
-        })
-        .catch(e => {
-           console.error("Crash Frontend:", e);
-           btn.disabled = false;
-           cont.innerHTML = '<div class="text-danger small">Error de conexión o red.</div>';
-        });
-    }
+               });
+               html += "</tbody></table>";
+               cont.innerHTML = html;
+            })
+            .catch(e => {
+               console.error("Crash Frontend:", e);
+               btn.disabled = false;
+               cont.innerHTML = '<div class="text-danger small">Error de conexión o red.</div>';
+            });
+      }
 
-    function seleccionarTag(fila, tag) {
-       filaSeleccionada = fila;
-       tagSeleccionado = tag;
-       
-       // Marcar el radio button visualmente
-       const radios = document.getElementsByName("selTag");
-       radios.forEach(r => r.checked = true); 
-       
-       document.getElementById("lblTagSel").textContent = tag;
-       
-       // 1. Obtener Última Etapa
-       callApi('ultimaEtapa', { fila }).then(res => {
-          // CORRECCIÓN: Leer desde res.data
-          const data = res.data || {};
-          let txt = (data.ultimaColumna) ? `${data.ultimaColumna} (${data.fechaTexto})` : "Sin datos";
-          document.getElementById("lblUltimaEtapa").textContent = txt;
-       });
+      function seleccionarTag(fila, tag) {
+         filaSeleccionada = fila;
+         tagSeleccionado = tag;
 
-       // 2. Obtener Estado
-       callApi('estadoTag', { fila }).then(res => {
-          // CORRECCIÓN: Leer desde res.data
-          const data = res.data || {};
-          const lbl = document.getElementById("lblEstado");
-          lbl.textContent = data.estado || "SIN INICIO";
-          lbl.className = `estado-${data.color || 'gray'}`;
-       });
+         // Marcar el radio button visualmente
+         const radios = document.getElementsByName("selTag");
+         radios.forEach(r => r.checked = true);
 
-       // 3. Cargar Plano
-       cargarPlano(tag);
-    }
+         document.getElementById("lblTagSel").textContent = tag;
 
-    function limpiarPlano(){
-       document.getElementById("imgPlanoFallback").classList.remove("d-none");
-       document.getElementById("iframePlano").classList.add("d-none");
-       document.getElementById("btnAbrirPlano").classList.add("d-none");
-       document.getElementById("msgPlano").textContent = "Selecciona un TAG";
-    }
+         // 1. Obtener Última Etapa
+         callApi('ultimaEtapa', { fila }).then(res => {
+            // CORRECCIÓN: Leer desde res.data
+            const data = res.data || {};
+            let txt = (data.ultimaColumna) ? `${data.ultimaColumna} (${data.fechaTexto})` : "Sin datos";
+            document.getElementById("lblUltimaEtapa").textContent = txt;
+         });
 
-    function cargarPlano(tag) {
-       limpiarPlano();
-       const msg = document.getElementById("msgPlano");
-       msg.textContent = "Buscando plano...";
-       
-       callApi('vistaPlano', { tag }).then(res => {
-          // Lógica de desempaquetado:
-          // Si éxito: res = { ok: true, data: { ok: true, url: "...", mensaje: "..." } }
-          // Si error: res = { ok: false, mensaje: "No encontrado" } (devuelto directo por doPost)
-          
-          const data = (res.ok && res.data) ? res.data : res;
+         // 2. Obtener Estado
+         callApi('estadoTag', { fila }).then(res => {
+            // CORRECCIÓN: Leer desde res.data
+            const data = res.data || {};
+            const lbl = document.getElementById("lblEstado");
+            lbl.textContent = data.estado || "SIN INICIO";
+            lbl.className = `estado-${data.color || 'gray'}`;
+         });
 
-          if(data.ok && data.url) {
-             // ÉXITO
-             const iframe = document.getElementById("iframePlano");
-             iframe.src = data.url;
-             iframe.classList.remove("d-none");
-             document.getElementById("imgPlanoFallback").classList.add("d-none");
-             msg.textContent = data.mensaje;
-             
-             const btn = document.getElementById("btnAbrirPlano");
-             // Convertir URL de preview a view para pantalla completa
-             btn.href = data.url.replace('/preview', '/view');
-             btn.classList.remove("d-none");
-          } else {
-             // FALLO / NO ENCONTRADO
-             msg.textContent = data.mensaje || "Plano no encontrado.";
-          }
-       }).catch(e => {
-          console.error(e);
-          msg.textContent = "Error de conexión al buscar plano.";
-       });
-    }
+         // 3. Cargar Plano
+         cargarPlano(tag);
+      }
 
-    function guardar(overwrite) {
-       // 1. Validaciones
-       if (!filaSeleccionada) {
-          alert("Por favor, seleccione un TAG de la búsqueda primero.");
-          return;
-       }
-       const etapa = document.getElementById("cmbEtapa").value;
-       const fechaISO = document.getElementById("dtFecha").value;
-       
-       if (!etapa) {
-          alert("Seleccione una Etapa.");
-          return;
-       }
-       if (!fechaISO) {
-          alert("Seleccione una Fecha.");
-          return;
-       }
+      function limpiarPlano() {
+         document.getElementById("imgPlanoFallback").classList.remove("d-none");
+         document.getElementById("iframePlano").classList.add("d-none");
+         document.getElementById("btnAbrirPlano").classList.add("d-none");
+         document.getElementById("msgPlano").textContent = "Selecciona un TAG";
+      }
 
-       // 2. UI Loading
-       const msg = document.getElementById("msgEstado");
-       const btnG = document.getElementById("btnGuardar");
-       const btnS = document.getElementById("btnSobrescribir");
-       
-       msg.textContent = "Guardando..."; 
-       msg.className = "msg loading";
-       btnG.disabled = true; 
-       btnS.disabled = true;
+      function cargarPlano(tag) {
+         limpiarPlano();
+         const msg = document.getElementById("msgPlano");
+         msg.textContent = "Buscando plano...";
 
-       // 3. Llamada al API
-       callApi('registrarFecha', { 
-          fila: filaSeleccionada, 
-          etapa: etapa, 
-          fechaISO: fechaISO, 
-          overwrite: overwrite 
-       })
-       .then(res => {
-          // Reactivar botones
-          btnG.disabled = false; 
-          btnS.disabled = false;
+         callApi('vistaPlano', { tag }).then(res => {
+            // Lógica de desempaquetado:
+            // Si éxito: res = { ok: true, data: { ok: true, url: "...", mensaje: "..." } }
+            // Si error: res = { ok: false, mensaje: "No encontrado" } (devuelto directo por doPost)
 
-          // CORRECCIÓN: Leer la respuesta interna (res.data)
-          const data = res.data || {};
+            const data = (res.ok && res.data) ? res.data : res;
 
-          if (res.ok && data.ok) {
-             // ÉXITO REAL
-             msg.textContent = data.msg || "Registrado correctamente.";
-             msg.className = "msg ok";
-             cargarLog(); // Actualizar tabla de log
-             
-             // Opcional: Actualizar texto de última etapa en la UI inmediata
-             document.getElementById("lblUltimaEtapa").textContent = `${etapa} (${fechaISO})`;
-          } else {
-             // ERROR LÓGICO (Ej: Ya existe fecha) O DE SERVIDOR
-             const errorMsg = data.msg || res.error || "Ya existe una fecha anterior, intente Sobrescribir";
-             msg.textContent = errorMsg;
-             msg.className = "msg error";
-          }
-       })
-       .catch(e => {
-          console.error(e);
-          btnG.disabled = false; 
-          btnS.disabled = false;
-          msg.textContent = "Error de conexión."; 
-          msg.className = "msg error";
-       });
-    }
+            if (data.ok && data.url) {
+               // ÉXITO
+               const iframe = document.getElementById("iframePlano");
+               iframe.src = data.url;
+               iframe.classList.remove("d-none");
+               document.getElementById("imgPlanoFallback").classList.add("d-none");
+               msg.textContent = data.mensaje;
 
-    function cargarLog(){
-       const tbody = document.getElementById("tbodyLog");
-       callApi('getChangeLogUltimos', {n:30}).then(rows => {
-          if(!rows.length) { tbody.innerHTML = "<tr><td colspan='6'>Vacío</td></tr>"; return; }
-          let h = "";
-          rows.forEach(r => {
-             let f = r.FechaHora;
-             try { f = new Date(r.FechaHora).toLocaleString(); } catch(e){}
-             h += `<tr>
+               const btn = document.getElementById("btnAbrirPlano");
+               // Convertir URL de preview a view para pantalla completa
+               btn.href = data.url.replace('/preview', '/view');
+               btn.classList.remove("d-none");
+            } else {
+               // FALLO / NO ENCONTRADO
+               msg.textContent = data.mensaje || "Plano no encontrado.";
+            }
+         }).catch(e => {
+            console.error(e);
+            msg.textContent = "Error de conexión al buscar plano.";
+         });
+      }
+
+      function guardar(overwrite) {
+         // 1. Validaciones
+         if (!filaSeleccionada) {
+            alert("Por favor, seleccione un TAG de la búsqueda primero.");
+            return;
+         }
+         const etapa = document.getElementById("cmbEtapa").value;
+         const fechaISO = document.getElementById("dtFecha").value;
+
+         if (!etapa) {
+            alert("Seleccione una Etapa.");
+            return;
+         }
+         if (!fechaISO) {
+            alert("Seleccione una Fecha.");
+            return;
+         }
+
+         // 2. UI Loading
+         const msg = document.getElementById("msgEstado");
+         const btnG = document.getElementById("btnGuardar");
+         const btnS = document.getElementById("btnSobrescribir");
+
+         msg.textContent = "Guardando...";
+         msg.className = "msg loading";
+         btnG.disabled = true;
+         btnS.disabled = true;
+
+         // 3. Llamada al API
+         callApi('registrarFecha', {
+            fila: filaSeleccionada,
+            etapa: etapa,
+            fechaISO: fechaISO,
+            overwrite: overwrite
+         })
+            .then(res => {
+               // Reactivar botones
+               btnG.disabled = false;
+               btnS.disabled = false;
+
+               // CORRECCIÓN: Leer la respuesta interna (res.data)
+               const data = res.data || {};
+
+               if (res.ok && data.ok) {
+                  // ÉXITO REAL
+                  msg.textContent = data.msg || "Registrado correctamente.";
+                  msg.className = "msg ok";
+                  cargarLog(); // Actualizar tabla de log
+
+                  // Opcional: Actualizar texto de última etapa en la UI inmediata
+                  document.getElementById("lblUltimaEtapa").textContent = `${etapa} (${fechaISO})`;
+               } else {
+                  // ERROR LÓGICO (Ej: Ya existe fecha) O DE SERVIDOR
+                  const errorMsg = data.msg || res.error || "Ya existe una fecha anterior, intente Sobrescribir";
+                  msg.textContent = errorMsg;
+                  msg.className = "msg error";
+               }
+            })
+            .catch(e => {
+               console.error(e);
+               btnG.disabled = false;
+               btnS.disabled = false;
+               msg.textContent = "Error de conexión.";
+               msg.className = "msg error";
+            });
+      }
+
+      function cargarLog() {
+         const tbody = document.getElementById("tbodyLog");
+         callApi('getChangeLogUltimos', { n: 30 }).then(rows => {
+            if (!rows.length) { tbody.innerHTML = "<tr><td colspan='6'>Vacío</td></tr>"; return; }
+            let h = "";
+            rows.forEach(r => {
+               let f = r.FechaHora;
+               try { f = new Date(r.FechaHora).toLocaleString(); } catch (e) { }
+               h += `<tr>
                 <td>${f}</td>
-                <td>${(r.Usuario||'').split('@')[0]}</td>
+                <td>${(r.Usuario || '').split('@')[0]}</td>
                 <td>${r.CabeceraColumna}</td>
                 <td>${r.TagSpool}</td>
                 <td class="text-muted">${formatVal(r.ValorAnterior)}</td>
                 <td>${formatVal(r.ValorNuevo)}</td>
              </tr>`;
-          });
-          tbody.innerHTML = h;
-       });
-    }
-    function formatVal(v){
-       if(!v) return "";
-       if(String(v).indexOf("T") > 0) return String(v).split("T")[0];
-       return v;
-    }
+            });
+            tbody.innerHTML = h;
+         });
+      }
+      function formatVal(v) {
+         if (!v) return "";
+         if (String(v).indexOf("T") > 0) return String(v).split("T")[0];
+         return v;
+      }
 
-    // ======================================================
-    // FUNCIONES DE TAB MERGE / UTILIDADES
-    // ======================================================
-    function doMerge() {
-       const txtId = document.getElementById("txtRemote").value.trim();
-       const msg = document.getElementById("msgMerge");
-       const btn = document.getElementById("btnMerge");
+      // ======================================================
+      // FUNCIONES DE TAB MERGE / UTILIDADES
+      // ======================================================
+      function doMerge() {
+         const txtId = document.getElementById("txtRemote").value.trim();
+         const msg = document.getElementById("msgMerge");
+         const btn = document.getElementById("btnMerge");
 
-       if (!txtId) { alert("Ingresa ID Nube."); return; }
-       if(!confirm("¿Iniciar Merge?")) return;
+         if (!txtId) { alert("Ingresa ID Nube."); return; }
+         if (!confirm("¿Iniciar Merge?")) return;
 
-       btn.disabled = true;
-       msg.textContent = "Procesando..."; msg.className = "msg loading d-block";
+         btn.disabled = true;
+         msg.textContent = "Procesando..."; msg.className = "msg loading d-block";
 
-       callApi('merge', { nubeId: txtId }).then(res => {
-          btn.disabled = false;
-          msg.textContent = res.ok ? "Éxito: " + res.msg : "Error: " + res.msg;
-          msg.className = res.ok ? "msg ok d-block" : "msg error d-block";
-          if(res.ok) cargarDashboard();
-       }).catch(e => { btn.disabled=false; msg.textContent="Error red"; msg.className="msg error d-block"; });
-    }
+         callApi('merge', { nubeId: txtId }).then(res => {
+            btn.disabled = false;
+            msg.textContent = res.ok ? "Éxito: " + res.msg : "Error: " + res.msg;
+            msg.className = res.ok ? "msg ok d-block" : "msg error d-block";
+            if (res.ok) cargarDashboard();
+         }).catch(e => { btn.disabled = false; msg.textContent = "Error red"; msg.className = "msg error d-block"; });
+      }
 
-    function doExportExcel() {
-       const msg = document.getElementById("msgExcel");
-       const btn = document.getElementById("btnExcel");
-       btn.disabled = true; msg.textContent = "Generando..."; msg.className = "msg loading d-block";
+      function doExportExcel() {
+         const msg = document.getElementById("msgExcel");
+         const btn = document.getElementById("btnExcel");
+         btn.disabled = true; msg.textContent = "Generando..."; msg.className = "msg loading d-block";
 
-       callApi('exportExcel').then(res => {
-          if (res.ok && res.url) {
-             msg.textContent = "Descargando...";
-             fetch(res.url, { headers: { 'Authorization': 'Bearer ' + res.token } })
-               .then(r => r.blob())
-               .then(blob => {
-                  const url = window.URL.createObjectURL(blob);
-                  const a = document.createElement('a'); a.href = url; a.download = res.filename;
-                  document.body.appendChild(a); a.click(); a.remove();
-                  msg.textContent = "Listo."; msg.className = "msg ok d-block"; btn.disabled = false;
-               });
-          } else {
-             msg.textContent = "Error"; msg.className = "msg error d-block"; btn.disabled = false;
-          }
-       });
-    }
+         callApi('exportExcel').then(res => {
+            if (res.ok && res.url) {
+               msg.textContent = "Descargando...";
+               fetch(res.url, { headers: { 'Authorization': 'Bearer ' + res.token } })
+                  .then(r => r.blob())
+                  .then(blob => {
+                     const url = window.URL.createObjectURL(blob);
+                     const a = document.createElement('a'); a.href = url; a.download = res.filename;
+                     document.body.appendChild(a); a.click(); a.remove();
+                     msg.textContent = "Listo."; msg.className = "msg ok d-block"; btn.disabled = false;
+                  });
+            } else {
+               msg.textContent = "Error"; msg.className = "msg error d-block"; btn.disabled = false;
+            }
+         });
+      }
 
-    // ======================================================
-    // DASHBOARD & CHARTS (CORREGIDO: usa cant_ok)
-    // ======================================================
-    let chartFunnel=null, chartStat=null, chartAtr=null, chartRep=null, chartPend=null, chartProm=null;
+      // ======================================================
+      // DASHBOARD & CHARTS (CORREGIDO: usa cant_ok)
+      // ======================================================
+      let chartFunnel = null, chartStat = null, chartAtr = null, chartRep = null, chartPend = null, chartProm = null;
 
-    function cargarDashboard() {
-       callApi('dashboardKPIs').then(res => {
-          if (res.ok && res.data) {
-             const k = res.data;
-             document.getElementById("kpi-total").textContent = k.total;
-             // CORRECCION: Usa cant_ok
-             document.getElementById("kpi-ok").textContent = k.cant_ok; 
-             document.getElementById("kpi-activos").textContent = k.activos;
-             document.getElementById("kpi-proceso").textContent = k.proceso;
-             document.getElementById("kpi-pend").textContent = k.pend;
-             document.getElementById("kpi-atr").textContent = k.atr;
-             
-             dibujarFunnel(k);
-             updateLastRefreshTime();
-          } else {
-             console.error("Error KPI:", res.error);
-             document.getElementById("kpi-ok").innerHTML = `<span style="color:red;font-size:12px">${res.error||"Error"}</span>`;
-          }
-       }).catch(e => console.error("Red KPI:", e));
+      function cargarDashboard() {
+         callApi('dashboardKPIs').then(res => {
+            if (res.ok && res.data) {
+               const k = res.data;
+               document.getElementById("kpi-total").textContent = k.total;
+               // CORRECCION: Usa cant_ok
+               document.getElementById("kpi-ok").textContent = k.cant_ok;
+               document.getElementById("kpi-activos").textContent = k.activos;
+               document.getElementById("kpi-proceso").textContent = k.proceso;
+               document.getElementById("kpi-pend").textContent = k.pend;
+               document.getElementById("kpi-atr").textContent = k.atr;
 
-       callApi('graficoStatusFluor').then(res => {
-          if(res.ok && res.data) dibujarBarra(res.data, 'chartLiberados', 'Status', '#1a2b48');
-       });
-       callApi('graficoAtrasos').then(res => {
-          if(res.ok && res.data) dibujarBarra(res.data, 'chartAtraso', 'Spools', '#d93025');
-       });
-       
-       cargarReporteHoy();
-       cargarPendientes();
-       cargarPromedios();
-    }
+               dibujarFunnel(k);
+               updateLastRefreshTime();
+            } else {
+               console.error("Error KPI:", res.error);
+               document.getElementById("kpi-ok").innerHTML = `<span style="color:red;font-size:12px">${res.error || "Error"}</span>`;
+            }
+         }).catch(e => console.error("Red KPI:", e));
 
-    function dibujarFunnel(k) {
-       const ctx = document.getElementById("chartFunnel");
-       if(chartFunnel) chartFunnel.destroy();
-       
-       chartFunnel = new Chart(ctx, {
-          type: 'bar',
-          data: {
-             labels: ['Total', 'Activos', '0-30 días', '31-60 días', '61+ días'],
-             datasets: [{
-                label: 'Spools',
-                data: [k.total, k.activos, k.proceso, k.pend, k.atr],
-                backgroundColor: ['#e0e0e0', '#1a2b48', '#3b82f6', '#f59e0b', '#d93025']
-             }]
-          },
-          options: { indexAxis: 'y', plugins: { legend: {display:false} } }
-       });
-    }
+         callApi('graficoStatusFluor').then(res => {
+            if (res.ok && res.data) dibujarBarra(res.data, 'chartLiberados', 'Status', '#1a2b48');
+         });
+         callApi('graficoAtrasos').then(res => {
+            if (res.ok && res.data) dibujarBarra(res.data, 'chartAtraso', 'Spools', '#d93025');
+         });
+         // ... (dentro de cargarDashboard) ...
 
-    function dibujarBarra(data, idCanvas, label, color) {
+         // Nuevo Gráfico Mensual
+         callApi('graficoDespachosMes').then(res => {
+            if (res.ok && res.data) {
+               dibujarGraficoTendencia(res.data, 'chartDespachosMes', 'Cant. Despachada');
+            }
+         });
+         cargarReporteHoy();
+         cargarPendientes();
+         cargarPromedios();
+      }
+
+      function dibujarFunnel(k) {
+         const ctx = document.getElementById("chartFunnel");
+         if (chartFunnel) chartFunnel.destroy();
+
+         chartFunnel = new Chart(ctx, {
+            type: 'bar',
+            data: {
+               labels: ['Total', 'Activos', '0-30 días', '31-60 días', '61+ días'],
+               datasets: [{
+                  label: 'Spools',
+                  data: [k.total, k.activos, k.proceso, k.pend, k.atr],
+                  backgroundColor: ['#e0e0e0', '#1a2b48', '#3b82f6', '#f59e0b', '#d93025']
+               }]
+            },
+            options: { indexAxis: 'y', plugins: { legend: { display: false } } }
+         });
+      }
+
+      function dibujarBarra(data, idCanvas, label, color) {
+         const ctx = document.getElementById(idCanvas);
+         const chartExistente = Chart.getChart(idCanvas);
+         if (chartExistente) chartExistente.destroy();
+
+         new Chart(ctx, {
+            type: 'bar',
+            data: {
+               labels: data.labels,
+               datasets: [{
+                  label: label,
+                  data: data.valores,
+                  backgroundColor: color
+               }]
+            },
+            options: { plugins: { legend: { display: false } } }
+         });
+      }
+
+      function cargarReporteHoy() {
+         callApi('reporteChangeLogHoy').then(res => {
+            if (!res.ok) return;
+            const rows = res.data;
+            const tbody = document.getElementById("tbodyReporteHoy");
+            let h = "";
+            let labels = [], dHoy = [], dAnt = [];
+            rows.forEach(r => {
+               h += `<tr><td>${r.columna}</td><td>${r.hoy}</td><td>${r.anteriores}</td></tr>`;
+               labels.push(r.columna);
+               dHoy.push(r.hoy);
+               dAnt.push(r.anteriores);
+            });
+            tbody.innerHTML = h || "<tr><td colspan='3'>Sin datos</td></tr>";
+
+            const ctx = document.getElementById("chartReporteHoy");
+            if (Chart.getChart("chartReporteHoy")) Chart.getChart("chartReporteHoy").destroy();
+            new Chart(ctx, {
+               type: 'bar',
+               data: {
+                  labels: labels,
+                  datasets: [
+                     { label: 'Hoy', data: dHoy, backgroundColor: '#2ea043' },
+                     { label: 'F. Ant.', data: dAnt, backgroundColor: '#ffc107' }
+                  ]
+               },
+               options: { scales: { x: { stacked: true }, y: { stacked: true } } }
+            });
+         });
+      }
+
+      function cargarPendientes() {
+         callApi('pendientesPorEtapa').then(res => {
+            if (!res.ok) return;
+            const rows = res.data;
+            const tbody = document.getElementById("tbodyPendEtapa");
+            let h = "";
+            let labels = [], vals = [];
+            rows.forEach(r => {
+               h += `<tr><td>${r.etapa}</td><td class="text-end fw-bold">${r.cantidad}</td></tr>`;
+               labels.push(r.etapa);
+               vals.push(r.cantidad);
+            });
+            tbody.innerHTML = h || "<tr><td colspan='2'>Sin pendientes</td></tr>";
+
+            const ctx = document.getElementById("chartPendEtapa");
+            if (Chart.getChart("chartPendEtapa")) Chart.getChart("chartPendEtapa").destroy();
+            new Chart(ctx, {
+               type: 'doughnut',
+               data: {
+                  labels: labels,
+                  datasets: [{ data: vals, borderWidth: 1 }]
+               },
+               options: { plugins: { legend: { display: false } } }
+            });
+         });
+      }
+
+      function cargarPromedios() {
+         callApi('promedioTiemposEtapas').then(res => {
+            if (!res.ok) return;
+            const rows = res.data;
+            const tbody = document.getElementById("tbodyPromEtapas");
+            let h = "";
+            rows.forEach(r => {
+               h += `<tr>
+                <td>${r.desde}</td><td>${r.hasta}</td>
+                <td class="fw-bold text-primary">${r.promedioDias}</td>
+                <td>${r.muestras}</td>
+             </tr>`;
+            });
+            tbody.innerHTML = h || "<tr><td colspan='4'>Sin datos</td></tr>";
+         });
+      }
+
+      /*************************************************
+       * EXPORTAR PDF / JPG
+       *************************************************/
+      async function exportKpiPDF() {
+         const { jsPDF } = window.jspdf;
+         const el = document.getElementById("tab-dashboard");
+         const btns = document.querySelectorAll(".btn-export-hide");
+         btns.forEach(b => b.style.visibility = "hidden");
+
+         try {
+            const canvas = await html2canvas(el, { scale: 2, useCORS: true });
+            const imgData = canvas.toDataURL("image/jpeg", 0.95);
+            const pdf = new jsPDF('p', 'mm', 'letter');
+            const pageWidth = 215.9; const pageHeight = 279.4; const margin = 5;
+            const contentWidth = pageWidth - (2 * margin);
+            const contentHeight = pageHeight - (2 * margin);
+            const imgWidth = contentWidth;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            let heightLeft = imgHeight; let position = margin;
+
+            pdf.addImage(imgData, 'JPEG', margin, position, imgWidth, imgHeight);
+            heightLeft -= contentHeight;
+
+            while (heightLeft > 0) {
+               position = -contentHeight + margin;
+               pdf.addPage();
+               pdf.addImage(imgData, 'JPEG', margin, margin - (imgHeight - heightLeft), imgWidth, imgHeight);
+               heightLeft -= contentHeight;
+            }
+            const totalPages = pdf.internal.getNumberOfPages();
+            const fecha = new Date().toLocaleDateString();
+            for (let i = 1; i <= totalPages; i++) {
+               pdf.setPage(i);
+               pdf.setFontSize(8);
+               pdf.setTextColor(150);
+               pdf.text(`Página ${i} de ${totalPages} - ${fecha}`, margin, pageHeight - 2);
+            }
+            pdf.save("Dashboard_MasterBI.pdf");
+         } catch (e) { console.error(e); alert("Error PDF"); }
+         finally { btns.forEach(b => b.style.visibility = "visible"); }
+      }
+
+      async function exportKpiJPG() {
+         const el = document.getElementById("tab-dashboard");
+         const btns = document.querySelectorAll(".btn-export-hide");
+         btns.forEach(b => b.style.visibility = "hidden");
+         try {
+            const originalCanvas = await html2canvas(el, { scale: 2, useCORS: true });
+            const marginPx = 40;
+            const newCanvas = document.createElement("canvas");
+            newCanvas.width = originalCanvas.width + (marginPx * 2);
+            newCanvas.height = originalCanvas.height + (marginPx * 2);
+            const ctx = newCanvas.getContext("2d");
+            ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
+            ctx.drawImage(originalCanvas, marginPx, marginPx);
+            ctx.font = "20px Arial"; ctx.fillStyle = "#888888";
+            ctx.fillText("MasterBI - " + new Date().toLocaleDateString(), marginPx, newCanvas.height - 10);
+            const a = document.createElement("a");
+            a.href = newCanvas.toDataURL("image/jpeg", 0.95); a.download = "Dashboard_MasterBI.jpg";
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+         } catch (e) { console.error(e); alert("Error JPG"); }
+         finally { btns.forEach(b => b.style.visibility = "visible"); }
+      }
+
+      function dibujarGraficoTendencia(data, idCanvas, label) {
        const ctx = document.getElementById(idCanvas);
-       const chartExistente = Chart.getChart(idCanvas);
-       if(chartExistente) chartExistente.destroy();
+       if(Chart.getChart(idCanvas)) Chart.getChart(idCanvas).destroy();
 
        new Chart(ctx, {
-          type: 'bar',
+          type: 'bar', // Puedes cambiar a 'line' si prefieres una línea
           data: {
              labels: data.labels,
              datasets: [{
                 label: label,
                 data: data.valores,
-                backgroundColor: color
+                backgroundColor: '#2ea043', // Color verde OK
+                borderColor: '#1e7e34',
+                borderWidth: 1,
+                borderRadius: 4, // Bordes redondeados en barras
+                fill: true
              }]
           },
-          options: { plugins: { legend: {display:false} } }
-       });
-    }
-
-    function cargarReporteHoy() {
-       callApi('reporteChangeLogHoy').then(res => {
-          if(!res.ok) return;
-          const rows = res.data;
-          const tbody = document.getElementById("tbodyReporteHoy");
-          let h = "";
-          let labels=[], dHoy=[], dAnt=[];
-          rows.forEach(r => {
-             h += `<tr><td>${r.columna}</td><td>${r.hoy}</td><td>${r.anteriores}</td></tr>`;
-             labels.push(r.columna);
-             dHoy.push(r.hoy);
-             dAnt.push(r.anteriores);
-          });
-          tbody.innerHTML = h || "<tr><td colspan='3'>Sin datos</td></tr>";
-
-          const ctx = document.getElementById("chartReporteHoy");
-          if(Chart.getChart("chartReporteHoy")) Chart.getChart("chartReporteHoy").destroy();
-          new Chart(ctx, {
-             type: 'bar',
-             data: {
-                labels: labels,
-                datasets: [
-                   { label: 'Hoy', data: dHoy, backgroundColor: '#2ea043' },
-                   { label: 'F. Ant.', data: dAnt, backgroundColor: '#ffc107' }
-                ]
+          options: {
+             responsive: true,
+             maintainAspectRatio: false,
+             plugins: {
+                legend: { display: false },
+                tooltip: { mode: 'index', intersect: false }
              },
-             options: { scales: { x: {stacked:true}, y:{stacked:true} } }
-          });
-       });
-    }
-
-    function cargarPendientes() {
-       callApi('pendientesPorEtapa').then(res => {
-          if(!res.ok) return;
-          const rows = res.data;
-          const tbody = document.getElementById("tbodyPendEtapa");
-          let h = "";
-          let labels=[], vals=[];
-          rows.forEach(r => {
-             h += `<tr><td>${r.etapa}</td><td class="text-end fw-bold">${r.cantidad}</td></tr>`;
-             labels.push(r.etapa);
-             vals.push(r.cantidad);
-          });
-          tbody.innerHTML = h || "<tr><td colspan='2'>Sin pendientes</td></tr>";
-          
-          const ctx = document.getElementById("chartPendEtapa");
-          if(Chart.getChart("chartPendEtapa")) Chart.getChart("chartPendEtapa").destroy();
-          new Chart(ctx, {
-             type: 'doughnut',
-             data: {
-                labels: labels,
-                datasets: [{ data: vals, borderWidth:1 }]
-             },
-             options: { plugins: { legend: {display:false} } }
-          });
-       });
-    }
-
-    function cargarPromedios() {
-       callApi('promedioTiemposEtapas').then(res => {
-          if(!res.ok) return;
-          const rows = res.data;
-          const tbody = document.getElementById("tbodyPromEtapas");
-          let h = "";
-          rows.forEach(r => {
-             h += `<tr>
-                <td>${r.desde}</td><td>${r.hasta}</td>
-                <td class="fw-bold text-primary">${r.promedioDias}</td>
-                <td>${r.muestras}</td>
-             </tr>`;
-          });
-          tbody.innerHTML = h || "<tr><td colspan='4'>Sin datos</td></tr>";
-       });
-    }
-
-    /*************************************************
-     * EXPORTAR PDF / JPG
-     *************************************************/
-    async function exportKpiPDF() {
-       const { jsPDF } = window.jspdf; 
-       const el = document.getElementById("tab-dashboard");
-       const btns = document.querySelectorAll(".btn-export-hide");
-       btns.forEach(b => b.style.visibility = "hidden");
-
-       try {
-          const canvas = await html2canvas(el, { scale: 2, useCORS: true });
-          const imgData = canvas.toDataURL("image/jpeg", 0.95);
-          const pdf = new jsPDF('p', 'mm', 'letter');
-          const pageWidth = 215.9; const pageHeight = 279.4; const margin = 5; 
-          const contentWidth = pageWidth - (2 * margin);
-          const contentHeight = pageHeight - (2 * margin);
-          const imgWidth = contentWidth; 
-          const imgHeight = (canvas.height * imgWidth) / canvas.width;
-          let heightLeft = imgHeight; let position = margin; 
-
-          pdf.addImage(imgData, 'JPEG', margin, position, imgWidth, imgHeight);
-          heightLeft -= contentHeight;
-
-          while (heightLeft > 0) {
-             position = -contentHeight + margin; 
-             pdf.addPage();
-             pdf.addImage(imgData, 'JPEG', margin, margin - (imgHeight - heightLeft), imgWidth, imgHeight);
-             heightLeft -= contentHeight;
+             scales: {
+                y: { beginAtZero: true, grid: { borderDash: [2, 2] } },
+                x: { grid: { display: false } }
+             }
           }
-          const totalPages = pdf.internal.getNumberOfPages();
-          const fecha = new Date().toLocaleDateString();
-          for (let i = 1; i <= totalPages; i++) {
-             pdf.setPage(i);
-             pdf.setFontSize(8);
-             pdf.setTextColor(150);
-             pdf.text(`Página ${i} de ${totalPages} - ${fecha}`, margin, pageHeight - 2);
-          }
-          pdf.save("Dashboard_MasterBI.pdf");
-       } catch(e) { console.error(e); alert("Error PDF"); } 
-       finally { btns.forEach(b => b.style.visibility = "visible"); }
+       });
     }
-
-    async function exportKpiJPG() {
-       const el = document.getElementById("tab-dashboard");
-       const btns = document.querySelectorAll(".btn-export-hide");
-       btns.forEach(b => b.style.visibility = "hidden");
-       try {
-          const originalCanvas = await html2canvas(el, { scale: 2, useCORS: true });
-          const marginPx = 40; 
-          const newCanvas = document.createElement("canvas");
-          newCanvas.width = originalCanvas.width + (marginPx * 2);
-          newCanvas.height = originalCanvas.height + (marginPx * 2);
-          const ctx = newCanvas.getContext("2d");
-          ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
-          ctx.drawImage(originalCanvas, marginPx, marginPx);
-          ctx.font = "20px Arial"; ctx.fillStyle = "#888888";
-          ctx.fillText("MasterBI - " + new Date().toLocaleDateString(), marginPx, newCanvas.height - 10);
-          const a = document.createElement("a");
-          a.href = newCanvas.toDataURL("image/jpeg", 0.95); a.download = "Dashboard_MasterBI.jpg";
-          document.body.appendChild(a); a.click(); document.body.removeChild(a);
-       } catch (e) { console.error(e); alert("Error JPG"); } 
-       finally { btns.forEach(b => b.style.visibility = "visible"); }
-    }
-  </script>
+   </script>
 </body>
+
 </html>
