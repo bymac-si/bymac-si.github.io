@@ -377,7 +377,7 @@
                      </span>
                   </div>
                   <div class="d-flex gap-2">
-                     <h5>Exportar:</h5>
+                     <h5 class="btn-export-hide">Exportar:</h5>
                      <button class="btn btn-secondary btn-sm btn-export-hide" onclick="exportKpiPDF()">PDF</button>
                      <button class="btn btn-secondary btn-sm btn-export-hide" onclick="exportKpiJPG()">JPG</button>
                   </div>
@@ -711,15 +711,21 @@
 
          // 1. Obtener Última Etapa
          callApi('ultimaEtapa', { fila }).then(res => {
-            // CORRECCIÓN: Leer desde res.data
             const data = res.data || {};
-            let txt = (data.ultimaColumna) ? `${data.ultimaColumna} (${data.fechaTexto})` : "Sin datos";
+
+            let fechaLatam = data.fechaTexto; // Viene como yyyy-mm-dd
+
+            // --- CORRECCIÓN DE FORMATO AQUÍ ---
+            if (fechaLatam && fechaLatam.includes('-')) {
+               fechaLatam = fechaLatam.split('-').reverse().join('/');
+            }
+
+            let txt = (data.ultimaColumna) ? `${data.ultimaColumna} (${fechaLatam})` : "Sin datos";
             document.getElementById("lblUltimaEtapa").textContent = txt;
          });
 
          // 2. Obtener Estado
          callApi('estadoTag', { fila }).then(res => {
-            // CORRECCIÓN: Leer desde res.data
             const data = res.data || {};
             const lbl = document.getElementById("lblEstado");
             lbl.textContent = data.estado || "SIN INICIO";
@@ -729,7 +735,6 @@
          // 3. Cargar Plano
          cargarPlano(tag);
       }
-
       function limpiarPlano() {
          document.getElementById("imgPlanoFallback").classList.remove("d-none");
          document.getElementById("iframePlano").classList.add("d-none");
@@ -811,20 +816,21 @@
                btnG.disabled = false;
                btnS.disabled = false;
 
-               // CORRECCIÓN: Leer la respuesta interna (res.data)
                const data = res.data || {};
 
                if (res.ok && data.ok) {
                   // ÉXITO REAL
                   msg.textContent = data.msg || "Registrado correctamente.";
                   msg.className = "msg ok";
-                  cargarLog(); // Actualizar tabla de log
+                  cargarLog();
 
-                  // Opcional: Actualizar texto de última etapa en la UI inmediata
-                  document.getElementById("lblUltimaEtapa").textContent = `${etapa} (${fechaISO})`;
+                  // --- CAMBIO DE FORMATO DE FECHA AQUÍ ---
+                  const fechaLatam = fechaISO.split('-').reverse().join('/');
+                  document.getElementById("lblUltimaEtapa").textContent = `${etapa} (${fechaLatam})`;
+
                } else {
-                  // ERROR LÓGICO (Ej: Ya existe fecha) O DE SERVIDOR
-                  const errorMsg = data.msg || res.error || "Ya existe una fecha anterior, intente Sobrescribir";
+                  // ERROR
+                  const errorMsg = data.msg || res.error || "Error desconocido al guardar.";
                   msg.textContent = errorMsg;
                   msg.className = "msg error";
                }
@@ -943,14 +949,14 @@
 
          // Nuevo Gráfico Mensual
          callApi('graficoDespachosMes').then(res => {
-          if(res.ok && res.data) {
-             // Si no hay datos, labels estará vacío
-             if (res.data.labels.length === 0) {
-                 console.warn("No hay datos de despacho para graficar");
-             }
-             dibujarGraficoTendencia(res.data, 'chartDespachosMes', 'Cant. Despachada');
-          }
-       });
+            if (res.ok && res.data) {
+               // Si no hay datos, labels estará vacío
+               if (res.data.labels.length === 0) {
+                  console.warn("No hay datos de despacho para graficar");
+               }
+               dibujarGraficoTendencia(res.data, 'chartDespachosMes', 'Cant. Despachada');
+            }
+         });
 
          cargarReporteHoy();
          cargarPendientes();
@@ -1133,33 +1139,33 @@
          finally { btns.forEach(b => b.style.visibility = "visible"); }
       }
 
-     function dibujarGraficoTendencia(data, idCanvas, label) {
-       const ctx = document.getElementById(idCanvas);
-       if(!ctx) return; // Seguridad si no encuentra el canvas
-       
-       if(Chart.getChart(idCanvas)) Chart.getChart(idCanvas).destroy();
+      function dibujarGraficoTendencia(data, idCanvas, label) {
+         const ctx = document.getElementById(idCanvas);
+         if (!ctx) return; // Seguridad si no encuentra el canvas
 
-       new Chart(ctx, {
-          type: 'bar',
-          data: {
-             labels: data.labels,
-             datasets: [{
-                label: label,
-                data: data.valores,
-                backgroundColor: '#2ea043',
-                borderRadius: 4
-             }]
-          },
-          options: {
-             responsive: true,
-             maintainAspectRatio: false,
-             plugins: { legend: { display: false } },
-             scales: {
-                y: { beginAtZero: true }
-             }
-          }
-       });
-    }
+         if (Chart.getChart(idCanvas)) Chart.getChart(idCanvas).destroy();
+
+         new Chart(ctx, {
+            type: 'bar',
+            data: {
+               labels: data.labels,
+               datasets: [{
+                  label: label,
+                  data: data.valores,
+                  backgroundColor: '#2ea043',
+                  borderRadius: 4
+               }]
+            },
+            options: {
+               responsive: true,
+               maintainAspectRatio: false,
+               plugins: { legend: { display: false } },
+               scales: {
+                  y: { beginAtZero: true }
+               }
+            }
+         });
+      }
    </script>
 </body>
 
