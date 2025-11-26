@@ -2,731 +2,625 @@
 <html lang="es">
 
 <head>
-  <meta charset="UTF-8">
-  <title>Panel MasterBI · Tag Spool</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>Panel MasterBI · Tag Spool</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-  <style>
-    :root {
-      --bymac-primary: #1a2b48;
-      --bymac-accent: #e74e35;
-      --bymac-bg: #f5f7fb;
-      --green-ok: #2ea043;
-      --blue-proceso: #1a2b48;
-    }
+    <style>
+        :root {
+            --bymac-primary: #1a2b48;
+            --bymac-bg: #f5f7fb;
+        }
 
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      font-size: 14px;
-      padding: 8px;
-      background-color: var(--bymac-bg);
-    }
+        body {
+            font-family: system-ui, sans-serif;
+            font-size: 14px;
+            padding: 8px;
+            background-color: var(--bymac-bg);
+        }
 
-    .tab { font-weight: 600; color: #1a2b48; }
-    
-    @media (min-width: 768px) {
-      body { padding: 16px; }
-    }
+        .tab {
+            font-weight: 600;
+            color: #1a2b48;
+        }
 
-    .bymac-header {
-      background: linear-gradient(90deg, #a0c0f6, #3c475a);
-      color: #fff;
-      border-radius: 10px;
-      padding: 14px 18px;
-      margin-bottom: 12px;
-      box-shadow: 0 12px 30px rgba(10, 20, 40, 0.18);
-      text-shadow: 2px 2px 0px #555;
-    }
+        @media (min-width: 768px) {
+            body {
+                padding: 16px;
+            }
+        }
 
-    .bymac-header h1 { margin: 0; font-size: 22px; }
-    .card { border-radius: 10px; border: 1px solid #e1e4ee; }
-    .tag-seleccionado { font-weight: bold; color: #0b5394; word-break: break-word; }
-    
-    .plano-frame {
-      width: 100%;
-      min-height: clamp(200px, 40vh, 420px);
-      border-radius: 8px;
-      border: 1px solid #e1e4ee;
-      background: #eee;
-    }
+        .card {
+            border-radius: 10px;
+            border: 1px solid #e1e4ee;
+        }
 
-    /* KPI BOXES */
-    .kpi-box {
-      padding: 12px;
-      border-radius: 8px;
-      background: #fff;
-      border: 1px solid #e1e4ee;
-      text-align: center;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-    .kpi-title { font-size: 13px; color: #666; font-weight: 600; margin-bottom: 4px; }
-    .kpi-value { font-size: 24px; font-weight: 800; }
-    
-    .kpi-green { color: var(--green-ok); }
-    .kpi-blue { color: var(--blue-proceso); }
-    .kpi-yellow { color: #b58900; }
-    .kpi-red { color: #d93025; }
-    .kpi-muted { color: #888; }
+        .tag-seleccionado {
+            font-weight: bold;
+            color: #0b5394;
+        }
 
-    /* ESTADOS */
-    .estado-green { color: var(--green-ok); font-weight: bold; }
-    .estado-blue { color: var(--blue-proceso); font-weight: bold; }
-    .estado-yellow { color: #b58900; font-weight: bold; }
-    .estado-red { color: #d93025; font-weight: bold; }
-    .estado-gray { color: #666; font-weight: bold; }
+        .plano-frame {
+            width: 100%;
+            min-height: 420px;
+            background: #eee;
+            border-radius: 8px;
+        }
 
-    /* UTILIDADES */
-    .msg {
-      font-size: 13px; padding: 4px 6px; border-radius: 6px; display: inline-block;
-      margin-top: 4px; font-weight: 600;
-    }
-    .msg.ok { color: #0f5132; background-color: #d1e7dd; border: 1px solid #badbcc; }
-    .msg.error { color: #842029; background-color: #f8d7da; border: 1px solid #f5c2c7; }
-    .msg.loading { color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; }
-  </style>
+        /* KPI BOXES */
+        .kpi-box {
+            padding: 12px;
+            border-radius: 8px;
+            background: #fff;
+            border: 1px solid #e1e4ee;
+            text-align: center;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .kpi-title {
+            font-size: 13px;
+            color: #666;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .kpi-value {
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .kpi-green {
+            color: #2ea043;
+        }
+
+        .kpi-blue {
+            color: #1a2b48;
+        }
+
+        .kpi-yellow {
+            color: #b58900;
+        }
+
+        .kpi-red {
+            color: #d93025;
+        }
+
+        .kpi-muted {
+            color: #888;
+        }
+
+        .text-info {
+            color: #0dcaf0;
+        }
+
+        /* UTILIDADES */
+        .msg {
+            font-size: 13px;
+            padding: 4px 6px;
+            border-radius: 6px;
+            display: inline-block;
+            font-weight: 600;
+        }
+
+        .msg.ok {
+            color: #0f5132;
+            background: #d1e7dd;
+        }
+
+        .msg.error {
+            color: #842029;
+            background: #f8d7da;
+        }
+
+        .msg.loading {
+            color: #856404;
+            background: #fff3cd;
+        }
+    </style>
 </head>
 
 <body class="d-flex flex-column min-vh-100">
+    <main class="container-fluid px-1 px-sm-2 flex-grow-1">
 
-  <main class="container-fluid px-1 px-sm-2 flex-grow-1">
-
-    <div class="bymac-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
-      <h1>
-        <img src="https://bymac-si.github.io/img/logo_imma.png" alt="IMMA" style="width: 100px;">
-        Panel MasterBI · Tag Spool
-      </h1>
-      <div class="text-start text-md-end mt-2 mt-md-0">
-        <div style="font-size:18px;font-weight:bold">IMMA · Soluciones en Piping</div>
-        <div style="font-size:10px;opacity:.8">byMAC · Desarrollo Web & Integraciones</div>
-      </div>
-    </div>
-
-    <div class="card shadow-sm">
-      <ul class="nav nav-tabs mb-3" id="tabsPanel" role="tablist">
-        <li class="nav-item">
-          <button class="nav-link active tab" data-bs-toggle="tab" data-bs-target="#tab-fechas" type="button">Fechas por TAG</button>
-        </li>
-        <li class="nav-item">
-          <button class="nav-link tab" data-bs-toggle="tab" data-bs-target="#tab-merge" type="button">Merge / Utilidades</button>
-        </li>
-        <li class="nav-item">
-          <button class="nav-link tab" data-bs-toggle="tab" data-bs-target="#tab-log" type="button">ChangeLog</button>
-        </li>
-        <li class="nav-item">
-          <button class="nav-link tab" data-bs-toggle="tab" data-bs-target="#tab-dashboard" type="button">Dashboard KPI</button>
-        </li>
-      </ul>
-
-      <div class="tab-content p-3">
-        
-        <div class="tab-pane fade show active" id="tab-fechas" role="tabpanel">
-          <div class="row g-3">
-            <div class="col-12">
-              <div class="card shadow-sm">
-                <div class="card-body">
-                  <h5 class="card-title mb-2">Buscar TAG SPOOL</h5>
-                  <div class="input-group input-group-sm mb-2">
-                    <input type="text" id="txtBuscar" class="form-control" placeholder="Ej: 29044-005" onkeyup="if(event.key === 'Enter') buscarTags()">
-                    <button class="btn btn-primary" onclick="buscarTags()" id="btnBuscar">Buscar</button>
-                  </div>
-                  <div id="contenedorCoincidencias" class="mt-2 border rounded p-1" style="max-height:230px; overflow:auto;">
-                    <div class="text-muted small">Sin resultados aún.</div>
-                  </div>
-                </div>
-              </div>
+        <div class="card mb-3 shadow-sm" style="background: linear-gradient(90deg, #a0c0f6, #3c475a); color: white;">
+            <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-center py-2">
+                <h1 class="m-0 fs-4"><img src="https://bymac-si.github.io/img/logo_imma.png" alt="IMMA"
+                        style="width: 80px; margin-right:10px;">Panel MasterBI</h1>
+                <div class="text-end small opacity-75">IMMA · Soluciones en Piping</div>
             </div>
+        </div>
 
-            <div class="col-12 col-md-6">
-              <div class="card shadow-sm mb-3">
-                <div class="card-body">
-                  <h5 class="card-title">Selección</h5>
-                  <p>TAG: <span id="lblTagSel" class="tag-seleccionado">(ninguno)</span></p>
-                  <p id="lblUltimaEtapa" class="small text-muted mb-1">Última etapa: -</p>
-                  <p class="small mb-0">Estado: <span id="lblEstado" class="estado-gray">SIN INICIO</span></p>
-                </div>
-              </div>
+        <div class="card shadow-sm">
+            <ul class="nav nav-tabs mb-3" id="tabsPanel" role="tablist">
+                <li class="nav-item"><button class="nav-link active tab" data-bs-toggle="tab"
+                        data-bs-target="#tab-fechas">Ingreso Fechas</button></li>
+                <li class="nav-item"><button class="nav-link tab" data-bs-toggle="tab"
+                        data-bs-target="#tab-dashboard">Dashboard KPI</button></li>
+            </ul>
 
-              <div class="card shadow-sm">
-                <div class="card-body">
-                  <h5 class="card-title mb-2">Registrar fecha</h5>
-                  <label class="form-label small">Etapa</label>
-                  <select id="cmbEtapa" class="form-select form-select-sm mb-2"></select>
+            <div class="tab-content p-3">
 
-                  <label class="form-label small">Fecha</label>
-                  <input type="date" id="dtFecha" class="form-control form-control-sm mb-2">
-
-                  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                    <span id="msgEstado" class="msg"></span>
-                    <div class="d-flex gap-1">
-                      <button class="btn btn-secondary btn-sm" onclick="setHoy()">Hoy</button>
-                      <button class="btn btn-primary btn-sm" id="btnGuardar" onclick="guardar(false)">Guardar</button>
-                      <button class="btn btn-danger btn-sm" id="btnSobrescribir" onclick="guardar(true)">Sobrescribir</button>
+                <div class="tab-pane fade show active" id="tab-fechas">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="card shadow-sm p-3">
+                                <h5 class="card-title">Buscar TAG</h5>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" id="txtBuscar" class="form-control" placeholder="Ej: 29044-005"
+                                        onkeyup="if(event.key==='Enter') buscarTags()">
+                                    <button class="btn btn-primary" onclick="buscarTags()"
+                                        id="btnBuscar">Buscar</button>
+                                </div>
+                                <div id="contenedorCoincidencias" class="mt-2 border rounded p-1"
+                                    style="max-height:200px; overflow:auto;">
+                                    <div class="text-muted small">Sin resultados.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="card shadow-sm mb-3 p-3">
+                                <h5 class="card-title">Selección</h5>
+                                <p class="mb-1">TAG: <span id="lblTagSel" class="tag-seleccionado">-</span></p>
+                                <p class="mb-1 small text-muted" id="lblUltimaEtapa">Última etapa: -</p>
+                                <p class="mb-0 small">Estado: <span id="lblEstado">SIN INICIO</span></p>
+                            </div>
+                            <div class="card shadow-sm p-3">
+                                <h5 class="card-title">Registrar</h5>
+                                <select id="cmbEtapa" class="form-select form-select-sm mb-2"></select>
+                                <input type="date" id="dtFecha" class="form-control form-control-sm mb-2">
+                                <div class="d-flex gap-2 align-items-center">
+                                    <button class="btn btn-secondary btn-sm" onclick="setHoy()">Hoy</button>
+                                    <button class="btn btn-primary btn-sm" id="btnGuardar"
+                                        onclick="guardar(false)">Guardar</button>
+                                    <button class="btn btn-danger btn-sm" id="btnSobrescribir"
+                                        onclick="guardar(true)">Sobrescribir</button>
+                                    <span id="msgEstado" class="msg ms-auto"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="card shadow-sm h-100 p-3">
+                                <div class="d-flex justify-content-between">
+                                    <h5 class="card-title">Plano</h5>
+                                    <a id="btnAbrirPlano" href="#" target="_blank"
+                                        class="btn btn-sm btn-outline-primary d-none"><i
+                                            class="bi bi-box-arrow-up-right"></i></a>
+                                </div>
+                                <div class="flex-grow-1 bg-light border rounded d-flex justify-content-center align-items-center"
+                                    style="min-height:300px;">
+                                    <img id="imgPlanoFallback" src="https://bymac-si.github.io/img/not-found.png"
+                                        style="max-width:100%; max-height:300px;">
+                                    <iframe id="iframePlano" class="w-100 h-100 d-none"></iframe>
+                                </div>
+                                <div id="msgPlano" class="small text-muted text-center mt-1">Selecciona TAG</div>
+                            </div>
+                        </div>
                     </div>
-                  </div>
                 </div>
-              </div>
-            </div>
 
-            <div class="col-12 col-md-6">
-              <div class="card shadow-sm h-100">
-                <div class="card-body d-flex flex-column">
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h5 class="card-title mb-0">Plano asociado</h5>
-                    <a id="btnAbrirPlano" href="#" target="_blank" class="btn btn-sm btn-outline-primary d-none">
-                      <i class="bi bi-box-arrow-up-right"></i> Abrir fuera
-                    </a>
-                  </div>
-
-                  <div class="flex-grow-1 d-flex flex-column justify-content-center bg-light border rounded">
-                     <img id="imgPlanoFallback" class="plano-frame" src="https://bymac-si.github.io/img/not-found.png" style="object-fit:contain">
-                     <iframe id="iframePlano" class="plano-frame d-none" allow="autoplay"></iframe>
-                  </div>
-                  <div id="msgPlano" class="small text-muted mt-1 text-center">Selecciona un TAG.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="tab-pane fade" id="tab-merge" role="tabpanel">
-          <div class="row g-3">
-            <div class="col-12 col-md-7">
-              <div class="card shadow-sm h-100">
-                <div class="card-body">
-                  <h5 class="card-title mb-2 text-primary"><i class="bi bi-arrow-repeat"></i> Merge Local + Nube</h5>
-                  <p class="small text-muted mb-3">Sincroniza MasterBI con la nube. Prioriza la fecha más reciente.</p>
-                  <label class="form-label small fw-bold">ID o URL Nube</label>
-                  <div class="input-group mb-3">
-                    <span class="input-group-text"><i class="bi bi-cloud"></i></span>
-                    <input id="txtRemote" type="text" class="form-control" placeholder="Ej: 1ih2lTVmf...">
-                  </div>
-                  <button id="btnMerge" class="btn btn-primary w-100" onclick="doMerge()">
-                    <i class="bi bi-play-fill"></i> Ejecutar Merge
-                  </button>
-                  <div id="msgMerge" class="msg mt-2 d-none"></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12 col-md-5">
-              <div class="card shadow-sm h-100">
-                <div class="card-body d-flex flex-column gap-3">
-                  <div>
-                    <h5 class="card-title mb-2 text-success"><i class="bi bi-file-earmark-excel"></i> Exportar Excel</h5>
-                    <p class="small text-muted mb-2">Descarga solo MasterBI.</p>
-                    <button id="btnExcel" class="btn btn-success w-100" onclick="doExportExcel()">Descargar .xlsx</button>
-                    <div id="msgExcel" class="msg mt-1 d-none"></div>
-                  </div>
-                  <hr class="my-1">
-                  <div>
-                    <h5 class="card-title mb-2 text-danger"><i class="bi bi-file-earmark-pdf"></i> Importar PDF (OCR)</h5>
-                    <div class="alert alert-light border small mb-0">
-                      <i class="bi bi-info-circle"></i> Usa el menú <b>"🚀 Herramientas MasterBI"</b> en la hoja de cálculo.
+                <div class="tab-pane fade" id="tab-dashboard">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h5 class="mb-0 d-inline-block">Indicadores de Gestión</h5>
+                            <span id="lblLastUpdate" class="badge bg-light text-dark border ms-2 fw-normal"><i
+                                    class="bi bi-clock"></i> ...</span>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline-secondary btn-export-hide"
+                                onclick="exportKpiPDF()">PDF</button>
+                            <button class="btn btn-sm btn-outline-secondary btn-export-hide"
+                                onclick="exportKpiJPG()">JPG</button>
+                        </div>
                     </div>
-                  </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6 col-md-3">
+                            <div class="kpi-box">
+                                <div class="kpi-title">Total Spools</div>
+                                <div id="kpi-total" class="kpi-value">-</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="kpi-box">
+                                <div class="kpi-title">Activos</div>
+                                <div id="kpi-activos" class="kpi-value kpi-blue">-</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="kpi-box">
+                                <div class="kpi-title">Liberados (Stock)</div>
+                                <div id="kpi-lib" class="kpi-value text-info">-</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="kpi-box">
+                                <div class="kpi-title">Despachados</div>
+                                <div id="kpi-desp" class="kpi-value kpi-green">-</div>
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <div class="kpi-box">
+                                <div class="kpi-title">0-30 días</div>
+                                <div id="kpi-proceso" class="kpi-value kpi-blue">-</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="kpi-box">
+                                <div class="kpi-title">31-60 días</div>
+                                <div id="kpi-pend" class="kpi-value kpi-yellow">-</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="kpi-box">
+                                <div class="kpi-title">61+ días</div>
+                                <div id="kpi-atr" class="kpi-value kpi-red">-</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="kpi-box bg-light">
+                                <div class="kpi-title">Eliminados</div>
+                                <div id="kpi-elim" class="kpi-value kpi-muted">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-4">
+                            <div class="card p-3 h-100">
+                                <h6>Status Fluor</h6><canvas id="chartLiberados" height="150"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="card p-3 h-100">
+                                <h6>Embudo por proceso</h6><canvas id="chartFunnel" height="150"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="card p-3 h-100">
+                                <h6>Días en Proceso</h6><canvas id="chartAtraso" height="150"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="card p-3">
+                                <h6>Evolución de Despachos (Por Mes)</h6>
+                                <div style="height:250px;"><canvas id="chartDespachosMes"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-12 col-lg-6">
+                            <div class="card p-3 h-100">
+                                <h6>Tags Registrados Hoy</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm small mb-0 table-hover">
+                                        <tbody id="tbodyReporteHoy"></tbody>
+                                    </table>
+                                </div>
+                                <canvas id="chartReporteHoy" height="150" class="mt-2"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6">
+                            <div class="card p-3 h-100">
+                                <h6>Estatus Tags por última etapa</h6>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm small mb-0 table-hover">
+                                                <tbody id="tbodyPendEtapa"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div style="max-height: 300px; display: flex; align-items: center;">
+                                            <canvas id="chartPendEtapa"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="card p-3">
+                                <h6>Tiempos promedio entre etapas</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm small table-striped text-center">
+                                        <thead>
+                                            <tr>
+                                                <th>Desde</th>
+                                                <th>Hasta</th>
+                                                <th>Promedio (Días)</th>
+                                                <th>Casos</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbodyPromEtapas"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
-              </div>
             </div>
-          </div>
         </div>
+    </main>
 
-        <div class="tab-pane fade" id="tab-log" role="tabpanel">
-          <div class="card shadow-sm">
-             <div class="card-body">
-               <div class="d-flex justify-content-between mb-2">
-                 <h5 class="card-title">ChangeLog Reciente</h5>
-                 <button class="btn btn-outline-primary btn-sm" onclick="cargarLog()">Recargar</button>
-               </div>
-               <div class="table-responsive" style="max-height: 400px;">
-                 <table class="table table-sm table-striped small">
-                   <thead><tr><th>Fecha</th><th>Usuario</th><th>Columna</th><th>TAG</th><th>Ant.</th><th>Nuevo</th></tr></thead>
-                   <tbody id="tbodyLog"><tr><td colspan="6">Cargando...</td></tr></tbody>
-                 </table>
-               </div>
-             </div>
-          </div>
-        </div>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
-        <div class="tab-pane fade" id="tab-dashboard" role="tabpanel" style="padding-bottom: 20px;">
-          <div class="d-flex justify-content-between align-items-center mb-3" >
-             <div class="d-flex align-items-center gap-2">
-                <h5 class="mb-0">Dashboard KPI</h5>
-                <span id="lblLastUpdate" class="badge bg-light text-dark border fw-normal" style="font-size:0.75em;">
-                  <i class="bi bi-clock-history"></i> Esperando datos...
-                </span>
-             </div>
-             <div class="d-flex gap-2">
-                <button class="btn btn-outline-secondary btn-sm btn-export-hide" onclick="exportKpiPDF()">PDF</button>
-                <button class="btn btn-outline-secondary btn-sm btn-export-hide" onclick="exportKpiJPG()">JPG</button>
-             </div>
-          </div>
+    <script>
+        // *** URL DE TU WEB APP ***
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxlKymChYTpJf2Hy_Y-7OS78TJPg2VqE9ZFCYVgOV5VLBa0bGaolzWbXYzKI-ld9Mhq/exec';
 
-          <div class="row g-2 mb-3">
-             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Total</div><div id="kpi-total" class="kpi-value">-</div></div></div>
-             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Liberado/Desp</div><div id="kpi-ok" class="kpi-value kpi-green">-</div></div></div>
-             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Activos</div><div id="kpi-activos" class="kpi-value kpi-blue">-</div></div></div>
-             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Proceso</div><div id="kpi-proceso" class="kpi-value kpi-blue">-</div></div></div>
-             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Pendientes</div><div id="kpi-pend" class="kpi-value kpi-yellow">-</div></div></div>
-             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Atrasados</div><div id="kpi-atr" class="kpi-value kpi-red">-</div></div></div>
-          </div>
-
-          <div class="row g-3 mb-3">
-             <div class="col-12 col-md-4">
-               <div class="card p-3 h-100"><h6>Status Fluor</h6><canvas id="chartLiberados" height="150"></canvas></div>
-             </div>
-             <div class="col-12 col-md-4">
-               <div class="card p-3 h-100"><h6>Embudo por proceso</h6><canvas id="chartFunnel" height="150"></canvas></div>
-             </div>
-             <div class="col-12 col-md-4">
-               <div class="card p-3 h-100"><h6>Días Atraso</h6><canvas id="chartAtraso" height="150"></canvas></div>
-             </div>
-          </div>
-
-          <div class="row mb-3">
-             <div class="col-12">
-               <div class="card p-3">
-                 <h6>Evolución de Despachos (Por Mes)</h6>
-                 <div style="height: 250px;"><canvas id="chartDespachosMes"></canvas></div>
-               </div>
-             </div>
-          </div>
-
-          <div class="row g-3">
-             <div class="col-12 col-lg-6">
-                <div class="card p-3 h-100">
-                   <h6>Registros Hoy (ChangeLog)</h6>
-                   <div class="table-responsive">
-                      <table class="table table-sm small mb-0 table-hover">
-                         <thead><tr class="table-light"><th>Etapa</th><th>Hoy</th><th>Regul.</th></tr></thead>
-                         <tbody id="tbodyReporteHoy"></tbody>
-                      </table>
-                   </div>
-                   <canvas id="chartReporteHoy" height="100" class="mt-3"></canvas>
-                </div>
-             </div>
-
-             <div class="col-12 col-lg-6">
-                <div class="card p-3 h-100">
-                   <h6>Estatus Tags por última etapa</h6>
-                   <div class="d-flex justify-content-center align-items-center" style="height: 350px;">
-                      <canvas id="chartPendEtapa"></canvas>
-                   </div>
-                </div>
-             </div>
-             
-             <div class="col-12">
-                <div class="card p-3">
-                   <h6>Tiempos promedio entre etapas</h6>
-                   <div class="table-responsive">
-                      <table class="table table-sm small table-striped text-center">
-                         <thead><tr><th>Desde</th><th>Hasta</th><th>Promedio (Días)</th><th>Casos</th></tr></thead>
-                         <tbody id="tbodyPromEtapas"></tbody>
-                      </table>
-                   </div>
-                </div>
-             </div>
-          </div>
-        </div> 
-      
-      </div>
-    </div>
-  </main>
-
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-
-  <script>
-    /*************************************************
-     * CONFIGURACIÓN DEL SCRIPT
-     *************************************************/
-    // IMPORTANTE: Asegúrate de que esta URL es la de TU Web App implementada
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwZG33mcdFrzbp91w-mEbQYq2m6ori8SvZRQV_jXDMQYk-Yo2sdXsFsyE2-nthpI5tG/exec';
-
-    function callApi(accion, data = {}) {
-      const params = new URLSearchParams();
-      params.append('accion', accion);
-      Object.keys(data).forEach(k => {
-        const v = data[k];
-        if (v !== undefined && v !== null) {
-          params.append(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
+        function callApi(accion, data = {}) {
+            const p = new URLSearchParams(); p.append('accion', accion);
+            Object.keys(data).forEach(k => { if (data[k]) p.append(k, typeof data[k] === 'object' ? JSON.stringify(data[k]) : String(data[k])); });
+            return fetch(API_URL, { method: 'POST', body: p }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
         }
-      });
 
-      return fetch(API_URL, { method: 'POST', body: params })
-        .then(res => {
-          if (!res.ok) throw new Error('HTTP ' + res.status);
-          return res.json();
+        document.addEventListener("DOMContentLoaded", () => {
+            setHoy(); cargarColumnas();
+            // Registrar plugin labels
+            if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
+
+            startAutoRefresh();
+            // Cargar si inicia en dashboard
+            const active = document.querySelector('#tabsPanel button.active');
+            if (active && active.dataset.bsTarget === "#tab-dashboard") cargarDashboard();
+
+            document.addEventListener("shown.bs.tab", (ev) => {
+                if (ev.target.dataset.bsTarget === "#tab-dashboard") cargarDashboard();
+            });
         });
-    }
 
-    let filaSeleccionada = null;
-    let tagSeleccionado = "";
+        function setHoy() {
+            const d = new Date(); const off = d.getTimezoneOffset() * 60000;
+            document.getElementById("dtFecha").value = new Date(d.getTime() - off).toISOString().slice(0, 10);
+        }
+        function cargarColumnas() {
+            const cmb = document.getElementById("cmbEtapa"); cmb.innerHTML = '<option>Cargando...</option>';
+            callApi('getColumnasFechas').then(r => {
+                if (r.ok && Array.isArray(r.data)) {
+                    cmb.innerHTML = '<option value="">-- seleccionar --</option>';
+                    r.data.forEach(e => { const o = document.createElement("option"); o.value = e; o.text = e; cmb.appendChild(o); });
+                } else cmb.innerHTML = '<option>Error</option>';
+            }).catch(() => cmb.innerHTML = '<option>Error red</option>');
+        }
 
-    // === INICIO ===
-    document.addEventListener("DOMContentLoaded", () => {
-      setHoy();
-      cargarColumnas();
-      cargarLog();
-      startAutoRefresh(); 
-      
-      let dashLoaded = false;
-      document.addEventListener("shown.bs.tab", (ev) => {
-         if(ev.target.dataset.bsTarget === "#tab-dashboard" && !dashLoaded){
-            dashLoaded = true;
-            cargarDashboard();
-         }
-      });
-    });
+        // --- DASHBOARD LOGIC ---
+        function startAutoRefresh() {
+            setInterval(() => {
+                if (document.querySelector('#tabsPanel button.active').dataset.bsTarget === "#tab-dashboard") cargarDashboard();
+            }, 60000);
+        }
 
-    function setHoy() {
-      const d = new Date();
-      const offset = d.getTimezoneOffset() * 60000;
-      const local = new Date(d.getTime() - offset);
-      document.getElementById("dtFecha").value = local.toISOString().slice(0, 10);
-    }
+        function cargarDashboard() {
+            console.log("Cargando Dashboard...");
 
-    function cargarColumnas() {
-      const cmb = document.getElementById("cmbEtapa");
-      cmb.innerHTML = '<option value="">Cargando...</option>';
-      callApi('getColumnasFechas').then(res => {
-         if (res.ok && Array.isArray(res.data)) {
-             cmb.innerHTML = '<option value="">-- seleccionar --</option>';
-             res.data.forEach(et => {
-                const opt = document.createElement("option");
-                opt.value = et; opt.textContent = et;
-                cmb.appendChild(opt);
-             });
-         } else {
-             cmb.innerHTML = '<option value="">Error</option>';
-         }
-      }).catch(() => cmb.innerHTML = '<option value="">Error red</option>');
-    }
+            // 1. KPIs & Funnel
+            callApi('dashboardKPIs').then(res => {
+                if (res.ok && res.data) {
+                    const k = res.data;
+                    // Asignación correcta de IDs
+                    document.getElementById("kpi-total").textContent = k.total;
+                    document.getElementById("kpi-activos").textContent = k.activos;
+                    document.getElementById("kpi-lib").textContent = k.cnt_lib;   // Nuevo ID
+                    document.getElementById("kpi-desp").textContent = k.cnt_desp; // Nuevo ID
+                    document.getElementById("kpi-proceso").textContent = k.proceso;
+                    document.getElementById("kpi-pend").textContent = k.pend;
+                    document.getElementById("kpi-atr").textContent = k.atr;
+                    document.getElementById("kpi-elim").textContent = k.elim;     // Nuevo ID
 
-    function startAutoRefresh() {
-       setInterval(() => {
-          const activeTab = document.querySelector('#tabsPanel button.active');
-          if (activeTab && activeTab.getAttribute('data-bs-target') === '#tab-dashboard') {
-             console.log("Auto-refresh...");
-             cargarDashboard();
-          }
-       }, 60000);
-    }
-
-    function updateLastRefreshTime() {
-       const now = new Date();
-       const lbl = document.getElementById("lblLastUpdate");
-       if(lbl) lbl.innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> Act: ${now.toLocaleTimeString()}`;
-    }
-
-    // === BUSQUEDA ===
-    function buscarTags() {
-      const txt = document.getElementById("txtBuscar").value.trim();
-      const cont = document.getElementById("contenedorCoincidencias");
-      const btn = document.getElementById("btnBuscar");
-      
-      if (!txt) { cont.innerHTML = '<div class="text-muted small">Escribe para buscar.</div>'; return; }
-
-      cont.innerHTML = '<div class="small text-primary"><span class="spinner-border spinner-border-sm"></span> Buscando...</div>';
-      btn.disabled = true;
-      filaSeleccionada = null; tagSeleccionado = "";
-      document.getElementById("lblTagSel").textContent = "(ninguno)";
-      document.getElementById("lblUltimaEtapa").textContent = "-";
-      document.getElementById("msgEstado").textContent = "";
-      limpiarPlano();
-
-      callApi('buscarTag', { texto: txt }).then(res => {
-         btn.disabled = false;
-         if (!res.ok) { cont.innerHTML = `<div class="text-danger small">Error: ${res.error}</div>`; return; }
-         
-         const lista = res.data;
-         if (!Array.isArray(lista) || lista.length === 0) {
-            cont.innerHTML = '<div class="text-muted small text-danger">No encontrado.</div>';
-            return;
-         }
-
-         let html = `<table class="table table-sm table-hover mb-0"><tbody>`;
-         lista.forEach(item => {
-            const safeTag = String(item.tag).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
-            html += `<tr style="cursor:pointer" onclick="seleccionarTag(${item.fila}, '${safeTag}')">
-                <td width="30"><input type="radio" name="selTag" value="${item.fila}" style="pointer-events:none;"></td>
-                <td><span class="badge bg-light text-dark border">${item.tag}</span></td>
-              </tr>`;
-         });
-         html += "</tbody></table>";
-         cont.innerHTML = html;
-      }).catch(e => {
-         console.error(e);
-         btn.disabled = false;
-         cont.innerHTML = '<div class="text-danger small">Error de red.</div>';
-      });
-    }
-
-    function seleccionarTag(fila, tag) {
-       filaSeleccionada = fila; tagSeleccionado = tag;
-       const radios = document.getElementsByName("selTag");
-       radios.forEach(r => r.checked = true); 
-       document.getElementById("lblTagSel").textContent = tag;
-       
-       callApi('ultimaEtapa', { fila }).then(res => {
-          const data = res.data || {};
-          let fl = data.fechaTexto; 
-          if(fl && fl.includes('-')) fl = fl.split('-').reverse().join('/');
-          let txt = (data.ultimaColumna) ? `${data.ultimaColumna} (${fl})` : "Sin datos";
-          document.getElementById("lblUltimaEtapa").textContent = txt;
-       });
-
-       callApi('estadoTag', { fila }).then(res => {
-          const data = res.data || {};
-          const lbl = document.getElementById("lblEstado");
-          lbl.textContent = data.estado || "SIN INICIO";
-          lbl.className = `estado-${data.color || 'gray'}`;
-       });
-       cargarPlano(tag);
-    }
-
-    function limpiarPlano(){
-       document.getElementById("imgPlanoFallback").classList.remove("d-none");
-       document.getElementById("iframePlano").classList.add("d-none");
-       document.getElementById("btnAbrirPlano").classList.add("d-none");
-       document.getElementById("msgPlano").textContent = "Selecciona un TAG";
-    }
-
-    function cargarPlano(tag) {
-       limpiarPlano();
-       const msg = document.getElementById("msgPlano");
-       msg.textContent = "Buscando plano...";
-       
-       callApi('vistaPlano', { tag }).then(res => {
-          const data = (res.ok && res.data) ? res.data : res;
-          if(data.ok && data.url) {
-             const iframe = document.getElementById("iframePlano");
-             iframe.src = data.url;
-             iframe.classList.remove("d-none");
-             document.getElementById("imgPlanoFallback").classList.add("d-none");
-             msg.textContent = data.mensaje;
-             const btn = document.getElementById("btnAbrirPlano");
-             btn.href = data.url.replace('/preview', '/view');
-             btn.classList.remove("d-none");
-          } else {
-             msg.textContent = data.mensaje || "No encontrado";
-          }
-       }).catch(() => msg.textContent = "Error al buscar");
-    }
-
-    function guardar(overwrite) {
-       if(!filaSeleccionada) return alert("Selecciona un TAG.");
-       const etapa = document.getElementById("cmbEtapa").value;
-       const fechaISO = document.getElementById("dtFecha").value;
-       if(!etapa || !fechaISO) return alert("Falta etapa o fecha.");
-
-       const msg = document.getElementById("msgEstado");
-       const btnG = document.getElementById("btnGuardar");
-       const btnS = document.getElementById("btnSobrescribir");
-       
-       msg.textContent = "Guardando..."; msg.className = "msg loading";
-       btnG.disabled = true; btnS.disabled = true;
-
-       callApi('registrarFecha', { fila: filaSeleccionada, etapa, fechaISO, overwrite })
-         .then(res => {
-            btnG.disabled = false; btnS.disabled = false;
-            const data = res.data || {};
-            if (res.ok && data.ok) {
-               msg.textContent = data.msg || "OK";
-               msg.className = "msg ok";
-               cargarLog(); 
-               const fl = fechaISO.split('-').reverse().join('/');
-               document.getElementById("lblUltimaEtapa").textContent = `${etapa} (${fl})`;
-            } else {
-               msg.textContent = data.msg || res.error || "Error";
-               msg.className = "msg error";
-            }
-         })
-         .catch(() => {
-            btnG.disabled = false; btnS.disabled = false;
-            msg.textContent = "Error red"; msg.className = "msg error";
-         });
-    }
-
-    function cargarLog(){
-       const tbody = document.getElementById("tbodyLog");
-       callApi('getChangeLogUltimos', {n:30}).then(res => {
-          if(!res.ok) return;
-          const rows = res.data;
-          if(!rows.length) { tbody.innerHTML = "<tr><td colspan='6'>Vacío</td></tr>"; return; }
-          let h = "";
-          rows.forEach(r => {
-             let f = r.FechaHora; try { f = new Date(r.FechaHora).toLocaleString(); } catch(e){}
-             h += `<tr><td>${f}</td><td>${(r.Usuario||'').split('@')[0]}</td><td>${r.CabeceraColumna}</td><td>${r.TagSpool}</td><td class="text-muted">${r.ValorAnterior||''}</td><td>${r.ValorNuevo||''}</td></tr>`;
-          });
-          tbody.innerHTML = h;
-       });
-    }
-
-    // === UTILIDADES ===
-    function doMerge() {
-       const txtId = document.getElementById("txtRemote").value.trim();
-       const msg = document.getElementById("msgMerge");
-       const btn = document.getElementById("btnMerge");
-       if (!txtId) { alert("Ingresa ID."); return; }
-       if(!confirm("¿Iniciar Merge?")) return;
-       btn.disabled = true; msg.textContent = "Procesando..."; msg.className = "msg loading d-block";
-       callApi('merge', { nubeId: txtId }).then(res => {
-          btn.disabled = false;
-          const data = res.data || {};
-          msg.textContent = res.ok ? ("Éxito: " + data.msg) : ("Error: " + (data.msg || res.error));
-          msg.className = res.ok ? "msg ok d-block" : "msg error d-block";
-          if(res.ok) cargarDashboard();
-       }).catch(() => { btn.disabled=false; msg.textContent="Error red"; msg.className="msg error d-block"; });
-    }
-
-    function doExportExcel() {
-       const msg = document.getElementById("msgExcel");
-       const btn = document.getElementById("btnExcel");
-       btn.disabled = true; msg.textContent = "Generando..."; msg.className = "msg loading d-block";
-       callApi('exportExcel').then(res => {
-          const data = res.data || {};
-          if (res.ok && data.ok && data.url) {
-             msg.textContent = "Descargando...";
-             fetch(data.url, { headers: { 'Authorization': 'Bearer ' + data.token } })
-               .then(r => r.blob()).then(blob => {
-                  const url = window.URL.createObjectURL(blob);
-                  const a = document.createElement('a'); a.href = url; a.download = data.filename;
-                  document.body.appendChild(a); a.click(); a.remove();
-                  msg.textContent = "Listo."; msg.className = "msg ok d-block"; btn.disabled = false;
-               });
-          } else {
-             msg.textContent = "Error"; msg.className = "msg error d-block"; btn.disabled = false;
-          }
-       });
-    }
-
-    // === DASHBOARD ===
-    function cargarDashboard() {
-       callApi('dashboardKPIs').then(res => {
-          if (res.ok && res.data) {
-             const k = res.data;
-             document.getElementById("kpi-total").textContent = k.total;
-             document.getElementById("kpi-ok").textContent = k.cant_ok;
-             document.getElementById("kpi-activos").textContent = k.activos;
-             document.getElementById("kpi-proceso").textContent = k.proceso;
-             document.getElementById("kpi-pend").textContent = k.pend;
-             document.getElementById("kpi-atr").textContent = k.atr;
-             dibujarFunnel(k);
-             updateLastRefreshTime();
-          }
-       });
-       callApi('graficoStatusFluor').then(res => { if(res.ok && res.data) dibujarBarra(res.data, 'chartLiberados', 'Status', '#1a2b48'); });
-       callApi('graficoAtrasos').then(res => { if(res.ok && res.data) dibujarBarra(res.data, 'chartAtraso', 'Spools', '#d93025'); });
-       // Nuevo grafico despachos
-       callApi('graficoDespachosMes').then(res => {
-          if(res.ok && res.data) dibujarBarra(res.data, 'chartDespachosMes', 'Cant. Despachada', '#2ea043');
-       });
-       cargarReporteHoy();
-       cargarPendientes();
-       cargarPromedios();
-    }
-
-    function dibujarFunnel(k) {
-       const ctx = document.getElementById("chartFunnel");
-       if(Chart.getChart("chartFunnel")) Chart.getChart("chartFunnel").destroy();
-       new Chart(ctx, { type: 'bar', data: { labels: ['Total', 'Activos', 'Proceso', 'Pendiente', 'Atrasado'], datasets: [{ label: 'Spools', data: [k.total, k.activos, k.proceso, k.pend, k.atr], backgroundColor: ['#e0e0e0', '#1a2b48', '#3b82f6', '#f59e0b', '#d93025'] }] }, options: { indexAxis: 'y', plugins: { legend: {display:false} } } });
-    }
-
-    function dibujarBarra(data, idCanvas, label, color) {
-       const ctx = document.getElementById(idCanvas);
-       if(!ctx) return;
-       if(Chart.getChart(idCanvas)) Chart.getChart(idCanvas).destroy();
-       new Chart(ctx, { type: 'bar', data: { labels: data.labels, datasets: [{ label: label, data: data.valores, backgroundColor: color }] }, options: { plugins: { legend: {display:false} } } });
-    }
-
-    function cargarReporteHoy() {
-       callApi('reporteChangeLogHoy').then(res => {
-          if(!res.ok) return;
-          const rows = res.data;
-          const tbody = document.getElementById("tbodyReporteHoy");
-          let h = "", labels=[], dHoy=[], dAnt=[];
-          rows.forEach(r => { h += `<tr><td>${r.columna}</td><td>${r.hoy}</td><td>${r.anteriores}</td></tr>`; labels.push(r.columna); dHoy.push(r.hoy); dAnt.push(r.anteriores); });
-          tbody.innerHTML = h || "<tr><td colspan='3'>Sin datos</td></tr>";
-          const ctx = document.getElementById("chartReporteHoy");
-          if(Chart.getChart("chartReporteHoy")) Chart.getChart("chartReporteHoy").destroy();
-          new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [ { label: 'Hoy', data: dHoy, backgroundColor: '#2ea043' }, { label: 'Regul.', data: dAnt, backgroundColor: '#ffc107' } ] }, options: { scales: { x: {stacked:true}, y:{stacked:true} } } });
-       });
-    }
-
-    function cargarPendientes() {
-       callApi('pendientesPorEtapa').then(res => {
-          if(!res.ok) return;
-          const rows = res.data;
-          let labels=[], vals=[];
-          rows.forEach(r => { labels.push(r.etapa); vals.push(r.cantidad); });
-          const ctx = document.getElementById("chartPendEtapa");
-          if(Chart.getChart("chartPendEtapa")) Chart.getChart("chartPendEtapa").destroy();
-          Chart.register(ChartDataLabels); // Plugin activado
-          new Chart(ctx, { 
-             type: 'doughnut', 
-             data: { labels: labels, datasets: [{ data: vals, backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF','#FF9F40','#71B37C'], borderWidth:1 }] },
-             options: { 
-                responsive:true, maintainAspectRatio:false, layout:{padding:20},
-                plugins: { 
-                   legend: {display:false},
-                   datalabels: {
-                      color:'#000', anchor:'end', align:'start', offset:10, font:{weight:'bold'},
-                      formatter: (val, ctx) => {
-                         let sum=0; ctx.chart.data.datasets[0].data.map(d=>sum+=d);
-                         if((val*100/sum)<3) return val; // Solo número si es pequeño
-                         return `${ctx.chart.data.labels[ctx.dataIndex]}\n${val} (${(val*100/sum).toFixed(1)}%)`;
-                      }
-                   }
+                    dibujarFunnel(k);
+                    const now = new Date(); document.getElementById("lblLastUpdate").innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> ${now.toLocaleTimeString()}`;
                 }
-             }
-          });
-       });
-    }
+            });
 
-    function cargarPromedios() {
-       callApi('promedioTiemposEtapas').then(res => {
-          if(!res.ok) return;
-          const rows = res.data;
-          const tbody = document.getElementById("tbodyPromEtapas");
-          let h = "";
-          rows.forEach(r => { h += `<tr><td>${r.desde}</td><td>${r.hasta}</td><td class="fw-bold text-primary">${r.promedioDias}</td><td>${r.muestras}</td></tr>`; });
-          tbody.innerHTML = h || "<tr><td colspan='4'>Sin datos</td></tr>";
-       });
-    }
+            // 2. Gráficos de Barras
+            callApi('graficoStatusFluor').then(r => { if (r.ok && r.data) dibujarBarra(r.data, 'chartLiberados', 'Status', '#1a2b48'); });
+            callApi('graficoAtrasos').then(r => { if (r.ok && r.data) dibujarBarra(r.data, 'chartAtraso', 'Spools', '#d93025'); });
+            callApi('graficoDespachosMes').then(r => { if (r.ok && r.data) dibujarGraficoTendencia(r.data, 'chartDespachosMes', 'Despachados'); });
 
-    async function exportKpiPDF() {
-       const { jsPDF } = window.jspdf; const el = document.getElementById("tab-dashboard"); const btns = document.querySelectorAll(".btn-export-hide");
-       btns.forEach(b => b.style.visibility = "hidden");
-       try {
-          const canvas = await html2canvas(el, { scale: 2, useCORS: true });
-          const imgData = canvas.toDataURL("image/jpeg", 0.95);
-          const pdf = new jsPDF('p', 'mm', 'letter');
-          const pageHeight = 279.4; const imgHeight = (canvas.height * 205.9) / canvas.width;
-          let heightLeft = imgHeight; let position = 5;
-          pdf.addImage(imgData, 'JPEG', 5, position, 205.9, imgHeight);
-          heightLeft -= (pageHeight - 10);
-          while (heightLeft > 0) { position = -pageHeight + 5; pdf.addPage(); pdf.addImage(imgData, 'JPEG', 5, 5 - (imgHeight - heightLeft), 205.9, imgHeight); heightLeft -= (pageHeight - 10); }
-          pdf.save("Dashboard.pdf");
-       } catch(e){alert("Error PDF")} finally { btns.forEach(b => b.style.visibility = "visible"); }
-    }
+            // 3. Tablas
+            cargarReporteHoy();
+            cargarPendientes();
+            cargarPromedios();
+        }
 
-    async function exportKpiJPG() {
-       const el = document.getElementById("tab-dashboard"); const btns = document.querySelectorAll(".btn-export-hide");
-       btns.forEach(b => b.style.visibility = "hidden");
-       try {
-          const c = await html2canvas(el, { scale: 2, useCORS: true });
-          const a = document.createElement("a"); a.href = c.toDataURL("image/jpeg", 0.95); a.download = "Dashboard.jpg";
-          document.body.appendChild(a); a.click(); a.remove();
-       } catch(e){alert("Error JPG")} finally { btns.forEach(b => b.style.visibility = "visible"); }
-    }
-  </script>
+        function dibujarFunnel(k) {
+            const ctx = document.getElementById("chartFunnel"); if (!ctx) return;
+            if (Chart.getChart("chartFunnel")) Chart.getChart("chartFunnel").destroy();
+            new Chart(ctx, { type: 'bar', data: { labels: ['Total', 'Activos', '0-30', '31-60', '61+'], datasets: [{ data: [k.total, k.activos, k.proceso, k.pend, k.atr], backgroundColor: ['#e0e0e0', '#1a2b48', '#3b82f6', '#f59e0b', '#d93025'] }] }, options: { indexAxis: 'y', plugins: { legend: { display: false }, datalabels: { display: false } } } });
+        }
+
+        function dibujarBarra(d, id, lbl, col) {
+            const ctx = document.getElementById(id); if (!ctx) return;
+            if (Chart.getChart(id)) Chart.getChart(id).destroy();
+            if (!d.labels || !d.labels.length) return;
+            new Chart(ctx, { type: 'bar', data: { labels: d.labels, datasets: [{ label: lbl, data: d.valores, backgroundColor: col }] }, options: { plugins: { legend: { display: false }, datalabels: { display: false } } } });
+        }
+
+        function dibujarGraficoTendencia(d, id, lbl) {
+            const ctx = document.getElementById(id); if (!ctx) return;
+            if (Chart.getChart(id)) Chart.getChart(id).destroy();
+            new Chart(ctx, { type: 'bar', data: { labels: d.labels, datasets: [{ label: lbl, data: d.valores, backgroundColor: '#2ea043', borderRadius: 4 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } }, scales: { y: { beginAtZero: true } } } });
+        }
+
+        function cargarReporteHoy() {
+            callApi('reporteChangeLogHoy').then(res => {
+                const tb = document.getElementById("tbodyReporteHoy");
+                if (!res.ok || !res.data.length) { tb.innerHTML = "<tr><td colspan='3'>Sin datos</td></tr>"; return; }
+                let h = "", l = [], d1 = [], d2 = [], t1 = 0, t2 = 0;
+                res.data.forEach(r => { t1 += (r.hoy || 0); t2 += (r.anteriores || 0); h += `<tr><td>${r.columna}</td><td class='text-center'>${r.hoy}</td><td class='text-center text-muted'>${r.anteriores}</td></tr>`; l.push(r.columna); d1.push(r.hoy); d2.push(r.anteriores); });
+                h += `<tr class='table-secondary fw-bold'><td>Total</td><td class='text-center'>${t1}</td><td class='text-center'>${t2}</td></tr>`;
+                tb.innerHTML = h;
+
+                const ctx = document.getElementById("chartReporteHoy");
+                if (Chart.getChart("chartReporteHoy")) Chart.getChart("chartReporteHoy").destroy();
+                new Chart(ctx, { type: 'bar', data: { labels: l, datasets: [{ label: 'Hoy', data: d1, backgroundColor: '#2ea043' }, { label: 'Regul.', data: d2, backgroundColor: '#ffc107' }] }, options: { scales: { x: { stacked: true }, y: { stacked: true } }, plugins: { datalabels: { display: false } } } });
+            });
+        }
+
+         function cargarPendientes() {
+         callApi('pendientesPorEtapa').then(res => {
+            if (!res.ok) return;
+            const rows = res.data;
+            const tbody = document.getElementById("tbodyPendEtapa");
+
+            let h = "";
+            let labels = [], vals = [];
+            let totalPendientes = 0; // Acumulador
+
+            rows.forEach(r => {
+               totalPendientes += Number(r.cantidad || 0);
+
+               h += `<tr>
+                     <td>${r.etapa}</td>
+                     <td class="text-end fw-bold">${r.cantidad}</td>
+                   </tr>`;
+               labels.push(r.etapa);
+               vals.push(r.cantidad);
+            });
+
+            if (rows.length === 0) {
+               tbody.innerHTML = "<tr><td colspan='2'>Sin pendientes</td></tr>";
+            } else {
+               // AGREGAR FILA DE TOTAL
+               h += `<tr class="table-secondary fw-bold border-top">
+                     <td>TOTAL PENDIENTES</td>
+                     <td class="text-end">${totalPendientes}</td>
+                   </tr>`;
+               tbody.innerHTML = h;
+            }
+
+            // Gráfico (Sin cambios, usando el plugin de datalabels que ya agregamos)
+            const ctx = document.getElementById("chartPendEtapa");
+            if (Chart.getChart("chartPendEtapa")) Chart.getChart("chartPendEtapa").destroy();
+
+            // Asegúrate de tener el plugin registrado si no lo hiciste antes
+            // Chart.register(ChartDataLabels); 
+
+            new Chart(ctx, {
+               type: 'doughnut',
+               data: {
+                  labels: labels,
+                  datasets: [{
+                     data: vals,
+                     backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#71B37C', '#C9CBCF'],
+                     borderWidth: 1
+                  }]
+               },
+               options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  layout: { padding: 20 },
+                  plugins: {
+                     legend: { display: false },
+                     datalabels: {
+                        color: '#000', anchor: 'end', align: 'start', offset: 10, font: { weight: 'bold' },
+                        formatter: (val, ctx) => {
+                           let sum = 0; ctx.chart.data.datasets[0].data.map(d => sum += d);
+                           if ((val * 100 / sum) < 3) return val;
+                           return `${ctx.chart.data.labels[ctx.dataIndex]}\n${val} (${(val * 100 / sum).toFixed(1)}%)`;
+                        }
+                     }
+                  }
+               }
+            });
+         });
+      }
+
+
+        function cargarPromedios() {
+            callApi('promedioTiemposEtapas').then(res => {
+                const tb = document.getElementById("tbodyPromEtapas");
+                if (!res.ok || !res.data.length) { tb.innerHTML = "<tr><td colspan='4'>Sin datos</td></tr>"; return; }
+                let h = "", sum = 0;
+                res.data.forEach(r => { let v = parseFloat(r.promedioDias); sum += v; h += `<tr><td>${r.desde}</td><td>${r.hasta}</td><td class='fw-bold text-primary'>${v.toFixed(1)}</td><td>${r.muestras}</td></tr>`; });
+                let prom = sum / res.data.length;
+                h += `<tr class='table-secondary fw-bold border-top'><td colspan='2' class='text-end'>PROMEDIO GLOBAL:</td><td class='text-primary' style='font-size:1.1em'>${prom.toFixed(1)} días</td><td>-</td></tr>`;
+                tb.innerHTML = h;
+            });
+        }
+
+        // --- BUSQUEDA Y EDICION ---
+        let filaSeleccionada = null;
+        function buscarTags() {
+            const txt = document.getElementById("txtBuscar").value.trim(); const div = document.getElementById("contenedorCoincidencias");
+            if (!txt) { div.innerHTML = "<small>Escribe algo.</small>"; return; }
+            div.innerHTML = "<small class='text-primary'>Buscando...</small>"; document.getElementById("btnBuscar").disabled = true;
+
+            callApi('buscarTag', { texto: txt }).then(r => {
+                document.getElementById("btnBuscar").disabled = false;
+                if (!r.ok) { div.innerHTML = `<small class='text-danger'>${r.error}</small>`; return; }
+                const l = r.data; if (!l || !l.length) { div.innerHTML = "<small>No encontrado.</small>"; return; }
+                let h = "<table class='table table-sm table-hover mb-0'><tbody>";
+                l.forEach(i => { h += `<tr style='cursor:pointer' onclick="selTag(${i.fila},'${i.tag}')"><td width='20'><input type='radio' name='sel' pointer-events:none></td><td>${i.tag}</td></tr>`; });
+                div.innerHTML = h + "</tbody></table>";
+            }).catch(() => { document.getElementById("btnBuscar").disabled = false; div.innerHTML = "<small class='text-danger'>Error red.</small>"; });
+        }
+
+        function selTag(f, t) {
+            filaSeleccionada = f; document.getElementById("lblTagSel").textContent = t;
+            callApi('ultimaEtapa', { fila: f }).then(r => {
+                const d = r.data || {}; let ft = d.fechaTexto; if (ft) ft = ft.split('-').reverse().join('/');
+                document.getElementById("lblUltimaEtapa").textContent = d.ultimaColumna ? `${d.ultimaColumna} (${ft})` : "-";
+            });
+            callApi('estadoTag', { fila: f }).then(r => { const d = r.data || {}; document.getElementById("lblEstado").textContent = d.estado || "SIN INICIO"; });
+
+            // Plano
+            document.getElementById("imgPlanoFallback").classList.remove("d-none"); document.getElementById("iframePlano").classList.add("d-none");
+            callApi('vistaPlano', { tag: t }).then(r => {
+                const d = (r.ok && r.data) ? r.data : r;
+                if (d.ok && d.url) {
+                    document.getElementById("iframePlano").src = d.url; document.getElementById("iframePlano").classList.remove("d-none");
+                    document.getElementById("imgPlanoFallback").classList.add("d-none");
+                    document.getElementById("btnAbrirPlano").href = d.url.replace('/preview', '/view'); document.getElementById("btnAbrirPlano").classList.remove("d-none");
+                } else { document.getElementById("btnAbrirPlano").classList.add("d-none"); }
+            });
+        }
+
+        function guardar(over) {
+            if (!filaSeleccionada) return alert("Selecciona TAG");
+            const et = document.getElementById("cmbEtapa").value; const fe = document.getElementById("dtFecha").value;
+            if (!et || !fe) return alert("Falta datos");
+            const btn = document.getElementById("btnGuardar"); btn.disabled = true;
+            document.getElementById("msgEstado").textContent = "Guardando...";
+            callApi('registrarFecha', { fila: filaSeleccionada, etapa: et, fechaISO: fe, overwrite: over }).then(r => {
+                btn.disabled = false; const d = r.data || {};
+                if (r.ok && d.ok) { document.getElementById("msgEstado").textContent = "OK"; document.getElementById("msgEstado").className = "msg ok"; }
+                else { document.getElementById("msgEstado").textContent = d.msg || "Error"; document.getElementById("msgEstado").className = "msg error"; }
+            });
+        }
+
+        // --- UTILS ---
+        function doMerge() {
+            const id = document.getElementById("txtRemote").value; if (!id) return alert("ID Nube?");
+            if (!confirm("¿Merge?")) return; document.getElementById("btnMerge").disabled = true;
+            callApi('merge', { nubeId: id }).then(r => {
+                document.getElementById("btnMerge").disabled = false;
+                const d = r.data || {}; alert(r.ok ? d.msg : d.msg || r.error); if (r.ok) cargarDashboard();
+            });
+        }
+        function doExportExcel() {
+            callApi('exportExcel').then(r => { const d = r.data || {}; if (r.ok && d.url) { location.href = d.url; } else alert("Error export"); });
+        }
+        async function exportKpiPDF() { const { jsPDF } = window.jspdf; const el = document.getElementById("tab-dashboard"); document.querySelectorAll(".btn-export-hide").forEach(b => b.style.display = 'none'); const c = await html2canvas(el, { scale: 2, useCORS: true }); const p = new jsPDF('p', 'mm', 'letter'); p.addImage(c.toDataURL('image/jpeg'), 'JPEG', 5, 5, 205, (c.height * 205) / c.width); p.save("Dash.pdf"); document.querySelectorAll(".btn-export-hide").forEach(b => b.style.display = 'inline-block'); }
+        async function exportKpiJPG() { const el = document.getElementById("tab-dashboard"); document.querySelectorAll(".btn-export-hide").forEach(b => b.style.display = 'none'); const c = await html2canvas(el, { scale: 2, useCORS: true }); const a = document.createElement('a'); a.href = c.toDataURL('image/jpeg'); a.download = "Dash.jpg"; a.click(); document.querySelectorAll(".btn-export-hide").forEach(b => b.style.display = 'inline-block'); }
+
+    </script>
 </body>
+
 </html>
