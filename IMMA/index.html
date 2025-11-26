@@ -401,7 +401,7 @@
      * CONFIG
      *************************************************/
     // IMPORTANTE: Asegúrate de que esta URL sea la correcta de tu implementación actual
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwZG33mcdFrzbp91w-mEbQYq2m6ori8SvZRQV_jXDMQYk-Yo2sdXsFsyE2-nthpI5tG/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxx0bgD3h2tng0VYO0WMtxZ4CkjCEsvaL-5pvMR3t0RDEUdzqkdO-a9cgMGpCRQDlbA/exec';
 
     function callApi(accion, data = {}) {
       const params = new URLSearchParams();
@@ -490,41 +490,75 @@
     /*************************************************
      * BUSQUEDA
      *************************************************/
+    // --- BUSCADOR CORREGIDO (Lectura de res.data) ---
     function buscarTags() {
       const txt = document.getElementById("txtBuscar").value.trim();
       const cont = document.getElementById("contenedorCoincidencias");
       const btn = document.getElementById("btnBuscar");
       
-      cont.innerHTML = '<div class="small text-muted">Buscando...</div>';
+      // 1. Validación inicial
+      if (!txt) {
+         cont.innerHTML = '<div class="text-muted small">Escribe algo para buscar.</div>';
+         return;
+      }
+
+      // 2. UI Loading
+      cont.innerHTML = '<div class="small text-primary"><span class="spinner-border spinner-border-sm"></span> Buscando...</div>';
       btn.disabled = true;
+      
+      // Limpiar selección previa
       filaSeleccionada = null;
       tagSeleccionado = "";
-      
       document.getElementById("lblTagSel").textContent = "(ninguno)";
       document.getElementById("lblUltimaEtapa").textContent = "-";
       document.getElementById("msgEstado").textContent = "";
       limpiarPlano();
 
-      callApi('buscarTag', { texto: txt }).then(res => {
-         btn.disabled = false;
-         if (!res || res.length === 0) {
-            cont.innerHTML = '<div class="text-danger small">No encontrado.</div>';
-            return;
-         }
-         let html = `<table class="table table-sm table-hover mb-0"><tbody>`;
-         res.forEach(item => {
-            html += `
-              <tr style="cursor:pointer" onclick="seleccionarTag(${item.fila}, '${item.tag}')">
-                <td width="30"><input type="radio" name="selTag" ${filaSeleccionada===item.fila?'checked':''}></td>
-                <td><span class="badge bg-light text-dark border">${item.tag}</span></td>
-              </tr>`;
-         });
-         html += "</tbody></table>";
-         cont.innerHTML = html;
-      }).catch(e => {
-         btn.disabled = false;
-         onApiError(e);
-      });
+      // 3. Llamada al Servidor
+      callApi('buscarTag', { texto: txt })
+        .then(res => {
+           btn.disabled = false;
+
+           // CASO A: Error reportado por el backend
+           if (!res.ok) {
+              console.error("Error Backend:", res.error);
+              cont.innerHTML = `<div class="text-danger small">Error: ${res.error || 'Desconocido'}</div>`;
+              return;
+           }
+
+           // CASO B: Extraer los datos reales
+           const listaTags = res.data; // <--- CORRECCIÓN CLAVE
+
+           // CASO C: Respuesta válida pero vacía
+           if (!Array.isArray(listaTags) || listaTags.length === 0) {
+              cont.innerHTML = '<div class="text-muted small" style="color: #d93025 !important;">No se encontraron coincidencias.</div>';
+              return;
+           }
+
+           // CASO D: Éxito - Renderizar Tabla
+           let html = `<table class="table table-sm table-hover mb-0"><tbody>`;
+           listaTags.forEach(item => {
+              // Escapar comillas para evitar errores en el HTML
+              const safeTag = String(item.tag).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+              
+              html += `
+                <tr style="cursor:pointer" onclick="seleccionarTag(${item.fila}, '${safeTag}')">
+                  <td width="30">
+                    <input type="radio" name="selTag" value="${item.fila}" style="pointer-events: none;">
+                  </td>
+                  <td>
+                    <span class="badge bg-light text-dark border">${item.tag}</span>
+                  </td>
+                </tr>`;
+           });
+           html += "</tbody></table>";
+           cont.innerHTML = html;
+        })
+        .catch(e => {
+           console.error("Crash Frontend:", e);
+           btn.disabled = false;
+           cont.innerHTML = '<div class="text-danger small">Error de conexión o red.</div>';
+        });
     }
 
     function seleccionarTag(fila, tag) {
