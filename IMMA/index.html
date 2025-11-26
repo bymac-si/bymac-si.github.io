@@ -1005,16 +1005,43 @@
             if (!res.ok) return;
             const rows = res.data;
             const tbody = document.getElementById("tbodyReporteHoy");
+
             let h = "";
             let labels = [], dHoy = [], dAnt = [];
+
+            // Variables para sumar
+            let totalHoy = 0;
+            let totalAnt = 0;
+
             rows.forEach(r => {
-               h += `<tr><td>${r.columna}</td><td>${r.hoy}</td><td>${r.anteriores}</td></tr>`;
+               // Sumar totales
+               totalHoy += Number(r.hoy || 0);
+               totalAnt += Number(r.anteriores || 0);
+
+               h += `<tr>
+                     <td>${r.columna}</td>
+                     <td class="text-center">${r.hoy}</td>
+                     <td class="text-center text-muted">${r.anteriores}</td>
+                   </tr>`;
+
                labels.push(r.columna);
                dHoy.push(r.hoy);
                dAnt.push(r.anteriores);
             });
-            tbody.innerHTML = h || "<tr><td colspan='3'>Sin datos</td></tr>";
 
+            if (rows.length === 0) {
+               tbody.innerHTML = "<tr><td colspan='3'>Sin datos</td></tr>";
+            } else {
+               // AGREGAR FILA DE TOTALES
+               h += `<tr class="table-secondary fw-bold">
+                     <td>TOTAL</td>
+                     <td class="text-center">${totalHoy}</td>
+                     <td class="text-center">${totalAnt}</td>
+                   </tr>`;
+               tbody.innerHTML = h;
+            }
+
+            // Gráfico (Sin cambios)
             const ctx = document.getElementById("chartReporteHoy");
             if (Chart.getChart("chartReporteHoy")) Chart.getChart("chartReporteHoy").destroy();
             new Chart(ctx, {
@@ -1023,7 +1050,7 @@
                   labels: labels,
                   datasets: [
                      { label: 'Hoy', data: dHoy, backgroundColor: '#2ea043' },
-                     { label: 'F. Ant.', data: dAnt, backgroundColor: '#ffc107' }
+                     { label: 'Regul.', data: dAnt, backgroundColor: '#ffc107' }
                   ]
                },
                options: { scales: { x: { stacked: true }, y: { stacked: true } } }
@@ -1036,24 +1063,66 @@
             if (!res.ok) return;
             const rows = res.data;
             const tbody = document.getElementById("tbodyPendEtapa");
+
             let h = "";
             let labels = [], vals = [];
+            let totalPendientes = 0; // Acumulador
+
             rows.forEach(r => {
-               h += `<tr><td>${r.etapa}</td><td class="text-end fw-bold">${r.cantidad}</td></tr>`;
+               totalPendientes += Number(r.cantidad || 0);
+
+               h += `<tr>
+                     <td>${r.etapa}</td>
+                     <td class="text-end fw-bold">${r.cantidad}</td>
+                   </tr>`;
                labels.push(r.etapa);
                vals.push(r.cantidad);
             });
-            tbody.innerHTML = h || "<tr><td colspan='2'>Sin pendientes</td></tr>";
 
+            if (rows.length === 0) {
+               tbody.innerHTML = "<tr><td colspan='2'>Sin pendientes</td></tr>";
+            } else {
+               // AGREGAR FILA DE TOTAL
+               h += `<tr class="table-secondary fw-bold border-top">
+                     <td>TOTAL PENDIENTES</td>
+                     <td class="text-end">${totalPendientes}</td>
+                   </tr>`;
+               tbody.innerHTML = h;
+            }
+
+            // Gráfico (Sin cambios, usando el plugin de datalabels que ya agregamos)
             const ctx = document.getElementById("chartPendEtapa");
             if (Chart.getChart("chartPendEtapa")) Chart.getChart("chartPendEtapa").destroy();
+
+            // Asegúrate de tener el plugin registrado si no lo hiciste antes
+            // Chart.register(ChartDataLabels); 
+
             new Chart(ctx, {
                type: 'doughnut',
                data: {
                   labels: labels,
-                  datasets: [{ data: vals, borderWidth: 1 }]
+                  datasets: [{
+                     data: vals,
+                     backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#71B37C', '#C9CBCF'],
+                     borderWidth: 1
+                  }]
                },
-               options: { plugins: { legend: { display: false } } }
+               options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  layout: { padding: 20 },
+                  plugins: {
+                     legend: { display: false },
+                     datalabels: {
+                        color: '#000', anchor: 'end', align: 'start', offset: 10, font: { weight: 'bold' },
+                        formatter: (val, ctx) => {
+                           let sum = 0; ctx.chart.data.datasets[0].data.map(d => sum += d);
+                           if ((val * 100 / sum) < 3) return val;
+                           return `${ctx.chart.data.labels[ctx.dataIndex]}\n${val} (${(val * 100 / sum).toFixed(1)}%)`;
+                        }
+                     }
+                  }
+               }
             });
          });
       }
@@ -1063,15 +1132,37 @@
             if (!res.ok) return;
             const rows = res.data;
             const tbody = document.getElementById("tbodyPromEtapas");
+
             let h = "";
+            let sumaDias = 0; // Acumulador
+
             rows.forEach(r => {
+               let dias = parseFloat(r.promedioDias || 0);
+               sumaDias += dias; // Sumamos para luego dividir
+
                h += `<tr>
-                <td>${r.desde}</td><td>${r.hasta}</td>
-                <td class="fw-bold text-primary">${r.promedioDias}</td>
-                <td>${r.muestras}</td>
-             </tr>`;
+                     <td>${r.desde}</td>
+                     <td>${r.hasta}</td>
+                     <td class="fw-bold text-primary">${dias.toFixed(1)}</td>
+                     <td>${r.muestras}</td>
+                   </tr>`;
             });
-            tbody.innerHTML = h || "<tr><td colspan='4'>Sin datos</td></tr>";
+
+            if (rows.length === 0) {
+               tbody.innerHTML = "<tr><td colspan='4'>Sin datos</td></tr>";
+            } else {
+               // CALCULAR PROMEDIO ARITMÉTICO
+               // (Suma total / Cantidad de etapas)
+               let promedioGlobal = sumaDias / rows.length;
+
+               // FILA DE TOTAL (Promedio)
+               h += `<tr class="table-secondary fw-bold border-top">
+                     <td colspan="2" class="text-end">PROMEDIO GLOBAL (Días):</td>
+                     <td class="text-primary" style="font-size:1.1em;">${promedioGlobal.toFixed(1)} días</td>
+                     <td class="text-muted small fst-italic">-</td>
+                   </tr>`;
+               tbody.innerHTML = h;
+            }
          });
       }
 
