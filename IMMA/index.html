@@ -527,7 +527,7 @@
        * CONFIG
        *************************************************/
       // IMPORTANTE: Asegúrate de que esta URL sea la correcta de tu implementación actual
-      const API_URL = 'https://script.google.com/macros/s/AKfycbxhSFnctVhdFpF8vtvmD4Dk6UiqhApMQlVrsvUHv68cEHLsqfT2w-xfzkPJIqos3vE/exec';
+      const API_URL = 'https://script.google.com/macros/s/AKfycbyJpbl2FMK3JhaeRuA2lyrr2uI6FN4r_qmS30KWAQHjxJBOktqg1B8D-2CGnudmaU1i/exec';
 
       function callApi(accion, data = {}) {
          const params = new URLSearchParams();
@@ -943,10 +943,15 @@
 
          // Nuevo Gráfico Mensual
          callApi('graficoDespachosMes').then(res => {
-            if (res.ok && res.data) {
-               dibujarGraficoTendencia(res.data, 'chartDespachosMes', 'Cant. Despachada');
-            }
-         });
+          if(res.ok && res.data) {
+             // Si no hay datos, labels estará vacío
+             if (res.data.labels.length === 0) {
+                 console.warn("No hay datos de despacho para graficar");
+             }
+             dibujarGraficoTendencia(res.data, 'chartDespachosMes', 'Cant. Despachada');
+          }
+       });
+
          cargarReporteHoy();
          cargarPendientes();
          cargarPromedios();
@@ -1128,34 +1133,29 @@
          finally { btns.forEach(b => b.style.visibility = "visible"); }
       }
 
-      function dibujarGraficoTendencia(data, idCanvas, label) {
+     function dibujarGraficoTendencia(data, idCanvas, label) {
        const ctx = document.getElementById(idCanvas);
+       if(!ctx) return; // Seguridad si no encuentra el canvas
+       
        if(Chart.getChart(idCanvas)) Chart.getChart(idCanvas).destroy();
 
        new Chart(ctx, {
-          type: 'bar', // Puedes cambiar a 'line' si prefieres una línea
+          type: 'bar',
           data: {
              labels: data.labels,
              datasets: [{
                 label: label,
                 data: data.valores,
-                backgroundColor: '#2ea043', // Color verde OK
-                borderColor: '#1e7e34',
-                borderWidth: 1,
-                borderRadius: 4, // Bordes redondeados en barras
-                fill: true
+                backgroundColor: '#2ea043',
+                borderRadius: 4
              }]
           },
           options: {
              responsive: true,
              maintainAspectRatio: false,
-             plugins: {
-                legend: { display: false },
-                tooltip: { mode: 'index', intersect: false }
-             },
+             plugins: { legend: { display: false } },
              scales: {
-                y: { beginAtZero: true, grid: { borderDash: [2, 2] } },
-                x: { grid: { display: false } }
+                y: { beginAtZero: true }
              }
           }
        });
