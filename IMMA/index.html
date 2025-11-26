@@ -214,28 +214,71 @@
 
           </div>
         </div>
-
+<!--Tab Merge-->
         <div class="tab-pane fade" id="tab-merge" role="tabpanel">
-           <div class="alert alert-info">Usa el menú "🚀 Herramientas MasterBI" en la hoja de cálculo para ejecutar el Merge o importar PDFs.</div>
-        </div>
+          <div class="row g-3">
+            
+            <div class="col-12 col-md-7">
+              <div class="card shadow-sm h-100">
+                <div class="card-body">
+                  <h5 class="card-title mb-2 text-primary">
+                    <i class="bi bi-arrow-repeat"></i> Merge Local + Nube
+                  </h5>
+                  <p class="small text-muted mb-3">
+                    Sincroniza la hoja <b>MasterBI</b> actual con una versión remota en Google Drive. 
+                    Se prioriza la fecha más reciente y se crea un backup automático.
+                  </p>
+                  
+                  <label class="form-label small fw-bold">ID o URL de la Planilla Nube</label>
+                  <div class="input-group mb-3">
+                    <span class="input-group-text"><i class="bi bi-cloud"></i></span>
+                    <input id="txtRemote" type="text" class="form-control" placeholder="Ej: 1ih2lTVmf...">
+                  </div>
+                  
+                  <button id="btnMerge" class="btn btn-primary w-100" onclick="doMerge()">
+                    <i class="bi bi-play-fill"></i> Ejecutar Merge
+                  </button>
+                  
+                  <div id="msgMerge" class="msg mt-2 d-none"></div>
+                </div>
+              </div>
+            </div>
 
-        <div class="tab-pane fade" id="tab-log" role="tabpanel">
-          <div class="card shadow-sm">
-             <div class="card-body">
-               <div class="d-flex justify-content-between mb-2">
-                 <h5 class="card-title">ChangeLog Reciente</h5>
-                 <button class="btn btn-outline-primary btn-sm" onclick="cargarLog()">Recargar</button>
-               </div>
-               <div class="table-responsive" style="max-height: 400px;">
-                 <table class="table table-sm table-striped small">
-                   <thead><tr><th>Fecha</th><th>Usuario</th><th>Columna</th><th>TAG</th><th>Ant.</th><th>Nuevo</th></tr></thead>
-                   <tbody id="tbodyLog"><tr><td colspan="6">Cargando...</td></tr></tbody>
-                 </table>
-               </div>
-             </div>
+            <div class="col-12 col-md-5">
+              <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column gap-3">
+                  
+                  <div>
+                    <h5 class="card-title mb-2 text-success">
+                      <i class="bi bi-file-earmark-excel"></i> Exportar Excel
+                    </h5>
+                    <p class="small text-muted mb-2">Descarga solo la hoja MasterBI.</p>
+                    <button id="btnExcel" class="btn btn-success w-100" onclick="doExportExcel()">
+                      Descargar .xlsx
+                    </button>
+                    <div id="msgExcel" class="msg mt-1 d-none"></div>
+                  </div>
+
+                  <hr class="my-1">
+
+                  <div>
+                    <h5 class="card-title mb-2 text-danger">
+                      <i class="bi bi-file-earmark-pdf"></i> Importar PDF (OCR)
+                    </h5>
+                    <p class="small text-muted mb-2">Extrae datos de Guías en Drive.</p>
+                    <div class="alert alert-light border small mb-0">
+                      <i class="bi bi-info-circle"></i> Para importar PDF, usa el menú <b>"🚀 Herramientas MasterBI"</b> en la barra superior de la Hoja de Cálculo.
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
-
+        </div>
+        <!--Tab Dashboard-->
         <div class="tab-pane fade" id="tab-dashboard" role="tabpanel">
           <div class="d-flex justify-content-between align-items-center mb-3">
              <div class="d-flex align-items-center gap-2">
@@ -339,7 +382,7 @@
     /*************************************************
      * CONFIG
      *************************************************/
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwtlcXRafy14UctiQ3uikrZP1UfoCf64yzjF3SvCkE1Y5EQF4t6cZLLtNVMCkXdVZA9/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwX9kM69Q045rne1GQRYMiApN4s9IJ2wLTHHbmN53WR9FwW-TnMR8NPXQnE14Wokv6v/exec';
 
     function callApi(accion, data = {}) {
       const params = new URLSearchParams();
@@ -810,6 +853,52 @@
        } finally {
           btns.forEach(b => b.style.visibility = "visible");
        }
+    }
+    /*************************************************
+     * FUNCIONES TAB MERGE / UTILIDADES
+     *************************************************/
+    
+    // --- MERGE ---
+    function doMerge() {
+       const txtId = document.getElementById("txtRemote").value.trim();
+       const msg = document.getElementById("msgMerge");
+       const btn = document.getElementById("btnMerge");
+
+       if (!txtId) { alert("Ingresa ID Nube."); return; }
+       if(!confirm("¿Iniciar Merge?")) return;
+
+       btn.disabled = true;
+       msg.textContent = "Procesando..."; msg.className = "msg loading d-block";
+
+       callApi('merge', { nubeId: txtId }).then(res => {
+          btn.disabled = false;
+          msg.textContent = res.ok ? "Éxito: " + res.msg : "Error: " + res.msg;
+          msg.className = res.ok ? "msg ok d-block" : "msg error d-block";
+          if(res.ok) cargarDashboard();
+       }).catch(e => { btn.disabled=false; msg.textContent="Error red"; msg.className="msg error d-block"; });
+    }
+
+    // --- EXCEL ---
+    function doExportExcel() {
+       const msg = document.getElementById("msgExcel");
+       const btn = document.getElementById("btnExcel");
+       btn.disabled = true; msg.textContent = "Generando..."; msg.className = "msg loading d-block";
+
+       callApi('exportExcel').then(res => {
+          if (res.ok && res.url) {
+             msg.textContent = "Descargando...";
+             fetch(res.url, { headers: { 'Authorization': 'Bearer ' + res.token } })
+               .then(r => r.blob())
+               .then(blob => {
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a'); a.href = url; a.download = res.filename;
+                  document.body.appendChild(a); a.click(); a.remove();
+                  msg.textContent = "Listo."; msg.className = "msg ok d-block"; btn.disabled = false;
+               });
+          } else {
+             msg.textContent = "Error"; msg.className = "msg error d-block"; btn.disabled = false;
+          }
+       });
     }
   </script>
 </body>
