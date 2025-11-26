@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
   <style>
     :root {
@@ -313,9 +314,9 @@
              <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Total</div><div id="kpi-total" class="kpi-value">-</div></div></div>
              <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Liberado/Desp</div><div id="kpi-ok" class="kpi-value kpi-green">-</div></div></div>
              <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Activos</div><div id="kpi-activos" class="kpi-value kpi-blue">-</div></div></div>
-             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Proceso</div><div id="kpi-proceso" class="kpi-value kpi-blue">-</div></div></div>
-             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Pendientes</div><div id="kpi-pend" class="kpi-value kpi-yellow">-</div></div></div>
-             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Atrasados</div><div id="kpi-atr" class="kpi-value kpi-red">-</div></div></div>
+             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">0-30 días</div><div id="kpi-proceso" class="kpi-value kpi-blue">-</div></div></div>
+             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">31-60 días</div><div id="kpi-pend" class="kpi-value kpi-yellow">-</div></div></div>
+             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">61+ días</div><div id="kpi-atr" class="kpi-value kpi-red">-</div></div></div>
           </div>
 
           <div class="row g-3 mb-3">
@@ -333,7 +334,7 @@
              </div>
              <div class="col-12 col-md-4">
                <div class="card p-3 h-100">
-                 <h6>Días Atraso</h6>
+                 <h6>Días en Proceso</h6>
                  <canvas id="chartAtraso" height="150"></canvas>
                </div>
              </div>
@@ -342,20 +343,20 @@
           <div class="row g-3">
              <div class="col-12 col-lg-6">
                 <div class="card p-3 h-100">
-                   <h6>Registros Hoy (ChangeLog)</h6>
+                   <h6>Tag Registrados Hoy</h6>
                    <div class="table-responsive">
                       <table class="table table-sm small mb-0 table-hover">
-                         <thead><tr class="table-light"><th>Etapa</th><th>Hoy</th><th>Regul.</th></tr></thead>
+                         <thead><tr class="table-light"><th>Etapa</th><th>Hoy</th><th>F. Ant.</th></tr></thead>
                          <tbody id="tbodyReporteHoy"></tbody>
                       </table>
                    </div>
-                   <canvas id="chartReporteHoy" height="100" class="mt-3"></canvas>
+                   <canvas id="chartReporteHoy" height="200" class="mt-3"></canvas>
                 </div>
              </div>
 
              <div class="col-12 col-lg-6">
                 <div class="card p-3 h-100">
-                   <h6>Pendientes por última etapa</h6>
+                   <h6>Estatus Tags por última etapa</h6>
                    <div class="row">
                       <div class="col-6">
                          <div class="table-responsive">
@@ -455,14 +456,26 @@
     function cargarColumnas() {
       const cmb = document.getElementById("cmbEtapa");
       cmb.innerHTML = '<option value="">Cargando...</option>';
-      callApi('getColumnasFechas').then(lista => {
-         cmb.innerHTML = '<option value="">-- seleccionar --</option>';
-         lista.forEach(et => {
-            const opt = document.createElement("option");
-            opt.value = et; opt.textContent = et;
-            cmb.appendChild(opt);
-         });
-      }).catch(onApiError);
+      
+      callApi('getColumnasFechas').then(res => {
+         // CORRECCIÓN: Validamos que la respuesta sea OK y accedemos a .data
+         if (res.ok && Array.isArray(res.data)) {
+             cmb.innerHTML = '<option value="">-- seleccionar --</option>';
+             
+             res.data.forEach(et => {
+                const opt = document.createElement("option");
+                opt.value = et; 
+                opt.textContent = et;
+                cmb.appendChild(opt);
+             });
+         } else {
+             console.error("Error cargando columnas:", res);
+             cmb.innerHTML = '<option value="">Error al cargar</option>';
+         }
+      }).catch(e => {
+          console.error(e);
+          cmb.innerHTML = '<option value="">Error de conexión</option>';
+      });
     }
 
     /*************************************************
@@ -564,20 +577,31 @@
     function seleccionarTag(fila, tag) {
        filaSeleccionada = fila;
        tagSeleccionado = tag;
+       
+       // Marcar el radio button visualmente
        const radios = document.getElementsByName("selTag");
        radios.forEach(r => r.checked = true); 
+       
        document.getElementById("lblTagSel").textContent = tag;
        
+       // 1. Obtener Última Etapa
        callApi('ultimaEtapa', { fila }).then(res => {
-          let txt = (res && res.ultimaColumna) ? `${res.ultimaColumna} (${res.fechaTexto})` : "Sin datos";
+          // CORRECCIÓN: Leer desde res.data
+          const data = res.data || {};
+          let txt = (data.ultimaColumna) ? `${data.ultimaColumna} (${data.fechaTexto})` : "Sin datos";
           document.getElementById("lblUltimaEtapa").textContent = txt;
        });
 
+       // 2. Obtener Estado
        callApi('estadoTag', { fila }).then(res => {
+          // CORRECCIÓN: Leer desde res.data
+          const data = res.data || {};
           const lbl = document.getElementById("lblEstado");
-          lbl.textContent = res.estado || "SIN INICIO";
-          lbl.className = `estado-${res.color || 'gray'}`;
+          lbl.textContent = data.estado || "SIN INICIO";
+          lbl.className = `estado-${data.color || 'gray'}`;
        });
+
+       // 3. Cargar Plano
        cargarPlano(tag);
     }
 
@@ -594,46 +618,99 @@
        msg.textContent = "Buscando plano...";
        
        callApi('vistaPlano', { tag }).then(res => {
-          if(res.ok && res.url) {
+          // Lógica de desempaquetado:
+          // Si éxito: res = { ok: true, data: { ok: true, url: "...", mensaje: "..." } }
+          // Si error: res = { ok: false, mensaje: "No encontrado" } (devuelto directo por doPost)
+          
+          const data = (res.ok && res.data) ? res.data : res;
+
+          if(data.ok && data.url) {
+             // ÉXITO
              const iframe = document.getElementById("iframePlano");
-             iframe.src = res.url;
+             iframe.src = data.url;
              iframe.classList.remove("d-none");
              document.getElementById("imgPlanoFallback").classList.add("d-none");
-             msg.textContent = res.mensaje;
+             msg.textContent = data.mensaje;
              
              const btn = document.getElementById("btnAbrirPlano");
-             btn.href = res.url.replace('/preview', '/view');
+             // Convertir URL de preview a view para pantalla completa
+             btn.href = data.url.replace('/preview', '/view');
              btn.classList.remove("d-none");
           } else {
-             msg.textContent = res.mensaje || "No encontrado";
+             // FALLO / NO ENCONTRADO
+             msg.textContent = data.mensaje || "Plano no encontrado.";
           }
-       }).catch(e => msg.textContent = "Error al buscar");
+       }).catch(e => {
+          console.error(e);
+          msg.textContent = "Error de conexión al buscar plano.";
+       });
     }
 
     function guardar(overwrite) {
-       if(!filaSeleccionada) return alert("Seleccione un TAG");
+       // 1. Validaciones
+       if (!filaSeleccionada) {
+          alert("Por favor, seleccione un TAG de la búsqueda primero.");
+          return;
+       }
        const etapa = document.getElementById("cmbEtapa").value;
        const fechaISO = document.getElementById("dtFecha").value;
-       if(!etapa || !fechaISO) return alert("Complete etapa y fecha");
-
-       const msg = document.getElementById("msgEstado");
-       msg.textContent = "Guardando..."; msg.className = "msg loading";
        
+       if (!etapa) {
+          alert("Seleccione una Etapa.");
+          return;
+       }
+       if (!fechaISO) {
+          alert("Seleccione una Fecha.");
+          return;
+       }
+
+       // 2. UI Loading
+       const msg = document.getElementById("msgEstado");
        const btnG = document.getElementById("btnGuardar");
        const btnS = document.getElementById("btnSobrescribir");
-       btnG.disabled = true; btnS.disabled = true;
+       
+       msg.textContent = "Guardando..."; 
+       msg.className = "msg loading";
+       btnG.disabled = true; 
+       btnS.disabled = true;
 
-       callApi('registrarFecha', { fila: filaSeleccionada, etapa, fechaISO, overwrite })
-         .then(res => {
-            btnG.disabled = false; btnS.disabled = false;
-            msg.textContent = res.msg;
-            msg.className = res.ok ? "msg ok" : "msg error";
-            if(res.ok) cargarLog(); 
-         })
-         .catch(e => {
-            btnG.disabled = false; btnS.disabled = false;
-            msg.textContent = "Error de red"; msg.className = "msg error";
-         });
+       // 3. Llamada al API
+       callApi('registrarFecha', { 
+          fila: filaSeleccionada, 
+          etapa: etapa, 
+          fechaISO: fechaISO, 
+          overwrite: overwrite 
+       })
+       .then(res => {
+          // Reactivar botones
+          btnG.disabled = false; 
+          btnS.disabled = false;
+
+          // CORRECCIÓN: Leer la respuesta interna (res.data)
+          const data = res.data || {};
+
+          if (res.ok && data.ok) {
+             // ÉXITO REAL
+             msg.textContent = data.msg || "Registrado correctamente.";
+             msg.className = "msg ok";
+             cargarLog(); // Actualizar tabla de log
+             
+             // Opcional: Actualizar texto de última etapa en la UI inmediata
+             document.getElementById("lblUltimaEtapa").textContent = `${etapa} (${fechaISO})`;
+          } else {
+             // ERROR LÓGICO (Ej: Ya existe fecha) O DE SERVIDOR
+             const errorMsg = data.msg || res.error || "Error desconocido al guardar.";
+             msg.textContent = errorMsg;
+             msg.className = "msg error";
+          }
+       })
+       .catch(e => {
+          console.error(e);
+          btnG.disabled = false; 
+          btnS.disabled = false;
+          msg.textContent = "Error de conexión."; 
+          msg.className = "msg error";
+       });
     }
 
     function cargarLog(){
@@ -750,7 +827,7 @@
        chartFunnel = new Chart(ctx, {
           type: 'bar',
           data: {
-             labels: ['Total', 'Activos', 'Proceso', 'Pendiente', 'Atrasado'],
+             labels: ['Total', 'Activos', '0-30 días', '31-60 días', '61+ días'],
              datasets: [{
                 label: 'Spools',
                 data: [k.total, k.activos, k.proceso, k.pend, k.atr],
@@ -803,7 +880,7 @@
                 labels: labels,
                 datasets: [
                    { label: 'Hoy', data: dHoy, backgroundColor: '#2ea043' },
-                   { label: 'Regul.', data: dAnt, backgroundColor: '#ffc107' }
+                   { label: 'F. Ant.', data: dAnt, backgroundColor: '#ffc107' }
                 ]
              },
              options: { scales: { x: {stacked:true}, y:{stacked:true} } }
