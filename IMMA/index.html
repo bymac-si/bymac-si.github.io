@@ -27,6 +27,10 @@
       background-color: var(--bymac-bg);
     }
 
+    .tab {
+      font-weight: 600;
+      color: #1a2b48;
+    }
     @media (min-width: 768px) {
       body {
         padding: 16px;
@@ -66,11 +70,7 @@
       border: 1px solid #e1e4ee;
       background: #eee;
     }
-    /* Tabs */
 
-    .tab {
-      font-size: 14px; color: #1a2b48; font-weight: 600;
-    }
     /* KPI cards */
     .kpi-box {
       padding: 12px;
@@ -138,7 +138,7 @@
           <button class="nav-link tab" data-bs-toggle="tab" data-bs-target="#tab-log" type="button">ChangeLog</button>
         </li>
         <li class="nav-item">
-          <button class="nav-link tab" data-bs-toggle="tab" data-bs-target="#tab-dashboard" type="button">Indicadores</button>
+          <button class="nav-link tab" data-bs-toggle="tab" data-bs-target="#tab-dashboard" type="button">Dashboard KPI</button>
         </li>
       </ul>
 
@@ -216,7 +216,7 @@
         </div>
 
         <div class="tab-pane fade" id="tab-merge" role="tabpanel">
-           <div class="alert alert-info">Funcionalidad en desarrollo para integración Local/Remoto.</div>
+           <div class="alert alert-info">Usa el menú "🚀 Herramientas MasterBI" en la hoja de cálculo para ejecutar el Merge o importar PDFs.</div>
         </div>
 
         <div class="tab-pane fade" id="tab-log" role="tabpanel">
@@ -238,7 +238,12 @@
 
         <div class="tab-pane fade" id="tab-dashboard" role="tabpanel">
           <div class="d-flex justify-content-between align-items-center mb-3">
-             <h5 class="mb-0">Indicadores de Gestión</h5>
+             <div class="d-flex align-items-center gap-2">
+                <h5 class="mb-0">Dashboard KPI</h5>
+                <span id="lblLastUpdate" class="badge bg-light text-dark border fw-normal" style="font-size:0.75em;">
+                  <i class="bi bi-clock-history"></i> Esperando datos...
+                </span>
+             </div>
              <div class="d-flex gap-2">
                 <button class="btn btn-outline-secondary btn-sm btn-export-hide" onclick="exportKpiPDF()">PDF</button>
                 <button class="btn btn-outline-secondary btn-sm btn-export-hide" onclick="exportKpiJPG()">JPG</button>
@@ -246,12 +251,12 @@
           </div>
 
           <div class="row g-2 mb-3">
-             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Total Spools</div><div id="kpi-total" class="kpi-value">-</div></div></div>
+             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Total</div><div id="kpi-total" class="kpi-value">-</div></div></div>
              <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Liberado/Desp</div><div id="kpi-ok" class="kpi-value kpi-green">-</div></div></div>
              <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Activos</div><div id="kpi-activos" class="kpi-value kpi-blue">-</div></div></div>
-             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">0 - 30 días</div><div id="kpi-proceso" class="kpi-value kpi-blue">-</div></div></div>
-             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">31 - 60 Días</div><div id="kpi-pend" class="kpi-value kpi-yellow">-</div></div></div>
-             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">> 61+ días</div><div id="kpi-atr" class="kpi-value kpi-red">-</div></div></div>
+             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Proceso</div><div id="kpi-proceso" class="kpi-value kpi-blue">-</div></div></div>
+             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Pendientes</div><div id="kpi-pend" class="kpi-value kpi-yellow">-</div></div></div>
+             <div class="col-6 col-md-3 col-lg-2"><div class="kpi-box"><div class="kpi-title">Atrasados</div><div id="kpi-atr" class="kpi-value kpi-red">-</div></div></div>
           </div>
 
           <div class="row g-3 mb-3">
@@ -269,7 +274,7 @@
              </div>
              <div class="col-12 col-md-4">
                <div class="card p-3 h-100">
-                 <h6>Días Proceso</h6>
+                 <h6>Días Atraso</h6>
                  <canvas id="chartAtraso" height="150"></canvas>
                </div>
              </div>
@@ -278,10 +283,10 @@
           <div class="row g-3">
              <div class="col-12 col-lg-6">
                 <div class="card p-3 h-100">
-                   <h6>Tags Registrados Hoy</h6>
+                   <h6>Registros Hoy (ChangeLog)</h6>
                    <div class="table-responsive">
                       <table class="table table-sm small mb-0 table-hover">
-                         <thead><tr class="table-light"><th>Etapa</th><th>Hoy</th><th>Anterior</th></tr></thead>
+                         <thead><tr class="table-light"><th>Etapa</th><th>Hoy</th><th>Regul.</th></tr></thead>
                          <tbody id="tbodyReporteHoy"></tbody>
                       </table>
                    </div>
@@ -291,7 +296,7 @@
 
              <div class="col-12 col-lg-6">
                 <div class="card p-3 h-100">
-                   <h6>Situación por última etapa Tag</h6>
+                   <h6>Pendientes por última etapa</h6>
                    <div class="row">
                       <div class="col-6">
                          <div class="table-responsive">
@@ -334,7 +339,7 @@
     /*************************************************
      * CONFIG
      *************************************************/
-    const API_URL = 'https://script.google.com/macros/s/AKfycbz7vKo14sL3ebsvLpls-rNT3JzhBjAV7zyDiibU2H0WBWhiIYkPfnfmJ6sDmN484Nw3/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwtlcXRafy14UctiQ3uikrZP1UfoCf64yzjF3SvCkE1Y5EQF4t6cZLLtNVMCkXdVZA9/exec';
 
     function callApi(accion, data = {}) {
       const params = new URLSearchParams();
@@ -355,7 +360,8 @@
 
     function onApiError(err) {
       console.error(err);
-      alert('Error de conexión o servidor:\n' + err.message);
+      // Quitar alerta intrusiva, mejor log en consola
+      // alert('Error de conexión o servidor:\n' + err.message);
     }
 
     let filaSeleccionada = null;
@@ -368,6 +374,7 @@
       setHoy();
       cargarColumnas();
       cargarLog();
+      startAutoRefresh(); // Iniciar Timer
       
       let dashLoaded = false;
       document.addEventListener("shown.bs.tab", (ev) => {
@@ -399,6 +406,30 @@
     }
 
     /*************************************************
+     * AUTO REFRESH (NUEVO)
+     *************************************************/
+    function startAutoRefresh() {
+       // Ejecutar cada 60 segundos (60000 ms)
+       setInterval(() => {
+          // Verificar si la pestaña activa es el Dashboard
+          const activeTab = document.querySelector('#tabsPanel button.active');
+          if (activeTab && activeTab.getAttribute('data-bs-target') === '#tab-dashboard') {
+             console.log("Auto-refreshing Dashboard...");
+             cargarDashboard();
+          }
+       }, 60000);
+    }
+
+    function updateLastRefreshTime() {
+       const now = new Date();
+       const timeStr = now.toLocaleTimeString();
+       const lbl = document.getElementById("lblLastUpdate");
+       if(lbl) {
+          lbl.innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> Act: ${timeStr}`;
+       }
+    }
+
+    /*************************************************
      * BUSQUEDA
      *************************************************/
     function buscarTags() {
@@ -411,7 +442,6 @@
       filaSeleccionada = null;
       tagSeleccionado = "";
       
-      // Limpiar UI
       document.getElementById("lblTagSel").textContent = "(ninguno)";
       document.getElementById("lblUltimaEtapa").textContent = "-";
       document.getElementById("msgEstado").textContent = "";
@@ -564,6 +594,7 @@
           document.getElementById("kpi-atr").textContent = k.atr;
           
           dibujarFunnel(k);
+          updateLastRefreshTime(); // Actualizar hora
        });
 
        callApi('graficoStatusFluor').then(d => dibujarBarra(d, 'chartLiberados', 'Status', '#1a2b48'));
@@ -581,7 +612,7 @@
        chartFunnel = new Chart(ctx, {
           type: 'bar',
           data: {
-             labels: ['Total Spools', 'Activos', '0-30 días', '31-60 días', '61+ días'],
+             labels: ['Total', 'Activos', 'Proceso', 'Pendiente', 'Atrasado'],
              datasets: [{
                 label: 'Spools',
                 data: [k.total, k.activos, k.proceso, k.pend, k.atr],
@@ -635,7 +666,7 @@
                 labels: labels,
                 datasets: [
                    { label: 'Hoy', data: dHoy, backgroundColor: '#2ea043' },
-                   { label: 'Anterior', data: dAnt, backgroundColor: '#ffc107' }
+                   { label: 'Regul.', data: dAnt, backgroundColor: '#ffc107' }
                 ]
              },
              options: {
@@ -686,74 +717,49 @@
     }
 
     /*************************************************
-     * EXPORTAR PDF (Multipage + Margen 5mm + Carta)
+     * EXPORTAR PDF (Multipage + Margen)
      *************************************************/
     async function exportKpiPDF() {
        const { jsPDF } = window.jspdf; 
        const el = document.getElementById("tab-dashboard");
        const btns = document.querySelectorAll(".btn-export-hide");
-       
-       // Ocultar botones temporalmente
        btns.forEach(b => b.style.visibility = "hidden");
 
        try {
-          // 1. Capturar el dashboard completo
-          // scale: 2 asegura buena calidad (retina)
           const canvas = await html2canvas(el, { scale: 2, useCORS: true });
           const imgData = canvas.toDataURL("image/jpeg", 0.95);
 
-          // 2. Configuración de dimensiones (mm)
-          // Carta (Letter): 215.9 x 279.4 mm
           const pdf = new jsPDF('p', 'mm', 'letter');
           const pageWidth = 215.9;
           const pageHeight = 279.4;
-          const margin = 5; // 5mm de margen
+          const margin = 5; 
 
-          // Área útil para imprimir
           const contentWidth = pageWidth - (2 * margin);
           const contentHeight = pageHeight - (2 * margin);
 
-          // 3. Calcular dimensiones de la imagen en el PDF
           const imgWidth = contentWidth; 
           const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
           let heightLeft = imgHeight;
-          let position = margin; // Posición Y inicial
+          let position = margin; 
 
-          // 4. Primera página
           pdf.addImage(imgData, 'JPEG', margin, position, imgWidth, imgHeight);
           heightLeft -= contentHeight;
 
-          // 5. Ciclo para páginas adicionales si el contenido es largo
           while (heightLeft > 0) {
-             position = position - pageHeight + (2 * margin); // Ajuste para solapar márgenes visualmente
-             // Opción alternativa matemática exacta: position -= contentHeight; 
-             // Pero jsPDF maneja coordenadas, así que movemos la imagen hacia arriba
-             position = -contentHeight + margin; // Reiniciamos posición relativa para la nueva pág
-             
-             // Como es un loop y la posición Y es acumulativa negativa, ajustamos:
-             // La lógica estándar para "slice" en jsPDF es mover la imagen hacia arriba (Y negativo)
-             
+             position = -contentHeight + margin; 
              pdf.addPage();
-             // Recalculamos la posición Y para la nueva página basada en lo que falta
-             // Truco: Imprimimos la MISMA imagen, pero desplazada hacia arriba
-             // El desplazamiento debe ser: (altura_ya_impresa) * -1 + margen
-             const offset = (imgHeight - heightLeft) * -1 + margin; 
-             
-             // Simplificación robusta para multipage continuous:
              pdf.addImage(imgData, 'JPEG', margin, margin - (imgHeight - heightLeft), imgWidth, imgHeight);
-             
              heightLeft -= contentHeight;
           }
 
-          // 6. Pie de página (opcional, fecha)
           const totalPages = pdf.internal.getNumberOfPages();
           const fecha = new Date().toLocaleDateString();
           for (let i = 1; i <= totalPages; i++) {
              pdf.setPage(i);
              pdf.setFontSize(8);
              pdf.setTextColor(150);
-             pdf.text(`Página ${i} de ${totalPages} - Generado: ${fecha}`, margin, pageHeight - 2);
+             pdf.text(`Página ${i} de ${totalPages} - ${fecha}`, margin, pageHeight - 2);
           }
 
           pdf.save("Dashboard_MasterBI.pdf");
@@ -767,7 +773,7 @@
     }
 
     /*************************************************
-     * EXPORTAR JPG (Imagen completa con margen blanco)
+     * EXPORTAR JPG (Sábana con Margen)
      *************************************************/
     async function exportKpiJPG() {
        const el = document.getElementById("tab-dashboard");
@@ -775,11 +781,7 @@
        btns.forEach(b => b.style.visibility = "hidden");
 
        try {
-          // 1. Capturar original
           const originalCanvas = await html2canvas(el, { scale: 2, useCORS: true });
-          
-          // 2. Crear un nuevo canvas para agregar el margen blanco
-          // Definimos el margen en pixeles (aprox 5mm a 96dpi ~ 19px, a escala 2 ~ 40px)
           const marginPx = 40; 
           
           const newCanvas = document.createElement("canvas");
@@ -787,22 +789,16 @@
           newCanvas.height = originalCanvas.height + (marginPx * 2);
           
           const ctx = newCanvas.getContext("2d");
-
-          // 3. Rellenar fondo blanco
           ctx.fillStyle = "#ffffff";
           ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
-
-          // 4. Dibujar el dashboard centrado
           ctx.drawImage(originalCanvas, marginPx, marginPx);
 
-          // 5. Agregar firma o fecha abajo (opcional)
           ctx.font = "20px Arial";
           ctx.fillStyle = "#888888";
-          ctx.fillText("Generado por Marcos Castr Abarca  - " + new Date().toLocaleDateString(), marginPx, newCanvas.height - 10);
+          ctx.fillText("Generado por MasterBI IMMA - " + new Date().toLocaleDateString(), marginPx, newCanvas.height - 10);
 
-          // 6. Descargar
           const a = document.createElement("a");
-          a.href = newCanvas.toDataURL("image/jpeg", 0.95); // Calidad alta
+          a.href = newCanvas.toDataURL("image/jpeg", 0.95); 
           a.download = "Dashboard_MasterBI.jpg";
           document.body.appendChild(a);
           a.click();
