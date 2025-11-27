@@ -141,7 +141,7 @@
                      <div class="card shadow-sm mb-3 p-3">
                         <h5 class="card-title">Selección</h5>
                         <p class="mb-1">TAG: <span id="lblTagSel" class="tag-seleccionado">-</span></p>
-                        <p class="mb-1 small text-muted" id="lblUltimaEtapa">Última etapa: -</p>
+                        <p class="mb-1 small text-muted" id="lblUltimaEtapa">Última etapa registrada: -</p>
                         <p class="mb-0 small">Estado: <span id="lblEstado">SIN INICIO</span></p>
                      </div>
                      <div class="card shadow-sm p-3">
@@ -206,7 +206,7 @@
 
                <div class="row mb-3">
                   <div class="col-12 col-md-6"><div class="card p-3 h-100"><h6>Embudo por proceso</h6><canvas id="chartFunnel" height="150"></canvas></div></div>
-                  <div class="col-12 col-md-6"><div class="card p-3 h-100"><h6>Días en Proceso (Atrasos)</h6><canvas id="chartAtraso" height="150"></canvas></div></div>
+                  <div class="col-12 col-md-6"><div class="card p-3 h-100"><h6>Días en Proceso</h6><canvas id="chartAtraso" height="150"></canvas></div></div>
                </div>
 
                <div class="row g-3">
@@ -240,7 +240,7 @@
 
                   <div class="col-12 col-lg-6">
                      <div class="card p-3 h-100">
-                        <h6>Estatus Tags por última etapa</h6>
+                        <h6>Estatus Tags por última etapa registrada (Fecha)</h6>
                         <div class="row">
                            <div class="col-6"><div class="table-responsive"><table class="table table-sm small mb-0 table-hover"><tbody id="tbodyPendEtapa"></tbody></table></div></div>
                            <div class="col-6"><div style="max-height: 300px; display: flex; align-items: center;"><canvas id="chartPendEtapa"></canvas></div></div>
@@ -424,6 +424,7 @@
             let h = "", l = [], d1 = [], d2 = [], t1 = 0, t2 = 0;
             res.data.forEach((r) => {
                t1 += r.hoy || 0; t2 += r.anteriores || 0;
+               h += `<tr><td></td><td class='text-center'>Hoy</td><td class='text-center text-muted'>F. Anterior</td></tr>`;
                h += `<tr><td>${r.columna}</td><td class='text-center'>${r.hoy}</td><td class='text-center text-muted'>${r.anteriores}</td></tr>`;
                l.push(r.columna); d1.push(r.hoy); d2.push(r.anteriores);
             });
@@ -433,7 +434,7 @@
             if (Chart.getChart("chartReporteHoy")) Chart.getChart("chartReporteHoy").destroy();
             new Chart(ctx, {
                type: "bar",
-               data: { labels: l, datasets: [{ label: "Hoy", data: d1, backgroundColor: "#2ea043" }, { label: "Ant.", data: d2, backgroundColor: "#ffc107" }] },
+               data: { labels: l, datasets: [{ label: "Hoy", data: d1, backgroundColor: "#2ea043" }, { label: "F. Anterior", data: d2, backgroundColor: "#ffc107" }] },
                options: { scales: { x: { stacked: true }, y: { stacked: true } }, plugins: { datalabels: { display: false } } },
             });
          });
