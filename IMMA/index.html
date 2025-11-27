@@ -43,6 +43,13 @@
          color: #0b5394;
       }
 
+      .plano-frame {
+         width: 100%;
+         min-height: 420px;
+         background: #eee;
+         border-radius: 8px;
+      }
+
       /* KPI BOXES */
       .kpi-box {
          padding: 12px;
@@ -141,7 +148,7 @@
                      <div class="card shadow-sm mb-3 p-3">
                         <h5 class="card-title">Selección</h5>
                         <p class="mb-1">TAG: <span id="lblTagSel" class="tag-seleccionado">-</span></p>
-                        <p class="mb-1 small text-muted" id="lblUltimaEtapa">Última etapa registrada: -</p>
+                        <p class="mb-1 small text-muted" id="lblUltimaEtapa">Última etapa: -</p>
                         <p class="mb-0 small">Estado: <span id="lblEstado">SIN INICIO</span></p>
                      </div>
                      <div class="card shadow-sm p-3">
@@ -195,18 +202,28 @@
                <div class="row g-2 mb-3">
                   <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">Total Spools</div><div id="kpi-total" class="kpi-value">-</div></div></div>
                   <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">Activos</div><div id="kpi-activos" class="kpi-value kpi-blue">-</div></div></div>
-                  <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">Despachados</div><div id="kpi-desp" class="kpi-value kpi-green">-</div></div></div>
-                  <div class="col-6 col-md-3"><div class="kpi-box bg-light"><div class="kpi-title">Eliminados</div><div id="kpi-elim" class="kpi-value kpi-muted">-</div></div></div>
                   <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">Liberados</div><div id="kpi-lib" class="kpi-value text-info">-</div></div></div>
+                  <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">Despachados</div><div id="kpi-desp" class="kpi-value kpi-green">-</div></div></div>
                   <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">0-30 días</div><div id="kpi-proceso" class="kpi-value kpi-blue">-</div></div></div>
                   <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">31-60 días</div><div id="kpi-pend" class="kpi-value kpi-yellow">-</div></div></div>
                   <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">61+ días</div><div id="kpi-atr" class="kpi-value kpi-red">-</div></div></div>
-                  
+                  <div class="col-6 col-md-3"><div class="kpi-box bg-light"><div class="kpi-title">Eliminados</div><div id="kpi-elim" class="kpi-value kpi-muted">-</div></div></div>
                </div>
 
                <div class="row mb-3">
                   <div class="col-12 col-md-6"><div class="card p-3 h-100"><h6>Embudo por proceso</h6><canvas id="chartFunnel" height="150"></canvas></div></div>
                   <div class="col-12 col-md-6"><div class="card p-3 h-100"><h6>Días en Proceso</h6><canvas id="chartAtraso" height="150"></canvas></div></div>
+               </div>
+
+               <div class="row mb-3">
+                  <div class="col-12">
+                     <div class="card p-3">
+                        <h6>Evolución de Despachos (Por Mes)</h6>
+                        <div style="height: 250px">
+                           <canvas id="chartDespachosMes"></canvas>
+                        </div>
+                     </div>
+                  </div>
                </div>
 
                <div class="row g-3">
@@ -240,7 +257,7 @@
 
                   <div class="col-12 col-lg-6">
                      <div class="card p-3 h-100">
-                        <h6>Estatus Tags por última etapa registrada (Fecha)</h6>
+                        <h6>Estatus Tags por Última Etapa Registrada (Fecha)</h6>
                         <div class="row">
                            <div class="col-6"><div class="table-responsive"><table class="table table-sm small mb-0 table-hover"><tbody id="tbodyPendEtapa"></tbody></table></div></div>
                            <div class="col-6"><div style="max-height: 300px; display: flex; align-items: center;"><canvas id="chartPendEtapa"></canvas></div></div>
@@ -273,7 +290,7 @@
 
    <script>
       // *** URL DE TU WEB APP ***
-      const API_URL = "https://script.google.com/macros/s/AKfycby1Kz52F7bzRDpiGiynhNAwxqr0NmyEIgX4dF_XZDOLrbk7m-K-l_SYfgwnRLzQLoaE/exec";
+      const API_URL = "https://script.google.com/macros/s/AKfycbx8Bz6WKF6PfRFXY815HxwQIqh6l_yRrOnr9PWQucfM-jKjJQgcz2wAyejgXfQe8qXW/exec";
 
       function callApi(accion, data = {}) {
          const p = new URLSearchParams();
@@ -377,19 +394,25 @@
                const k = res.data;
                document.getElementById("kpi-total").textContent = k.total;
                document.getElementById("kpi-activos").textContent = k.activos;
-               document.getElementById("kpi-lib").textContent = k.cnt_lib; // LIBERADOS SEPARADOS
-               document.getElementById("kpi-desp").textContent = k.cnt_desp; // DESPACHADOS SEPARADOS
+               document.getElementById("kpi-lib").textContent = k.cnt_lib; 
+               document.getElementById("kpi-desp").textContent = k.cnt_desp; 
                document.getElementById("kpi-proceso").textContent = k.proceso;
                document.getElementById("kpi-pend").textContent = k.pend;
                document.getElementById("kpi-atr").textContent = k.atr;
                document.getElementById("kpi-elim").textContent = k.elim;
                dibujarFunnel(k);
                const now = new Date();
-               document.getElementById("lblLastUpdate").innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> Actualizado a las ${now.toLocaleTimeString()} del ${now.toLocaleDateString()}`;
+               document.getElementById("lblLastUpdate").innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> ${now.toLocaleTimeString()}`;
             }
          });
          // 2. Gráficos
          callApi("graficoAtrasos").then((r) => { if (r.ok && r.data) dibujarBarra(r.data, "chartAtraso", "Spools", "#d93025"); });
+         
+         // NUEVO: DESPACHOS POR MES
+         callApi("graficoDespachosMes").then((r) => { 
+            if (r.ok && r.data) dibujarGraficoTendencia(r.data, "chartDespachosMes", "Despachados"); 
+         });
+
          // 3. Tablas
          cargarReporteHoy(); cargarPendientes(); cargarPromedios(); cargarStatusFluor();
       }
@@ -414,6 +437,32 @@
             type: "bar",
             data: { labels: d.labels, datasets: [{ label: lbl, data: d.valores, backgroundColor: col }] },
             options: { plugins: { legend: { display: false }, datalabels: { display: false } } },
+         });
+      }
+
+      // NUEVA FUNCIÓN PARA EL GRAFICO DE DESPACHOS
+      function dibujarGraficoTendencia(d, id, lbl) {
+         const ctx = document.getElementById(id); if (!ctx) return;
+         if (Chart.getChart(id)) Chart.getChart(id).destroy();
+         new Chart(ctx, {
+            type: "bar",
+            data: {
+               labels: d.labels,
+               datasets: [{
+                  label: lbl,
+                  data: d.valores,
+                  backgroundColor: "#2ea043",
+                  borderRadius: 4
+               }]
+            },
+            options: {
+               maintainAspectRatio: false,
+               plugins: {
+                  legend: { display: false },
+                  datalabels: { display: false }
+               },
+               scales: { y: { beginAtZero: true } }
+            }
          });
       }
 
