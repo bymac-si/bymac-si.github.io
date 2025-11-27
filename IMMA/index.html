@@ -691,6 +691,7 @@
           res.data.forEach((r) => {
             t1 += r.hoy || 0;
             t2 += r.anteriores || 0;
+            h += `<tr><td></td><td class='text-center' style='font-weight:600;'>Hoy</td><td class='text-center text-muted' style='font-weight:600;'>F. Anterior</td></tr>`;
             h += `<tr><td>${r.columna}</td><td class='text-center'>${r.hoy}</td><td class='text-center text-muted'>${r.anteriores}</td></tr>`;
             l.push(r.columna);
             d1.push(r.hoy);
@@ -708,7 +709,7 @@
               labels: l,
               datasets: [
                 { label: "Hoy", data: d1, backgroundColor: "#2ea043" },
-                { label: "Regul.", data: d2, backgroundColor: "#ffc107" },
+                { label: "F. Anterior", data: d2, backgroundColor: "#ffc107" },
               ],
             },
             options: {
