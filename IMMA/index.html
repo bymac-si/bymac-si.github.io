@@ -402,7 +402,7 @@
                document.getElementById("kpi-elim").textContent = k.elim;
                dibujarFunnel(k);
                const now = new Date();
-               document.getElementById("lblLastUpdate").innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> ${now.toLocaleTimeString()}`;
+               document.getElementById("lblLastUpdate").innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> ${now.toLocaleTimeString()} - ${now.toLocaleDateString()}`;
             }
          });
          // 2. Gráficos
