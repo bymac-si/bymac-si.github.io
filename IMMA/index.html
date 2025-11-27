@@ -470,10 +470,12 @@
          callApi("reporteChangeLogHoy").then((res) => {
             const tb = document.getElementById("tbodyReporteHoy");
             if (!res.ok || !res.data.length) { tb.innerHTML = "<tr><td colspan='3'>Sin datos</td></tr>"; return; }
+            
             let h = "", l = [], d1 = [], d2 = [], t1 = 0, t2 = 0;
+            h +=`<tr><td></td><td class='text-center'>Hoy</td><td class='text-center text-muted'>F. Anterior</td></tr>`;
             res.data.forEach((r) => {
                t1 += r.hoy || 0; t2 += r.anteriores || 0;
-               h += `<tr><td></td><td class='text-center'>Hoy</td><td class='text-center text-muted'>F. Anterior</td></tr>`;
+              
                h += `<tr><td>${r.columna}</td><td class='text-center'>${r.hoy}</td><td class='text-center text-muted'>${r.anteriores}</td></tr>`;
                l.push(r.columna); d1.push(r.hoy); d2.push(r.anteriores);
             });
