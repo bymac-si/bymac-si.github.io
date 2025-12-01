@@ -500,10 +500,10 @@
 
             // 2. Construimos el mensaje incluyendo el TAG
             if (r.ok && d.ok) {
-               document.getElementById("msgEstado").textContent = "OK " + tagActual;
+               document.getElementById("msgEstado").textContent = "OK: " + tagActual;
                document.getElementById("msgEstado").className = "msg ok";
             } else {
-               document.getElementById("msgEstado").textContent = (d.msg || "Error") + " " + tagActual;
+               document.getElementById("msgEstado").textContent = (d.msg || "Error") + ": " + tagActual;
                document.getElementById("msgEstado").className = "msg error";
             }
          });
