@@ -492,9 +492,20 @@
          const btn = document.getElementById("btnGuardar"); btn.disabled = true;
          document.getElementById("msgEstado").textContent = "Guardando...";
          callApi("registrarFecha", { fila: filaSeleccionada, etapa: et, fechaISO: fe, overwrite: over }).then((r) => {
-            btn.disabled = false; const d = r.data || {};
-            document.getElementById("msgEstado").textContent = (r.ok && d.ok) ? "OK" : (d.msg || "Error");
-            document.getElementById("msgEstado").className = (r.ok && d.ok) ? "msg ok" : "msg error";
+            btn.disabled = false; 
+            const d = r.data || {};
+            
+            // 1. Obtenemos el texto del TAG desde la etiqueta lblTagSel
+            const tagActual = document.getElementById("lblTagSel").textContent;
+
+            // 2. Construimos el mensaje incluyendo el TAG
+            if (r.ok && d.ok) {
+               document.getElementById("msgEstado").textContent = "OK " + tagActual;
+               document.getElementById("msgEstado").className = "msg ok";
+            } else {
+               document.getElementById("msgEstado").textContent = (d.msg || "Error") + " " + tagActual;
+               document.getElementById("msgEstado").className = "msg error";
+            }
          });
       }
 
