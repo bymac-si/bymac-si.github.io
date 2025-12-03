@@ -1,757 +1,1194 @@
 <!DOCTYPE html>
 <html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Panel MasterBI · Tag Spool</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<head>
-   <meta charset="UTF-8" />
-   <title>Panel MasterBI · Tag Spool</title>
-   <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
 
-   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-
-   <style>
+    <style>
       :root {
-         --bymac-primary: #1a2b48;
-         --bymac-bg: #f5f7fb;
+        --bymac-primary: #1a2b48;
+        --bymac-bg: #f5f7fb;
       }
 
       body {
-         font-family: system-ui, sans-serif;
-         font-size: 14px;
-         padding: 8px;
-         background-color: var(--bymac-bg);
+        font-family: system-ui, sans-serif;
+        font-size: 14px;
+        padding: 8px;
+        background-color: var(--bymac-bg);
       }
 
       .tab {
-         font-weight: 600;
-         color: #1a2b48;
+        font-weight: 600;
+        color: #1a2b48;
       }
 
       @media (min-width: 768px) {
-         body {
-            padding: 16px;
-         }
+        body {
+          padding: 16px;
+        }
       }
 
       .card {
-         border-radius: 10px;
-         border: 1px solid #e1e4ee;
+        border-radius: 10px;
+        border: 1px solid #e1e4ee;
       }
 
       .tag-seleccionado {
-         font-weight: bold;
-         color: #0b5394;
+        font-weight: bold;
+        color: #0b5394;
       }
 
       .plano-frame {
-         width: 100%;
-         min-height: 420px;
-         background: #eee;
-         border-radius: 8px;
+        width: 100%;
+        min-height: 420px;
+        background: #eee;
+        border-radius: 8px;
       }
 
       /* KPI BOXES */
       .kpi-box {
-         padding: 12px;
-         border-radius: 8px;
-         background: #fff;
-         border: 1px solid #e1e4ee;
-         text-align: center;
-         height: 100%;
-         display: flex;
-         flex-direction: column;
-         justify-content: center;
+        padding: 12px;
+        border-radius: 8px;
+        background: #fff;
+        border: 1px solid #e1e4ee;
+        text-align: center;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
       }
 
       .kpi-title {
-         font-size: 13px;
-         color: #666;
-         font-weight: 600;
-         margin-bottom: 4px;
+        font-size: 13px;
+        color: #666;
+        font-weight: 600;
+        margin-bottom: 4px;
       }
 
       .kpi-value {
-         font-size: 24px;
-         font-weight: 800;
+        font-size: 24px;
+        font-weight: 800;
       }
 
       .kpi-green {
-         color: #2ea043;
+        color: #2ea043;
       }
 
       .kpi-blue {
-         color: #1a2b48;
+        color: #1a2b48;
       }
 
       .kpi-yellow {
-         color: #b58900;
+        color: #b58900;
       }
 
       .kpi-red {
-         color: #d93025;
+        color: #d93025;
       }
 
       .kpi-muted {
-         color: #888;
+        color: #888;
       }
 
       .text-info {
-         color: #0dcaf0;
+        color: #0dcaf0;
       }
 
       /* MESSAGES */
       .msg {
-         font-size: 13px;
-         padding: 4px 6px;
-         border-radius: 6px;
-         display: inline-block;
-         font-weight: 600;
+        font-size: 13px;
+        padding: 4px 6px;
+        border-radius: 6px;
+        display: inline-block;
+        font-weight: 600;
       }
 
       .msg.ok {
-         color: #0f5132;
-         background: #d1e7dd;
+        color: #0f5132;
+        background: #d1e7dd;
       }
 
       .msg.error {
-         color: #842029;
-         background: #f8d7da;
+        color: #842029;
+        background: #f8d7da;
       }
 
       .msg.loading {
-         color: #856404;
-         background: #fff3cd;
+        color: #856404;
+        background: #fff3cd;
       }
-   </style>
-</head>
+    </style>
+  </head>
 
-<body class="d-flex flex-column min-vh-100">
-   <main class="container-fluid px-1 px-sm-2 flex-grow-1">
-
-      <div class="card mb-3 shadow-sm" style="background: linear-gradient(90deg, #a0c0f6, #3c475a); color: white;">
-         <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-center py-2">
-            <h1 class="m-0 fs-4">
-               <img src="https://bymac-si.github.io/img/logo_imma.png" alt="IMMA"
-                  style="width: 80px; margin-right: 10px" />Soluciones en Piping
-            </h1>
-            <div class="text-end small fs-5">Panel MasterBI Fluor</div>
-         </div>
+  <body class="d-flex flex-column min-vh-100">
+    <main class="container-fluid px-1 px-sm-2 flex-grow-1">
+      <div
+        class="card mb-3 shadow-sm"
+        style="
+          background: linear-gradient(90deg, #a0c0f6, #3c475a);
+          color: white;
+        "
+      >
+        <div
+          class="card-body d-flex flex-column flex-md-row justify-content-between align-items-center py-2"
+        >
+          <h1 class="m-0 fs-4">
+            <img
+              src="https://bymac-si.github.io/img/logo_imma.png"
+              alt="IMMA"
+              style="width: 80px; margin-right: 10px"
+            />Soluciones en Piping
+          </h1>
+          <div class="text-end small fs-5">Panel MasterBI Fluor</div>
+        </div>
       </div>
 
       <div class="card shadow-sm">
-         <ul class="nav nav-tabs mb-3" id="tabsPanel" role="tablist">
-            <li class="nav-item">
-               <button class="nav-link active tab" data-bs-toggle="tab" data-bs-target="#tab-fechas">
-                  <i class="bi bi-pencil-square"></i> Ingreso Fechas
-               </button>
-            </li>
-            <li class="nav-item">
-               <button class="nav-link tab" data-bs-toggle="tab" data-bs-target="#tab-dashboard">
-                  <i class="bi bi-bar-chart-line"></i> Dashboard KPI
-               </button>
-            </li>
-         </ul>
+        <ul class="nav nav-tabs mb-3" id="tabsPanel" role="tablist">
+          <li class="nav-item">
+            <button
+              class="nav-link active tab"
+              data-bs-toggle="tab"
+              data-bs-target="#tab-fechas"
+            >
+              <i class="bi bi-pencil-square"></i> Ingreso Fechas
+            </button>
+          </li>
+          <li class="nav-item">
+            <button
+              class="nav-link tab"
+              data-bs-toggle="tab"
+              data-bs-target="#tab-dashboard"
+            >
+              <i class="bi bi-bar-chart-line"></i> Dashboard KPI
+            </button>
+          </li>
+          <li class="nav-item">
+            <button
+              class="nav-link text-danger fw-bold"
+              id="btn-criticos"
+              data-bs-toggle="tab"
+              data-bs-target="#tab-criticos"
+              onclick="cargarTagsCriticos()"
+            >
+              <i class="bi bi-exclamation-triangle-fill"></i> Alerta 61+ Días
+            </button>
+          </li>
+        </ul>
 
-         <div class="tab-content p-3">
-
-            <div class="tab-pane fade show active" id="tab-fechas">
-               <div class="row g-3">
-                  <div class="col-12">
-                     <div class="card shadow-sm p-3">
-                        <h5 class="card-title">Buscar TAG</h5>
-                        <div class="input-group input-group-sm">
-                           <input type="text" id="txtBuscar" class="form-control" placeholder="Ej: 29044-005"
-                              onkeyup="if(event.key==='Enter') buscarTags()" />
-                           <button class="btn btn-primary" onclick="buscarTags()" id="btnBuscar">
-                              Buscar
-                           </button>
-                        </div>
-                        <div id="contenedorCoincidencias" class="mt-2 border rounded p-1"
-                           style="max-height: 200px; overflow: auto">
-                           <div class="text-muted small">Realiza una búsqueda.</div>
-                        </div>
-                     </div>
+        <div class="tab-content p-3">
+          <div class="tab-pane fade show active" id="tab-fechas">
+            <div class="row g-3">
+              <div class="col-12">
+                <div class="card shadow-sm p-3">
+                  <h5 class="card-title">Buscar TAG</h5>
+                  <div class="input-group input-group-sm">
+                    <input
+                      type="text"
+                      id="txtBuscar"
+                      class="form-control"
+                      placeholder="Ej: 29044-005"
+                      onkeyup="if(event.key==='Enter') buscarTags()"
+                    />
+                    <button
+                      class="btn btn-primary"
+                      onclick="buscarTags()"
+                      id="btnBuscar"
+                    >
+                      Buscar
+                    </button>
                   </div>
-
-                  <div class="col-12 col-md-6">
-                     <div class="card shadow-sm mb-3 p-3">
-                        <h5 class="card-title">Selección</h5>
-                        <p class="mb-1">TAG: <span id="lblTagSel" class="tag-seleccionado">-</span></p>
-                        <p class="mb-1 small text-muted" id="lblUltimaEtapa">Última etapa: -</p>
-                        <p class="mb-0 small">Estado: <span id="lblEstado">SIN INICIO</span></p>
-                     </div>
-                     <div class="card shadow-sm p-3">
-                        <h5 class="card-title">Registrar</h5>
-                        <select id="cmbEtapa" class="form-select form-select-sm mb-2"></select>
-                        <input type="date" id="dtFecha" class="form-control form-control-sm mb-2" />
-                        <div class="d-flex gap-2 align-items-center">
-                           <button class="btn btn-secondary btn-sm" onclick="setHoy()">Hoy</button>
-                           <button class="btn btn-primary btn-sm" id="btnGuardar"
-                              onclick="guardar(false)">Guardar</button>
-                           <button class="btn btn-danger btn-sm" id="btnSobrescribir"
-                              onclick="guardar(true)">Sobrescribir</button>
-                           <span id="msgEstado" class="msg ms-auto"></span>
-                        </div>
-                     </div>
+                  <div
+                    id="contenedorCoincidencias"
+                    class="mt-2 border rounded p-1"
+                    style="max-height: 200px; overflow: auto"
+                  >
+                    <div class="text-muted small">Realiza una búsqueda.</div>
                   </div>
+                </div>
+              </div>
 
-                  <div class="col-12 col-md-6">
-                     <div class="card shadow-sm h-100 p-3">
-                        <div class="d-flex justify-content-between">
-                           <h5 class="card-title">Plano</h5>
-                           <a id="btnAbrirPlano" href="#" target="_blank"
-                              class="btn btn-sm btn-outline-primary d-none"><i class="bi bi-box-arrow-up-right"></i>
-                              Abrir fuera</a>
-                        </div>
-                        <div
-                           class="flex-grow-1 bg-light border rounded d-flex justify-content-center align-items-center"
-                           style="min-height: 300px">
-                           <img id="imgPlanoFallback" src="https://bymac-si.github.io/img/not-found.png"
-                              style="max-width: 100%; max-height: 300px" />
-                           <iframe id="iframePlano" class="w-100 h-100 d-none"></iframe>
-                        </div>
-                        <div id="msgPlano" class="small text-muted text-center mt-1">Selecciona TAG</div>
-                     </div>
+              <div class="col-12 col-md-6">
+                <div class="card shadow-sm mb-3 p-3">
+                  <h5 class="card-title">Selección</h5>
+                  <p class="mb-1">
+                    TAG: <span id="lblTagSel" class="tag-seleccionado">-</span>
+                  </p>
+                  <p class="mb-1 small text-muted" id="lblUltimaEtapa">
+                    Última etapa: -
+                  </p>
+                  <p class="mb-0 small">
+                    Estado: <span id="lblEstado">SIN INICIO</span>
+                  </p>
+                </div>
+                <div class="card shadow-sm p-3">
+                  <h5 class="card-title">Registrar</h5>
+                  <select
+                    id="cmbEtapa"
+                    class="form-select form-select-sm mb-2"
+                  ></select>
+                  <input
+                    type="date"
+                    id="dtFecha"
+                    class="form-control form-control-sm mb-2"
+                  />
+                  <div class="d-flex gap-2 align-items-center">
+                    <button class="btn btn-secondary btn-sm" onclick="setHoy()">
+                      Hoy
+                    </button>
+                    <button
+                      class="btn btn-primary btn-sm"
+                      id="btnGuardar"
+                      onclick="guardar(false)"
+                    >
+                      Guardar
+                    </button>
+                    <button
+                      class="btn btn-danger btn-sm"
+                      id="btnSobrescribir"
+                      onclick="guardar(true)"
+                    >
+                      Sobrescribir
+                    </button>
+                    <span id="msgEstado" class="msg ms-auto"></span>
                   </div>
-               </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <div class="card shadow-sm h-100 p-3">
+                  <div class="d-flex justify-content-between">
+                    <h5 class="card-title">Plano</h5>
+                    <a
+                      id="btnAbrirPlano"
+                      href="#"
+                      target="_blank"
+                      class="btn btn-sm btn-outline-primary d-none"
+                      ><i class="bi bi-box-arrow-up-right"></i> Abrir fuera</a
+                    >
+                  </div>
+                  <div
+                    class="flex-grow-1 bg-light border rounded d-flex justify-content-center align-items-center"
+                    style="min-height: 300px"
+                  >
+                    <img
+                      id="imgPlanoFallback"
+                      src="https://bymac-si.github.io/img/not-found.png"
+                      style="max-width: 100%; max-height: 300px"
+                    />
+                    <iframe
+                      id="iframePlano"
+                      class="w-100 h-100 d-none"
+                    ></iframe>
+                  </div>
+                  <div id="msgPlano" class="small text-muted text-center mt-1">
+                    Selecciona TAG
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- tab dashboard-->
+          <div class="tab-pane fade" id="tab-dashboard">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h5 class="mb-0 d-inline-block">Indicadores de Gestión</h5>
+                <span
+                  id="lblLastUpdate"
+                  class="badge bg-light text-dark border ms-2 fw-normal"
+                  ><i class="bi bi-clock"></i> Actualizando...</span
+                >
+              </div>
+              <div>
+                <h4 class="btn-export-hide">
+                  <button
+                    class="btn btn-sm btn-outline-secondary btn-export-hide"
+                    onclick="exportKpiPDF()"
+                  >
+                    PDF
+                  </button>
+                  <button
+                    class="btn btn-sm btn-outline-secondary btn-export-hide"
+                    onclick="exportKpiJPG()"
+                  >
+                    JPG
+                  </button>
+                </h4>
+              </div>
             </div>
 
-            <div class="tab-pane fade" id="tab-dashboard">
-               <div class="d-flex justify-content-between align-items-center mb-3">
-                  <div>
-                     <h5 class="mb-0 d-inline-block">Indicadores de Gestión</h5>
-                     <span id="lblLastUpdate" class="badge bg-light text-dark border ms-2 fw-normal"><i
-                           class="bi bi-clock"></i> Actualizando...</span>
-                  </div>
-                  <div>
-                     <h4 class="btn-export-hide">
-                        <button class="btn btn-sm btn-outline-secondary btn-export-hide"
-                           onclick="exportKpiPDF()">PDF</button>
-                        <button class="btn btn-sm btn-outline-secondary btn-export-hide"
-                           onclick="exportKpiJPG()">JPG</button>
-                     </h4>
-                  </div>
-               </div>
-
-               <div class="row g-2 mb-3">
-                  <div class="col-6 col-md-3">
-                     <div class="kpi-box">
-                        <div class="kpi-title">Total Spools</div>
-                        <div id="kpi-total" class="kpi-value">-</div>
-                     </div>
-                  </div>
-                  <div class="col-6 col-md-3">
-                     <div class="kpi-box">
-                        <div class="kpi-title">Activos</div>
-                        <div id="kpi-activos" class="kpi-value kpi-blue">-</div>
-                     </div>
-                  </div>
-                  <div class="col-6 col-md-3">
-                     <div class="kpi-box">
-                        <div class="kpi-title">Liberados</div>
-                        <div id="kpi-lib" class="kpi-value text-info">-</div>
-                     </div>
-                  </div>
-                  <div class="col-6 col-md-3">
-                     <div class="kpi-box">
-                        <div class="kpi-title">Despachados</div>
-                        <div id="kpi-desp" class="kpi-value kpi-green">-</div>
-                     </div>
-                  </div>
-                  <div class="col-6 col-md-3">
-                     <div class="kpi-box">
-                        <div class="kpi-title">0-30 días</div>
-                        <div id="kpi-proceso" class="kpi-value kpi-blue">-</div>
-                     </div>
-                  </div>
-                  <div class="col-6 col-md-3">
-                     <div class="kpi-box">
-                        <div class="kpi-title">31-60 días</div>
-                        <div id="kpi-pend" class="kpi-value kpi-yellow">-</div>
-                     </div>
-                  </div>
-                  <div class="col-6 col-md-3">
-                     <div class="kpi-box">
-                        <div class="kpi-title">61+ días</div>
-                        <div id="kpi-atr" class="kpi-value kpi-red">-</div>
-                     </div>
-                  </div>
-                  <div class="col-6 col-md-3">
-                     <div class="kpi-box bg-light">
-                        <div class="kpi-title">Eliminados</div>
-                        <div id="kpi-elim" class="kpi-value kpi-muted">-</div>
-                     </div>
-                  </div>
-               </div>
-
-               <div class="row mb-3">
-                  <div class="col-12 col-md-6">
-                     <div class="card p-3 h-100">
-                        <h6>Embudo por proceso</h6><canvas id="chartFunnel" height="150"></canvas>
-                     </div>
-                  </div>
-                  <div class="col-12 col-md-6">
-                     <div class="card p-3 h-100">
-                        <h6>Días en Proceso</h6><canvas id="chartAtraso" height="150"></canvas>
-                     </div>
-                  </div>
-               </div>
-
-               <div class="row mb-3">
-                  <div class="col-12">
-                     <div class="card p-3">
-                        <h6>Evolución de Despachos (Por Mes)</h6>
-                        <div style="height: 250px">
-                           <canvas id="chartDespachosMes"></canvas>
-                        </div>
-                     </div>
-                  </div>
-               </div>
-
-               <div class="row g-3">
-                  <div class="col-12 col-lg-12">
-                     <div class="card p-3 h-100">
-                        <h6>Distribución Status Fluor (Activos)</h6>
-                        <div class="row align-items-center h-100">
-                           <div class="col-6">
-                              <div class="table-responsive" style="max-height: 350px;">
-                                 <table class="table table-sm small mb-0 table-hover">
-                                    <tbody id="tbodyStatusFluor"></tbody>
-                                 </table>
-                              </div>
-                           </div>
-                           <div class="col-6">
-                              <div
-                                 style="max-height: 200px; display: flex; align-items: center; justify-content: center;">
-                                 <canvas id="chartStatusFluor"></canvas>
-                              </div>
-                           </div>
-                        </div>
-                     </div>
-                  </div>
-
-                  <div class="col-12 col-lg-6">
-                     <div class="card p-3 h-100">
-                        <h6>Tags Registrados Hoy</h6>
-                        <div class="table-responsive">
-                           <table class="table table-sm small mb-0 table-hover">
-                              <tbody id="tbodyReporteHoy"></tbody>
-                           </table>
-                        </div>
-                        <canvas id="chartReporteHoy" height="150" class="mt-2"></canvas>
-                     </div>
-                  </div>
-
-                  <div class="col-12 col-lg-6">
-                     <div class="card p-3 h-100">
-                        <h6>Estatus Tags por Última Etapa Registrada (Fecha)</h6>
-                        <div class="row">
-                           <div class="col-6">
-                              <div class="table-responsive">
-                                 <table class="table table-sm small mb-0 table-hover">
-                                    <tbody id="tbodyPendEtapa"></tbody>
-                                 </table>
-                              </div>
-                           </div>
-                           <div class="col-6">
-                              <div style="max-height: 300px; display: flex; align-items: center;"><canvas
-                                    id="chartPendEtapa"></canvas></div>
-                           </div>
-                        </div>
-                     </div>
-                  </div>
-
-                  <div class="col-12">
-                     <div class="card p-3">
-                        <h6>Tiempos promedio entre etapas</h6>
-                        <div class="table-responsive">
-                           <table class="table table-sm small table-striped text-center">
-                              <thead>
-                                 <tr>
-                                    <th>Desde</th>
-                                    <th>Hasta</th>
-                                    <th>Promedio (Días)</th>
-                                    <th>Casos</th>
-                                 </tr>
-                              </thead>
-                              <tbody id="tbodyPromEtapas"></tbody>
-                           </table>
-                        </div>
-                     </div>
-                  </div>
-               </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6 col-md-3">
+                <div class="kpi-box">
+                  <div class="kpi-title">Total Spools</div>
+                  <div id="kpi-total" class="kpi-value">-</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="kpi-box">
+                  <div class="kpi-title">Activos</div>
+                  <div id="kpi-activos" class="kpi-value kpi-blue">-</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="kpi-box">
+                  <div class="kpi-title">Liberados</div>
+                  <div id="kpi-lib" class="kpi-value text-info">-</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="kpi-box">
+                  <div class="kpi-title">Despachados</div>
+                  <div id="kpi-desp" class="kpi-value kpi-green">-</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="kpi-box">
+                  <div class="kpi-title">0-30 días</div>
+                  <div id="kpi-proceso" class="kpi-value kpi-blue">-</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="kpi-box">
+                  <div class="kpi-title">31-60 días</div>
+                  <div id="kpi-pend" class="kpi-value kpi-yellow">-</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="kpi-box">
+                  <div class="kpi-title">61+ días</div>
+                  <div id="kpi-atr" class="kpi-value kpi-red">-</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="kpi-box bg-light">
+                  <div class="kpi-title">Eliminados</div>
+                  <div id="kpi-elim" class="kpi-value kpi-muted">-</div>
+                </div>
+              </div>
             </div>
-         </div>
+
+            <div class="row mb-3">
+              <div class="col-12 col-md-6">
+                <div class="card p-3 h-100">
+                  <h6>Embudo por proceso</h6>
+                  <canvas id="chartFunnel" height="150"></canvas>
+                </div>
+              </div>
+              <div class="col-12 col-md-6">
+                <div class="card p-3 h-100">
+                  <h6>Días en Proceso</h6>
+                  <canvas id="chartAtraso" height="150"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-12">
+                <div class="card p-3">
+                  <h6>Evolución de Despachos (Por Mes)</h6>
+                  <div style="height: 250px">
+                    <canvas id="chartDespachosMes"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-12 col-lg-12">
+                <div class="card p-3 h-100">
+                  <h6>Distribución Status Fluor (Activos)</h6>
+                  <div class="row align-items-center h-100">
+                    <div class="col-6">
+                      <div class="table-responsive" style="max-height: 350px">
+                        <table class="table table-sm small mb-0 table-hover">
+                          <tbody id="tbodyStatusFluor"></tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div
+                        style="
+                          max-height: 200px;
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                        "
+                      >
+                        <canvas id="chartStatusFluor"></canvas>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-lg-6">
+                <div class="card p-3 h-100">
+                  <h6>Tags Registrados Hoy</h6>
+                  <div class="table-responsive">
+                    <table class="table table-sm small mb-0 table-hover">
+                      <tbody id="tbodyReporteHoy"></tbody>
+                    </table>
+                  </div>
+                  <canvas
+                    id="chartReporteHoy"
+                    height="150"
+                    class="mt-2"
+                  ></canvas>
+                </div>
+              </div>
+
+              <div class="col-12 col-lg-6">
+                <div class="card p-3 h-100">
+                  <h6>Estatus Tags por Última Etapa Registrada (Fecha)</h6>
+                  <div class="row">
+                    <div class="col-6">
+                      <div class="table-responsive">
+                        <table class="table table-sm small mb-0 table-hover">
+                          <tbody id="tbodyPendEtapa"></tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div
+                        style="
+                          max-height: 300px;
+                          display: flex;
+                          align-items: center;
+                        "
+                      >
+                        <canvas id="chartPendEtapa"></canvas>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="card p-3">
+                  <h6>Tiempos promedio entre etapas</h6>
+                  <div class="table-responsive">
+                    <table
+                      class="table table-sm small table-striped text-center"
+                    >
+                      <thead>
+                        <tr>
+                          <th>Desde</th>
+                          <th>Hasta</th>
+                          <th>Promedio (Días)</th>
+                          <th>Casos</th>
+                        </tr>
+                      </thead>
+                      <tbody id="tbodyPromEtapas"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--tab alerta 61+ días-->
+          <div class="tab-pane fade" id="tab-criticos">
+            <div class="card p-3 shadow-sm border-danger">
+              <div
+                class="d-flex justify-content-between align-items-center mb-3"
+              >
+                <h5 class="text-danger fw-bold mb-0">
+                  <i class="bi bi-alarm"></i> Tags con más de 60 días sin
+                  movimiento
+                </h5>
+                <button
+                  class="btn btn-sm btn-outline-secondary"
+                  onclick="cargarTagsCriticos()"
+                >
+                  <i class="bi bi-arrow-clockwise"></i> Recargar
+                </button>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Tag Spool</th>
+                      <th class="text-center">Días Atraso</th>
+                      <th>Última Etapa</th>
+                      <th>Fecha Movimiento</th>
+                      <th class="text-center">Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tabla-criticos-body"></tbody>
+                </table>
+              </div>
+
+              <div id="loading-criticos" class="text-center py-4 d-none">
+                <div class="spinner-border text-danger" role="status">
+                  <span class="visually-hidden">Cargando...</span>
+                </div>
+                <div class="text-muted small mt-2">Analizando datos...</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-   </main>
+    </main>
 
-   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
-   <script>
+    <script>
       // *** URL DE TU WEB APP ***
-      const API_URL = "https://script.google.com/macros/s/AKfycbzR5uJs_HFpsx-h2BptbucLrYITt9UUHTWBPli2Qk4VH25mnPK0JREeOmRe7DZ6RlI6/exec";
+      const API_URL =
+        "https://script.google.com/macros/s/AKfycbz9W1UPXquuIB0DIV2fGJS8nnKsj5tRAHaBh-3ufNMXPE-5aE9P6NmyY7O3aCrz6vuP/exec";
 
       function callApi(accion, data = {}) {
-         const p = new URLSearchParams();
-         p.append("accion", accion);
-         Object.keys(data).forEach((k) => {
-            if (data[k])
-               p.append(k, typeof data[k] === "object" ? JSON.stringify(data[k]) : String(data[k]));
-         });
-         return fetch(API_URL, { method: "POST", body: p }).then((r) => {
-            if (!r.ok) throw new Error(r.status);
-            return r.json();
-         });
+        const p = new URLSearchParams();
+        p.append("accion", accion);
+        Object.keys(data).forEach((k) => {
+          if (data[k])
+            p.append(
+              k,
+              typeof data[k] === "object"
+                ? JSON.stringify(data[k])
+                : String(data[k])
+            );
+        });
+        return fetch(API_URL, { method: "POST", body: p }).then((r) => {
+          if (!r.ok) throw new Error(r.status);
+          return r.json();
+        });
       }
 
       document.addEventListener("DOMContentLoaded", () => {
-         setHoy();
-         cargarColumnas();
-         if (typeof ChartDataLabels !== "undefined") Chart.register(ChartDataLabels);
+        setHoy();
+        cargarColumnas();
+        if (typeof ChartDataLabels !== "undefined")
+          Chart.register(ChartDataLabels);
 
-         startAutoRefresh();
+        startAutoRefresh();
 
-         const active = document.querySelector("#tabsPanel button.active");
-         if (active && active.dataset.bsTarget === "#tab-dashboard") cargarDashboard();
+        const active = document.querySelector("#tabsPanel button.active");
+        if (active && active.dataset.bsTarget === "#tab-dashboard")
+          cargarDashboard();
 
-         document.addEventListener("shown.bs.tab", (ev) => {
-            if (ev.target.dataset.bsTarget === "#tab-dashboard") cargarDashboard();
-         });
+        document.addEventListener("shown.bs.tab", (ev) => {
+          if (ev.target.dataset.bsTarget === "#tab-dashboard")
+            cargarDashboard();
+        });
       });
 
       function setHoy() {
-         const d = new Date();
-         const off = d.getTimezoneOffset() * 60000;
-         document.getElementById("dtFecha").value = new Date(d.getTime() - off).toISOString().slice(0, 10);
+        const d = new Date();
+        const off = d.getTimezoneOffset() * 60000;
+        document.getElementById("dtFecha").value = new Date(d.getTime() - off)
+          .toISOString()
+          .slice(0, 10);
       }
       function cargarColumnas() {
-         const cmb = document.getElementById("cmbEtapa");
-         cmb.innerHTML = "<option>Cargando...</option>";
-         callApi("getColumnasFechas").then((r) => {
+        const cmb = document.getElementById("cmbEtapa");
+        cmb.innerHTML = "<option>Cargando...</option>";
+        callApi("getColumnasFechas")
+          .then((r) => {
             if (r.ok && Array.isArray(r.data)) {
-               cmb.innerHTML = '<option value="">-- seleccionar --</option>';
-               r.data.forEach((e) => {
-                  const o = document.createElement("option");
-                  o.value = e; o.text = e; cmb.appendChild(o);
-               });
+              cmb.innerHTML = '<option value="">-- seleccionar --</option>';
+              r.data.forEach((e) => {
+                const o = document.createElement("option");
+                o.value = e;
+                o.text = e;
+                cmb.appendChild(o);
+              });
             } else cmb.innerHTML = "<option>Error</option>";
-         }).catch(() => (cmb.innerHTML = "<option>Error red</option>"));
+          })
+          .catch(() => (cmb.innerHTML = "<option>Error red</option>"));
       }
 
       // --- LOGIC: BUSQUEDA ---
       let filaSeleccionada = null;
       function buscarTags() {
-         const txt = document.getElementById("txtBuscar").value.trim();
-         const div = document.getElementById("contenedorCoincidencias");
-         if (!txt) { div.innerHTML = "<small>Escribe algo.</small>"; return; }
-         div.innerHTML = "<small class='text-primary'>Buscando...</small>";
-         document.getElementById("btnBuscar").disabled = true;
-         callApi("buscarTag", { texto: txt }).then((r) => {
+        const txt = document.getElementById("txtBuscar").value.trim();
+        const div = document.getElementById("contenedorCoincidencias");
+        if (!txt) {
+          div.innerHTML = "<small>Escribe algo.</small>";
+          return;
+        }
+        div.innerHTML = "<small class='text-primary'>Buscando...</small>";
+        document.getElementById("btnBuscar").disabled = true;
+        callApi("buscarTag", { texto: txt })
+          .then((r) => {
             document.getElementById("btnBuscar").disabled = false;
             if (!r.ok || !r.data.length) {
-               div.innerHTML = "<small>No encontrado.</small>";
-               return;
+              div.innerHTML = "<small>No encontrado.</small>";
+              return;
             }
             let h = "<table class='table table-sm table-hover mb-0'><tbody>";
-            r.data.forEach((i) => { h += `<tr style='cursor:pointer' onclick="selTag(${i.fila},'${i.tag}')"><td width='20'><input type='radio' name='sel'></td><td>${i.tag}</td></tr>`; });
+            r.data.forEach((i) => {
+              h += `<tr style='cursor:pointer' onclick="selTag(${i.fila},'${i.tag}')"><td width='20'><input type='radio' name='sel'></td><td>${i.tag}</td></tr>`;
+            });
             div.innerHTML = h + "</tbody></table>";
-         }).catch(() => { document.getElementById("btnBuscar").disabled = false; div.innerHTML = "<small class='text-danger'>Error.</small>"; });
+          })
+          .catch(() => {
+            document.getElementById("btnBuscar").disabled = false;
+            div.innerHTML = "<small class='text-danger'>Error.</small>";
+          });
       }
 
       function selTag(f, t) {
-         filaSeleccionada = f; document.getElementById("lblTagSel").textContent = t;
-         callApi("ultimaEtapa", { fila: f }).then((r) => {
-            const d = r.data || {};
-            let ft = d.fechaTexto; if (ft) ft = ft.split("-").reverse().join("/");
-            document.getElementById("lblUltimaEtapa").textContent = d.ultimaColumna ? `${d.ultimaColumna} (${ft})` : "-";
-         });
-         callApi("estadoTag", { fila: f }).then((r) => {
-            const d = r.data || {};
-            document.getElementById("lblEstado").textContent = d.estado || "SIN INICIO";
-         });
-         document.getElementById("imgPlanoFallback").classList.remove("d-none");
-         document.getElementById("iframePlano").classList.add("d-none");
-         callApi("vistaPlano", { tag: t }).then((r) => {
-            const d = r.data || r; if (d.ok && d.url) {
-               document.getElementById("iframePlano").src = d.url; document.getElementById("iframePlano").classList.remove("d-none");
-               document.getElementById("imgPlanoFallback").classList.add("d-none");
-               document.getElementById("btnAbrirPlano").href = d.url.replace("/preview", "/view");
-               document.getElementById("btnAbrirPlano").classList.remove("d-none");
-            } else document.getElementById("btnAbrirPlano").classList.add("d-none");
-         });
+        filaSeleccionada = f;
+        document.getElementById("lblTagSel").textContent = t;
+        callApi("ultimaEtapa", { fila: f }).then((r) => {
+          const d = r.data || {};
+          let ft = d.fechaTexto;
+          if (ft) ft = ft.split("-").reverse().join("/");
+          document.getElementById("lblUltimaEtapa").textContent =
+            d.ultimaColumna ? `${d.ultimaColumna} (${ft})` : "-";
+        });
+        callApi("estadoTag", { fila: f }).then((r) => {
+          const d = r.data || {};
+          document.getElementById("lblEstado").textContent =
+            d.estado || "SIN INICIO";
+        });
+        document.getElementById("imgPlanoFallback").classList.remove("d-none");
+        document.getElementById("iframePlano").classList.add("d-none");
+        callApi("vistaPlano", { tag: t }).then((r) => {
+          const d = r.data || r;
+          if (d.ok && d.url) {
+            document.getElementById("iframePlano").src = d.url;
+            document.getElementById("iframePlano").classList.remove("d-none");
+            document.getElementById("imgPlanoFallback").classList.add("d-none");
+            document.getElementById("btnAbrirPlano").href = d.url.replace(
+              "/preview",
+              "/view"
+            );
+            document.getElementById("btnAbrirPlano").classList.remove("d-none");
+          } else
+            document.getElementById("btnAbrirPlano").classList.add("d-none");
+        });
       }
 
       function guardar(over) {
-         if (!filaSeleccionada) return alert("Selecciona TAG");
-         const et = document.getElementById("cmbEtapa").value; const fe = document.getElementById("dtFecha").value;
-         if (!et || !fe) return alert("Falta datos");
-         const btn = document.getElementById("btnGuardar"); btn.disabled = true;
-         document.getElementById("msgEstado").textContent = "Guardando...";
-         callApi("registrarFecha", { fila: filaSeleccionada, etapa: et, fechaISO: fe, overwrite: over }).then((r) => {
-            btn.disabled = false; 
-            const d = r.data || {};
-            
-            // 1. Obtenemos el texto del TAG desde la etiqueta lblTagSel
-            const tagActual = document.getElementById("lblTagSel").textContent;
+        if (!filaSeleccionada) return alert("Selecciona TAG");
+        const et = document.getElementById("cmbEtapa").value;
+        const fe = document.getElementById("dtFecha").value;
+        if (!et || !fe) return alert("Falta datos");
+        const btn = document.getElementById("btnGuardar");
+        btn.disabled = true;
+        document.getElementById("msgEstado").textContent = "Guardando...";
+        callApi("registrarFecha", {
+          fila: filaSeleccionada,
+          etapa: et,
+          fechaISO: fe,
+          overwrite: over,
+        }).then((r) => {
+          btn.disabled = false;
+          const d = r.data || {};
 
-            // 2. Construimos el mensaje incluyendo el TAG
-            if (r.ok && d.ok) {
-               document.getElementById("msgEstado").textContent = "OK: " + tagActual;
-               document.getElementById("msgEstado").className = "msg ok";
-            } else {
-               document.getElementById("msgEstado").textContent = (d.msg || "Error") + ": " + tagActual;
-               document.getElementById("msgEstado").className = "msg error";
-            }
-         });
+          // 1. Obtenemos el texto del TAG desde la etiqueta lblTagSel
+          const tagActual = document.getElementById("lblTagSel").textContent;
+
+          // 2. Construimos el mensaje incluyendo el TAG
+          if (r.ok && d.ok) {
+            document.getElementById("msgEstado").textContent =
+              "OK: " + tagActual;
+            document.getElementById("msgEstado").className = "msg ok";
+          } else {
+            document.getElementById("msgEstado").textContent =
+              (d.msg || "Error") + ": " + tagActual;
+            document.getElementById("msgEstado").className = "msg error";
+          }
+        });
       }
 
       // --- LOGIC: DASHBOARD ---
       function startAutoRefresh() {
-         setInterval(() => {
-            if (document.querySelector("#tabsPanel button.active").dataset.bsTarget === "#tab-dashboard") cargarDashboard();
-         }, 60000);
+        setInterval(() => {
+          if (
+            document.querySelector("#tabsPanel button.active").dataset
+              .bsTarget === "#tab-dashboard"
+          )
+            cargarDashboard();
+        }, 60000);
       }
 
       function cargarDashboard() {
-         // 1. KPIs
-         callApi("dashboardKPIs").then((res) => {
-            if (res.ok && res.data) {
-               const k = res.data;
-               document.getElementById("kpi-total").textContent = k.total;
-               document.getElementById("kpi-activos").textContent = k.activos;
-               document.getElementById("kpi-lib").textContent = k.cnt_lib;
-               document.getElementById("kpi-desp").textContent = k.cnt_desp;
-               document.getElementById("kpi-proceso").textContent = k.proceso;
-               document.getElementById("kpi-pend").textContent = k.pend;
-               document.getElementById("kpi-atr").textContent = k.atr;
-               document.getElementById("kpi-elim").textContent = k.elim;
-               dibujarFunnel(k);
-               const now = new Date();
-               document.getElementById("lblLastUpdate").innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> ${now.toLocaleTimeString()} - ${now.toLocaleDateString()}`;
-            }
-         });
-         // 2. Gráficos
-         callApi("graficoAtrasos").then((r) => { if (r.ok && r.data) dibujarBarra(r.data, "chartAtraso", "Spools", "#d93025"); });
+        // 1. KPIs
+        callApi("dashboardKPIs").then((res) => {
+          if (res.ok && res.data) {
+            const k = res.data;
+            document.getElementById("kpi-total").textContent = k.total;
+            document.getElementById("kpi-activos").textContent = k.activos;
+            document.getElementById("kpi-lib").textContent = k.cnt_lib;
+            document.getElementById("kpi-desp").textContent = k.cnt_desp;
+            document.getElementById("kpi-proceso").textContent = k.proceso;
+            document.getElementById("kpi-pend").textContent = k.pend;
+            document.getElementById("kpi-atr").textContent = k.atr;
+            document.getElementById("kpi-elim").textContent = k.elim;
+            dibujarFunnel(k);
+            const now = new Date();
+            document.getElementById(
+              "lblLastUpdate"
+            ).innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> ${now.toLocaleTimeString()} - ${now.toLocaleDateString()}`;
+          }
+        });
+        // 2. Gráficos
+        callApi("graficoAtrasos").then((r) => {
+          if (r.ok && r.data)
+            dibujarBarra(r.data, "chartAtraso", "Spools", "#d93025");
+        });
 
-         // NUEVO: DESPACHOS POR MES
-         callApi("graficoDespachosMes").then((r) => {
-            if (r.ok && r.data) dibujarGraficoTendencia(r.data, "chartDespachosMes", "Despachados");
-         });
+        // NUEVO: DESPACHOS POR MES
+        callApi("graficoDespachosMes").then((r) => {
+          if (r.ok && r.data)
+            dibujarGraficoTendencia(r.data, "chartDespachosMes", "Despachados");
+        });
 
-         // 3. Tablas
-         cargarReporteHoy(); cargarPendientes(); cargarPromedios(); cargarStatusFluor();
+        // 3. Tablas
+        cargarReporteHoy();
+        cargarPendientes();
+        cargarPromedios();
+        cargarStatusFluor();
       }
 
       function dibujarFunnel(k) {
-         const ctx = document.getElementById("chartFunnel");
-         if (!ctx) return;
-         if (Chart.getChart("chartFunnel")) Chart.getChart("chartFunnel").destroy();
-         new Chart(ctx, {
-            type: "bar",
-            data: {
-               labels: ["Total", "Activos", "0-30", "31-60", "61+"],
-               datasets: [{ data: [k.total, k.activos, k.proceso, k.pend, k.atr], backgroundColor: ["#e0e0e0", "#1a2b48", "#3b82f6", "#f59e0b", "#d93025"] }],
+        const ctx = document.getElementById("chartFunnel");
+        if (!ctx) return;
+        if (Chart.getChart("chartFunnel"))
+          Chart.getChart("chartFunnel").destroy();
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: ["Total", "Activos", "0-30", "31-60", "61+"],
+            datasets: [
+              {
+                data: [k.total, k.activos, k.proceso, k.pend, k.atr],
+                backgroundColor: [
+                  "#e0e0e0",
+                  "#1a2b48",
+                  "#3b82f6",
+                  "#f59e0b",
+                  "#d93025",
+                ],
+              },
+            ],
+          },
+          options: {
+            indexAxis: "y",
+            plugins: {
+              legend: { display: false },
+              datalabels: { display: false },
             },
-            options: { indexAxis: "y", plugins: { legend: { display: false }, datalabels: { display: false } } },
-         });
+          },
+        });
       }
 
       function dibujarBarra(d, id, lbl, col) {
-         const ctx = document.getElementById(id); if (!ctx) return;
-         if (Chart.getChart(id)) Chart.getChart(id).destroy();
-         new Chart(ctx, {
-            type: "bar",
-            data: { labels: d.labels, datasets: [{ label: lbl, data: d.valores, backgroundColor: col }] },
-            options: { plugins: { legend: { display: false }, datalabels: { display: false } } },
-         });
+        const ctx = document.getElementById(id);
+        if (!ctx) return;
+        if (Chart.getChart(id)) Chart.getChart(id).destroy();
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: d.labels,
+            datasets: [{ label: lbl, data: d.valores, backgroundColor: col }],
+          },
+          options: {
+            plugins: {
+              legend: { display: false },
+              datalabels: { display: false },
+            },
+          },
+        });
       }
 
       // NUEVA FUNCIÓN PARA EL GRAFICO DE DESPACHOS
       function dibujarGraficoTendencia(d, id, lbl) {
-         const ctx = document.getElementById(id); if (!ctx) return;
-         if (Chart.getChart(id)) Chart.getChart(id).destroy();
-         new Chart(ctx, {
-            type: "bar",
-            data: {
-               labels: d.labels,
-               datasets: [{
-                  label: lbl,
-                  data: d.valores,
-                  backgroundColor: "#2ea043",
-                  borderRadius: 4
-               }]
+        const ctx = document.getElementById(id);
+        if (!ctx) return;
+        if (Chart.getChart(id)) Chart.getChart(id).destroy();
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: d.labels,
+            datasets: [
+              {
+                label: lbl,
+                data: d.valores,
+                backgroundColor: "#2ea043",
+                borderRadius: 4,
+              },
+            ],
+          },
+          options: {
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              datalabels: { display: false },
             },
-            options: {
-               maintainAspectRatio: false,
-               plugins: {
-                  legend: { display: false },
-                  datalabels: { display: false }
-               },
-               scales: { y: { beginAtZero: true } }
-            }
-         });
+            scales: { y: { beginAtZero: true } },
+          },
+        });
       }
 
       function cargarReporteHoy() {
-         callApi("reporteChangeLogHoy").then((res) => {
-            const tb = document.getElementById("tbodyReporteHoy");
-            if (!res.ok || !res.data.length) { tb.innerHTML = "<tr><td colspan='3'>Sin datos</td></tr>"; return; }
+        callApi("reporteChangeLogHoy").then((res) => {
+          const tb = document.getElementById("tbodyReporteHoy");
+          if (!res.ok || !res.data.length) {
+            tb.innerHTML = "<tr><td colspan='3'>Sin datos</td></tr>";
+            return;
+          }
 
-            let h = "", l = [], d1 = [], d2 = [], t1 = 0, t2 = 0;
-            h += `<tr><td></td><td class='text-center'>Hoy</td><td class='text-center text-muted'>F. Anterior</td></tr>`;
-            res.data.forEach((r) => {
-               t1 += r.hoy || 0; t2 += r.anteriores || 0;
+          let h = "",
+            l = [],
+            d1 = [],
+            d2 = [],
+            t1 = 0,
+            t2 = 0;
+          h += `<tr><td></td><td class='text-center'>Hoy</td><td class='text-center text-muted'>F. Anterior</td></tr>`;
+          res.data.forEach((r) => {
+            t1 += r.hoy || 0;
+            t2 += r.anteriores || 0;
 
-               h += `<tr><td>${r.columna}</td><td class='text-center'>${r.hoy}</td><td class='text-center text-muted'>${r.anteriores}</td></tr>`;
-               l.push(r.columna); d1.push(r.hoy); d2.push(r.anteriores);
-            });
-            h += `<tr class='table-secondary fw-bold'><td>Total</td><td class='text-center'>${t1}</td><td class='text-center'>${t2}</td></tr>`;
-            tb.innerHTML = h;
-            const ctx = document.getElementById("chartReporteHoy");
-            if (Chart.getChart("chartReporteHoy")) Chart.getChart("chartReporteHoy").destroy();
-            new Chart(ctx, {
-               type: "bar",
-               data: { labels: l, datasets: [{ label: "Hoy", data: d1, backgroundColor: "#2ea043" }, { label: "F. Anterior", data: d2, backgroundColor: "#ffc107" }] },
-               options: { scales: { x: { stacked: true }, y: { stacked: true } }, plugins: { datalabels: { display: false } } },
-            });
-         });
+            h += `<tr><td>${r.columna}</td><td class='text-center'>${r.hoy}</td><td class='text-center text-muted'>${r.anteriores}</td></tr>`;
+            l.push(r.columna);
+            d1.push(r.hoy);
+            d2.push(r.anteriores);
+          });
+          h += `<tr class='table-secondary fw-bold'><td>Total</td><td class='text-center'>${t1}</td><td class='text-center'>${t2}</td></tr>`;
+          tb.innerHTML = h;
+          const ctx = document.getElementById("chartReporteHoy");
+          if (Chart.getChart("chartReporteHoy"))
+            Chart.getChart("chartReporteHoy").destroy();
+          new Chart(ctx, {
+            type: "bar",
+            data: {
+              labels: l,
+              datasets: [
+                { label: "Hoy", data: d1, backgroundColor: "#2ea043" },
+                { label: "F. Anterior", data: d2, backgroundColor: "#ffc107" },
+              ],
+            },
+            options: {
+              scales: { x: { stacked: true }, y: { stacked: true } },
+              plugins: { datalabels: { display: false } },
+            },
+          });
+        });
       }
 
       function cargarPendientes() {
-         callApi("pendientesPorEtapa").then((res) => {
-            if (!res.ok) return;
-            const rows = res.data; const tbody = document.getElementById("tbodyPendEtapa");
-            let h = "", labels = [], vals = [], total = 0;
-            rows.forEach((r) => {
-               total += Number(r.cantidad || 0); h += `<tr><td>${r.etapa}</td><td class="text-end fw-bold">${r.cantidad}</td></tr>`;
-               labels.push(r.etapa); vals.push(r.cantidad);
-            });
-            tbody.innerHTML = rows.length ? h + `<tr class="table-secondary fw-bold border-top"><td>TOTAL</td><td class="text-end">${total}</td></tr>` : "<tr><td colspan='2'>Sin pendientes</td></tr>";
-            const ctx = document.getElementById("chartPendEtapa");
-            if (Chart.getChart("chartPendEtapa")) Chart.getChart("chartPendEtapa").destroy();
-            new Chart(ctx, {
-               type: "doughnut",
-               data: { labels: labels, datasets: [{ data: vals, backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40", "#71B37C", "#C9CBCF"], borderWidth: 1 }] },
-               options: { plugins: { datalabels: { display: false }, legend: { display: false } } },
-            });
-         });
+        callApi("pendientesPorEtapa").then((res) => {
+          if (!res.ok) return;
+          const rows = res.data;
+          const tbody = document.getElementById("tbodyPendEtapa");
+          let h = "",
+            labels = [],
+            vals = [],
+            total = 0;
+          rows.forEach((r) => {
+            total += Number(r.cantidad || 0);
+            h += `<tr><td>${r.etapa}</td><td class="text-end fw-bold">${r.cantidad}</td></tr>`;
+            labels.push(r.etapa);
+            vals.push(r.cantidad);
+          });
+          tbody.innerHTML = rows.length
+            ? h +
+              `<tr class="table-secondary fw-bold border-top"><td>TOTAL</td><td class="text-end">${total}</td></tr>`
+            : "<tr><td colspan='2'>Sin pendientes</td></tr>";
+          const ctx = document.getElementById("chartPendEtapa");
+          if (Chart.getChart("chartPendEtapa"))
+            Chart.getChart("chartPendEtapa").destroy();
+          new Chart(ctx, {
+            type: "doughnut",
+            data: {
+              labels: labels,
+              datasets: [
+                {
+                  data: vals,
+                  backgroundColor: [
+                    "#FF6384",
+                    "#36A2EB",
+                    "#FFCE56",
+                    "#4BC0C0",
+                    "#9966FF",
+                    "#FF9F40",
+                    "#71B37C",
+                    "#C9CBCF",
+                  ],
+                  borderWidth: 1,
+                },
+              ],
+            },
+            options: {
+              plugins: {
+                datalabels: { display: false },
+                legend: { display: false },
+              },
+            },
+          });
+        });
       }
 
       function cargarStatusFluor() {
-         callApi('graficoStatusFluor').then(res => {
-            const data = res.data; const tbody = document.getElementById("tbodyStatusFluor");
-            let h = "", total = 0;
-            if (!data || !data.labels.length) {
-               h = "<tr><td colspan='2' class='text-muted'>Sin datos</td></tr>";
-
-            }
-            else {
-               data.labels.forEach((lbl, i) => { const val = data.valores[i]; total += val; h += `<tr><td>${lbl}</td><td class="text-end fw-bold">${val}</td></tr>`; });
-               h += `<tr class="table-light fw-bold border-top"><td>Total</td><td class="text-end">${total}</td></tr>`;
-            }
-            tbody.innerHTML = h;
-            const ctx = document.getElementById("chartStatusFluor");
-            if (Chart.getChart("chartStatusFluor")) Chart.getChart("chartStatusFluor").destroy();
-            new Chart(ctx, {
-               type: 'doughnut',
-               data: { labels: data.labels, datasets: [{ data: data.valores, backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#C9CBCF', '#2a9d8f'], borderWidth: 1 }] },
-               options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: false }, datalabels: { display: false } } }
+        callApi("graficoStatusFluor").then((res) => {
+          const data = res.data;
+          const tbody = document.getElementById("tbodyStatusFluor");
+          let h = "",
+            total = 0;
+          if (!data || !data.labels.length) {
+            h = "<tr><td colspan='2' class='text-muted'>Sin datos</td></tr>";
+          } else {
+            data.labels.forEach((lbl, i) => {
+              const val = data.valores[i];
+              total += val;
+              h += `<tr><td>${lbl}</td><td class="text-end fw-bold">${val}</td></tr>`;
             });
-         });
+            h += `<tr class="table-light fw-bold border-top"><td>Total</td><td class="text-end">${total}</td></tr>`;
+          }
+          tbody.innerHTML = h;
+          const ctx = document.getElementById("chartStatusFluor");
+          if (Chart.getChart("chartStatusFluor"))
+            Chart.getChart("chartStatusFluor").destroy();
+          new Chart(ctx, {
+            type: "doughnut",
+            data: {
+              labels: data.labels,
+              datasets: [
+                {
+                  data: data.valores,
+                  backgroundColor: [
+                    "#36A2EB",
+                    "#FF6384",
+                    "#FFCE56",
+                    "#4BC0C0",
+                    "#9966FF",
+                    "#FF9F40",
+                    "#C9CBCF",
+                    "#2a9d8f",
+                  ],
+                  borderWidth: 1,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                title: { display: false },
+                datalabels: { display: false },
+              },
+            },
+          });
+        });
       }
 
       function cargarPromedios() {
-         callApi("promedioTiemposEtapas").then((res) => {
-            const tb = document.getElementById("tbodyPromEtapas");
-            if (!res.ok || !res.data.length) {
-               tb.innerHTML = "<tr><td colspan='4'>Sin datos</td></tr>";
-               return;
-            }
-            let h = "", sum = 0;
-            res.data.forEach((r) => {
-               let v = parseFloat(r.promedioDias);
-               sum += v; h += `<tr><td>${r.desde}</td><td>${r.hasta}</td><td class='fw-bold text-primary'>${v.toFixed(1)}</td><td>${r.muestras}</td></tr>`;
-            });
-            let prom = sum / res.data.length;
-            h += `<tr class='table-secondary fw-bold border-top'><td colspan='2' class='text-end'>PROMEDIO:</td><td class='text-primary'>${prom.toFixed(1)} días</td><td>-</td></tr>`;
-            tb.innerHTML = h;
-         });
+        callApi("promedioTiemposEtapas").then((res) => {
+          const tb = document.getElementById("tbodyPromEtapas");
+          if (!res.ok || !res.data.length) {
+            tb.innerHTML = "<tr><td colspan='4'>Sin datos</td></tr>";
+            return;
+          }
+          let h = "",
+            sum = 0;
+          res.data.forEach((r) => {
+            let v = parseFloat(r.promedioDias);
+            sum += v;
+            h += `<tr><td>${r.desde}</td><td>${
+              r.hasta
+            }</td><td class='fw-bold text-primary'>${v.toFixed(1)}</td><td>${
+              r.muestras
+            }</td></tr>`;
+          });
+          let prom = sum / res.data.length;
+          h += `<tr class='table-secondary fw-bold border-top'><td colspan='2' class='text-end'>PROMEDIO:</td><td class='text-primary'>${prom.toFixed(
+            1
+          )} días</td><td>-</td></tr>`;
+          tb.innerHTML = h;
+        });
       }
 
       // --- EXPORT PDF/JPG ---
       async function exportKpiPDF() {
-         const { jsPDF } = window.jspdf;
-         const el = document.getElementById("tab-dashboard");
-         const btns = document.querySelectorAll(".btn-export-hide");
-         const d = new Date();
-         const offset = d.getTimezoneOffset() * 60000;
-         const localDate = new Date(d.getTime() - offset);
-         const fechaStr = localDate.toISOString().slice(0, 10).replace(/-/g, "");
-         const fileName = `informe${fechaStr}.pdf`;
-         btns.forEach((b) => (b.style.visibility = "hidden"));
-         try {
-            const canvas = await html2canvas(el, { scale: 2, useCORS: true });
-            const imgData = canvas.toDataURL("image/jpeg", 0.95);
-            const pdf = new jsPDF("p", "mm", "letter");
-            const pageWidth = 215.9; const pageHeight = 279.4;
-            const margin = 5;
-            const contentWidth = pageWidth - 2 * margin;
-            const contentHeight = pageHeight - 2 * margin;
-            const imgWidth = contentWidth; const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            let heightLeft = imgHeight; let position = margin;
-            pdf.addImage(imgData, "JPEG", margin, position, imgWidth, imgHeight);
+        const { jsPDF } = window.jspdf;
+        const el = document.getElementById("tab-dashboard");
+        const btns = document.querySelectorAll(".btn-export-hide");
+        const d = new Date();
+        const offset = d.getTimezoneOffset() * 60000;
+        const localDate = new Date(d.getTime() - offset);
+        const fechaStr = localDate.toISOString().slice(0, 10).replace(/-/g, "");
+        const fileName = `informe${fechaStr}.pdf`;
+        btns.forEach((b) => (b.style.visibility = "hidden"));
+        try {
+          const canvas = await html2canvas(el, { scale: 2, useCORS: true });
+          const imgData = canvas.toDataURL("image/jpeg", 0.95);
+          const pdf = new jsPDF("p", "mm", "letter");
+          const pageWidth = 215.9;
+          const pageHeight = 279.4;
+          const margin = 5;
+          const contentWidth = pageWidth - 2 * margin;
+          const contentHeight = pageHeight - 2 * margin;
+          const imgWidth = contentWidth;
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+          let heightLeft = imgHeight;
+          let position = margin;
+          pdf.addImage(imgData, "JPEG", margin, position, imgWidth, imgHeight);
+          heightLeft -= contentHeight;
+          while (heightLeft > 0) {
+            position = -contentHeight + margin;
+            pdf.addPage();
+            pdf.addImage(
+              imgData,
+              "JPEG",
+              margin,
+              margin - (imgHeight - heightLeft),
+              imgWidth,
+              imgHeight
+            );
             heightLeft -= contentHeight;
-            while (heightLeft > 0) {
-               position = -contentHeight + margin;
-               pdf.addPage();
-               pdf.addImage(imgData, "JPEG", margin, margin - (imgHeight - heightLeft), imgWidth, imgHeight);
-               heightLeft -= contentHeight;
-            }
-            const totalPages = pdf.internal.getNumberOfPages();
-            const fechaDisplay = new Date().toLocaleDateString();
-            for (let i = 1; i <= totalPages; i++) {
-               pdf.setPage(i); pdf.setFontSize(8);
-               pdf.setTextColor(150); pdf.text(`Página ${i} de ${totalPages} - ${fechaDisplay}`, margin, pageHeight - 2);
-            }
-            pdf.save(fileName);
-         } catch (e) {
-            alert("Error PDF");
-
-         } finally { btns.forEach((b) => (b.style.visibility = "visible")); }
+          }
+          const totalPages = pdf.internal.getNumberOfPages();
+          const fechaDisplay = new Date().toLocaleDateString();
+          for (let i = 1; i <= totalPages; i++) {
+            pdf.setPage(i);
+            pdf.setFontSize(8);
+            pdf.setTextColor(150);
+            pdf.text(
+              `Página ${i} de ${totalPages} - ${fechaDisplay}`,
+              margin,
+              pageHeight - 2
+            );
+          }
+          pdf.save(fileName);
+        } catch (e) {
+          alert("Error PDF");
+        } finally {
+          btns.forEach((b) => (b.style.visibility = "visible"));
+        }
       }
 
       async function exportKpiJPG() {
-         const el = document.getElementById("tab-dashboard");
-         const btns = document.querySelectorAll(".btn-export-hide");
-         const d = new Date(); const offset = d.getTimezoneOffset() * 60000;
-         const localDate = new Date(d.getTime() - offset);
-         const fechaStr = localDate.toISOString().slice(0, 10).replace(/-/g, "");
-         const fileName = `informe${fechaStr}.jpg`;
-         btns.forEach((b) => (b.style.visibility = "hidden"));
-         try {
-            const originalCanvas = await html2canvas(el, { scale: 2, useCORS: true });
-            const marginPx = 40;
-            const newCanvas = document.createElement("canvas");
-            newCanvas.width = originalCanvas.width + marginPx * 2;
-            newCanvas.height = originalCanvas.height + marginPx * 2;
-            const ctx = newCanvas.getContext("2d");
-            ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
-            ctx.drawImage(originalCanvas, marginPx, marginPx);
-            ctx.font = "20px Arial"; ctx.fillStyle = "#888888";
-            ctx.fillText("Generado por MasterBI IMMA - " + new Date().toLocaleDateString(), marginPx, newCanvas.height - 10);
-            const a = document.createElement("a"); a.href = newCanvas.toDataURL("image/jpeg", 0.95);
-            a.download = fileName; document.body.appendChild(a);
-            a.click(); document.body.removeChild(a);
-         } catch (e) { alert("Error JPG"); } finally {
-            btns.forEach((b) => (b.style.visibility = "visible"));
-
-         }
+        const el = document.getElementById("tab-dashboard");
+        const btns = document.querySelectorAll(".btn-export-hide");
+        const d = new Date();
+        const offset = d.getTimezoneOffset() * 60000;
+        const localDate = new Date(d.getTime() - offset);
+        const fechaStr = localDate.toISOString().slice(0, 10).replace(/-/g, "");
+        const fileName = `informe${fechaStr}.jpg`;
+        btns.forEach((b) => (b.style.visibility = "hidden"));
+        try {
+          const originalCanvas = await html2canvas(el, {
+            scale: 2,
+            useCORS: true,
+          });
+          const marginPx = 40;
+          const newCanvas = document.createElement("canvas");
+          newCanvas.width = originalCanvas.width + marginPx * 2;
+          newCanvas.height = originalCanvas.height + marginPx * 2;
+          const ctx = newCanvas.getContext("2d");
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
+          ctx.drawImage(originalCanvas, marginPx, marginPx);
+          ctx.font = "20px Arial";
+          ctx.fillStyle = "#888888";
+          ctx.fillText(
+            "Generado por MasterBI IMMA - " + new Date().toLocaleDateString(),
+            marginPx,
+            newCanvas.height - 10
+          );
+          const a = document.createElement("a");
+          a.href = newCanvas.toDataURL("image/jpeg", 0.95);
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        } catch (e) {
+          alert("Error JPG");
+        } finally {
+          btns.forEach((b) => (b.style.visibility = "visible"));
+        }
       }
-   </script>
-</body>
+      // --- LOGIC: ALERTAS 61+ ---
 
+      function cargarTagsCriticos() {
+        const tbody = document.getElementById("tabla-criticos-body");
+        const loader = document.getElementById("loading-criticos");
+
+        // Limpiar y mostrar loader
+        tbody.innerHTML = "";
+        loader.classList.remove("d-none");
+
+        // Usamos callApi en lugar de google.script.run para mantener consistencia
+        callApi("listaTagsCriticos")
+          .then((res) => {
+            loader.classList.add("d-none"); // Ocultar loader
+
+            if (!res.ok || !res.data || res.data.length === 0) {
+              tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="text-center py-4 text-success fw-bold">
+              <i class="bi bi-check-circle fs-3 d-block mb-2"></i>
+              ¡Excelente! No hay tags con +60 días de atraso.
+            </td>
+          </tr>`;
+              return;
+            }
+
+            // Renderizar filas con clases Bootstrap
+            let html = "";
+            res.data.forEach((item) => {
+              html += `
+          <tr>
+            <td class="fw-bold text-dark">${item.tag}</td>
+            <td class="text-center">
+              <span class="badge bg-danger rounded-pill">${item.dias} días</span>
+            </td>
+            <td class="small text-muted">${item.etapa}</td>
+            <td class="small">${item.fecha}</td>
+            <td class="text-center">
+               <button class="btn btn-sm btn-outline-primary" 
+                       onclick="verDetalleTag('${item.tag}')">
+                 <i class="bi bi-search"></i> Ver
+               </button>
+            </td>
+          </tr>
+        `;
+            });
+            tbody.innerHTML = html;
+          })
+          .catch((err) => {
+            loader.classList.add("d-none");
+            tbody.innerHTML = `<tr><td colspan="5" class="text-danger text-center">Error al cargar: ${err.message}</td></tr>`;
+          });
+      }
+
+      function verDetalleTag(tag) {
+        // 1. Activar la pestaña de "Ingreso Fechas" usando la API de Bootstrap
+        const triggerEl = document.querySelector(
+          'button[data-bs-target="#tab-fechas"]'
+        );
+        const tab = new bootstrap.Tab(triggerEl);
+        tab.show();
+
+        // 2. Rellenar el input de búsqueda y ejecutar buscarTags()
+        const input = document.getElementById("txtBuscar");
+        input.value = tag;
+
+        // Pequeño delay para asegurar que la pestaña cargó visualmente
+        setTimeout(() => {
+          buscarTags();
+        }, 100);
+      }
+    </script>
+  </body>
 </html>
