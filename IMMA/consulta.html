@@ -192,10 +192,13 @@
           // Esto asegura que el usuario no vea datos del tag anterior
           document.getElementById("ficha-tag").textContent = tag;
           
-          // Textos a guiones
-          document.getElementById("ficha-etapa").textContent = "-";
-          document.getElementById("ficha-fecha").textContent = "-";
-          document.getElementById("ficha-estado-texto").textContent = "Consultando...";
+          // Textos a spinners
+          document.getElementById("ficha-etapa").innerHTML = 
+        '<div class="spinner-border spinner-border-sm text-secondary" role="status"></div> <span class="text-muted fst-italic small">Consultando...</span>';
+          document.getElementById("ficha-fecha").innerHTML = 
+        '<div class="spinner-border spinner-border-sm text-secondary" role="status"></div> <span class="text-muted fst-italic small">Consultando...</span>';
+          document.getElementById("ficha-estado-texto").innerHTML = 
+        '<div class="spinner-border spinner-border-sm text-secondary" role="status"></div> <span class="text-muted fst-italic small">Consultando...</span>';
           
           // Badge a estado 'Cargando'
           const badge = document.getElementById("ficha-status-badge");
