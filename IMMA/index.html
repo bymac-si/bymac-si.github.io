@@ -745,7 +745,7 @@
           return;
         }
 
-        resDiv.innerHTML = '<div class="list-group-item">Buscando...</div>';
+        resDiv.innerHTML = '<div class="spinner-border spinner-border-sm text-secondary" role="status"></div> <span class="text-muted fst-italic small">Buscando...</span>';
         resDiv.style.display = "block";
 
         callApi("buscarTag", { texto: txt }).then((r) => {
@@ -781,7 +781,8 @@
         badge.textContent = "Validando...";
         badge.className = "badge bg-secondary mt-2";
 
-        document.getElementById("ficha-etapa").textContent = "...";
+        document.getElementById("ficha-etapa").innerHTML = 
+        '<div class="spinner-border spinner-border-sm text-secondary" role="status"></div> <span class="text-muted fst-italic small">Consultando...</span>';
         document.getElementById("ficha-fecha").textContent = "...";
         document.getElementById("ficha-estado-texto").textContent = "...";
 
