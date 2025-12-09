@@ -224,14 +224,14 @@
                     <div class="col-12 col-lg-6">
                         <div class="card p-3 h-100">
                             <h6>Registrados Hoy</h6>
-                            <div class="table-responsive mb-2">
+                            <div class="table-responsive mb-2" style="max-height: 100px;">
                                 <table class="table table-sm small">
                                     <thead><tr><th>Etapa</th><th class="text-center">Hoy</th><th class="text-center text-muted">F. Anterior</th></tr></thead>
                                     <tbody id="tbodyLogHoy"></tbody>
                                 </table>
                             </div>
-                            <div style="height: 150px; position: relative;">
-                            <canvas id="chartLogHoy" height="150"></canvas>
+                            <div style="height: 200px; position: relative;">
+                                <canvas id="chartLogHoy"></canvas>
                             </div>
                         </div>
                     </div>
@@ -348,10 +348,28 @@
         } catch (e) { console.error("Error AppSheet:", e); return []; }
     }
 
-    function diffDays(d1Str, d2Str) {
-        if(!d1Str || !d2Str) return null;
-        const d1 = new Date(d1Str); const d2 = new Date(d2Str);
-        if(isNaN(d1) || isNaN(d2)) return null;
+    // ========================================================
+    // CORRECCIÓN FECHAS (SERIAL NUMBER EXCEL)
+    // ========================================================
+    function parseDateFlexible(val) {
+        if (!val) return null;
+        
+        // Si es número (Serial Excel: 45991)
+        if (typeof val === 'number') {
+            // Excel base date: Dec 30 1899
+            const date = new Date(1899, 11, 30 + val);
+            return date;
+        }
+        
+        // Si es string ISO o formato texto
+        const d = new Date(val);
+        return isNaN(d) ? null : d;
+    }
+
+    function diffDays(d1Val, d2Val) {
+        const d1 = parseDateFlexible(d1Val);
+        const d2 = parseDateFlexible(d2Val);
+        if(!d1 || !d2) return null;
         return (d2 - d1) / (1000 * 60 * 60 * 24);
     }
     
@@ -380,14 +398,19 @@
         PARES_TIEMPOS.forEach(p => { todasCols.add(p.from); todasCols.add(p.to); });
         
         todasCols.forEach(c => {
-            if(row[c]) {
-                let d = new Date(row[c]);
-                if(!isNaN(d)) {
-                    if(maxFecha === null || d > maxFecha) { maxFecha = d; col = c; txt = row[c]; }
+            const val = row[c];
+            if(val) {
+                const d = parseDateFlexible(val);
+                if(d) {
+                    if(maxFecha === null || d > maxFecha) { 
+                        maxFecha = d; 
+                        col = c; 
+                        // Formatear fecha para mostrar
+                        txt = d.toISOString().split("T")[0]; 
+                    }
                 }
             }
         });
-        if(txt.includes("T")) txt = txt.split("T")[0];
         return { etapa: col, fecha: txt };
     }
 
@@ -521,6 +544,7 @@
         let distUltima = {};
         
         const today = new Date();
+        today.setHours(0,0,0,0); // Normalizar hoy a medianoche
 
         rows.forEach(r => {
             const st = (r[COL_STATUS]||"").toUpperCase();
@@ -529,17 +553,18 @@
             if(st.includes("LIBERADO")) lib++;
             else if(st.includes("DESPACHADO")) {
                 desp++;
-                let fDesp = r[COL_FECHA_FIN] || r["F.Despacho"]; 
+                let fDesp = parseDateFlexible(r[COL_FECHA_FIN] || r["F.Despacho"]); 
                 if(fDesp) {
-                    let k = fDesp.substring(0, 7); 
+                    // YYYY-MM
+                    let k = fDesp.toISOString().substring(0, 7); 
                     distDespachoMes[k] = (distDespachoMes[k]||0)+1;
                 }
             }
             else if(st.includes("ELIMINADO") || st.includes("HOLD")) elim++;
             else {
                 act++;
-                let fIni = r[COL_FECHA_TRN] || r["F.Emision Plano"] || today;
-                let diff = diffDays(fIni, today);
+                let fIni = parseDateFlexible(r[COL_FECHA_TRN] || r["F.Emision Plano"]) || today;
+                let diff = (today - fIni) / (1000 * 60 * 60 * 24);
                 if(diff!==null) {
                     if(diff<=30) d0++; else if(diff<=60) d31++; else d61++;
                 }
@@ -562,7 +587,7 @@
         document.getElementById("kpi-atr").textContent = d61;
         document.getElementById("kpi-elim").textContent = elim;
 
-        // 1. Embudo (Horizontal)
+        // 1. Embudo
         renderChart("chartEmbudo", "bar", {
             labels: ["Total", "Activos", "0-30", "31-60", "61+"],
             datasets: [{
@@ -572,7 +597,7 @@
             options: { indexAxis: 'y', plugins: {legend: {display: false}} }
         });
 
-        // 2. Días Proceso (Vertical)
+        // 2. Días Proceso
         renderChart("chartDiasProceso", "bar", {
             labels: ["0-30 días", "31-60 días", "61+ días"],
             datasets: [{
@@ -582,7 +607,7 @@
             options: { plugins: {legend: {display: false}} }
         });
 
-        // 3. Evolución Despachos
+        // 3. Evolución Despachos (Ordenado por Mes)
         const labelsMes = Object.keys(distDespachoMes).sort();
         const dataMes = labelsMes.map(k => distDespachoMes[k]);
         renderChart("chartEvolucion", "bar", {
@@ -615,27 +640,49 @@
         hFluor += `<tr class="fw-bold border-top"><td>Total</td><td class="text-end">${sumFluor}</td></tr>`;
         document.getElementById("tbodyFluor").innerHTML = hFluor;
 
-        // 5. Registrados Hoy
-        const nowStr = today.toLocaleDateString("es-CL"); 
+        // 5. Registrados Hoy (CORREGIDO LOGICA FECHA)
+        // La logica es: Mostrar solo entradas que se crearon HOY (FechaHora == Today)
+        // Y diferenciar si la fecha ingresada (ValorNuevo) es Hoy o Pasada
         
         let logHoy = {};
         let logAnt = {};
         
         logs.forEach(l => {
-            let fh = l["FechaHora"] || "";
-            let col = l["CabeceraColumna"];
+            let fhEntrada = parseDateFlexible(l["FechaHora"]); // Cuándo se escribió el log
             
-            let dLog = new Date(fh);
-            let isHoy = (!isNaN(dLog) && dLog.getDate() === today.getDate() && dLog.getMonth() === today.getMonth());
-            
-            if(isHoy) logHoy[col] = (logHoy[col]||0)+1;
-            else logAnt[col] = (logAnt[col]||0)+1;
+            if (fhEntrada) {
+                // Verificar si se creó HOY
+                let isEntryToday = (fhEntrada.getDate() === today.getDate() && 
+                                    fhEntrada.getMonth() === today.getMonth() && 
+                                    fhEntrada.getFullYear() === today.getFullYear());
+                
+                if (isEntryToday) {
+                    let col = l["CabeceraColumna"];
+                    // Verificar qué fecha se puso en el valor
+                    let fechaValor = parseDateFlexible(l["ValorNuevo"]);
+                    
+                    if (fechaValor) {
+                        // Es fecha hoy o pasado?
+                        // Si la fecha valor es >= hoy (considerando horas en 0), es Hoy (Green)
+                        // Si es < hoy, es Anterior (Yellow)
+                        let diffTime = fechaValor.getTime() - today.getTime();
+                        if (diffTime >= -86400000 && diffTime <= 86400000) { // Tolerancia de un dia aprox
+                             logHoy[col] = (logHoy[col]||0)+1;
+                        } else {
+                             logAnt[col] = (logAnt[col]||0)+1;
+                        }
+                    } else {
+                        // Si no es fecha válida, asumimos 'Hoy' por defecto o ignoramos
+                        logHoy[col] = (logHoy[col]||0)+1;
+                    }
+                }
+            }
         });
         
         let allLogKeys = new Set([...Object.keys(logHoy), ...Object.keys(logAnt)]);
         let arrLog = Array.from(allLogKeys).map(k => ({
             key: k, hoy: logHoy[k]||0, ant: logAnt[k]||0
-        })).sort((a,b) => b.hoy - a.hoy).slice(0, 5); 
+        })).sort((a,b) => (b.hoy + b.ant) - (a.hoy + a.ant)).slice(0, 5); 
 
         let hLog = ""; let tHoy=0, tAnt=0;
         arrLog.forEach(x => {
@@ -694,10 +741,10 @@
         let hCrit = "";
         rows.forEach(r => {
              const st = (r[COL_STATUS]||"").toUpperCase();
-             if(!st.includes("DESP") && !st.includes("ELIM") && !st.includes("LIB")) {
-                 let f = r[COL_FECHA_TRN] || today; 
-                 let d = diffDays(f, today);
-                 if(d>60) hCrit += `<tr><td>${r[COL_TAG]}</td><td class="text-center"><span class="badge bg-danger">${Math.floor(d)}</span></td><td>${r[COL_STATUS]}</td><td>${f.split("T")[0]}</td></tr>`;
+             if(!st.includes("DESPACHADO") && !st.includes("ELIMINADO") && !st.includes("LIBERADO")) {
+                 let f = parseDateFlexible(r[COL_FECHA_TRN] || r["F.Emision Plano"]) || today; 
+                 let d = (today - f) / (1000 * 60 * 60 * 24);
+                 if(d>60) hCrit += `<tr><td>${r[COL_TAG]}</td><td class="text-center"><span class="badge bg-danger">${Math.floor(d)}</span></td><td>${r[COL_STATUS]}</td><td>${f.toISOString().split("T")[0]}</td></tr>`;
              }
         });
         document.getElementById("tabla-criticos-body").innerHTML = hCrit || '<tr><td colspan="4">Sin críticos</td></tr>';
