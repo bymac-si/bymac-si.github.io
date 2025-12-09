@@ -23,6 +23,7 @@
         border: 1px solid #e1e4ee;
         box-shadow: 0 2px 10px rgba(0,0,0,0.05);
       }
+      /* FICHA ESTILOS */
       .ficha-header {
         background-color: var(--bymac-primary);
         color: white;
@@ -47,10 +48,18 @@
         font-size: 1.1rem;
         font-weight: 600;
         color: #212529;
-        margin-bottom: 18px;
+        margin-bottom: 15px;
         border-bottom: 1px solid #f0f0f0;
         padding-bottom: 5px;
       }
+
+      /* TIMELINE STYLES */
+      .timeline { position: relative; padding-left: 20px; border-left: 2px solid #e9ecef; margin-top: 20px; margin-bottom: 20px; }
+      .timeline-item { position: relative; margin-bottom: 15px; }
+      .timeline-dot { position: absolute; left: -27px; top: 2px; width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 3px solid #1a2b48; }
+      .timeline-date { font-size: 0.8rem; color: #6c757d; font-weight: 600; }
+      .timeline-content { font-size: 0.95rem; font-weight: bold; color: #212529; }
+      .timeline-empty { font-style: italic; color: #adb5bd; font-size: 0.9rem; padding-left: 10px; }
     </style>
   </head>
 
@@ -84,50 +93,55 @@
       </div>
 
       <div id="contenedorFicha" class="d-none animate__animated animate__fadeIn">
-        <div class="row g-4">
+        <div class="row g-4 align-items-stretch">
             
-            <div class="col-12 col-lg-4">
-                <div class="ficha-header">
+            <div class="col-12 col-lg-4 d-flex flex-column">
+                <div class="ficha-header flex-shrink-0">
                     <h5 class="m-0"><i class="bi bi-info-circle"></i> Datos del Spool</h5>
                 </div>
-                <div class="ficha-body h-100">
-                    <div class="mb-4 text-center">
-                        <h2 id="ficha-tag" class="text-primary fw-bold mb-0">-</h2>
-                        <span id="ficha-status-badge" class="badge bg-secondary mt-1">Consultando...</span>
+                <div class="ficha-body h-100 d-flex flex-column">
+                    <div class="flex-shrink-0">
+                        <div class="mb-4 text-center">
+                            <h2 id="ficha-tag" class="text-primary fw-bold mb-0">-</h2>
+                            <span id="ficha-status-badge" class="badge bg-secondary mt-1">Consultando...</span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="ficha-label">Status Spool</div>
+                                <div id="ficha-estado-texto" class="ficha-value small">-</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="ficha-label">Status Fluor</div>
+                                <div id="ficha-fluor" class="ficha-value small text-info">-</div>
+                            </div>
+                        </div>
+
+                        <div class="ficha-label">Última Etapa (Calculada)</div>
+                        <div id="ficha-etapa" class="ficha-value">-</div>
+
+                        <div class="ficha-label mt-3 border-bottom pb-2">Historial de Movimientos</div>
                     </div>
-
-                    <div class="ficha-label">Última Etapa Registrada</div>
-                    <div id="ficha-etapa" class="ficha-value">-</div>
-
-                    <div class="ficha-label">Fecha de Movimiento</div>
-                    <div id="ficha-fecha" class="ficha-value">-</div>
-
-                    <div class="ficha-label">Estado General</div>
-                    <div id="ficha-estado-texto" class="ficha-value">-</div>
-
-                    <div class="alert alert-info border mt-4 small">
-                        <i class="bi bi-shield-lock"></i> Vista de solo lectura.
+                    
+                    <div id="timeline-container" class="flex-grow-1" style="overflow-y: auto; min-height: 150px; max-height: 400px;">
+                        <small class="text-muted">Cargando historial...</small>
                     </div>
                 </div>
             </div>
 
-            <div class="col-12 col-lg-8">
-                <div class="ficha-header d-flex justify-content-between align-items-center">
+            <div class="col-12 col-lg-8 d-flex flex-column">
+                <div class="ficha-header d-flex justify-content-between align-items-center flex-shrink-0">
                     <h5 class="m-0"><i class="bi bi-file-earmark-pdf"></i> Plano</h5>
                     <a id="ficha-btn-abrir" href="#" target="_blank" class="btn btn-sm btn-outline-light d-none">
                         <i class="bi bi-box-arrow-up-right"></i> Expandir
                     </a>
                 </div>
-                <div class="ficha-body p-0" style="height: 600px; background: #eee; position: relative;">
-                    
-                    <div id="ficha-plano-loading" class="d-flex flex-column justify-content-center align-items-center h-100 text-muted">
-                        <i class="bi bi-file-pdf fs-1 mb-2"></i>
-                        <span>Seleccione un TAG para visualizar</span>
+                <div class="ficha-body p-0 position-relative" style="min-height: 600px; flex-grow: 1;">
+                    <div id="ficha-plano-loading" class="d-flex flex-column justify-content-center align-items-center h-100 text-muted" style="position: absolute; width: 100%;">
+                        <div class="spinner-border text-primary d-none" id="spinner-plano" role="status"></div>
+                        <span id="msg-plano">Seleccione un TAG para visualizar</span>
                     </div>
-                    
                     <iframe id="ficha-iframe" class="w-100 h-100 d-none" style="border:none;"></iframe>
-                    
-                    <img id="ficha-img-fallback" src="https://bymac-si.github.io/img/not-found.png" class="d-none w-100 h-100" style="object-fit: contain;">
                 </div>
             </div>
         </div>
@@ -142,12 +156,32 @@
   const APP_ID = "59c4aa7f-9e37-4e66-af20-52250f9c4c07";
   const APP_KEY = "V2-157Vx-ltOIu-kTlqv-TYrU7-Gsowd-355md-nWdkC-k7s1N";
   const TABLE_NAME = "MasterBI"; 
-  const COL_PLANO = "ID_PLANO"; // O "ID_PLANO" si ya hiciste la indexación
+  const COL_PLANO = "ID_PLANO"; 
+  const COL_FLUOR = "STATUS FLUOR";
 
-  // Variable para guardar los datos temporalmente
+  // Lista completa de columnas de fecha para el Timeline
+  const COLUMNAS_FECHAS_ALL = [
+      "Fecha TRN Cliente", "F.Emision Plano", "F.Aprobacion Plano", "F. Entrada Taller", "F.Salida Taller",
+      "F.Ingreso Granallado", "F.Salida Granallado", "F.Ingreso Caucho", "F.Salida Caucho",
+      "F.Salida Engomado", "F.Ingreso Vulcanizado", "F.Salida Vulcanizado",
+      "F.Ingreso Term. Caucho", "F.Salida Term. Caucho", "F.Envio a Pint", "F.Salida Pintura",
+      "F.Liberado", "F.Despacho", "F. ELIMINADO", "F. HOLD"
+  ];
+
   let resultadosGlobales = [];
 
-  // --- 2. FUNCIÓN DE CONEXIÓN API ---
+  // --- 2. UTILIDADES DE FECHA ---
+  function parseDateFlexible(val) {
+      if (!val) return null;
+      if (typeof val === 'number') {
+          // Excel serial date (base 1899-12-30)
+          return new Date(1899, 11, 30 + val);
+      }
+      const d = new Date(val);
+      return isNaN(d) ? null : d;
+  }
+
+  // --- 3. CONEXIÓN API ---
   async function callAppSheet(selectorStr) {
     const url = `https://api.appsheet.com/api/v2/apps/${APP_ID}/tables/${TABLE_NAME}/Action`;
     const body = {
@@ -162,10 +196,7 @@
 
     const response = await fetch(url, {
       method: "POST",
-      headers: {
-        "ApplicationAccessKey": APP_KEY,
-        "Content-Type": "application/json"
-      },
+      headers: { "ApplicationAccessKey": APP_KEY, "Content-Type": "application/json" },
       body: JSON.stringify(body)
     });
 
@@ -173,7 +204,7 @@
     return await response.json();
   }
 
-  // --- 3. LÓGICA DE BÚSQUEDA ---
+  // --- 4. BUSQUEDA ---
   function buscarTags() {
     const txt = document.getElementById("txtBuscar").value.trim().toUpperCase();
     const resDiv = document.getElementById("resFicha");
@@ -190,17 +221,11 @@
         resDiv.innerHTML = '<div class="list-group-item text-danger">No se encontraron coincidencias.</div>';
         return;
       }
-
-      // GUARDAMOS LOS RESULTADOS EN LA VARIABLE GLOBAL
       resultadosGlobales = rows;
-
       let h = '';
-      // Limitamos a 10 resultados
       rows.slice(0, 10).forEach((row, index) => {
         const tag = row['TAG SPOOL'] || "S/N";
-        
-        // CORRECCIÓN: Ahora pasamos solo el ÍNDICE (0, 1, 2...) en lugar de todo el objeto
-        h += `<a href="#" class="list-group-item list-group-item-action py-3" onclick="verFichaAppSheet(${index}); return false;">
+        h += `<a href="#" class="list-group-item list-group-item-action py-2" onclick="verFichaAppSheet(${index}); return false;">
                 <div class="d-flex w-100 justify-content-between align-items-center">
                   <h6 class="mb-0 fw-bold text-primary"><i class="bi bi-tag-fill"></i> ${tag}</h6>
                   <small class="text-muted"><i class="bi bi-chevron-right"></i></small>
@@ -208,78 +233,119 @@
               </a>`;
       });
       resDiv.innerHTML = h;
-
     }).catch(e => {
       console.error(e);
-      let msg = "Error de conexión.";
-      if(e.message && e.message.includes("Failed to fetch")) msg = "Error CORS: Bloqueo de seguridad del navegador.";
-      resDiv.innerHTML = `<div class="list-group-item text-danger small">${msg}</div>`;
+      resDiv.innerHTML = `<div class="list-group-item text-danger small">Error de conexión.</div>`;
     });
   }
 
-  // --- 4. VISUALIZACIÓN ---
+  // --- 5. RENDERIZADO FICHA ---
   function verFichaAppSheet(index) {
-    // RECUPERAMOS EL DATO USANDO EL ÍNDICE
     const row = resultadosGlobales[index];
-
-    if (!row) {
-        console.error("Error: No se encontró la fila en memoria");
-        return;
-    }
+    if (!row) return;
     
-    // UI Setup
+    // UI Reset
     document.getElementById("resFicha").style.display = 'none';
     document.getElementById("txtBuscar").value = row['TAG SPOOL'];
     document.getElementById("contenedorFicha").classList.remove("d-none");
 
-    // -- A. DATOS PRINCIPALES --
+    // Datos Principales
     document.getElementById("ficha-tag").textContent = row['TAG SPOOL'];
-
+    
     const estado = row['STATUS SPOOL'] || "SIN STATUS";
+    const stUpper = estado.toUpperCase();
     const badge = document.getElementById("ficha-status-badge");
     let colorClass = "bg-secondary";
 
-    const stUpper = estado.toUpperCase();
     if(stUpper.includes("LIBERADO") || stUpper.includes("DESPACHADO")) colorClass = "bg-success";
     else if(stUpper.includes("PINTURA") || stUpper.includes("FABRICACION")) colorClass = "bg-primary";
     else if(stUpper.includes("HOLD") || stUpper.includes("ELIMINADO")) colorClass = "bg-danger";
     else if(stUpper.includes("PENDIENTE")) colorClass = "bg-warning text-dark";
 
     badge.textContent = estado;
-    badge.className = `badge ${colorClass} mt-2`;
+    badge.className = `badge ${colorClass} mt-1`;
     document.getElementById("ficha-estado-texto").textContent = estado;
+    document.getElementById("ficha-fluor").textContent = row[COL_FLUOR] || "-";
 
-    document.getElementById("ficha-etapa").textContent = row['OBSERVACIONES'] || row['Area'] || "Sin observaciones";
+    // TIMELINE & ULTIMA ETAPA
+    renderTimeline(row);
 
-    let fecha = row['Fecha Terminado'] || row['F.Liberado'] || row['Fecha Flúor'] || "-";
-    if(fecha && fecha.includes("T")) fecha = fecha.split("T")[0]; 
-    document.getElementById("ficha-fecha").textContent = fecha;
+    // PLANO
+    renderPlano(row[COL_PLANO]);
+  }
 
-    // -- B. PLANO --
-    const archivoVal = row[COL_PLANO] || ""; 
+  // --- 6. TIMELINE LOGIC ---
+  function renderTimeline(row) {
+      const container = document.getElementById("timeline-container");
+      container.innerHTML = "";
+      
+      let events = [];
+      COLUMNAS_FECHAS_ALL.forEach(col => {
+          const val = row[col];
+          const d = parseDateFlexible(val);
+          if(d) {
+              events.push({ date: d, name: col });
+          }
+      });
+      
+      // Ordenar cronológicamente (antiguo a reciente)
+      events.sort((a,b) => a.date - b.date);
+      
+      if(events.length === 0) {
+          container.innerHTML = '<div class="timeline-empty">Sin movimientos registrados.</div>';
+          document.getElementById("ficha-etapa").textContent = "Sin movimientos";
+          return;
+      }
+      
+      // Generar HTML
+      let html = '<div class="timeline">';
+      events.forEach(ev => {
+          const dateStr = ev.date.toLocaleDateString("es-CL");
+          html += `
+              <div class="timeline-item">
+                  <div class="timeline-dot"></div>
+                  <div class="timeline-date">${dateStr}</div>
+                  <div class="timeline-content">${ev.name}</div>
+              </div>
+          `;
+      });
+      html += '</div>';
+      container.innerHTML = html;
+
+      // Actualizar campo "Última Etapa" con el evento más reciente
+      const last = events[events.length - 1];
+      document.getElementById("ficha-etapa").innerHTML = `${last.name} <br> <small class='text-muted'>${last.date.toLocaleDateString("es-CL")}</small>`;
+  }
+
+  // --- 7. PLANO LOGIC ---
+  function renderPlano(archivoVal) {
     const iframe = document.getElementById("ficha-iframe");
     const loader = document.getElementById("ficha-plano-loading");
-    const fallback = document.getElementById("ficha-img-fallback");
+    const spinner = document.getElementById("spinner-plano");
+    const msg = document.getElementById("msg-plano");
     const btnAbrir = document.getElementById("ficha-btn-abrir");
 
+    // Reset
     iframe.classList.add("d-none");
-    loader.classList.remove("d-none");
-    fallback.classList.add("d-none");
     btnAbrir.classList.add("d-none");
-
+    if(spinner) spinner.classList.add("d-none");
+    
     if (archivoVal) {
+      msg.textContent = "Cargando visualización...";
+      if(spinner) spinner.classList.remove("d-none");
+      
+      // Convertir ID Drive a URL Preview
       let urlFinal = archivoVal;
-      // Si es ID de Drive (formato corto sin http)
       if (!archivoVal.startsWith("http")) {
-         // Asumimos que es un ID de Drive si no tiene http
          urlFinal = `https://drive.google.com/file/d/${archivoVal}/preview`;
-      } else if(urlFinal.includes("drive.google.com/file/d/")) {
+      } else if(urlFinal.includes("/view")) {
           urlFinal = urlFinal.replace("/view", "/preview");
       }
 
       iframe.src = urlFinal;
       iframe.onload = () => {
-          loader.classList.add("d-none");
+          if(spinner) spinner.classList.add("d-none");
+          loader.classList.add("d-none"); // Ocultar todo el div loading
           iframe.classList.remove("d-none");
       };
       
@@ -288,8 +354,9 @@
       btnAbrir.classList.remove("d-none");
       
     } else {
-      loader.classList.add("d-none");
-      fallback.classList.remove("d-none");
+      // Caso No encontrado
+      msg.textContent = "Plano no disponible";
+      loader.classList.remove("d-none"); // Mostrar div loading con mensaje
     }
   }
 </script>
