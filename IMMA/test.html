@@ -1,22 +1,20 @@
 <!DOCTYPE html>
 <html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Panel MasterBI · Tag Spool</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<head>
-   <meta charset="UTF-8" />
-   <title>Panel MasterBI · Tag Spool</title>
-   <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 
-   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-
-   <style>
+    <style>
       :root { --bymac-primary: #1a2b48; --bymac-bg: #f5f7fb; }
       body { font-family: system-ui, sans-serif; font-size: 14px; padding: 8px; background-color: var(--bymac-bg); }
       .tab { font-weight: 600; color: #1a2b48; }
       @media (min-width: 768px) { body { padding: 16px; } }
       .card { border-radius: 10px; border: 1px solid #e1e4ee; }
       .tag-seleccionado { font-weight: bold; color: #0b5394; }
-      .plano-frame { width: 100%; min-height: 420px; background: #eee; border-radius: 8px; }
       
       /* KPI BOXES */
       .kpi-box { padding: 12px; border-radius: 8px; background: #fff; border: 1px solid #e1e4ee; text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: center; }
@@ -24,310 +22,719 @@
       .kpi-value { font-size: 24px; font-weight: 800; }
       .kpi-green { color: #2ea043; } .kpi-blue { color: #1a2b48; } .kpi-yellow { color: #b58900; } .kpi-red { color: #d93025; } .kpi-muted { color: #888; } .text-info { color: #0dcaf0; }
 
-      /* MESSAGES */
-      .msg { font-size: 13px; padding: 4px 6px; border-radius: 6px; display: inline-block; font-weight: 600; }
-      .msg.ok { color: #0f5132; background: #d1e7dd; } .msg.error { color: #842029; background: #f8d7da; } .msg.loading { color: #856404; background: #fff3cd; }
-   </style>
-</head>
+      /* FICHA TÉCNICA */
+      .ficha-header { background-color: #1a2b48; color: white; padding: 10px 15px; border-radius: 8px 8px 0 0; }
+      .ficha-body { background-color: white; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 8px 8px; padding: 20px; }
+      .ficha-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6c757d; margin-bottom: 2px; }
+      .ficha-value { font-size: 1.1rem; font-weight: 600; color: #212529; margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 5px; }
+    </style>
+  </head>
 
-<body class="d-flex flex-column min-vh-100">
-   <main class="container-fluid px-1 px-sm-2 flex-grow-1">
+  <body class="d-flex flex-column min-vh-100">
+    <main class="container-fluid px-1 px-sm-2 flex-grow-1">
       
       <div class="card mb-3 shadow-sm" style="background: linear-gradient(90deg, #a0c0f6, #3c475a); color: white;">
-         <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-center py-2">
-            <h1 class="m-0 fs-4">
-               <img src="https://bymac-si.github.io/img/logo_imma.png" alt="IMMA" style="width: 80px; margin-right: 10px" />Soluciones en Piping
-            </h1>
-            <div class="text-end small fs-5">Panel MasterBI Fluor</div>
-         </div>
+        <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-center py-2">
+          <h1 class="m-0 fs-4">
+            <img src="https://bymac-si.github.io/img/logo_imma.png" alt="IMMA" style="width: 80px; margin-right: 10px" />Soluciones en Piping
+          </h1>
+          <div class="text-end small fs-5">Panel MasterBI Fluor</div>
+        </div>
       </div>
 
       <div class="card shadow-sm">
-         <ul class="nav nav-tabs mb-3" id="tabsPanel" role="tablist">
-            <li class="nav-item">
-               <button class="nav-link active tab" data-bs-toggle="tab" data-bs-target="#tab-fechas">
-                  <i class="bi bi-pencil-square"></i> Ingreso Fechas
-               </button>
-            </li>
-            <li class="nav-item">
-               <button class="nav-link tab" data-bs-toggle="tab" data-bs-target="#tab-dashboard">
-                  <i class="bi bi-bar-chart-line"></i> Dashboard KPI
-               </button>
-            </li>
-         </ul>
+        <ul class="nav nav-tabs mb-3" id="tabsPanel" role="tablist">
+          <li class="nav-item"><button class="nav-link active tab" data-bs-toggle="tab" data-bs-target="#tab-ficha"><i class="bi bi-file-earmark-medical"></i> Ficha Técnica</button></li>
+          <li class="nav-item"><button class="nav-link tab" data-bs-toggle="tab" data-bs-target="#tab-fechas"><i class="bi bi-pencil-square"></i> Gestión/Cambios</button></li>
+          <li class="nav-item"><button class="nav-link tab" data-bs-toggle="tab" data-bs-target="#tab-dashboard" onclick="cargarDashboardLocal()"><i class="bi bi-bar-chart-line"></i> Dashboard KPI</button></li>
+          <li class="nav-item"><button class="nav-link text-danger fw-bold" data-bs-toggle="tab" data-bs-target="#tab-criticos" onclick="cargarTagsCriticos()"><i class="bi bi-exclamation-triangle-fill"></i> Alerta 61+</button></li>
+        </ul>
 
-         <div class="tab-content p-3">
-            <div class="tab-pane fade show active" id="tab-fechas">
-               <div class="row g-3">
-                  <div class="col-12">
-                     <div class="card shadow-sm p-3">
-                        <h5 class="card-title">Buscar TAG</h5>
-                        <div class="input-group input-group-sm">
-                           <input type="text" id="txtBuscar" class="form-control" placeholder="Ej: 29044-005" onkeyup="if(event.key==='Enter') buscarTags()" />
-                           <button class="btn btn-primary" onclick="buscarTags()" id="btnBuscar">Buscar</button>
-                        </div>
-                        <div id="contenedorCoincidencias" class="mt-2 border rounded p-1" style="max-height: 200px; overflow: auto">
-                           <div class="text-muted small">Realiza una búsqueda.</div>
-                        </div>
-                     </div>
-                  </div>
-
-                  <div class="col-12 col-md-6">
-                     <div class="card shadow-sm mb-3 p-3">
-                        <div class="d-flex justify-content-between align-items-start">
-                           <div>
-                              <h5 class="card-title">Selección</h5>
-                              <p class="mb-1">TAG: <span id="lblTagSel" class="tag-seleccionado">-</span></p>
-                              <p class="mb-1 small text-muted" id="lblUltimaEtapa">Última etapa: -</p>
-                              <p class="mb-0 small">Estado: <span id="lblEstado">SIN INICIO</span></p>
-                           </div>
-                           <button id="btnPrintLabel" class="btn btn-dark btn-sm d-none" onclick="imprimirEtiquetaSimple()">
-                              <i class="bi bi-printer-fill"></i> Imprimir Etiqueta
-                           </button>
-                        </div>
-                        <div id="contenedorBarcode" class="text-center mt-3 d-none border rounded p-2 bg-light">
-                           <small class="text-muted d-block mb-1">Vista Previa</small>
-                           <img id="imgBarcodeVisual" src="" style="max-width: 100%; height: auto;" alt="Barcode" />
-                        </div>
-                     </div>
-
-                     <div class="card shadow-sm p-3">
-                        <h5 class="card-title">Registrar</h5>
-                        <select id="cmbEtapa" class="form-select form-select-sm mb-2"></select>
-                        <input type="date" id="dtFecha" class="form-control form-control-sm mb-2" />
-                        <div class="d-flex gap-2 align-items-center">
-                           <button class="btn btn-secondary btn-sm" onclick="setHoy()">Hoy</button>
-                           <button class="btn btn-primary btn-sm" id="btnGuardar" onclick="guardar(false)">Guardar</button>
-                           <button class="btn btn-danger btn-sm" id="btnSobrescribir" onclick="guardar(true)">Sobrescribir</button>
-                           <span id="msgEstado" class="msg ms-auto"></span>
-                        </div>
-                     </div>
-                  </div>
-
-                  <div class="col-12 col-md-6">
-                     <div class="card shadow-sm h-100 p-3">
-                        <div class="d-flex justify-content-between">
-                           <h5 class="card-title">Plano</h5>
-                           <a id="btnAbrirPlano" href="#" target="_blank" class="btn btn-sm btn-outline-primary d-none"><i class="bi bi-box-arrow-up-right"></i> Abrir fuera</a>
-                        </div>
-                        <div class="flex-grow-1 bg-light border rounded d-flex justify-content-center align-items-center" style="min-height: 300px">
-                           <img id="imgPlanoFallback" src="https://bymac-si.github.io/img/not-found.png" style="max-width: 100%; max-height: 300px" />
-                           <iframe id="iframePlano" class="w-100 h-100 d-none"></iframe>
-                        </div>
-                        <div id="msgPlano" class="small text-muted text-center mt-1">Selecciona TAG</div>
-                     </div>
-                  </div>
-               </div>
+        <div class="tab-content p-3">
+          
+          <div class="tab-pane fade show active" id="tab-ficha">
+            <div class="row justify-content-center mb-4">
+              <div class="col-12 col-md-8 col-lg-6">
+                <div class="input-group input-group-lg shadow-sm">
+                  <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                  <input type="text" id="txtBuscarFicha" class="form-control" placeholder="Ingrese TAG Spool..." onkeyup="if(event.key==='Enter') buscarTagsFicha()" />
+                  <button class="btn btn-primary" onclick="buscarTagsFicha()">Consultar</button>
+                </div>
+                <div id="resFicha" class="list-group mt-2 shadow-sm" style="position: absolute; z-index: 1000; width: inherit; display: none;"></div>
+              </div>
             </div>
 
-            <div class="tab-pane fade" id="tab-dashboard">
-               <div class="d-flex justify-content-between align-items-center mb-3">
-                  <div>
-                     <h5 class="mb-0 d-inline-block">Indicadores de Gestión</h5>
-                     <span id="lblLastUpdate" class="badge bg-light text-dark border ms-2 fw-normal"><i class="bi bi-clock"></i> Actualizando...</span>
+            <div id="contenedorFicha" class="d-none animate__animated animate__fadeIn">
+              <div class="row g-0">
+                <div class="col-12 col-lg-4 pe-lg-3 mb-3 mb-lg-0">
+                  <div class="ficha-header"><h5 class="m-0"><i class="bi bi-info-circle"></i> Detalles del Spool</h5></div>
+                  <div class="ficha-body h-100">
+                    <div class="mb-4 text-center">
+                      <h2 id="ficha-tag" class="text-primary fw-bold mb-0">-</h2>
+                      <span id="ficha-status-badge" class="badge bg-secondary mt-2">...</span>
+                    </div>
+                    <div class="ficha-label">Última Etapa / Observación</div>
+                    <div id="ficha-etapa" class="ficha-value">-</div>
+                    <div class="ficha-label">Fecha Término / Movimiento</div>
+                    <div id="ficha-fecha" class="ficha-value">-</div>
+                    <div class="ficha-label">Estado General</div>
+                    <div id="ficha-estado-texto" class="ficha-value">-</div>
                   </div>
-                  <div>
-                     <h4 class="btn-export-hide">
-                        <button class="btn btn-sm btn-outline-secondary btn-export-hide" onclick="exportKpiPDF()">PDF</button>
-                        <button class="btn btn-sm btn-outline-secondary btn-export-hide" onclick="exportKpiJPG()">JPG</button>
-                     </h4>
+                </div>
+
+                <div class="col-12 col-lg-8">
+                  <div class="ficha-header d-flex justify-content-between align-items-center">
+                    <h5 class="m-0"><i class="bi bi-file-earmark-pdf"></i> Plano</h5>
+                    <a id="ficha-btn-abrir" href="#" target="_blank" class="btn btn-sm btn-outline-light d-none"><i class="bi bi-box-arrow-up-right"></i> Expandir</a>
                   </div>
-               </div>
-               <div class="row g-2 mb-3">
-                  <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">Total Spools</div><div id="kpi-total" class="kpi-value">-</div></div></div>
-                  <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">Activos</div><div id="kpi-activos" class="kpi-value kpi-blue">-</div></div></div>
-                  <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">Liberados</div><div id="kpi-lib" class="kpi-value text-info">-</div></div></div>
-                  <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">Despachados</div><div id="kpi-desp" class="kpi-value kpi-green">-</div></div></div>
-                  <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">0-30 días</div><div id="kpi-proceso" class="kpi-value kpi-blue">-</div></div></div>
-                  <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">31-60 días</div><div id="kpi-pend" class="kpi-value kpi-yellow">-</div></div></div>
-                  <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">61+ días</div><div id="kpi-atr" class="kpi-value kpi-red">-</div></div></div>
-                  <div class="col-6 col-md-3"><div class="kpi-box bg-light"><div class="kpi-title">Eliminados</div><div id="kpi-elim" class="kpi-value kpi-muted">-</div></div></div>
-               </div>
-               <div class="row mb-3">
-                  <div class="col-12 col-md-6"><div class="card p-3 h-100"><h6>Embudo por proceso</h6><canvas id="chartFunnel" height="150"></canvas></div></div>
-                  <div class="col-12 col-md-6"><div class="card p-3 h-100"><h6>Días en Proceso (Atrasos)</h6><canvas id="chartAtraso" height="150"></canvas></div></div>
-               </div>
-               <div class="row mb-3">
-                  <div class="col-12"><div class="card p-3"><h6>Evolución de Despachos (Por Mes)</h6><div style="height: 250px"><canvas id="chartDespachosMes"></canvas></div></div></div>
-               </div>
-               <div class="row g-3">
-                  <div class="col-12 col-lg-12">
-                     <div class="card p-3 h-100">
-                        <h6>Distribución Status Fluor (Activos)</h6>
-                        <div class="row align-items-center h-100">
-                           <div class="col-6"><div class="table-responsive" style="max-height: 350px;"><table class="table table-sm small mb-0 table-hover"><tbody id="tbodyStatusFluor"></tbody></table></div></div>
-                           <div class="col-6"><div style="max-height: 200px; display: flex; align-items: center; justify-content: center;"><canvas id="chartStatusFluor"></canvas></div></div>
-                        </div>
-                     </div>
+                  <div class="ficha-body p-0" style="height: 600px; background: #eee; position: relative;">
+                    <div id="ficha-plano-loading" class="d-flex flex-column justify-content-center align-items-center h-100 text-muted">
+                        <div class="spinner-border text-primary d-none" id="spinner-plano" role="status"></div>
+                        <span id="msg-plano-load">Seleccione un TAG</span>
+                    </div>
+                    <iframe id="ficha-iframe" class="w-100 h-100 d-none" style="border: none"></iframe>
                   </div>
-                  <div class="col-12 col-lg-6"><div class="card p-3 h-100"><h6>Tags Registrados Hoy</h6><div class="table-responsive"><table class="table table-sm small mb-0 table-hover"><tbody id="tbodyReporteHoy"></tbody></table></div><canvas id="chartReporteHoy" height="150" class="mt-2"></canvas></div></div>
-                  <div class="col-12 col-lg-6">
-                     <div class="card p-3 h-100">
-                        <h6>Estatus Tags por última etapa</h6>
-                        <div class="row">
-                           <div class="col-6"><div class="table-responsive"><table class="table table-sm small mb-0 table-hover"><tbody id="tbodyPendEtapa"></tbody></table></div></div>
-                           <div class="col-6"><div style="max-height: 300px; display: flex; align-items: center;"><canvas id="chartPendEtapa"></canvas></div></div>
-                        </div>
-                     </div>
-                  </div>
-                  <div class="col-12"><div class="card p-3"><h6>Tiempos promedio entre etapas</h6><div class="table-responsive"><table class="table table-sm small table-striped text-center"><thead><tr><th>Desde</th><th>Hasta</th><th>Promedio (Días)</th><th>Casos</th></tr></thead><tbody id="tbodyPromEtapas"></tbody></table></div></div></div>
-               </div>
+                </div>
+              </div>
             </div>
-         </div>
+          </div>
+
+          <div class="tab-pane fade" id="tab-fechas">
+             <div class="row g-3">
+               <div class="col-12">
+                 <div class="card shadow-sm p-3">
+                   <h5 class="card-title">Buscar para Editar</h5>
+                   <div class="input-group input-group-sm">
+                     <input type="text" id="txtBuscarEdit" class="form-control" placeholder="Ej: 29044-005" onkeyup="if(event.key==='Enter') buscarTagsEdit()" />
+                     <button class="btn btn-secondary" onclick="buscarTagsEdit()" id="btnBuscarEdit">Buscar</button>
+                   </div>
+                   <div id="resEdit" class="list-group mt-2" style="max-height: 200px; overflow: auto; display:none;"></div>
+                 </div>
+               </div>
+               
+               <div class="col-12 col-md-6">
+                 <div class="card shadow-sm mb-3 p-3">
+                   <h5 class="card-title">Spool Seleccionado</h5>
+                   <p class="mb-1">TAG: <span id="lblTagSel" class="tag-seleccionado">-</span></p>
+                   <p class="mb-0 small">Status Actual: <span id="lblEstadoEdit">-</span></p>
+                 </div>
+                 <div class="card shadow-sm p-3">
+                   <h5 class="card-title">Registrar Movimiento</h5>
+                   <label class="small text-muted">Etapa a actualizar:</label>
+                   <select id="cmbEtapa" class="form-select form-select-sm mb-2">
+                      <option value="">Cargando columnas...</option>
+                   </select>
+                   <label class="small text-muted">Fecha del evento:</label>
+                   <input type="date" id="dtFecha" class="form-control form-control-sm mb-2" />
+                   <div class="d-flex gap-2">
+                     <button class="btn btn-secondary btn-sm" onclick="setHoy()">Hoy</button>
+                     <button class="btn btn-primary btn-sm w-100" id="btnGuardar" onclick="guardarCambios()">Guardar </button>
+                   </div>
+                   <div id="msgGuardar" class="mt-2 small fw-bold"></div>
+                 </div>
+               </div>
+               
+               <div class="col-12 col-md-6">
+                    <div class="card p-3 h-100 bg-light d-flex justify-content-center align-items-center text-muted">
+                        <i class="bi bi-file-pdf fs-1"></i>
+                        <span id="lblPlanoEdit">Sin plano cargado</span>
+                    </div>
+               </div>
+             </div>
+          </div>
+
+          <div class="tab-pane fade" id="tab-dashboard">
+             <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Indicadores de Gestión <span id="dash-time" class="badge bg-light text-dark fw-normal border ms-2">--:--</span></h5>
+                <div>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="exportKpi('pdf')">PDF</button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="exportKpi('jpg')">JPG</button>
+                    <button class="btn btn-sm btn-outline-primary ms-2" onclick="cargarDashboardLocal(true)"><i class="bi bi-arrow-clockwise"></i></button>
+                </div>
+             </div>
+             
+             <div id="loading-dashboard" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <div class="mt-2 text-muted">Sincronizando con AppSheet...</div>
+             </div>
+
+             <div id="content-dashboard" class="d-none">
+                 <div class="row g-2 mb-3">
+                    <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">Total Spools</div><div id="kpi-total" class="kpi-value">-</div></div></div>
+                    <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">Activos</div><div id="kpi-activos" class="kpi-value kpi-blue">-</div></div></div>
+                    <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">Liberados</div><div id="kpi-lib" class="kpi-value text-info">-</div></div></div>
+                    <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">Despachados</div><div id="kpi-desp" class="kpi-value kpi-green">-</div></div></div>
+                    <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">0-30 días</div><div id="kpi-proceso" class="kpi-value kpi-blue">-</div></div></div>
+                    <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">31-60 días</div><div id="kpi-pend" class="kpi-value kpi-yellow">-</div></div></div>
+                    <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">61+ días</div><div id="kpi-atr" class="kpi-value kpi-red">-</div></div></div>
+                    <div class="col-6 col-md-3"><div class="kpi-box bg-light"><div class="kpi-title">Eliminados</div><div id="kpi-elim" class="kpi-value kpi-muted">-</div></div></div>
+                 </div>
+
+                 <div class="row mb-3 g-3">
+                    <div class="col-12 col-md-6">
+                        <div class="card p-3 h-100">
+                            <h6>Embudo por proceso</h6>
+                            <div style="height: 150px; position: relative;">
+                                <canvas id="chartEmbudo"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="card p-3 h-100">
+                            <h6>Días en Proceso</h6>
+                            <div style="height: 150px; position: relative;">
+                                <canvas id="chartDiasProceso"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+                 
+                 <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="card p-3">
+                            <h6>Evolución de Despachos</h6>
+                            <div style="height: 250px;">
+                                <canvas id="chartEvolucion"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+
+                 <div class="row mb-3 g-3">
+                     <div class="col-12 col-lg-5">
+                         <div class="card p-3 h-100">
+                             <h6>Distribución Status Fluor</h6>
+                             <div class="table-responsive" style="max-height: 250px;">
+                                 <table class="table table-sm table-striped small">
+                                     <tbody id="tbodyFluor"></tbody>
+                                 </table>
+                             </div>
+                         </div>
+                     </div>
+                     <div class="col-12 col-lg-7">
+                         <div class="card p-3 h-100 d-flex align-items-center justify-content-center">
+                             <div style="width: 300px; height: 300px;">
+                                 <canvas id="chartFluor"></canvas>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+
+                 <div class="row mb-3 g-3">
+                    <div class="col-12 col-lg-6">
+                        <div class="card p-3 h-100">
+                            <h6>Registrados Hoy</h6>
+                            <div class="table-responsive mb-2">
+                                <table class="table table-sm small">
+                                    <thead><tr><th>Etapa</th><th class="text-center">Hoy</th><th class="text-center text-muted">F. Anterior</th></tr></thead>
+                                    <tbody id="tbodyLogHoy"></tbody>
+                                </table>
+                            </div>
+                            <div style="height: 150px; position: relative;">
+                            <canvas id="chartLogHoy" height="150"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <div class="card p-3 h-100">
+                            <h6>Estatus por Última Etapa (Activos)</h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="table-responsive" style="max-height: 250px;">
+                                        <table class="table table-sm table-hover small">
+                                            <tbody id="tbodyUltimaEtapa"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-6 d-flex align-items-center">
+                                    <canvas id="chartUltimaEtapa"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+
+                 <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="card p-3">
+                            <h6>Tiempos promedio</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped small text-center align-middle">
+                                    <thead class="table-light">
+                                        <tr><th>Desde</th><th>Hasta</th><th>Promedio (Días)</th><th>Casos</th></tr>
+                                    </thead>
+                                    <tbody id="tbodyTiempos"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+             </div>
+          </div>
+
+          <div class="tab-pane fade" id="tab-criticos">
+              <div class="card p-3 border-danger shadow-sm">
+                  <h5 class="text-danger fw-bold"><i class="bi bi-alarm"></i> Tags con más de 60 días sin movimiento</h5>
+                  <div class="table-responsive mt-3">
+                      <table class="table table-hover align-middle">
+                          <thead class="table-light"><tr><th>TAG</th><th>Días</th><th>Etapa</th><th>Fecha</th></tr></thead>
+                          <tbody id="tabla-criticos-body"></tbody>
+                      </table>
+                  </div>
+              </div>
+          </div>
+
+        </div>
       </div>
-   </main>
+    </main>
 
-   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
    <script>
-      const API_URL = "https://script.google.com/macros/s/AKfycbxzFyURRmRM1ZWXECUcDNi7iZYdHfGdbJqEBLDWVIDeWEIf1X9y5JDAIyBvjpqueH_f/exec";
+    // --- CONFIGURACIÓN APPSHEET ---
+    const APP_ID = "59c4aa7f-9e37-4e66-af20-52250f9c4c07";
+    const APP_KEY = "V2-157Vx-ltOIu-kTlqv-TYrU7-Gsowd-355md-nWdkC-k7s1N";
+    const TABLE_MASTER = "MasterBI";
+    const TABLE_LOG = "ChangeLog"; 
 
-      function callApi(accion, data = {}) {
-         const p = new URLSearchParams(); p.append("accion", accion);
-         Object.keys(data).forEach((k) => { if (data[k]) p.append(k, typeof data[k] === "object" ? JSON.stringify(data[k]) : String(data[k])); });
-         return fetch(API_URL, { method: "POST", body: p }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
-      }
+    // COLUMNAS
+    const COL_TAG = "TAG SPOOL";
+    const COL_STATUS = "STATUS SPOOL";
+    const COL_PLANO = "ID_PLANO"; 
+    const COL_FECHA_FIN = "Fecha Terminado"; 
+    const COL_FLUOR = "STATUS FLUOR";
+    const COL_FECHA_TRN = "Fecha TRN Cliente"; 
 
-      document.addEventListener("DOMContentLoaded", () => {
-         setHoy(); cargarColumnas();
-         if (typeof ChartDataLabels !== "undefined") Chart.register(ChartDataLabels);
-         startAutoRefresh();
-         const active = document.querySelector("#tabsPanel button.active");
-         if (active && active.dataset.bsTarget === "#tab-dashboard") cargarDashboard();
-         document.addEventListener("shown.bs.tab", (ev) => { if (ev.target.dataset.bsTarget === "#tab-dashboard") cargarDashboard(); });
-      });
+    // COLUMNAS FECHAS (Orden Lógico para Tiempos Promedio)
+    const PARES_TIEMPOS = [
+        { from: "Fecha TRN Cliente", to: "F.Emision Plano" },
+        { from: "F.Emision Plano", to: "F.Aprobacion Plano" },
+        { from: "F.Aprobacion Plano", to: "F. Entrada Taller" },
+        { from: "F. Entrada Taller", to: "F.Salida Taller" },
+        { from: "F.Salida Taller", to: "F.Ingreso Granallado" },
+        { from: "F.Ingreso Granallado", to: "F.Salida Granallado" },
+        { from: "F.Salida Granallado", to: "F.Ingreso Caucho" },
+        { from: "F.Ingreso Caucho", to: "F.Salida Caucho" },
+        { from: "F.Salida Caucho", to: "F.Salida Engomado" },
+        { from: "F.Salida Engomado", to: "F.Ingreso Vulcanizado" },
+        { from: "F.Ingreso Vulcanizado", to: "F.Salida Vulcanizado" },
+        { from: "F.Salida Vulcanizado", to: "F.Ingreso Term. Caucho" },
+        { from: "F.Ingreso Term. Caucho", to: "F.Salida Term. Caucho" },
+        { from: "F.Salida Term. Caucho", to: "F.Envio a Pint" },
+        { from: "F.Envio a Pint", to: "F.Salida Pintura" },
+        { from: "F.Salida Pintura", to: "F.Liberado" },
+        { from: "F.Liberado", to: "F.Despacho" }
+    ];
 
-      function setHoy() { const d = new Date(); const off = d.getTimezoneOffset() * 60000; document.getElementById("dtFecha").value = new Date(d.getTime() - off).toISOString().slice(0, 10); }
-      function cargarColumnas() {
-         const cmb = document.getElementById("cmbEtapa"); cmb.innerHTML = "<option>Cargando...</option>";
-         callApi("getColumnasFechas").then((r) => {
-            if (r.ok && Array.isArray(r.data)) {
-               cmb.innerHTML = '<option value="">-- seleccionar --</option>';
-               r.data.forEach((e) => { const o = document.createElement("option"); o.value = e; o.text = e; cmb.appendChild(o); });
-            } else cmb.innerHTML = "<option>Error</option>";
-         }).catch(() => (cmb.innerHTML = "<option>Error red</option>"));
-      }
+    let dataCache = []; 
+    let logCache = [];
+    let lastFetchTime = 0;
+    
+    // --- UTILS ---
+    async function callAppSheet(tableName, action, bodyParams = {}) {
+        const url = `https://api.appsheet.com/api/v2/apps/${APP_ID}/tables/${tableName}/Action`;
+        const body = { "Action": action, "Properties": { "Locale": "es-CL", "Timezone": "America/Santiago", ...bodyParams.Properties }, ...bodyParams };
+        if(bodyParams.Rows) body.Rows = bodyParams.Rows;
+        if(bodyParams.Selector) body.Properties.Selector = bodyParams.Selector;
 
-      // --- LOGIC: BUSQUEDA ---
-      let filaSeleccionada = null; let tagSeleccionado = ""; 
-      function buscarTags() {
-         const txt = document.getElementById("txtBuscar").value.trim(); const div = document.getElementById("contenedorCoincidencias");
-         if (!txt) { div.innerHTML = "<small>Escribe algo.</small>"; return; }
-         div.innerHTML = "<small class='text-primary'>Buscando...</small>"; document.getElementById("btnBuscar").disabled = true;
-         callApi("buscarTag", { texto: txt }).then((r) => {
-            document.getElementById("btnBuscar").disabled = false;
-            if (!r.ok || !r.data.length) { div.innerHTML = "<small>No encontrado.</small>"; return; }
-            let h = "<table class='table table-sm table-hover mb-0'><tbody>";
-            r.data.forEach((i) => { h += `<tr style='cursor:pointer' onclick="selTag(${i.fila},'${i.tag}')"><td width='20'><input type='radio' name='sel'></td><td>${i.tag}</td></tr>`; });
-            div.innerHTML = h + "</tbody></table>";
-         }).catch(() => { document.getElementById("btnBuscar").disabled = false; div.innerHTML = "<small class='text-danger'>Error.</small>"; });
-      }
+        try {
+            const r = await fetch(url, { method: "POST", headers: { "ApplicationAccessKey": APP_KEY, "Content-Type": "application/json" }, body: JSON.stringify(body) });
+            if (!r.ok) throw new Error("Error API: " + r.status);
+            return await r.json();
+        } catch (e) { console.error("Error AppSheet:", e); return []; }
+    }
 
-      function selTag(f, t) {
-         filaSeleccionada = f; tagSeleccionado = t;
-         document.getElementById("lblTagSel").textContent = t;
-         
-         // 1. Mostrar Botón Imprimir
-         document.getElementById("btnPrintLabel").classList.remove("d-none");
-         // 2. Mostrar Contenedor Visual
-         document.getElementById("contenedorBarcode").classList.remove("d-none");
-         
-         // 3. Generar URL de la API Barcode
-         const urlBarcode = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" + encodeURIComponent(t) + "&scale=3&includetext";
-         document.getElementById("imgBarcodeVisual").src = urlBarcode;
-
-         callApi("ultimaEtapa", { fila: f }).then((r) => { const d = r.data || {}; let ft = d.fechaTexto; if (ft) ft = ft.split("-").reverse().join("/"); document.getElementById("lblUltimaEtapa").textContent = d.ultimaColumna ? `${d.ultimaColumna} (${ft})` : "-"; });
-         callApi("estadoTag", { fila: f }).then((r) => { const d = r.data || {}; document.getElementById("lblEstado").textContent = d.estado || "SIN INICIO"; });
-         document.getElementById("imgPlanoFallback").classList.remove("d-none"); document.getElementById("iframePlano").classList.add("d-none");
-         callApi("vistaPlano", { tag: t }).then((r) => {
-            const d = r.data || r; if (d.ok && d.url) {
-               document.getElementById("iframePlano").src = d.url; document.getElementById("iframePlano").classList.remove("d-none"); document.getElementById("imgPlanoFallback").classList.add("d-none");
-               document.getElementById("btnAbrirPlano").href = d.url.replace("/preview", "/view"); document.getElementById("btnAbrirPlano").classList.remove("d-none");
-            } else document.getElementById("btnAbrirPlano").classList.add("d-none");
-         });
-      }
-
-      function guardar(over) {
-         if (!filaSeleccionada) return alert("Selecciona TAG");
-         const et = document.getElementById("cmbEtapa").value; const fe = document.getElementById("dtFecha").value;
-         if (!et || !fe) return alert("Falta datos");
-         const btn = document.getElementById("btnGuardar"); btn.disabled = true; document.getElementById("msgEstado").textContent = "Guardando...";
-         callApi("registrarFecha", { fila: filaSeleccionada, etapa: et, fechaISO: fe, overwrite: over }).then((r) => {
-            btn.disabled = false; const d = r.data || {};
-            document.getElementById("msgEstado").textContent = (r.ok && d.ok) ? "OK" : (d.msg || "Error");
-            document.getElementById("msgEstado").className = (r.ok && d.ok) ? "msg ok" : "msg error";
-         });
-      }
-
-      // --- ETIQUETA SIMPLE (SOLUCIÓN DEFINITIVA) ---
-      function imprimirEtiquetaSimple() {
-         if (!tagSeleccionado) return;
-         
-         const urlBarcode = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" + encodeURIComponent(tagSeleccionado) + "&scale=3&includetext";
-         
-         const win = window.open('', '_blank', 'width=400,height=300');
-         
-         // Creamos los elementos programáticamente, SIN USAR document.write con texto
-         const style = win.document.createElement('style');
-         style.textContent = `
-            @page { size: 50mm 30mm; margin: 0; }
-            body { margin: 0; padding: 0; width: 50mm; height: 30mm; display: flex; justify-content: center; align-items: center; }
-            img { max-width: 95%; height: auto; }
-         `;
-         win.document.head.appendChild(style);
-         
-         const img = win.document.createElement('img');
-         img.src = urlBarcode;
-         
-         // Evento clave: Esperar a que cargue la imagen
-         img.onload = function() {
-            // Pequeña pausa para asegurar renderizado
-            setTimeout(() => {
-               win.print();
-               win.close();
-            }, 500);
-         };
-         
-         img.onerror = function() {
-            alert("No se pudo cargar el código de barras.");
-            win.close();
-         };
-         
-         win.document.body.appendChild(img);
-      }
-
-      // --- DASHBOARD ---
-      function startAutoRefresh() { setInterval(() => { if (document.querySelector("#tabsPanel button.active").dataset.bsTarget === "#tab-dashboard") cargarDashboard(); }, 60000); }
-      function cargarDashboard() {
-         callApi("dashboardKPIs").then((res) => {
-            if (res.ok && res.data) {
-               const k = res.data;
-               document.getElementById("kpi-total").textContent = k.total;
-               document.getElementById("kpi-activos").textContent = k.activos;
-               document.getElementById("kpi-lib").textContent = k.cnt_lib; document.getElementById("kpi-desp").textContent = k.cnt_desp; 
-               document.getElementById("kpi-proceso").textContent = k.proceso; document.getElementById("kpi-pend").textContent = k.pend;
-               document.getElementById("kpi-atr").textContent = k.atr; document.getElementById("kpi-elim").textContent = k.elim;
-               dibujarFunnel(k);
-               document.getElementById("lblLastUpdate").innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> ${new Date().toLocaleTimeString()}`;
+    function diffDays(d1Str, d2Str) {
+        if(!d1Str || !d2Str) return null;
+        const d1 = new Date(d1Str); const d2 = new Date(d2Str);
+        if(isNaN(d1) || isNaN(d2)) return null;
+        return (d2 - d1) / (1000 * 60 * 60 * 24);
+    }
+    
+    function setHoy() {
+        const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+        document.getElementById("dtFecha").value = d.toISOString().split("T")[0];
+    }
+    
+    function llenarComboEtapas() {
+        const cmb = document.getElementById("cmbEtapa");
+        cmb.innerHTML = '<option value="">-- Seleccione Etapa --</option>';
+        PARES_TIEMPOS.forEach(p => {
+             [p.from, p.to].forEach(col => {
+                 if(!cmb.querySelector(`option[value="${col}"]`)) {
+                     const opt = document.createElement("option");
+                     opt.value = col; opt.text = col;
+                     cmb.appendChild(opt);
+                 }
+             });
+        });
+    }
+    
+    function calcularUltimaEtapa(row) {
+        let maxFecha = null; let col = "Sin mov."; let txt = "-";
+        const todasCols = new Set();
+        PARES_TIEMPOS.forEach(p => { todasCols.add(p.from); todasCols.add(p.to); });
+        
+        todasCols.forEach(c => {
+            if(row[c]) {
+                let d = new Date(row[c]);
+                if(!isNaN(d)) {
+                    if(maxFecha === null || d > maxFecha) { maxFecha = d; col = c; txt = row[c]; }
+                }
             }
+        });
+        if(txt.includes("T")) txt = txt.split("T")[0];
+        return { etapa: col, fecha: txt };
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        setHoy();
+        llenarComboEtapas();
+        if (typeof ChartDataLabels !== "undefined") Chart.register(ChartDataLabels);
+    });
+
+    let resultadosFicha = [];
+    function buscarTagsFicha() {
+        const txt = document.getElementById("txtBuscarFicha").value.trim().toUpperCase();
+        if(!txt) return;
+        document.getElementById("resFicha").style.display='block';
+        document.getElementById("resFicha").innerHTML='<div class="list-group-item">Buscando...</div>';
+        
+        const sel = `Filter(${TABLE_MASTER}, CONTAINS([${COL_TAG}], '${txt}'))`;
+        callAppSheet(TABLE_MASTER, "Find", {Selector: sel}).then(rows => {
+            resultadosFicha = rows;
+            let h='';
+            if(!rows.length) h='<div class="list-group-item text-danger">No encontrado</div>';
+            else rows.slice(0,5).forEach((r,i) => h+=`<a href="#" class="list-group-item list-group-item-action" onclick="verFicha(${i});return false;">${r[COL_TAG]}</a>`);
+            document.getElementById("resFicha").innerHTML=h;
+        });
+    }
+    function verFicha(i) {
+        const r = resultadosFicha[i];
+        document.getElementById("resFicha").style.display='none';
+        document.getElementById("contenedorFicha").classList.remove("d-none");
+        document.getElementById("ficha-tag").textContent = r[COL_TAG];
+        document.getElementById("ficha-status-badge").textContent = r[COL_STATUS];
+        const ult = calcularUltimaEtapa(r);
+        document.getElementById("ficha-etapa").textContent = ult.etapa;
+        document.getElementById("ficha-fecha").textContent = ult.fecha;
+        const iframe = document.getElementById("ficha-iframe");
+        if(r[COL_PLANO]) {
+            iframe.src = `https://drive.google.com/file/d/${r[COL_PLANO]}/preview`;
+            iframe.classList.remove("d-none");
+            document.getElementById("ficha-btn-abrir").classList.remove("d-none");
+            document.getElementById("ficha-btn-abrir").href = `https://drive.google.com/file/d/${r[COL_PLANO]}/view`;
+            document.getElementById("ficha-plano-loading").classList.add("d-none");
+        }
+    }
+    
+    let resultadosEditCache = [];
+    let rowEdit = null;
+    function buscarTagsEdit() {
+         const txt = document.getElementById("txtBuscarEdit").value.trim().toUpperCase();
+         if(!txt) return;
+         document.getElementById("resEdit").style.display='block';
+         document.getElementById("resEdit").innerHTML='<div class="list-group-item">Buscando...</div>';
+         const sel = `Filter(${TABLE_MASTER}, CONTAINS([${COL_TAG}], '${txt}'))`;
+         callAppSheet(TABLE_MASTER, "Find", {Selector: sel}).then(rows => {
+             resultadosEditCache = rows;
+             let h='<div class="list-group">';
+             if(!rows.length) h+='<div class="list-group-item text-danger">No encontrado</div>';
+             else rows.slice(0,5).forEach((r,i) => h+=`<a href="#" class="list-group-item list-group-item-action" onclick="selEditInd(${i}); return false;">${r[COL_TAG]}</a>`);
+             h+='</div>';
+             document.getElementById("resEdit").innerHTML=h;
          });
-         callApi("graficoAtrasos").then((r) => { if (r.ok && r.data) dibujarBarra(r.data, "chartAtraso", "Spools", "#d93025"); });
-         callApi("graficoDespachosMes").then((r) => { if (r.ok && r.data) dibujarGraficoTendencia(r.data, "chartDespachosMes", "Despachados"); });
-         cargarReporteHoy(); cargarPendientes(); cargarPromedios(); cargarStatusFluor();
-      }
-      function dibujarFunnel(k) { const ctx = document.getElementById("chartFunnel"); if (!ctx) return; if (Chart.getChart("chartFunnel")) Chart.getChart("chartFunnel").destroy(); new Chart(ctx, { type: "bar", data: { labels: ["Total", "Activos", "0-30", "31-60", "61+"], datasets: [{ data: [k.total, k.activos, k.proceso, k.pend, k.atr], backgroundColor: ["#e0e0e0", "#1a2b48", "#3b82f6", "#f59e0b", "#d93025"] }] }, options: { indexAxis: "y", plugins: { legend: { display: false }, datalabels: { display: false } } } }); }
-      function dibujarBarra(d, id, lbl, col) { const ctx = document.getElementById(id); if (!ctx) return; if (Chart.getChart(id)) Chart.getChart(id).destroy(); new Chart(ctx, { type: "bar", data: { labels: d.labels, datasets: [{ label: lbl, data: d.valores, backgroundColor: col }] }, options: { plugins: { legend: { display: false }, datalabels: { display: false } } } }); }
-      function dibujarGraficoTendencia(d, id, lbl) { const ctx = document.getElementById(id); if (!ctx) return; if (Chart.getChart(id)) Chart.getChart(id).destroy(); new Chart(ctx, { type: "bar", data: { labels: d.labels, datasets: [{ label: lbl, data: d.valores, backgroundColor: "#2ea043", borderRadius: 4 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } }, scales: { y: { beginAtZero: true } } } }); }
-      function cargarReporteHoy() { callApi("reporteChangeLogHoy").then((res) => { const tb = document.getElementById("tbodyReporteHoy"); if (!res.ok || !res.data.length) { tb.innerHTML = "<tr><td colspan='3'>Sin datos</td></tr>"; return; } let h = "", l = [], d1 = [], d2 = [], t1 = 0, t2 = 0; res.data.forEach((r) => { t1 += r.hoy || 0; t2 += r.anteriores || 0; h += `<tr><td>${r.columna}</td><td class='text-center'>${r.hoy}</td><td class='text-center text-muted'>${r.anteriores}</td></tr>`; l.push(r.columna); d1.push(r.hoy); d2.push(r.anteriores); }); h += `<tr class='table-secondary fw-bold'><td>Total</td><td class='text-center'>${t1}</td><td class='text-center'>${t2}</td></tr>`; tb.innerHTML = h; const ctx = document.getElementById("chartReporteHoy"); if (Chart.getChart("chartReporteHoy")) Chart.getChart("chartReporteHoy").destroy(); new Chart(ctx, { type: "bar", data: { labels: l, datasets: [{ label: "Hoy", data: d1, backgroundColor: "#2ea043" }, { label: "Ant.", data: d2, backgroundColor: "#ffc107" }] }, options: { scales: { x: { stacked: true }, y: { stacked: true } }, plugins: { datalabels: { display: false } } } }); }); }
-      function cargarPendientes() { callApi("pendientesPorEtapa").then((res) => { if (!res.ok) return; const rows = res.data; const tbody = document.getElementById("tbodyPendEtapa"); let h = "", labels = [], vals = [], total = 0; rows.forEach((r) => { total += Number(r.cantidad || 0); h += `<tr><td>${r.etapa}</td><td class="text-end fw-bold">${r.cantidad}</td></tr>`; labels.push(r.etapa); vals.push(r.cantidad); }); tbody.innerHTML = rows.length ? h + `<tr class="table-secondary fw-bold border-top"><td>TOTAL</td><td class="text-end">${total}</td></tr>` : "<tr><td colspan='2'>Sin pendientes</td></tr>"; const ctx = document.getElementById("chartPendEtapa"); if (Chart.getChart("chartPendEtapa")) Chart.getChart("chartPendEtapa").destroy(); new Chart(ctx, { type: "doughnut", data: { labels: labels, datasets: [{ data: vals, backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40", "#71B37C", "#C9CBCF"], borderWidth: 1 }] }, options: { plugins: { datalabels: { display: false }, legend: { display: false } } } }); }); }
-      function cargarStatusFluor() { callApi('graficoStatusFluor').then(res => { const data = res.data; const tbody = document.getElementById("tbodyStatusFluor"); let h = "", total = 0; if (!data || !data.labels.length) { h = "<tr><td colspan='2' class='text-muted'>Sin datos</td></tr>"; } else { data.labels.forEach((lbl, i) => { const val = data.valores[i]; total += val; h += `<tr><td>${lbl}</td><td class="text-end fw-bold">${val}</td></tr>`; }); h += `<tr class="table-light fw-bold border-top"><td>Total</td><td class="text-end">${total}</td></tr>`; } tbody.innerHTML = h; const ctx = document.getElementById("chartStatusFluor"); if (Chart.getChart("chartStatusFluor")) Chart.getChart("chartStatusFluor").destroy(); new Chart(ctx, { type: 'doughnut', data: { labels: data.labels, datasets: [{ data: data.valores, backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#C9CBCF', '#2a9d8f'], borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: false }, datalabels: { display: false } } } }); }); }
-      function cargarPromedios() { callApi("promedioTiemposEtapas").then((res) => { const tb = document.getElementById("tbodyPromEtapas"); if (!res.ok || !res.data.length) { tb.innerHTML = "<tr><td colspan='4'>Sin datos</td></tr>"; return; } let h = "", sum = 0; res.data.forEach((r) => { let v = parseFloat(r.promedioDias); sum += v; h += `<tr><td>${r.desde}</td><td>${r.hasta}</td><td class='fw-bold text-primary'>${v.toFixed(1)}</td><td>${r.muestras}</td></tr>`; }); let prom = sum / res.data.length; h += `<tr class='table-secondary fw-bold border-top'><td colspan='2' class='text-end'>PROMEDIO:</td><td class='text-primary'>${prom.toFixed(1)} días</td><td>-</td></tr>`; tb.innerHTML = h; }); }
-      async function exportKpiPDF() { const { jsPDF } = window.jspdf; const el = document.getElementById("tab-dashboard"); const btns = document.querySelectorAll(".btn-export-hide"); const d = new Date(); const offset = d.getTimezoneOffset() * 60000; const localDate = new Date(d.getTime() - offset); const fechaStr = localDate.toISOString().slice(0, 10).replace(/-/g, ""); const fileName = `informe${fechaStr}.pdf`; btns.forEach((b) => (b.style.visibility = "hidden")); try { const canvas = await html2canvas(el, { scale: 2, useCORS: true }); const imgData = canvas.toDataURL("image/jpeg", 0.95); const pdf = new jsPDF("p", "mm", "letter"); const pageWidth = 215.9; const pageHeight = 279.4; const margin = 5; const contentWidth = pageWidth - 2 * margin; const contentHeight = pageHeight - 2 * margin; const imgWidth = contentWidth; const imgHeight = (canvas.height * imgWidth) / canvas.width; let heightLeft = imgHeight; let position = margin; pdf.addImage(imgData, "JPEG", margin, position, imgWidth, imgHeight); heightLeft -= contentHeight; while (heightLeft > 0) { position = -contentHeight + margin; pdf.addPage(); pdf.addImage(imgData, "JPEG", margin, margin - (imgHeight - heightLeft), imgWidth, imgHeight); heightLeft -= contentHeight; } const totalPages = pdf.internal.getNumberOfPages(); const fechaDisplay = new Date().toLocaleDateString(); for (let i = 1; i <= totalPages; i++) { pdf.setPage(i); pdf.setFontSize(8); pdf.setTextColor(150); pdf.text(`Página ${i} de ${totalPages} - ${fechaDisplay}`, margin, pageHeight - 2); } pdf.save(fileName); } catch (e) { alert("Error PDF"); } finally { btns.forEach((b) => (b.style.visibility = "visible")); } }
-      async function exportKpiJPG() { const el = document.getElementById("tab-dashboard"); const btns = document.querySelectorAll(".btn-export-hide"); const d = new Date(); const offset = d.getTimezoneOffset() * 60000; const localDate = new Date(d.getTime() - offset); const fechaStr = localDate.toISOString().slice(0, 10).replace(/-/g, ""); const fileName = `informe${fechaStr}.jpg`; btns.forEach((b) => (b.style.visibility = "hidden")); try { const originalCanvas = await html2canvas(el, { scale: 2, useCORS: true }); const marginPx = 40; const newCanvas = document.createElement("canvas"); newCanvas.width = originalCanvas.width + marginPx * 2; newCanvas.height = originalCanvas.height + marginPx * 2; const ctx = newCanvas.getContext("2d"); ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, newCanvas.width, newCanvas.height); ctx.drawImage(originalCanvas, marginPx, marginPx); ctx.font = "20px Arial"; ctx.fillStyle = "#888888"; ctx.fillText("Generado por MasterBI IMMA - " + new Date().toLocaleDateString(), marginPx, newCanvas.height - 10); const a = document.createElement("a"); a.href = newCanvas.toDataURL("image/jpeg", 0.95); a.download = fileName; document.body.appendChild(a); a.click(); document.body.removeChild(a); } catch (e) { alert("Error JPG"); } finally { btns.forEach((b) => (b.style.visibility = "visible")); } }
-   </script>
-</body>
+    }
+    function selEditInd(i) {
+        rowEdit = resultadosEditCache[i];
+        document.getElementById("resEdit").style.display='none';
+        document.getElementById("lblTagSel").textContent = rowEdit[COL_TAG];
+        document.getElementById("lblEstadoEdit").textContent = rowEdit[COL_STATUS];
+        document.getElementById("msgGuardar").textContent = "";
+    }
+    
+    async function guardarCambios() {
+        if(!rowEdit) return alert("Seleccione TAG");
+        const col = document.getElementById("cmbEtapa").value;
+        const fec = document.getElementById("dtFecha").value;
+        if(!col || !fec) return alert("Datos incompletos");
+        
+        document.getElementById("btnGuardar").textContent = "Guardando...";
+        
+        const logData = {
+            "FechaHora": new Date().toLocaleString("es-CL"),
+            "Usuario": "WebAdmin",
+            "Hoja": TABLE_MASTER,
+            "Celda": col,
+            "CabeceraColumna": col,
+            "TAG SPOOL": rowEdit[COL_TAG],
+            "ValorAnterior": rowEdit[col] || "",
+            "ValorNuevo": fec
+        };
+        await callAppSheet(TABLE_LOG, "Add", {Rows:[logData]});
+        
+        const update = {};
+        update[COL_TAG] = rowEdit[COL_TAG];
+        update[col] = fec;
+        await callAppSheet(TABLE_MASTER, "Edit", {Rows:[update]});
+        
+        document.getElementById("btnGuardar").textContent = "Guardar";
+        document.getElementById("msgGuardar").className="text-success";
+        document.getElementById("msgGuardar").textContent="Guardado OK";
+    }
+
+    // =========================================================
+    // DASHBOARD
+    // =========================================================
+    async function cargarDashboardLocal(force = false) {
+        const now = new Date();
+        document.getElementById("dash-time").textContent = now.toLocaleTimeString();
+        
+        if(!force && dataCache.length > 0) { renderAll(dataCache, logCache); return; }
+
+        document.getElementById("loading-dashboard").classList.remove("d-none");
+        document.getElementById("content-dashboard").classList.add("d-none");
+
+        try {
+            const [m, l] = await Promise.all([
+                callAppSheet(TABLE_MASTER, "Find", {Selector: `Filter(${TABLE_MASTER}, true)`}),
+                callAppSheet(TABLE_LOG, "Find", {Selector: `Filter(${TABLE_LOG}, true)`})
+            ]);
+            dataCache = m; logCache = l;
+            renderAll(m, l);
+        } catch(e) { console.error(e); }
+        finally {
+            document.getElementById("loading-dashboard").classList.add("d-none");
+            document.getElementById("content-dashboard").classList.remove("d-none");
+        }
+    }
+
+    function renderAll(rows, logs) {
+        let total=rows.length, act=0, lib=0, desp=0, elim=0;
+        let d0=0, d31=0, d61=0;
+        let distFluor = {}; 
+        let distDespachoMes = {}; 
+        let distUltima = {};
+        
+        const today = new Date();
+
+        rows.forEach(r => {
+            const st = (r[COL_STATUS]||"").toUpperCase();
+            const fl = (r[COL_FLUOR]||"SIN STATUS").toUpperCase();
+            
+            if(st.includes("LIBERADO")) lib++;
+            else if(st.includes("DESPACHADO")) {
+                desp++;
+                let fDesp = r[COL_FECHA_FIN] || r["F.Despacho"]; 
+                if(fDesp) {
+                    let k = fDesp.substring(0, 7); 
+                    distDespachoMes[k] = (distDespachoMes[k]||0)+1;
+                }
+            }
+            else if(st.includes("ELIMINADO") || st.includes("HOLD")) elim++;
+            else {
+                act++;
+                let fIni = r[COL_FECHA_TRN] || r["F.Emision Plano"] || today;
+                let diff = diffDays(fIni, today);
+                if(diff!==null) {
+                    if(diff<=30) d0++; else if(diff<=60) d31++; else d61++;
+                }
+                
+                distFluor[fl] = (distFluor[fl]||0)+1;
+
+                const ult = calcularUltimaEtapa(r);
+                if(ult.etapa !== "Sin mov.") {
+                    distUltima[ult.etapa] = (distUltima[ult.etapa]||0)+1;
+                }
+            }
+        });
+
+        document.getElementById("kpi-total").textContent = total;
+        document.getElementById("kpi-activos").textContent = act;
+        document.getElementById("kpi-lib").textContent = lib;
+        document.getElementById("kpi-desp").textContent = desp;
+        document.getElementById("kpi-proceso").textContent = d0;
+        document.getElementById("kpi-pend").textContent = d31;
+        document.getElementById("kpi-atr").textContent = d61;
+        document.getElementById("kpi-elim").textContent = elim;
+
+        // 1. Embudo (Horizontal)
+        renderChart("chartEmbudo", "bar", {
+            labels: ["Total", "Activos", "0-30", "31-60", "61+"],
+            datasets: [{
+                data: [total, act, d0, d31, d61],
+                backgroundColor: ["#e0e0e0", "#1a2b48", "#3b82f6", "#f59e0b", "#d93025"]
+            }],
+            options: { indexAxis: 'y', plugins: {legend: {display: false}} }
+        });
+
+        // 2. Días Proceso (Vertical)
+        renderChart("chartDiasProceso", "bar", {
+            labels: ["0-30 días", "31-60 días", "61+ días"],
+            datasets: [{
+                data: [d0, d31, d61],
+                backgroundColor: ["#d93025", "#d93025", "#d93025"] 
+            }],
+            options: { plugins: {legend: {display: false}} }
+        });
+
+        // 3. Evolución Despachos
+        const labelsMes = Object.keys(distDespachoMes).sort();
+        const dataMes = labelsMes.map(k => distDespachoMes[k]);
+        renderChart("chartEvolucion", "bar", {
+            labels: labelsMes,
+            datasets: [{
+                data: dataMes,
+                backgroundColor: "#2ea043",
+                barPercentage: 0.6
+            }],
+            options: { plugins: {legend: {display: false}} }
+        });
+
+        // 4. Fluor 
+        const labelsFluor = Object.keys(distFluor);
+        const dataFluor = Object.values(distFluor);
+        renderChart("chartFluor", "doughnut", {
+            labels: labelsFluor,
+            datasets: [{
+                data: dataFluor,
+                backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF']
+            }],
+            options: { plugins: {legend: {display: false}} }
+        });
+        
+        let hFluor = ""; let sumFluor = 0;
+        Object.entries(distFluor).sort((a,b)=>b[1]-a[1]).forEach(([k,v]) => {
+            hFluor += `<tr><td>${k}</td><td class="text-end fw-bold">${v}</td></tr>`;
+            sumFluor += v;
+        });
+        hFluor += `<tr class="fw-bold border-top"><td>Total</td><td class="text-end">${sumFluor}</td></tr>`;
+        document.getElementById("tbodyFluor").innerHTML = hFluor;
+
+        // 5. Registrados Hoy
+        const nowStr = today.toLocaleDateString("es-CL"); 
+        
+        let logHoy = {};
+        let logAnt = {};
+        
+        logs.forEach(l => {
+            let fh = l["FechaHora"] || "";
+            let col = l["CabeceraColumna"];
+            
+            let dLog = new Date(fh);
+            let isHoy = (!isNaN(dLog) && dLog.getDate() === today.getDate() && dLog.getMonth() === today.getMonth());
+            
+            if(isHoy) logHoy[col] = (logHoy[col]||0)+1;
+            else logAnt[col] = (logAnt[col]||0)+1;
+        });
+        
+        let allLogKeys = new Set([...Object.keys(logHoy), ...Object.keys(logAnt)]);
+        let arrLog = Array.from(allLogKeys).map(k => ({
+            key: k, hoy: logHoy[k]||0, ant: logAnt[k]||0
+        })).sort((a,b) => b.hoy - a.hoy).slice(0, 5); 
+
+        let hLog = ""; let tHoy=0, tAnt=0;
+        arrLog.forEach(x => {
+            hLog += `<tr><td>${x.key}</td><td class="text-center fw-bold text-success">${x.hoy}</td><td class="text-center text-muted">${x.ant}</td></tr>`;
+            tHoy+=x.hoy; tAnt+=x.ant;
+        });
+        hLog += `<tr class="table-light fw-bold"><td>Total</td><td class="text-center">${tHoy}</td><td class="text-center">${tAnt}</td></tr>`;
+        document.getElementById("tbodyLogHoy").innerHTML = hLog;
+
+        renderChart("chartLogHoy", "bar", {
+            labels: arrLog.map(x=>x.key),
+            datasets: [
+                { label: "Hoy", data: arrLog.map(x=>x.hoy), backgroundColor: "#2ea043" },
+                { label: "F. Anterior", data: arrLog.map(x=>x.ant), backgroundColor: "#ffc107" }
+            ]
+        }, { scales: {x:{stacked:false}, y:{stacked:false}} }); 
+
+        // 6. Ultima Etapa
+        const labelsUlt = Object.keys(distUltima);
+        const dataUlt = Object.values(distUltima);
+        renderChart("chartUltimaEtapa", "doughnut", {
+            labels: labelsUlt,
+            datasets: [{ data: dataUlt, backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#8e5ea2', '#3cba9f'] }]
+        }, {plugins:{legend:{display:false}}});
+        
+        let hUlt = ""; let sumUlt=0;
+        Object.entries(distUltima).sort((a,b)=>b[1]-a[1]).forEach(([k,v]) => {
+            hUlt += `<tr><td>${k}</td><td class="text-end">${v}</td></tr>`;
+            sumUlt += v;
+        });
+        hUlt += `<tr class="table-light fw-bold"><td>TOTAL</td><td class="text-end">${sumUlt}</td></tr>`;
+        document.getElementById("tbodyUltimaEtapa").innerHTML = hUlt;
+
+        // 7. TIEMPOS PROMEDIO
+        let hTiempos = "";
+        let sumProm = 0; let countProm = 0;
+        
+        PARES_TIEMPOS.forEach(p => {
+            let sumDias = 0; let count = 0;
+            rows.forEach(r => {
+                let d = diffDays(r[p.from], r[p.to]);
+                if(d !== null && d >= 0) { 
+                    sumDias += d; count++;
+                }
+            });
+            let prom = count > 0 ? (sumDias/count).toFixed(1) : "-";
+            hTiempos += `<tr><td>${p.from}</td><td>${p.to}</td><td class="fw-bold text-primary">${prom}</td><td>${count}</td></tr>`;
+            
+            if(count > 0) { sumProm += (sumDias/count); countProm++; } 
+        });
+        let totalAvg = countProm > 0 ? (sumProm / countProm).toFixed(1) + " días" : "-";
+        hTiempos += `<tr class="table-secondary fw-bold border-top"><td colspan="2" class="text-end">PROMEDIO GLOBAL:</td><td>${totalAvg}</td><td>-</td></tr>`;
+        document.getElementById("tbodyTiempos").innerHTML = hTiempos;
+
+        // 8. Tab Críticos (DATA DESDE MASTERBI)
+        let hCrit = "";
+        rows.forEach(r => {
+             const st = (r[COL_STATUS]||"").toUpperCase();
+             if(!st.includes("DESP") && !st.includes("ELIM") && !st.includes("LIB")) {
+                 let f = r[COL_FECHA_TRN] || today; 
+                 let d = diffDays(f, today);
+                 if(d>60) hCrit += `<tr><td>${r[COL_TAG]}</td><td class="text-center"><span class="badge bg-danger">${Math.floor(d)}</span></td><td>${r[COL_STATUS]}</td><td>${f.split("T")[0]}</td></tr>`;
+             }
+        });
+        document.getElementById("tabla-criticos-body").innerHTML = hCrit || '<tr><td colspan="4">Sin críticos</td></tr>';
+    }
+
+    function renderChart(id, type, data, extraOptions={}) {
+        const ctx = document.getElementById(id);
+        if(Chart.getChart(id)) Chart.getChart(id).destroy();
+        new Chart(ctx, {
+            type: type,
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {display: false},
+                    datalabels: { display: type==='bar', color:'white', font:{weight:'bold'} } 
+                },
+                ...extraOptions
+            }
+        });
+    }
+
+    async function exportKpi(type) {
+        const el = document.getElementById("content-dashboard");
+        const canvas = await html2canvas(el, {scale: 2});
+        const img = canvas.toDataURL("image/jpeg", 0.9);
+        if(type==='jpg') {
+            const a = document.createElement('a'); a.href=img; a.download='dashboard.jpg'; a.click();
+        } else {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const w = 210; const h = (canvas.height * w) / canvas.width;
+            pdf.addImage(img, 'JPEG', 0, 0, w, h);
+            pdf.save('dashboard.pdf');
+        }
+    }
+</script>
+  </body>
 </html>
