@@ -93,7 +93,7 @@
                 <div class="ficha-body h-100">
                     <div class="mb-4 text-center">
                         <h2 id="ficha-tag" class="text-primary fw-bold mb-0">-</h2>
-                        <span id="ficha-status-badge" class="badge bg-secondary mt-2">Cargando...</span>
+                        <span id="ficha-status-badge" class="badge bg-secondary mt-1">Consultando...</span>
                     </div>
 
                     <div class="ficha-label">Última Etapa Registrada</div>
@@ -183,100 +183,86 @@
       }
 
       function verFicha(fila, tag) {
-          // 1. CONFIGURACIÓN INICIAL DE LA UI (RESET)
-          document.getElementById("resFicha").style.display = 'none';
-          document.getElementById("txtBuscar").value = tag;
-          document.getElementById("contenedorFicha").classList.remove("d-none");
-          
-          // 2. LIMPIEZA DE DATOS (Previo a la carga)
-          // Esto asegura que el usuario no vea datos del tag anterior
-          document.getElementById("ficha-tag").textContent = tag;
-          
-          // Textos a spinners
-          document.getElementById("ficha-etapa").innerHTML = 
-        '<div class="spinner-border spinner-border-sm text-secondary" role="status"></div> <span class="text-muted fst-italic small">Consultando...</span>';
-          document.getElementById("ficha-fecha").innerHTML = 
-        '<div class="spinner-border spinner-border-sm text-secondary" role="status"></div> <span class="text-muted fst-italic small">Consultando...</span>';
-          document.getElementById("ficha-estado-texto").innerHTML = 
-        '<div class="spinner-border spinner-border-sm text-secondary" role="status"></div> <span class="text-muted fst-italic small">Consultando...</span>';
-          
-          // Badge a estado 'Cargando'
-          const badge = document.getElementById("ficha-status-badge");
-          badge.textContent = "Cargando...";
-          badge.className = "badge bg-secondary mt-2";
-          
-          // 3. LIMPIEZA DE PLANO
-          const iframe = document.getElementById("ficha-iframe");
-          const loader = document.getElementById("ficha-plano-loading");
-          const fallback = document.getElementById("ficha-img-fallback");
-          const btnAbrir = document.getElementById("ficha-btn-abrir");
-          
-          iframe.classList.add("d-none");
-          iframe.src = ""; // IMPORTANTE: Vaciar el source para evitar glitches visuales
-          
-          fallback.classList.add("d-none");
-          btnAbrir.classList.add("d-none");
-          
-          // Mostrar loader
-          loader.classList.remove("d-none");
-          loader.innerHTML = '<div class="spinner-border text-primary" role="status"></div><div class="mt-2">Obteniendo datos...</div>';
+    // 1. UI RESET (Igual que antes)
+    document.getElementById("resFicha").style.display = 'none';
+    document.getElementById("txtBuscar").value = tag;
+    document.getElementById("contenedorFicha").classList.remove("d-none");
+    document.getElementById("ficha-tag").textContent = tag;
 
-          // 4. LLAMADAS API
-          Promise.all([
-              callApi("estadoTag", { fila: fila }),
-              callApi("ultimaEtapa", { fila: fila }),
-              callApi("vistaPlano", { tag: tag })
-          ]).then(results => {
-              const [resEstado, resEtapa, resPlano] = results;
+    // Resetear visuales a "Cargando..." independiente para cada elemento
+    const spinner = '<div class="spinner-border spinner-border-sm text-secondary" role="status"></div>';
+    
+    // Elementos del DOM
+    const elBadge = document.getElementById("ficha-status-badge");
+    const elEstadoTxt = document.getElementById("ficha-estado-texto");
+    const elEtapa = document.getElementById("ficha-etapa");
+    const elFecha = document.getElementById("ficha-fecha");
+    
+    // Poner todo en estado de carga inicial
+    elBadge.textContent = "Consultando...";
+    elBadge.className = "badge bg-secondary mt-2";
+    elEstadoTxt.innerHTML = spinner;
+    elEtapa.innerHTML = spinner;
+    elFecha.innerHTML = spinner;
 
-              // A. Renderizar Estado
-              const dEst = resEstado.data || {};
-              let colorClass = "bg-secondary";
-              if(dEst.color === 'green') colorClass = "bg-success";
-              if(dEst.color === 'blue') colorClass = "bg-primary";
-              if(dEst.color === 'red') colorClass = "bg-danger";
-              
-              badge.textContent = dEst.estado || "SIN INICIO";
-              badge.className = `badge ${colorClass} mt-2`;
-              document.getElementById("ficha-estado-texto").textContent = dEst.estado || "-";
+    // Resetear Plano
+    const iframe = document.getElementById("ficha-iframe");
+    const loader = document.getElementById("ficha-plano-loading");
+    const fallback = document.getElementById("ficha-img-fallback");
+    const btnAbrir = document.getElementById("ficha-btn-abrir");
 
-              // B. Renderizar Etapa
-              const dEtp = resEtapa.data || {};
-              let ft = dEtp.fechaTexto;
-              if (ft) ft = ft.split("-").reverse().join("/");
-              document.getElementById("ficha-etapa").textContent = dEtp.ultimaColumna || "Sin registros";
-              document.getElementById("ficha-fecha").textContent = ft || "-";
+    iframe.classList.add("d-none");
+    iframe.src = ""; 
+    fallback.classList.add("d-none");
+    btnAbrir.classList.add("d-none");
+    loader.classList.remove("d-none");
+    loader.innerHTML = '<div class="spinner-border text-primary" role="status"></div><div class="mt-2">Buscando plano...</div>';
 
-              // C. Renderizar Plano
-              const dPlano = resPlano.data || resPlano;
-              
-              if (dPlano.ok && dPlano.url) {
-                  // Asignamos URL
-                  iframe.src = dPlano.url;
-                  
-                  // Manejamos la carga para ocultar el loader
-                  iframe.onload = () => {
-                      loader.classList.add("d-none");
-                      iframe.classList.remove("d-none");
-                  };
-                  
-                  // Botón externo
-                  const fullUrl = dPlano.url.replace("/preview", "/view");
-                  btnAbrir.href = fullUrl;
-                  btnAbrir.classList.remove("d-none");
-              } else {
-                  // Si no hay plano
-                  loader.classList.add("d-none");
-                  fallback.classList.remove("d-none");
-                  // Aseguramos que el iframe siga oculto
-                  iframe.classList.add("d-none");
-              }
-          }).catch(error => {
-              console.error("Error cargando ficha:", error);
-              // Manejo de error visual
-              loader.innerHTML = '<span class="text-danger">Error al cargar datos</span>';
-          });
-      }
+    // 2. DISPARAR PETICIONES INDEPENDIENTES (Sin Promise.all)
+
+    // A. Obtener ESTADO (Suele ser rápido)
+    callApi("estadoTag", { fila: fila }).then(res => {
+        const d = res.data || {};
+        let colorClass = "bg-secondary";
+        if(d.color === 'green') colorClass = "bg-success";
+        if(d.color === 'blue') colorClass = "bg-primary";
+        if(d.color === 'red') colorClass = "bg-danger";
+        
+        elBadge.textContent = d.estado || "SIN DATOS";
+        elBadge.className = `badge ${colorClass} mt-2`;
+        elEstadoTxt.textContent = d.estado || "-";
+    }).catch(e => elEstadoTxt.textContent = "Error");
+
+    // B. Obtener ETAPA (Suele ser rápido)
+    callApi("ultimaEtapa", { fila: fila }).then(res => {
+        const d = res.data || {};
+        let ft = d.fechaTexto;
+        if (ft) ft = ft.split("-").reverse().join("/");
+        
+        elEtapa.textContent = d.ultimaColumna || "Sin registros";
+        elFecha.textContent = ft || "-";
+    }).catch(e => elEtapa.textContent = "Error");
+
+    // C. Obtener PLANO (Suele ser lento, no bloqueará lo anterior)
+    callApi("vistaPlano", { tag: tag }).then(res => {
+        const d = res.data || res;
+        if (d.ok && d.url) {
+            iframe.src = d.url;
+            iframe.onload = () => {
+                loader.classList.add("d-none");
+                iframe.classList.remove("d-none");
+            };
+            const fullUrl = d.url.replace("/preview", "/view");
+            btnAbrir.href = fullUrl;
+            btnAbrir.classList.remove("d-none");
+        } else {
+            loader.classList.add("d-none");
+            fallback.classList.remove("d-none");
+        }
+    }).catch(e => {
+        loader.innerHTML = '<span class="text-danger">Plano no disponible</span>';
+    });
+}
     </script>
   </body>
 </html>
