@@ -138,131 +138,160 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-      // ⚠️ URL ORIGINAL MANTENIDA
-      const API_URL = "https://script.google.com/macros/s/AKfycbz9W1UPXquuIB0DIV2fGJS8nnKsj5tRAHaBh-3ufNMXPE-5aE9P6NmyY7O3aCrz6vuP/exec";
+  // --- 1. CONFIGURACIÓN ---
+  const APP_ID = "59c4aa7f-9e37-4e66-af20-52250f9c4c07";
+  const APP_KEY = "V2-157Vx-ltOIu-kTlqv-TYrU7-Gsowd-355md-nWdkC-k7s1N";
+  const TABLE_NAME = "MasterBI"; 
+  const COL_PLANO = "ID_PLANO"; // O "ID_PLANO" si ya hiciste la indexación
 
-      function callApi(accion, data = {}) {
-        const p = new URLSearchParams();
-        p.append("accion", accion);
-        Object.keys(data).forEach((k) => {
-          if (data[k]) p.append(k, typeof data[k] === "object" ? JSON.stringify(data[k]) : String(data[k]));
-        });
-        return fetch(API_URL, { method: "POST", body: p }).then((r) => {
-          if (!r.ok) throw new Error(r.status);
-          return r.json();
-        });
+  // Variable para guardar los datos temporalmente
+  let resultadosGlobales = [];
+
+  // --- 2. FUNCIÓN DE CONEXIÓN API ---
+  async function callAppSheet(selectorStr) {
+    const url = `https://api.appsheet.com/api/v2/apps/${APP_ID}/tables/${TABLE_NAME}/Action`;
+    const body = {
+      "Action": "Find",
+      "Properties": {
+        "Locale": "es-CL",
+        "Timezone": "America/Santiago",
+        "Selector": selectorStr
+      },
+      "Rows": []
+    };
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "ApplicationAccessKey": APP_KEY,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!response.ok) throw new Error(`Error API: ${response.status}`);
+    return await response.json();
+  }
+
+  // --- 3. LÓGICA DE BÚSQUEDA ---
+  function buscarTags() {
+    const txt = document.getElementById("txtBuscar").value.trim().toUpperCase();
+    const resDiv = document.getElementById("resFicha");
+
+    if (!txt) { resDiv.style.display = 'none'; return; }
+
+    resDiv.innerHTML = '<div class="list-group-item">Buscando en AppSheet...</div>';
+    resDiv.style.display = 'block';
+
+    const selector = `Filter(${TABLE_NAME}, CONTAINS([TAG SPOOL], '${txt}'))`;
+
+    callAppSheet(selector).then(rows => {
+      if (!rows || rows.length === 0) {
+        resDiv.innerHTML = '<div class="list-group-item text-danger">No se encontraron coincidencias.</div>';
+        return;
       }
 
-      function buscarTags() {
-          const txt = document.getElementById("txtBuscar").value.trim();
-          const resDiv = document.getElementById("resFicha");
-          
-          if (!txt) { resDiv.style.display = 'none'; return; }
-          
-          resDiv.innerHTML = '<div class="list-group-item">Buscando...</div>';
-          resDiv.style.display = 'block';
+      // GUARDAMOS LOS RESULTADOS EN LA VARIABLE GLOBAL
+      resultadosGlobales = rows;
 
-          callApi("buscarTag", { texto: txt }).then(r => {
-             if (!r.ok || !r.data.length) {
-                 resDiv.innerHTML = '<div class="list-group-item text-danger">No se encontraron coincidencias.</div>';
-                 return;
-             }
-             let h = '';
-             r.data.forEach(i => {
-                 h += `<a href="#" class="list-group-item list-group-item-action py-3" onclick="verFicha('${i.fila}', '${i.tag}'); return false;">
-                         <div class="d-flex w-100 justify-content-between align-items-center">
-                           <h6 class="mb-0 fw-bold text-primary"><i class="bi bi-tag-fill"></i> ${i.tag}</h6>
-                           <small class="text-muted"><i class="bi bi-chevron-right"></i></small>
-                         </div>
-                       </a>`;
-             });
-             resDiv.innerHTML = h;
-          }).catch(e => {
-              resDiv.innerHTML = '<div class="list-group-item text-danger">Error de conexión.</div>';
-          });
-      }
+      let h = '';
+      // Limitamos a 10 resultados
+      rows.slice(0, 10).forEach((row, index) => {
+        const tag = row['TAG SPOOL'] || "S/N";
+        
+        // CORRECCIÓN: Ahora pasamos solo el ÍNDICE (0, 1, 2...) en lugar de todo el objeto
+        h += `<a href="#" class="list-group-item list-group-item-action py-3" onclick="verFichaAppSheet(${index}); return false;">
+                <div class="d-flex w-100 justify-content-between align-items-center">
+                  <h6 class="mb-0 fw-bold text-primary"><i class="bi bi-tag-fill"></i> ${tag}</h6>
+                  <small class="text-muted"><i class="bi bi-chevron-right"></i></small>
+                </div>
+              </a>`;
+      });
+      resDiv.innerHTML = h;
 
-      function verFicha(fila, tag) {
-    // 1. UI RESET (Igual que antes)
+    }).catch(e => {
+      console.error(e);
+      let msg = "Error de conexión.";
+      if(e.message && e.message.includes("Failed to fetch")) msg = "Error CORS: Bloqueo de seguridad del navegador.";
+      resDiv.innerHTML = `<div class="list-group-item text-danger small">${msg}</div>`;
+    });
+  }
+
+  // --- 4. VISUALIZACIÓN ---
+  function verFichaAppSheet(index) {
+    // RECUPERAMOS EL DATO USANDO EL ÍNDICE
+    const row = resultadosGlobales[index];
+
+    if (!row) {
+        console.error("Error: No se encontró la fila en memoria");
+        return;
+    }
+    
+    // UI Setup
     document.getElementById("resFicha").style.display = 'none';
-    document.getElementById("txtBuscar").value = tag;
+    document.getElementById("txtBuscar").value = row['TAG SPOOL'];
     document.getElementById("contenedorFicha").classList.remove("d-none");
-    document.getElementById("ficha-tag").textContent = tag;
 
-    // Resetear visuales a "Cargando..." independiente para cada elemento
-    const spinner = '<div class="spinner-border spinner-border-sm text-secondary" role="status"></div> Consultando BBDD...';
-    
-    // Elementos del DOM
-    const elBadge = document.getElementById("ficha-status-badge");
-    const elEstadoTxt = document.getElementById("ficha-estado-texto");
-    const elEtapa = document.getElementById("ficha-etapa");
-    const elFecha = document.getElementById("ficha-fecha");
-    
-    // Poner todo en estado de carga inicial
-    elBadge.textContent = "Consultando...";
-    elBadge.className = "badge bg-secondary mt-2";
-    elEstadoTxt.innerHTML = spinner;
-    elEtapa.innerHTML = spinner;
-    elFecha.innerHTML = spinner;
+    // -- A. DATOS PRINCIPALES --
+    document.getElementById("ficha-tag").textContent = row['TAG SPOOL'];
 
-    // Resetear Plano
+    const estado = row['STATUS SPOOL'] || "SIN STATUS";
+    const badge = document.getElementById("ficha-status-badge");
+    let colorClass = "bg-secondary";
+
+    const stUpper = estado.toUpperCase();
+    if(stUpper.includes("LIBERADO") || stUpper.includes("DESPACHADO")) colorClass = "bg-success";
+    else if(stUpper.includes("PINTURA") || stUpper.includes("FABRICACION")) colorClass = "bg-primary";
+    else if(stUpper.includes("HOLD") || stUpper.includes("ELIMINADO")) colorClass = "bg-danger";
+    else if(stUpper.includes("PENDIENTE")) colorClass = "bg-warning text-dark";
+
+    badge.textContent = estado;
+    badge.className = `badge ${colorClass} mt-2`;
+    document.getElementById("ficha-estado-texto").textContent = estado;
+
+    document.getElementById("ficha-etapa").textContent = row['OBSERVACIONES'] || row['Area'] || "Sin observaciones";
+
+    let fecha = row['Fecha Terminado'] || row['F.Liberado'] || row['Fecha Flúor'] || "-";
+    if(fecha && fecha.includes("T")) fecha = fecha.split("T")[0]; 
+    document.getElementById("ficha-fecha").textContent = fecha;
+
+    // -- B. PLANO --
+    const archivoVal = row[COL_PLANO] || ""; 
     const iframe = document.getElementById("ficha-iframe");
     const loader = document.getElementById("ficha-plano-loading");
     const fallback = document.getElementById("ficha-img-fallback");
     const btnAbrir = document.getElementById("ficha-btn-abrir");
 
     iframe.classList.add("d-none");
-    iframe.src = ""; 
+    loader.classList.remove("d-none");
     fallback.classList.add("d-none");
     btnAbrir.classList.add("d-none");
-    loader.classList.remove("d-none");
-    loader.innerHTML = '<div class="spinner-border text-primary" role="status"></div><div class="mt-2">Buscando plano...</div>';
 
-    // 2. DISPARAR PETICIONES INDEPENDIENTES (Sin Promise.all)
+    if (archivoVal) {
+      let urlFinal = archivoVal;
+      // Si es ID de Drive (formato corto sin http)
+      if (!archivoVal.startsWith("http")) {
+         // Asumimos que es un ID de Drive si no tiene http
+         urlFinal = `https://drive.google.com/file/d/${archivoVal}/preview`;
+      } else if(urlFinal.includes("drive.google.com/file/d/")) {
+          urlFinal = urlFinal.replace("/view", "/preview");
+      }
 
-    // A. Obtener ESTADO (Suele ser rápido)
-    callApi("estadoTag", { fila: fila }).then(res => {
-        const d = res.data || {};
-        let colorClass = "bg-secondary";
-        if(d.color === 'green') colorClass = "bg-success";
-        if(d.color === 'blue') colorClass = "bg-primary";
-        if(d.color === 'red') colorClass = "bg-danger";
-        
-        elBadge.textContent = d.estado || "SIN DATOS";
-        elBadge.className = `badge ${colorClass} mt-2`;
-        elEstadoTxt.textContent = d.estado || "-";
-    }).catch(e => elEstadoTxt.textContent = "Error");
-
-    // B. Obtener ETAPA (Suele ser rápido)
-    callApi("ultimaEtapa", { fila: fila }).then(res => {
-        const d = res.data || {};
-        let ft = d.fechaTexto;
-        if (ft) ft = ft.split("-").reverse().join("/");
-        
-        elEtapa.textContent = d.ultimaColumna || "Sin registros";
-        elFecha.textContent = ft || "-";
-    }).catch(e => elEtapa.textContent = "Error");
-
-    // C. Obtener PLANO (Suele ser lento, no bloqueará lo anterior)
-    callApi("vistaPlano", { tag: tag }).then(res => {
-        const d = res.data || res;
-        if (d.ok && d.url) {
-            iframe.src = d.url;
-            iframe.onload = () => {
-                loader.classList.add("d-none");
-                iframe.classList.remove("d-none");
-            };
-            const fullUrl = d.url.replace("/preview", "/view");
-            btnAbrir.href = fullUrl;
-            btnAbrir.classList.remove("d-none");
-        } else {
-            loader.classList.add("d-none");
-            fallback.classList.remove("d-none");
-        }
-    }).catch(e => {
-        loader.innerHTML = '<span class="text-danger">Plano no disponible</span>';
-    });
-}
-    </script>
+      iframe.src = urlFinal;
+      iframe.onload = () => {
+          loader.classList.add("d-none");
+          iframe.classList.remove("d-none");
+      };
+      
+      const urlView = urlFinal.replace("/preview", "/view");
+      btnAbrir.href = urlView;
+      btnAbrir.classList.remove("d-none");
+      
+    } else {
+      loader.classList.add("d-none");
+      fallback.classList.remove("d-none");
+    }
+  }
+</script>
   </body>
 </html>
