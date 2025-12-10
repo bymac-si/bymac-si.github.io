@@ -493,9 +493,16 @@
     let resultadosFicha = [], resultadosEditCache = [], rowEdit = null;
     function buscarTagsFicha() {
         const txt = document.getElementById("txtBuscarFicha").value.trim().toUpperCase();
+        const resDiv = document.getElementById("resFicha");
+        
+        // 1. LIMPIEZA: Ocultar ficha anterior inmediatamente
+        document.getElementById("contenedorFicha").classList.add("d-none");
+
         if(!txt) return;
-        document.getElementById("resFicha").style.display='block';
-        document.getElementById("resFicha").innerHTML='<div class="list-group-item">Buscando...</div>';
+        
+        resDiv.style.display='block';
+        resDiv.innerHTML='<div class="list-group-item">Buscando...</div>';
+        
         callAppSheet(TABLE_MASTER, "Find", {Selector: `Filter(${TABLE_MASTER}, CONTAINS([${COL_TAG}], '${txt}'))`}).then(rows => {
             resultadosFicha = rows;
             let h='';
@@ -517,16 +524,34 @@
     }
     function buscarTagsEdit() {
          const txt = document.getElementById("txtBuscarEdit").value.trim().toUpperCase();
+         const resDiv = document.getElementById("resEdit");
+
+         // 1. LIMPIEZA: Resetear campos de edición
+         rowEdit = null; // Limpiar variable global
+         document.getElementById("lblTagSel").textContent = "-";
+         document.getElementById("lblEstadoEdit").textContent = "-";
+         document.getElementById("lblFluorEdit").textContent = "-";
+         document.getElementById("lblUltimoMovEdit").textContent = "-";
+         document.getElementById("timeline-edit").innerHTML = "<div class='text-muted small'>Realice una búsqueda...</div>";
+         
+         // Resetear plano
+         document.getElementById("edit-iframe").classList.add("d-none");
+         document.getElementById("edit-plano-loading").classList.remove("d-none");
+         document.getElementById("edit-btn-abrir").classList.add("d-none");
+         document.getElementById("edit-msg-plano").textContent = "Sin plano cargado";
+
          if(!txt) return;
-         document.getElementById("resEdit").style.display='block';
-         document.getElementById("resEdit").innerHTML='<div class="list-group-item">Buscando...</div>';
+         
+         resDiv.style.display='block';
+         resDiv.innerHTML='<div class="list-group-item">Buscando...</div>';
+         
          callAppSheet(TABLE_MASTER, "Find", {Selector: `Filter(${TABLE_MASTER}, CONTAINS([${COL_TAG}], '${txt}'))`}).then(rows => {
              resultadosEditCache = rows;
              let h='<div class="list-group">';
              if(!rows.length) h+='<div class="list-group-item text-danger">No encontrado</div>';
              else rows.slice(0,5).forEach((r,i) => h+=`<a href="#" class="list-group-item list-group-item-action" onclick="selEditInd(${i}); return false;">${r[COL_TAG]}</a>`);
              h+='</div>';
-             document.getElementById("resEdit").innerHTML=h;
+             resDiv.innerHTML=h;
          });
     }
     function selEditInd(i) {
