@@ -212,7 +212,7 @@
                     </div>
                     <div class="col-12 col-md-6">
                         <div class="card p-3 h-100">
-                            <h6>Días en Proceso (Sin Movimiento)</h6>
+                            <h6>Días en Proceso</h6>
                             <div style="height: 150px; position: relative;"><canvas id="chartDiasProceso"></canvas></div>
                         </div>
                     </div>
@@ -313,7 +313,6 @@
     // COLUMNAS
     const COL_MES_DESPACHO = "Mes Despacho"; 
     const COL_ESTATUS_ELIMINADO = "EstatusEliminado"; 
-    // COLUMNA VIRTUAL DE DIAS
     const COL_DIAS_MOV = "Days_Since_Last_Move"; 
 
     const COL_TAG = "TAG SPOOL";
@@ -326,7 +325,6 @@
 
     const STATUS_ELIMINADOS = ["ELIMINADO", "ELIMINADO / REFABRICADO", "REFABRICAR"];
 
-    // >>> MAPA DE COLUMNAS A LETRAS DE EXCEL <<<
     const COL_LETTERS_MAP = {
         "F.Emision Plano": "CI", 
         "F.Aprobacion Plano": "T",
@@ -498,7 +496,7 @@
           if (document.querySelector("#tabsPanel button.active").dataset.bsTarget === "#tab-dashboard") {
             cargarDashboardLocal(true); 
           }
-        }, 300000);
+        }, 60000);
     }
 
     // --- FICHA Y GESTIÓN ---
@@ -620,7 +618,6 @@
         document.getElementById("content-dashboard").classList.add("d-none");
 
         try {
-            // *** USANDO SLICE PARA LOGS DE HOY ***
             const [m, l] = await Promise.all([
                 callAppSheet(TABLE_MASTER, "Find", {Selector: `Filter(${TABLE_MASTER}, true)`}),
                 callAppSheet(SLICE_LOGS, "Find", {Selector: `Filter(${SLICE_LOGS}, true)`}) 
@@ -784,16 +781,15 @@
         hTiempos += `<tr class="table-secondary"><th colspan="2" class="text-end">PROMEDIO GENERAL</th><th class="fw-bold text-primary">${generalAvg}</th><th>-</th></tr>`;
         document.getElementById("tbodyTiempos").innerHTML=hTiempos;
 
-        // CRITICOS (USANDO COLUMNA VIRTUAL DE DIAS)
-        let hCrit="";
+        // CRITICOS (USANDO COLUMNA VIRTUAL DE DIAS Y ORDEN DESCENDENTE)
+        let listaCriticos = []; 
+
         rows.forEach(r => {
              const st = (r[COL_STATUS]||"").toUpperCase();
              if(!st.includes("DESP") && !esTagEliminado(r) && !st.includes("LIBERADO")) {
                  
-                 // Usamos directamente la columna virtual para filtrar 61+
                  let dias = Number(r[COL_DIAS_MOV]) || 0;
                  
-                 // Para la visualización de fecha, buscamos la ultima registrada
                  let maxDate = null;
                  COLUMNAS_FECHAS_ALL.forEach(c => {
                      let d = parseDateFlexible(r[c]);
@@ -802,10 +798,24 @@
                  let fBase = maxDate || parseDateFlexible(r["F.Emision Plano"]) || today;
 
                  if(dias > 60) {
-                     hCrit += `<tr><td>${r[COL_TAG]}</td><td class="text-center"><span class="badge bg-danger">${Math.floor(dias)}</span></td><td>${r[COL_STATUS]}</td><td>${formatDateManual(fBase)}</td></tr>`;
+                     listaCriticos.push({
+                         tag: r[COL_TAG],
+                         dias: Math.floor(dias),
+                         status: r[COL_STATUS],
+                         fecha: formatDateManual(fBase)
+                     });
                  }
              }
         });
+
+        // Ordenar
+        listaCriticos.sort((a, b) => b.dias - a.dias);
+
+        let hCrit = "";
+        listaCriticos.forEach(item => {
+            hCrit += `<tr><td>${item.tag}</td><td class="text-center"><span class="badge bg-danger">${item.dias}</span></td><td>${item.status}</td><td>${item.fecha}</td></tr>`;
+        });
+
         document.getElementById("tabla-criticos-body").innerHTML = hCrit || '<tr><td colspan="4">Sin críticos</td></tr>';
     }
 
@@ -823,5 +833,3 @@
         else { const { jsPDF } = window.jspdf; const pdf = new jsPDF('p', 'mm', 'a4'); const w = 210; const h = (canvas.height * w) / canvas.width; pdf.addImage(img, 'JPEG', 0, 0, w, h); pdf.save('dashboard.pdf'); }
     }
 </script>
-  </body>
-</html>
