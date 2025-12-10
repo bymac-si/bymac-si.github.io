@@ -700,7 +700,7 @@
         document.getElementById("kpi-atr").textContent = d61_plus;
         document.getElementById("kpi-elim").textContent = elim;
 
-        renderChart("chartEmbudo", "bar", { labels: ["Total", "Activos", "0-30", "31-60", "61+"], datasets: [{ data: [total, act, d0_30, d31_60, d61_plus], backgroundColor: ["#e0e0e0", "#1a2b48", "#3b82f6", "#f59e0b", "#d93025"] }], options: { indexAxis: 'y', plugins: {legend: {display: false}} } });
+        renderChart("chartEmbudo", "bar", { labels: ["Total", "Activos", "Liberados", "Despachados", "Eliminados"], datasets: [{ data: [total, act, lib, desp, elim], backgroundColor: ["#e0e0e0", "#1a2b48", "#0dcaf0", "#2ea043", "#888"] }], options: { indexAxis: 'x', plugins: {legend: {display: true}} } });
         renderChart("chartDiasProceso", "bar", { labels: ["0-30", "31-60", "61+"], datasets: [{ data: [d0_30, d31_60, d61_plus], backgroundColor: ["#d93025", "#d93025", "#d93025"] }], options: { plugins: {legend: {display: false}} } });
         
         const sortedKeys = Object.keys(distDespachoMes).sort((a, b) => {
