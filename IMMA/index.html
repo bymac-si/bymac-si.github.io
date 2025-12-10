@@ -5,46 +5,173 @@
     <title>Panel MasterBI · Tag Spool</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
 
     <style>
-      :root { --bymac-primary: #1a2b48; --bymac-bg: #f5f7fb; }
-      body { font-family: system-ui, sans-serif; font-size: 14px; padding: 8px; background-color: var(--bymac-bg); }
-      .tab { font-weight: 600; color: #1a2b48; }
-      @media (min-width: 768px) { body { padding: 16px; } }
-      .card { border-radius: 10px; border: 1px solid #e1e4ee; }
-      .tag-seleccionado { font-weight: bold; color: #0b5394; }
-      
+      :root {
+        --bymac-primary: #1a2b48;
+        --bymac-bg: #f5f7fb;
+      }
+      body {
+        font-family: system-ui, sans-serif;
+        font-size: 14px;
+        padding: 8px;
+        background-color: var(--bymac-bg);
+      }
+      .tab {
+        font-weight: 600;
+        color: #1a2b48;
+      }
+      @media (min-width: 768px) {
+        body {
+          padding: 16px;
+        }
+      }
+      .card {
+        border-radius: 10px;
+        border: 1px solid #e1e4ee;
+      }
+      .tag-seleccionado {
+        font-weight: bold;
+        color: #0b5394;
+      }
+
       /* KPI BOXES */
-      .kpi-box { padding: 12px; border-radius: 8px; background: #fff; border: 1px solid #e1e4ee; text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: center; }
-      .kpi-title { font-size: 13px; color: #666; font-weight: 600; margin-bottom: 4px; }
-      .kpi-value { font-size: 24px; font-weight: 800; }
-      .kpi-green { color: #2ea043; } .kpi-blue { color: #1a2b48; } .kpi-yellow { color: #b58900; } .kpi-red { color: #d93025; } .kpi-muted { color: #888; } .text-info { color: #0dcaf0; }
+      .kpi-box {
+        padding: 12px;
+        border-radius: 8px;
+        background: #fff;
+        border: 1px solid #e1e4ee;
+        text-align: center;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .kpi-title {
+        font-size: 13px;
+        color: #666;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      .kpi-value {
+        font-size: 24px;
+        font-weight: 800;
+      }
+      .kpi-green {
+        color: #2ea043;
+      }
+      .kpi-blue {
+        color: #1a2b48;
+      }
+      .kpi-yellow {
+        color: #b58900;
+      }
+      .kpi-red {
+        color: #d93025;
+      }
+      .kpi-muted {
+        color: #888;
+      }
+      .text-info {
+        color: #0dcaf0;
+      }
 
       /* FICHA TÉCNICA Y TIMELINE */
-      .ficha-header { background-color: #1a2b48; color: white; padding: 10px 15px; border-radius: 8px 8px 0 0; }
-      .ficha-body { background-color: white; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 8px 8px; padding: 20px; }
-      .ficha-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6c757d; margin-bottom: 2px; }
-      .ficha-value { font-size: 1.1rem; font-weight: 600; color: #212529; margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 5px; }
+      .ficha-header {
+        background-color: #1a2b48;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 8px 8px 0 0;
+      }
+      .ficha-body {
+        background-color: white;
+        border: 1px solid #dee2e6;
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        padding: 20px;
+      }
+      .ficha-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        margin-bottom: 2px;
+      }
+      .ficha-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #f0f0f0;
+        padding-bottom: 5px;
+      }
 
       /* TIMELINE STYLES */
-      .timeline { position: relative; padding-left: 20px; border-left: 2px solid #e9ecef; margin-top: 10px; }
-      .timeline-item { position: relative; margin-bottom: 15px; }
-      .timeline-dot { position: absolute; left: -26px; top: 0; width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 3px solid #1a2b48; }
-      .timeline-date { font-size: 0.75rem; color: #6c757d; font-weight: 600; }
-      .timeline-content { font-size: 0.9rem; font-weight: bold; color: #212529; }
-      .timeline-empty { font-style: italic; color: #adb5bd; font-size: 0.9rem; padding-left: 10px; }
+      .timeline {
+        position: relative;
+        padding-left: 20px;
+        border-left: 2px solid #e9ecef;
+        margin-top: 10px;
+      }
+      .timeline-item {
+        position: relative;
+        margin-bottom: 15px;
+      }
+      .timeline-dot {
+        position: absolute;
+        left: -26px;
+        top: 0;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #fff;
+        border: 3px solid #1a2b48;
+      }
+      .timeline-date {
+        font-size: 0.75rem;
+        color: #6c757d;
+        font-weight: 600;
+      }
+      .timeline-content {
+        font-size: 0.9rem;
+        font-weight: bold;
+        color: #212529;
+      }
+      .timeline-empty {
+        font-style: italic;
+        color: #adb5bd;
+        font-size: 0.9rem;
+        padding-left: 10px;
+      }
     </style>
   </head>
 
   <body class="d-flex flex-column min-vh-100">
     <main class="container-fluid px-1 px-sm-2 flex-grow-1">
-      
-      <div class="card mb-3 shadow-sm" style="background: linear-gradient(90deg, #a0c0f6, #3c475a); color: white;">
-        <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-center py-2">
+      <div
+        class="card mb-3 shadow-sm"
+        style="
+          background: linear-gradient(90deg, #a0c0f6, #3c475a);
+          color: white;
+        "
+      >
+        <div
+          class="card-body d-flex flex-column flex-md-row justify-content-between align-items-center py-2"
+        >
           <h1 class="m-0 fs-4">
-            <img src="https://bymac-si.github.io/img/logo_imma.png" alt="IMMA" style="width: 80px; margin-right: 10px" />Soluciones en Piping
+            <img
+              src="https://bymac-si.github.io/img/logo_imma.png"
+              alt="IMMA"
+              style="width: 80px; margin-right: 10px"
+            />Soluciones en Piping
           </h1>
           <div class="text-end small fs-5">Panel MasterBI Fluor</div>
         </div>
@@ -52,62 +179,170 @@
 
       <div class="card shadow-sm">
         <ul class="nav nav-tabs mb-3" id="tabsPanel" role="tablist">
-          <li class="nav-item"><button class="nav-link active tab" data-bs-toggle="tab" data-bs-target="#tab-ficha"><i class="bi bi-file-earmark-medical"></i> Ficha Técnica</button></li>
-          <li class="nav-item"><button class="nav-link tab" data-bs-toggle="tab" data-bs-target="#tab-fechas"><i class="bi bi-pencil-square"></i> Gestión/Cambios</button></li>
-          <li class="nav-item"><button class="nav-link tab" data-bs-toggle="tab" data-bs-target="#tab-dashboard" onclick="cargarDashboardLocal()"><i class="bi bi-bar-chart-line"></i> Dashboard KPI</button></li>
-          <li class="nav-item"><button class="nav-link text-danger fw-bold" data-bs-toggle="tab" data-bs-target="#tab-criticos" onclick="cargarTagsCriticos()"><i class="bi bi-exclamation-triangle-fill"></i> Alerta 61+</button></li>
+          <li class="nav-item">
+            <button
+              class="nav-link active tab"
+              data-bs-toggle="tab"
+              data-bs-target="#tab-ficha"
+            >
+              <i class="bi bi-file-earmark-medical"></i> Ficha Técnica
+            </button>
+          </li>
+          <li class="nav-item">
+            <button
+              class="nav-link tab"
+              data-bs-toggle="tab"
+              data-bs-target="#tab-fechas"
+            >
+              <i class="bi bi-pencil-square"></i> Gestión/Cambios
+            </button>
+          </li>
+          <li class="nav-item">
+            <button
+              class="nav-link tab"
+              data-bs-toggle="tab"
+              data-bs-target="#tab-dashboard"
+              onclick="cargarDashboardLocal()"
+            >
+              <i class="bi bi-bar-chart-line"></i> Dashboard KPI
+            </button>
+          </li>
+          <li class="nav-item">
+            <button
+              class="nav-link text-danger fw-bold"
+              data-bs-toggle="tab"
+              data-bs-target="#tab-criticos"
+              onclick="cargarTagsCriticos()"
+            >
+              <i class="bi bi-exclamation-triangle-fill"></i> Alerta 61+
+            </button>
+          </li>
         </ul>
 
         <div class="tab-content p-3">
-          
           <div class="tab-pane fade show active" id="tab-ficha">
             <div class="row justify-content-center mb-4">
               <div class="col-12 col-md-8 col-lg-6">
                 <div class="input-group input-group-lg shadow-sm">
-                  <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                  <input type="text" id="txtBuscarFicha" class="form-control" placeholder="Ingrese TAG Spool..." onkeyup="if(event.key==='Enter') buscarTagsFicha()" />
-                  <button class="btn btn-primary" onclick="buscarTagsFicha()">Consultar</button>
+                  <span class="input-group-text bg-white"
+                    ><i class="bi bi-search"></i
+                  ></span>
+                  <input
+                    type="text"
+                    id="txtBuscarFicha"
+                    class="form-control"
+                    placeholder="Ingrese TAG Spool..."
+                    onkeyup="if(event.key==='Enter') buscarTagsFicha()"
+                  />
+                  <button class="btn btn-primary" onclick="buscarTagsFicha()">
+                    Consultar
+                  </button>
                 </div>
-                <div id="resFicha" class="list-group mt-2 shadow-sm" style="position: absolute; z-index: 1000; width: inherit; display: none;"></div>
+                <div
+                  id="resFicha"
+                  class="list-group mt-2 shadow-sm"
+                  style="
+                    position: absolute;
+                    z-index: 1000;
+                    width: inherit;
+                    display: none;
+                  "
+                ></div>
               </div>
             </div>
 
-            <div id="contenedorFicha" class="d-none animate__animated animate__fadeIn">
+            <div
+              id="contenedorFicha"
+              class="d-none animate__animated animate__fadeIn"
+            >
               <div class="row g-0 align-items-stretch">
-                <div class="col-12 col-lg-4 pe-lg-3 mb-3 mb-lg-0 d-flex flex-column">
-                  <div class="ficha-header flex-shrink-0"><h5 class="m-0"><i class="bi bi-info-circle"></i> Detalles del Spool</h5></div>
+                <div
+                  class="col-12 col-lg-4 pe-lg-3 mb-3 mb-lg-0 d-flex flex-column"
+                >
+                  <div class="ficha-header flex-shrink-0">
+                    <h5 class="m-0">
+                      <i class="bi bi-info-circle"></i> Detalles del Spool
+                    </h5>
+                  </div>
                   <div class="ficha-body h-100 d-flex flex-column">
                     <div class="flex-shrink-0">
-                        <div class="mb-4 text-center">
-                          <h2 id="ficha-tag" class="text-primary fw-bold mb-0">-</h2>
-                          <span id="ficha-status-badge" class="badge bg-secondary mt-2">...</span>
+                      <div class="mb-4 text-center">
+                        <h2 id="ficha-tag" class="text-primary fw-bold mb-0">
+                          -
+                        </h2>
+                        <span
+                          id="ficha-status-badge"
+                          class="badge bg-secondary mt-2"
+                          >...</span
+                        >
+                      </div>
+                      <div class="row">
+                        <div class="col-6">
+                          <div class="ficha-label">Status Spool</div>
+                          <div
+                            id="ficha-estado-texto"
+                            class="ficha-value small"
+                          >
+                            -
+                          </div>
                         </div>
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="ficha-label">Status Spool</div>
-                                <div id="ficha-estado-texto" class="ficha-value small">-</div>
-                            </div>
-                            <div class="col-6">
-                                <div class="ficha-label">Status Fluor</div>
-                                <div id="ficha-fluor" class="ficha-value small text-info">-</div>
-                            </div>
+                        <div class="col-6">
+                          <div class="ficha-label">Status Fluor</div>
+                          <div
+                            id="ficha-fluor"
+                            class="ficha-value small text-info"
+                          >
+                            -
+                          </div>
                         </div>
-                        <div class="ficha-label mt-2 border-bottom pb-1 mb-2">Línea de Tiempo (Histórico)</div>
+                      </div>
+                      <div class="ficha-label mt-2 border-bottom pb-1 mb-2">
+                        Línea de Tiempo (Histórico)
+                      </div>
                     </div>
-                    <div id="timeline-ficha" class="flex-grow-1" style="overflow-y: auto; min-height: 0;"></div>
+                    <div
+                      id="timeline-ficha"
+                      class="flex-grow-1"
+                      style="overflow-y: auto; min-height: 0"
+                    ></div>
                   </div>
                 </div>
                 <div class="col-12 col-lg-8 d-flex flex-column">
-                  <div class="ficha-header d-flex justify-content-between align-items-center flex-shrink-0">
-                    <h5 class="m-0"><i class="bi bi-file-earmark-pdf"></i> Plano</h5>
-                    <a id="ficha-btn-abrir" href="#" target="_blank" class="btn btn-sm btn-outline-light d-none"><i class="bi bi-box-arrow-up-right"></i> Expandir</a>
+                  <div
+                    class="ficha-header d-flex justify-content-between align-items-center flex-shrink-0"
+                  >
+                    <h5 class="m-0">
+                      <i class="bi bi-file-earmark-pdf"></i> Plano
+                    </h5>
+                    <a
+                      id="ficha-btn-abrir"
+                      href="#"
+                      target="_blank"
+                      class="btn btn-sm btn-outline-light d-none"
+                      ><i class="bi bi-box-arrow-up-right"></i> Expandir</a
+                    >
                   </div>
-                  <div class="ficha-body p-0 position-relative" style="height: 600px;">
-                    <div id="ficha-plano-loading" class="d-flex flex-column justify-content-center align-items-center h-100 text-muted" style="position: absolute; width: 100%;">
-                        <div class="spinner-border text-primary d-none" id="spinner-plano" role="status"></div>
-                        <span id="msg-plano-load">Seleccione un TAG</span>
+                  <div
+                    class="ficha-body p-0 position-relative"
+                    style="height: 600px"
+                  >
+                    <div
+                      id="ficha-plano-loading"
+                      class="d-flex flex-column justify-content-center align-items-center h-100 text-muted"
+                      style="position: absolute; width: 100%"
+                    >
+                      <div
+                        class="spinner-border text-primary d-none"
+                        id="spinner-plano"
+                        role="status"
+                      ></div>
+                      <span id="msg-plano-load">Seleccione un TAG</span>
                     </div>
-                    <iframe id="ficha-iframe" class="w-100 h-100 d-none" style="border: none"></iframe>
+                    <iframe
+                      id="ficha-iframe"
+                      class="w-100 h-100 d-none"
+                      style="border: none"
+                    ></iframe>
                   </div>
                 </div>
               </div>
@@ -115,197 +350,377 @@
           </div>
 
           <div class="tab-pane fade" id="tab-fechas">
-             <div class="row g-3 mb-3">
-               <div class="col-12">
-                 <div class="card shadow-sm p-3">
-                   <h5 class="card-title">Buscar para Editar</h5>
-                   <div class="input-group input-group-sm">
-                     <input type="text" id="txtBuscarEdit" class="form-control" placeholder="Ej: 29044-005" onkeyup="if(event.key==='Enter') buscarTagsEdit()" />
-                     <button class="btn btn-secondary" onclick="buscarTagsEdit()" id="btnBuscarEdit">Buscar</button>
-                   </div>
-                   <div id="resEdit" class="list-group mt-2" style="max-height: 200px; overflow: auto; display:none;"></div>
-                 </div>
-               </div>
-             </div>
+            <div class="row g-3 mb-3">
+              <div class="col-12">
+                <div class="card shadow-sm p-3">
+                  <h5 class="card-title">Buscar para Editar</h5>
+                  <div class="input-group input-group-sm">
+                    <input
+                      type="text"
+                      id="txtBuscarEdit"
+                      class="form-control"
+                      placeholder="Ej: 29044-005"
+                      onkeyup="if(event.key==='Enter') buscarTagsEdit()"
+                    />
+                    <button
+                      class="btn btn-secondary"
+                      onclick="buscarTagsEdit()"
+                      id="btnBuscarEdit"
+                    >
+                      Buscar
+                    </button>
+                  </div>
+                  <div
+                    id="resEdit"
+                    class="list-group mt-2"
+                    style="max-height: 200px; overflow: auto; display: none"
+                  ></div>
+                </div>
+              </div>
+            </div>
 
-             <div class="row g-3 align-items-stretch" style="min-height: 600px;">
-               <div class="col-12 col-lg-4 d-flex flex-column gap-3">
-                 <div class="card shadow-sm mb-0 p-3 flex-shrink-0">
-                   <h5 class="card-title">Spool Seleccionado</h5>
-                   <p class="mb-1 fw-bold fs-5 text-primary" id="lblTagSel">-</p>
-                   <div class="row g-2 mb-2">
-                       <div class="col-6">
-                           <small class="text-muted d-block">Status Spool</small>
-                           <span id="lblEstadoEdit" class="fw-bold small">-</span>
-                       </div>
-                       <div class="col-6">
-                           <small class="text-muted d-block">Status Fluor</small>
-                           <span id="lblFluorEdit" class="fw-bold small text-info">-</span>
-                       </div>
-                   </div>
-                   <div class="alert alert-light border p-2 mb-0">
-                       <small class="text-muted d-block">Último Movimiento Detectado:</small>
-                       <span id="lblUltimoMovEdit" class="fw-bold">-</span>
-                   </div>
-                 </div>
-
-                 <div class="card shadow-sm p-3 mb-0 flex-shrink-0">
-                   <h5 class="card-title">Registrar Movimiento</h5>
-                   <label class="small text-muted">Etapa a actualizar:</label>
-                   <select id="cmbEtapa" class="form-select form-select-sm mb-2">
-                      <option value="">Cargando columnas...</option>
-                   </select>
-                   <label class="small text-muted">Fecha del evento:</label>
-                   <input type="date" id="dtFecha" class="form-control form-control-sm mb-2" />
-                   <div class="d-flex gap-2">
-                     <button class="btn btn-secondary btn-sm" onclick="setHoy()">Hoy</button>
-                     <button class="btn btn-primary btn-sm w-100" id="btnGuardar" onclick="guardarCambios()">Guardar </button>
-                   </div>
-                   <div id="msgGuardar" class="mt-2 small fw-bold"></div>
-                 </div>
-
-                 <div class="card shadow-sm p-3 flex-grow-1 d-flex flex-column" style="min-height: 200px;">
-                     <h6 class="card-title border-bottom pb-2">Historial</h6>
-                     <div id="timeline-edit" class="flex-grow-1" style="overflow-y: auto;">
-                         <small class="text-muted fst-italic">Seleccione un TAG</small>
-                     </div>
-                 </div>
-               </div>
-               
-               <div class="col-12 col-lg-8">
-                    <div class="card h-100 shadow-sm d-flex flex-column">
-                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                            <h6 class="m-0"><i class="bi bi-file-earmark-pdf"></i> Referencia Plano</h6>
-                            <a id="edit-btn-abrir" href="#" target="_blank" class="btn btn-sm btn-outline-primary d-none"><i class="bi bi-box-arrow-up-right"></i></a>
-                        </div>
-                        <div class="card-body p-0 bg-light position-relative flex-grow-1">
-                             <div id="edit-plano-loading" class="d-flex flex-column justify-content-center align-items-center h-100 text-muted" style="position:absolute; width:100%; height: 100%;">
-                                <div class="spinner-border text-primary d-none" id="edit-spinner-plano" role="status"></div>
-                                <span id="edit-msg-plano">Sin plano cargado</span>
-                            </div>
-                            <iframe id="edit-iframe" class="w-100 h-100 d-none" style="border: none;"></iframe>
-                        </div>
+            <div class="row g-3 align-items-stretch" style="min-height: 600px">
+              <div class="col-12 col-lg-4 d-flex flex-column gap-3">
+                <div class="card shadow-sm mb-0 p-3 flex-shrink-0">
+                  <h5 class="card-title">Spool Seleccionado</h5>
+                  <p class="mb-1 fw-bold fs-5 text-primary" id="lblTagSel">-</p>
+                  <div class="row g-2 mb-2">
+                    <div class="col-6">
+                      <small class="text-muted d-block">Status Spool</small
+                      ><span id="lblEstadoEdit" class="fw-bold small">-</span>
                     </div>
-               </div>
-             </div>
+                    <div class="col-6">
+                      <small class="text-muted d-block">Status Fluor</small
+                      ><span id="lblFluorEdit" class="fw-bold small text-info"
+                        >-</span
+                      >
+                    </div>
+                  </div>
+                  <div class="alert alert-light border p-2 mb-0">
+                    <small class="text-muted d-block"
+                      >Último Movimiento Detectado:</small
+                    >
+                    <span id="lblUltimoMovEdit" class="fw-bold">-</span>
+                  </div>
+                </div>
+
+                <div class="card shadow-sm p-3 mb-0 flex-shrink-0">
+                  <h5 class="card-title">Registrar Movimiento</h5>
+                  <label class="small text-muted">Etapa a actualizar:</label>
+                  <select id="cmbEtapa" class="form-select form-select-sm mb-2">
+                    <option value="">Cargando columnas...</option>
+                  </select>
+                  <label class="small text-muted">Fecha del evento:</label>
+                  <input
+                    type="date"
+                    id="dtFecha"
+                    class="form-control form-control-sm mb-2"
+                  />
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-secondary btn-sm" onclick="setHoy()">
+                      Hoy
+                    </button>
+                    <button
+                      class="btn btn-primary btn-sm w-100"
+                      id="btnGuardar"
+                      onclick="guardarCambios()"
+                    >
+                      Guardar
+                    </button>
+                  </div>
+                  <div id="msgGuardar" class="mt-2 small fw-bold"></div>
+                </div>
+
+                <div
+                  class="card shadow-sm p-3 flex-grow-1 d-flex flex-column"
+                  style="min-height: 200px"
+                >
+                  <h6 class="card-title border-bottom pb-2">Historial</h6>
+                  <div
+                    id="timeline-edit"
+                    class="flex-grow-1"
+                    style="overflow-y: auto"
+                  >
+                    <small class="text-muted fst-italic"
+                      >Seleccione un TAG</small
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-lg-8">
+                <div class="card h-100 shadow-sm d-flex flex-column">
+                  <div
+                    class="card-header bg-white d-flex justify-content-between align-items-center"
+                  >
+                    <h6 class="m-0">
+                      <i class="bi bi-file-earmark-pdf"></i> Referencia Plano
+                    </h6>
+                    <a
+                      id="edit-btn-abrir"
+                      href="#"
+                      target="_blank"
+                      class="btn btn-sm btn-outline-primary d-none"
+                      ><i class="bi bi-box-arrow-up-right"></i
+                    ></a>
+                  </div>
+                  <div
+                    class="card-body p-0 bg-light position-relative flex-grow-1"
+                  >
+                    <div
+                      id="edit-plano-loading"
+                      class="d-flex flex-column justify-content-center align-items-center h-100 text-muted"
+                      style="position: absolute; width: 100%; height: 100%"
+                    >
+                      <div
+                        class="spinner-border text-primary d-none"
+                        id="edit-spinner-plano"
+                        role="status"
+                      ></div>
+                      <span id="edit-msg-plano">Sin plano cargado</span>
+                    </div>
+                    <iframe
+                      id="edit-iframe"
+                      class="w-100 h-100 d-none"
+                      style="border: none"
+                    ></iframe>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="tab-pane fade" id="tab-dashboard">
-             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0">Indicadores de Gestión <span id="dash-time" class="badge bg-light text-dark fw-normal border ms-2"><i class="bi bi-clock"></i>--:--</span></h5>
-                <div>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="exportKpi('pdf')">PDF</button>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="exportKpi('jpg')">JPG</button>
-                    <button class="btn btn-sm btn-outline-primary ms-2" onclick="cargarDashboardLocal(true)"><i class="bi bi-arrow-clockwise"></i></button>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="mb-0">
+                Indicadores de Gestión
+                <span
+                  id="dash-time"
+                  class="badge bg-light text-dark fw-normal border ms-2"
+                  >--:--</span
+                >
+              </h5>
+              <div>
+                <button
+                  class="btn btn-sm btn-outline-secondary"
+                  onclick="exportKpi('pdf')"
+                >
+                  PDF
+                </button>
+                <button
+                  class="btn btn-sm btn-outline-secondary"
+                  onclick="exportKpi('jpg')"
+                >
+                  JPG
+                </button>
+                <button
+                  class="btn btn-sm btn-outline-primary ms-2"
+                  onclick="cargarDashboardLocal(true)"
+                >
+                  <i class="bi bi-arrow-clockwise"></i>
+                </button>
+              </div>
+            </div>
+
+            <div id="loading-dashboard" class="text-center py-5">
+              <div class="spinner-border text-primary" role="status"></div>
+              <div class="mt-2 text-muted">Sincronizando con AppSheet...</div>
+            </div>
+
+            <div id="content-dashboard" class="d-none">
+              <div class="row g-2 mb-3">
+                <div class="col-6 col-md-3">
+                  <div class="kpi-box">
+                    <div class="kpi-title">Total Spools</div>
+                    <div id="kpi-total" class="kpi-value">-</div>
+                  </div>
                 </div>
-             </div>
-             
-             <div id="loading-dashboard" class="text-center py-5">
-                <div class="spinner-border text-primary" role="status"></div>
-                <div class="mt-2 text-muted">Sincronizando con BBDD...</div>
-             </div>
+                <div class="col-6 col-md-3">
+                  <div class="kpi-box">
+                    <div class="kpi-title">Activos</div>
+                    <div id="kpi-activos" class="kpi-value kpi-blue">-</div>
+                  </div>
+                </div>
+                <div class="col-6 col-md-3">
+                  <div class="kpi-box">
+                    <div class="kpi-title">Liberados</div>
+                    <div id="kpi-lib" class="kpi-value text-info">-</div>
+                  </div>
+                </div>
+                <div class="col-6 col-md-3">
+                  <div class="kpi-box">
+                    <div class="kpi-title">Despachados</div>
+                    <div id="kpi-desp" class="kpi-value kpi-green">-</div>
+                  </div>
+                </div>
+                <div class="col-6 col-md-3">
+                  <div class="kpi-box">
+                    <div class="kpi-title">0-30 días</div>
+                    <div id="kpi-proceso" class="kpi-value kpi-blue">-</div>
+                  </div>
+                </div>
+                <div class="col-6 col-md-3">
+                  <div class="kpi-box">
+                    <div class="kpi-title">31-60 días</div>
+                    <div id="kpi-pend" class="kpi-value kpi-yellow">-</div>
+                  </div>
+                </div>
+                <div class="col-6 col-md-3">
+                  <div class="kpi-box">
+                    <div class="kpi-title">61+ días</div>
+                    <div id="kpi-atr" class="kpi-value kpi-red">-</div>
+                  </div>
+                </div>
+                <div class="col-6 col-md-3">
+                  <div class="kpi-box bg-light">
+                    <div class="kpi-title">Eliminados/Ref/Mod</div>
+                    <div id="kpi-elim" class="kpi-value kpi-muted">-</div>
+                  </div>
+                </div>
+              </div>
 
-             <div id="content-dashboard" class="d-none">
-                 <div class="row g-2 mb-3">
-                    <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">Total Spools</div><div id="kpi-total" class="kpi-value">-</div></div></div>
-                    <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">Activos</div><div id="kpi-activos" class="kpi-value kpi-blue">-</div></div></div>
-                    <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">Liberados</div><div id="kpi-lib" class="kpi-value text-info">-</div></div></div>
-                    <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">Despachados</div><div id="kpi-desp" class="kpi-value kpi-green">-</div></div></div>
-                    <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">0-30 días</div><div id="kpi-proceso" class="kpi-value kpi-blue">-</div></div></div>
-                    <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">31-60 días</div><div id="kpi-pend" class="kpi-value kpi-yellow">-</div></div></div>
-                    <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">61+ días</div><div id="kpi-atr" class="kpi-value kpi-red">-</div></div></div>
-                    <div class="col-6 col-md-3"><div class="kpi-box bg-light"><div class="kpi-title">Eliminados/Ref/Mod</div><div id="kpi-elim" class="kpi-value kpi-muted">-</div></div></div>
-                 </div>
+              <div class="row mb-3 g-3">
+                <div class="col-12 col-md-6">
+                  <div class="card p-3 h-100">
+                    <h6>Embudo por proceso</h6>
+                    <div style="height: 150px; position: relative">
+                      <canvas id="chartEmbudo"></canvas>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6">
+                  <div class="card p-3 h-100">
+                    <h6>Días en Proceso</h6>
+                    <div style="height: 150px; position: relative">
+                      <canvas id="chartDiasProceso"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-                 <div class="row mb-3 g-3">
-                    <div class="col-12 col-md-6">
-                        <div class="card p-3 h-100">
-                            <h6>Embudo por proceso</h6>
-                            <div style="height: 150px; position: relative;"><canvas id="chartEmbudo"></canvas></div>
-                        </div>
+              <div class="row mb-3">
+                <div class="col-12">
+                  <div class="card p-3">
+                    <h6>Evolución de Despachos 2025 (MM/YYYY)</h6>
+                    <div style="height: 250px">
+                      <canvas id="chartEvolucion"></canvas>
                     </div>
-                    <div class="col-12 col-md-6">
-                        <div class="card p-3 h-100">
-                            <h6>Días en Proceso</h6>
-                            <div style="height: 150px; position: relative;"><canvas id="chartDiasProceso"></canvas></div>
-                        </div>
-                    </div>
-                 </div>
-                 
-                 <div class="row mb-3">
-                    <div class="col-12">
-                        <div class="card p-3">
-                            <h6>Evolución de Despachos 2025 (MM/YYYY)</h6>
-                            <div style="height: 250px;"><canvas id="chartEvolucion"></canvas></div>
-                        </div>
-                    </div>
-                 </div>
+                  </div>
+                </div>
+              </div>
 
-                 <div class="row mb-3 g-3">
-                     <div class="col-12 col-lg-5">
-                         <div class="card p-3 h-100">
-                             <h6>Distribución Status Fluor</h6>
-                             <div class="table-responsive" style="max-height: 250px;"><table class="table table-sm table-striped small"><tbody id="tbodyFluor"></tbody></table></div>
-                         </div>
-                     </div>
-                     <div class="col-12 col-lg-7">
-                         <div class="card p-3 h-100 d-flex align-items-center justify-content-center">
-                             <div style="width: 300px; height: 300px;"><canvas id="chartFluor"></canvas></div>
-                         </div>
-                     </div>
-                 </div>
+              <div class="row mb-3 g-3">
+                <div class="col-12 col-lg-5">
+                  <div class="card p-3 h-100">
+                    <h6>Distribución Status Fluor</h6>
+                    <div class="table-responsive" style="max-height: 250px">
+                      <table class="table table-sm table-striped small">
+                        <tbody id="tbodyFluor"></tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-lg-7">
+                  <div
+                    class="card p-3 h-100 d-flex align-items-center justify-content-center"
+                  >
+                    <div style="width: 300px; height: 300px">
+                      <canvas id="chartFluor"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-                 <div class="row mb-3 g-3">
-                    <div class="col-12 col-lg-6">
-                        <div class="card p-3 h-100">
-                            <div class="d-flex justify-content-between">
-                                <h6>Registrados Hoy</h6>
-                                <span class="badge bg-success" id="count-logs">0 registros</span>
-                            </div>
-                            <div class="table-responsive mb-2">
-                                <table class="table table-sm small"><thead><tr><th>Etapa</th><th class="text-center text-primary">Cantidad</th></tr></thead><tbody id="tbodyLogHoy"></tbody></table>
-                            </div>
-                            <div style="height: 200px; position: relative;"><canvas id="chartLogHoy"></canvas></div>
-                        </div>
+              <div class="row mb-3 g-3">
+                <div class="col-12 col-lg-6">
+                  <div class="card p-3 h-100">
+                    <div class="d-flex justify-content-between">
+                      <h6>Registrados Hoy</h6>
+                      <span class="badge bg-success" id="count-logs"
+                        >0 registros</span
+                      >
                     </div>
-                    <div class="col-12 col-lg-6">
-                        <div class="card p-3 h-100">
-                            <h6>Estatus por Última Etapa (Activos)</h6>
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="table-responsive"><table class="table table-sm table-hover small"><tbody id="tbodyUltimaEtapa"></tbody></table></div>
-                                </div>
-                                <div class="col-6 d-flex align-items-center"><canvas id="chartUltimaEtapa"></canvas></div>
-                            </div>
-                        </div>
+                    <div class="table-responsive mb-2">
+                      <table class="table table-sm small">
+                        <thead>
+                          <tr>
+                            <th>Etapa</th>
+                            <th class="text-center text-primary">Cantidad</th>
+                          </tr>
+                        </thead>
+                        <tbody id="tbodyLogHoy"></tbody>
+                      </table>
                     </div>
-                 </div>
+                    <div style="height: 200px; position: relative">
+                      <canvas id="chartLogHoy"></canvas>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-lg-6">
+                  <div class="card p-3 h-100">
+                    <h6>Estatus por Última Etapa (Activos)</h6>
+                    <div class="row">
+                      <div class="col-6">
+                        <div class="table-responsive">
+                          <table class="table table-sm table-hover small">
+                            <tbody id="tbodyUltimaEtapa"></tbody>
+                          </table>
+                        </div>
+                      </div>
+                      <div class="col-6 d-flex align-items-center">
+                        <canvas id="chartUltimaEtapa"></canvas>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-                 <div class="row mb-3">
-                    <div class="col-12">
-                        <div class="card p-3">
-                            <h6>Tiempos promedio</h6>
-                            <div class="table-responsive">
-                                <table class="table table-sm table-striped small text-center align-middle"><thead class="table-light"><tr><th>Desde</th><th>Hasta</th><th>Promedio (Días)</th><th>Casos</th></tr></thead><tbody id="tbodyTiempos"></tbody></table>
-                            </div>
-                        </div>
+              <div class="row mb-3">
+                <div class="col-12">
+                  <div class="card p-3">
+                    <h6>Tiempos promedio</h6>
+                    <div class="table-responsive">
+                      <table
+                        class="table table-sm table-striped small text-center align-middle"
+                      >
+                        <thead class="table-light">
+                          <tr>
+                            <th>Desde</th>
+                            <th>Hasta</th>
+                            <th>Promedio (Días)</th>
+                            <th>Casos</th>
+                          </tr>
+                        </thead>
+                        <tbody id="tbodyTiempos"></tbody>
+                      </table>
                     </div>
-                 </div>
-             </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="tab-pane fade" id="tab-criticos">
-              <div class="card p-3 border-danger shadow-sm">
-                  <h5 class="text-danger fw-bold"><i class="bi bi-alarm"></i> Tags con más de 60 días sin movimiento</h5>
-                  <div class="table-responsive mt-3">
-                      <table class="table table-hover align-middle">
-                          <thead class="table-light"><tr><th>TAG</th><th>Días</th><th>Etapa</th><th>Fecha</th></tr></thead>
-                          <tbody id="tabla-criticos-body"></tbody>
-                      </table>
-                  </div>
+            <div class="card p-3 border-danger shadow-sm">
+              <h5 class="text-danger fw-bold">
+                <i class="bi bi-alarm"></i> Tags con más de 60 días sin
+                movimiento
+              </h5>
+              <div class="table-responsive mt-3">
+                <table class="table table-hover align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>TAG</th>
+                      <th>Días</th>
+                      <th>Etapa</th>
+                      <th>Fecha</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tabla-criticos-body"></tbody>
+                </table>
               </div>
+            </div>
           </div>
-
         </div>
       </div>
     </main>
@@ -316,27 +731,34 @@
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-   <script>
-    const APP_ID = "59c4aa7f-9e37-4e66-af20-52250f9c4c07";
-    const APP_KEY = "V2-157Vx-ltOIu-kTlqv-TYrU7-Gsowd-355md-nWdkC-k7s1N";
-    
-    // TABLAS
-    const TABLE_MASTER = "MasterBI";
-    // *** CAMBIO CRÍTICO: USAR EL SLICE PARA FILTRAR HOY ***
-    const SLICE_LOGS = "Slice_Logs_Hoy"; 
+    <script>
+      const APP_ID = "59c4aa7f-9e37-4e66-af20-52250f9c4c07";
+      const APP_KEY = "V2-157Vx-ltOIu-kTlqv-TYrU7-Gsowd-355md-nWdkC-k7s1N";
 
-    // COLUMNAS
-    const COL_MES_DESPACHO = "Mes Despacho"; 
-    const COL_TAG = "TAG SPOOL";
-    const COL_STATUS = "STATUS SPOOL";
-    const COL_PLANO = "ID_PLANO"; 
-    const COL_FECHA_FIN = "Fecha Terminado"; 
-    const COL_FLUOR = "STATUS FLUOR";
-    const COL_F_ELIMINADO = "F. ELIMINADO";
+      // TABLAS
+      const TABLE_MASTER = "MasterBI";
+      const SLICE_LOGS = "Slice_Logs_Hoy";
 
-    const STATUS_ELIMINADOS = ["ELIMINADO", "ELIMINADO / REFABRICADO", "REFABRICAR"];
+      // COLUMNAS
+      const COL_MES_DESPACHO = "Mes Despacho";
+      const COL_ESTATUS_ELIMINADO = "EstatusEliminado";
 
-    const COL_LETTERS_MAP = {
+      const COL_TAG = "TAG SPOOL";
+      const COL_STATUS = "STATUS SPOOL";
+      const COL_PLANO = "ID_PLANO";
+      const COL_FECHA_FIN = "Fecha Terminado";
+      const COL_FLUOR = "STATUS FLUOR";
+      const COL_FECHA_TRN = "Fecha TRN Cliente";
+      const COL_F_ELIMINADO = "F. ELIMINADO";
+
+      const STATUS_ELIMINADOS = [
+        "ELIMINADO",
+        "ELIMINADO / REFABRICADO",
+        "REFABRICAR",
+      ];
+
+      // >>> MAPA DE COLUMNAS A LETRAS DE EXCEL <<<
+      const COL_LETTERS_MAP = {
         "F.Emision Plano": "S",
         "F.Aprobacion Plano": "T",
         "F. Entrada Taller": "U",
@@ -355,11 +777,10 @@
         "F.Liberado": "AH",
         "F.Despacho": "AI",
         "F. ELIMINADO": "AJ",
-        "F. HOLD": "AK"
-    };
+        "F. HOLD": "AK",
+      };
 
-    const PARES_TIEMPOS = [
-        
+      const PARES_TIEMPOS = [
         { from: "F.Emision Plano", to: "F.Aprobacion Plano" },
         { from: "F.Aprobacion Plano", to: "F. Entrada Taller" },
         { from: "F. Entrada Taller", to: "F.Salida Taller" },
@@ -375,295 +796,476 @@
         { from: "F.Salida Term. Caucho", to: "F.Envio a Pint" },
         { from: "F.Envio a Pint", to: "F.Salida Pintura" },
         { from: "F.Salida Pintura", to: "F.Liberado" },
-        { from: "F.Liberado", to: "F.Despacho" }
-    ];
+        { from: "F.Liberado", to: "F.Despacho" },
+      ];
 
-    const COLUMNAS_FECHAS_ALL = Object.keys(COL_LETTERS_MAP);
+      const COLUMNAS_FECHAS_ALL = Object.keys(COL_LETTERS_MAP);
 
-    let dataCache = []; 
-    let logCache = [];
-    
-    async function callAppSheet(tableName, action, bodyParams = {}) {
+      let dataCache = [];
+      let logCache = [];
+
+      async function callAppSheet(tableName, action, bodyParams = {}) {
         const url = `https://api.appsheet.com/api/v2/apps/${APP_ID}/tables/${tableName}/Action`;
-        const body = { "Action": action, "Properties": { "Locale": "es-CL", "Timezone": "America/Santiago", ...bodyParams.Properties }, ...bodyParams };
-        if(bodyParams.Rows) body.Rows = bodyParams.Rows;
-        if(bodyParams.Selector) body.Properties.Selector = bodyParams.Selector;
+        const body = {
+          Action: action,
+          Properties: {
+            Locale: "es-CL",
+            Timezone: "America/Santiago",
+            ...bodyParams.Properties,
+          },
+          ...bodyParams,
+        };
+        if (bodyParams.Rows) body.Rows = bodyParams.Rows;
+        if (bodyParams.Selector) body.Properties.Selector = bodyParams.Selector;
 
         try {
-            const r = await fetch(url, { method: "POST", headers: { "ApplicationAccessKey": APP_KEY, "Content-Type": "application/json" }, body: JSON.stringify(body) });
-            if (!r.ok) throw new Error("Error API: " + r.status);
-            return await r.json();
-        } catch (e) { console.error("Error AppSheet:", e); return []; }
-    }
+          const r = await fetch(url, {
+            method: "POST",
+            headers: {
+              ApplicationAccessKey: APP_KEY,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+          });
+          if (!r.ok) throw new Error("Error API: " + r.status);
+          return await r.json();
+        } catch (e) {
+          console.error("Error AppSheet:", e);
+          return [];
+        }
+      }
 
-    // --- FUNCIÓN SCL PURA ---
-    function parseDateFlexible(val) {
+      // --- FUNCIÓN SCL PURA INTELIGENTE ---
+      // Detecta si es formato MM/DD (AppSheet) o DD/MM (Latino) basado en los valores
+      function parseDateFlexible(val) {
         if (!val) return null;
-        if (typeof val === 'number') return new Date(1899, 11, 30 + val);
-        
-        let str = String(val).trim();
-        if(str.includes("T")) str = str.split("T")[0];
-        if(str.includes(" ")) str = str.split(" ")[0];
+        if (typeof val === "number") return new Date(1899, 11, 30 + val);
 
-        if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
-            const [y, m, d] = str.split('-').map(Number);
-            return new Date(y, m - 1, d);
+        let str = String(val).trim();
+        if (str.includes("T")) str = str.split("T")[0];
+        if (str.includes(" ")) str = str.split(" ")[0];
+
+        // Separador - o /
+        const parts = str.split(/[\/\-]/);
+        if (parts.length === 3) {
+          let p1 = parseInt(parts[0]);
+          let p2 = parseInt(parts[1]);
+          let p3 = parseInt(parts[2]);
+
+          let year, month, day;
+
+          // Caso ISO (YYYY-MM-DD)
+          if (p1 > 1000) {
+            year = p1;
+            month = p2;
+            day = p3;
+          }
+          // Caso MM/DD/YYYY (Americano de AppSheet)
+          // Si el primer numero es <= 12 y el segundo > 12, es MM/DD
+          else if (p1 <= 12 && p2 > 12) {
+            year = p3;
+            month = p1;
+            day = p2;
+          }
+          // Caso DD/MM/YYYY (Latino)
+          // Si el segundo numero es <= 12 y el primero > 12
+          else if (p1 > 12 && p2 <= 12) {
+            year = p3;
+            month = p2;
+            day = p1;
+          }
+          // Caso Ambiguo (05/06/2025): Asumimos MM/DD porque AppSheet API suele ser US
+          else {
+            year = p3;
+            month = p1;
+            day = p2;
+          }
+
+          return new Date(year, month - 1, day);
         }
-        if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(str)) {
-            const parts = str.split(/[\/\-]/).map(Number);
-            return new Date(parts[2], parts[1] - 1, parts[0]);
-        }
-        
+
         const d = new Date(str);
         return isNaN(d.getTime()) ? null : d;
-    }
+      }
 
-    function isSameDaySCL(d1, d2) {
-        return d1 && d2 &&
-               d1.getDate() === d2.getDate() &&
-               d1.getMonth() === d2.getMonth() &&
-               d1.getFullYear() === d2.getFullYear();
-    }
-    
-    // Función auxiliar para determinar si un Tag está eliminado
-    function esTagEliminado(row) {
-      if (parseDateFlexible(row[COL_F_ELIMINADO])) return true;
-      const stFluor = String(row[COL_FLUOR] || '').trim().toUpperCase();
-      const stSpool = String(row[COL_STATUS] || '').trim().toUpperCase();
-      if (STATUS_ELIMINADOS.some(e => stFluor.includes(e) || stSpool.includes(e))) return true;
-      return false;
-    }
+      function formatDateManual(date) {
+        if (!date) return "-";
+        const d = String(date.getDate()).padStart(2, "0");
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const y = date.getFullYear();
+        return `${d}-${m}-${y}`;
+      }
 
-    function diffDays(d1Val, d2Val) {
+      function isSameDaySCL(d1, d2) {
+        return (
+          d1 &&
+          d2 &&
+          d1.getDate() === d2.getDate() &&
+          d1.getMonth() === d2.getMonth() &&
+          d1.getFullYear() === d2.getFullYear()
+        );
+      }
+
+      // LOGICA ELIMINADOS (Replicada de GS)
+      function esTagEliminado(row) {
+        if (parseDateFlexible(row[COL_F_ELIMINADO])) return true;
+        const stFluor = String(row[COL_FLUOR] || "")
+          .trim()
+          .toUpperCase();
+        const stSpool = String(row[COL_STATUS] || "")
+          .trim()
+          .toUpperCase();
+        if (
+          STATUS_ELIMINADOS.some(
+            (e) => stFluor.includes(e) || stSpool.includes(e)
+          )
+        )
+          return true;
+        return false;
+      }
+
+      function diffDays(d1Val, d2Val) {
         const d1 = parseDateFlexible(d1Val);
         const d2 = parseDateFlexible(d2Val);
-        if(!d1 || !d2) return null;
+        if (!d1 || !d2) return null;
         return (d2 - d1) / (1000 * 60 * 60 * 24);
-    }
-    
-    function setHoy() {
-        const d = new Date(); 
+      }
+
+      function setHoy() {
+        const d = new Date();
         const y = d.getFullYear();
-        const m = String(d.getMonth()+1).padStart(2,'0');
-        const day = String(d.getDate()).padStart(2,'0');
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
         document.getElementById("dtFecha").value = `${y}-${m}-${day}`;
-    }
-    
-    function llenarComboEtapas() {
+      }
+
+      function llenarComboEtapas() {
         const cmb = document.getElementById("cmbEtapa");
         cmb.innerHTML = '<option value="">-- Seleccione Etapa --</option>';
-        COLUMNAS_FECHAS_ALL.forEach(col => {
-             const opt = document.createElement("option");
-             opt.value = col; opt.text = col;
-             cmb.appendChild(opt);
+        COLUMNAS_FECHAS_ALL.forEach((col) => {
+          const opt = document.createElement("option");
+          opt.value = col;
+          opt.text = col;
+          cmb.appendChild(opt);
         });
-    }
-    
-    function renderTimeline(row, containerId) {
+      }
+
+      function renderTimeline(row, containerId) {
         const container = document.getElementById(containerId);
         container.innerHTML = "";
         let events = [];
-        COLUMNAS_FECHAS_ALL.forEach(col => {
-            const val = row[col];
-            const d = parseDateFlexible(val);
-            if(d) events.push({ date: d, name: col });
+        COLUMNAS_FECHAS_ALL.forEach((col) => {
+          const val = row[col];
+          const d = parseDateFlexible(val);
+          if (d) events.push({ date: d, name: col });
         });
-        events.sort((a,b) => a.date - b.date);
-        
-        if(events.length === 0) {
-            container.innerHTML = '<div class="timeline-empty">Sin movimientos registrados.</div>';
-            return null;
+        events.sort((a, b) => a.date - b.date);
+
+        if (events.length === 0) {
+          container.innerHTML =
+            '<div class="timeline-empty">Sin movimientos registrados.</div>';
+          return null;
         }
         let html = '<div class="timeline">';
-        events.forEach(ev => {
-            const dateStr = ev.date.toLocaleDateString("es-CL");
-            html += `<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-date">${dateStr}</div><div class="timeline-content">${ev.name}</div></div>`;
+        events.forEach((ev) => {
+          const dateStr = formatDateManual(ev.date); // Visulización correcta
+          html += `<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-date">${dateStr}</div><div class="timeline-content">${ev.name}</div></div>`;
         });
-        html += '</div>';
+        html += "</div>";
         container.innerHTML = html;
         return events[events.length - 1];
-    }
+      }
 
-    document.addEventListener("DOMContentLoaded", () => {
+      document.addEventListener("DOMContentLoaded", () => {
         setHoy();
         llenarComboEtapas();
-        if (typeof ChartDataLabels !== "undefined") Chart.register(ChartDataLabels);
+        if (typeof ChartDataLabels !== "undefined")
+          Chart.register(ChartDataLabels);
         startAutoRefresh();
-    });
+      });
 
-    function startAutoRefresh() {
+      function startAutoRefresh() {
         setInterval(() => {
-          if (document.querySelector("#tabsPanel button.active").dataset.bsTarget === "#tab-dashboard") {
+          if (
+            document.querySelector("#tabsPanel button.active").dataset
+              .bsTarget === "#tab-dashboard"
+          ) {
             cargarDashboardLocal();
           }
         }, 60000);
-    }
+      }
 
-    // --- FICHA Y GESTIÓN ---
-    let resultadosFicha = [], resultadosEditCache = [], rowEdit = null;
-    function buscarTagsFicha() {
-        const txt = document.getElementById("txtBuscarFicha").value.trim().toUpperCase();
-        if(!txt) return;
-        document.getElementById("resFicha").style.display='block';
-        document.getElementById("resFicha").innerHTML='<div class="list-group-item">Buscando...</div>';
-        callAppSheet(TABLE_MASTER, "Find", {Selector: `Filter(${TABLE_MASTER}, CONTAINS([${COL_TAG}], '${txt}'))`}).then(rows => {
-            resultadosFicha = rows;
-            let h='';
-            if(!rows.length) h='<div class="list-group-item text-danger">No encontrado</div>';
-            else rows.slice(0,5).forEach((r,i) => h+=`<a href="#" class="list-group-item list-group-item-action" onclick="verFicha(${i});return false;"><h6 class="mb-0 fw-bold text-primary"><i class="bi bi-tag-fill"></i>${r[COL_TAG]}</h6></a>`);
-            document.getElementById("resFicha").innerHTML=h;
+      // --- FICHA Y GESTIÓN ---
+      let resultadosFicha = [],
+        resultadosEditCache = [],
+        rowEdit = null;
+      function buscarTagsFicha() {
+        const txt = document
+          .getElementById("txtBuscarFicha")
+          .value.trim()
+          .toUpperCase();
+        if (!txt) return;
+        document.getElementById("resFicha").style.display = "block";
+        document.getElementById("resFicha").innerHTML =
+          '<div class="list-group-item">Buscando...</div>';
+        callAppSheet(TABLE_MASTER, "Find", {
+          Selector: `Filter(${TABLE_MASTER}, CONTAINS([${COL_TAG}], '${txt}'))`,
+        }).then((rows) => {
+          resultadosFicha = rows;
+          let h = "";
+          if (!rows.length)
+            h = '<div class="list-group-item text-danger">No encontrado</div>';
+          else
+            rows
+              .slice(0, 5)
+              .forEach(
+                (r, i) =>
+                  (h += `<a href="#" class="list-group-item list-group-item-action" onclick="verFicha(${i});return false;">${r[COL_TAG]}</a>`)
+              );
+          document.getElementById("resFicha").innerHTML = h;
         });
-    }
-    function verFicha(i) {
+      }
+      function verFicha(i) {
         const r = resultadosFicha[i];
-        document.getElementById("resFicha").style.display='none';
+        document.getElementById("resFicha").style.display = "none";
         document.getElementById("contenedorFicha").classList.remove("d-none");
         document.getElementById("ficha-tag").textContent = r[COL_TAG];
-        document.getElementById("ficha-status-badge").textContent = r[COL_STATUS];
-        document.getElementById("ficha-estado-texto").textContent = r[COL_STATUS];
-        document.getElementById("ficha-fluor").textContent = r[COL_FLUOR] || "-";
+        document.getElementById("ficha-status-badge").textContent =
+          r[COL_STATUS];
+        document.getElementById("ficha-estado-texto").textContent =
+          r[COL_STATUS];
+        document.getElementById("ficha-fluor").textContent =
+          r[COL_FLUOR] || "-";
         renderTimeline(r, "timeline-ficha");
-        renderPlano(r[COL_PLANO], "ficha-iframe", "ficha-plano-loading", "ficha-btn-abrir", "spinner-plano", "msg-plano-load");
-    }
-    function buscarTagsEdit() {
-         const txt = document.getElementById("txtBuscarEdit").value.trim().toUpperCase();
-         if(!txt) return;
-         document.getElementById("resEdit").style.display='block';
-         document.getElementById("resEdit").innerHTML='<div class="list-group-item">Buscando...</div>';
-         callAppSheet(TABLE_MASTER, "Find", {Selector: `Filter(${TABLE_MASTER}, CONTAINS([${COL_TAG}], '${txt}'))`}).then(rows => {
-             resultadosEditCache = rows;
-             let h='<div class="list-group">';
-             if(!rows.length) h+='<div class="list-group-item text-danger">No encontrado</div>';
-             else rows.slice(0,5).forEach((r,i) => h+=`<a href="#" class="list-group-item list-group-item-action" onclick="selEditInd(${i}); return false;"><h6 class="mb-0 fw-bold text-primary"><i class="bi bi-tag-fill"></i> ${r[COL_TAG]}</h6></a>`);
-             h+='</div>';
-             document.getElementById("resEdit").innerHTML=h;
-         });
-    }
-    function selEditInd(i) {
+        renderPlano(
+          r[COL_PLANO],
+          "ficha-iframe",
+          "ficha-plano-loading",
+          "ficha-btn-abrir",
+          "spinner-plano",
+          "msg-plano-load"
+        );
+      }
+      function buscarTagsEdit() {
+        const txt = document
+          .getElementById("txtBuscarEdit")
+          .value.trim()
+          .toUpperCase();
+        if (!txt) return;
+        document.getElementById("resEdit").style.display = "block";
+        document.getElementById("resEdit").innerHTML =
+          '<div class="list-group-item">Buscando...</div>';
+        callAppSheet(TABLE_MASTER, "Find", {
+          Selector: `Filter(${TABLE_MASTER}, CONTAINS([${COL_TAG}], '${txt}'))`,
+        }).then((rows) => {
+          resultadosEditCache = rows;
+          let h = '<div class="list-group">';
+          if (!rows.length)
+            h += '<div class="list-group-item text-danger">No encontrado</div>';
+          else
+            rows
+              .slice(0, 5)
+              .forEach(
+                (r, i) =>
+                  (h += `<a href="#" class="list-group-item list-group-item-action" onclick="selEditInd(${i}); return false;">${r[COL_TAG]}</a>`)
+              );
+          h += "</div>";
+          document.getElementById("resEdit").innerHTML = h;
+        });
+      }
+      function selEditInd(i) {
         rowEdit = resultadosEditCache[i];
-        document.getElementById("resEdit").style.display='none';
+        document.getElementById("resEdit").style.display = "none";
         document.getElementById("lblTagSel").textContent = rowEdit[COL_TAG];
-        document.getElementById("lblEstadoEdit").textContent = rowEdit[COL_STATUS];
-        document.getElementById("lblFluorEdit").textContent = rowEdit[COL_FLUOR] || "-";
+        document.getElementById("lblEstadoEdit").textContent =
+          rowEdit[COL_STATUS];
+        document.getElementById("lblFluorEdit").textContent =
+          rowEdit[COL_FLUOR] || "-";
         const lastEvt = renderTimeline(rowEdit, "timeline-edit");
-        if(lastEvt) document.getElementById("lblUltimoMovEdit").innerHTML = `${lastEvt.name} <br> <span class='text-primary'>${lastEvt.date.toLocaleDateString("es-CL")}</span>`;
-        else document.getElementById("lblUltimoMovEdit").textContent = "Sin movimientos";
-        renderPlano(rowEdit[COL_PLANO], "edit-iframe", "edit-plano-loading", "edit-btn-abrir", "edit-spinner-plano", "edit-msg-plano");
+        if (lastEvt)
+          document.getElementById("lblUltimoMovEdit").innerHTML = `${
+            lastEvt.name
+          } <br> <span class='text-primary'>${formatDateManual(
+            lastEvt.date
+          )}</span>`;
+        else
+          document.getElementById("lblUltimoMovEdit").textContent =
+            "Sin movimientos";
+        renderPlano(
+          rowEdit[COL_PLANO],
+          "edit-iframe",
+          "edit-plano-loading",
+          "edit-btn-abrir",
+          "edit-spinner-plano",
+          "edit-msg-plano"
+        );
         document.getElementById("msgGuardar").textContent = "";
-    }
-    function renderPlano(id, ifr, load, btn, spin, msg) {
-        const f = document.getElementById(ifr), l = document.getElementById(load), b = document.getElementById(btn), s = document.getElementById(spin), m = document.getElementById(msg);
-        f.classList.add("d-none"); l.classList.remove("d-none"); b.classList.add("d-none");
-        if(id) { m.textContent="Cargando..."; s.classList.remove("d-none"); f.src=`https://drive.google.com/file/d/${id}/preview`; f.onload=()=>{s.classList.add("d-none"); l.classList.add("d-none"); f.classList.remove("d-none");}; b.href=`https://drive.google.com/file/d/${id}/view`; b.classList.remove("d-none"); }
-        else { m.textContent="Sin plano"; s.classList.add("d-none"); }
-    }
-    async function guardarCambios() {
-        if(!rowEdit) return alert("Seleccione TAG");
+      }
+      function renderPlano(id, ifr, load, btn, spin, msg) {
+        const f = document.getElementById(ifr),
+          l = document.getElementById(load),
+          b = document.getElementById(btn),
+          s = document.getElementById(spin),
+          m = document.getElementById(msg);
+        f.classList.add("d-none");
+        l.classList.remove("d-none");
+        b.classList.add("d-none");
+        if (id) {
+          m.textContent = "Cargando...";
+          s.classList.remove("d-none");
+          f.src = `https://drive.google.com/file/d/${id}/preview`;
+          f.onload = () => {
+            s.classList.add("d-none");
+            l.classList.add("d-none");
+            f.classList.remove("d-none");
+          };
+          b.href = `https://drive.google.com/file/d/${id}/view`;
+          b.classList.remove("d-none");
+        } else {
+          m.textContent = "Sin plano";
+          s.classList.add("d-none");
+        }
+      }
+      async function guardarCambios() {
+        if (!rowEdit) return alert("Seleccione TAG");
         const colNombre = document.getElementById("cmbEtapa").value;
         const fec = document.getElementById("dtFecha").value;
-        if(!colNombre || !fec) return alert("Datos incompletos");
-          // 1. VERIFICAR SI YA EXISTE VALOR Y PEDIR CONFIRMACIÓN
+        if (!colNombre || !fec) return alert("Datos incompletos");
+
         const valorExistente = rowEdit[colNombre];
         if (valorExistente) {
-             const confirmar = confirm(`⚠ ATENCIÓN ⚠\n\nLa etapa "${colNombre}" ya tiene registrado: ${valorExistente}\n\n¿Desea SOBRESCRIBIRLO con la nueva fecha ${fec}?`);
-             if (!confirmar) return; // Si dice Cancelar, salimos de la función
+          const confirmar = confirm(
+            `⚠ ATENCIÓN ⚠\n\nLa etapa "${colNombre}" ya tiene registrado: ${valorExistente}\n\n¿Desea SOBRESCRIBIRLO con la nueva fecha ${fec}?`
+          );
+          if (!confirmar) return;
         }
+
         document.getElementById("btnGuardar").textContent = "Guardando...";
 
         const rowNum = rowEdit["_RowNumber"];
         const colLetra = COL_LETTERS_MAP[colNombre] || "?";
-        const cellId = (rowNum && colLetra !== "?") ? `${colLetra}${rowNum}` : "N/A";
+        const cellId =
+          rowNum && colLetra !== "?" ? `${colLetra}${rowNum}` : "N/A";
+        const fechaLog = new Date().toLocaleString("es-CL", {
+          timeZone: "America/Santiago",
+        });
 
-        await callAppSheet("ChangeLog", "Add", {Rows:[{
-            "FechaHora": new Date().toLocaleString("es-CL"), 
-            "Usuario": "WebAdmin", 
-            "Hoja": TABLE_MASTER, 
-            "Celda": cellId, 
-            "CabeceraColumna": colNombre, 
-            "TAG SPOOL": rowEdit[COL_TAG], 
-            "ValorAnterior": rowEdit[colNombre]||"", 
-            "ValorNuevo": fec
-        }]});
-        await callAppSheet(TABLE_MASTER, "Edit", {Rows:[{ "TAG SPOOL": rowEdit[COL_TAG], [colNombre]: fec }]});
+        await callAppSheet("ChangeLog", "Add", {
+          Rows: [
+            {
+              FechaHora: fechaLog,
+              Usuario: "WebAdmin",
+              Hoja: TABLE_MASTER,
+              Celda: cellId,
+              CabeceraColumna: colNombre,
+              "TAG SPOOL": rowEdit[COL_TAG],
+              ValorAnterior: valorExistente || "",
+              ValorNuevo: fec,
+            },
+          ],
+        });
+        await callAppSheet(TABLE_MASTER, "Edit", {
+          Rows: [{ "TAG SPOOL": rowEdit[COL_TAG], [colNombre]: fec }],
+        });
+
+        rowEdit[colNombre] = fec;
         document.getElementById("btnGuardar").textContent = "Guardar";
-        document.getElementById("msgGuardar").className="text-success";
-        document.getElementById("msgGuardar").textContent= "Guardado OK";
-    }
+        document.getElementById("msgGuardar").className = "text-success";
+        document.getElementById("msgGuardar").textContent = "Guardado OK";
+      }
 
-    async function cargarDashboardLocal(force = false) {
+      async function cargarDashboardLocal(force = false) {
         const now = new Date();
-        document.getElementById("dash-time").innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> ${now.toLocaleTimeString()} - ${now.toLocaleDateString()}`;
-        if(!force && dataCache.length > 0) { renderAll(dataCache, logCache); return; }
+        document.getElementById("dash-time").textContent =
+          now.toLocaleTimeString();
+        if (!force && dataCache.length > 0) {
+          renderAll(dataCache, logCache);
+          return;
+        }
 
         document.getElementById("loading-dashboard").classList.remove("d-none");
         document.getElementById("content-dashboard").classList.add("d-none");
 
         try {
-            // *** CAMBIO: Usamos SLICE_LOGS para traer solo lo de hoy ***
-            const [m, l] = await Promise.all([
-                callAppSheet(TABLE_MASTER, "Find", {Selector: `Filter(${TABLE_MASTER}, true)`}),
-                callAppSheet(SLICE_LOGS, "Find", {Selector: `Filter(${SLICE_LOGS}, true)`}) 
-            ]);
-            dataCache = m; logCache = l;
-            renderAll(m, l);
-        } catch(e) { console.error(e); }
-        finally {
-            document.getElementById("loading-dashboard").classList.add("d-none");
-            document.getElementById("content-dashboard").classList.remove("d-none");
+          const [m, l] = await Promise.all([
+            callAppSheet(TABLE_MASTER, "Find", {
+              Selector: `Filter(${TABLE_MASTER}, true)`,
+            }),
+            callAppSheet(SLICE_LOGS, "Find", {
+              Selector: `Filter(${SLICE_LOGS}, true)`,
+            }),
+          ]);
+          dataCache = m;
+          logCache = l;
+          renderAll(m, l);
+        } catch (e) {
+          console.error(e);
+        } finally {
+          document.getElementById("loading-dashboard").classList.add("d-none");
+          document
+            .getElementById("content-dashboard")
+            .classList.remove("d-none");
         }
-    }
+      }
 
-    function renderAll(rows, logs) {
-        let total=rows.length, act=0, lib=0, desp=0, elim=0;
-        let d0_30=0, d31_60=0, d61_plus=0;
-        let distFluor = {}; 
-        let distDespachoMes = {}; 
+      function renderAll(rows, logs) {
+        let total = rows.length,
+          act = 0,
+          lib = 0,
+          desp = 0,
+          elim = 0;
+        let d0_30 = 0,
+          d31_60 = 0,
+          d61_plus = 0;
+        let distFluor = {};
+        let distDespachoMes = {};
         let distUltima = {};
-        
+
         const today = new Date();
-        today.setHours(0,0,0,0);
-        const todayStr = today.toLocaleDateString("es-CL");
+        today.setHours(0, 0, 0, 0);
 
-        rows.forEach(r => {
-            const st = (r[COL_STATUS]||"").toUpperCase();
-            const fl = (r[COL_FLUOR]||"SIN STATUS").toUpperCase();
-            
-            // LOGICA ELIMINADOS ACTUALIZADA
-            if (esTagEliminado(r)) {
-                elim++;
-                return; // Cortamos el flujo
+        rows.forEach((r) => {
+          const st = (r[COL_STATUS] || "").toUpperCase();
+          const fl = (r[COL_FLUOR] || "SIN STATUS").toUpperCase();
+
+          // --- LOGICA ELIMINADOS ---
+          if (esTagEliminado(r)) {
+            elim++;
+            return;
+          }
+
+          if (st.includes("LIBERADO")) lib++;
+          else if (st.includes("DESPACHADO")) {
+            desp++;
+            let valMes = r[COL_MES_DESPACHO];
+            if (valMes)
+              distDespachoMes[valMes] = (distDespachoMes[valMes] || 0) + 1;
+          } else if (st.includes("HOLD")) {
+            elim++;
+          } else {
+            act++;
+
+            let fIni = parseDateFlexible(r["F.Emision Plano"]) || today;
+            let diff = (today - fIni) / (1000 * 60 * 60 * 24);
+            if (diff !== null) {
+              if (diff <= 30) d0_30++;
+              else if (diff <= 60) d31_60++;
+              else d61_plus++;
             }
 
-            if(st.includes("LIBERADO")) lib++;
-            else if(st.includes("DESPACHADO")) {
-                desp++;
-                let valMes = r[COL_MES_DESPACHO];
-                if (valMes) distDespachoMes[valMes] = (distDespachoMes[valMes] || 0) + 1;
+            distFluor[fl] = (distFluor[fl] || 0) + 1;
+
+            let evt = [];
+            COLUMNAS_FECHAS_ALL.forEach((c) => {
+              let d = parseDateFlexible(r[c]);
+              if (d) evt.push({ d: d, n: c });
+            });
+            evt.sort((a, b) => a.d - b.d);
+            if (evt.length) {
+              let ult = evt[evt.length - 1].n;
+              distUltima[ult] = (distUltima[ult] || 0) + 1;
             }
-            else if(st.includes("HOLD")) { 
-                elim++; 
-            }
-            else {
-                act++;
-                
-                let fIni = parseDateFlexible(r["F.Emision Plano"]) || today;
-                let diff = (today - fIni) / (1000 * 60 * 60 * 24);
-                if(diff!==null) {
-                    if(diff<=30) d0_30++; else if(diff<=60) d31_60++; else d61_plus++;
-                }
-                distFluor[fl] = (distFluor[fl]||0)+1;
-                
-                let evt = [];
-                COLUMNAS_FECHAS_ALL.forEach(c => {
-                    let d = parseDateFlexible(r[c]);
-                    if(d) evt.push({d:d, n:c});
-                });
-                evt.sort((a,b)=>a.d-b.d);
-                if(evt.length) {
-                    let ult = evt[evt.length-1].n;
-                    distUltima[ult] = (distUltima[ult]||0)+1;
-                }
-            }
+          }
         });
 
         document.getElementById("kpi-total").textContent = total;
@@ -675,86 +1277,215 @@
         document.getElementById("kpi-atr").textContent = d61_plus;
         document.getElementById("kpi-elim").textContent = elim;
 
-        renderChart("chartEmbudo", "bar", { labels: ["Total", "Activos", "0-30", "31-60", "61+"], datasets: [{ data: [total, act, d0_30, d31_60, d61_plus], backgroundColor: ["#e0e0e0", "#1a2b48", "#3b82f6", "#f59e0b", "#d93025"] }], options: { indexAxis: 'y', plugins: {legend: {display: false}} } });
-        renderChart("chartDiasProceso", "bar", { labels: ["0-30", "31-60", "61+"], datasets: [{ data: [d0_30, d31_60, d61_plus], backgroundColor: ["#d93025", "#d93025", "#d93025"] }], options: { plugins: {legend: {display: false}} } });
-        
+        renderChart("chartEmbudo", "bar", {
+          labels: ["Total", "Activos", "0-30", "31-60", "61+"],
+          datasets: [
+            {
+              data: [total, act, d0_30, d31_60, d61_plus],
+              backgroundColor: [
+                "#e0e0e0",
+                "#1a2b48",
+                "#3b82f6",
+                "#f59e0b",
+                "#d93025",
+              ],
+            },
+          ],
+          options: { indexAxis: "y", plugins: { legend: { display: false } } },
+        });
+        renderChart("chartDiasProceso", "bar", {
+          labels: ["0-30", "31-60", "61+"],
+          datasets: [
+            {
+              data: [d0_30, d31_60, d61_plus],
+              backgroundColor: ["#d93025", "#d93025", "#d93025"],
+            },
+          ],
+          options: { plugins: { legend: { display: false } } },
+        });
+
         const sortedKeys = Object.keys(distDespachoMes).sort((a, b) => {
-            let [m1, y1] = a.split('/').map(Number);
-            let [m2, y2] = b.split('/').map(Number);
-            if (y1 !== y2) return y1 - y2;
-            return m1 - m2;
+          let [m1, y1] = a.split("/").map(Number);
+          let [m2, y2] = b.split("/").map(Number);
+          if (y1 !== y2) return y1 - y2;
+          return m1 - m2;
         });
-        renderChart("chartEvolucion", "bar", { 
-            labels: sortedKeys, 
-            datasets: [{ data: sortedKeys.map(k => distDespachoMes[k]), backgroundColor: "#2ea043" }], 
-            options: { plugins: {legend: {display: false}} } 
-        });
-        
-        renderChart("chartFluor", "doughnut", { labels: Object.keys(distFluor), datasets: [{ data: Object.values(distFluor), backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF'] }], options: { plugins: {legend: {display: false}} } });
-        let hFluor=""; Object.entries(distFluor).sort((a,b)=>b[1]-a[1]).forEach(([k,v]) => hFluor+=`<tr><td>${k}</td><td class='text-end fw-bold'>${v}</td></tr>`);
-        document.getElementById("tbodyFluor").innerHTML=hFluor;
-
-        // --- REGISTROS HOY: USAMOS DIRECTAMENTE EL SLICE ---
-        // Ya no filtramos por fecha en JS porque el Slice 'Slice_Logs_Hoy' ya trae solo lo de hoy
-        let logsHoy = logs; 
-        
-        document.getElementById("count-logs").textContent = logsHoy.length + " registros";
-        let logCounts = {}; 
-        
-        logsHoy.forEach(l => {
-            let col = (l["CabeceraColumna"] || "Sin Etapa").trim();
-            logCounts[col] = (logCounts[col] || 0) + 1;
+        renderChart("chartEvolucion", "bar", {
+          labels: sortedKeys,
+          datasets: [
+            {
+              data: sortedKeys.map((k) => distDespachoMes[k]),
+              backgroundColor: "#2ea043",
+            },
+          ],
+          options: { plugins: { legend: { display: false } } },
         });
 
-        let arrLog = Object.keys(logCounts).map(k=>({ k, v: logCounts[k] })).sort((a,b)=>b.v - a.v);
+        renderChart("chartFluor", "doughnut", {
+          labels: Object.keys(distFluor),
+          datasets: [
+            {
+              data: Object.values(distFluor),
+              backgroundColor: [
+                "#36A2EB",
+                "#FF6384",
+                "#FFCE56",
+                "#4BC0C0",
+                "#9966FF",
+              ],
+            },
+          ],
+          options: { plugins: { legend: { display: false } } },
+        });
+        let hFluor = "";
+        Object.entries(distFluor)
+          .sort((a, b) => b[1] - a[1])
+          .forEach(
+            ([k, v]) =>
+              (hFluor += `<tr><td>${k}</td><td class='text-end fw-bold'>${v}</td></tr>`)
+          );
+        document.getElementById("tbodyFluor").innerHTML = hFluor;
 
-        let hLog=""; 
-        arrLog.forEach(x=> hLog+=`<tr><td>${x.k}</td><td class='text-center fw-bold'>${x.v}</td></tr>`);
+        // REGISTROS HOY: USANDO SLICE (DATA LISTA)
+        let logsHoy = logs;
+        document.getElementById("count-logs").textContent =
+          logsHoy.length + " registros";
+        let logCounts = {};
+
+        logsHoy.forEach((l) => {
+          let col = (l["CabeceraColumna"] || "Sin Etapa").trim();
+          logCounts[col] = (logCounts[col] || 0) + 1;
+        });
+
+        let arrLog = Object.keys(logCounts)
+          .map((k) => ({ k, v: logCounts[k] }))
+          .sort((a, b) => b.v - a.v);
+
+        let hLog = "";
+        arrLog.forEach(
+          (x) =>
+            (hLog += `<tr><td>${x.k}</td><td class='text-center fw-bold'>${x.v}</td></tr>`)
+        );
         document.getElementById("tbodyLogHoy").innerHTML = hLog;
 
         let arrLogChart = arrLog.slice(0, 12);
-        renderChart("chartLogHoy", "bar", { 
-            labels: arrLogChart.map(x=>x.k), 
-            datasets: [{ label:"Cantidad", data:arrLogChart.map(x=>x.v), backgroundColor:"#2ea043" }] 
-        }, {scales:{x:{stacked:false}, y:{stacked:false}}});
+        renderChart(
+          "chartLogHoy",
+          "bar",
+          {
+            labels: arrLogChart.map((x) => x.k),
+            datasets: [
+              {
+                label: "Cantidad",
+                data: arrLogChart.map((x) => x.v),
+                backgroundColor: "#2ea043",
+              },
+            ],
+          },
+          { scales: { x: { stacked: false }, y: { stacked: false } } }
+        );
 
-        renderChart("chartUltimaEtapa", "doughnut", { labels: Object.keys(distUltima), datasets: [{ data: Object.values(distUltima), backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#8e5ea2'] }], options: { plugins: {legend: {display: false}} } });
-        let hUlt=""; Object.entries(distUltima).sort((a,b)=>b[1]-a[1]).forEach(([k,v]) => hUlt+=`<tr><td>${k}</td><td class='text-end'>${v}</td></tr>`);
-        document.getElementById("tbodyUltimaEtapa").innerHTML=hUlt;
-
-        let hTiempos="";
-        PARES_TIEMPOS.forEach(p => {
-            let sum=0, c=0;
-            rows.forEach(r => { let d = diffDays(r[p.from], r[p.to]); if(d!==null && d>=0){ sum+=d; c++; } });
-            hTiempos+=`<tr><td>${p.from}</td><td>${p.to}</td><td class='fw-bold text-primary'>${c>0?(sum/c).toFixed(1):"-"}</td><td>${c}</td></tr>`;
+        renderChart("chartUltimaEtapa", "doughnut", {
+          labels: Object.keys(distUltima),
+          datasets: [
+            {
+              data: Object.values(distUltima),
+              backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#8e5ea2"],
+            },
+          ],
+          options: { plugins: { legend: { display: false } } },
         });
-        document.getElementById("tbodyTiempos").innerHTML=hTiempos;
+        let hUlt = "";
+        Object.entries(distUltima)
+          .sort((a, b) => b[1] - a[1])
+          .forEach(
+            ([k, v]) =>
+              (hUlt += `<tr><td>${k}</td><td class='text-end'>${v}</td></tr>`)
+          );
+        document.getElementById("tbodyUltimaEtapa").innerHTML = hUlt;
 
-        let hCrit="";
-        rows.forEach(r => {
-             const st = (r[COL_STATUS]||"").toUpperCase();
-             if(!st.includes("DESP") && !st.includes("ELIM") && !st.includes("LIB")) {
-                 let f = parseDateFlexible(r["F.Emision Plano"]) || today; 
-                 let d = (today - f) / (1000 * 60 * 60 * 24);
-                 if(d>60) hCrit += `<tr><td>${r[COL_TAG]}</td><td class="text-center"><span class="badge bg-danger">${Math.floor(d)}</span></td><td>${r[COL_STATUS]}</td><td>${f.toISOString().split("T")[0]}</td></tr>`;
-             }
+        let hTiempos = "";
+        PARES_TIEMPOS.forEach((p) => {
+          let sum = 0,
+            c = 0;
+          rows.forEach((r) => {
+            let d = diffDays(r[p.from], r[p.to]);
+            if (d !== null && d >= 0) {
+              sum += d;
+              c++;
+            }
+          });
+          hTiempos += `<tr><td>${p.from}</td><td>${
+            p.to
+          }</td><td class='fw-bold text-primary'>${
+            c > 0 ? (sum / c).toFixed(1) : "-"
+          }</td><td>${c}</td></tr>`;
         });
-        document.getElementById("tabla-criticos-body").innerHTML = hCrit || '<tr><td colspan="4">Sin críticos</td></tr>';
-    }
+        document.getElementById("tbodyTiempos").innerHTML = hTiempos;
 
-    function renderChart(id, type, data, extraOptions={}) {
+        let hCrit = "";
+        rows.forEach((r) => {
+          const st = (r[COL_STATUS] || "").toUpperCase();
+          // Reutilizamos logica eliminado
+          if (esTagEliminado(r)) return;
+
+          if (!st.includes("DESPACHADO") && !st.includes("LIBERADO")) {
+            let f = parseDateFlexible(r["F.Emision Plano"]) || today;
+            let d = (today - f) / (1000 * 60 * 60 * 24);
+            if (d > 60)
+              hCrit += `<tr><td>${
+                r[COL_TAG]
+              }</td><td class="text-center"><span class="badge bg-danger">${Math.floor(
+                d
+              )}</span></td><td>${r[COL_STATUS]}</td><td>${formatDateManual(
+                f
+              )}</td></tr>`;
+          }
+        });
+        document.getElementById("tabla-criticos-body").innerHTML =
+          hCrit || '<tr><td colspan="4">Sin críticos</td></tr>';
+      }
+
+      function renderChart(id, type, data, extraOptions = {}) {
         const ctx = document.getElementById(id);
-        if(Chart.getChart(id)) Chart.getChart(id).destroy();
-        new Chart(ctx, { type: type, data: data, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display: false}, datalabels: { display: type==='bar', color:'white', font:{weight:'bold'} } }, ...extraOptions } });
-    }
+        if (Chart.getChart(id)) Chart.getChart(id).destroy();
+        new Chart(ctx, {
+          type: type,
+          data: data,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              datalabels: {
+                display: type === "bar",
+                color: "white",
+                font: { weight: "bold" },
+              },
+            },
+            ...extraOptions,
+          },
+        });
+      }
 
-    async function exportKpi(type) {
+      async function exportKpi(type) {
         const el = document.getElementById("content-dashboard");
-        const canvas = await html2canvas(el, {scale: 2});
+        const canvas = await html2canvas(el, { scale: 2 });
         const img = canvas.toDataURL("image/jpeg", 0.9);
-        if(type==='jpg') { const a = document.createElement('a'); a.href=img; a.download='dashboard.jpg'; a.click(); }
-        else { const { jsPDF } = window.jspdf; const pdf = new jsPDF('p', 'mm', 'a4'); const w = 210; const h = (canvas.height * w) / canvas.width; pdf.addImage(img, 'JPEG', 0, 0, w, h); pdf.save('dashboard.pdf'); }
-    }
-</script>
-   </body>
+        if (type === "jpg") {
+          const a = document.createElement("a");
+          a.href = img;
+          a.download = "dashboard.jpg";
+          a.click();
+        } else {
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF("p", "mm", "a4");
+          const w = 210;
+          const h = (canvas.height * w) / canvas.width;
+          pdf.addImage(img, "JPEG", 0, 0, w, h);
+          pdf.save("dashboard.pdf");
+        }
+      }
+    </script>
+  </body>
 </html>
