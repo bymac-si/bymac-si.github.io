@@ -188,7 +188,7 @@
              
              <div id="loading-dashboard" class="text-center py-5">
                 <div class="spinner-border text-primary" role="status"></div>
-                <div class="mt-2 text-muted">Sincronizando con BBDD...</div>
+                <div class="mt-2 text-muted">Sincronizando con AppSheet...</div>
              </div>
 
              <div id="content-dashboard" class="d-none">
@@ -326,7 +326,6 @@
 
     // >>> MAPA DE COLUMNAS A LETRAS DE EXCEL <<<
     const COL_LETTERS_MAP = {
-        "Fecha TRN Cliente": "Q", 
         "F.Emision Plano": "S",
         "F.Aprobacion Plano": "T",
         "F. Entrada Taller": "U",
@@ -349,7 +348,6 @@
     };
 
     const PARES_TIEMPOS = [
-        { from: "Fecha TRN Cliente", to: "F.Emision Plano" },
         { from: "F.Emision Plano", to: "F.Aprobacion Plano" },
         { from: "F.Aprobacion Plano", to: "F. Entrada Taller" },
         { from: "F. Entrada Taller", to: "F.Salida Taller" },
@@ -410,14 +408,13 @@
         return isNaN(d.getTime()) ? null : d;
     }
 
-    // Comparador estricto
     function isSameDaySCL(d1, d2) {
         return d1 && d2 &&
                d1.getDate() === d2.getDate() &&
                d1.getMonth() === d2.getMonth() &&
                d1.getFullYear() === d2.getFullYear();
     }
-    
+
     // Función auxiliar para determinar si un Tag está eliminado
     function esTagEliminado(row) {
       if (parseDateFlexible(row[COL_F_ELIMINADO])) return true;
@@ -690,10 +687,18 @@
         });
         
         renderChart("chartFluor", "doughnut", { labels: Object.keys(distFluor), datasets: [{ data: Object.values(distFluor), backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF'] }], options: { plugins: {legend: {display: false}} } });
-        let hFluor=""; Object.entries(distFluor).sort((a,b)=>b[1]-a[1]).forEach(([k,v]) => hFluor+=`<tr><td>${k}</td><td class='text-end fw-bold'>${v}</td></tr>`);
+        
+        // --- STATUS FLUOR CON TOTAL ---
+        let hFluor="";
+        let totalFluor = 0;
+        Object.entries(distFluor).sort((a,b)=>b[1]-a[1]).forEach(([k,v]) => {
+            hFluor+=`<tr><td>${k}</td><td class='text-end fw-bold'>${v}</td></tr>`;
+            totalFluor += v;
+        });
+        hFluor += `<tr class="table-secondary"><th>TOTAL</th><th class="text-end">${totalFluor}</th></tr>`;
         document.getElementById("tbodyFluor").innerHTML=hFluor;
 
-        // --- REGISTROS HOY: USA LA DATA DEL SLICE DIRECTO ---
+        // --- REGISTROS HOY: USANDO SLICE ---
         let logsHoy = logs; 
         document.getElementById("count-logs").textContent = logsHoy.length + " registros";
         let logCounts = {}; 
@@ -716,21 +721,48 @@
         }, {scales:{x:{stacked:false}, y:{stacked:false}}});
 
         renderChart("chartUltimaEtapa", "doughnut", { labels: Object.keys(distUltima), datasets: [{ data: Object.values(distUltima), backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#8e5ea2'] }], options: { plugins: {legend: {display: false}} } });
-        let hUlt=""; Object.entries(distUltima).sort((a,b)=>b[1]-a[1]).forEach(([k,v]) => hUlt+=`<tr><td>${k}</td><td class='text-end'>${v}</td></tr>`);
+        
+        // --- ULTIMA ETAPA CON TOTAL ---
+        let hUlt="";
+        let totalUlt = 0;
+        Object.entries(distUltima).sort((a,b)=>b[1]-a[1]).forEach(([k,v]) => {
+            hUlt+=`<tr><td>${k}</td><td class='text-end'>${v}</td></tr>`;
+            totalUlt += v;
+        });
+        hUlt += `<tr class="table-secondary"><th>TOTAL</th><th class="text-end">${totalUlt}</th></tr>`;
         document.getElementById("tbodyUltimaEtapa").innerHTML=hUlt;
 
+        // --- TIEMPOS PROMEDIO CON GENERAL ---
         let hTiempos="";
+        let sumPromedios = 0;
+        let countPromedios = 0;
+
         PARES_TIEMPOS.forEach(p => {
             let sum=0, c=0;
             rows.forEach(r => { let d = diffDays(r[p.from], r[p.to]); if(d!==null && d>=0){ sum+=d; c++; } });
-            hTiempos+=`<tr><td>${p.from}</td><td>${p.to}</td><td class='fw-bold text-primary'>${c>0?(sum/c).toFixed(1):"-"}</td><td>${c}</td></tr>`;
+            
+            let avg = c > 0 ? (sum/c) : 0;
+            if (c > 0) {
+                sumPromedios += avg;
+                countPromedios++;
+            }
+            let avgStr = c > 0 ? avg.toFixed(1) : "-";
+
+            hTiempos+=`<tr><td>${p.from}</td><td>${p.to}</td><td class='fw-bold text-primary'>${avgStr}</td><td>${c}</td></tr>`;
         });
+        
+        let generalAvg = countPromedios > 0 ? (sumPromedios / countPromedios).toFixed(1) : "-";
+        hTiempos += `<tr class="table-secondary"><th colspan="2" class="text-end">PROMEDIO GENERAL</th><th class="fw-bold text-primary">${generalAvg}</th><th>-</th></tr>`;
+
         document.getElementById("tbodyTiempos").innerHTML=hTiempos;
 
         let hCrit="";
         rows.forEach(r => {
              const st = (r[COL_STATUS]||"").toUpperCase();
-             if(!st.includes("DESP") && !esTagEliminado(r) && !st.includes("LIBERADO")) {
+             // Reutilizamos logica eliminado
+             if (esTagEliminado(r)) return;
+
+             if(!st.includes("DESPACHADO") && !st.includes("LIBERADO")) {
                  let f = parseDateFlexible(r["F.Emision Plano"]) || today; 
                  let d = (today - f) / (1000 * 60 * 60 * 24);
                  if(d>60) hCrit += `<tr><td>${r[COL_TAG]}</td><td class="text-center"><span class="badge bg-danger">${Math.floor(d)}</span></td><td>${r[COL_STATUS]}</td><td>${f.toISOString().split("T")[0]}</td></tr>`;
@@ -753,5 +785,3 @@
         else { const { jsPDF } = window.jspdf; const pdf = new jsPDF('p', 'mm', 'a4'); const w = 210; const h = (canvas.height * w) / canvas.width; pdf.addImage(img, 'JPEG', 0, 0, w, h); pdf.save('dashboard.pdf'); }
     }
 </script>
-  </body>      
-</html>
