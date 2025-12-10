@@ -377,50 +377,49 @@
         return await response.json();
       }
 
-      // --- 4. BUSQUEDA ---
-      function buscarTags() {
-        const txt = document
-          .getElementById("txtBuscar")
-          .value.trim()
-          .toUpperCase();
-        const resDiv = document.getElementById("resFicha");
+      // --- 4. BUSQUEDA (CON LIMPIEZA AUTOMÁTICA) ---
+  function buscarTags() {
+    const txt = document.getElementById("txtBuscar").value.trim().toUpperCase();
+    const resDiv = document.getElementById("resFicha");
+    const contenedor = document.getElementById("contenedorFicha");
 
-        if (!txt) {
-          resDiv.style.display = "none";
-          return;
-        }
+    // 1. LIMPIEZA INMEDIATA: Ocultar ficha anterior
+    contenedor.classList.add("d-none");
+    
+    // Limpiar campos visuales por si acaso se muestra antes de cargar
+    document.getElementById("ficha-tag").textContent = "-";
+    document.getElementById("ficha-status-badge").textContent = "...";
+    document.getElementById("ficha-status-badge").className = "badge bg-secondary mt-1";
 
-        resDiv.innerHTML =
-          '<div class="list-group-item">Buscando en BBDD...</div>';
-        resDiv.style.display = "block";
+    if (!txt) { resDiv.style.display = 'none'; return; }
 
-        const selector = `Filter(${TABLE_NAME}, CONTAINS([TAG SPOOL], '${txt}'))`;
+    resDiv.innerHTML = '<div class="list-group-item">Buscando en AppSheet...</div>';
+    resDiv.style.display = 'block';
 
-        callAppSheet(selector)
-          .then((rows) => {
-            if (!rows || rows.length === 0) {
-              resDiv.innerHTML =
-                '<div class="list-group-item text-danger">No se encontraron coincidencias.</div>';
-              return;
-            }
-            resultadosGlobales = rows;
-            let h = "";
-            rows.slice(0, 10).forEach((row, index) => {
-              const tag = row["TAG SPOOL"] || "S/N";
-              h += `<a href="#" class="list-group-item list-group-item-action py-2" onclick="verFichaAppSheet(${index}); return false;">
+    const selector = `Filter(${TABLE_NAME}, CONTAINS([TAG SPOOL], '${txt}'))`;
+
+    callAppSheet(selector).then(rows => {
+      if (!rows || rows.length === 0) {
+        resDiv.innerHTML = '<div class="list-group-item text-danger">No se encontraron coincidencias.</div>';
+        return;
+      }
+      resultadosGlobales = rows;
+      let h = '';
+      rows.slice(0, 10).forEach((row, index) => {
+        const tag = row['TAG SPOOL'] || "S/N";
+        h += `<a href="#" class="list-group-item list-group-item-action py-2" onclick="verFichaAppSheet(${index}); return false;">
                 <div class="d-flex w-100 justify-content-between align-items-center">
                   <h6 class="mb-0 fw-bold text-primary"><i class="bi bi-tag-fill"></i> ${tag}</h6>
                   <small class="text-muted"><i class="bi bi-chevron-right"></i></small>
                 </div>
               </a>`;
-            });
-            resDiv.innerHTML = h;
-          })
-          .catch((e) => {
-            console.error(e);
-            resDiv.innerHTML = `<div class="list-group-item text-danger small">Error de conexión.</div>`;
-          });
-      }
+      });
+      resDiv.innerHTML = h;
+    }).catch(e => {
+      console.error(e);
+      resDiv.innerHTML = `<div class="list-group-item text-danger small">Error de conexión.</div>`;
+    });
+  }
 
       // --- 5. RENDERIZADO FICHA ---
       function verFichaAppSheet(index) {
