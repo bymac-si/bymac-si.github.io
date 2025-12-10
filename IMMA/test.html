@@ -22,12 +22,13 @@
       .kpi-value { font-size: 24px; font-weight: 800; }
       .kpi-green { color: #2ea043; } .kpi-blue { color: #1a2b48; } .kpi-yellow { color: #b58900; } .kpi-red { color: #d93025; } .kpi-muted { color: #888; } .text-info { color: #0dcaf0; }
 
-      /* FICHA Y TIMELINE */
+      /* FICHA TÉCNICA Y TIMELINE */
       .ficha-header { background-color: #1a2b48; color: white; padding: 10px 15px; border-radius: 8px 8px 0 0; }
       .ficha-body { background-color: white; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 8px 8px; padding: 20px; }
       .ficha-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6c757d; margin-bottom: 2px; }
       .ficha-value { font-size: 1.1rem; font-weight: 600; color: #212529; margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 5px; }
 
+      /* TIMELINE STYLES */
       .timeline { position: relative; padding-left: 20px; border-left: 2px solid #e9ecef; margin-top: 10px; }
       .timeline-item { position: relative; margin-bottom: 15px; }
       .timeline-dot { position: absolute; left: -26px; top: 0; width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 3px solid #1a2b48; }
@@ -316,24 +317,29 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
    <script>
+    // --- CONFIGURACIÓN ---
     const APP_ID = "59c4aa7f-9e37-4e66-af20-52250f9c4c07";
     const APP_KEY = "V2-157Vx-ltOIu-kTlqv-TYrU7-Gsowd-355md-nWdkC-k7s1N";
     
-    // TABLAS
+    // TABLAS COMPLETAS
     const TABLE_MASTER = "MasterBI";
     const TABLE_LOG = "ChangeLog"; 
 
     // COLUMNAS
-    const COL_MES_DESPACHO = "Mes Despacho"; // VIRTUAL
-    const COL_IS_DELETED = "isDeleted"; // VIRTUAL (Revisa si el nombre es 'isDeleted' o 'EstatusEliminado' en AppSheet)
+    const COL_MES_DESPACHO = "Mes Despacho"; 
+    const COL_ESTATUS_ELIMINADO = "EstatusEliminado"; 
+
     const COL_TAG = "TAG SPOOL";
     const COL_STATUS = "STATUS SPOOL";
     const COL_PLANO = "ID_PLANO"; 
     const COL_FECHA_FIN = "Fecha Terminado"; 
     const COL_FLUOR = "STATUS FLUOR";
     const COL_FECHA_TRN = "Fecha TRN Cliente"; 
+    const COL_F_ELIMINADO = "F. ELIMINADO";
 
-    // MAPA LETRAS
+    const STATUS_ELIMINADOS = ["ELIMINADO", "ELIMINADO / REFABRICADO", "REFABRICAR"];
+
+    // >>> MAPA DE COLUMNAS A LETRAS DE EXCEL <<<
     const COL_LETTERS_MAP = {
         "Fecha TRN Cliente": "Q", 
         "F.Emision Plano": "S",
@@ -377,17 +383,12 @@
         { from: "F.Liberado", to: "F.Despacho" }
     ];
 
-    const COLUMNAS_FECHAS_ALL = [
-        "Fecha TRN Cliente", "F.Emision Plano", "F.Aprobacion Plano", "F. Entrada Taller", "F.Salida Taller",
-        "F.Ingreso Granallado", "F.Salida Granallado", "F.Ingreso Caucho", "F.Salida Caucho",
-        "F.Salida Engomado", "F.Ingreso Vulcanizado", "F.Salida Vulcanizado",
-        "F.Ingreso Term. Caucho", "F.Salida Term. Caucho", "F.Envio a Pint", "F.Salida Pintura",
-        "F.Liberado", "F.Despacho", "F. ELIMINADO", "F. HOLD"
-    ];
+    const COLUMNAS_FECHAS_ALL = Object.keys(COL_LETTERS_MAP);
 
     let dataCache = []; 
     let logCache = [];
     
+    // --- UTILS ---
     async function callAppSheet(tableName, action, bodyParams = {}) {
         const url = `https://api.appsheet.com/api/v2/apps/${APP_ID}/tables/${tableName}/Action`;
         const body = { "Action": action, "Properties": { "Locale": "es-CL", "Timezone": "America/Santiago", ...bodyParams.Properties }, ...bodyParams };
@@ -401,20 +402,37 @@
         } catch (e) { console.error("Error AppSheet:", e); return []; }
     }
 
-    // FECHA ROBUSTA
+    // --- FUNCIÓN SCL PURA (FORZADA) ---
+    // Esta es la clave para que la fecha de AppSheet (UTC) se lea como local
     function parseDateFlexible(val) {
         if (!val) return null;
         if (typeof val === 'number') return new Date(1899, 11, 30 + val);
+        
         let str = String(val).trim();
-        if(str.includes("T")) str = str.split("T")[0]; 
-        if (/^\d{4}-\d{2}-\d{2}$/.test(str)) { const [y, m, d] = str.split('-').map(Number); return new Date(y, m - 1, d); }
-        if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(str)) { const parts = str.split(/[\/\-]/).map(Number); return new Date(parts[2], parts[1] - 1, parts[0]); }
+        // Limpieza de ISO
+        if(str.includes("T")) str = str.split("T")[0];
+        if(str.includes(" ")) str = str.split(" ")[0];
+
+        // Detección formato ISO YYYY-MM-DD
+        if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+            const [y, m, d] = str.split('-').map(Number);
+            return new Date(y, m - 1, d); // Construcción Local
+        }
+        // Detección formato Latino DD/MM/YYYY
+        if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(str)) {
+            const parts = str.split(/[\/\-]/).map(Number);
+            return new Date(parts[2], parts[1] - 1, parts[0]);
+        }
+        
         const d = new Date(str);
         return isNaN(d.getTime()) ? null : d;
     }
 
-    function isSameDay(d1, d2) {
-        return d1 && d2 && d1.getDate() === d2.getDate() && d1.getMonth() === d2.getMonth() && d1.getFullYear() === d2.getFullYear();
+    function isSameDaySCL(d1, d2) {
+        return d1 && d2 &&
+               d1.getDate() === d2.getDate() &&
+               d1.getMonth() === d2.getMonth() &&
+               d1.getFullYear() === d2.getFullYear();
     }
 
     function diffDays(d1Val, d2Val) {
@@ -424,9 +442,16 @@
         return (d2 - d1) / (1000 * 60 * 60 * 24);
     }
     
+    // Configura el input de fecha a HOY en CHILE
     function setHoy() {
-        const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-        document.getElementById("dtFecha").value = d.toISOString().split("T")[0];
+        const now = new Date();
+        const sclString = now.toLocaleString("en-US", {timeZone: "America/Santiago"});
+        const d = new Date(sclString);
+        
+        const y = d.getFullYear();
+        const m = String(d.getMonth()+1).padStart(2,'0');
+        const day = String(d.getDate()).padStart(2,'0');
+        document.getElementById("dtFecha").value = `${y}-${m}-${day}`;
     }
     
     function llenarComboEtapas() {
@@ -468,7 +493,16 @@
         setHoy();
         llenarComboEtapas();
         if (typeof ChartDataLabels !== "undefined") Chart.register(ChartDataLabels);
+        startAutoRefresh(); // Activa refresco
     });
+
+    function startAutoRefresh() {
+        setInterval(() => {
+          if (document.querySelector("#tabsPanel button.active").dataset.bsTarget === "#tab-dashboard") {
+            cargarDashboardLocal();
+          }
+        }, 60000);
+    }
 
     // --- FICHA Y GESTIÓN ---
     let resultadosFicha = [], resultadosEditCache = [], rowEdit = null;
@@ -528,7 +562,6 @@
         if(id) { m.textContent="Cargando..."; s.classList.remove("d-none"); f.src=`https://drive.google.com/file/d/${id}/preview`; f.onload=()=>{s.classList.add("d-none"); l.classList.add("d-none"); f.classList.remove("d-none");}; b.href=`https://drive.google.com/file/d/${id}/view`; b.classList.remove("d-none"); }
         else { m.textContent="Sin plano"; s.classList.add("d-none"); }
     }
-    
     async function guardarCambios() {
         if(!rowEdit) return alert("Seleccione TAG");
         const colNombre = document.getElementById("cmbEtapa").value;
@@ -540,17 +573,19 @@
         const colLetra = COL_LETTERS_MAP[colNombre] || "?";
         const cellId = (rowNum && colLetra !== "?") ? `${colLetra}${rowNum}` : "N/A";
 
+        // Fecha hora en formato SCL para el log
+        const fechaHoraLog = new Date().toLocaleString("es-CL", {timeZone: "America/Santiago"});
+
         await callAppSheet("ChangeLog", "Add", {Rows:[{
-            "FechaHora": new Date().toLocaleString("es-CL"), 
+            "FechaHora": fechaHoraLog, 
             "Usuario": "WebAdmin", 
-            "Hoja": TABLE_MASTER,
+            "Hoja": TABLE_MASTER, 
             "Celda": cellId, 
             "CabeceraColumna": colNombre, 
             "TAG SPOOL": rowEdit[COL_TAG], 
             "ValorAnterior": rowEdit[colNombre]||"", 
             "ValorNuevo": fec
         }]});
-
         await callAppSheet(TABLE_MASTER, "Edit", {Rows:[{ "TAG SPOOL": rowEdit[COL_TAG], [colNombre]: fec }]});
         document.getElementById("btnGuardar").textContent = "Guardar";
         document.getElementById("msgGuardar").className="text-success";
@@ -559,7 +594,7 @@
 
     async function cargarDashboardLocal(force = false) {
         const now = new Date();
-        document.getElementById("dash-time").textContent = now.toLocaleTimeString();
+        document.getElementById("dash-time").textContent = now.toLocaleTimeString("es-CL", {timeZone: "America/Santiago"});
         if(!force && dataCache.length > 0) { renderAll(dataCache, logCache); return; }
 
         document.getElementById("loading-dashboard").classList.remove("d-none");
@@ -581,12 +616,14 @@
 
     function renderAll(rows, logs) {
         let total=rows.length, act=0, lib=0, desp=0, elim=0;
-        let d0=0, d31=0, d61=0;
+        let d0_30=0, d31_60=0, d61_plus=0;
         let distFluor = {}; 
         let distDespachoMes = {}; 
         let distUltima = {};
         
-        const today = new Date();
+        // HOY EN SCL
+        const todaySclString = new Date().toLocaleString("en-US", {timeZone: "America/Santiago"});
+        const today = new Date(todaySclString);
         today.setHours(0,0,0,0);
         const todayStr = today.toLocaleDateString("es-CL");
 
@@ -594,10 +631,17 @@
             const st = (r[COL_STATUS]||"").toUpperCase();
             const fl = (r[COL_FLUOR]||"SIN STATUS").toUpperCase();
             
-            // --- LOGICA ELIMINADOS CON VIRTUAL COLUMN ---
-            // Verifica si IsDeleted es "Y" o "Yes" o "true"
-            let valEliminado = r[COL_IS_DELETED]; 
-            const isElim = (valEliminado === "Y" || valEliminado === "Yes" || valEliminado === true || valEliminado === "true");
+            // --- LOGICA ELIMINADOS (COPIA EXACTA DE GAS) ---
+            // 1. Fecha en columna 107 (F. ELIMINADO)
+            const tieneF_Elim = parseDateFlexible(r[COL_F_ELIMINADO]);
+            // 2. Palabras clave
+            const isStatusElim = STATUS_ELIMINADOS.some(e => st.includes(e) || fl.includes(e));
+
+            // Si es eliminado, contamos y pasamos al siguiente (no cuenta como activo ni despachado)
+            if (tieneF_Elim || isStatusElim) {
+                elim++;
+                return;
+            }
 
             if(st.includes("LIBERADO")) lib++;
             else if(st.includes("DESPACHADO")) {
@@ -605,15 +649,16 @@
                 let valMes = r[COL_MES_DESPACHO];
                 if (valMes) distDespachoMes[valMes] = (distDespachoMes[valMes] || 0) + 1;
             }
-            else if(isElim || st.includes("HOLD")) { 
+            else if(st.includes("HOLD")) { 
                 elim++; 
             }
             else {
                 act++;
+                
                 let fIni = parseDateFlexible(r[COL_FECHA_TRN] || r["F.Emision Plano"]) || today;
                 let diff = (today - fIni) / (1000 * 60 * 60 * 24);
                 if(diff!==null) {
-                    if(diff<=30) d0++; else if(diff<=60) d31++; else d61++;
+                    if(diff<=30) d0_30++; else if(diff<=60) d31_60++; else d61_plus++;
                 }
                 distFluor[fl] = (distFluor[fl]||0)+1;
                 
@@ -634,13 +679,13 @@
         document.getElementById("kpi-activos").textContent = act;
         document.getElementById("kpi-lib").textContent = lib;
         document.getElementById("kpi-desp").textContent = desp;
-        document.getElementById("kpi-proceso").textContent = d0;
-        document.getElementById("kpi-pend").textContent = d31;
-        document.getElementById("kpi-atr").textContent = d61;
+        document.getElementById("kpi-proceso").textContent = d0_30;
+        document.getElementById("kpi-pend").textContent = d31_60;
+        document.getElementById("kpi-atr").textContent = d61_plus;
         document.getElementById("kpi-elim").textContent = elim;
 
-        renderChart("chartEmbudo", "bar", { labels: ["Total", "Activos", "0-30", "31-60", "61+"], datasets: [{ data: [total, act, d0, d31, d61], backgroundColor: ["#e0e0e0", "#1a2b48", "#3b82f6", "#f59e0b", "#d93025"] }], options: { indexAxis: 'y', plugins: {legend: {display: false}} } });
-        renderChart("chartDiasProceso", "bar", { labels: ["0-30", "31-60", "61+"], datasets: [{ data: [d0, d31, d61], backgroundColor: ["#d93025", "#d93025", "#d93025"] }], options: { plugins: {legend: {display: false}} } });
+        renderChart("chartEmbudo", "bar", { labels: ["Total", "Activos", "0-30", "31-60", "61+"], datasets: [{ data: [total, act, d0_30, d31_60, d61_plus], backgroundColor: ["#e0e0e0", "#1a2b48", "#3b82f6", "#f59e0b", "#d93025"] }], options: { indexAxis: 'y', plugins: {legend: {display: false}} } });
+        renderChart("chartDiasProceso", "bar", { labels: ["0-30", "31-60", "61+"], datasets: [{ data: [d0_30, d31_60, d61_plus], backgroundColor: ["#d93025", "#d93025", "#d93025"] }], options: { plugins: {legend: {display: false}} } });
         
         const sortedKeys = Object.keys(distDespachoMes).sort((a, b) => {
             let [m1, y1] = a.split('/').map(Number);
@@ -648,7 +693,6 @@
             if (y1 !== y2) return y1 - y2;
             return m1 - m2;
         });
-        
         renderChart("chartEvolucion", "bar", { 
             labels: sortedKeys, 
             datasets: [{ data: sortedKeys.map(k => distDespachoMes[k]), backgroundColor: "#2ea043" }], 
@@ -659,26 +703,20 @@
         let hFluor=""; Object.entries(distFluor).sort((a,b)=>b[1]-a[1]).forEach(([k,v]) => hFluor+=`<tr><td>${k}</td><td class='text-end fw-bold'>${v}</td></tr>`);
         document.getElementById("tbodyFluor").innerHTML=hFluor;
 
-        // --- REGISTROS HOY: FILTRO STRING (ANTI-TIMEZONE) ---
+        // REGISTROS HOY: FILTRO STRING (SCL)
         let logsHoy = logs.filter(l => {
             let fh = l["FechaHora"] || "";
-            return fh.includes(todayStr); // Busca "9/12/2025" en el string
+            return fh.includes(todayStr); // Busca "9/12/2025"
         });
-
         document.getElementById("count-logs").textContent = logsHoy.length + " registros";
         let logCounts = {}; 
-        
         logsHoy.forEach(l => {
             let col = (l["CabeceraColumna"] || "Sin Etapa").trim();
             logCounts[col] = (logCounts[col] || 0) + 1;
         });
-
         let arrLog = Object.keys(logCounts).map(k=>({ k, v: logCounts[k] })).sort((a,b)=>b.v - a.v);
-
-        let hLog=""; 
-        arrLog.forEach(x=> hLog+=`<tr><td>${x.k}</td><td class='text-center fw-bold'>${x.v}</td></tr>`);
+        let hLog=""; arrLog.forEach(x=> hLog+=`<tr><td>${x.k}</td><td class='text-center fw-bold'>${x.v}</td></tr>`);
         document.getElementById("tbodyLogHoy").innerHTML = hLog;
-
         let arrLogChart = arrLog.slice(0, 12);
         renderChart("chartLogHoy", "bar", { 
             labels: arrLogChart.map(x=>x.k), 
@@ -700,7 +738,12 @@
         let hCrit="";
         rows.forEach(r => {
              const st = (r[COL_STATUS]||"").toUpperCase();
-             if(!st.includes("DESP") && !st.includes("ELIM") && !st.includes("LIB")) {
+             // Reutilizamos logica eliminado
+             const tieneF_Elim = parseDateFlexible(r[COL_F_ELIMINADO]);
+             const isStatusElim = STATUS_ELIMINADOS.some(e => st.includes(e));
+             const isElim = (tieneF_Elim || isStatusElim);
+
+             if(!st.includes("DESPACHADO") && !isElim && !st.includes("LIBERADO")) {
                  let f = parseDateFlexible(r[COL_FECHA_TRN] || r["F.Emision Plano"]) || today; 
                  let d = (today - f) / (1000 * 60 * 60 * 24);
                  if(d>60) hCrit += `<tr><td>${r[COL_TAG]}</td><td class="text-center"><span class="badge bg-danger">${Math.floor(d)}</span></td><td>${r[COL_STATUS]}</td><td>${f.toISOString().split("T")[0]}</td></tr>`;
@@ -723,6 +766,3 @@
         else { const { jsPDF } = window.jspdf; const pdf = new jsPDF('p', 'mm', 'a4'); const w = 210; const h = (canvas.height * w) / canvas.width; pdf.addImage(img, 'JPEG', 0, 0, w, h); pdf.save('dashboard.pdf'); }
     }
 </script>
-
-  </body>
-</html>
