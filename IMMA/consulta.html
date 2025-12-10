@@ -194,15 +194,15 @@
                     </div>
                   </div>
                   <div class="col-6">
-                    <div class="ficha-label">P. FLUOR (474)</div>
+                    <div class="ficha-label">RETIRA FLUOR</div>
                     <div id="ficha-pfluor" class="ficha-value small">-</div>
                   </div>
-                  <div class="col-6">
+                 <!-- <div class="col-6">
                     <div class="ficha-label">P. ATTEX (EX474)</div>
                     <div id="ficha-pattex" class="ficha-value small">-</div>
-                  </div>
+                  </div>-->
                   <div class="col-12">
-                    <div class="ficha-label">Proveedor</div>
+                    <div class="ficha-label">Proveedor Caucho</div>
                     <div id="ficha-proveedor" class="ficha-value small">-</div>
                   </div>
                 </div>
@@ -277,7 +277,7 @@
       // Nombres de Columnas
       const COL_PLANO = "ID_PLANO";
       const COL_FLUOR = "STATUS FLUOR";
-      const COL_474 = "P. FLUOR";
+      const COL_474 = "RETIRA FLUOR";
       const COL_EX474 = "P. ATTEX";
       const COL_PROVEEDOR = "PROVEEDOR";
 
@@ -391,7 +391,7 @@
         }
 
         resDiv.innerHTML =
-          '<div class="list-group-item">Buscando en AppSheet...</div>';
+          '<div class="list-group-item">Buscando en BBDD...</div>';
         resDiv.style.display = "block";
 
         const selector = `Filter(${TABLE_NAME}, CONTAINS([TAG SPOOL], '${txt}'))`;
@@ -455,8 +455,8 @@
 
         document.getElementById("ficha-pfluor").textContent =
           row[COL_474] || "-";
-        document.getElementById("ficha-pattex").textContent =
-          row[COL_EX474] || "-";
+        //document.getElementById("ficha-pattex").textContent =
+        //  row[COL_EX474] || "-";
         document.getElementById("ficha-proveedor").textContent =
           row[COL_PROVEEDOR] || "-";
 
