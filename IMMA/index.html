@@ -562,6 +562,12 @@
         const colNombre = document.getElementById("cmbEtapa").value;
         const fec = document.getElementById("dtFecha").value;
         if(!colNombre || !fec) return alert("Datos incompletos");
+          // 1. VERIFICAR SI YA EXISTE VALOR Y PEDIR CONFIRMACIÓN
+        const valorExistente = rowEdit[colNombre];
+        if (valorExistente) {
+             const confirmar = confirm(`⚠ ATENCIÓN ⚠\n\nLa etapa "${colNombre}" ya tiene registrado: ${valorExistente}\n\n¿Desea SOBRESCRIBIRLO con la nueva fecha ${fec}?`);
+             if (!confirmar) return; // Si dice Cancelar, salimos de la función
+        }
         document.getElementById("btnGuardar").textContent = "Guardando...";
 
         const rowNum = rowEdit["_RowNumber"];
@@ -581,7 +587,7 @@
         await callAppSheet(TABLE_MASTER, "Edit", {Rows:[{ "TAG SPOOL": rowEdit[COL_TAG], [colNombre]: fec }]});
         document.getElementById("btnGuardar").textContent = "Guardar";
         document.getElementById("msgGuardar").className="text-success";
-        document.getElementById("msgGuardar").textContent="Guardado OK";
+        document.getElementById("msgGuardar").textContent= "Guardado OK";
     }
 
     async function cargarDashboardLocal(force = false) {

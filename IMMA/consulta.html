@@ -38,21 +38,24 @@
         padding: 25px;
       }
       .ficha-label {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         color: #6c757d;
-        margin-bottom: 4px;
+        margin-bottom: 2px;
+        font-weight: 600;
       }
       .ficha-value {
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-weight: 600;
         color: #212529;
-        margin-bottom: 15px;
-        border-bottom: 1px solid #f0f0f0;
+        margin-bottom: 0;
         padding-bottom: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
-
+      
       /* TIMELINE STYLES */
       .timeline { position: relative; padding-left: 20px; border-left: 2px solid #e9ecef; margin-top: 20px; margin-bottom: 20px; }
       .timeline-item { position: relative; margin-bottom: 15px; }
@@ -106,7 +109,7 @@
                             <span id="ficha-status-badge" class="badge bg-secondary mt-1">Consultando...</span>
                         </div>
 
-                        <div class="row">
+                        <div class="row g-2 mb-3 border-bottom pb-3">
                             <div class="col-6">
                                 <div class="ficha-label">Status Spool</div>
                                 <div id="ficha-estado-texto" class="ficha-value small">-</div>
@@ -114,6 +117,14 @@
                             <div class="col-6">
                                 <div class="ficha-label">Status Fluor</div>
                                 <div id="ficha-fluor" class="ficha-value small text-info">-</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="ficha-label">P. FLUOR (474)</div>
+                                <div id="ficha-pfluor" class="ficha-value small">-</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="ficha-label">P. ATTEX (EX474)</div>
+                                <div id="ficha-pattex" class="ficha-value small">-</div>
                             </div>
                         </div>
 
@@ -156,8 +167,12 @@
   const APP_ID = "59c4aa7f-9e37-4e66-af20-52250f9c4c07";
   const APP_KEY = "V2-157Vx-ltOIu-kTlqv-TYrU7-Gsowd-355md-nWdkC-k7s1N";
   const TABLE_NAME = "MasterBI"; 
+  
+  // Nombres de Columnas
   const COL_PLANO = "ID_PLANO"; 
   const COL_FLUOR = "STATUS FLUOR";
+  const COL_474 = "P. FLUOR";
+  const COL_EX474 = "P. ATTEX";
 
   // Lista completa de columnas de fecha para el Timeline
   const COLUMNAS_FECHAS_ALL = [
@@ -173,12 +188,23 @@
   // --- 2. UTILIDADES DE FECHA ---
   function parseDateFlexible(val) {
       if (!val) return null;
-      if (typeof val === 'number') {
-          // Excel serial date (base 1899-12-30)
-          return new Date(1899, 11, 30 + val);
+      if (typeof val === 'number') return new Date(1899, 11, 30 + val);
+      
+      let str = String(val).trim();
+      if(str.includes("T")) str = str.split("T")[0];
+      if(str.includes(" ")) str = str.split(" ")[0];
+
+      if (/^\d{4}-\d{2}-\d{2}$/.test(str)) { // ISO
+          const [y, m, d] = str.split('-').map(Number);
+          return new Date(y, m - 1, d);
       }
-      const d = new Date(val);
-      return isNaN(d) ? null : d;
+      if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(str)) { // Latino
+          const parts = str.split(/[\/\-]/).map(Number);
+          return new Date(parts[2], parts[1] - 1, parts[0]);
+      }
+      
+      const d = new Date(str);
+      return isNaN(d.getTime()) ? null : d;
   }
 
   // --- 3. CONEXIÓN API ---
@@ -266,6 +292,10 @@
     badge.className = `badge ${colorClass} mt-1`;
     document.getElementById("ficha-estado-texto").textContent = estado;
     document.getElementById("ficha-fluor").textContent = row[COL_FLUOR] || "-";
+    
+    // *** NUEVOS CAMPOS ***
+    document.getElementById("ficha-pfluor").textContent = row[COL_474] || "-";
+    document.getElementById("ficha-pattex").textContent = row[COL_EX474] || "-";
 
     // TIMELINE & ULTIMA ETAPA
     renderTimeline(row);
