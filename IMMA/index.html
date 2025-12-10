@@ -212,7 +212,7 @@
                     </div>
                     <div class="col-12 col-md-6">
                         <div class="card p-3 h-100">
-                            <h6>Días en Proceso</h6>
+                            <h6>Días en Proceso (Sin Movimiento)</h6>
                             <div style="height: 150px; position: relative;"><canvas id="chartDiasProceso"></canvas></div>
                         </div>
                     </div>
@@ -303,7 +303,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
    <script>
-    // --- CONFIGURACIÓN ---
     const APP_ID = "59c4aa7f-9e37-4e66-af20-52250f9c4c07";
     const APP_KEY = "V2-157Vx-ltOIu-kTlqv-TYrU7-Gsowd-355md-nWdkC-k7s1N";
     
@@ -314,6 +313,8 @@
     // COLUMNAS
     const COL_MES_DESPACHO = "Mes Despacho"; 
     const COL_ESTATUS_ELIMINADO = "EstatusEliminado"; 
+    // COLUMNA VIRTUAL DE DIAS
+    const COL_DIAS_MOV = "Days_Since_Last_Move"; 
 
     const COL_TAG = "TAG SPOOL";
     const COL_STATUS = "STATUS SPOOL";
@@ -327,7 +328,7 @@
 
     // >>> MAPA DE COLUMNAS A LETRAS DE EXCEL <<<
     const COL_LETTERS_MAP = {
-        "F.Emision Plano": "S",
+        "F.Emision Plano": "CI", 
         "F.Aprobacion Plano": "T",
         "F. Entrada Taller": "U",
         "F.Salida Taller": "V",
@@ -367,7 +368,6 @@
         { from: "F.Liberado", to: "F.Despacho" }
     ];
 
-    // SIN TRN
     const COLUMNAS_FECHAS_ALL = Object.keys(COL_LETTERS_MAP);
 
     let dataCache = []; 
@@ -386,7 +386,7 @@
         } catch (e) { console.error("Error AppSheet:", e); return []; }
     }
 
-    // --- FUNCIÓN SCL PURA ROBUSTA (Misma lógica que consulta.html) ---
+    // --- FUNCIÓN SCL PURA ---
     function parseDateFlexible(val) {
         if (!val) return null;
         if (typeof val === 'number') return new Date(1899, 11, 30 + val);
@@ -400,28 +400,17 @@
             const [y, m, d] = str.split('-').map(Number);
             return new Date(y, m - 1, d);
         }
-        
-        // CORRECCIÓN CRITICA: Detectar MM/DD/YYYY que envía AppSheet
-        const partes = str.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
-        if (partes) {
-            const p1 = Number(partes[1]);
-            const p2 = Number(partes[2]);
-            const anio = Number(partes[3]);
-
-            // Si el primer número > 12, seguro es DD/MM/YYYY
-            if (p1 > 12) {
-               return new Date(anio, p2 - 1, p1);
-            }
-            
-            // Si no, asumimos MM/DD/YYYY (formato US de API)
-            return new Date(anio, p1 - 1, p2);
+        // Latino DD/MM/YYYY
+        if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(str)) {
+            const parts = str.split(/[\/\-]/).map(Number);
+            return new Date(parts[2], parts[1] - 1, parts[0]);
         }
         
         const d = new Date(str);
         return isNaN(d.getTime()) ? null : d;
     }
 
-    // Helper visual
+    // Formato visual chileno
     function formatDateManual(date) {
         if(!date) return "-";
         const d = String(date.getDate()).padStart(2, '0');
@@ -437,6 +426,7 @@
                d1.getFullYear() === d2.getFullYear();
     }
 
+    // LOGICA ELIMINADOS
     function esTagEliminado(row) {
       if (parseDateFlexible(row[COL_F_ELIMINADO])) return true;
       const stFluor = String(row[COL_FLUOR] || '').trim().toUpperCase();
@@ -480,7 +470,6 @@
             if(d) events.push({ date: d, name: col });
         });
         
-        // ORDENAMIENTO CRONOLOGICO REAL
         events.sort((a,b) => a.date - b.date);
         
         if(events.length === 0) {
@@ -494,7 +483,7 @@
         });
         html += '</div>';
         container.innerHTML = html;
-        return events[events.length - 1]; // Último evento
+        return events[events.length - 1];
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -517,7 +506,6 @@
     function buscarTagsFicha() {
         const txt = document.getElementById("txtBuscarFicha").value.trim().toUpperCase();
         const resDiv = document.getElementById("resFicha");
-        // Limpieza inmediata
         document.getElementById("contenedorFicha").classList.add("d-none");
         
         if(!txt) return;
@@ -546,7 +534,6 @@
          const txt = document.getElementById("txtBuscarEdit").value.trim().toUpperCase();
          const resDiv = document.getElementById("resEdit");
          
-         // Limpieza inmediata
          rowEdit = null; 
          document.getElementById("lblTagSel").textContent = "-";
          document.getElementById("lblEstadoEdit").textContent = "-";
@@ -573,7 +560,6 @@
         document.getElementById("lblEstadoEdit").textContent = rowEdit[COL_STATUS];
         document.getElementById("lblFluorEdit").textContent = rowEdit[COL_FLUOR] || "-";
         
-        // RENDERIZAR TIMELINE EDICION
         const lastEvt = renderTimeline(rowEdit, "timeline-edit");
         if(lastEvt) document.getElementById("lblUltimoMovEdit").innerHTML = `${lastEvt.name} <br> <span class='text-primary'>${formatDateManual(lastEvt.date)}</span>`;
         else document.getElementById("lblUltimoMovEdit").textContent = "Sin movimientos";
@@ -619,10 +605,6 @@
         await callAppSheet(TABLE_MASTER, "Edit", {Rows:[{ "TAG SPOOL": rowEdit[COL_TAG], [colNombre]: fec }]});
         
         rowEdit[colNombre] = fec;
-        // Refrescar timeline localmente
-        const lastEvt = renderTimeline(rowEdit, "timeline-edit");
-        if(lastEvt) document.getElementById("lblUltimoMovEdit").innerHTML = `${lastEvt.name} <br> <span class='text-primary'>${formatDateManual(lastEvt.date)}</span>`;
-
         document.getElementById("btnGuardar").textContent = "Guardar";
         document.getElementById("msgGuardar").className="text-success";
         document.getElementById("msgGuardar").textContent="Guardado OK";
@@ -638,6 +620,7 @@
         document.getElementById("content-dashboard").classList.add("d-none");
 
         try {
+            // *** USANDO SLICE PARA LOGS DE HOY ***
             const [m, l] = await Promise.all([
                 callAppSheet(TABLE_MASTER, "Find", {Selector: `Filter(${TABLE_MASTER}, true)`}),
                 callAppSheet(SLICE_LOGS, "Find", {Selector: `Filter(${SLICE_LOGS}, true)`}) 
@@ -654,7 +637,9 @@
     function renderAll(rows, logs) {
         let total=rows.length, act=0, lib=0, desp=0, elim=0;
         let d0_30=0, d31_60=0, d61_plus=0;
-        let distFluor = {}, distDespachoMes = {}, distUltima = {};
+        let distFluor = {}; 
+        let distDespachoMes = {}; 
+        let distUltima = {};
         
         const today = new Date();
         today.setHours(0,0,0,0);
@@ -663,10 +648,10 @@
             const st = (r[COL_STATUS]||"").toUpperCase();
             const fl = (r[COL_FLUOR]||"SIN STATUS").toUpperCase();
             
-            // LOGICA ELIMINADOS
+            // --- LOGICA ELIMINADOS ---
             if (esTagEliminado(r)) {
                 elim++;
-                return; 
+                return; // Cortamos el flujo
             }
 
             if(st.includes("LIBERADO")) lib++;
@@ -681,10 +666,14 @@
             else {
                 act++;
                 
-                let fIni = parseDateFlexible(r["F.Emision Plano"]) || today; 
-                let diff = (today - fIni) / (1000 * 60 * 60 * 24);
-                if(diff!==null) {
-                    if(diff<=30) d0_30++; else if(diff<=60) d31_60++; else d61_plus++;
+                // *** USO DIRECTO DE LA COLUMNA VIRTUAL "Days_Since_Last_Move" ***
+                let dias = Number(r[COL_DIAS_MOV]) || 0;
+                
+                // Solo contamos si es mayor a 0 (Active)
+                if (dias > 0) {
+                     if (dias <= 30) d0_30++;
+                     else if (dias <= 60) d31_60++;
+                     else d61_plus++;
                 }
 
                 distFluor[fl] = (distFluor[fl]||0)+1;
@@ -738,24 +727,29 @@
         hFluor += `<tr class="table-secondary"><th>TOTAL</th><th class="text-end">${totalFluor}</th></tr>`;
         document.getElementById("tbodyFluor").innerHTML=hFluor;
 
-        // REGISTROS HOY: USANDO SLICE DIRECTO
+        // REGISTROS HOY
         let logsHoy = logs; 
         document.getElementById("count-logs").textContent = logsHoy.length + " registros";
         let logCounts = {}; 
+        
         logsHoy.forEach(l => {
             let col = (l["CabeceraColumna"] || "Sin Etapa").trim();
             logCounts[col] = (logCounts[col] || 0) + 1;
         });
+
         let arrLog = Object.keys(logCounts).map(k=>({ k, v: logCounts[k] })).sort((a,b)=>b.v - a.v);
-        let hLog=""; arrLog.forEach(x=> hLog+=`<tr><td>${x.k}</td><td class='text-center fw-bold'>${x.v}</td></tr>`);
+
+        let hLog=""; 
+        arrLog.forEach(x=> hLog+=`<tr><td>${x.k}</td><td class='text-center fw-bold'>${x.v}</td></tr>`);
         document.getElementById("tbodyLogHoy").innerHTML = hLog;
+
         let arrLogChart = arrLog.slice(0, 12);
         renderChart("chartLogHoy", "bar", { 
             labels: arrLogChart.map(x=>x.k), 
             datasets: [{ label:"Cantidad", data:arrLogChart.map(x=>x.v), backgroundColor:"#2ea043" }] 
         }, {scales:{x:{stacked:false}, y:{stacked:false}}});
 
-        renderChart("chartUltimaEtapa", "doughnut", { labels: Object.keys(distUltima), datasets: [{ data: Object.values(distUltima), backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#8e5ea2'] }], options: { plugins: {legend: {display: false}} } });
+        renderChart("chartUltimaEtapa", "doughnut", { labels: Object.keys(distUltima), datasets: [{ data: Object.values(distUltima), backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'] }], options: { plugins: {legend: {display: false}} } });
         
         // TABLA ULTIMA ETAPA CON TOTAL
         let hUlt="";
@@ -790,14 +784,26 @@
         hTiempos += `<tr class="table-secondary"><th colspan="2" class="text-end">PROMEDIO GENERAL</th><th class="fw-bold text-primary">${generalAvg}</th><th>-</th></tr>`;
         document.getElementById("tbodyTiempos").innerHTML=hTiempos;
 
-        // CRITICOS (usando fecha manual)
+        // CRITICOS (USANDO COLUMNA VIRTUAL DE DIAS)
         let hCrit="";
         rows.forEach(r => {
              const st = (r[COL_STATUS]||"").toUpperCase();
              if(!st.includes("DESP") && !esTagEliminado(r) && !st.includes("LIBERADO")) {
-                 let f = parseDateFlexible(r["F.Emision Plano"]) || today; 
-                 let d = (today - f) / (1000 * 60 * 60 * 24);
-                 if(d>60) hCrit += `<tr><td>${r[COL_TAG]}</td><td class="text-center"><span class="badge bg-danger">${Math.floor(d)}</span></td><td>${r[COL_STATUS]}</td><td>${formatDateManual(f)}</td></tr>`;
+                 
+                 // Usamos directamente la columna virtual para filtrar 61+
+                 let dias = Number(r[COL_DIAS_MOV]) || 0;
+                 
+                 // Para la visualización de fecha, buscamos la ultima registrada
+                 let maxDate = null;
+                 COLUMNAS_FECHAS_ALL.forEach(c => {
+                     let d = parseDateFlexible(r[c]);
+                     if(d && (!maxDate || d > maxDate)) maxDate = d;
+                 });
+                 let fBase = maxDate || parseDateFlexible(r["F.Emision Plano"]) || today;
+
+                 if(dias > 60) {
+                     hCrit += `<tr><td>${r[COL_TAG]}</td><td class="text-center"><span class="badge bg-danger">${Math.floor(dias)}</span></td><td>${r[COL_STATUS]}</td><td>${formatDateManual(fBase)}</td></tr>`;
+                 }
              }
         });
         document.getElementById("tabla-criticos-body").innerHTML = hCrit || '<tr><td colspan="4">Sin críticos</td></tr>';
