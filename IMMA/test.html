@@ -24,7 +24,6 @@
 
       /* FICHA TÉCNICA Y TIMELINE */
       .ficha-header { background-color: #1a2b48; color: white; padding: 10px 15px; border-radius: 8px 8px 0 0; }
-      /* Ficha Body ahora es flex container por defecto para el layout */
       .ficha-body { background-color: white; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 8px 8px; padding: 20px; }
       .ficha-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6c757d; margin-bottom: 2px; }
       .ficha-value { font-size: 1.1rem; font-weight: 600; color: #212529; margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 5px; }
@@ -32,7 +31,7 @@
       /* TIMELINE STYLES */
       .timeline { position: relative; padding-left: 20px; border-left: 2px solid #e9ecef; margin-top: 10px; }
       .timeline-item { position: relative; margin-bottom: 15px; }
-      .timeline-dot { position: absolute; left: -15px; top: 0; width: 12px; height: 12px; border-radius: 50%; background: #212529; border: 3px solid #b58900; }
+      .timeline-dot { position: absolute; left: -26px; top: 0; width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 3px solid #1a2b48; }
       .timeline-date { font-size: 0.75rem; color: #6c757d; font-weight: 600; }
       .timeline-content { font-size: 0.9rem; font-weight: bold; color: #212529; }
       .timeline-empty { font-style: italic; color: #adb5bd; font-size: 0.9rem; padding-left: 10px; }
@@ -75,7 +74,6 @@
 
             <div id="contenedorFicha" class="d-none animate__animated animate__fadeIn">
               <div class="row g-0 align-items-stretch">
-                
                 <div class="col-12 col-lg-4 pe-lg-3 mb-3 mb-lg-0 d-flex flex-column">
                   <div class="ficha-header flex-shrink-0"><h5 class="m-0"><i class="bi bi-info-circle"></i> Detalles del Spool</h5></div>
                   <div class="ficha-body h-100 d-flex flex-column">
@@ -84,7 +82,6 @@
                           <h2 id="ficha-tag" class="text-primary fw-bold mb-0">-</h2>
                           <span id="ficha-status-badge" class="badge bg-secondary mt-2">...</span>
                         </div>
-                        
                         <div class="row">
                             <div class="col-6">
                                 <div class="ficha-label">Status Spool</div>
@@ -97,11 +94,9 @@
                         </div>
                         <div class="ficha-label mt-2 border-bottom pb-1 mb-2">Línea de Tiempo (Histórico)</div>
                     </div>
-
                     <div id="timeline-ficha" class="flex-grow-1" style="overflow-y: auto; min-height: 0;"></div>
                   </div>
                 </div>
-
                 <div class="col-12 col-lg-8 d-flex flex-column">
                   <div class="ficha-header d-flex justify-content-between align-items-center flex-shrink-0">
                     <h5 class="m-0"><i class="bi bi-file-earmark-pdf"></i> Plano</h5>
@@ -134,12 +129,10 @@
              </div>
 
              <div class="row g-3 align-items-stretch" style="min-height: 600px;">
-               
                <div class="col-12 col-lg-4 d-flex flex-column gap-3">
                  <div class="card shadow-sm mb-0 p-3 flex-shrink-0">
                    <h5 class="card-title">Spool Seleccionado</h5>
                    <p class="mb-1 fw-bold fs-5 text-primary" id="lblTagSel">-</p>
-                   
                    <div class="row g-2 mb-2">
                        <div class="col-6">
                            <small class="text-muted d-block">Status Spool</small>
@@ -150,7 +143,6 @@
                            <span id="lblFluorEdit" class="fw-bold small text-info">-</span>
                        </div>
                    </div>
-                   
                    <div class="alert alert-light border p-2 mb-0">
                        <small class="text-muted d-block">Último Movimiento Detectado:</small>
                        <span id="lblUltimoMovEdit" class="fw-bold">-</span>
@@ -222,7 +214,7 @@
                     <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">0-30 días</div><div id="kpi-proceso" class="kpi-value kpi-blue">-</div></div></div>
                     <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">31-60 días</div><div id="kpi-pend" class="kpi-value kpi-yellow">-</div></div></div>
                     <div class="col-6 col-md-3"><div class="kpi-box"><div class="kpi-title">61+ días</div><div id="kpi-atr" class="kpi-value kpi-red">-</div></div></div>
-                    <div class="col-6 col-md-3"><div class="kpi-box bg-light"><div class="kpi-title">Eliminados</div><div id="kpi-elim" class="kpi-value kpi-muted">-</div></div></div>
+                    <div class="col-6 col-md-3"><div class="kpi-box bg-light"><div class="kpi-title">Eliminados/Ref/Mod</div><div id="kpi-elim" class="kpi-value kpi-muted">-</div></div></div>
                  </div>
 
                  <div class="row mb-3 g-3">
@@ -243,7 +235,7 @@
                  <div class="row mb-3">
                     <div class="col-12">
                         <div class="card p-3">
-                            <h6>Evolución de Despachos</h6>
+                            <h6>Evolución de Despachos (MM/YYYY)</h6>
                             <div style="height: 250px;"><canvas id="chartEvolucion"></canvas></div>
                         </div>
                     </div>
@@ -266,9 +258,12 @@
                  <div class="row mb-3 g-3">
                     <div class="col-12 col-lg-6">
                         <div class="card p-3 h-100">
-                            <h6>Registrados Hoy</h6>
-                            <div class="table-responsive mb-2" style="max-height: 100px;">
-                                <table class="table table-sm small"><thead><tr><th>Etapa</th><th class="text-center">Hoy</th><th class="text-center text-muted">F. Anterior</th></tr></thead><tbody id="tbodyLogHoy"></tbody></table>
+                            <div class="d-flex justify-content-between">
+                                <h6>Registrados Hoy</h6>
+                                <span class="badge bg-success" id="count-logs">0 registros</span>
+                            </div>
+                            <div class="table-responsive mb-2">
+                                <table class="table table-sm small"><thead><tr><th>Etapa</th><th class="text-center text-primary">Cantidad</th></tr></thead><tbody id="tbodyLogHoy"></tbody></table>
                             </div>
                             <div style="height: 200px; position: relative;"><canvas id="chartLogHoy"></canvas></div>
                         </div>
@@ -278,7 +273,7 @@
                             <h6>Estatus por Última Etapa (Activos)</h6>
                             <div class="row">
                                 <div class="col-6">
-                                    <div class="table-responsive" style="max-height: 250px;"><table class="table table-sm table-hover small"><tbody id="tbodyUltimaEtapa"></tbody></table></div>
+                                    <div class="table-responsive"><table class="table table-sm table-hover small"><tbody id="tbodyUltimaEtapa"></tbody></table></div>
                                 </div>
                                 <div class="col-6 d-flex align-items-center"><canvas id="chartUltimaEtapa"></canvas></div>
                             </div>
@@ -322,13 +317,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
    <script>
-    // --- CONFIGURACIÓN APPSHEET ---
     const APP_ID = "59c4aa7f-9e37-4e66-af20-52250f9c4c07";
     const APP_KEY = "V2-157Vx-ltOIu-kTlqv-TYrU7-Gsowd-355md-nWdkC-k7s1N";
     const TABLE_MASTER = "MasterBI";
     const TABLE_LOG = "ChangeLog"; 
 
-    // COLUMNAS
     const COL_TAG = "TAG SPOOL";
     const COL_STATUS = "STATUS SPOOL";
     const COL_PLANO = "ID_PLANO"; 
@@ -367,7 +360,6 @@
     let dataCache = []; 
     let logCache = [];
     
-    // --- UTILS ---
     async function callAppSheet(tableName, action, bodyParams = {}) {
         const url = `https://api.appsheet.com/api/v2/apps/${APP_ID}/tables/${tableName}/Action`;
         const body = { "Action": action, "Properties": { "Locale": "es-CL", "Timezone": "America/Santiago", ...bodyParams.Properties }, ...bodyParams };
@@ -384,8 +376,16 @@
     function parseDateFlexible(val) {
         if (!val) return null;
         if (typeof val === 'number') return new Date(1899, 11, 30 + val);
-        const d = new Date(val);
-        return isNaN(d) ? null : d;
+        let str = String(val).trim();
+        if(str.includes("T")) str = str.split("T")[0]; 
+        if (/^\d{4}-\d{2}-\d{2}$/.test(str)) { const [y, m, d] = str.split('-').map(Number); return new Date(y, m - 1, d); }
+        if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(str)) { const parts = str.split(/[\/\-]/).map(Number); return new Date(parts[2], parts[1] - 1, parts[0]); }
+        const d = new Date(str);
+        return isNaN(d.getTime()) ? null : d;
+    }
+
+    function isSameDay(d1, d2) {
+        return d1 && d2 && d1.getDate() === d2.getDate() && d1.getMonth() === d2.getMonth() && d1.getFullYear() === d2.getFullYear();
     }
 
     function diffDays(d1Val, d2Val) {
@@ -410,41 +410,28 @@
         });
     }
     
-    // --- TIMELINE GENERATOR ---
     function renderTimeline(row, containerId) {
         const container = document.getElementById(containerId);
         container.innerHTML = "";
-        
         let events = [];
         COLUMNAS_FECHAS_ALL.forEach(col => {
             const val = row[col];
             const d = parseDateFlexible(val);
-            if(d) {
-                events.push({ date: d, name: col });
-            }
+            if(d) events.push({ date: d, name: col });
         });
-        
         events.sort((a,b) => a.date - b.date);
         
         if(events.length === 0) {
             container.innerHTML = '<div class="timeline-empty">Sin movimientos registrados.</div>';
             return null;
         }
-        
         let html = '<div class="timeline">';
         events.forEach(ev => {
             const dateStr = ev.date.toLocaleDateString("es-CL");
-            html += `
-                <div class="timeline-item">
-                    <div class="timeline-dot"></div>
-                    <div class="timeline-date">${dateStr}</div>
-                    <div class="timeline-content">${ev.name}</div>
-                </div>
-            `;
+            html += `<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-date">${dateStr}</div><div class="timeline-content">${ev.name}</div></div>`;
         });
         html += '</div>';
         container.innerHTML = html;
-        
         return events[events.length - 1];
     }
 
@@ -454,16 +441,13 @@
         if (typeof ChartDataLabels !== "undefined") Chart.register(ChartDataLabels);
     });
 
-    // --- FICHA TÉCNICA ---
-    let resultadosFicha = [];
+    let resultadosFicha = [], resultadosEditCache = [], rowEdit = null;
     function buscarTagsFicha() {
         const txt = document.getElementById("txtBuscarFicha").value.trim().toUpperCase();
         if(!txt) return;
         document.getElementById("resFicha").style.display='block';
         document.getElementById("resFicha").innerHTML='<div class="list-group-item">Buscando...</div>';
-        
-        const sel = `Filter(${TABLE_MASTER}, CONTAINS([${COL_TAG}], '${txt}'))`;
-        callAppSheet(TABLE_MASTER, "Find", {Selector: sel}).then(rows => {
+        callAppSheet(TABLE_MASTER, "Find", {Selector: `Filter(${TABLE_MASTER}, CONTAINS([${COL_TAG}], '${txt}'))`}).then(rows => {
             resultadosFicha = rows;
             let h='';
             if(!rows.length) h='<div class="list-group-item text-danger">No encontrado</div>';
@@ -475,26 +459,19 @@
         const r = resultadosFicha[i];
         document.getElementById("resFicha").style.display='none';
         document.getElementById("contenedorFicha").classList.remove("d-none");
-        
         document.getElementById("ficha-tag").textContent = r[COL_TAG];
         document.getElementById("ficha-status-badge").textContent = r[COL_STATUS];
         document.getElementById("ficha-estado-texto").textContent = r[COL_STATUS];
         document.getElementById("ficha-fluor").textContent = r[COL_FLUOR] || "-";
-        
         renderTimeline(r, "timeline-ficha");
         renderPlano(r[COL_PLANO], "ficha-iframe", "ficha-plano-loading", "ficha-btn-abrir", "spinner-plano", "msg-plano-load");
     }
-    
-    // --- GESTIÓN / CAMBIOS ---
-    let resultadosEditCache = [];
-    let rowEdit = null;
     function buscarTagsEdit() {
          const txt = document.getElementById("txtBuscarEdit").value.trim().toUpperCase();
          if(!txt) return;
          document.getElementById("resEdit").style.display='block';
          document.getElementById("resEdit").innerHTML='<div class="list-group-item">Buscando...</div>';
-         const sel = `Filter(${TABLE_MASTER}, CONTAINS([${COL_TAG}], '${txt}'))`;
-         callAppSheet(TABLE_MASTER, "Find", {Selector: sel}).then(rows => {
+         callAppSheet(TABLE_MASTER, "Find", {Selector: `Filter(${TABLE_MASTER}, CONTAINS([${COL_TAG}], '${txt}'))`}).then(rows => {
              resultadosEditCache = rows;
              let h='<div class="list-group">';
              if(!rows.length) h+='<div class="list-group-item text-danger">No encontrado</div>';
@@ -503,87 +480,40 @@
              document.getElementById("resEdit").innerHTML=h;
          });
     }
-    
     function selEditInd(i) {
         rowEdit = resultadosEditCache[i];
         document.getElementById("resEdit").style.display='none';
-        
         document.getElementById("lblTagSel").textContent = rowEdit[COL_TAG];
         document.getElementById("lblEstadoEdit").textContent = rowEdit[COL_STATUS];
         document.getElementById("lblFluorEdit").textContent = rowEdit[COL_FLUOR] || "-";
-        
         const lastEvt = renderTimeline(rowEdit, "timeline-edit");
-        if(lastEvt) {
-            document.getElementById("lblUltimoMovEdit").innerHTML = `${lastEvt.name} <br> <span class='text-primary'>${lastEvt.date.toLocaleDateString("es-CL")}</span>`;
-        } else {
-            document.getElementById("lblUltimoMovEdit").textContent = "Sin movimientos";
-        }
-
+        if(lastEvt) document.getElementById("lblUltimoMovEdit").innerHTML = `${lastEvt.name} <br> <span class='text-primary'>${lastEvt.date.toLocaleDateString("es-CL")}</span>`;
+        else document.getElementById("lblUltimoMovEdit").textContent = "Sin movimientos";
         renderPlano(rowEdit[COL_PLANO], "edit-iframe", "edit-plano-loading", "edit-btn-abrir", "edit-spinner-plano", "edit-msg-plano");
         document.getElementById("msgGuardar").textContent = "";
     }
-    
-    function renderPlano(idPlano, iframeId, loadingId, btnId, spinnerId, msgId) {
-        const iframe = document.getElementById(iframeId);
-        const loadingDiv = document.getElementById(loadingId);
-        const btn = document.getElementById(btnId);
-        const spinner = document.getElementById(spinnerId);
-        const msg = document.getElementById(msgId);
-        
-        iframe.classList.add("d-none");
-        loadingDiv.classList.remove("d-none");
-        btn.classList.add("d-none");
-        
-        if(idPlano) {
-            msg.textContent = "Cargando PDF...";
-            spinner.classList.remove("d-none");
-            iframe.src = `https://drive.google.com/file/d/${idPlano}/preview`;
-            iframe.onload = () => {
-                spinner.classList.add("d-none");
-                loadingDiv.classList.add("d-none");
-                iframe.classList.remove("d-none");
-            };
-            btn.href = `https://drive.google.com/file/d/${idPlano}/view`;
-            btn.classList.remove("d-none");
-        } else {
-            msg.textContent = "Sin plano cargado";
-            spinner.classList.add("d-none");
-        }
+    function renderPlano(id, ifr, load, btn, spin, msg) {
+        const f = document.getElementById(ifr), l = document.getElementById(load), b = document.getElementById(btn), s = document.getElementById(spin), m = document.getElementById(msg);
+        f.classList.add("d-none"); l.classList.remove("d-none"); b.classList.add("d-none");
+        if(id) { m.textContent="Cargando..."; s.classList.remove("d-none"); f.src=`https://drive.google.com/file/d/${id}/preview`; f.onload=()=>{s.classList.add("d-none"); l.classList.add("d-none"); f.classList.remove("d-none");}; b.href=`https://drive.google.com/file/d/${id}/view`; b.classList.remove("d-none"); }
+        else { m.textContent="Sin plano"; s.classList.add("d-none"); }
     }
-
     async function guardarCambios() {
         if(!rowEdit) return alert("Seleccione TAG");
         const col = document.getElementById("cmbEtapa").value;
         const fec = document.getElementById("dtFecha").value;
-        if(!col || !fec) return alert("Datos incompletos");
-        
+        if(!col || !fec) return alert("Incompleto");
         document.getElementById("btnGuardar").textContent = "Guardando...";
-        
-        const logData = {
-            "FechaHora": new Date().toLocaleString("es-CL"),
-            "Usuario": "WebAdmin",
-            "Hoja": TABLE_MASTER,
-            "Celda": col,
-            "CabeceraColumna": col,
-            "TAG SPOOL": rowEdit[COL_TAG],
-            "ValorAnterior": rowEdit[col] || "",
-            "ValorNuevo": fec
-        };
-        await callAppSheet(TABLE_LOG, "Add", {Rows:[logData]});
-        
-        const update = {};
-        update[COL_TAG] = rowEdit[COL_TAG];
-        update[col] = fec;
-        await callAppSheet(TABLE_MASTER, "Edit", {Rows:[update]});
-        
+        await callAppSheet("ChangeLog", "Add", {Rows:[{
+            "FechaHora": new Date().toLocaleString("es-CL"), "Usuario": "WebAdmin", "Hoja": TABLE_MASTER,
+            "Celda": col, "CabeceraColumna": col, "TAG SPOOL": rowEdit[COL_TAG], "ValorAnterior": rowEdit[col]||"", "ValorNuevo": fec
+        }]});
+        await callAppSheet(TABLE_MASTER, "Edit", {Rows:[{ "TAG SPOOL": rowEdit[COL_TAG], [col]: fec }]});
         document.getElementById("btnGuardar").textContent = "Guardar";
         document.getElementById("msgGuardar").className="text-success";
         document.getElementById("msgGuardar").textContent="Guardado OK";
     }
 
-    // =========================================================
-    // DASHBOARD (Render All)
-    // =========================================================
     async function cargarDashboardLocal(force = false) {
         const now = new Date();
         document.getElementById("dash-time").textContent = now.toLocaleTimeString();
@@ -595,7 +525,8 @@
         try {
             const [m, l] = await Promise.all([
                 callAppSheet(TABLE_MASTER, "Find", {Selector: `Filter(${TABLE_MASTER}, true)`}),
-                callAppSheet(TABLE_LOG, "Find", {Selector: `Filter(${TABLE_LOG}, true)`})
+                // DESCARGA TODO EL CHANGELOG Y FILTRA EN JS (REEMPLAZA SLICE FALLIDO)
+                callAppSheet(TABLE_LOG, "Find", {Selector: `Filter(${TABLE_LOG}, true)`}) 
             ]);
             dataCache = m; logCache = l;
             renderAll(m, l);
@@ -624,9 +555,14 @@
             else if(st.includes("DESPACHADO")) {
                 desp++;
                 let fDesp = parseDateFlexible(r[COL_FECHA_FIN] || r["F.Despacho"]); 
-                if(fDesp) distDespachoMes[fDesp.toISOString().substring(0, 7)] = (distDespachoMes[fDesp.toISOString().substring(0, 7)]||0)+1;
+                if(fDesp) {
+                    let k = fDesp.toISOString().substring(0, 7); 
+                    distDespachoMes[k] = (distDespachoMes[k]||0)+1;
+                }
             }
-            else if(st.includes("ELIMINADO") || st.includes("HOLD")) elim++;
+            else if(st.includes("ELIMINADO") || st.includes("HOLD") || fl.includes("ELIMINADO") || fl.includes("MODIFICAR") || fl.includes("REFABRICAR")) {
+                elim++;
+            }
             else {
                 act++;
                 let fIni = parseDateFlexible(r[COL_FECHA_TRN] || r["F.Emision Plano"]) || today;
@@ -661,32 +597,43 @@
         renderChart("chartEmbudo", "bar", { labels: ["Total", "Activos", "0-30", "31-60", "61+"], datasets: [{ data: [total, act, d0, d31, d61], backgroundColor: ["#e0e0e0", "#1a2b48", "#3b82f6", "#f59e0b", "#d93025"] }], options: { indexAxis: 'y', plugins: {legend: {display: false}} } });
         renderChart("chartDiasProceso", "bar", { labels: ["0-30", "31-60", "61+"], datasets: [{ data: [d0, d31, d61], backgroundColor: ["#d93025", "#d93025", "#d93025"] }], options: { plugins: {legend: {display: false}} } });
         
-        const labelsMes = Object.keys(distDespachoMes).sort();
-        renderChart("chartEvolucion", "bar", { labels: labelsMes, datasets: [{ data: labelsMes.map(k=>distDespachoMes[k]), backgroundColor: "#2ea043" }], options: { plugins: {legend: {display: false}} } });
+        const sortedKeys = Object.keys(distDespachoMes).sort();
+        const labelsVisual = sortedKeys.map(k => { const parts = k.split('-'); return `${parts[1]}/${parts[0]}`; });
+        renderChart("chartEvolucion", "bar", { 
+            labels: labelsVisual, 
+            datasets: [{ data: sortedKeys.map(k=>distDespachoMes[k]), backgroundColor: "#2ea043" }], 
+            options: { plugins: {legend: {display: false}} } 
+        });
         
         renderChart("chartFluor", "doughnut", { labels: Object.keys(distFluor), datasets: [{ data: Object.values(distFluor), backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF'] }], options: { plugins: {legend: {display: false}} } });
-        
         let hFluor=""; Object.entries(distFluor).sort((a,b)=>b[1]-a[1]).forEach(([k,v]) => hFluor+=`<tr><td>${k}</td><td class='text-end fw-bold'>${v}</td></tr>`);
         document.getElementById("tbodyFluor").innerHTML=hFluor;
 
-        let logHoy={}, logAnt={};
-        logs.forEach(l => {
-            let fh = parseDateFlexible(l["FechaHora"]);
-            if(fh && fh.getDate()===today.getDate() && fh.getMonth()===today.getMonth()) {
-                let col = l["CabeceraColumna"];
-                let val = parseDateFlexible(l["ValorNuevo"]);
-                if(val) {
-                    let diff = val.getTime() - today.getTime();
-                    if(diff>=-86400000 && diff<=86400000) logHoy[col]=(logHoy[col]||0)+1;
-                    else logAnt[col]=(logAnt[col]||0)+1;
-                } else logHoy[col]=(logHoy[col]||0)+1;
-            }
+        // --- LÓGICA REGISTROS HOY (SIMPLIFICADA SIN SLICE) ---
+        let logsHoy = logs.filter(l => {
+            let fd = parseDateFlexible(l["FechaHora"]);
+            return isSameDay(fd, today);
         });
-        let arrLog = Array.from(new Set([...Object.keys(logHoy), ...Object.keys(logAnt)])).map(k=>({k, h:logHoy[k]||0, a:logAnt[k]||0})).sort((a,b)=>(b.h+b.a)-(a.h+a.a)).slice(0,5);
+
+        document.getElementById("count-logs").textContent = logsHoy.length + " registros";
+        let logCounts = {}; 
         
-        let hLog=""; arrLog.forEach(x=> hLog+=`<tr><td>${x.k}</td><td class='text-center text-success fw-bold'>${x.h}</td><td class='text-center text-muted'>${x.a}</td></tr>`);
-        document.getElementById("tbodyLogHoy").innerHTML=hLog;
-        renderChart("chartLogHoy", "bar", { labels: arrLog.map(x=>x.k), datasets: [{label:"Hoy", data:arrLog.map(x=>x.h), backgroundColor:"#2ea043"}, {label:"Ant", data:arrLog.map(x=>x.a), backgroundColor:"#ffc107"}] }, {scales:{x:{stacked:false}, y:{stacked:false}}});
+        logsHoy.forEach(l => {
+            let col = (l["CabeceraColumna"] || "Sin Etapa").trim();
+            logCounts[col] = (logCounts[col] || 0) + 1;
+        });
+
+        let arrLog = Object.keys(logCounts).map(k=>({ k, v: logCounts[k] })).sort((a,b)=>b.v - a.v);
+
+        let hLog=""; 
+        arrLog.forEach(x=> hLog+=`<tr><td>${x.k}</td><td class='text-center fw-bold'>${x.v}</td></tr>`);
+        document.getElementById("tbodyLogHoy").innerHTML = hLog;
+
+        let arrLogChart = arrLog.slice(0, 12);
+        renderChart("chartLogHoy", "bar", { 
+            labels: arrLogChart.map(x=>x.k), 
+            datasets: [{ label:"Cantidad", data:arrLogChart.map(x=>x.v), backgroundColor:"#2ea043" }] 
+        }, {scales:{x:{stacked:false}, y:{stacked:false}}});
 
         renderChart("chartUltimaEtapa", "doughnut", { labels: Object.keys(distUltima), datasets: [{ data: Object.values(distUltima), backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#8e5ea2'] }], options: { plugins: {legend: {display: false}} } });
         let hUlt=""; Object.entries(distUltima).sort((a,b)=>b[1]-a[1]).forEach(([k,v]) => hUlt+=`<tr><td>${k}</td><td class='text-end'>${v}</td></tr>`);
@@ -726,5 +673,3 @@
         else { const { jsPDF } = window.jspdf; const pdf = new jsPDF('p', 'mm', 'a4'); const w = 210; const h = (canvas.height * w) / canvas.width; pdf.addImage(img, 'JPEG', 0, 0, w, h); pdf.save('dashboard.pdf'); }
     }
 </script>
-  </body>
-</html>
