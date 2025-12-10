@@ -317,10 +317,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
    <script>
+    // --- CONFIGURACIÓN ---
     const APP_ID = "59c4aa7f-9e37-4e66-af20-52250f9c4c07";
     const APP_KEY = "V2-157Vx-ltOIu-kTlqv-TYrU7-Gsowd-355md-nWdkC-k7s1N";
+    
+    // TABLAS COMPLETAS
     const TABLE_MASTER = "MasterBI";
     const TABLE_LOG = "ChangeLog"; 
+
+    // COLUMNAS
+    // IMPORTANTE: Asegúrate de que en AppSheet la columna virtual se llame EXACTAMENTE "Mes Despacho"
+    const COL_MES_DESPACHO = "Mes Despacho"; 
 
     const COL_TAG = "TAG SPOOL";
     const COL_STATUS = "STATUS SPOOL";
@@ -360,6 +367,7 @@
     let dataCache = []; 
     let logCache = [];
     
+    // --- UTILS ---
     async function callAppSheet(tableName, action, bodyParams = {}) {
         const url = `https://api.appsheet.com/api/v2/apps/${APP_ID}/tables/${tableName}/Action`;
         const body = { "Action": action, "Properties": { "Locale": "es-CL", "Timezone": "America/Santiago", ...bodyParams.Properties }, ...bodyParams };
@@ -376,16 +384,15 @@
     function parseDateFlexible(val) {
         if (!val) return null;
         if (typeof val === 'number') return new Date(1899, 11, 30 + val);
-        let str = String(val).trim();
-        if(str.includes("T")) str = str.split("T")[0]; 
-        if (/^\d{4}-\d{2}-\d{2}$/.test(str)) { const [y, m, d] = str.split('-').map(Number); return new Date(y, m - 1, d); }
-        if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(str)) { const parts = str.split(/[\/\-]/).map(Number); return new Date(parts[2], parts[1] - 1, parts[0]); }
-        const d = new Date(str);
-        return isNaN(d.getTime()) ? null : d;
+        const str = String(val).trim();
+        let datePart = str.split(/[T ]/)[0];
+        if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) { const [y, m, d] = datePart.split('-').map(Number); return new Date(y, m - 1, d); }
+        if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(datePart)) { const parts = datePart.split(/[\/\-]/).map(Number); return new Date(parts[2], parts[1] - 1, parts[0]); }
+        const d = new Date(str); return isNaN(d.getTime()) ? null : d;
     }
 
     function isSameDay(d1, d2) {
-        return d1 && d2 && d1.getDate() === d2.getDate() && d1.getMonth() === d2.getMonth() && d1.getFullYear() === d2.getFullYear();
+        return d1 && d2 && d1.getFullYear()===d2.getFullYear() && d1.getMonth()===d2.getMonth() && d1.getDate()===d2.getDate();
     }
 
     function diffDays(d1Val, d2Val) {
@@ -441,6 +448,7 @@
         if (typeof ChartDataLabels !== "undefined") Chart.register(ChartDataLabels);
     });
 
+    // --- FICHA Y GESTIÓN ---
     let resultadosFicha = [], resultadosEditCache = [], rowEdit = null;
     function buscarTagsFicha() {
         const txt = document.getElementById("txtBuscarFicha").value.trim().toUpperCase();
@@ -514,6 +522,9 @@
         document.getElementById("msgGuardar").textContent="Guardado OK";
     }
 
+    // =========================================================
+    // DASHBOARD KPI
+    // =========================================================
     async function cargarDashboardLocal(force = false) {
         const now = new Date();
         document.getElementById("dash-time").textContent = now.toLocaleTimeString();
@@ -525,7 +536,6 @@
         try {
             const [m, l] = await Promise.all([
                 callAppSheet(TABLE_MASTER, "Find", {Selector: `Filter(${TABLE_MASTER}, true)`}),
-                // DESCARGA TODO EL CHANGELOG Y FILTRA EN JS (REEMPLAZA SLICE FALLIDO)
                 callAppSheet(TABLE_LOG, "Find", {Selector: `Filter(${TABLE_LOG}, true)`}) 
             ]);
             dataCache = m; logCache = l;
@@ -554,10 +564,12 @@
             if(st.includes("LIBERADO")) lib++;
             else if(st.includes("DESPACHADO")) {
                 desp++;
-                let fDesp = parseDateFlexible(r[COL_FECHA_FIN] || r["F.Despacho"]); 
-                if(fDesp) {
-                    let k = fDesp.toISOString().substring(0, 7); 
-                    distDespachoMes[k] = (distDespachoMes[k]||0)+1;
+                
+                // LECTURA DIRECTA DE COLUMNA VIRTUAL "Mes Despacho" (Ej: "12/2025")
+                // Ya no calculamos, confiamos en AppSheet
+                let valMes = r[COL_MES_DESPACHO];
+                if (valMes) {
+                    distDespachoMes[valMes] = (distDespachoMes[valMes] || 0) + 1;
                 }
             }
             else if(st.includes("ELIMINADO") || st.includes("HOLD") || fl.includes("ELIMINADO") || fl.includes("MODIFICAR") || fl.includes("REFABRICAR")) {
@@ -597,10 +609,16 @@
         renderChart("chartEmbudo", "bar", { labels: ["Total", "Activos", "0-30", "31-60", "61+"], datasets: [{ data: [total, act, d0, d31, d61], backgroundColor: ["#e0e0e0", "#1a2b48", "#3b82f6", "#f59e0b", "#d93025"] }], options: { indexAxis: 'y', plugins: {legend: {display: false}} } });
         renderChart("chartDiasProceso", "bar", { labels: ["0-30", "31-60", "61+"], datasets: [{ data: [d0, d31, d61], backgroundColor: ["#d93025", "#d93025", "#d93025"] }], options: { plugins: {legend: {display: false}} } });
         
-        const sortedKeys = Object.keys(distDespachoMes).sort();
-        const labelsVisual = sortedKeys.map(k => { const parts = k.split('-'); return `${parts[1]}/${parts[0]}`; });
+        // ORDENAMIENTO DE MESES (M/YYYY -> Cronológico)
+        const sortedKeys = Object.keys(distDespachoMes).sort((a, b) => {
+            let [m1, y1] = a.split('/').map(Number);
+            let [m2, y2] = b.split('/').map(Number);
+            if (y1 !== y2) return y1 - y2;
+            return m1 - m2;
+        });
+        
         renderChart("chartEvolucion", "bar", { 
-            labels: labelsVisual, 
+            labels: sortedKeys, 
             datasets: [{ data: sortedKeys.map(k=>distDespachoMes[k]), backgroundColor: "#2ea043" }], 
             options: { plugins: {legend: {display: false}} } 
         });
@@ -609,7 +627,7 @@
         let hFluor=""; Object.entries(distFluor).sort((a,b)=>b[1]-a[1]).forEach(([k,v]) => hFluor+=`<tr><td>${k}</td><td class='text-end fw-bold'>${v}</td></tr>`);
         document.getElementById("tbodyFluor").innerHTML=hFluor;
 
-        // --- LÓGICA REGISTROS HOY (SIMPLIFICADA SIN SLICE) ---
+        // --- REGISTROS HOY (SIMPLIFICADO) ---
         let logsHoy = logs.filter(l => {
             let fd = parseDateFlexible(l["FechaHora"]);
             return isSameDay(fd, today);
