@@ -229,7 +229,7 @@ function updateClock() {
 
 function renderCategories() {
   const container = document.getElementById("category-container");
-  let html = `<button class="btn btn-dark btn-lg flex-shrink-0" onclick="filterProducts('Todo')">Todo</button>`;
+  let html = `<button class="btn btn-primary btn-lg flex-shrink-0" onclick="filterProducts('Todo')">Todo</button>`;
 
   db.categorias.forEach((cat) => {
     const color = cat.Color ? mapColor(cat.Color) : "secondary";
