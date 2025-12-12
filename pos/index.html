@@ -26,9 +26,38 @@
       .product-card:active {
         transform: scale(0.95);
       }
+      /* 1. Definir el área fija para que aparezca el scroll */
       .scroll-area {
-        height: calc(100vh - 160px);
-        overflow-y: auto;
+        /* Ajusta este valor (160px) si tu cabecera es más alta o más baja */
+        height: calc(100vh - 180px);
+        overflow-y: auto; /* Esto activa el scroll vertical automático */
+        overflow-x: hidden; /* Evita scroll horizontal */
+        padding-right: 5px; /* Espacio para que el scroll no tape botones */
+      }
+
+      /* 2. ESTILOS PARA LA BARRA DE SCROLL TÁCTIL (Webkit: Chrome/Edge) */
+
+      /* Ancho de la barra */
+      .scroll-area::-webkit-scrollbar {
+        width: 25px; /* Lo suficientemente ancha para un dedo adulto */
+      }
+
+      /* El fondo de la barra (el riel) */
+      .scroll-area::-webkit-scrollbar-track {
+        background: #e9ecef;
+        border-radius: 10px;
+      }
+
+      /* La parte que se mueve (el "pulgar") */
+      .scroll-area::-webkit-scrollbar-thumb {
+        background-color: #6c757d; /* Gris oscuro visible */
+        border-radius: 12px; /* Bordes redondos */
+        border: 5px solid #e9ecef; /* Crea un margen blanco alrededor para estética */
+      }
+
+      /* Cuando tocas la barra */
+      .scroll-area::-webkit-scrollbar-thumb:active {
+        background-color: #495057; /* Más oscuro al presionar */
       }
       .ticket-area {
         height: calc(100vh - 250px);
@@ -45,6 +74,33 @@
       }
       .material-symbols-outlined {
         font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      }
+      /* NUEVO: Reemplaza el sistema de filas de Bootstrap por Grid nativo */
+      #products-container {
+        display: grid;
+        /* MAGIA AQUÍ: 
+           Esto dice "Crea tantas columnas como quepan, pero que midan mínimo 100px".
+           En una pantalla normal esto te dará entre 8 y 10 columnas. */
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 8px; /* Espacio entre botones */
+        padding-bottom: 20px;
+      }
+
+      /* Ajuste para que el botón se vea bien en tamaño pequeño */
+      .product-card {
+        height: 100px; /* Altura fija más pequeña (antes 120px) */
+        cursor: pointer;
+        transition: transform 0.1s;
+        font-size: 0.85rem; /* Texto un poco más pequeño */
+      }
+
+      .product-card .card-title {
+        font-size: 0.9rem; /* Título ajustado */
+        line-height: 1.1;
+      }
+
+      .product-card .badge {
+        font-size: 0.75rem;
       }
     </style>
   </head>
@@ -89,19 +145,20 @@
               id="category-container"
             ></div>
             <div class="flex-shrink-0">
-              <h3><span class="material-symbols-outlined">
-point_of_sale
-</span>&nbsp;Punto de Venta el carro del 8&nbsp;
-              <button
-                class="btn btn-dark btn-lg shadow-sm"
-                onclick="loadSystemData(false)"
-                title="Actualizar Datos"
-              >
-                🔄
-              </button></h3>
+              <h3>
+                <span class="material-symbols-outlined"> point_of_sale </span
+                >&nbsp;Punto de Venta el carro del 8&nbsp;
+                <button
+                  class="btn btn-dark btn-lg shadow-sm"
+                  onclick="loadSystemData(false)"
+                  title="Actualizar Datos"
+                >
+                  🔄
+                </button>
+              </h3>
             </div>
           </div>
-          <div class="row g-3 scroll-area" id="products-container"></div>
+          <div class="scroll-area" id="products-container"></div>
         </div>
         <div
           class="col-4 bg-white border-start p-0 d-flex flex-col flex-column shadow-lg"

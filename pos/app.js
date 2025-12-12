@@ -250,52 +250,31 @@ function renderProducts(lista) {
     const container = document.getElementById('products-container');
     
     if(lista.length === 0) {
-        container.innerHTML = '<div class="col-12 text-center text-muted">No hay productos en esta categoría</div>';
+        // Usamos grid-column: 1 / -1 para que el mensaje ocupe todo el ancho
+        container.innerHTML = '<div style="grid-column: 1 / -1;" class="text-center text-muted mt-4">No hay productos en esta categoría</div>';
         return;
     }
 
     container.innerHTML = lista.map(p => {
-        // LÓGICA DE COLOR HÍBRIDA
         const esHex = p.Color.startsWith('#');
-        
-        // Si es Hex (#007bff), no usamos clase bg-, usamos style directo.
-        // Si es nombre (blue), usamos mapColor para obtener 'primary'.
         const claseBg = esHex ? '' : `bg-${mapColor(p.Color)}`;
-        
-        // Si es Hex, aplicamos el color de fondo manual y forzamos texto blanco.
         const estiloBg = esHex ? `background-color: ${p.Color}; color: white;` : '';
 
+        // NOTA: Ya no hay <div class="col-..."> envolviendo la card.
+        // La card es hija directa del grid container.
         return `
-        <div class="col-4 col-md-3">
             <div class="card product-card h-100 shadow-sm border-0 ${claseBg}" 
                  style="${estiloBg}"
                  onclick="addToCart('${p.ID_Producto}')">
                  
-                <div class="card-body d-flex flex-column align-items-center justify-content-center text-center p-2">
-                    <h6 class="card-title fw-bold mb-1 lh-sm" style="color: inherit;">${p.Nombre}</h6>
-                    <span class="badge bg-white text-dark bg-opacity-75 mt-auto">$${p.Precio.toLocaleString('es-CL')}</span>
+                <div class="card-body d-flex flex-column align-items-center justify-content-center text-center p-1">
+                    <h6 class="card-title fw-bold mb-1" style="color: inherit;">${p.Nombre}</h6>
+                    <span class="badge bg-white text-dark bg-opacity-75 mt-auto p-1">$${p.Precio.toLocaleString('es-CL')}</span>
                 </div>
             </div>
-        </div>
         `;
     }).join('');
 }
-function mapColor(appSheetColor) {
-  if (!appSheetColor) return "secondary";
-  const c = appSheetColor.toLowerCase();
-  const map = {
-    red: "danger",
-    orange: "warning",
-    yellow: "warning",
-    green: "success",
-    blue: "primary",
-    cyan: "info",
-    black: "dark",
-    grey: "secondary",
-  };
-  return map[c] || "primary";
-}
-
 // ==========================================
 // 6. GESTIÓN DEL CARRITO
 // ==========================================
