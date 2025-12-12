@@ -1131,90 +1131,73 @@ class="card-body d-flex flex-column flex-md-row justify-content-between align-it
         }
       }
       async function guardarCambios() {
-        if (!rowEdit) return alert("Seleccione TAG");
+        if(!rowEdit) return alert("Seleccione TAG");
         const colNombre = document.getElementById("cmbEtapa").value;
         const fec = document.getElementById("dtFecha").value;
-        if (!colNombre || !fec) return alert("Datos incompletos");
-
+        if(!colNombre || !fec) return alert("Datos incompletos");
+        
         const valorExistente = rowEdit[colNombre];
         if (valorExistente) {
-          const confirmar = confirm(
-            `⚠ ATENCIÓN ⚠\n\nLa etapa "${colNombre}" ya tiene registrado: ${valorExistente}\n\n¿Desea SOBRESCRIBIRLO con la nueva fecha ${fec}?`
-          );
-          if (!confirmar) return;
+             const confirmar = confirm(`⚠ ATENCIÓN ⚠\n\nLa etapa "${colNombre}" ya tiene registrado: ${valorExistente}\n\n¿Desea SOBRESCRIBIRLO con la nueva fecha ${fec}?`);
+             if (!confirmar) return; 
         }
 
-        document.getElementById("btnGuardar").textContent = "Guardando...";
+        const btn = document.getElementById("btnGuardar");
+        const msg = document.getElementById("msgGuardar");
+        
+        btn.textContent = "Guardando...";
+        btn.disabled = true; // Deshabilitar para evitar doble click
+        msg.textContent = "";
 
         const rowNum = rowEdit["_RowNumber"];
         const colLetra = COL_LETTERS_MAP[colNombre] || "?";
-        const cellId =
-          rowNum && colLetra !== "?" ? `${colLetra}${rowNum}` : "N/A";
-        const fechaLog = new Date().toLocaleString("es-CL", {
-          timeZone: "America/Santiago",
-        });
-
-        await callAppSheet("ChangeLog", "Add", {
-          Rows: [
-            {
-              FechaHora: fechaLog,
-              Usuario: "WebAdmin",
-              Hoja: TABLE_MASTER,
-              Celda: cellId,
-              CabeceraColumna: colNombre,
-              "TAG SPOOL": rowEdit[COL_TAG],
-              ValorAnterior: valorExistente || "",
-              ValorNuevo: fec,
-            },
-          ],
-        });
-        await callAppSheet(TABLE_MASTER, "Edit", {
-          Rows: [{ "TAG SPOOL": rowEdit[COL_TAG], [colNombre]: fec }],
-        });
-
-        rowEdit[colNombre] = fec;
-        document.getElementById("btnGuardar").textContent = "Guardar";
-        document.getElementById("msgGuardar").className = "text-success";
-        document.getElementById("msgGuardar").textContent = "Guardado OK";
-      }
-
-      async function cargarDashboardLocal(force = false) {
-        const now = new Date();
-        document.getElementById(
-          "dash-time"
-        ).innerHTML = `<span class="btn-success"><i class="bi bi-clock-history"></i>${now.toLocaleString(
-          "es-CL"
-        )}</span>`;
-
-        if (!force && dataCache.length > 0) {
-          renderAll(dataCache, logCache);
-          return;
-        }
-
-        document.getElementById("loading-dashboard").classList.remove("d-none");
-        document.getElementById("content-dashboard").classList.add("d-none");
+        const cellId = (rowNum && colLetra !== "?") ? `${colLetra}${rowNum}` : "N/A";
+        
+        // USAMOS LA NUEVA FUNCIÓN SEGURA PARA IPHONE
+        const fechaLog = getFechaHoraSCL_String(); 
 
         try {
-          const [m, l] = await Promise.all([
-            callAppSheet(TABLE_MASTER, "Find", {
-              Selector: `Filter(${TABLE_MASTER}, true)`,
-            }),
-            callAppSheet(SLICE_LOGS, "Find", {
-              Selector: `Filter(${SLICE_LOGS}, true)`,
-            }),
-          ]);
-          dataCache = m;
-          logCache = l;
-          renderAll(m, l);
+            // 1. Guardar en ChangeLog
+            await callAppSheet("ChangeLog", "Add", {Rows:[{
+                "FechaHora": fechaLog, 
+                "Usuario": "WebAdmin", 
+                "Hoja": TABLE_MASTER, 
+                "Celda": cellId, 
+                "CabeceraColumna": colNombre, 
+                "TAG SPOOL": rowEdit[COL_TAG], 
+                "ValorAnterior": valorExistente||"", 
+                "ValorNuevo": fec
+            }]});
+
+            // 2. Guardar en MasterBI
+            await callAppSheet(TABLE_MASTER, "Edit", {Rows:[{ "TAG SPOOL": rowEdit[COL_TAG], [colNombre]: fec }]});
+            
+            // Actualizar memoria local
+            rowEdit[colNombre] = fec;
+            
+            // Refrescar UI visualmente
+            const lastEvt = renderTimeline(rowEdit, "timeline-edit");
+            if(lastEvt) document.getElementById("lblUltimoMovEdit").innerHTML = `${lastEvt.name} <br> <span class='text-primary'>${formatDateManual(lastEvt.date)}</span>`;
+
+            btn.textContent = "Guardar";
+            msg.className="text-success fw-bold";
+            msg.textContent="¡Guardado Exitoso!";
+            
+            // Limpiar mensaje después de 3 seg
+            setTimeout(() => { msg.textContent = ""; }, 3000);
+
         } catch (e) {
-          console.error(e);
+            console.error(e);
+            // ESTA ALERTA ES CLAVE PARA EL IPHONE:
+            alert("Error al guardar: " + e.message);
+            
+            btn.textContent = "Reintentar";
+            msg.className="text-danger fw-bold";
+            msg.textContent="Error. Verifique conexión.";
         } finally {
-          document.getElementById("loading-dashboard").classList.add("d-none");
-          document
-            .getElementById("content-dashboard")
-            .classList.remove("d-none");
+            btn.disabled = false;
         }
-      }
+    }
 
       function renderAll(rows, logs) {
         let total = rows.length,
@@ -1564,6 +1547,24 @@ class="card-body d-flex flex-column flex-md-row justify-content-between align-it
           pdf.save("dashboard.pdf");
         }
       }
+      // --- NUEVA FUNCIÓN PARA FECHA HORA SEGURA EN IPHONE ---
+    function getFechaHoraSCL_String() {
+        // 1. Obtener hora actual convertida a zona horaria Chile
+        const now = new Date();
+        const sclStr = now.toLocaleString("en-US", {timeZone: "America/Santiago"});
+        const d = new Date(sclStr);
+
+        // 2. Construir string manualmente DD/MM/YYYY HH:mm:ss
+        const dia = String(d.getDate()).padStart(2, '0');
+        const mes = String(d.getMonth() + 1).padStart(2, '0'); // Enero es 0
+        const anio = d.getFullYear();
+        
+        const hrs = String(d.getHours()).padStart(2, '0');
+        const min = String(d.getMinutes()).padStart(2, '0');
+        const sec = String(d.getSeconds()).padStart(2, '0');
+
+        return `${dia}/${mes}/${anio} ${hrs}:${min}:${sec}`;
+    }
     </script>
   </body>
 </html>
