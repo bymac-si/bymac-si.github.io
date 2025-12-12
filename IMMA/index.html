@@ -1136,6 +1136,7 @@ class="card-body d-flex flex-column flex-md-row justify-content-between align-it
         const fec = document.getElementById("dtFecha").value;
         if(!colNombre || !fec) return alert("Datos incompletos");
         
+        // --- VALIDACION DE SOBRESCRITURA ---
         const valorExistente = rowEdit[colNombre];
         if (valorExistente) {
              const confirmar = confirm(`⚠ ATENCIÓN ⚠\n\nLa etapa "${colNombre}" ya tiene registrado: ${valorExistente}\n\n¿Desea SOBRESCRIBIRLO con la nueva fecha ${fec}?`);
@@ -1144,21 +1145,24 @@ class="card-body d-flex flex-column flex-md-row justify-content-between align-it
 
         const btn = document.getElementById("btnGuardar");
         const msg = document.getElementById("msgGuardar");
-        
         btn.textContent = "Guardando...";
-        btn.disabled = true; // Deshabilitar para evitar doble click
-        msg.textContent = "";
+        btn.disabled = true;
 
         const rowNum = rowEdit["_RowNumber"];
         const colLetra = COL_LETTERS_MAP[colNombre] || "?";
         const cellId = (rowNum && colLetra !== "?") ? `${colLetra}${rowNum}` : "N/A";
         
-        // USAMOS LA NUEVA FUNCIÓN SEGURA PARA IPHONE
+        // 1. OBTENER FECHA SEGURA (IPHONE FIX)
         const fechaLog = getFechaHoraSCL_String(); 
+        
+        // 2. GENERAR ID UNICO (CRÍTICO PARA INSERTAR FILAS)
+        const idLog = generarUniqueID(); 
 
         try {
-            // 1. Guardar en ChangeLog
-            await callAppSheet("ChangeLog", "Add", {Rows:[{
+            // --- PASO A: INSERTAR EN CHANGELOG ---
+            // IMPORTANTE: Reemplaza "ID" por el nombre real de tu columna llave en ChangeLog
+            const respLog = await callAppSheet("ChangeLog", "Add", {Rows:[{
+                "ID": idLog,  // <--- AQUI DEBES PONER EL NOMBRE DE TU COLUMNA KEY (Ej: "IdLog", "Row ID")
                 "FechaHora": fechaLog, 
                 "Usuario": "WebAdmin", 
                 "Hoja": TABLE_MASTER, 
@@ -1168,37 +1172,38 @@ class="card-body d-flex flex-column flex-md-row justify-content-between align-it
                 "ValorAnterior": valorExistente||"", 
                 "ValorNuevo": fec
             }]});
+            
+            // Verificación simple de que AppSheet respondió filas creadas
+            if (!respLog || !respLog.Rows || respLog.Rows.length === 0) {
+                console.warn("ChangeLog no devolvió filas creadas. Verifica nombres de columnas.");
+            }
 
-            // 2. Guardar en MasterBI
+            // --- PASO B: ACTUALIZAR MASTERBI ---
             await callAppSheet(TABLE_MASTER, "Edit", {Rows:[{ "TAG SPOOL": rowEdit[COL_TAG], [colNombre]: fec }]});
             
             // Actualizar memoria local
             rowEdit[colNombre] = fec;
             
-            // Refrescar UI visualmente
+            // Refrescar timeline
             const lastEvt = renderTimeline(rowEdit, "timeline-edit");
             if(lastEvt) document.getElementById("lblUltimoMovEdit").innerHTML = `${lastEvt.name} <br> <span class='text-primary'>${formatDateManual(lastEvt.date)}</span>`;
 
             btn.textContent = "Guardar";
+            btn.disabled = false;
             msg.className="text-success fw-bold";
             msg.textContent="¡Guardado Exitoso!";
             
-            // Limpiar mensaje después de 3 seg
             setTimeout(() => { msg.textContent = ""; }, 3000);
 
         } catch (e) {
             console.error(e);
-            // ESTA ALERTA ES CLAVE PARA EL IPHONE:
             alert("Error al guardar: " + e.message);
-            
             btn.textContent = "Reintentar";
-            msg.className="text-danger fw-bold";
-            msg.textContent="Error. Verifique conexión.";
-        } finally {
             btn.disabled = false;
+            msg.className="text-danger fw-bold";
+            msg.textContent="Error. Ver consola.";
         }
     }
-
       function renderAll(rows, logs) {
         let total = rows.length,
           act = 0,
@@ -1565,6 +1570,13 @@ class="card-body d-flex flex-column flex-md-row justify-content-between align-it
 
         return `${dia}/${mes}/${anio} ${hrs}:${min}:${sec}`;
     }
+    // Generador de ID único simple para AppSheet
+function generarUniqueID() {
+    return 'xxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
     </script>
   </body>
 </html>
