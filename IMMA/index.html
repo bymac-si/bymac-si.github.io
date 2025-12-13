@@ -156,9 +156,15 @@
 
   <body class="d-flex flex-column min-vh-100">
     <main class="container-fluid px-1 px-sm-2 flex-grow-1">
-      <div class="card mb-3 shadow-sm" style="background: linear-gradient(90deg, #a0c0f6, #3c475a);color: white;">
+      <div
+        class="card mb-3 shadow-sm"
+        style="
+          background: linear-gradient(90deg, #a0c0f6, #3c475a);
+          color: white;
+        "
+      >
         <div
-class="card-body d-flex flex-column flex-md-row justify-content-between align-items-center py-2" 
+          class="card-body d-flex flex-column flex-md-row justify-content-between align-items-center py-2"
         >
           <h1 class="m-0 fs-4">
             <img
@@ -584,7 +590,7 @@ class="card-body d-flex flex-column flex-md-row justify-content-between align-it
                 </div>
                 <div class="col-12 col-md-6">
                   <div class="card p-3 h-100">
-                    <h6>Días en Proceso</h6>
+                    <h6>Días en Proceso (Inactividad)</h6>
                     <div style="height: 150px; position: relative">
                       <canvas id="chartDiasProceso"></canvas>
                     </div>
@@ -749,7 +755,6 @@ class="card-body d-flex flex-column flex-md-row justify-content-between align-it
       // COLUMNAS
       const COL_MES_DESPACHO = "Mes Despacho";
       const COL_ESTATUS_ELIMINADO = "EstatusEliminado";
-      const COL_DIAS_MOV = "Days_Since_Last_Move";
 
       const COL_TAG = "TAG SPOOL";
       const COL_STATUS = "STATUS SPOOL";
@@ -765,7 +770,6 @@ class="card-body d-flex flex-column flex-md-row justify-content-between align-it
         "REFABRICAR",
       ];
 
-      // >>> MAPA DE COLUMNAS A LETRAS DE EXCEL <<<
       const COL_LETTERS_MAP = {
         "F.Emision Plano": "CI",
         "F.Aprobacion Plano": "T",
@@ -852,7 +856,7 @@ class="card-body d-flex flex-column flex-md-row justify-content-between align-it
         if (str.includes("T")) str = str.split("T")[0];
         if (str.includes(" ")) str = str.split(" ")[0];
 
-        // ISO YYYY-MM-DD
+        // ISO
         if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
           const [y, m, d] = str.split("-").map(Number);
           return new Date(y, m - 1, d);
@@ -1130,17 +1134,42 @@ class="card-body d-flex flex-column flex-md-row justify-content-between align-it
           s.classList.add("d-none");
         }
       }
+      // --- NUEVA FUNCIÓN PARA FECHA HORA SEGURA EN IPHONE ---
+      function getFechaHoraSCL_String() {
+        const now = new Date();
+        const sclStr = now.toLocaleString("en-US", {
+          timeZone: "America/Santiago",
+        });
+        const d = new Date(sclStr);
+        const dia = String(d.getDate()).padStart(2, "0");
+        const mes = String(d.getMonth() + 1).padStart(2, "0");
+        const anio = d.getFullYear();
+        const hrs = String(d.getHours()).padStart(2, "0");
+        const min = String(d.getMinutes()).padStart(2, "0");
+        const sec = String(d.getSeconds()).padStart(2, "0");
+        return `${dia}/${mes}/${anio} ${hrs}:${min}:${sec}`;
+      }
+      // Generador de ID único simple para AppSheet
+      function generarUniqueID() {
+        return "xxxxxxxx".replace(/[xy]/g, function (c) {
+          var r = (Math.random() * 16) | 0,
+            v = c == "x" ? r : (r & 0x3) | 0x8;
+          return v.toString(16);
+        });
+      }
+
       async function guardarCambios() {
-        if(!rowEdit) return alert("Seleccione TAG");
+        if (!rowEdit) return alert("Seleccione TAG");
         const colNombre = document.getElementById("cmbEtapa").value;
         const fec = document.getElementById("dtFecha").value;
-        if(!colNombre || !fec) return alert("Datos incompletos");
-        
-        // --- VALIDACION DE SOBRESCRITURA ---
+        if (!colNombre || !fec) return alert("Datos incompletos");
+
         const valorExistente = rowEdit[colNombre];
         if (valorExistente) {
-             const confirmar = confirm(`⚠ ATENCIÓN ⚠\n\nLa etapa "${colNombre}" ya tiene registrado: ${valorExistente}\n\n¿Desea SOBRESCRIBIRLO con la nueva fecha ${fec}?`);
-             if (!confirmar) return; 
+          const confirmar = confirm(
+            `⚠ ATENCIÓN ⚠\n\nLa etapa "${colNombre}" ya tiene registrado: ${valorExistente}\n\n¿Desea SOBRESCRIBIRLO con la nueva fecha ${fec}?`
+          );
+          if (!confirmar) return;
         }
 
         const btn = document.getElementById("btnGuardar");
@@ -1150,60 +1179,103 @@ class="card-body d-flex flex-column flex-md-row justify-content-between align-it
 
         const rowNum = rowEdit["_RowNumber"];
         const colLetra = COL_LETTERS_MAP[colNombre] || "?";
-        const cellId = (rowNum && colLetra !== "?") ? `${colLetra}${rowNum}` : "N/A";
-        
-        // 1. OBTENER FECHA SEGURA (IPHONE FIX)
-        const fechaLog = getFechaHoraSCL_String(); 
-        
-        // 2. GENERAR ID UNICO (CRÍTICO PARA INSERTAR FILAS)
-        const idLog = generarUniqueID(); 
+        const cellId =
+          rowNum && colLetra !== "?" ? `${colLetra}${rowNum}` : "N/A";
+
+        const fechaLog = getFechaHoraSCL_String();
+        const idLog = generarUniqueID();
 
         try {
-            // --- PASO A: INSERTAR EN CHANGELOG ---
-            // IMPORTANTE: Reemplaza "ID" por el nombre real de tu columna llave en ChangeLog
-            const respLog = await callAppSheet("ChangeLog", "Add", {Rows:[{
-                "ID": idLog,  // <--- AQUI DEBES PONER EL NOMBRE DE TU COLUMNA KEY (Ej: "IdLog", "Row ID")
-                "FechaHora": fechaLog, 
-                "Usuario": "WebAdmin", 
-                "Hoja": TABLE_MASTER, 
-                "Celda": cellId, 
-                "CabeceraColumna": colNombre, 
-                "TAG SPOOL": rowEdit[COL_TAG], 
-                "ValorAnterior": valorExistente||"", 
-                "ValorNuevo": fec
-            }]});
-            
-            // Verificación simple de que AppSheet respondió filas creadas
-            if (!respLog || !respLog.Rows || respLog.Rows.length === 0) {
-                console.warn("ChangeLog no devolvió filas creadas. Verifica nombres de columnas.");
-            }
+          const respLog = await callAppSheet("ChangeLog", "Add", {
+            Rows: [
+              {
+                ID: idLog,
+                FechaHora: fechaLog,
+                Usuario: "WebAdmin",
+                Hoja: TABLE_MASTER,
+                Celda: cellId,
+                CabeceraColumna: colNombre,
+                "TAG SPOOL": rowEdit[COL_TAG],
+                ValorAnterior: valorExistente || "",
+                ValorNuevo: fec,
+              },
+            ],
+          });
 
-            // --- PASO B: ACTUALIZAR MASTERBI ---
-            await callAppSheet(TABLE_MASTER, "Edit", {Rows:[{ "TAG SPOOL": rowEdit[COL_TAG], [colNombre]: fec }]});
-            
-            // Actualizar memoria local
-            rowEdit[colNombre] = fec;
-            
-            // Refrescar timeline
-            const lastEvt = renderTimeline(rowEdit, "timeline-edit");
-            if(lastEvt) document.getElementById("lblUltimoMovEdit").innerHTML = `${lastEvt.name} <br> <span class='text-primary'>${formatDateManual(lastEvt.date)}</span>`;
+          if (!respLog || !respLog.Rows || respLog.Rows.length === 0) {
+            console.warn("ChangeLog no devolvió filas creadas.");
+          }
 
-            btn.textContent = "Guardar";
-            btn.disabled = false;
-            msg.className="text-success fw-bold";
-            msg.textContent="¡Guardado Exitoso!";
-            
-            setTimeout(() => { msg.textContent = ""; }, 3000);
+          await callAppSheet(TABLE_MASTER, "Edit", {
+            Rows: [{ "TAG SPOOL": rowEdit[COL_TAG], [colNombre]: fec }],
+          });
 
+          rowEdit[colNombre] = fec;
+
+          const lastEvt = renderTimeline(rowEdit, "timeline-edit");
+          if (lastEvt)
+            document.getElementById("lblUltimoMovEdit").innerHTML = `${
+              lastEvt.name
+            } <br> <span class='text-primary'>${formatDateManual(
+              lastEvt.date
+            )}</span>`;
+
+          btn.textContent = "Guardar";
+          btn.disabled = false;
+          msg.className = "text-success fw-bold";
+          msg.textContent = "¡Guardado Exitoso!";
+
+          setTimeout(() => {
+            msg.textContent = "";
+          }, 3000);
         } catch (e) {
-            console.error(e);
-            alert("Error al guardar: " + e.message);
-            btn.textContent = "Reintentar";
-            btn.disabled = false;
-            msg.className="text-danger fw-bold";
-            msg.textContent="Error. Ver consola.";
+          console.error(e);
+          alert("Error al guardar: " + e.message);
+          btn.textContent = "Reintentar";
+          btn.disabled = false;
+          msg.className = "text-danger fw-bold";
+          msg.textContent = "Error. Ver consola.";
         }
-    }
+      }
+
+      async function cargarDashboardLocal(force = false) {
+        const now = new Date();
+        document.getElementById(
+          "dash-time"
+        ).innerHTML = `<i class="bi bi-clock-history"></i> ${now.toLocaleString(
+          "es-CL"
+        )}`;
+
+        if (!force && dataCache.length > 0) {
+          renderAll(dataCache, logCache);
+          return;
+        }
+
+        document.getElementById("loading-dashboard").classList.remove("d-none");
+        document.getElementById("content-dashboard").classList.add("d-none");
+
+        try {
+          const [m, l] = await Promise.all([
+            callAppSheet(TABLE_MASTER, "Find", {
+              Selector: `Filter(${TABLE_MASTER}, true)`,
+            }),
+            callAppSheet(SLICE_LOGS, "Find", {
+              Selector: `Filter(${SLICE_LOGS}, true)`,
+            }),
+          ]);
+          dataCache = m;
+          logCache = l;
+          renderAll(m, l);
+        } catch (e) {
+          console.error(e);
+        } finally {
+          document.getElementById("loading-dashboard").classList.add("d-none");
+          document
+            .getElementById("content-dashboard")
+            .classList.remove("d-none");
+        }
+      }
+
       function renderAll(rows, logs) {
         let total = rows.length,
           act = 0,
@@ -1220,17 +1292,16 @@ class="card-body d-flex flex-column flex-md-row justify-content-between align-it
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        // *** ARRAY PARA ORDENAR CRITICOS ***
+        // Array para críticos
         let listaCriticos = [];
 
         rows.forEach((r) => {
           const st = (r[COL_STATUS] || "").toUpperCase();
           const fl = (r[COL_FLUOR] || "SIN STATUS").toUpperCase();
 
-          // --- LOGICA ELIMINADOS ---
           if (esTagEliminado(r)) {
             elim++;
-            return; // Cortamos el flujo
+            return;
           }
 
           if (st.includes("LIBERADO")) lib++;
@@ -1244,46 +1315,43 @@ class="card-body d-flex flex-column flex-md-row justify-content-between align-it
           } else {
             act++;
 
-            // *** USO DIRECTO DE LA COLUMNA VIRTUAL "Days_Since_Last_Move" ***
-            let dias = Number(r[COL_DIAS_MOV]) || 0;
+            // CALCULO MANUAL DE DIAS
+            let maxDate = null;
+            let ultimaEtapaNombre = "Sin Inicio";
 
-            if (dias > 0) {
-              if (dias <= 30) d0_30++;
-              else if (dias <= 60) d31_60++;
-              else d61_plus++;
-            }
+            // Buscar fecha mas reciente
+            COLUMNAS_FECHAS_ALL.forEach((c) => {
+              let d = parseDateFlexible(r[c]);
+              if (d && (!maxDate || d > maxDate)) {
+                maxDate = d;
+                ultimaEtapaNombre = c;
+              }
+            });
+
+            // Si no hay ninguna fecha, usamos F. Emision o Today
+            let fBase =
+              maxDate || parseDateFlexible(r["F.Emision Plano"]) || today;
+
+            let dias = (today - fBase) / (1000 * 60 * 60 * 24);
+            if (dias < 0) dias = 0; // proteccion fechas futuras
+
+            if (dias <= 30) d0_30++;
+            else if (dias <= 60) d31_60++;
+            else d61_plus++;
 
             distFluor[fl] = (distFluor[fl] || 0) + 1;
 
-            let evt = [];
-            COLUMNAS_FECHAS_ALL.forEach((c) => {
-              let d = parseDateFlexible(r[c]);
-              if (d) evt.push({ d: d, n: c });
-            });
-            evt.sort((a, b) => a.d - b.d);
+            distUltima[ultimaEtapaNombre] =
+              (distUltima[ultimaEtapaNombre] || 0) + 1;
 
-            if (evt.length) {
-              let ult = evt[evt.length - 1].n;
-              distUltima[ult] = (distUltima[ult] || 0) + 1;
-            }
-
-            // *** RECOLECCIÓN DE CRITICOS ***
+            // RECOLECCIÓN DE CRITICOS (>60 dias)
             if (dias > 60) {
-              // Fecha mas reciente
-              let maxDate = null;
-              let ultimaEtapaNombre = "-";
-              if (evt.length > 0) {
-                maxDate = evt[evt.length - 1].d;
-                ultimaEtapaNombre = evt[evt.length - 1].n;
-              }
-              let fBase = maxDate || today;
-
               listaCriticos.push({
                 tag: r[COL_TAG],
                 dias: Math.floor(dias),
                 status: r[COL_STATUS],
                 etapa: ultimaEtapaNombre,
-                fecha: formatDateManual(fBase),
+                fecha: formatDateManual(fBase), // FORMATO CORRECTO
               });
             }
           }
@@ -1476,18 +1544,16 @@ class="card-body d-flex flex-column flex-md-row justify-content-between align-it
         hTiempos += `<tr class="table-secondary"><th colspan="2" class="text-end">PROMEDIO GENERAL</th><th class="fw-bold text-primary">${generalAvg}</th><th>-</th></tr>`;
         document.getElementById("tbodyTiempos").innerHTML = hTiempos;
 
-        // *** GENERACIÓN DE TABLA CRITICOS ORDENADA ***
-        // 1. Ordenar descendente por días
+        // GENERAR TABLA CRITICOS ORDENADA
         listaCriticos.sort((a, b) => b.dias - a.dias);
 
-        // 2. Generar HTML
-        let hCrit = "";
+        let htmlCriticos = "";
         if (listaCriticos.length === 0) {
-          hCrit =
+          htmlCriticos =
             '<tr><td colspan="5" class="text-center text-success py-3"><i class="bi bi-check-circle"></i> ¡Excelente! No hay atrasos críticos (>60 días).</td></tr>';
         } else {
           listaCriticos.forEach((item) => {
-            hCrit += `<tr>
+            htmlCriticos += `<tr>
                     <td class="fw-bold">${item.tag}</td>
                     <td class="text-center"><span class="badge bg-danger rounded-pill">${item.dias} días</span></td>
                     <td class="small text-muted">${item.etapa}</td>
@@ -1496,10 +1562,9 @@ class="card-body d-flex flex-column flex-md-row justify-content-between align-it
                  </tr>`;
           });
         }
-        document.getElementById("tabla-criticos-body").innerHTML = hCrit;
+        document.getElementById("tabla-criticos-body").innerHTML = htmlCriticos;
       }
 
-      // Función auxiliar para conectar botón "Ver" de críticos con la ficha
       function verDetalleTag(tag) {
         const triggerEl = document.querySelector(
           'button[data-bs-target="#tab-ficha"]'
@@ -1552,31 +1617,6 @@ class="card-body d-flex flex-column flex-md-row justify-content-between align-it
           pdf.save("dashboard.pdf");
         }
       }
-      // --- NUEVA FUNCIÓN PARA FECHA HORA SEGURA EN IPHONE ---
-    function getFechaHoraSCL_String() {
-        // 1. Obtener hora actual convertida a zona horaria Chile
-        const now = new Date();
-        const sclStr = now.toLocaleString("en-US", {timeZone: "America/Santiago"});
-        const d = new Date(sclStr);
-
-        // 2. Construir string manualmente DD/MM/YYYY HH:mm:ss
-        const dia = String(d.getDate()).padStart(2, '0');
-        const mes = String(d.getMonth() + 1).padStart(2, '0'); // Enero es 0
-        const anio = d.getFullYear();
-        
-        const hrs = String(d.getHours()).padStart(2, '0');
-        const min = String(d.getMinutes()).padStart(2, '0');
-        const sec = String(d.getSeconds()).padStart(2, '0');
-
-        return `${dia}/${mes}/${anio} ${hrs}:${min}:${sec}`;
-    }
-    // Generador de ID único simple para AppSheet
-function generarUniqueID() {
-    return 'xxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
-}
     </script>
   </body>
 </html>
