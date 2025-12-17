@@ -3,10 +3,10 @@
  * Stack: Vanilla JS + Bootstrap 5 + Google Apps Script Backend
  */
 
-// ==========================================
 // 1. CONFIGURACIÓN Y ESTADO
 // ==========================================
 
+// ¡IMPORTANTE! Reemplaza esto con la URL de tu implementación de Google Apps Script
 const API_URL =
   "https://script.google.com/macros/s/AKfycbwlsRu_5_hqbX84z0VLWi1p1AkFk8rEIumqRttgs9unki436_0xAVQKzbj2Iu680gM1/exec";
 
