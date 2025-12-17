@@ -3,7 +3,6 @@
  * Stack: Vanilla JS + Bootstrap 5 + Google Apps Script Backend
  */
 
-// ==========================================
 // 1. CONFIGURACIÓN Y ESTADO
 // ==========================================
 
