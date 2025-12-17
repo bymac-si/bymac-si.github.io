@@ -943,19 +943,38 @@
         const fechaLog = getFechaHoraSCL_String();
         const idLog = generarUniqueID();
 
+        // --- CORRECCIÓN DE FORMATO VALOR ANTERIOR ---
+        // Convertimos cualquier formato extraño (ej: 06/27/2025) a dd/mm/yyyy
+        let valAnt = "";
+        if (valorExistente) {
+            // Intentamos interpretar la fecha existente
+            let dAnt = parseDateFlexible(valorExistente);
+            if (dAnt) {
+                // Si es fecha válida, forzamos formato dd/mm/yyyy
+                const d = String(dAnt.getDate()).padStart(2, '0');
+                const m = String(dAnt.getMonth() + 1).padStart(2, '0');
+                const y = dAnt.getFullYear();
+                valAnt = `${d}/${m}/${y}`;
+            } else {
+                // Si no es fecha (texto), lo dejamos tal cual
+                valAnt = String(valorExistente);
+            }
+        }
+
         try {
+          // Primero ChangeLog con valor saneado
           const respLog = await callAppSheet("ChangeLog", "Add", {
             Rows: [
               {
-                ID: idLog,
-                FechaHora: fechaLog,
-                Usuario: "WebAdmin",
-                Hoja: TABLE_MASTER,
-                Celda: cellId,
-                CabeceraColumna: colNombre,
+                "ID": idLog,
+                "FechaHora": fechaLog,
+                "Usuario": "WebAdmin",
+                "Hoja": TABLE_MASTER,
+                "Celda": cellId,
+                "CabeceraColumna": colNombre,
                 "TAG SPOOL": rowEdit[COL_TAG],
-                ValorAnterior: valorExistente || "",
-                ValorNuevo: fec,
+                "ValorAnterior": valAnt, // <--- AQUI ESTÁ EL CAMBIO
+                "ValorNuevo": fec,
               },
             ],
           });
@@ -964,10 +983,12 @@
             console.warn("ChangeLog no devolvió filas creadas.");
           }
 
+          // Luego MasterBI
           await callAppSheet(TABLE_MASTER, "Edit", {
             Rows: [{ "TAG SPOOL": rowEdit[COL_TAG], [colNombre]: fec }],
           });
 
+          // Éxito
           rowEdit[colNombre] = fec;
 
           const lastEvt = renderTimeline(rowEdit, "timeline-edit");
@@ -991,7 +1012,6 @@
           msg.textContent = "Error. Ver consola.";
         }
       }
-
       async function cargarDashboardLocal(force = false) {
         const now = new Date();
         document.getElementById("dash-time").innerHTML = `<i class="bi bi-clock-history"></i> ${now.toLocaleString("es-CL")}`;
