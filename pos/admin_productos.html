@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Productos - El Carro del Ocho</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f0f2f5; }
+        .table-container { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 20px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1">🛠️ Administración POS</span>
+        <a href="index.html" class="btn btn-outline-light btn-sm">Ir a POS</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="table-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>Gestión de Productos</h3>
+            <button class="btn btn-success" onclick="openProductModal()">+ Nuevo Producto</button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Precio</th>
+                        <th>Orden</th>
+                        <th>Color</th>
+                        <th>Cocina</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-table-body">
+                    <tr><td colspan="8" class="text-center">Cargando datos...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="productModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productModalLabel">Producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="product-form">
+                    <input type="hidden" id="edit-id">
+                    <div class="mb-2">
+                        <label>Nombre</label>
+                        <input type="text" id="edit-nombre" class="form-control" required>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <label>Categoría</label>
+                            <input type="text" id="edit-categoria" class="form-control" list="cat-list" required>
+                            <datalist id="cat-list"></datalist>
+                        </div>
+                        <div class="col-6">
+                            <label>Precio</label>
+                            <input type="number" id="edit-precio" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <label>Orden</label>
+                            <input type="number" id="edit-orden" class="form-control" value="99">
+                        </div>
+                        <div class="col-6">
+                            <label>Color</label>
+                            <input type="text" id="edit-color" class="form-control" placeholder="#007bff">
+                        </div>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" id="edit-cocina">
+                        <label class="form-check-label">Imprimir en Cocina</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="edit-activo" checked>
+                        <label class="form-check-label">Activo</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger me-auto" id="btn-delete-prod" style="display:none;" onclick="deleteProduct()">Eliminar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="saveProduct()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // --- LÓGICA DE ADMINISTRACIÓN ---
+    
+    // 1. CONFIGURACIÓN: PEGA AQUÍ LA MISMA URL QUE EN EL POS
+    const API_URL = "https://script.google.com/macros/s/AKfycbwlsRu_5_hqbX84z0VLWi1p1AkFk8rEIumqRttgs9unki436_0xAVQKzbj2Iu680gM1/exec"; 
+
+    let productosCache = [];
+
+    document.addEventListener('DOMContentLoaded', loadAdminData);
+
+    async function loadAdminData() {
+        try {
+            const response = await fetch(API_URL);
+            const data = await response.json();
+            
+            // Ordenamos por categoría y luego por orden
+            productosCache = data.productos.sort((a, b) => {
+                if(a.Categoria === b.Categoria) return (parseInt(a.Orden) || 99) - (parseInt(b.Orden) || 99);
+                return a.Categoria.localeCompare(b.Categoria);
+            });
+
+            renderTable();
+        } catch (error) {
+            console.error(error);
+            alert("Error cargando datos. Revisa la URL del Script.");
+        }
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('admin-table-body');
+        const datalist = document.getElementById('cat-list');
+
+        // Autocompletar categorías
+        const cats = [...new Set(productosCache.map(p => p.Categoria))];
+        datalist.innerHTML = cats.map(c => `<option value="${c}">`).join('');
+
+        tbody.innerHTML = productosCache.map(p => `
+            <tr>
+                <td class="fw-bold">${p.Nombre}</td>
+                <td><span class="badge bg-secondary">${p.Categoria}</span></td>
+                <td>$${parseInt(p.Precio).toLocaleString('es-CL')}</td>
+                <td>${p.Orden}</td>
+                <td>
+                    <span class="d-inline-block border rounded-circle" 
+                          style="width: 20px; height: 20px; background-color: ${p['Color Boton']?.startsWith('#') ? p['Color Boton'] : 'gray'};"
+                          title="${p['Color Boton']}"></span>
+                </td>
+                <td>${String(p.Imprimir_en_Cocina).toLowerCase() === 'true' ? '✅' : '❌'}</td>
+                <td>${String(p.Activo).toLowerCase() === 'true' ? '<span class="text-success">Activo</span>' : '<span class="text-danger">Inactivo</span>'}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" onclick="openProductModal('${p.ID_Producto}')">Editar</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // Funciones Modales y CRUD (Iguales a las que teníamos, adaptadas para AppSheet)
+    function openProductModal(id = null) {
+        const modal = new bootstrap.Modal(document.getElementById('productModal'));
+        const deleteBtn = document.getElementById('btn-delete-prod');
+        
+        if (id) {
+            const p = productosCache.find(prod => prod.ID_Producto === id);
+            document.getElementById('edit-id').value = p.ID_Producto;
+            document.getElementById('edit-nombre').value = p.Nombre;
+            document.getElementById('edit-categoria').value = p.Categoria;
+            document.getElementById('edit-precio').value = p.Precio; // Valor crudo
+            document.getElementById('edit-orden').value = p.Orden;
+            document.getElementById('edit-color').value = p['Color Boton'];
+            document.getElementById('edit-cocina').checked = (String(p.Imprimir_en_Cocina).toLowerCase() === 'true');
+            document.getElementById('edit-activo').checked = (String(p.Activo).toLowerCase() === 'true');
+            deleteBtn.style.display = 'block';
+        } else {
+            document.getElementById('product-form').reset();
+            document.getElementById('edit-id').value = '';
+            document.getElementById('edit-activo').checked = true;
+            deleteBtn.style.display = 'none';
+        }
+        modal.show();
+    }
+
+    async function saveProduct() {
+        const btn = document.querySelector('#productModal .btn-primary');
+        btn.disabled = true;
+        btn.innerText = "Guardando...";
+
+        const id = document.getElementById('edit-id').value;
+        const isNew = !id;
+        const finalId = isNew ? Math.random().toString(36).substring(2, 10).toUpperCase() : id;
+
+        const producto = {
+            ID_Producto: finalId,
+            Nombre: document.getElementById('edit-nombre').value,
+            Categoria: document.getElementById('edit-categoria').value,
+            Precio: document.getElementById('edit-precio').value,
+            Orden: document.getElementById('edit-orden').value,
+            Color: document.getElementById('edit-color').value,
+            Cocina: document.getElementById('edit-cocina').checked, // El backend debe convertir esto a TRUE/FALSE string
+            Activo: document.getElementById('edit-activo').checked
+        };
+
+        try {
+            await fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: isNew ? 'create_product' : 'update_product',
+                    producto: producto
+                })
+            });
+            alert("Guardado exitoso");
+            bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
+            loadAdminData(); // Recargar tabla
+        } catch (e) {
+            alert("Error: " + e.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Guardar";
+        }
+    }
+
+    async function deleteProduct() {
+        if(!confirm("¿Seguro que deseas eliminar este producto?")) return;
+        const id = document.getElementById('edit-id').value;
+        try {
+            await fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'delete_product', producto: { ID_Producto: id } })
+            });
+            alert("Eliminado");
+            bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
+            loadAdminData();
+        } catch(e) { alert("Error"); }
+    }
+</script>
+</body>
+</html>
