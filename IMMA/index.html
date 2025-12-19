@@ -169,22 +169,22 @@
         <ul class="nav nav-tabs mb-3" id="tabsPanel" role="tablist">
           <li class="nav-item">
             <button class="nav-link active tab" data-bs-toggle="tab" data-bs-target="#tab-ficha">
-              <i class="bi bi-file-earmark-medical"></i> Ficha Técnica
+              <i class="bi bi-file-earmark-medical"></i> consultar Ficha Técnica
             </button>
           </li>
           <li class="nav-item">
             <button class="nav-link tab" data-bs-toggle="tab" data-bs-target="#tab-fechas">
-              <i class="bi bi-pencil-square"></i> Gestión/Cambios
+              <i class="bi bi-pencil-square"></i> Gestión de Cambios
             </button>
           </li>
           <li class="nav-item">
             <button class="nav-link tab" data-bs-toggle="tab" data-bs-target="#tab-dashboard" onclick="cargarDashboardLocal()">
-              <i class="bi bi-bar-chart-line"></i> Dashboard KPI
+              <i class="bi bi-bar-chart-line"></i> Dashboard KPIs
             </button>
           </li>
           <li class="nav-item">
             <button class="nav-link text-danger fw-bold" data-bs-toggle="tab" data-bs-target="#tab-criticos" onclick="cargarTagsCriticos()">
-              <i class="bi bi-exclamation-triangle-fill"></i> Alerta 61+
+              <i class="bi bi-exclamation-triangle-fill"></i> Spools 61+ días
             </button>
           </li>
         </ul>
@@ -274,7 +274,7 @@
                     </div>
                   </div>
                   <div class="alert alert-light border p-2 mb-0">
-                    <small class="text-muted d-block">Último Movimiento Detectado:</small>
+                    <small class="text-muted d-block">Último Movimiento Registrado:</small>
                     <span id="lblUltimoMovEdit" class="fw-bold">-</span>
                   </div>
                 </div>
@@ -401,7 +401,7 @@
                 </div>
                 <div class="col-12 col-md-6">
                   <div class="card p-3 h-100">
-                    <h6>Días en Proceso (Inactividad)</h6>
+                    <h6>Días en Proceso</h6>
                     <div style="height: 150px; position: relative">
                       <canvas id="chartDiasProceso"></canvas>
                     </div>
@@ -412,7 +412,7 @@
               <div class="row mb-3">
                 <div class="col-12">
                   <div class="card p-3">
-                    <h6>Evolución de Despachos 2025 (MM/YYYY)</h6>
+                    <h6>Evolución de Despachos 2025</h6>
                     <div style="height: 250px">
                       <canvas id="chartEvolucion"></canvas>
                     </div>
