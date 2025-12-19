@@ -107,7 +107,7 @@
     // --- LÓGICA DE ADMINISTRACIÓN ---
     
     // 1. CONFIGURACIÓN: PEGA AQUÍ LA MISMA URL QUE EN EL POS
-    const API_URL = "https://script.google.com/macros/s/AKfycbwlsRu_5_hqbX84z0VLWi1p1AkFk8rEIumqRttgs9unki436_0xAVQKzbj2Iu680gM1/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbzimvh8RF1r4YD_h5-UzPYKi5K-92YNVaI6f82KqO8R52vnx6aEJ5FQTGi_-DIr4DJm/exec"; 
 
     let productosCache = [];
 
@@ -186,12 +186,14 @@
 
     async function saveProduct() {
         const btn = document.querySelector('#productModal .btn-primary');
+        const originalText = btn.innerText;
         btn.disabled = true;
         btn.innerText = "Guardando...";
 
         const id = document.getElementById('edit-id').value;
         const isNew = !id;
-        const finalId = isNew ? Math.random().toString(36).substring(2, 10).toUpperCase() : id;
+        // Generar ID limpio sin espacios
+        const finalId = isNew ? Math.random().toString(36).substring(2, 10).toUpperCase() : String(id).trim();
 
         const producto = {
             ID_Producto: finalId,
@@ -200,26 +202,42 @@
             Precio: document.getElementById('edit-precio').value,
             Orden: document.getElementById('edit-orden').value,
             Color: document.getElementById('edit-color').value,
-            Cocina: document.getElementById('edit-cocina').checked, // El backend debe convertir esto a TRUE/FALSE string
+            Cocina: document.getElementById('edit-cocina').checked,
             Activo: document.getElementById('edit-activo').checked
         };
 
+        console.log("Enviando datos:", producto); // Para depurar
+
         try {
-            await fetch(API_URL, {
+            const response = await fetch(API_URL, {
                 method: 'POST',
+                // Usamos redirect: 'follow' por si Google hace redirecciones internas
+                redirect: 'follow', 
                 body: JSON.stringify({
                     action: isNew ? 'create_product' : 'update_product',
                     producto: producto
                 })
             });
-            alert("Guardado exitoso");
-            bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
-            loadAdminData(); // Recargar tabla
+
+            const result = await response.json();
+            console.log("Respuesta servidor:", result);
+
+            // Verificamos si el backend dijo que todo salió bien
+            if (result.status === 'success') {
+                alert("✅ Operación exitosa");
+                bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
+                loadAdminData(); // Recargar tabla
+            } else {
+                // Si el backend devolvió error, lo mostramos
+                alert("❌ Error del servidor: " + result.message);
+            }
+
         } catch (e) {
-            alert("Error: " + e.message);
+            console.error(e);
+            alert("❌ Error de conexión: " + e.message);
         } finally {
             btn.disabled = false;
-            btn.innerText = "Guardar";
+            btn.innerText = originalText;
         }
     }
 

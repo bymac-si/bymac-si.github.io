@@ -8,7 +8,7 @@
 // ==========================================
 
 // ¡IMPORTANTE! Pega aquí la misma URL de Apps Script que usas en el admin
-const API_URL = "https://script.google.com/macros/s/AKfycbwlsRu_5_hqbX84z0VLWi1p1AkFk8rEIumqRttgs9unki436_0xAVQKzbj2Iu680gM1/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzimvh8RF1r4YD_h5-UzPYKi5K-92YNVaI6f82KqO8R52vnx6aEJ5FQTGi_-DIr4DJm/exec";
 
 // Estado de la Aplicación
 let db = {
