@@ -147,8 +147,8 @@
                 <td>${p.Orden}</td>
                 <td>
                     <span class="d-inline-block border rounded-circle" 
-                          style="width: 20px; height: 20px; background-color: ${p['Color Boton']?.startsWith('#') ? p['Color Boton'] : 'gray'};"
-                          title="${p['Color Boton']}"></span>
+                          style="width: 20px; height: 20px; background-color: ${p['ColorBoton']?.startsWith('#') ? p['ColorBoton'] : 'gray'};"
+                          title="${p['ColorBoton']}"></span>
                 </td>
                 <td>${String(p.Imprimir_en_Cocina).toLowerCase() === 'true' ? '✅' : '❌'}</td>
                 <td>${String(p.Activo).toLowerCase() === 'true' ? '<span class="text-success">Activo</span>' : '<span class="text-danger">Inactivo</span>'}</td>
@@ -171,7 +171,7 @@
             document.getElementById('edit-categoria').value = p.Categoria;
             document.getElementById('edit-precio').value = p.Precio; // Valor crudo
             document.getElementById('edit-orden').value = p.Orden;
-            document.getElementById('edit-color').value = p['Color Boton'];
+            document.getElementById('edit-color').value = p['ColorBoton'];
             document.getElementById('edit-cocina').checked = (String(p.Imprimir_en_Cocina).toLowerCase() === 'true');
             document.getElementById('edit-activo').checked = (String(p.Activo).toLowerCase() === 'true');
             deleteBtn.style.display = 'block';
