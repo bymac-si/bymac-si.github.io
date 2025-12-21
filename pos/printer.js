@@ -3,7 +3,7 @@
  */
 
 // CAMBIA ESTO A 'false' CUANDO CONECTES LA IMPRESORA REAL EN WINDOWS
-const SIMULATION_MODE = false; 
+const SIMULATION_MODE = true; 
 
 let printerPort;
 
