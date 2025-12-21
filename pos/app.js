@@ -8,7 +8,7 @@
 // ==========================================
 
 // ¡IMPORTANTE! Pega aquí la misma URL de Apps Script que usas en el admin
-const API_URL = "https://script.google.com/macros/s/AKfycbzimvh8RF1r4YD_h5-UzPYKi5K-92YNVaI6f82KqO8R52vnx6aEJ5FQTGi_-DIr4DJm/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzXtHVx96y5T6c7qaqm0yTNzVL8ygCMmy7X2Q99ZrWDxSDEBzBRGvVhjDlSn457eERn/exec";
 
 // Estado de la Aplicación
 let db = {
@@ -152,22 +152,23 @@ function calcularTurno() {
     if (hora < 3) {
         fechaComercial.setDate(fechaComercial.getDate() - 1);
     }
-    const fechaComercialStr = fechaComercial.toISOString().split('T')[0];
+    const fechaStr = fechaComercial.toISOString().split('T')[0];
 
-    // Turno: 1 (AM) o 2 (PM - empieza a las 19:00)
+    // LÓGICA DE TURNO ACTUALIZADA (Corte 18:00)
+    // Turno 1: 03:00 AM a 17:59 PM
+    // Turno 2: 18:00 PM a 02:59 AM
     let idTurno = 1;
-    if (hora >= 19 || hora < 3) {
+    if (hora >= 18 || hora < 3) { // <--- CAMBIO AQUÍ: 18 en lugar de 19
         idTurno = 2;
     }
 
     currentTurnData = {
         fechaHora: ahora.toISOString(),
-        fechaComercial: fechaComercialStr,
+        fechaComercial: fechaStr,
         idTurno: idTurno,
-        turnoKey: `${fechaComercialStr}-T${idTurno}`
+        turnoKey: `${fechaStr}-T${idTurno}`
     };
 }
-
 function updateClock() {
     calcularTurno();
     // Aquí podrías actualizar un reloj en pantalla si lo tuvieras
@@ -301,15 +302,32 @@ function updateCartUI() {
 
 let selectedPaymentMethod = 'Efectivo';
 
+// ==========================================
+// CORRECCIÓN EN app.js
+// ==========================================
+
 function openPaymentModal() {
     if (cart.length === 0) return alert("El carrito está vacío.");
     
-    const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+    const modalEl = document.getElementById('paymentModal');
+    
+    // CORRECCIÓN: Usamos getOrCreateInstance
+    // Esto evita crear duplicados que causan el error de aria-hidden
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    
     modal.show();
     
+    // Resetear formulario
     setPaymentMethod('Efectivo');
     document.getElementById('amount-tendered').value = '';
     document.getElementById('change-display').innerText = '$0';
+    
+    // Opcional: Dar foco al campo de dinero automáticamente al abrir
+    // Esto mejora la experiencia en el POS
+    setTimeout(() => {
+        const input = document.getElementById('amount-tendered');
+        if(input) input.focus();
+    }, 500);
 }
 
 function setPaymentMethod(method) {
@@ -343,36 +361,76 @@ function calculateChange() {
     }
 }
 
+// ... (Mantén tu código anterior de Configuración, Carga de datos, Login, etc.) ...
+
+// ==========================================
+// NUEVO: GENERADOR DE NÚMERO DE PEDIDO (Diario 001 - 999)
+// ==========================================
+// --- GENERADOR DE NÚMERO DIARIO ---
+function getNextOrderNumber() {
+    const today = new Date().toLocaleDateString('es-CL'); // Clave por fecha local
+    let data = JSON.parse(localStorage.getItem('pos_turno_counter')) || { date: '', count: 0 };
+
+    // Si cambió el día, reiniciar a 0
+    if (data.date !== today) {
+        data = { date: today, count: 0 };
+    }
+
+    data.count++; // Sumar 1
+    localStorage.setItem('pos_turno_counter', JSON.stringify(data));
+
+    // Retorna string de 3 dígitos: "001", "002"...
+    return String(data.count).padStart(3, '0');
+}
+
+// --- PROCESAR VENTA ---
 async function processSale() {
     if (!currentUser) return checkLogin();
     
-    calcularTurno();
+    // 1. Validar Montos
     const total = cart.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
-    
-    // Validación Efectivo
     if (selectedPaymentMethod === 'Efectivo') {
         const received = parseInt(document.getElementById('amount-tendered').value) || 0;
         if (received < total) return alert("Monto insuficiente.");
     }
 
-    // Cerrar modal
-    bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
+    // 2. Cerrar modal y mostrar indicador de carga visual (opcional)
+    const modalEl = document.getElementById('paymentModal');
+    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+    modalInstance.hide();
 
-    // ID Único para el pedido
+    // 3. GENERAR DATOS
+    calcularTurno(); // Asegurar fecha/hora actual
     const idPedido = `PED-${Date.now()}`;
+    const numeroDia = getNextOrderNumber(); // Generamos el "001"
+    
+    console.log("Procesando Venta...", { idPedido, numeroDia }); // DEBUG
 
-    // 1. Preparar Payload (Pedido + Detalles)
+    // 4. IMPRIMIR (Primero imprimimos, es lo más importante en comida rápida)
+    if (typeof window.printTicket === 'function') {
+        try {
+            // Enviamos el numeroDia a printer.js
+            await window.printTicket(cart, total, selectedPaymentMethod, numeroDia);
+        } catch (e) {
+            console.error("Error Impresión:", e);
+            alert("⚠️ La venta se registró, pero NO SE PUDO IMPRIMIR. Revisa el cable USB.");
+        }
+    } else {
+        console.warn("printer.js no cargado o función printTicket no existe");
+    }
+
+    // 5. PREPARAR DATOS PARA GOOGLE SHEETS
     const saleData = {
         action: "create_order",
         pedido: {
             ID_Pedido: idPedido,
+            Numero_Turno: numeroDia, // ESTE CAMPO DEBE COINCIDIR CON CODE.GS
             FechaHora: currentTurnData.fechaHora,
             Fecha_Comercial: currentTurnData.fechaComercial,
             Turno: currentTurnData.idTurno,
             ID_Turno: currentTurnData.turnoKey,
             Usuario_Caja: currentUser.Nombre,
             Total_Bruto: total,
-            Descuento: 0,
             Total_Neto: total,
             Medio_Pago: selectedPaymentMethod,
             Estado: "Pagado"
@@ -387,29 +445,21 @@ async function processSale() {
             Cantidad: item.cantidad,
             Precio_Unitario: item.precio,
             Subtotal: item.cantidad * item.precio,
-            Comentarios: item.comentario
+            Comentarios: item.comentario || ""
         }))
     };
 
-    // 2. Imprimir (Si printer.js está cargado y conectado)
-    if (typeof window.printTicket === 'function') {
-        try {
-            await window.printTicket(cart, total, selectedPaymentMethod, idPedido);
-        } catch (e) {
-            console.warn("Error impresión:", e);
-            // No bloqueamos la venta si falla la impresora
-        }
-    }
-
-    // 3. Guardar en Backend (Async)
+    // 6. GUARDAR EN NUBE (Segundo plano)
     saveToDatabase(saleData);
 
-    // 4. Limpiar
+    // 7. LIMPIAR INTERFAZ
     cart = [];
     updateCartUI();
-    // Opcional: Mostrar alerta flotante de éxito
+    // Opcional: Feedback visual
+    // alert(`Venta #${numeroDia} Lista!`); 
 }
 
+// ... (Resto de funciones: saveToDatabase, startAutoUpdate, etc.) ...
 async function saveToDatabase(payload) {
     try {
         await fetch(API_URL, {
@@ -437,4 +487,129 @@ function startAutoUpdate() {
             loadSystemData(true); // true = modo silencioso
         }
     }, UPDATE_INTERVAL);
+}
+// ==========================================
+// REPORTE DIARIO (CIERRE Z)
+// ==========================================
+let currentReportData = null;
+
+async function showDailyReport() {
+    // 1. Pedir PIN de Admin para ver cierres (Opcional, recomendado)
+    // const pin = prompt("Ingrese PIN Admin:");
+    // if (pin !== "1234") return alert("Acceso denegado");
+
+    const modal = new bootstrap.Modal(document.getElementById('reportModal'));
+    modal.show();
+
+    calcularTurno(); // Asegurar fecha actual
+    const fecha = currentTurnData.fechaComercial;
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: "get_daily_report", fecha: fecha })
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === "success") {
+            currentReportData = result.data;
+            renderReportUI(result.data);
+        } else {
+            document.getElementById('report-body').innerHTML = `<div class="alert alert-danger">Error: ${result.message}</div>`;
+        }
+    } catch (e) {
+        document.getElementById('report-body').innerHTML = `<div class="alert alert-danger">Error de red: ${e.message}</div>`;
+    }
+}
+
+// --- app.js (Actualización Reporte) ---
+
+function renderReportUI(data) {
+    const fmt = (n) => formatter.format(n);
+    
+    // 1. Generar HTML de la lista de productos
+    // Ordenamos de mayor venta a menor
+    let productosHtml = '<table class="table table-sm table-striped mb-0">';
+    const ranking = Object.entries(data.productos).sort((a,b) => b[1] - a[1]);
+    
+    if(ranking.length === 0) {
+        productosHtml += '<tr><td class="text-muted text-center">Sin ventas</td></tr>';
+    } else {
+        ranking.forEach(([nombre, cantidad]) => {
+            productosHtml += `
+                <tr>
+                    <td>${nombre}</td>
+                    <td class="text-end fw-bold">${cantidad}</td>
+                </tr>
+            `;
+        });
+    }
+    productosHtml += '</table>';
+
+    // 2. Armar el HTML completo
+    const html = `
+        <h4 class="text-center fw-bold mb-3">${data.fecha}</h4>
+        
+        <div class="row g-2 mb-3">
+            <div class="col-6">
+                <div class="card bg-light border-0 h-100">
+                    <div class="card-body py-2 px-2" style="font-size: 0.9em">
+                        <h6 class="fw-bold text-primary mb-1">🌅 AM</h6>
+                        <div>Efec: ${fmt(data.turnos[1].efectivo)}</div>
+                        <div>Tarj: ${fmt(data.turnos[1].tarjeta)}</div>
+                        <div>Trans: ${fmt(data.turnos[1].transferencia)}</div>
+                        <div class="border-top fw-bold mt-1">Total: ${fmt(data.turnos[1].total)}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="card bg-light border-0 h-100">
+                    <div class="card-body py-2 px-2" style="font-size: 0.9em">
+                        <h6 class="fw-bold text-primary mb-1">🌆 PM</h6>
+                        <div>Efec: ${fmt(data.turnos[2].efectivo)}</div>
+                        <div>Tarj: ${fmt(data.turnos[2].tarjeta)}</div>
+                        <div>Trans: ${fmt(data.turnos[2].transferencia)}</div>
+                        <div class="border-top fw-bold mt-1">Total: ${fmt(data.turnos[2].total)}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3 border-0">
+            <div class="card-header bg-white fw-bold">📦 Desglose Productos</div>
+            <div class="card-body p-0 overflow-auto" style="max-height: 200px;">
+                ${productosHtml}
+            </div>
+        </div>
+
+        <ul class="list-group">
+            <li class="list-group-item d-flex justify-content-between align-items-center bg-dark text-white fs-5">
+                TOTAL DÍA
+                <span class="fw-bold">${fmt(data.gran_total)}</span>
+            </li>
+        </ul>
+    `;
+    document.getElementById('report-body').innerHTML = html;
+}
+
+// Función corregida para el botón de imprimir
+async function printReportAction() {
+    console.log("Intentando imprimir reporte...", currentReportData);
+
+    if (!currentReportData) {
+        return alert("No hay datos de reporte cargados. Presiona 'Cierre' nuevamente.");
+    }
+    
+    // Verificamos si printer.js cargó bien
+    if (typeof window.printDailyReport !== 'function') {
+        return alert("Error: El archivo printer.js no está cargado o la función no existe.");
+    }
+
+    try {
+        await window.printDailyReport(currentReportData);
+    } catch (e) {
+        console.error(e);
+        alert("Error de comunicación con la impresora: " + e.message);
+    }
 }
