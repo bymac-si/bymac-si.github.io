@@ -143,36 +143,52 @@ function attemptLogin() {
 // 4. LÓGICA DE NEGOCIO (TURNOS)
 // ==========================================
 
-function calcularTurno() {
-    const ahora = new Date();
-    const hora = ahora.getHours();
+// ==========================================
+// CÁLCULO DE TURNO (FORZADO A CHILE 🇨🇱)
+// ==========================================
 
-    // Fecha Comercial: Si es antes de las 3 AM, cuenta como "ayer"
-    let fechaComercial = new Date(ahora);
+// ==========================================
+// CÁLCULO DE TURNO (CORREGIDO)
+// ==========================================
+function calcularTurno() {
+    // 1. Hora actual del navegador
+    const ahora = new Date();
+    
+    // 2. FORZAR HORA CHILENA
+    // Convertimos la hora actual a string en zona horaria de Santiago
+    const santiagoStr = ahora.toLocaleString("en-US", { timeZone: "America/Santiago" });
+    const santiagoDate = new Date(santiagoStr);
+
+    const hora = santiagoDate.getHours();
+
+    // 3. Lógica Fecha Comercial (Corte 03:00 AM)
+    let fechaComercial = new Date(santiagoDate);
     if (hora < 3) {
         fechaComercial.setDate(fechaComercial.getDate() - 1);
     }
-    const fechaStr = fechaComercial.toISOString().split('T')[0];
+    
+    // Formato YYYY-MM-DD manual (seguro)
+    const yyyy = fechaComercial.getFullYear();
+    const mm = String(fechaComercial.getMonth() + 1).padStart(2, '0');
+    const dd = String(fechaComercial.getDate()).padStart(2, '0');
+    const fechaStr = `${yyyy}-${mm}-${dd}`;
 
-    // LÓGICA DE TURNO ACTUALIZADA (Corte 18:00)
-    // Turno 1: 03:00 AM a 17:59 PM
-    // Turno 2: 18:00 PM a 02:59 AM
+    // 4. Lógica Turnos (Corte 18:00 PM)
     let idTurno = 1;
-    if (hora >= 18 || hora < 3) { // <--- CAMBIO AQUÍ: 18 en lugar de 19
+    if (hora >= 18 || hora < 3) {
         idTurno = 2;
     }
 
     currentTurnData = {
-        fechaHora: ahora.toISOString(),
+        fechaHora: santiagoDate.toLocaleString("es-CL"), 
         fechaComercial: fechaStr,
         idTurno: idTurno,
         turnoKey: `${fechaStr}-T${idTurno}`
     };
 }
-function updateClock() {
     calcularTurno();
     // Aquí podrías actualizar un reloj en pantalla si lo tuvieras
-}
+
 
 // ==========================================
 // 5. INTERFAZ (RENDER)

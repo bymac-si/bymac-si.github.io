@@ -1,150 +1,141 @@
 /**
- * printer.js - MODO HÍBRIDO (Físico + Virtual para Mac/Dev)
+ * printer.js - VERSIÓN UNIVERSAL (HTML/CSS) - A PRUEBA DE ERRORES
  */
 
-// CAMBIA ESTO A 'false' CUANDO CONECTES LA IMPRESORA REAL EN WINDOWS
-const SIMULATION_MODE = false; 
+// Helper: Asegura que exista el área de impresión
+function getPrintableArea() {
+    let area = document.getElementById('printable-area');
+    
+    // Si no existe (causa del error), lo creamos al vuelo
+    if (!area) {
+        area = document.createElement('div');
+        area.id = 'printable-area';
+        document.body.appendChild(area);
+        console.log("Área de impresión creada automáticamente.");
+    }
+    return area;
+}
 
-let printerPort;
-
-// Comandos ESC/POS (Iguales)
-const CMD = {
-    LF: '\x0A', CUT: '\x1D\x56\x41\x00', INIT: '\x1B\x40',
-    CENTER: '\x1B\x61\x01', LEFT: '\x1B\x61\x00',
-    BOLD_ON: '\x1B\x45\x01', BOLD_OFF: '\x1B\x45\x00',
-    DOUBLE_H: '\x1D\x21\x10', NORMAL: '\x1D\x21\x00', HUGE: '\x1D\x21\x30'
-};
-
-function setButtonSuccess() {
+// 1. CONEXIÓN (Ficticia en este modo)
+async function connectPrinter() {
+    alert("✅ Modo Impresión Nativa activado.\nSe usará la impresora predeterminada.");
+    
+    // Cambiar visualmente el botón a OK
     const btn = document.querySelector('button[onclick="connectPrinter()"]');
     if(btn) {
         btn.className = "btn btn-sm btn-success text-white border border-3 border-white shadow";
-        btn.innerText = SIMULATION_MODE ? "🖨️ VIRTUAL" : "🖨️ OK";
+        btn.innerText = "🖨️ OK";
     }
 }
 
-// 1. INICIALIZACIÓN
-document.addEventListener('DOMContentLoaded', async () => {
-    if (SIMULATION_MODE) {
-        console.warn("⚠️ MODO IMPRESORA VIRTUAL ACTIVADO ⚠️");
-        setButtonSuccess();
-        return;
-    }
-
-    if ("serial" in navigator) {
-        try {
-            const ports = await navigator.serial.getPorts();
-            if (ports.length > 0) {
-                printerPort = ports[0];
-                await printerPort.open({ baudRate: 9600 });
-                setButtonSuccess();
-            }
-        } catch (err) { console.error(err); }
-    }
-});
-
-// 2. CONEXIÓN (Simulada o Real)
-async function connectPrinter() {
-    if (SIMULATION_MODE) {
-        alert("Modo Virtual: La impresora está 'lista' para pruebas en pantalla.");
-        setButtonSuccess();
-        return;
-    }
-
-    if (!navigator.serial) return alert("Navegador no compatible (Usa Chrome).");
-    
-    try {
-        printerPort = await navigator.serial.requestPort();
-        await printerPort.open({ baudRate: 9600 });
-        setButtonSuccess();
-    } catch (e) {
-        alert("Error: " + e.message);
-    }
-}
-
-// 3. IMPRIMIR TICKET (Lógica Híbrida)
+// 2. IMPRIMIR TICKET VENTA
 window.printTicket = async function(cart, total, method, orderNum) {
-    console.log(`%c 🖨️ IMPRIMIENDO PEDIDO #${orderNum} `, 'background: #222; color: #bada55; font-size: 14px');
+    const ticketArea = getPrintableArea(); // <--- USA LA FUNCIÓN SEGURA
+const fecha = new Date().toLocaleString('es-CL', { timeZone: 'America/Santiago' });
 
-    // --- MODO VIRTUAL (MAC / PRUEBAS) ---
-    if (SIMULATION_MODE) {
-        // Simulamos el tiempo que tarda la impresora
-        await new Promise(r => setTimeout(r, 500));
+
+    let itemsHtml = '';
+    cart.forEach(item => {
+        const totalItem = (item.precio * item.cantidad).toLocaleString('es-CL');
+        itemsHtml += `
+            <div style="display:flex; justify-content:space-between; margin-bottom: 2px;">
+                <span>${item.cantidad} x ${item.nombre.substring(0, 18)}</span>
+                <span>$${totalItem}</span>
+            </div>
+        `;
+    });
+
+    ticketArea.innerHTML = `
+        <div style="text-align: center; font-weight: bold; margin-bottom: 5px;"><img src="img/logo_8_sf.png" width="50px" alt="" /><br>
+            EL CARRO DEL OCHO<br>
+        </div>
+        <div style="text-align: center; border-bottom: 1px dashed black; padding-bottom: 5px; margin-bottom: 5px;">
+            PEDIDO: <span style="font-size: 1.5em; font-weight:bold;">#${orderNum}</span>
+        </div>
+        <div style="font-size: 0.8em; margin-bottom: 10px; text-align:center;">
+            ${fecha}
+        </div>
         
-        console.group("🧾 TICKET VIRTUAL");
-        console.log("=== COCINA ===");
-        const cocina = cart.filter(i => i.cocina);
-        if(cocina.length > 0) {
-            console.log(`PEDIDO #${orderNum}`);
-            cocina.forEach(i => console.log(`${i.cantidad}x ${i.nombre}`));
-        } else {
-            console.log("(Sin items de cocina)");
-        }
+        <div style="border-bottom: 1px dashed black; padding-bottom: 5px; margin-bottom: 5px; font-size: 0.9em;">
+            ${itemsHtml}
+        </div>
         
-        console.log("\n=== CLIENTE ===");
-        console.log(`SU NUMERO: #${orderNum}`);
-        cart.forEach(i => console.log(`${i.cantidad}x ${i.nombre} - $${i.precio}`));
-        console.log(`TOTAL: $${total}`);
-        console.log(`MEDIO: ${method}`);
-        console.groupEnd();
-        
-        return; // Salimos exitosamente
-    }
+        <div style="display:flex; justify-content:space-between; font-weight:bold; font-size: 1.1em; margin-top: 5px;">
+            <span>TOTAL:</span>
+            <span>$${total.toLocaleString('es-CL')}</span>
+        </div>
+        <div style="margin-top: 5px; font-size: 0.9em;">
+            Pago: ${method}
+        </div>
+        <div style="text-align: center; margin-top: 15px; font-size: 0.8em;">
+            ¡Gracias por su preferencia!
+        </div>
+        <br>.
+    `;
 
-    // --- MODO REAL (Hardware) ---
-    if (!printerPort || !printerPort.writable) {
-        return alert("⚠️ Conecta la impresora real.");
-    }
-
-    const encoder = new TextEncoder();
-    const writer = printerPort.writable.getWriter();
-    const print = async (txt) => await writer.write(encoder.encode(txt));
-
-    try {
-        // TICKET COCINA
-        const itemsCocina = cart.filter(i => i.cocina);
-        if (itemsCocina.length > 0) {
-            await print(CMD.INIT + CMD.CENTER + CMD.BOLD_ON + "COCINA\n" + CMD.BOLD_OFF);
-            await print(CMD.HUGE + `#${orderNum}\n` + CMD.NORMAL);
-            await print(CMD.LEFT + "--------------------------------\n");
-            await print(CMD.DOUBLE_H);
-            for (const item of itemsCocina) await print(`${item.cantidad}x ${item.nombre}\n`);
-            await print(CMD.NORMAL + "\n\n" + CMD.CUT);
-            await new Promise(r => setTimeout(r, 1000));
-        }
-
-        // TICKET CLIENTE
-        await print(CMD.INIT + CMD.CENTER + CMD.BOLD_ON + "EL CARRO DEL OCHO\n" + CMD.BOLD_OFF);
-        await print("Sandwicheria\n--------------------------------\nSU NUMERO:\n");
-        await print(CMD.HUGE + `#${orderNum}\n` + CMD.NORMAL);
-        await print("--------------------------------\n" + CMD.LEFT);
-        
-        for (const item of cart) {
-            const precio = `$${(item.precio * item.cantidad).toLocaleString('es-CL')}`;
-            await print(`${item.cantidad}x ${item.nombre.slice(0,15)} ${precio}\n`);
-        }
-
-        await print("--------------------------------\n");
-        await print(CMD.BOLD_ON + `TOTAL: $${total.toLocaleString('es-CL')}\n` + CMD.BOLD_OFF);
-        await print(`Pago: ${method}\n\nGracias por su compra!\n\n\n` + CMD.CUT);
-
-    } catch (err) { alert("Error imprimiendo"); } 
-    finally { writer.releaseLock(); }
+    imprimirYLimpiar(ticketArea);
 };
 
-// 4. REPORTE Z (Híbrido)
+// 3. IMPRIMIR REPORTE Z
 window.printDailyReport = async function(data) {
-    console.log(`%c 📊 REPORTE DIARIO `, 'background: #000; color: #fff; font-size: 14px');
-
-    if (SIMULATION_MODE) {
-        console.table(data.turnos);
-        console.log("Total Unidades:", data.total_unidades);
-        console.log("GRAN TOTAL:", data.gran_total);
-        return;
+    const ticketArea = getPrintableArea(); // <--- USA LA FUNCIÓN SEGURA
+    await print(`Impreso: ${new Date().toLocaleTimeString('es-CL', { timeZone: 'America/Santiago' })}\n`);
+    
+    // Generar tabla de productos
+    let prodHtml = '';
+    const ranking = Object.entries(data.productos).sort((a,b) => b[1] - a[1]);
+    
+    if (ranking.length === 0) {
+        prodHtml = '<div>Sin ventas registradas.</div>';
+    } else {
+        ranking.forEach(([nom, cant]) => {
+            prodHtml += `
+                <div style="display:flex; justify-content:space-between;">
+                    <span>${cant} x ${nom.substring(0,20)}</span>
+                </div>`;
+        });
     }
 
-    if (!printerPort || !printerPort.writable) return alert("Impresora desconectada.");
-    
-    // ... (Aquí iría el código real de impresión del reporte que ya tienes) ...
-    // Puedes dejar esta parte vacía o copiar la lógica anterior si planeas conectar la impresora al Mac eventualmente.
+    ticketArea.innerHTML = `
+        <div style="text-align: center; font-weight: bold; font-size: 1.1em;">REPORTE CIERRE (Z)</div>
+        <div style="text-align: center; font-size: 0.9em;">${data.fecha}</div>
+        <hr style="border-top: 1px dashed black;">
+        
+        <strong style="display:block; margin-bottom:5px;">RESUMEN FINANCIERO:</strong>
+        <div style="display:flex; justify-content:space-between;"><span>AM:</span> <span>$${data.turnos[1].total.toLocaleString('es-CL')}</span></div>
+        <div style="display:flex; justify-content:space-between;"><span>PM:</span> <span>$${data.turnos[2].total.toLocaleString('es-CL')}</span></div>
+        <hr style="border-top: 1px dashed black;">
+        
+        <strong style="display:block; margin-bottom:5px;">VENDIDOS:</strong>
+        <div style="font-size: 0.9em;">
+            ${prodHtml}
+        </div>
+        <hr style="border-top: 1px dashed black;">
+        
+        <div style="text-align: center; margin: 10px 0;">
+            UNIDADES: <strong>${data.total_unidades}</strong>
+        </div>
+        <div style="text-align: right; font-weight: bold; font-size: 1.3em; border: 1px solid black; padding: 5px;">
+            TOTAL: $${data.gran_total.toLocaleString('es-CL')}
+        </div>
+        <br><br>.
+    `;
+
+    imprimirYLimpiar(ticketArea);
 };
+
+// Helper para lanzar la impresión
+function imprimirYLimpiar(area) {
+    area.style.display = 'block';
+    
+    // Pequeño timeout para asegurar que el renderizado terminó
+    setTimeout(() => {
+        window.print();
+        
+        // Ocultar después de imprimir
+        setTimeout(() => {
+            area.style.display = 'none';
+            area.innerHTML = '';
+        }, 500);
+    }, 100);
+}

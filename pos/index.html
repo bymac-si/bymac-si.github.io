@@ -86,6 +86,76 @@
       .material-symbols-outlined {
         font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
       }
+      /* ESTILOS SOLO PARA IMPRESIÓN */
+      @media print {
+        /* Ocultar todo lo que no sea el ticket */
+        body * {
+          visibility: hidden;
+        }
+
+        /* Mostrar solo el área del ticket */
+        #printable-area,
+        #printable-area * {
+          visibility: visible;
+        }
+
+        /* Posicionar el ticket arriba a la izquierda */
+        #printable-area {
+          position: absolute;
+          left: 10;
+          right: 10;
+          top: 5;
+          width: 80mm; /* O 58mm según tu impresora */
+          font-family: "Courier New", monospace; /* Fuente tipo ticket */
+          font-size: 12px;
+          color: black;
+        }
+
+        /* Quitar márgenes automáticos del navegador */
+        @page {
+          margin: 5;
+          size: auto;
+        }
+      }
+
+      /* Ocultar el área de impresión en la pantalla normal */
+      #printable-area {
+        display: none;
+      }
+
+      /* Clase para mostrarlo temporalmente al imprimir (opcional) */
+      .printing #printable-area {
+        display: block;
+      }
+      /* ESTILOS DE IMPRESIÓN (TICKET) */
+      @media print {
+        body * {
+          visibility: hidden; /* Oculta todo */
+        }
+        #printable-area,
+        #printable-area * {
+          visibility: visible; /* Muestra solo el ticket */
+        }
+        #printable-area {
+          position: absolute;
+          left: 10;
+          right: 10;
+          top: 0;
+          width: 95%; /* O ancho fijo ej: 75mm */
+          margin: 0;
+          padding: 10;
+          font-family: "Courier New", monospace; /* Letra tipo ticket */
+          color: black;
+        }
+        @page {
+          margin: 0; /* Quita encabezados y pies de página del navegador */
+        }
+      }
+
+      /* Ocultar en pantalla normal */
+      #printable-area {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -275,22 +345,41 @@
       </div>
     </div>
     <div class="modal fade" id="reportModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header bg-dark text-white">
-        <h5 class="modal-title">📊 Reporte Diario (Cierre Z)</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body" id="report-body">
-        <div class="text-center py-3"><div class="spinner-border"></div><p>Calculando...</p></div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <button type="button" class="btn btn-primary" onclick="printReportAction()">🖨️ IMPRIMIR REPORTE</button>
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-dark text-white">
+            <h5 class="modal-title">📊 Reporte Diario (Cierre Z)</h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body" id="report-body">
+            <div class="text-center py-3">
+              <div class="spinner-border"></div>
+              <p>Calculando...</p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cerrar
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="printReportAction()"
+            >
+              🖨️ IMPRIMIR REPORTE
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
     <footer class="bg-primary text-white fixed-bottom py-1 border-top">
       <p class="text-center m-0" style="font-size: 0.7em">
