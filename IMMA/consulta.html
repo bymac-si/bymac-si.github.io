@@ -157,9 +157,10 @@
       <div class="row justify-content-center mb-4">
         <div class="col-12 col-md-8">
           <div class="input-group input-group-lg shadow-sm">
-            <span class="input-group-text bg-white border-0"
-              ><i class="bi bi-search text-muted"></i
-            ></span>
+            <span class="input-group-text bg-white border-0">
+              <i class="bi bi-search text-muted"></i>
+            </span>
+
             <input
               type="text"
               id="txtBuscar"
@@ -167,8 +168,17 @@
               placeholder="Ingrese TAG (Ej: 29044-005)..."
               onkeyup="if(event.key==='Enter') buscarTags()"
             />
-            <button class="btn btn-primary px-4" onclick="buscarTags()">
-              Consultar
+
+            <button
+              class="btn bg-danger border-0"
+              type="button"
+              onclick="limpiarBusqueda()"
+              title="Limpiar búsqueda"
+            >
+              <i class="bi bi-x-lg text-light"></i>
+            </button>
+            <button class="btn btn-primary px-3" onclick="buscarTags()">
+            <i class="bi bi-search"></i>
             </button>
           </div>
           <div
@@ -589,6 +599,21 @@
           msg.textContent = "Plano no disponible";
           loader.classList.remove("d-none");
         }
+      }
+      // --- FUNCIÓN PARA LIMPIAR BÚSQUEDA ---
+      function limpiarBusqueda() {
+        // 1. Borrar texto del input
+        const input = document.getElementById("txtBuscar");
+        input.value = "";
+        
+        // 2. Ocultar lista de resultados
+        document.getElementById("resFicha").style.display = "none";
+        
+        // 3. Ocultar el contenedor de la ficha técnica
+        document.getElementById("contenedorFicha").classList.add("d-none");
+        
+        // 4. Devolver el foco al input para escribir de nuevo
+        input.focus();
       }
     </script>
   </body>
