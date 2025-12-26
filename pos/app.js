@@ -302,8 +302,8 @@ function renderReportUI(data) {
 
     document.getElementById('report-body').innerHTML = `
         <h5 class="text-center fw-bold">${data.fecha}</h5>
-        <div class="row g-2 mb-2"><div class="col-6"><div class="card bg-light p-2"><div class="fw-bold text-primary">AM</div><div>Total: ${fmt(data.turnos[1].total)}</div></div></div>
-        <div class="col-6"><div class="card bg-light p-2"><div class="fw-bold text-primary">PM</div><div>Total: ${fmt(data.turnos[2].total)}</div></div></div></div>
+        <div class="row g-2 mb-2"><div class="col-6"><div class="card bg-light p-2"><div class="fw-bold text-primary">Turno 1</div><div>Total: ${fmt(data.turnos[1].total)}</div></div></div>
+        <div class="col-6"><div class="card bg-light p-2"><div class="fw-bold text-primary">Turno 2</div><div>Total: ${fmt(data.turnos[2].total)}</div></div></div></div>
         <div class="card p-2 mb-2" style="max-height:200px;overflow:auto;">${prodHtml}</div>
         <div class="bg-dark text-white p-2 d-flex justify-content-between"><span>TOTAL DIA</span><span class="fw-bold">${fmt(data.gran_total)}</span></div>
     `;

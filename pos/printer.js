@@ -64,7 +64,8 @@ window.printTicket = async function(cart, total, method, orderNum) {
 
     const htmlCliente = `
         <div class="ticket-header">
-            EL CARRO DEL OCHO<br>Sandwicheria
+        <img src="img/Logo_8_sf.png" width="80px"><br>
+            EL CARRO DEL OCHO
         </div>
         <div class="text-center ticket-divider">
             PEDIDO: <span class="fs-huge">#${orderNum}</span>
@@ -96,11 +97,17 @@ window.printTicket = async function(cart, total, method, orderNum) {
     imprimirYLimpiar(ticketArea);
 };
 
-// === IMPRIMIR REPORTE Z ===
+// === IMPRIMIR REPORTE Z CON DESGLOSE DE PAGO ===
 window.printDailyReport = async function(data) {
     const ticketArea = getPrintableArea();
     
-    // Tabla de productos vendidos
+    // 1. CALCULAMOS LOS TOTALES POR MÉTODO DE PAGO
+    // Sumamos lo del Turno 1 + Turno 2 para tener el total del día
+    const totalEfectivo = (data.turnos[1].efectivo || 0) + (data.turnos[2].efectivo || 0);
+    const totalTarjeta  = (data.turnos[1].tarjeta || 0) + (data.turnos[2].tarjeta || 0);
+    const totalTransf   = (data.turnos[1].transferencia || 0) + (data.turnos[2].transferencia || 0);
+
+    // 2. Lógica de Productos (Igual que antes)
     let prodHtml = '';
     const ranking = Object.entries(data.productos).sort((a,b) => b[1] - a[1]);
     
@@ -108,18 +115,35 @@ window.printDailyReport = async function(data) {
         prodHtml = '<div>Sin ventas registradas.</div>';
     } else {
         ranking.forEach(([nom, cant]) => {
-            prodHtml += `<div class="d-flex-between"><span>${cant} x ${nom.substring(0,20)}</span></div>`;
+            // Recortamos el nombre a 18 caracteres para que quepa bien
+            prodHtml += `<div class="d-flex-between"><span>${cant} x ${nom.substring(0,18)}</span></div>`;
         });
     }
 
+    // 3. GENERAMOS EL HTML
     ticketArea.innerHTML = `
-        <div class="ticket-header fs-big">REPORTE Z</div>
+        <div class="ticket-header fs-big">REPORTE DE VENTAS</div>
         <div class="text-center">${data.fecha}</div>
         <div class="ticket-divider"></div>
         
-        <div class="fs-big">FINANZAS</div>
-        <div class="d-flex-between"><span>AM:</span><span>$${data.turnos[1].total.toLocaleString('es-CL')}</span></div>
-        <div class="d-flex-between"><span>PM:</span><span>$${data.turnos[2].total.toLocaleString('es-CL')}</span></div>
+        <div class="fs-big">MEDIOS DE PAGO</div>
+        <div class="d-flex-between">
+            <span>Efectivo (Caja):</span>
+            <span class="fw-bold">$${totalEfectivo.toLocaleString('es-CL')}</span>
+        </div>
+        <div class="d-flex-between">
+            <span>Tarjeta:</span>
+            <span>$${totalTarjeta.toLocaleString('es-CL')}</span>
+        </div>
+        <div class="d-flex-between">
+            <span>Transferencia:</span>
+            <span>$${totalTransf.toLocaleString('es-CL')}</span>
+        </div>
+        <div class="ticket-divider"></div>
+
+        <div class="fs-big">TOTALES POR TURNO</div>
+        <div class="d-flex-between"><span>Turno 1 (AM): </span><span>$${data.turnos[1].total.toLocaleString('es-CL')}</span></div>
+        <div class="d-flex-between"><span>Turno 2 (PM): </span><span>$${data.turnos[2].total.toLocaleString('es-CL')}</span></div>
         <div class="ticket-divider"></div>
         
         <div class="fs-big">PRODUCTOS</div>
