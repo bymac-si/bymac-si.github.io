@@ -1,208 +1,125 @@
 /**
- * POS El Carro del Ocho - Lógica de Venta (Frontend)
- * Versión Depurada: Solo Venta y Caja (Sin Administración)
+ * POS El Carro del Ocho - Lógica Principal
  */
 
-// ==========================================
-// 1. CONFIGURACIÓN Y ESTADO
-// ==========================================
+// URL DE TU SCRIPT GOOGLE (¡Asegúrate que sea la correcta!)
+const API_URL = "https://script.google.com/macros/s/AKfycbyTsarYzEHOqu8Xtqx8qOaxgjRY-7fsUIT6TLcOv5VFQaL7nOGecbxGGhMbJJg6igAG/exec";
 
-// ¡IMPORTANTE! Pega aquí la misma URL de Apps Script que usas en el admin
-const API_URL = "https://script.google.com/macros/s/AKfycbzXtHVx96y5T6c7qaqm0yTNzVL8ygCMmy7X2Q99ZrWDxSDEBzBRGvVhjDlSn457eERn/exec";
-
-// Estado de la Aplicación
-let db = {
-    productos: [],
-    categorias: [],
-    usuarios: [],
-    config: {}
-};
-
+let db = { productos: [], categorias: [], usuarios: [] };
 let cart = [];
-let currentUser = null; // Cajero logueado
-let currentTurnData = null; // Info del turno (AM/PM, Fecha Comercial)
+let currentUser = null;
+let currentTurnData = null;
+let currentReportData = null;
 
-// Formateador de moneda (CLP)
-const formatter = new Intl.NumberFormat('es-CL', {
-    style: 'currency',
-    currency: 'CLP',
-    minimumFractionDigits: 0
-});
+const formatter = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 });
 
-// ==========================================
-// 2. INICIALIZACIÓN
-// ==========================================
-
+// --- INICIO ---
 document.addEventListener('DOMContentLoaded', () => {
-    loadSystemData();       // Carga inicial
-    updateClock();          // Iniciar reloj interno
-    startAutoUpdate();      // Iniciar sincronización silenciosa
-    setInterval(updateClock, 60000); // Actualizar reloj cada minuto
+    loadSystemData();
+    updateClock();
+    startAutoUpdate();
+    setInterval(updateClock, 60000);
 });
 
-// Carga de datos (Soporta modo silencioso para no bloquear venta)
+// --- CARGA DE DATOS ---
 async function loadSystemData(silent = false) {
     const container = document.getElementById('products-container');
-
-    if (!silent) {
-        container.innerHTML = `
-            <div style="grid-column: 1/-1;" class="text-center mt-5">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-muted">Cargando sistema...</p>
-            </div>`;
-    }
+    if (!silent) container.innerHTML = `<div style="grid-column:1/-1;" class="text-center mt-5"><div class="spinner-border text-primary"></div><p>Cargando...</p></div>`;
 
     try {
         const response = await fetch(API_URL);
         const data = await response.json();
 
-        // 1. Procesar Usuarios (Solo activos)
         db.usuarios = data.usuarios.filter(u => String(u.Activo).toLowerCase() === 'true');
-
-        // 2. Procesar Categorías (Ordenadas)
-        db.categorias = data.categorias.sort((a, b) => (parseInt(a.Orden) || 99) - (parseInt(b.Orden) || 99));
-
-        // 3. Procesar Productos (Solo activos, limpieza de precios y colores)
+        db.categorias = data.categorias.sort((a, b) => (parseInt(a.Orden)||99) - (parseInt(b.Orden)||99));
+        
         db.productos = data.productos
             .filter(p => String(p.Activo).trim().toUpperCase() === 'TRUE')
             .map(p => ({
                 ...p,
-                // Limpieza robusta de precio (quita signos $ y puntos)
                 Precio: parseInt(String(p.Precio).replace(/\D/g, '')) || 0,
                 Cocina: String(p.Imprimir_en_Cocina).toUpperCase() === 'TRUE',
-                // Mapeo de color: Soporta Hex (#) o Nombre (Blue)
-                Color: (p['Color Boton'] || p['ColorBoton'] || 'primary').trim(),
+                Color: (p['ColorBoton'] || 'primary').trim(),
                 Categoria: p.Categoria
             }))
-            .sort((a, b) => (parseInt(a.Orden) || 99) - (parseInt(b.Orden) || 99));
+            .sort((a, b) => (parseInt(a.Orden)||99) - (parseInt(b.Orden)||99));
 
-        // 4. Renderizar Interfaz
         renderCategories();
-        
-        // Renderizado inteligente: Si ya hay productos, intentar mantener vista, sino mostrar todo
-        // Por defecto refrescamos todo para asegurar precios nuevos
-        renderProducts(db.productos); 
-
-        // 5. Verificar Login (Solo si no es silencioso)
+        renderProducts(db.productos);
         if (!silent) checkLogin();
 
-        console.log(`Sincronización completada: ${new Date().toLocaleTimeString()}`);
-
     } catch (error) {
-        console.error("Error cargando datos:", error);
-        if (!silent) {
-            container.innerHTML = `<div class="alert alert-danger" style="grid-column: 1/-1;">Error de conexión. Revisa internet.</div>`;
-        }
+        if (!silent) container.innerHTML = `<div class="alert alert-danger" style="grid-column:1/-1;">Error de conexión.</div>`;
     }
 }
 
-// ==========================================
-// 3. SEGURIDAD Y LOGIN
-// ==========================================
-
+// --- LOGIN ---
 function checkLogin() {
-    if (!currentUser) {
-        const loginModalEl = document.getElementById('loginModal');
-        const modal = new bootstrap.Modal(loginModalEl, { backdrop: 'static', keyboard: false });
-        modal.show();
-    }
+    if (!currentUser) new bootstrap.Modal(document.getElementById('loginModal'), { backdrop: 'static', keyboard: false }).show();
 }
 
 function attemptLogin() {
-    const pinInput = document.getElementById('pin-input');
-    const pin = pinInput.value.trim();
-
-    // Comparar PIN (convertir a string por seguridad)
+    const pin = document.getElementById('pin-input').value.trim();
     const usuario = db.usuarios.find(u => String(u.PIN) === pin);
 
     if (usuario) {
         currentUser = usuario;
-        
-        // Actualizar UI
-        const userDisplay = document.getElementById('user-display');
-        if(userDisplay) userDisplay.innerText = `Cajero: ${usuario.Nombre}`;
-        
-        // Cerrar modal
-        const modalEl = document.getElementById('loginModal');
-        const modal = bootstrap.Modal.getInstance(modalEl);
-        if(modal) modal.hide();
-        
-        // Limpiar
-        pinInput.value = '';
-        document.getElementById('login-error').innerText = '';
-        
-        calcularTurno(); // Calcular turno al entrar
+        document.getElementById('user-display').innerText = `Cajero: ${usuario.Nombre}`;
+        bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
+        document.getElementById('pin-input').value = '';
+        calcularTurno();
     } else {
         document.getElementById('login-error').innerText = 'PIN incorrecto';
-        pinInput.value = '';
-        pinInput.focus();
     }
 }
 
-// ==========================================
-// 4. LÓGICA DE NEGOCIO (TURNOS)
-// ==========================================
-
-// ==========================================
-// CÁLCULO DE TURNO (FORZADO A CHILE 🇨🇱)
-// ==========================================
-
-// ==========================================
-// CÁLCULO DE TURNO (CORREGIDO)
-// ==========================================
+// --- LÓGICA DE TURNO (HORA CHILE) ---
 function calcularTurno() {
-    // 1. Hora actual del navegador
     const ahora = new Date();
-    
-    // 2. FORZAR HORA CHILENA
-    // Convertimos la hora actual a string en zona horaria de Santiago
+    // Forzar zona horaria Santiago
     const santiagoStr = ahora.toLocaleString("en-US", { timeZone: "America/Santiago" });
     const santiagoDate = new Date(santiagoStr);
-
     const hora = santiagoDate.getHours();
 
-    // 3. Lógica Fecha Comercial (Corte 03:00 AM)
+    // Día Comercial (Corte 3 AM)
     let fechaComercial = new Date(santiagoDate);
-    if (hora < 3) {
-        fechaComercial.setDate(fechaComercial.getDate() - 1);
-    }
+    if (hora < 3) fechaComercial.setDate(fechaComercial.getDate() - 1);
     
-    // Formato YYYY-MM-DD manual (seguro)
     const yyyy = fechaComercial.getFullYear();
     const mm = String(fechaComercial.getMonth() + 1).padStart(2, '0');
     const dd = String(fechaComercial.getDate()).padStart(2, '0');
     const fechaStr = `${yyyy}-${mm}-${dd}`;
 
-    // 4. Lógica Turnos (Corte 18:00 PM)
-    let idTurno = 1;
-    if (hora >= 18 || hora < 3) {
-        idTurno = 2;
-    }
+    // Turno (Corte 18:00)
+    let idTurno = (hora >= 18 || hora < 3) ? 2 : 1;
 
     currentTurnData = {
-        fechaHora: santiagoDate.toLocaleString("es-CL"), 
+        fechaHora: santiagoDate.toLocaleString("es-CL"),
         fechaComercial: fechaStr,
         idTurno: idTurno,
         turnoKey: `${fechaStr}-T${idTurno}`
     };
 }
+
+function updateClock() { calcularTurno(); }
+
+// --- NÚMERO DE PEDIDO ---
+function getNextOrderNumber() {
+    // Usamos fecha comercial para agrupar pedidos de la noche con el día anterior
     calcularTurno();
-    // Aquí podrías actualizar un reloj en pantalla si lo tuvieras
+    const key = `pos_counter_${currentTurnData.fechaComercial}`;
+    
+    let count = parseInt(localStorage.getItem(key)) || 0;
+    count++;
+    localStorage.setItem(key, count);
+    return String(count).padStart(3, '0');
+}
 
-
-// ==========================================
-// 5. INTERFAZ (RENDER)
-// ==========================================
-
+// --- RENDERIZADO ---
 function renderCategories() {
     const container = document.getElementById('category-container');
-    // Botón "Todo" primero
     let html = `<button class="btn btn-dark shadow-sm flex-shrink-0" onclick="filterProducts('Todo')">Todo</button>`;
-    
-    // Categorías desde DB
     db.categorias.forEach(cat => {
-        // Usamos el color de la categoría si existe
-        // Si no, un gris por defecto
         const color = cat.Color ? mapColor(cat.Color) : "secondary";
         html += `<button class="btn btn-${color} shadow-sm flex-shrink-0" onclick="filterProducts('${cat.Nombre}')">${cat.Nombre}</button>`;
     });
@@ -210,73 +127,40 @@ function renderCategories() {
 }
 
 function filterProducts(catName) {
-    if (catName === 'Todo') {
-        renderProducts(db.productos);
-    } else {
-        renderProducts(db.productos.filter(p => p.Categoria === catName));
-    }
+    renderProducts(catName === 'Todo' ? db.productos : db.productos.filter(p => p.Categoria === catName));
 }
 
 function renderProducts(lista) {
     const container = document.getElementById('products-container');
-    
-    if(lista.length === 0) {
-        container.innerHTML = '<div style="grid-column: 1 / -1;" class="text-center text-muted mt-5">No hay productos disponibles</div>';
-        return;
-    }
+    if(lista.length === 0) return container.innerHTML = '<div style="grid-column:1/-1;" class="text-center text-muted mt-5">Sin productos</div>';
 
     container.innerHTML = lista.map(p => {
-        // Lógica de color híbrida (Hex o Bootstrap)
         const esHex = p.Color.startsWith('#');
         const claseBg = esHex ? '' : `bg-${mapColor(p.Color)}`;
         const estiloBg = esHex ? `background-color: ${p.Color}; color: white;` : '';
-
         return `
-        <div class="card product-card h-100 shadow-sm border-0 ${claseBg}" 
-             style="${estiloBg}"
-             onclick="addToCart('${p.ID_Producto}')">
-             
+        <div class="card product-card h-100 shadow-sm border-0 ${claseBg}" style="${estiloBg}" onclick="addToCart('${p.ID_Producto}')">
             <div class="card-body d-flex flex-column align-items-center justify-content-center text-center p-1">
                 <h6 class="card-title fw-bold mb-1" style="color: inherit;">${p.Nombre}</h6>
                 <span class="badge bg-white text-dark bg-opacity-90 mt-auto px-2 py-1">${formatter.format(p.Precio)}</span>
             </div>
-        </div>
-        `;
+        </div>`;
     }).join('');
 }
 
-// Helper para colores de texto (inglés -> bootstrap)
 function mapColor(c) {
     if (!c) return 'primary';
-    const map = {
-        'red': 'danger', 'orange': 'warning', 'yellow': 'warning',
-        'green': 'success', 'blue': 'primary', 'cyan': 'info',
-        'black': 'dark', 'grey': 'secondary', 'gray': 'secondary'
-    };
+    const map = { 'red': 'danger', 'orange': 'warning', 'yellow': 'warning', 'green': 'success', 'blue': 'primary', 'cyan': 'info', 'black': 'dark', 'grey': 'secondary' };
     return map[String(c).toLowerCase()] || 'primary';
 }
 
-// ==========================================
-// 6. GESTIÓN DEL CARRITO
-// ==========================================
-
+// --- CARRITO ---
 function addToCart(id) {
     const prod = db.productos.find(p => p.ID_Producto === id);
     if (!prod) return;
-
     const existing = cart.find(i => i.id === id);
-    if (existing) {
-        existing.cantidad++;
-    } else {
-        cart.push({
-            id: prod.ID_Producto,
-            nombre: prod.Nombre,
-            precio: prod.Precio,
-            cantidad: 1,
-            cocina: prod.Cocina,
-            comentario: ''
-        });
-    }
+    if (existing) existing.cantidad++;
+    else cart.push({ id: prod.ID_Producto, nombre: prod.Nombre, precio: prod.Precio, cantidad: 1, cocina: prod.Cocina, comentario: '' });
     updateCartUI();
 }
 
@@ -288,7 +172,6 @@ function removeFromCart(index) {
 function updateCartUI() {
     const container = document.getElementById('cart-container');
     let total = 0;
-
     container.innerHTML = cart.map((item, index) => {
         const subtotal = item.precio * item.cantidad;
         total += subtotal;
@@ -304,328 +187,132 @@ function updateCartUI() {
                 </div>
             </div>`;
     }).join('');
-
+    
     const totalFmt = formatter.format(total);
     document.getElementById('total-display').innerText = totalFmt;
-    
-    const modalTotal = document.getElementById('modal-total-pagar');
-    if (modalTotal) modalTotal.innerText = totalFmt;
+    document.getElementById('modal-total-pagar').innerText = totalFmt;
 }
 
-// ==========================================
-// 7. COBRO Y FINALIZACIÓN
-// ==========================================
-
+// --- COBRO ---
 let selectedPaymentMethod = 'Efectivo';
 
-// ==========================================
-// CORRECCIÓN EN app.js
-// ==========================================
-
 function openPaymentModal() {
-    if (cart.length === 0) return alert("El carrito está vacío.");
-    
-    const modalEl = document.getElementById('paymentModal');
-    
-    // CORRECCIÓN: Usamos getOrCreateInstance
-    // Esto evita crear duplicados que causan el error de aria-hidden
-    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-    
+    if (cart.length === 0) return alert("Carrito vacío");
+    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('paymentModal'));
     modal.show();
-    
-    // Resetear formulario
     setPaymentMethod('Efectivo');
     document.getElementById('amount-tendered').value = '';
     document.getElementById('change-display').innerText = '$0';
-    
-    // Opcional: Dar foco al campo de dinero automáticamente al abrir
-    // Esto mejora la experiencia en el POS
-    setTimeout(() => {
-        const input = document.getElementById('amount-tendered');
-        if(input) input.focus();
-    }, 500);
+    setTimeout(() => document.getElementById('amount-tendered').focus(), 500);
 }
 
 function setPaymentMethod(method) {
     selectedPaymentMethod = method;
-    
     document.querySelectorAll('#pills-tab .nav-link').forEach(btn => {
         if (btn.dataset.method === method) btn.classList.add('active');
         else btn.classList.remove('active');
     });
-
-    const cashSection = document.getElementById('cash-section');
-    cashSection.style.display = (method === 'Efectivo') ? 'block' : 'none';
+    document.getElementById('cash-section').style.display = (method === 'Efectivo') ? 'block' : 'none';
 }
 
 function calculateChange() {
     const total = cart.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
-    const inputVal = document.getElementById('amount-tendered').value;
-    const received = parseInt(inputVal) || 0;
-    
+    const received = parseInt(document.getElementById('amount-tendered').value) || 0;
     const change = received - total;
     const display = document.getElementById('change-display');
     
-    if (change >= 0) {
-        display.innerText = formatter.format(change);
-        display.classList.remove('text-danger');
-        display.classList.add('text-success');
-    } else {
-        display.innerText = "Falta dinero";
-        display.classList.remove('text-success');
-        display.classList.add('text-danger');
-    }
+    if (change >= 0) { display.innerText = formatter.format(change); display.classList.replace('text-danger', 'text-success'); } 
+    else { display.innerText = "Falta dinero"; display.classList.replace('text-success', 'text-danger'); }
 }
 
-// ... (Mantén tu código anterior de Configuración, Carga de datos, Login, etc.) ...
-
-// ==========================================
-// NUEVO: GENERADOR DE NÚMERO DE PEDIDO (Diario 001 - 999)
-// ==========================================
-// --- GENERADOR DE NÚMERO DIARIO ---
-function getNextOrderNumber() {
-    const today = new Date().toLocaleDateString('es-CL'); // Clave por fecha local
-    let data = JSON.parse(localStorage.getItem('pos_turno_counter')) || { date: '', count: 0 };
-
-    // Si cambió el día, reiniciar a 0
-    if (data.date !== today) {
-        data = { date: today, count: 0 };
-    }
-
-    data.count++; // Sumar 1
-    localStorage.setItem('pos_turno_counter', JSON.stringify(data));
-
-    // Retorna string de 3 dígitos: "001", "002"...
-    return String(data.count).padStart(3, '0');
-}
-
-// --- PROCESAR VENTA ---
 async function processSale() {
     if (!currentUser) return checkLogin();
     
-    // 1. Validar Montos
-    const total = cart.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
+    const total = cart.reduce((acc, i) => acc + (i.precio * i.cantidad), 0);
     if (selectedPaymentMethod === 'Efectivo') {
         const received = parseInt(document.getElementById('amount-tendered').value) || 0;
-        if (received < total) return alert("Monto insuficiente.");
+        if (received < total) return alert("Monto insuficiente");
     }
 
-    // 2. Cerrar modal y mostrar indicador de carga visual (opcional)
-    const modalEl = document.getElementById('paymentModal');
-    const modalInstance = bootstrap.Modal.getInstance(modalEl);
-    modalInstance.hide();
-
-    // 3. GENERAR DATOS
-    calcularTurno(); // Asegurar fecha/hora actual
-    const idPedido = `PED-${Date.now()}`;
-    const numeroDia = getNextOrderNumber(); // Generamos el "001"
+    bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
     
-    console.log("Procesando Venta...", { idPedido, numeroDia }); // DEBUG
+    calcularTurno();
+    const idPedido = `PED-${Date.now()}`;
+    const numeroDia = getNextOrderNumber();
 
-    // 4. IMPRIMIR (Primero imprimimos, es lo más importante en comida rápida)
-    if (typeof window.printTicket === 'function') {
-        try {
-            // Enviamos el numeroDia a printer.js
+    // 1. IMPRIMIR
+    try {
+        if (typeof window.printTicket === 'function') {
             await window.printTicket(cart, total, selectedPaymentMethod, numeroDia);
-        } catch (e) {
-            console.error("Error Impresión:", e);
-            alert("⚠️ La venta se registró, pero NO SE PUDO IMPRIMIR. Revisa el cable USB.");
         }
-    } else {
-        console.warn("printer.js no cargado o función printTicket no existe");
-    }
+    } catch (e) { alert("Error impresión, pero se guardará."); }
 
-    // 5. PREPARAR DATOS PARA GOOGLE SHEETS
+    // 2. GUARDAR
     const saleData = {
         action: "create_order",
         pedido: {
-            ID_Pedido: idPedido,
-            Numero_Turno: numeroDia, // ESTE CAMPO DEBE COINCIDIR CON CODE.GS
-            FechaHora: currentTurnData.fechaHora,
-            Fecha_Comercial: currentTurnData.fechaComercial,
-            Turno: currentTurnData.idTurno,
-            ID_Turno: currentTurnData.turnoKey,
-            Usuario_Caja: currentUser.Nombre,
-            Total_Bruto: total,
-            Total_Neto: total,
-            Medio_Pago: selectedPaymentMethod,
-            Estado: "Pagado"
+            ID_Pedido: idPedido, Numero_Turno: numeroDia,
+            FechaHora: currentTurnData.fechaHora, Fecha_Comercial: currentTurnData.fechaComercial,
+            Turno: currentTurnData.idTurno, ID_Turno: currentTurnData.turnoKey,
+            Usuario_Caja: currentUser.Nombre, Total_Bruto: total, Total_Neto: total,
+            Medio_Pago: selectedPaymentMethod, Estado: "Pagado"
         },
         detalles: cart.map(item => ({
             ID_Detalle: `DET-${Math.random().toString(36).substr(2, 9)}`,
-            ID_Pedido: idPedido,
-            Fecha_Comercial: currentTurnData.fechaComercial,
-            Turno: currentTurnData.idTurno,
-            ID_Producto: item.id,
-            Nombre_Producto: item.nombre,
-            Cantidad: item.cantidad,
-            Precio_Unitario: item.precio,
-            Subtotal: item.cantidad * item.precio,
-            Comentarios: item.comentario || ""
+            ID_Pedido: idPedido, Fecha_Comercial: currentTurnData.fechaComercial,
+            Turno: currentTurnData.idTurno, ID_Producto: item.id, Nombre_Producto: item.nombre,
+            Cantidad: item.cantidad, Precio_Unitario: item.precio, Subtotal: item.cantidad * item.precio,
+            Comentarios: item.comentario
         }))
     };
-
-    // 6. GUARDAR EN NUBE (Segundo plano)
     saveToDatabase(saleData);
 
-    // 7. LIMPIAR INTERFAZ
     cart = [];
     updateCartUI();
-    // Opcional: Feedback visual
-    // alert(`Venta #${numeroDia} Lista!`); 
 }
 
-// ... (Resto de funciones: saveToDatabase, startAutoUpdate, etc.) ...
 async function saveToDatabase(payload) {
-    try {
-        await fetch(API_URL, {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        });
-        console.log("Venta sincronizada");
-    } catch (error) {
-        console.error("Error guardando venta:", error);
-        alert("⚠️ Venta realizada pero NO guardada en la nube (Error de red). Anótala.");
-    }
+    try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }); } 
+    catch (e) { console.error("Error guardando:", e); alert("Error guardando en nube (Anótalo)."); }
 }
 
-// ==========================================
-// 8. SINCRONIZACIÓN AUTOMÁTICA
-// ==========================================
-
-const UPDATE_INTERVAL = 300000; // 5 minutos
-
-function startAutoUpdate() {
-    setInterval(() => {
-        // Solo actualizamos si el carrito está vacío para no interrumpir venta
-        if (cart.length === 0) {
-            console.log("Auto-sincronizando...");
-            loadSystemData(true); // true = modo silencioso
-        }
-    }, UPDATE_INTERVAL);
-}
-// ==========================================
-// REPORTE DIARIO (CIERRE Z)
-// ==========================================
-let currentReportData = null;
-
+// --- REPORTE Z ---
 async function showDailyReport() {
-    // 1. Pedir PIN de Admin para ver cierres (Opcional, recomendado)
-    // const pin = prompt("Ingrese PIN Admin:");
-    // if (pin !== "1234") return alert("Acceso denegado");
-
     const modal = new bootstrap.Modal(document.getElementById('reportModal'));
     modal.show();
-
-    calcularTurno(); // Asegurar fecha actual
-    const fecha = currentTurnData.fechaComercial;
-
+    calcularTurno();
+    
     try {
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: "get_daily_report", fecha: fecha })
-        });
-        
+        const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "get_daily_report", fecha: currentTurnData.fechaComercial }) });
         const result = await response.json();
-        
         if (result.status === "success") {
             currentReportData = result.data;
             renderReportUI(result.data);
-        } else {
-            document.getElementById('report-body').innerHTML = `<div class="alert alert-danger">Error: ${result.message}</div>`;
-        }
-    } catch (e) {
-        document.getElementById('report-body').innerHTML = `<div class="alert alert-danger">Error de red: ${e.message}</div>`;
-    }
+        } else { document.getElementById('report-body').innerHTML = `<div class="alert alert-danger">${result.message}</div>`; }
+    } catch (e) { document.getElementById('report-body').innerHTML = `<div class="alert alert-danger">${e.message}</div>`; }
 }
-
-// --- app.js (Actualización Reporte) ---
 
 function renderReportUI(data) {
     const fmt = (n) => formatter.format(n);
-    
-    // 1. Generar HTML de la lista de productos
-    // Ordenamos de mayor venta a menor
-    let productosHtml = '<table class="table table-sm table-striped mb-0">';
-    const ranking = Object.entries(data.productos).sort((a,b) => b[1] - a[1]);
-    
-    if(ranking.length === 0) {
-        productosHtml += '<tr><td class="text-muted text-center">Sin ventas</td></tr>';
-    } else {
-        ranking.forEach(([nombre, cantidad]) => {
-            productosHtml += `
-                <tr>
-                    <td>${nombre}</td>
-                    <td class="text-end fw-bold">${cantidad}</td>
-                </tr>
-            `;
-        });
-    }
-    productosHtml += '</table>';
+    let ranking = Object.entries(data.productos).sort((a,b)=>b[1]-a[1]);
+    let prodHtml = '<table class="table table-sm table-striped"><tbody>';
+    if(ranking.length===0) prodHtml += '<tr><td>Sin ventas</td></tr>';
+    else ranking.forEach(([n,c])=> prodHtml += `<tr><td>${n}</td><td class="text-end fw-bold">${c}</td></tr>`);
+    prodHtml += '</tbody></table>';
 
-    // 2. Armar el HTML completo
-    const html = `
-        <h4 class="text-center fw-bold mb-3">${data.fecha}</h4>
-        
-        <div class="row g-2 mb-3">
-            <div class="col-6">
-                <div class="card bg-light border-0 h-100">
-                    <div class="card-body py-2 px-2" style="font-size: 0.9em">
-                        <h6 class="fw-bold text-primary mb-1">🌅 AM</h6>
-                        <div>Efec: ${fmt(data.turnos[1].efectivo)}</div>
-                        <div>Tarj: ${fmt(data.turnos[1].tarjeta)}</div>
-                        <div>Trans: ${fmt(data.turnos[1].transferencia)}</div>
-                        <div class="border-top fw-bold mt-1">Total: ${fmt(data.turnos[1].total)}</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6">
-                <div class="card bg-light border-0 h-100">
-                    <div class="card-body py-2 px-2" style="font-size: 0.9em">
-                        <h6 class="fw-bold text-primary mb-1">🌆 PM</h6>
-                        <div>Efec: ${fmt(data.turnos[2].efectivo)}</div>
-                        <div>Tarj: ${fmt(data.turnos[2].tarjeta)}</div>
-                        <div>Trans: ${fmt(data.turnos[2].transferencia)}</div>
-                        <div class="border-top fw-bold mt-1">Total: ${fmt(data.turnos[2].total)}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card mb-3 border-0">
-            <div class="card-header bg-white fw-bold">📦 Desglose Productos</div>
-            <div class="card-body p-0 overflow-auto" style="max-height: 200px;">
-                ${productosHtml}
-            </div>
-        </div>
-
-        <ul class="list-group">
-            <li class="list-group-item d-flex justify-content-between align-items-center bg-dark text-white fs-5">
-                TOTAL DÍA
-                <span class="fw-bold">${fmt(data.gran_total)}</span>
-            </li>
-        </ul>
+    document.getElementById('report-body').innerHTML = `
+        <h5 class="text-center fw-bold">${data.fecha}</h5>
+        <div class="row g-2 mb-2"><div class="col-6"><div class="card bg-light p-2"><div class="fw-bold text-primary">AM</div><div>Total: ${fmt(data.turnos[1].total)}</div></div></div>
+        <div class="col-6"><div class="card bg-light p-2"><div class="fw-bold text-primary">PM</div><div>Total: ${fmt(data.turnos[2].total)}</div></div></div></div>
+        <div class="card p-2 mb-2" style="max-height:200px;overflow:auto;">${prodHtml}</div>
+        <div class="bg-dark text-white p-2 d-flex justify-content-between"><span>TOTAL DIA</span><span class="fw-bold">${fmt(data.gran_total)}</span></div>
     `;
-    document.getElementById('report-body').innerHTML = html;
 }
 
-// Función corregida para el botón de imprimir
 async function printReportAction() {
-    console.log("Intentando imprimir reporte...", currentReportData);
+    if(currentReportData && window.printDailyReport) await window.printDailyReport(currentReportData);
+}
 
-    if (!currentReportData) {
-        return alert("No hay datos de reporte cargados. Presiona 'Cierre' nuevamente.");
-    }
-    
-    // Verificamos si printer.js cargó bien
-    if (typeof window.printDailyReport !== 'function') {
-        return alert("Error: El archivo printer.js no está cargado o la función no existe.");
-    }
-
-    try {
-        await window.printDailyReport(currentReportData);
-    } catch (e) {
-        console.error(e);
-        alert("Error de comunicación con la impresora: " + e.message);
-    }
+function startAutoUpdate() {
+    setInterval(() => { if (cart.length === 0) loadSystemData(true); }, 300000);
 }
