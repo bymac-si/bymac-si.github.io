@@ -332,41 +332,41 @@ function startAutoUpdate() {
 // LOGICA DE CAMBIO DE TURNO
 // ==========================================
 
-// 1. CAMBIO MANUAL (Botón)
-function manualShiftChange() {
-    // Si hay cosas en el carrito, preguntamos para no perder la venta por error
+// ==========================================
+// LOGICA DE CAMBIO DE TURNO (CORREGIDA)
+// ==========================================
+
+// 1. CAMBIO MANUAL (Anclado a window para que el botón lo encuentre sí o sí)
+window.manualShiftChange = function() {
+    console.log("Intentando cambio de turno..."); // Para depurar en consola
+
+    // Si hay cosas en el carrito, preguntamos
     if (cart.length > 0) {
         if (!confirm("⚠️ Hay una venta en curso.\n¿Seguro que desea cambiar de turno?\nSe perderá el pedido actual.")) {
             return;
         }
     }
-    // Recarga la página -> Borra usuario -> Pide PIN
-    location.reload();
-}
+    
+    // Forzamos la recarga desde el servidor ignorando caché
+    window.location.reload(true);
+};
 
 // 2. CAMBIO AUTOMÁTICO (18:00)
-// Esta función revisa la hora cada minuto
+// (Esta puede quedarse igual, ya que se llama desde dentro del JS)
 function checkAutoShiftChange() {
     const ahora = new Date();
-    // Forzamos hora chilena para la detección
     const santiagoStr = ahora.toLocaleString("en-US", { timeZone: "America/Santiago" });
     const santiagoDate = new Date(santiagoStr);
     
     const hora = santiagoDate.getHours();
     const min = santiagoDate.getMinutes();
 
-    // LOGICA: Si son las 18:00 (y entre el minuto 0 y 1)
     if (hora === 18 && min <= 1) {
-        // Usamos sessionStorage para asegurarnos de que solo recargue UNA VEZ
-        // y no se quede recargando en bucle durante todo el minuto de las 18:00
         const key = `turno_cambiado_${santiagoDate.getDate()}`;
-        
         if (!sessionStorage.getItem(key)) {
-            // Marcamos que ya hicimos el cambio hoy
             sessionStorage.setItem(key, "true");
-            
-            alert("⏰ SON LAS 18:00 HRS.\n\nSe realizará el Cambio de Turno automático.");
-            location.reload();
+            alert("⏰ SON LAS 18:00 HRS.\nCierre de turno automático.");
+            window.location.reload(true);
         }
     }
 }
