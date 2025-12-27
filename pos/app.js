@@ -319,5 +319,54 @@ async function printReportAction() {
 }
 
 function startAutoUpdate() {
+    // Sincronizar datos cada 5 min (existente)
     setInterval(() => { if (cart.length === 0) loadSystemData(true); }, 300000);
+    
+    // --- AGREGAR ESTO: Chequeo de hora cada 30 segundos ---
+    setInterval(() => {
+        updateClock();        // Actualiza variables de turno
+        checkAutoShiftChange(); // Revisa si son las 18:00
+    }, 30000); 
+}
+// ==========================================
+// LOGICA DE CAMBIO DE TURNO
+// ==========================================
+
+// 1. CAMBIO MANUAL (Botón)
+function manualShiftChange() {
+    // Si hay cosas en el carrito, preguntamos para no perder la venta por error
+    if (cart.length > 0) {
+        if (!confirm("⚠️ Hay una venta en curso.\n¿Seguro que desea cambiar de turno?\nSe perderá el pedido actual.")) {
+            return;
+        }
+    }
+    // Recarga la página -> Borra usuario -> Pide PIN
+    location.reload();
+}
+
+// 2. CAMBIO AUTOMÁTICO (18:00)
+// Esta función revisa la hora cada minuto
+function checkAutoShiftChange() {
+    const ahora = new Date();
+    // Forzamos hora chilena para la detección
+    const santiagoStr = ahora.toLocaleString("en-US", { timeZone: "America/Santiago" });
+    const santiagoDate = new Date(santiagoStr);
+    
+    const hora = santiagoDate.getHours();
+    const min = santiagoDate.getMinutes();
+
+    // LOGICA: Si son las 18:00 (y entre el minuto 0 y 1)
+    if (hora === 18 && min <= 1) {
+        // Usamos sessionStorage para asegurarnos de que solo recargue UNA VEZ
+        // y no se quede recargando en bucle durante todo el minuto de las 18:00
+        const key = `turno_cambiado_${santiagoDate.getDate()}`;
+        
+        if (!sessionStorage.getItem(key)) {
+            // Marcamos que ya hicimos el cambio hoy
+            sessionStorage.setItem(key, "true");
+            
+            alert("⏰ SON LAS 18:00 HRS.\n\nSe realizará el Cambio de Turno automático.");
+            location.reload();
+        }
+    }
 }
