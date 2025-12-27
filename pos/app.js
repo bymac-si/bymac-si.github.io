@@ -1,8 +1,9 @@
 /**
  * POS El Carro del Ocho - Lógica Principal
+ * APP.JS
  */
 
-// URL DE TU SCRIPT GOOGLE (¡Asegúrate que sea la correcta!)
+// URL DE TU SCRIPT GOOGLE
 const API_URL = "https://script.google.com/macros/s/AKfycbyTsarYzEHOqu8Xtqx8qOaxgjRY-7fsUIT6TLcOv5VFQaL7nOGecbxGGhMbJJg6igAG/exec";
 
 let db = { productos: [], categorias: [], usuarios: [] };
@@ -319,40 +320,35 @@ async function printReportAction() {
 }
 
 function startAutoUpdate() {
-    // Sincronizar datos cada 5 min (existente)
+    // Sincronizar datos cada 5 min
     setInterval(() => { if (cart.length === 0) loadSystemData(true); }, 300000);
     
-    // --- AGREGAR ESTO: Chequeo de hora cada 30 segundos ---
+    // Chequeo de hora cada 30 segundos para cambio de turno
     setInterval(() => {
-        updateClock();        // Actualiza variables de turno
-        checkAutoShiftChange(); // Revisa si son las 18:00
+        updateClock();
+        checkAutoShiftChange(); 
     }, 30000); 
 }
-// ==========================================
-// LOGICA DE CAMBIO DE TURNO
-// ==========================================
 
 // ==========================================
-// LOGICA DE CAMBIO DE TURNO (CORREGIDA)
+// LOGICA DE CAMBIO DE TURNO (FINAL)
 // ==========================================
 
-// 1. CAMBIO MANUAL (Anclado a window para que el botón lo encuentre sí o sí)
+// 1. CAMBIO MANUAL
 window.manualShiftChange = function() {
-    console.log("Intentando cambio de turno..."); // Para depurar en consola
+    console.log("Intentando cambio de turno..."); 
 
-    // Si hay cosas en el carrito, preguntamos
     if (cart.length > 0) {
         if (!confirm("⚠️ Hay una venta en curso.\n¿Seguro que desea cambiar de turno?\nSe perderá el pedido actual.")) {
             return;
         }
     }
     
-    // Forzamos la recarga desde el servidor ignorando caché
+    // Forzamos la recarga ignorando caché
     window.location.reload(true);
 };
 
 // 2. CAMBIO AUTOMÁTICO (18:00)
-// (Esta puede quedarse igual, ya que se llama desde dentro del JS)
 function checkAutoShiftChange() {
     const ahora = new Date();
     const santiagoStr = ahora.toLocaleString("en-US", { timeZone: "America/Santiago" });
