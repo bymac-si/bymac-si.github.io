@@ -294,6 +294,11 @@ async function showDailyReport() {
 
 function renderReportUI(data) {
     const fmt = (n) => formatter.format(n);
+    let fechaFormateada = data.fecha;
+    if (data.fecha && data.fecha.includes('-')) {
+        const [anio, mes, dia] = data.fecha.split('-');
+        fechaFormateada = `${dia}/${mes}/${anio}`;
+    }
     let ranking = Object.entries(data.productos).sort((a,b)=>b[1]-a[1]);
     let prodHtml = '<table class="table table-sm table-striped"><tbody>';
     if(ranking.length===0) prodHtml += '<tr><td>Sin ventas</td></tr>';
@@ -301,7 +306,7 @@ function renderReportUI(data) {
     prodHtml += '</tbody></table>';
 
     document.getElementById('report-body').innerHTML = `
-        <h5 class="text-center fw-bold">${data.fecha}</h5>
+        <h5 class="text-center fw-bold">Fecha: ${fechaFormateada}</h5>
         <div class="row g-2 mb-2"><div class="col-6"><div class="card bg-light p-2"><div class="fw-bold text-primary">Turno 1</div><div>Total: ${fmt(data.turnos[1].total)}</div></div></div>
         <div class="col-6"><div class="card bg-light p-2"><div class="fw-bold text-primary">Turno 2</div><div>Total: ${fmt(data.turnos[2].total)}</div></div></div></div>
         <div class="card p-2 mb-2" style="max-height:200px;overflow:auto;">${prodHtml}</div>

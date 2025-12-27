@@ -101,13 +101,20 @@ window.printTicket = async function(cart, total, method, orderNum) {
 window.printDailyReport = async function(data) {
     const ticketArea = getPrintableArea();
     
+    // CORRECCIÓN DE FECHA: De YYYY-MM-DD a DD/MM/YYYY
+    // Esto evita problemas de zona horaria al usar new Date()
+    let fechaFormateada = data.fecha;
+    if (data.fecha && data.fecha.includes('-')) {
+        const [anio, mes, dia] = data.fecha.split('-');
+        fechaFormateada = `${dia}/${mes}/${anio}`;
+    }
+
     // 1. CALCULAMOS LOS TOTALES POR MÉTODO DE PAGO
-    // Sumamos lo del Turno 1 + Turno 2 para tener el total del día
     const totalEfectivo = (data.turnos[1].efectivo || 0) + (data.turnos[2].efectivo || 0);
     const totalTarjeta  = (data.turnos[1].tarjeta || 0) + (data.turnos[2].tarjeta || 0);
     const totalTransf   = (data.turnos[1].transferencia || 0) + (data.turnos[2].transferencia || 0);
 
-    // 2. Lógica de Productos (Igual que antes)
+    // 2. Lógica de Productos
     let prodHtml = '';
     const ranking = Object.entries(data.productos).sort((a,b) => b[1] - a[1]);
     
@@ -115,18 +122,19 @@ window.printDailyReport = async function(data) {
         prodHtml = '<div>Sin ventas registradas.</div>';
     } else {
         ranking.forEach(([nom, cant]) => {
-            // Recortamos el nombre a 18 caracteres para que quepa bien
             prodHtml += `<div class="d-flex-between"><span>${cant} x ${nom.substring(0,18)}</span></div>`;
         });
     }
 
     // 3. GENERAMOS EL HTML
     ticketArea.innerHTML = `
-        <div class="ticket-header fs-big">REPORTE DE VENTAS</div>
-        <div class="text-center">${data.fecha}</div>
+        <div class="ticket-header fs-big">REPORTE DE VENTAS<br><b>El Carro del 8</b></div>
+        
+        <div class="text-center">Fecha: ${fechaFormateada}</div>
+        
         <div class="ticket-divider"></div>
         
-        <div class="fs-big">MEDIOS DE PAGO</div>
+        <div class="fs-big">RESUMEN POR MEDIO DE PAGO</div>
         <div class="d-flex-between">
             <span>Efectivo (Caja):</span>
             <span class="fw-bold">$${totalEfectivo.toLocaleString('es-CL')}</span>
@@ -142,8 +150,8 @@ window.printDailyReport = async function(data) {
         <div class="ticket-divider"></div>
 
         <div class="fs-big">TOTALES POR TURNO</div>
-        <div class="d-flex-between"><span>Turno 1 (AM): </span><span>$${data.turnos[1].total.toLocaleString('es-CL')}</span></div>
-        <div class="d-flex-between"><span>Turno 2 (PM): </span><span>$${data.turnos[2].total.toLocaleString('es-CL')}</span></div>
+        <div class="d-flex-between"><span>Venta Turno 1 (AM): </span><span>$${data.turnos[1].total.toLocaleString('es-CL')}</span></div>
+        <div class="d-flex-between"><span>Venta Turno 2 (PM): </span><span>$${data.turnos[2].total.toLocaleString('es-CL')}</span></div>
         <div class="ticket-divider"></div>
         
         <div class="fs-big">PRODUCTOS</div>
@@ -159,7 +167,6 @@ window.printDailyReport = async function(data) {
 
     imprimirYLimpiar(ticketArea);
 };
-
 // Helper de impresión
 function imprimirYLimpiar(area) {
     area.style.display = 'block';
