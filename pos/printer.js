@@ -70,7 +70,7 @@ window.printTicket = async function (cart, total, method, orderNum) {
 
   const htmlCliente = `
         <div class="ticket-header">
-        <img src="img/Logo_8_sf.png" width="80px"><br>
+        <img src="img/logo_8_sf.png" width="80px"><br>
             EL CARRO DEL OCHO
         </div>
         <div class="text-center ticket-divider">
