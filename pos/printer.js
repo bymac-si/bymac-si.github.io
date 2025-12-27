@@ -1,43 +1,46 @@
 /**
- * printer.js - VERSIÓN UNIVERSAL (HTML/CSS)
- * Genera Cocina + Cliente en una sola tira.
+ * printer.js - VERSIÓN FINAL CON CORTE DE PÁGINA FÍSICO
  */
 
 // Helper para obtener/crear el área de impresión
 function getPrintableArea() {
-    let area = document.getElementById('printable-area');
-    if (!area) {
-        area = document.createElement('div');
-        area.id = 'printable-area';
-        document.body.appendChild(area);
-    }
-    return area;
+  let area = document.getElementById("printable-area");
+  if (!area) {
+    area = document.createElement("div");
+    area.id = "printable-area";
+    document.body.appendChild(area);
+  }
+  return area;
 }
 
 function connectPrinter() {
-    alert("✅ Impresión Nativa Activada.\nSe usará la impresora predeterminada de Windows/Mac.");
+  alert(
+    "✅ Impresión Nativa Activada.\nSe usará la impresora predeterminada de Windows/Mac."
+  );
 }
 
-// === IMPRIMIR TICKET DE VENTA ===
-window.printTicket = async function(cart, total, method, orderNum) {
-    const ticketArea = getPrintableArea();
-    // Hora forzada a Chile
-    const fechaHora = new Date().toLocaleString('es-CL', { timeZone: 'America/Santiago' });
-    const soloHora = fechaHora.split(' ')[1] || fechaHora; // Intento de sacar solo la hora
+// === IMPRIMIR TICKET DE VENTA (Con corte físico entre Cocina y Cliente) ===
+window.printTicket = async function (cart, total, method, orderNum) {
+  const ticketArea = getPrintableArea();
+  
+  // Hora forzada a Chile
+  const fechaHora = new Date().toLocaleString("es-CL", {
+    timeZone: "America/Santiago",
+  });
+  const soloHora = fechaHora.split(" ")[1] || fechaHora;
 
-    // 1. GENERAR SECCIÓN COCINA
-    // Filtramos items que tengan la propiedad cocina = true
-    const itemsCocina = cart.filter(i => i.cocina);
-    let htmlCocina = '';
+  // 1. GENERAR SECCIÓN COCINA
+  const itemsCocina = cart.filter((i) => i.cocina);
+  let htmlCocina = "";
 
-    if (itemsCocina.length > 0) {
-        let listadoCocina = '';
-        itemsCocina.forEach(item => {
-            // Cocina necesita letra grande y clara: CANTIDAD x NOMBRE
-            listadoCocina += `<div>${item.cantidad} x ${item.nombre}</div>`;
-        });
+  if (itemsCocina.length > 0) {
+    let listadoCocina = "";
+    itemsCocina.forEach((item) => {
+      // Cocina: Nombre completo
+      listadoCocina += `<div>${item.cantidad} x ${item.nombre}</div>`;
+    });
 
-        htmlCocina = `
+    htmlCocina = `
             <div class="ticket-header fs-big">COCINA</div>
             <div class="text-center fs-huge">#${orderNum}</div>
             <div class="text-center" style="font-size:0.9em">${soloHora}</div>
@@ -45,24 +48,27 @@ window.printTicket = async function(cart, total, method, orderNum) {
             <div class="fs-big" style="text-align:left; margin-bottom: 10px;">
                 ${listadoCocina}
             </div>
-            <div class="ticket-cut">- - - - CORTAR AQUÍ - - - -</div>
+            
+            <div class="text-center">.</div>
+            <div class="force-break"></div>
         `;
-    }
+  }
 
-    // 2. GENERAR SECCIÓN CLIENTE (Detalle Completo)
-    let listadoCliente = '';
-    cart.forEach(item => {
-        const totalItem = (item.precio * item.cantidad).toLocaleString('es-CL');
-        // Nombre truncado a 18 chars para que quepa precio al lado
-        listadoCliente += `
-            <div class="d-flex-between">
-                <span>${item.cantidad} x ${item.nombre.substring(0, 20)}</span>
-                <span>$${totalItem}</span>
+  // 2. GENERAR SECCIÓN CLIENTE (Detalle Completo)
+  let listadoCliente = "";
+  cart.forEach((item) => {
+    const totalItem = (item.precio * item.cantidad).toLocaleString("es-CL");
+    
+    // Layout flexible para nombres largos sin cortar
+    listadoCliente += `
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 2px;">
+                <span style="flex:1; padding-right:5px; text-align:left;">${item.cantidad} x ${item.nombre}</span>
+                <span style="white-space:nowrap;">$${totalItem}</span>
             </div>
         `;
-    });
+  });
 
-    const htmlCliente = `
+  const htmlCliente = `
         <div class="ticket-header">
         <img src="img/Logo_8_sf.png" width="80px"><br>
             EL CARRO DEL OCHO
@@ -80,7 +86,7 @@ window.printTicket = async function(cart, total, method, orderNum) {
         
         <div class="d-flex-between fs-big" style="margin-top:5px;">
             <span>TOTAL:</span>
-            <span>$${total.toLocaleString('es-CL')}</span>
+            <span>$${total.toLocaleString("es-CL")}</span>
         </div>
         <div style="font-size: 0.9em;">Pago: ${method}</div>
         
@@ -90,91 +96,98 @@ window.printTicket = async function(cart, total, method, orderNum) {
         <div style="text-align:center; margin-top:10px;">.</div> 
     `;
 
-    // 3. RENDERIZAR E IMPRIMIR
-    // Concatenamos: Cocina (si existe) + Cliente
-    ticketArea.innerHTML = htmlCocina + htmlCliente;
-    
-    imprimirYLimpiar(ticketArea);
+  // 3. RENDERIZAR E IMPRIMIR
+  // Si hay cocina, se imprime primero, luego el corte, luego el cliente
+  ticketArea.innerHTML = htmlCocina + htmlCliente;
+  imprimirYLimpiar(ticketArea);
 };
 
 // === IMPRIMIR REPORTE Z CON DESGLOSE DE PAGO ===
-window.printDailyReport = async function(data) {
-    const ticketArea = getPrintableArea();
-    
-    // CORRECCIÓN DE FECHA: De YYYY-MM-DD a DD/MM/YYYY
-    // Esto evita problemas de zona horaria al usar new Date()
-    let fechaFormateada = data.fecha;
-    if (data.fecha && data.fecha.includes('-')) {
-        const [anio, mes, dia] = data.fecha.split('-');
-        fechaFormateada = `${dia}/${mes}/${anio}`;
-    }
+window.printDailyReport = async function (data) {
+  const ticketArea = getPrintableArea();
 
-    // 1. CALCULAMOS LOS TOTALES POR MÉTODO DE PAGO
-    const totalEfectivo = (data.turnos[1].efectivo || 0) + (data.turnos[2].efectivo || 0);
-    const totalTarjeta  = (data.turnos[1].tarjeta || 0) + (data.turnos[2].tarjeta || 0);
-    const totalTransf   = (data.turnos[1].transferencia || 0) + (data.turnos[2].transferencia || 0);
+  // Formato de Fecha DD/MM/YYYY
+  let fechaFormateada = data.fecha;
+  if (data.fecha && data.fecha.includes("-")) {
+    const [anio, mes, dia] = data.fecha.split("-");
+    fechaFormateada = `${dia}/${mes}/${anio}`;
+  }
 
-    // 2. Lógica de Productos
-    let prodHtml = '';
-    const ranking = Object.entries(data.productos).sort((a,b) => b[1] - a[1]);
-    
-    if (ranking.length === 0) {
-        prodHtml = '<div>Sin ventas registradas.</div>';
-    } else {
-        ranking.forEach(([nom, cant]) => {
-            prodHtml += `<div class="d-flex-between"><span>${cant} x ${nom.substring(0,18)}</span></div>`;
-        });
-    }
+  // 1. CALCULAMOS LOS TOTALES
+  const totalEfectivo =
+    (data.turnos[1].efectivo || 0) + (data.turnos[2].efectivo || 0);
+  const totalTarjeta =
+    (data.turnos[1].tarjeta || 0) + (data.turnos[2].tarjeta || 0);
+  const totalTransf =
+    (data.turnos[1].transferencia || 0) + (data.turnos[2].transferencia || 0);
 
-    // 3. GENERAMOS EL HTML
-    ticketArea.innerHTML = `
+  // 2. Lógica de Productos (Nombres completos)
+  let prodHtml = "";
+  const ranking = Object.entries(data.productos).sort((a, b) => b[1] - a[1]);
+
+  if (ranking.length === 0) {
+    prodHtml = "<div>Sin ventas registradas.</div>";
+  } else {
+    ranking.forEach(([nom, cant]) => {
+      prodHtml += `
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <span style="flex:1; text-align:left;">${cant} x ${nom}</span>
+            </div>`;
+    });
+  }
+
+  // 3. GENERAMOS EL HTML DEL REPORTE
+  ticketArea.innerHTML = `
         <div class="ticket-header fs-big">REPORTE DE VENTAS<br><b>El Carro del 8</b></div>
         
-        <div class="text-center">Fecha: ${fechaFormateada}</div>
+        <div class="text-center fs-big">Fecha: ${fechaFormateada}</div><br>
         
         <div class="ticket-divider"></div>
-        
-        <div class="fs-big">RESUMEN POR MEDIO DE PAGO</div>
+        <br>
+        <div class="text-center fs-big">RESUMEN POR MEDIO DE PAGO</div>
         <div class="d-flex-between">
             <span>Efectivo (Caja):</span>
-            <span class="fw-bold">$${totalEfectivo.toLocaleString('es-CL')}</span>
+            <span class="fw-bold">$${totalEfectivo.toLocaleString("es-CL")}</span>
         </div>
         <div class="d-flex-between">
             <span>Tarjeta:</span>
-            <span>$${totalTarjeta.toLocaleString('es-CL')}</span>
+            <span>$${totalTarjeta.toLocaleString("es-CL")}</span>
         </div>
         <div class="d-flex-between">
             <span>Transferencia:</span>
-            <span>$${totalTransf.toLocaleString('es-CL')}</span>
-        </div>
+            <span>$${totalTransf.toLocaleString("es-CL")}</span>
+        </div><br>
         <div class="ticket-divider"></div>
-
-        <div class="fs-big">TOTALES POR TURNO</div>
-        <div class="d-flex-between"><span>Venta Turno 1 (AM): </span><span>$${data.turnos[1].total.toLocaleString('es-CL')}</span></div>
-        <div class="d-flex-between"><span>Venta Turno 2 (PM): </span><span>$${data.turnos[2].total.toLocaleString('es-CL')}</span></div>
+        <br>
+        <div class="fs-big text-center">TOTALES POR TURNO</div>
+        <div class="d-flex-between"><span>Venta Turno 1 (AM): </span><span>$${data.turnos[1].total.toLocaleString("es-CL")}</span></div>
+        <div class="d-flex-between"><span>Venta Turno 2 (PM): </span><span>$${data.turnos[2].total.toLocaleString("es-CL")}</span></div>
+        <br>
         <div class="ticket-divider"></div>
-        
-        <div class="fs-big">PRODUCTOS</div>
+        <br>
+        <div class="fs-big text-center">PRODUCTOS</div><br>
         <div style="font-size:0.9em">${prodHtml}</div>
+        <br>
         <div class="ticket-divider"></div>
-        
-        <div class="text-center">UNIDADES: <strong>${data.total_unidades}</strong></div>
+        <br>
+        <div class="text-center fs-big">UNIDADES: <strong>${data.total_unidades}</strong></div><br>
         <div class="text-center fs-huge" style="border:1px solid black; margin-top:5px;">
-            $${data.gran_total.toLocaleString('es-CL')}
+            $${data.gran_total.toLocaleString("es-CL")}
         </div>
         <br><br>.
     `;
 
-    imprimirYLimpiar(ticketArea);
+  imprimirYLimpiar(ticketArea);
 };
+
 // Helper de impresión
 function imprimirYLimpiar(area) {
-    area.style.display = 'block';
+  area.style.display = "block";
+  setTimeout(() => {
+    window.print();
     setTimeout(() => {
-        window.print();
-        setTimeout(() => {
-            area.style.display = 'none';
-            area.innerHTML = '';
-        }, 500);
-    }, 100);
+      area.style.display = "none";
+      area.innerHTML = "";
+    }, 500);
+  }, 100);
 }

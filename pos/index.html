@@ -13,123 +13,125 @@
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=point_of_sale"
     />
     <style>
-      /* --- ESTILOS GENERALES POS --- */
-      body {
-        overflow: hidden;
-        background-color: #f8f9fa;
-      }
-      .product-card {
-        height: 100px;
-        cursor: pointer;
-        transition: transform 0.1s;
-        font-size: 0.85rem;
-      }
-      .product-card:active {
-        transform: scale(0.95);
-      }
-      .left-column {
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-      }
-      .scroll-area {
-        flex-grow: 1;
-        overflow-y: auto;
-        min-height: 0;
-        padding-bottom: 20px;
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        gap: 8px;
-        padding-right: 5px;
-      }
-      .ticket-area {
-        height: calc(100vh - 250px);
-        overflow-y: auto;
-        background: white;
-      }
-
-      /* --- ESTILOS DE IMPRESIÓN (TICKET) --- */
-      @media print {
-        body * {
-          visibility: hidden;
-          height: 0;
+        /* --- ESTILOS GENERALES POS --- */
+        body {
+          overflow: hidden;
+          background-color: #f8f9fa;
+        }
+        .product-card {
+          height: 100px;
+          cursor: pointer;
+          transition: transform 0.1s;
+          font-size: 0.85rem;
+        }
+        .product-card:active {
+          transform: scale(0.95);
+        }
+        .left-column {
+          height: 100vh;
+          display: flex;
+          flex-direction: column;
           overflow: hidden;
         }
-
-        #printable-area,
-        #printable-area * {
-          visibility: visible;
-          height: auto;
-          overflow: visible;
+        .scroll-area {
+          flex-grow: 1;
+          overflow-y: auto;
+          min-height: 0;
+          padding-bottom: 20px;
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+          gap: 8px;
+          padding-right: 5px;
         }
-
-        #printable-area {
-          position: absolute;
-          left: 0;
-          top: 0;
-          width: 72mm; /* Ajuste para papel de 80mm */
-          margin: 0;
-          padding: 0;
-          font-family: "Courier New", monospace;
-          color: black;
+        .ticket-area {
+          height: calc(100vh - 250px);
+          overflow-y: auto;
           background: white;
-          font-size: 13px;
-          line-height: 1.2;
         }
 
-        @page {
-          size: auto;
-          margin: 0mm;
-        } /* Quita encabezados del navegador */
+        /* --- ESTILOS DE IMPRESIÓN (TICKET) --- */
+        @media print {
+          body * {
+            visibility: hidden;
+            height: 0;
+            overflow: hidden;
+          }
 
-        /* Utilidades Ticket */
-        .ticket-header {
-          text-align: center;
-          font-weight: bold;
-          margin-bottom: 5px;
-        }
-        .ticket-divider {
-          border-bottom: 1px dashed black;
-          margin: 5px 0;
-        }
-        .ticket-cut {
-          border-bottom: 2px solid black;
-          margin: 15px 0;
-          text-align: center;
-          font-size: 10px;
-          padding: 5px 0;
-        }
-        .fs-huge {
-          font-size: 24px;
-          font-weight: bold;
-        }
-        .fs-big {
-          font-size: 16px;
-          font-weight: bold;
-        }
-        .text-center {
-          text-align: center;
-        }
-        .d-flex-between {
-          display: flex;
-          justify-content: space-between;
-        }
-      }
+          #printable-area,
+          #printable-area * {
+            visibility: visible;
+            height: auto;
+            overflow: visible;
+          }
 
-      /* Ocultar área de impresión en pantalla normal */
-      #printable-area {
-        display: none;
-      }
+          #printable-area {
+            position: absolute;
+            left: 5mm;
+            top: 0;
+            width: 72mm; /* Ajuste para papel de 80mm */
+            margin: 0;
+            padding: 0;
+            font-family: "Courier New", monospace;
+            color: black;
+            background: white;
+            font-size: 13px;
+            line-height: 1.2;
+          }
 
-      .force-break {
-        display: block;
-        page-break-before: always; /* CSS antiguo */
-        break-before: page; /* CSS moderno */
-        height: 0;
-        margin: 0;
-        border: none;
-      }
+          @page {
+            size: auto;
+            margin: 5mm;
+          } /* Quita encabezados del navegador */
+
+          /* Utilidades Ticket */
+          .ticket-header {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 5px;
+          }
+          .ticket-divider {
+            border-bottom: 1px dashed black;
+            margin: 5px 0;
+          }
+          .ticket-cut {
+            border-bottom: 2px solid black;
+            margin: 15px 0;
+            text-align: center;
+            font-size: 10px;
+            padding: 5px 0;
+          }
+          .fs-huge {
+            font-size: 24px;
+            font-weight: bold;
+          }
+          .fs-big {
+            font-size: 16px;
+            font-weight: bold;
+          }
+          .text-center {
+            text-align: center;
+          }
+          .d-flex-between {
+            display: flex;
+            justify-content: space-between;
+            width: 95%;
+          }
+        }
+
+        /* Ocultar área de impresión en pantalla normal */
+        #printable-area {
+          display: none;
+        }
+
+        .force-break {
+      display: block;
+      page-break-before: always; /* Obliga a empezar nueva hoja */
+      break-before: page;        /* Sintaxis moderna */
+      height: 0;
+      margin: 0;                 /* Sin márgenes para no gastar papel extra */
+      border: none;
+      content: "";               /* Asegura que el elemento exista para el render */
+        }
     </style>
   </head>
   <body>
@@ -168,17 +170,35 @@
       <div class="row h-100">
         <div class="col-8 p-2 left-column">
           <div class="d-flex gap-2 mb-2 flex-shrink-0">
-            <div class="d-flex gap-2 overflow-auto pb-1 flex-grow-1" id="category-container"><button class="btn btn-dark shadow-sm flex-shrink-0" onclick="filterProducts('Todo')">Todo</button></div>
+            <div
+              class="d-flex gap-2 overflow-auto pb-1 flex-grow-1"
+              id="category-container"
+            >
+              <button
+                class="btn btn-dark shadow-sm flex-shrink-0"
+                onclick="filterProducts('Todo')"
+              >
+                Todo
+              </button>
+            </div>
             <div class="flex-shrink-0 d-flex align-items-center">
               <span class="material-symbols-outlined me-2">point_of_sale</span>
               &nbsp;Punto de Venta "El Carro del
-              <img src="img/logo_8_sf.png" width="30px" alt="">"&nbsp;
+              <img src="img/logo_8_sf.png" width="30px" alt />"&nbsp;
               <div class="flex-shrink-0 d-flex align-items-center gap-2">
-                <button class="btn btn-primary shadow-sm" onclick="showDailyReport()" title="Cierre de Día">
+                <button
+                  class="btn btn-primary shadow-sm"
+                  onclick="showDailyReport()"
+                  title="Cierre de Día"
+                >
                   📜 Cierre
                 </button>
 
-                <button class="btn btn-primary shadow-sm" onclick="loadSystemData(false)" title="Sincronizar">
+                <button
+                  class="btn btn-primary shadow-sm"
+                  onclick="loadSystemData(false)"
+                  title="Sincronizar"
+                >
                   🔄
                 </button>
               </div>
