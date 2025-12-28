@@ -55,9 +55,9 @@ window.printTicket = async function (
     htmlCocina = `
             <div class="ticket-header fs-big">COCINA</div>
             <div class="text-center fs-huge">#${orderNum}</div>
-            <div class="text-center" style="font-size:0.9em;font-weight: bold;">${soloHora}</div>
+            <div class="text-center" style="font-size:1em;font-weight: bold;">${soloHora}</div>
             
-            <div class="text-center" style="border: 2px solid black; margin: 5px 0; font-weight:bold; font-size:1.6em; padding:2px;">
+            <div class="text-center" style="border: 2px solid black; margin: 5px 0; font-weight:bold; font-size:1.8em; padding:2px;">
                 ${serviceType}
             </div>
 
@@ -92,7 +92,7 @@ window.printTicket = async function (
             <span class="fs-huge">PEDIDO: #${orderNum}</span>
         </div>
         
-        <div class="text-center fw-bold" style="font-size:1.1em; margin-bottom:5px;">
+        <div class="text-center fw-bold" style="font-size:1.2em; margin-bottom:5px;">
             << ${serviceType} >>
         </div>
       
@@ -101,7 +101,7 @@ window.printTicket = async function (
             ATENDIDO POR: ${nombreCajero}
         </div>
         
-        <div class="ticket-divider" style="font-size: 1.4em;">
+        <div class="ticket-divider" style="font-size: 1.5em;">
             ${listadoCliente}
         </div>
         
@@ -166,15 +166,15 @@ window.printDailyReport = async function (data) {
         <br>
         <div class="text-center fs-big">RESUMEN POR MEDIO DE PAGO</div>
         
-        <div class="d-flex-between fw-bold" style="font-size:1.1em;">
+        <div class="d-flex-between fw-bold" style="font-size:1.3em;">
             <span>Efectivo (Caja):</span>
             <span>$${totalEfectivo.toLocaleString("es-CL")}</span>
         </div>
-        <div class="d-flex-between fw-bold" style="font-size:1.1em;">
+        <div class="d-flex-between fw-bold" style="font-size:1.3em;">
             <span>Tarjeta:</span>
             <span>$${totalTarjeta.toLocaleString("es-CL")}</span>
         </div>
-        <div class="d-flex-between fw-bold" style="font-size:1.1em;">
+        <div class="d-flex-between fw-bold" style="font-size:1.3em;">
             <span>Transferencia:</span>
             <span>$${totalTransf.toLocaleString("es-CL")}</span>
         </div><br>
@@ -183,11 +183,11 @@ window.printDailyReport = async function (data) {
         <br>
         <div class="fs-big text-center">TOTALES POR TURNO</div>
         
-        <div class="d-flex-between fw-bold" style="font-size:1.1em;">
+        <div class="d-flex-between fw-bold" style="font-size:1.3em;">
             <span>Venta Turno 1 (AM): </span>
             <span>$${data.turnos[1].total.toLocaleString("es-CL")}</span>
         </div>
-        <div class="d-flex-between fw-bold" style="font-size:1.1em;">
+        <div class="d-flex-between fw-bold" style="font-size:1.3em;">
             <span>Venta Turno 2 (PM): </span>
             <span>$${data.turnos[2].total.toLocaleString("es-CL")}</span>
         </div>
@@ -196,7 +196,7 @@ window.printDailyReport = async function (data) {
         <div class="ticket-divider"></div>
         <br>
         <div class="fs-big text-center">PRODUCTOS</div><br>
-        <div style="font-size:1.2em">${prodHtml}</div>
+        <div style="font-size:1.4em; font-weight:bold;">${prodHtml}</div>
         <br>
         <div class="ticket-divider"></div>
         <br>
