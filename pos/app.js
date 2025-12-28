@@ -119,7 +119,7 @@ function getNextOrderNumber() {
 // --- RENDERIZADO ---
 function renderCategories() {
     const container = document.getElementById('category-container');
-    let html = `<button class="btn btn-dark shadow-sm flex-shrink-0" onclick="filterProducts('Todo')">Todo</button>`;
+    let html = `<button class="btn btn-primary shadow-sm flex-shrink-0" onclick="filterProducts('Todo')">Todo</button>`;
     db.categorias.forEach(cat => {
         const color = cat.Color ? mapColor(cat.Color) : "secondary";
         html += `<button class="btn btn-${color} shadow-sm flex-shrink-0" onclick="filterProducts('${cat.Nombre}')">${cat.Nombre}</button>`;
@@ -226,6 +226,8 @@ function calculateChange() {
     else { display.innerText = "Falta dinero"; display.classList.replace('text-success', 'text-danger'); }
 }
 
+// EN app.js
+
 async function processSale() {
     if (!currentUser) return checkLogin();
     
@@ -235,34 +237,52 @@ async function processSale() {
         if (received < total) return alert("Monto insuficiente");
     }
 
+    // 1. CAPTURAR TIPO DE SERVICIO (NUEVO)
+    // Buscamos cuál radio button está marcado
+    const serviceRadio = document.querySelector('input[name="serviceType"]:checked');
+    const serviceType = serviceRadio ? serviceRadio.value : "PARA SERVIR";
+
     bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
     
     calcularTurno();
     const idPedido = `PED-${Date.now()}`;
     const numeroDia = getNextOrderNumber();
 
-    // 1. IMPRIMIR
+    // 2. IMPRIMIR (Pasamos serviceType como nuevo argumento)
     try {
         if (typeof window.printTicket === 'function') {
-            await window.printTicket(cart, total, selectedPaymentMethod, numeroDia);
+            // AHORA ENVIAMOS 5 ARGUMENTOS
+            await window.printTicket(cart, total, selectedPaymentMethod, numeroDia, serviceType);
         }
-    } catch (e) { alert("Error impresión, pero se guardará."); }
+    } catch (e) { console.error(e); alert("Error impresión, pero se guardará."); }
 
-    // 2. GUARDAR
+    // 3. GUARDAR (Agregamos Tipo_Servicio al objeto pedido)
     const saleData = {
         action: "create_order",
         pedido: {
-            ID_Pedido: idPedido, Numero_Turno: numeroDia,
-            FechaHora: currentTurnData.fechaHora, Fecha_Comercial: currentTurnData.fechaComercial,
-            Turno: currentTurnData.idTurno, ID_Turno: currentTurnData.turnoKey,
-            Usuario_Caja: currentUser.Nombre, Total_Bruto: total, Total_Neto: total,
-            Medio_Pago: selectedPaymentMethod, Estado: "Pagado"
+            ID_Pedido: idPedido, 
+            Numero_Turno: numeroDia,
+            FechaHora: currentTurnData.fechaHora, 
+            Fecha_Comercial: currentTurnData.fechaComercial,
+            Turno: currentTurnData.idTurno, 
+            ID_Turno: currentTurnData.turnoKey,
+            Usuario_Caja: currentUser.Nombre, 
+            Total_Bruto: total, 
+            Total_Neto: total,
+            Medio_Pago: selectedPaymentMethod, 
+            Tipo_Servicio: serviceType, // <--- NUEVO CAMPO PARA EXCEL
+            Estado: "Pagado"
         },
         detalles: cart.map(item => ({
             ID_Detalle: `DET-${Math.random().toString(36).substr(2, 9)}`,
-            ID_Pedido: idPedido, Fecha_Comercial: currentTurnData.fechaComercial,
-            Turno: currentTurnData.idTurno, ID_Producto: item.id, Nombre_Producto: item.nombre,
-            Cantidad: item.cantidad, Precio_Unitario: item.precio, Subtotal: item.cantidad * item.precio,
+            ID_Pedido: idPedido, 
+            Fecha_Comercial: currentTurnData.fechaComercial,
+            Turno: currentTurnData.idTurno, 
+            ID_Producto: item.id, 
+            Nombre_Producto: item.nombre,
+            Cantidad: item.cantidad, 
+            Precio_Unitario: item.precio, 
+            Subtotal: item.cantidad * item.precio,
             Comentarios: item.comentario
         }))
     };
