@@ -457,7 +457,7 @@
             }
             resultadosGlobales = rows;
             let h = "";
-            rows.slice(0, 10).forEach((row, index) => {
+            rows.slice(0, 75).forEach((row, index) => {
               const tag = row["TAG SPOOL"] || "S/N";
               h += `<a href="#" class="list-group-item list-group-item-action py-2" onclick="verFichaAppSheet(${index}); return false;">
                 <div class="d-flex w-100 justify-content-between align-items-center">
