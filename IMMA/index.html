@@ -862,7 +862,7 @@
           if (!rows.length)
             h += '<div class="list-group-item text-danger">No encontrado</div>';
           else
-            rows.slice(0, 5).forEach((r, i) => (h += `<a href="#" class="list-group-item list-group-item-action" onclick="selEditInd(${i}); return false;">${r[COL_TAG]}</a>`));
+            rows.slice(0, 75).forEach((r, i) => (h += `<a href="#" class="list-group-item list-group-item-action" onclick="selEditInd(${i}); return false;">${r[COL_TAG]}</a>`));
           h += "</div>";
           document.getElementById("resEdit").innerHTML = h;
         });
