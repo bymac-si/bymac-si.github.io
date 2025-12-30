@@ -48,15 +48,15 @@ window.printTicket = async function (cart, total, method, orderNum, serviceType)
 
     htmlCocina = `
             <div class="ticket-header fs-big">COCINA</div>
-            <div class="text-center fs-huge">#${orderNum}</div>
-            <div class="text-center" style="font-size:1em;font-weight: bold;">${soloHora}</div>
+            <div class="text-center fs-huge" style="font-size:1.1rem;font-weight: bold;">#${orderNum}</div>
+            <div class="text-center" style="font-size:1.1rem;font-weight: bold;">${soloHora}</div>
             
-            <div class="text-center" style="border: 2px solid black; margin: 5px 0; font-weight:bold; font-size:1.8em; padding:2px;">
+            <div class="text-center" style="border: 2px solid black; margin: 5px 0; font-weight:bold; font-size:1.8rem; padding:2px;">
                 ${serviceType}
             </div>
 
             <div class="ticket-divider"></div>
-            <div class="fs-big text-uppercase" style="text-align:left; margin-bottom: 10px; font-size: 2.1em;">
+            <div class="fs-big text-uppercase" style="text-align:left; margin-bottom: 10px; font-size: 2.5rem;">
                 ${listadoCocina}
             </div>
             
@@ -70,7 +70,7 @@ window.printTicket = async function (cart, total, method, orderNum, serviceType)
   cart.forEach((item) => {
     const totalItem = (item.precio * item.cantidad).toLocaleString("es-CL");
     listadoCliente += `
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 2px; font-size:1.5em;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 2px; font-size:1.5rem;">
                 <span style="flex:1; padding-right:5px; text-align:left;">${item.cantidad} x ${item.nombre}</span>
                 <span style="white-space:nowrap;">$${totalItem}</span>
             </div>
@@ -86,16 +86,16 @@ window.printTicket = async function (cart, total, method, orderNum, serviceType)
             <span class="fs-huge">PEDIDO: #${orderNum}</span>
         </div>
         
-        <div class="text-center fw-bold" style="font-size:1.4em; margin-bottom:5px;">
+        <div class="text-center fw-bold" style="font-size:1.4rem; margin-bottom:5px;">
             << ${serviceType} >>
         </div>
       
-        <div class="text-center text-uppercase" style="font-size:1.4em; margin-bottom:5px;">
+        <div class="text-center text-uppercase" style="font-size:1.4rem; margin-bottom:5px;">
             ${fechaHora}<br>
             ATENDIDO POR: ${nombreCajero}
         </div>
         
-        <div class="ticket-divider text-uppercase" style="font-size: 1.2em;">
+        <div class="ticket-divider text-uppercase" style="font-size: 1.2rem;">
             ${listadoCliente}
         </div>
         
@@ -103,9 +103,9 @@ window.printTicket = async function (cart, total, method, orderNum, serviceType)
             <span>TOTAL:</span>
             <span>$${total.toLocaleString("es-CL")}</span>
         </div>
-        <div style="font-size: 1.5em;">Pago: ${method}</div>
+        <div style="font-size: 1.5rem;">Pago: ${method}</div>
         
-        <div class="text-center" style="margin-top:15px; font-size:1.3em;">
+        <div class="text-center" style="margin-top:15px; font-size:1.3rem;">
             ¡Gracias por su preferencia!
         </div>
         <div style="text-align:center; margin-top:10px;">.</div> 
@@ -166,38 +166,38 @@ window.printDailyReport = async function (data) {
         <div class="ticket-divider"></div>
         <br>
         
-        <div class="d-flex-between fw-bold" style="font-size:1.1em;">
+        <div class="d-flex-between fw-bold" style="font-size:1.1rem;">
             <span>💰 Fondo Inicial (Total):</span>
             <span>$${totalApertura.toLocaleString("es-CL")}</span>
         </div>
-        <div class="d-flex-between fw-bold" style="font-size:1.1em;">
+        <div class="d-flex-between fw-bold" style="font-size:1.1rem;">
             <span>💵 Efectivo Venta:</span>
             <span>$${totalEfectivo.toLocaleString("es-CL")}</span>
         </div>
         <div class="ticket-divider"></div>
-        <div class="d-flex-between fw-bold" style="font-size:1.2em;">
+        <div class="d-flex-between fw-bold" style="font-size:1.2rem;">
             <span>TOTAL CAJA:</span>
             <span>$${(totalApertura + totalEfectivo).toLocaleString("es-CL")}</span>
         </div>
         <br>
         
         <div class="ticket-divider"></div>
-        <div class="d-flex-between" style="font-size:1.1em;">
+        <div class="d-flex-between" style="font-size:1.1rem;">
             <span>💳 Tarjeta:</span>
             <span>$${totalTarjeta.toLocaleString("es-CL")}</span>
         </div>
-        <div class="d-flex-between" style="font-size:1.1em;">
+        <div class="d-flex-between" style="font-size:1.1rem;">
             <span>🏦 Transferencia:</span>
             <span>$${totalTransf.toLocaleString("es-CL")}</span>
         </div>
         <br>
 
         <div class="ticket-divider"></div>
-        <div class="d-flex-between" style="font-size:1.1em;">
+        <div class="d-flex-between" style="font-size:1.1rem;">
             <span>Venta Turno AM:</span>
             <span>$${data.turnos[1].total.toLocaleString("es-CL")}</span>
         </div>
-        <div class="d-flex-between" style="font-size:1.1em;">
+        <div class="d-flex-between" style="font-size:1.1rem;">
             <span>Venta Turno PM:</span>
             <span>$${data.turnos[2].total.toLocaleString("es-CL")}</span>
         </div>

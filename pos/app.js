@@ -141,7 +141,7 @@ function renderProducts(lista) {
         return `
         <div class="card product-card h-100 shadow-sm border-0 ${claseBg}" style="${estiloBg}" onclick="addToCart('${p.ID_Producto}')">
             <div class="card-body d-flex flex-column align-items-center justify-content-center text-center p-1">
-                <h6 class="card-title fw-bold mb-1" style="color: inherit; font-size:0.9em;">${p.Nombre}</h6>
+                <h6 class="card-title fw-bold mb-1" style="color: inherit; font-size:0.9rem;">${p.Nombre}</h6>
                 <span class="badge bg-white text-dark bg-opacity-90 mt-auto px-2 py-1">${formatter.format(p.Precio)}</span>
             </div>
         </div>`;
@@ -406,26 +406,24 @@ function renderReportUI(data) {
     `;
 }
 
+// --- app.js ---
+
 async function printReportAction() {
-    if(currentReportData && window.printDailyReport) await window.printDailyReport(currentReportData);
+    // 1. Cerrar el modal inmediatamente
+    const modalElement = document.getElementById('reportModal');
+    const modalInstance = bootstrap.Modal.getInstance(modalElement);
+    if (modalInstance) {
+        modalInstance.hide();
+    }
+
+    // 2. Proceder a imprimir
+    if(currentReportData && window.printDailyReport) {
+        // Un pequeño delay asegura que el modal se haya ido visualmente antes de abrir el diálogo de impresión
+        setTimeout(async () => {
+            await window.printDailyReport(currentReportData);
+        }, 300); 
+    }
 }
-
-// ==========================================
-// AUTOMATIZACIÓN Y CAMBIO DE TURNO
-// ==========================================
-
-// 1. MONITOR DE CAMBIO AUTOMÁTICO
-function startAutoUpdate() {
-    // Sincronizar datos cada 5 min
-    setInterval(() => { if (cart.length === 0) loadSystemData(true); }, 300000);
-    
-    // Chequeo de hora cada 30 segundos
-    setInterval(() => {
-        updateClock();
-        checkAutoShiftChange(); 
-    }, 30000); 
-}
-
 // 2. LÓGICA CAMBIO AUTOMÁTICO (18:00)
 function checkAutoShiftChange() {
     const ahora = new Date();
