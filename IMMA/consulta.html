@@ -152,7 +152,9 @@
           <div class="input-group input-group-lg shadow-sm">
             <button
               class="btn btn-outline-secondary bg-white border-0 border-end"
-              type="button" onclick="abrirCamara()">
+              type="button"
+              data-bs-toggle="modal"
+              data-bs-target="#modalCamara">
               <i class="bi bi-qr-code-scan text-primary"
                 style="font-size: 1.2rem;"></i>
             </button>
@@ -636,80 +638,76 @@
               document.getElementById("txtBuscar").focus();
           }
       });
-      // --- VARIABLES GLOBALES PARA EL SCANNER ---
+      
+      // --- LÓGICA DE CÁMARA ROBUSTA PARA IPHONE ---
     let html5QrcodeScanner = null;
+    const modalElement = document.getElementById('modalCamara');
 
-    function abrirCamara() {
-        // 1. Mostrar el modal de Bootstrap
-        const myModal = new bootstrap.Modal(document.getElementById('modalCamara'));
-        myModal.show();
-
-        // 2. Configurar e iniciar el scanner
+    // 1. EVENTO: Cuando el modal termina de abrirse (SHOWN)
+    modalElement.addEventListener('shown.bs.modal', function () {
+        // Crear instancia nueva cada vez para asegurar limpieza
         if (html5QrcodeScanner === null) {
             html5QrcodeScanner = new Html5Qrcode("reader");
         }
 
         const config = {
-            fps: 10, // Cuadros por segundo
-            qrbox: { width: 250, height: 250 }, // Zona de escaneo
-            // IMPORTANTE: Aquí definimos qué formatos leer
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0,
             formatsToSupport: [ 
                 Html5QrcodeSupportedFormats.QR_CODE, 
-                Html5QrcodeSupportedFormats.CODE_128, // Para tus códigos de barras
-                Html5QrcodeSupportedFormats.EAN_13 
-            ] 
+                Html5QrcodeSupportedFormats.CODE_128 
+            ]
         };
 
-        // Preferir cámara trasera (environment)
+        // Iniciar cámara trasera
         html5QrcodeScanner.start(
-            { facingMode: "environment" }, 
+            { facingMode: "environment" },
             config,
             onScanSuccess,
-            onScanFailure // Opcional, para errores de lectura silenciosos
+            (errorMessage) => { 
+                // Error de lectura (no detecta código), ignorar para no saturar log
+            }
         ).catch(err => {
-            console.error("Error al iniciar cámara", err);
-            alert("No se pudo iniciar la cámara. Verifique permisos.");
+            console.error("Error crítico al iniciar cámara:", err);
+            document.getElementById('reader').innerHTML = 
+                '<div class="alert alert-danger">Error: Permiso de cámara denegado o no disponible.</div>';
         });
-    }
+    });
 
-    function onScanSuccess(decodedText, decodedResult) {
-        // 1. Detener escaneo
-        cerrarCamara(); 
-
-        // 2. Poner el valor en el input
-        console.log(`Código escaneado: ${decodedText}`);
-        document.getElementById('txtBuscar').value = decodedText;
-
-        // 3. Ejecutar búsqueda automáticamente
-        buscarTags();
-        
-        // 4. Cerrar el modal visualmente
-        const modalEl = document.getElementById('modalCamara');
-        const modal = bootstrap.Modal.getInstance(modalEl);
-        modal.hide();
-    }
-
-    function onScanFailure(error) {
-        // La librería lanza errores constantemente si no ve un código. 
-        // Es mejor no hacer nada aquí para no saturar la consola.
-    }
-
-    function cerrarCamara() {
+    // 2. EVENTO: Cuando el modal se va a cerrar (HIDE)
+    modalElement.addEventListener('hide.bs.modal', function () {
         if (html5QrcodeScanner) {
             html5QrcodeScanner.stop().then(() => {
-                console.log("Cámara detenida.");
-                // Limpiar el render para que no quede la última imagen congelada
-                html5QrcodeScanner.clear(); 
+                html5QrcodeScanner.clear();
+                html5QrcodeScanner = null; // Destruir instancia para liberar memoria iPhone
             }).catch(err => {
-                console.error("Error al detener cámara", err);
+                console.error("Error al detener cámara:", err);
+                // Forzar limpieza aunque falle el stop
+                html5QrcodeScanner = null;
+                document.getElementById('reader').innerHTML = ""; 
             });
         }
+    });
+
+    // 3. EXITO DE ESCANEO
+    function onScanSuccess(decodedText, decodedResult) {
+        console.log(`Código escaneado: ${decodedText}`);
+        
+        // Poner valor en input
+        const input = document.getElementById('txtBuscar');
+        input.value = decodedText;
+
+        // Cerrar modal (esto disparará automáticamente el evento 'hide.bs.modal' de arriba)
+        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+        modalInstance.hide();
+
+        // Ejecutar búsqueda (pequeño delay para dar tiempo a la UI)
+        setTimeout(() => {
+            buscarTags();
+        }, 300);
     }
     
-    // Asegurar que si cierran el modal clickeando fuera, se apague la cámara
-    document.getElementById('modalCamara').addEventListener('hidden.bs.modal', function () {
-        cerrarCamara();
-    });
     </script>
   </body>
 </html>
