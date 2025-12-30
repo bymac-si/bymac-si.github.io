@@ -205,7 +205,7 @@ window.printDailyReport = async function (data) {
         <br>
         <div class="ticket-divider"></div>
         <div class="fs-big text-center">PRODUCTOS VENDIDOS</div><br>
-        <div style="font-size:1.1em">${prodHtml}</div>
+        <div style="font-size:1.2em">${prodHtml}</div>
         
         <br>
         <div class="ticket-divider"></div>
