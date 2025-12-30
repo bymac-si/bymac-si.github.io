@@ -232,7 +232,7 @@
                     <div class="ficha-label">Espesor Caucho</div>
                     <div id="ficha-mmcaucho" class="ficha-value small">-</div>
                   </div>
-                  <div class="col-3">
+                  <div class="col-6">
                     <div class="ficha-label">RAL</div>
                     <div id="ficha-color-ral" class="ficha-value small">-</div>
                   </div>
@@ -360,10 +360,11 @@ async function loadRalJson(url = "./ral-colors.json") {
 function normalizeRal(value) {
   if (value == null) return null;
 
-  // acepta 6029, "6029", "RAL 6029", "ral6029", " 6029 "
   const s = String(value).trim().toUpperCase();
 
-  // extrae 4 dígitos si vienen mezclados
+  // caso especial
+  if (s === "INOX") return "INOX";
+
   const m = s.match(/(\d{4})/);
   if (!m) return null;
 
@@ -382,23 +383,33 @@ function bestTextColor(hex) {
 }
 
 function renderRalPill(containerEl, ralCode, data) {
-  // fallback si no hay data
   if (!ralCode) {
     containerEl.textContent = "-";
     return;
   }
 
-  const hex = data?.hex || "#e9ecef"; // gris bootstrap light
+  const hex = data?.hex || "#e9ecef";
   const name = data?.name || "RAL no encontrado";
-  const textColor = bestTextColor(hex);
+
+  const badgeStyle = data?.css
+    ? `
+      background:${data.css};
+      color:#111;
+      border:1px solid rgba(0,0,0,.25);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
+    `
+    : `
+      background:${hex};
+      color:${bestTextColor(hex)};
+      border:1px solid rgba(0,0,0,.15);
+    `;
 
   containerEl.innerHTML = `
-    <span class="badge rounded-pill"
+    <span class="badge rounded-pill position-relative overflow-hidden"
           title="${ralCode} · ${name} · ${hex}"
-          style="background:${hex}; color:${textColor}; border: 1px solid rgba(0,0,0,.15);">
+          style="${badgeStyle}">
       ${ralCode}
     </span>
-    <span class="ms-2 text-muted">${hex}</span>
   `;
 }
 

@@ -25,8 +25,9 @@
     "name": "Amarillo señal"
   },
   "INOX": {
-    "hex": "#BFC3C6",
-    "rgb": "191,195,198",
-    "name": "Acero inoxidable"
-  }
+  "hex": "#BFC3C6",
+  "rgb": "191,195,198",
+  "name": "Acero inoxidable",
+  "css": "linear-gradient(135deg,#f7f7f7 0%,#d9dde0 12%,#b8bec3 28%,#f0f2f3 42%,#9ea5ab 58%,#f7f7f7 76%,#c0c6cb 100%)"
+}
 }
