@@ -220,13 +220,25 @@
                     <div class="ficha-label">RETIRA FLUOR</div>
                     <div id="ficha-pfluor" class="ficha-value small">-</div>
                   </div>
-                  <!-- <div class="col-6">
-                    <div class="ficha-label">P. ATTEX (EX474)</div>
-                    <div id="ficha-pattex" class="ficha-value small">-</div>
-                  </div>-->
-                  <div class="col-12">
+                  <div class="col-6">
+                    <div class="ficha-label">Diámetro</div>
+                    <div id="ficha-diametro" class="ficha-value small">-</div>
+                  </div>
+                  <div class="col-6">
                     <div class="ficha-label">Proveedor Caucho</div>
                     <div id="ficha-proveedor" class="ficha-value small">-</div>
+                  </div>
+                  <div class="col-6">
+                    <div class="ficha-label">Espesor Caucho</div>
+                    <div id="ficha-mmcaucho" class="ficha-value small">-</div>
+                  </div>
+                  <div class="col-3">
+                    <div class="ficha-label">RAL</div>
+                    <div id="ficha-color-ral" class="ficha-value small">-</div>
+                  </div>
+                  <div class="col-6">
+                    <div class="ficha-label"># Liberación</div>
+                    <div id="ficha-liberado" class="ficha-value small">-</div>
                   </div>
                 </div>
 
@@ -329,6 +341,88 @@
       const COL_474 = "RETIRA FLUOR";
       const COL_EX474 = "P. ATTEX";
       const COL_PROVEEDOR = "PROVEEDOR";
+      const COL_DIAMETRO = "Ø";
+      const COL_MMCAUCHO = "Espesor Caucho";
+      const COL_COLOR = "RAL";
+      const COL_NLIBERA ="N° LIB.";
+
+// cache en memoria
+let RAL_MAP = null;
+
+async function loadRalJson(url = "./ral-colors.json") {
+  if (RAL_MAP) return RAL_MAP;
+  const res = await fetch(url, { cache: "force-cache" });
+  if (!res.ok) throw new Error(`No se pudo cargar ${url} (${res.status})`);
+  RAL_MAP = await res.json();
+  return RAL_MAP;
+}
+
+function normalizeRal(value) {
+  if (value == null) return null;
+
+  // acepta 6029, "6029", "RAL 6029", "ral6029", " 6029 "
+  const s = String(value).trim().toUpperCase();
+
+  // extrae 4 dígitos si vienen mezclados
+  const m = s.match(/(\d{4})/);
+  if (!m) return null;
+
+  return `RAL ${m[1]}`;
+}
+
+function bestTextColor(hex) {
+  // decide blanco/negro para legibilidad (simple, sin librerías)
+  const h = hex.replace("#", "");
+  if (h.length !== 6) return "#000";
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b);
+  return luminance < 140 ? "#fff" : "#000";
+}
+
+function renderRalPill(containerEl, ralCode, data) {
+  // fallback si no hay data
+  if (!ralCode) {
+    containerEl.textContent = "-";
+    return;
+  }
+
+  const hex = data?.hex || "#e9ecef"; // gris bootstrap light
+  const name = data?.name || "RAL no encontrado";
+  const textColor = bestTextColor(hex);
+
+  containerEl.innerHTML = `
+    <span class="badge rounded-pill"
+          title="${ralCode} · ${name} · ${hex}"
+          style="background:${hex}; color:${textColor}; border: 1px solid rgba(0,0,0,.15);">
+      ${ralCode}
+    </span>
+    <span class="ms-2 text-muted">${hex}</span>
+  `;
+}
+
+async function paintRalFromRow(row) {
+  const el = document.getElementById("ficha-color-ral");
+  if (!el) return;
+
+  const ral = normalizeRal(row?.[COL_COLOR]); // "RAL 6029" o null
+  if (!ral) {
+    el.textContent = row?.[COL_COLOR] || "-";
+    return;
+  }
+
+  try {
+    const map = await loadRalJson("./ral-colors.json");
+    const data = map[ral]; // {hex,rgb,name} o undefined
+    renderRalPill(el, ral, data);
+  } catch (err) {
+    console.error(err);
+    // si falla el JSON, al menos muestra el código
+    el.textContent = ral;
+  }
+}
+
 
       // Lista SIN FECHA TRN
       const COLUMNAS_FECHAS_ALL = [
@@ -518,6 +612,14 @@
         //  row[COL_EX474] || "-";
         document.getElementById("ficha-proveedor").textContent =
           row[COL_PROVEEDOR] || "-";
+        document.getElementById("ficha-diametro").textContent =
+          row[COL_DIAMETRO] || "-";  
+         document.getElementById("ficha-mmcaucho").textContent =
+          row[COL_MMCAUCHO] || "-";    
+          document.getElementById("ficha-liberado").textContent =
+          row[COL_NLIBERA] || "-";
+          paintRalFromRow(row);
+
 
         renderTimeline(row);
         renderPlano(row[COL_PLANO]);
@@ -707,7 +809,7 @@
             buscarTags();
         }, 300);
     }
-    
+
     </script>
   </body>
 </html>

@@ -1,0 +1,32 @@
+{
+  "RAL 5012": {
+    "hex": "#2F8EDB",
+    "rgb": "47,142,219",
+    "name": "Azul luminoso"
+  },
+  "RAL 6029": {
+    "hex": "#007243",
+    "rgb": "0,114,67",
+    "name": "Verde menta"
+  },
+  "RAL 7036": {
+    "hex": "#7F868A",
+    "rgb": "127,134,138",
+    "name": "Gris platino"
+  },
+  "RAL 8008": {
+    "hex": "#6F4F28",
+    "rgb": "111,79,40",
+    "name": "Marrón oliva"
+  },
+  "RAL 1003": {
+    "hex": "#F7BA0B",
+    "rgb": "247,186,11",
+    "name": "Amarillo señal"
+  },
+  "INOX": {
+    "hex": "#BFC3C6",
+    "rgb": "191,195,198",
+    "name": "Acero inoxidable"
+  }
+}
