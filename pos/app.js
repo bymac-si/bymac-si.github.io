@@ -1,16 +1,18 @@
 /**
  * POS El Carro del Ocho - Lógica Principal
- * APP.JS
+ * APP.JS - VERSIÓN UNIFICADA (Apertura + Mixto + Turnos)
  */
 
 // URL DE TU SCRIPT GOOGLE
-const API_URL = "https://script.google.com/macros/s/AKfycbyTsarYzEHOqu8Xtqx8qOaxgjRY-7fsUIT6TLcOv5VFQaL7nOGecbxGGhMbJJg6igAG/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzEZ8Tq9gNEu32qw37dN8FbxiGh2F8b1ufZkEuxMZuiunLUk8T2voi_XuZahg35KSEB/exec";
 
+// --- VARIABLES GLOBALES ---
 let db = { productos: [], categorias: [], usuarios: [] };
 let cart = [];
 let currentUser = null;
 let currentTurnData = null;
 let currentReportData = null;
+let selectedPaymentMethod = 'Efectivo'; // Por defecto
 
 const formatter = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 });
 
@@ -77,7 +79,6 @@ function attemptLogin() {
 // --- LÓGICA DE TURNO (HORA CHILE) ---
 function calcularTurno() {
     const ahora = new Date();
-    // Forzar zona horaria Santiago
     const santiagoStr = ahora.toLocaleString("en-US", { timeZone: "America/Santiago" });
     const santiagoDate = new Date(santiagoStr);
     const hora = santiagoDate.getHours();
@@ -106,20 +107,18 @@ function updateClock() { calcularTurno(); }
 
 // --- NÚMERO DE PEDIDO ---
 function getNextOrderNumber() {
-    // Usamos fecha comercial para agrupar pedidos de la noche con el día anterior
     calcularTurno();
     const key = `pos_counter_${currentTurnData.fechaComercial}`;
-    
     let count = parseInt(localStorage.getItem(key)) || 0;
     count++;
     localStorage.setItem(key, count);
     return String(count).padStart(3, '0');
 }
 
-// --- RENDERIZADO ---
+// --- RENDERIZADO UI ---
 function renderCategories() {
     const container = document.getElementById('category-container');
-    let html = `<button class="btn btn-primary shadow-sm flex-shrink-0" onclick="filterProducts('Todo')">Todo</button>`;
+    let html = `<button class="btn btn-dark shadow-sm flex-shrink-0" onclick="filterProducts('Todo')">Todo</button>`;
     db.categorias.forEach(cat => {
         const color = cat.Color ? mapColor(cat.Color) : "secondary";
         html += `<button class="btn btn-${color} shadow-sm flex-shrink-0" onclick="filterProducts('${cat.Nombre}')">${cat.Nombre}</button>`;
@@ -142,7 +141,7 @@ function renderProducts(lista) {
         return `
         <div class="card product-card h-100 shadow-sm border-0 ${claseBg}" style="${estiloBg}" onclick="addToCart('${p.ID_Producto}')">
             <div class="card-body d-flex flex-column align-items-center justify-content-center text-center p-1">
-                <h6 class="card-title fw-bold mb-1" style="color: inherit;">${p.Nombre}</h6>
+                <h6 class="card-title fw-bold mb-1" style="color: inherit; font-size:0.9em;">${p.Nombre}</h6>
                 <span class="badge bg-white text-dark bg-opacity-90 mt-auto px-2 py-1">${formatter.format(p.Precio)}</span>
             </div>
         </div>`;
@@ -194,28 +193,63 @@ function updateCartUI() {
     document.getElementById('modal-total-pagar').innerText = totalFmt;
 }
 
-// --- COBRO ---
-let selectedPaymentMethod = 'Efectivo';
+// ==========================================
+// SECCIÓN DE COBROS Y PAGOS (Actualizada)
+// ==========================================
 
+// 1. APERTURA DE CAJA
+window.setOpeningBalance = function() {
+    calcularTurno(); 
+    const key = `apertura_${currentTurnData.fechaComercial}_T${currentTurnData.idTurno}`;
+    const currentVal = localStorage.getItem(key) || "0";
+    
+    const input = prompt(`💰 INGRESO FONDO DE CAJA (Turno ${currentTurnData.idTurno})\n\nIngrese monto inicial para vuelto:`, currentVal);
+    
+    if (input !== null) {
+        const amount = parseInt(input.replace(/\D/g, '')) || 0;
+        localStorage.setItem(key, amount);
+        alert(`✅ Fondo de $${amount.toLocaleString('es-CL')} guardado para este turno.`);
+    }
+};
+
+// 2. ABRIR MODAL
 function openPaymentModal() {
     if (cart.length === 0) return alert("Carrito vacío");
     const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('paymentModal'));
     modal.show();
     setPaymentMethod('Efectivo');
+    
+    // Resetear inputs de efectivo y mixto
     document.getElementById('amount-tendered').value = '';
     document.getElementById('change-display').innerText = '$0';
+    document.getElementById('mix-cash').value = '';
+    document.getElementById('mix-card').value = '';
+    document.getElementById('mix-transfer').value = '';
+    document.getElementById('mix-remaining').innerText = '$0';
+    
     setTimeout(() => document.getElementById('amount-tendered').focus(), 500);
 }
 
-function setPaymentMethod(method) {
+// 3. CAMBIAR PESTAÑA DE PAGO
+window.setPaymentMethod = function(method) {
     selectedPaymentMethod = method;
     document.querySelectorAll('#pills-tab .nav-link').forEach(btn => {
         if (btn.dataset.method === method) btn.classList.add('active');
         else btn.classList.remove('active');
     });
-    document.getElementById('cash-section').style.display = (method === 'Efectivo') ? 'block' : 'none';
-}
+    
+    // Mostrar/Ocultar secciones según selección
+    const cashSec = document.getElementById('cash-section');
+    const mixSec = document.getElementById('mixed-section');
+    
+    if (cashSec) cashSec.style.display = (method === 'Efectivo') ? 'block' : 'none';
+    if (mixSec) mixSec.style.display = (method === 'Mixto') ? 'block' : 'none';
+    
+    // Si es Mixto, reiniciamos cálculo UI
+    if(method === 'Mixto') calculateMixed();
+};
 
+// 4. CALCULAR VUELTO (Efectivo)
 function calculateChange() {
     const total = cart.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
     const received = parseInt(document.getElementById('amount-tendered').value) || 0;
@@ -226,19 +260,57 @@ function calculateChange() {
     else { display.innerText = "Falta dinero"; display.classList.replace('text-success', 'text-danger'); }
 }
 
-// EN app.js
+// 5. CALCULAR MIXTO
+window.calculateMixed = function() {
+    const total = cart.reduce((acc, i) => acc + (i.precio * i.cantidad), 0);
+    
+    const c = parseInt(document.getElementById('mix-cash').value) || 0;
+    const t = parseInt(document.getElementById('mix-card').value) || 0;
+    const tr = parseInt(document.getElementById('mix-transfer').value) || 0;
+    
+    const sum = c + t + tr;
+    const diff = total - sum;
+    
+    const lbl = document.getElementById('mix-remaining');
+    if (!lbl) return;
 
+    if(diff > 0) {
+        lbl.innerText = `$${diff.toLocaleString('es-CL')}`;
+        lbl.className = 'text-danger';
+    } else if (diff === 0) {
+        lbl.innerText = "¡COMPLETO!";
+        lbl.className = 'text-success';
+    } else {
+        lbl.innerText = `Sobran: $${Math.abs(diff).toLocaleString('es-CL')}`;
+        lbl.className = 'text-warning';
+    }
+};
+
+// 6. PROCESAR VENTA (FINAL)
 async function processSale() {
     if (!currentUser) return checkLogin();
     
     const total = cart.reduce((acc, i) => acc + (i.precio * i.cantidad), 0);
+    let finalPaymentString = selectedPaymentMethod; 
+    
+    // VALIDACIONES
     if (selectedPaymentMethod === 'Efectivo') {
         const received = parseInt(document.getElementById('amount-tendered').value) || 0;
         if (received < total) return alert("Monto insuficiente");
     }
+    
+    if (selectedPaymentMethod === 'Mixto') {
+        const c = parseInt(document.getElementById('mix-cash').value) || 0;
+        const t = parseInt(document.getElementById('mix-card').value) || 0;
+        const tr = parseInt(document.getElementById('mix-transfer').value) || 0;
+        
+        if (c + t + tr !== total) return alert("⚠️ El pago mixto no cuadra con el total.");
+        
+        // FORMATO PARA BACKEND: MIXTO|E:1000|T:2000|Tr:0
+        finalPaymentString = `MIXTO|E:${c}|T:${t}|Tr:${tr}`;
+    }
 
-    // 1. CAPTURAR TIPO DE SERVICIO (NUEVO)
-    // Buscamos cuál radio button está marcado
+    // CAPTURAR TIPO DE SERVICIO
     const serviceRadio = document.querySelector('input[name="serviceType"]:checked');
     const serviceType = serviceRadio ? serviceRadio.value : "PARA SERVIR";
 
@@ -248,15 +320,14 @@ async function processSale() {
     const idPedido = `PED-${Date.now()}`;
     const numeroDia = getNextOrderNumber();
 
-    // 2. IMPRIMIR (Pasamos serviceType como nuevo argumento)
+    // IMPRIMIR
     try {
         if (typeof window.printTicket === 'function') {
-            // AHORA ENVIAMOS 5 ARGUMENTOS
-            await window.printTicket(cart, total, selectedPaymentMethod, numeroDia, serviceType);
+            await window.printTicket(cart, total, finalPaymentString, numeroDia, serviceType);
         }
-    } catch (e) { console.error(e); alert("Error impresión, pero se guardará."); }
+    } catch (e) { console.error(e); }
 
-    // 3. GUARDAR (Agregamos Tipo_Servicio al objeto pedido)
+    // GUARDAR EN BD
     const saleData = {
         action: "create_order",
         pedido: {
@@ -269,9 +340,9 @@ async function processSale() {
             Usuario_Caja: currentUser.Nombre, 
             Total_Bruto: total, 
             Total_Neto: total,
-            Medio_Pago: selectedPaymentMethod, 
-            Tipo_Servicio: serviceType, // <--- NUEVO CAMPO PARA EXCEL
+            Medio_Pago: finalPaymentString, 
             Estado: "Pagado"
+            // No enviamos Tipo_Servicio a BD para no alterar Excel
         },
         detalles: cart.map(item => ({
             ID_Detalle: `DET-${Math.random().toString(36).substr(2, 9)}`,
@@ -339,36 +410,23 @@ async function printReportAction() {
     if(currentReportData && window.printDailyReport) await window.printDailyReport(currentReportData);
 }
 
+// ==========================================
+// AUTOMATIZACIÓN Y CAMBIO DE TURNO
+// ==========================================
+
+// 1. MONITOR DE CAMBIO AUTOMÁTICO
 function startAutoUpdate() {
     // Sincronizar datos cada 5 min
     setInterval(() => { if (cart.length === 0) loadSystemData(true); }, 300000);
     
-    // Chequeo de hora cada 30 segundos para cambio de turno
+    // Chequeo de hora cada 30 segundos
     setInterval(() => {
         updateClock();
         checkAutoShiftChange(); 
     }, 30000); 
 }
 
-// ==========================================
-// LOGICA DE CAMBIO DE TURNO (FINAL)
-// ==========================================
-
-// 1. CAMBIO MANUAL
-window.manualShiftChange = function() {
-    console.log("Intentando cambio de turno..."); 
-
-    if (cart.length > 0) {
-        if (!confirm("⚠️ Hay una venta en curso.\n¿Seguro que desea cambiar de turno?\nSe perderá el pedido actual.")) {
-            return;
-        }
-    }
-    
-    // Forzamos la recarga ignorando caché
-    window.location.reload(true);
-};
-
-// 2. CAMBIO AUTOMÁTICO (18:00)
+// 2. LÓGICA CAMBIO AUTOMÁTICO (18:00)
 function checkAutoShiftChange() {
     const ahora = new Date();
     const santiagoStr = ahora.toLocaleString("en-US", { timeZone: "America/Santiago" });
@@ -386,3 +444,15 @@ function checkAutoShiftChange() {
         }
     }
 }
+
+// 3. CAMBIO MANUAL (Botón)
+window.manualShiftChange = function() {
+    console.log("Intentando cambio de turno..."); 
+
+    if (cart.length > 0) {
+        if (!confirm("⚠️ Hay una venta en curso.\n¿Seguro que desea cambiar de turno?\nSe perderá el pedido actual.")) {
+            return;
+        }
+    }
+    window.location.reload(true);
+};
