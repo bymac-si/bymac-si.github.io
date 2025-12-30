@@ -4,8 +4,7 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
     <meta name="theme-color" content="#ffffff" />
 
@@ -15,8 +14,7 @@
 
     <meta
       name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
+      content="black-translucent" />
 
     <meta name="apple-mobile-web-app-title" content="IMMA" />
 
@@ -26,12 +24,10 @@
 
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+      rel="stylesheet" />
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-    />
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 
     <style>
       :root {
@@ -129,17 +125,14 @@
         style="
           background: linear-gradient(90deg, #a0c0f6, #3c475a);
           color: white;
-        "
-      >
+        ">
         <div
-          class="card-body d-flex flex-column flex-md-row justify-content-between align-items-center py-2"
-        >
+          class="card-body d-flex flex-column flex-md-row justify-content-between align-items-center py-2">
           <h1 class="m-0 fs-4">
             <img
               src="https://bymac-si.github.io/img/logo_imma.png"
               alt="IMMA"
-              style="width: 80px; margin-right: 10px"
-            />Soluciones en Piping
+              style="width: 80px; margin-right: 10px" />Soluciones en Piping
           </h1>
           <div class="text-end small fs-5">Panel MasterBI Fluor</div>
         </div>
@@ -157,6 +150,13 @@
       <div class="row justify-content-center mb-4">
         <div class="col-12 col-md-8">
           <div class="input-group input-group-lg shadow-sm">
+            <button
+              class="btn btn-outline-secondary bg-white border-0 border-end"
+              type="button" onclick="abrirCamara()">
+              <i class="bi bi-qr-code-scan text-primary"
+                style="font-size: 1.2rem;"></i>
+            </button>
+
             <span class="input-group-text bg-white border-0">
               <i class="bi bi-search text-muted"></i>
             </span>
@@ -165,34 +165,27 @@
               type="text"
               id="txtBuscar"
               class="form-control border-0"
-              placeholder="Ingrese TAG (Ej: 29044-005)..."
-              onkeyup="if(event.key==='Enter') buscarTags()"
-            />
+              placeholder="Escanee o ingrese TAG..."
+              onkeyup="if(event.key==='Enter') buscarTags()" />
 
-            <button
-              class="btn bg-danger px-4"
-              type="button"
-              onclick="limpiarBusqueda()"
-              title="Limpiar búsqueda"
-            >
+            <button class="btn bg-danger px-4" type="button"
+              onclick="limpiarBusqueda()" title="Limpiar">
               <i class="bi bi-x-lg text-light"></i>
             </button>
             <button class="btn btn-primary px-4" onclick="buscarTags()">
-            <i class="bi bi-search"></i>
+              <i class="bi bi-search"></i>
             </button>
           </div>
           <div
             id="resFicha"
             class="list-group mt-2 shadow-sm"
-            style="display: none"
-          ></div>
+            style="display: none"></div>
         </div>
       </div>
 
       <div
         id="contenedorFicha"
-        class="d-none animate__animated animate__fadeIn"
-      >
+        class="d-none animate__animated animate__fadeIn">
         <div class="row g-4 align-items-stretch">
           <div class="col-12 col-lg-4 d-flex flex-column">
             <div class="ficha-header flex-shrink-0">
@@ -204,9 +197,8 @@
               <div class="flex-shrink-0">
                 <div class="mb-4 text-center">
                   <h2 id="ficha-tag" class="text-primary fw-bold mb-0">-</h2>
-                  <span id="ficha-status-badge" class="badge bg-secondary mt-1"
-                    >Consultando...</span
-                  >
+                  <span id="ficha-status-badge"
+                    class="badge bg-secondary mt-1">Consultando...</span>
                 </div>
 
                 <div class="row g-2 mb-3 border-bottom pb-3">
@@ -247,8 +239,7 @@
               <div
                 id="timeline-container"
                 class="flex-grow-1"
-                style="overflow-y: auto; min-height: 150px; max-height: 400px"
-              >
+                style="overflow-y: auto; min-height: 150px; max-height: 400px">
                 <small class="text-muted">Cargando historial...</small>
               </div>
             </div>
@@ -256,39 +247,33 @@
 
           <div class="col-12 col-lg-8 d-flex flex-column">
             <div
-              class="ficha-header d-flex justify-content-between align-items-center flex-shrink-0"
-            >
+              class="ficha-header d-flex justify-content-between align-items-center flex-shrink-0">
               <h5 class="m-0"><i class="bi bi-file-earmark-pdf"></i> Plano</h5>
               <a
                 id="ficha-btn-abrir"
                 href="#"
                 target="_blank"
-                class="btn btn-sm btn-outline-light d-none"
-              >
+                class="btn btn-sm btn-outline-light d-none">
                 <i class="bi bi-box-arrow-up-right"></i> Expandir
               </a>
             </div>
             <div
               class="ficha-body p-0 position-relative"
-              style="min-height: 600px; flex-grow: 1"
-            >
+              style="min-height: 600px; flex-grow: 1">
               <div
                 id="ficha-plano-loading"
                 class="d-flex flex-column justify-content-center align-items-center h-100 text-muted"
-                style="position: absolute; width: 100%"
-              >
+                style="position: absolute; width: 100%">
                 <div
                   class="spinner-border text-primary d-none"
                   id="spinner-plano"
-                  role="status"
-                ></div>
+                  role="status"></div>
                 <span id="msg-plano">Seleccione un TAG para visualizar</span>
               </div>
               <iframe
                 id="ficha-iframe"
                 class="w-100 h-100 d-none"
-                style="border: none"
-              ></iframe>
+                style="border: none"></iframe>
             </div>
           </div>
         </div>
@@ -298,17 +283,37 @@
         style="
           background: linear-gradient(90deg, #a0c0f6, #3c475a);
           color: white;
-        "
-      >
+        ">
         <div>
           <p class="text-center py-1" style="font-size: 0.7em">
             &nbsp; &nbsp; Desarrollado por Marcos Castro Abarca
           </p>
         </div>
       </footer>
+      <div class="modal fade" id="modalCamara" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Escanear Código</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"
+                onclick="cerrarCamara()"></button>
+            </div>
+            <div class="modal-body p-0">
+              <div id="reader" style="width: 100%;"></div>
+            </div>
+            <div class="modal-footer justify-content-center">
+              <small class="text-muted">Apunte la cámara al código QR o de
+                Barras</small>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"
+      type="text/javascript"></script>
 
     <script>
       // --- 1. CONFIGURACIÓN ---
@@ -615,6 +620,96 @@
         // 4. Devolver el foco al input para escribir de nuevo
         input.focus();
       }
+      // --- 8. AUTO-EJECTUAR SI VIENE DE QR ---
+      document.addEventListener("DOMContentLoaded", function() {
+          // Leer parámetros de la URL
+          const params = new URLSearchParams(window.location.search);
+          const tagUrl = params.get("tag"); // Busca ?tag=VALOR
+
+          if (tagUrl) {
+              // Si existe el tag en la URL, lo ponemos en el input y buscamos
+              const input = document.getElementById("txtBuscar");
+              input.value = tagUrl;
+              buscarTags(); // Ejecutamos la búsqueda automáticamente
+          } else {
+              // Si no hay tag, ponemos el foco en el input para esperar escaneo manual o teclado
+              document.getElementById("txtBuscar").focus();
+          }
+      });
+      // --- VARIABLES GLOBALES PARA EL SCANNER ---
+    let html5QrcodeScanner = null;
+
+    function abrirCamara() {
+        // 1. Mostrar el modal de Bootstrap
+        const myModal = new bootstrap.Modal(document.getElementById('modalCamara'));
+        myModal.show();
+
+        // 2. Configurar e iniciar el scanner
+        if (html5QrcodeScanner === null) {
+            html5QrcodeScanner = new Html5Qrcode("reader");
+        }
+
+        const config = {
+            fps: 10, // Cuadros por segundo
+            qrbox: { width: 250, height: 250 }, // Zona de escaneo
+            // IMPORTANTE: Aquí definimos qué formatos leer
+            formatsToSupport: [ 
+                Html5QrcodeSupportedFormats.QR_CODE, 
+                Html5QrcodeSupportedFormats.CODE_128, // Para tus códigos de barras
+                Html5QrcodeSupportedFormats.EAN_13 
+            ] 
+        };
+
+        // Preferir cámara trasera (environment)
+        html5QrcodeScanner.start(
+            { facingMode: "environment" }, 
+            config,
+            onScanSuccess,
+            onScanFailure // Opcional, para errores de lectura silenciosos
+        ).catch(err => {
+            console.error("Error al iniciar cámara", err);
+            alert("No se pudo iniciar la cámara. Verifique permisos.");
+        });
+    }
+
+    function onScanSuccess(decodedText, decodedResult) {
+        // 1. Detener escaneo
+        cerrarCamara(); 
+
+        // 2. Poner el valor en el input
+        console.log(`Código escaneado: ${decodedText}`);
+        document.getElementById('txtBuscar').value = decodedText;
+
+        // 3. Ejecutar búsqueda automáticamente
+        buscarTags();
+        
+        // 4. Cerrar el modal visualmente
+        const modalEl = document.getElementById('modalCamara');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        modal.hide();
+    }
+
+    function onScanFailure(error) {
+        // La librería lanza errores constantemente si no ve un código. 
+        // Es mejor no hacer nada aquí para no saturar la consola.
+    }
+
+    function cerrarCamara() {
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.stop().then(() => {
+                console.log("Cámara detenida.");
+                // Limpiar el render para que no quede la última imagen congelada
+                html5QrcodeScanner.clear(); 
+            }).catch(err => {
+                console.error("Error al detener cámara", err);
+            });
+        }
+    }
+    
+    // Asegurar que si cierran el modal clickeando fuera, se apague la cámara
+    document.getElementById('modalCamara').addEventListener('hidden.bs.modal', function () {
+        cerrarCamara();
+    });
     </script>
   </body>
 </html>
