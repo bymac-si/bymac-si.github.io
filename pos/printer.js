@@ -1,6 +1,6 @@
 /**
  * printer.js - VERSIÓN FINAL CON CORTE DE PÁGINA FÍSICO
- * CORREGIDO: Variable de usuario y comillas en estilos.
+ * Incluye: Letra grande en cocina, Apertura de Caja y Pagos Mixtos en Reporte Z
  */
 
 // Helper para obtener/crear el área de impresión
@@ -20,14 +20,8 @@ function connectPrinter() {
   );
 }
 
-// === IMPRIMIR TICKET DE VENTA (Con corte físico entre Cocina y Cliente) ===
-window.printTicket = async function (
-  cart,
-  total,
-  method,
-  orderNum,
-  serviceType
-) {
+// === IMPRIMIR TICKET DE VENTA ===
+window.printTicket = async function (cart, total, method, orderNum, serviceType) {
   const ticketArea = getPrintableArea();
 
   // Hora forzada a Chile
@@ -54,15 +48,15 @@ window.printTicket = async function (
 
     htmlCocina = `
             <div class="ticket-header fs-big">COCINA</div>
-            <div class="text-center fs-huge">#${orderNum}</div>
-            <div class="text-center" style="font-size:1em;font-weight: bold;">${soloHora}</div>
+            <div class="text-center fs-huge" style="font-size:1.1rem;font-weight: bold;">#${orderNum}</div>
+            <div class="text-center" style="font-size:1.1rem;font-weight: bold;">${soloHora}</div>
             
-            <div class="text-center" style="border: 2px solid black; margin: 5px 0; font-weight:bold; font-size:1.8em; padding:2px;">
+            <div class="text-center" style="border: 2px solid black; margin: 5px 0; font-weight:bold; font-size:1.8rem; padding:2px;">
                 ${serviceType}
             </div>
 
             <div class="ticket-divider"></div>
-            <div class="fs-big" style="text-align:left; margin-bottom: 10px;">
+            <div class="fs-big text-uppercase" style="text-align:left; margin-bottom: 10px; font-size: 2.5rem;">
                 ${listadoCocina}
             </div>
             
@@ -76,7 +70,7 @@ window.printTicket = async function (
   cart.forEach((item) => {
     const totalItem = (item.precio * item.cantidad).toLocaleString("es-CL");
     listadoCliente += `
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 2px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 2px; font-size:1.5rem;">
                 <span style="flex:1; padding-right:5px; text-align:left;">${item.cantidad} x ${item.nombre}</span>
                 <span style="white-space:nowrap;">$${totalItem}</span>
             </div>
@@ -85,23 +79,23 @@ window.printTicket = async function (
 
   const htmlCliente = `
         <div class="ticket-header">
-        <img src="img/logo_8_sf.png" width="50px" alt="" /><br>
+        <img src="img/logo_8_sf.png" width="80px" alt="" /><br>
             EL CARRO DEL OCHO
         </div>
         <div class="text-center ticket-divider">
             <span class="fs-huge">PEDIDO: #${orderNum}</span>
         </div>
         
-        <div class="text-center fw-bold" style="font-size:1.2em; margin-bottom:5px;">
+        <div class="text-center fw-bold" style="font-size:1.4rem; margin-bottom:5px;">
             << ${serviceType} >>
         </div>
       
-        <div class="text-center" style="font-size:1em; margin-bottom:5px;">
+        <div class="text-center text-uppercase" style="font-size:1.4rem; margin-bottom:5px;">
             ${fechaHora}<br>
             ATENDIDO POR: ${nombreCajero}
         </div>
         
-        <div class="ticket-divider" style="font-size: 1.5em;">
+        <div class="ticket-divider text-uppercase" style="font-size: 1.2rem;">
             ${listadoCliente}
         </div>
         
@@ -109,9 +103,9 @@ window.printTicket = async function (
             <span>TOTAL:</span>
             <span>$${total.toLocaleString("es-CL")}</span>
         </div>
-        <div style="font-size: 1.1em;">Pago: ${method}</div>
+        <div style="font-size: 1.5rem;">Pago: ${method}</div>
         
-        <div class="text-center" style="margin-top:15px; font-size:0.8em;">
+        <div class="text-center" style="margin-top:15px; font-size:1.3rem;">
             ¡Gracias por su preferencia!
         </div>
         <div style="text-align:center; margin-top:10px;">.</div> 
@@ -121,26 +115,33 @@ window.printTicket = async function (
   ticketArea.innerHTML = htmlCocina + htmlCliente;
   imprimirYLimpiar(ticketArea);
 };
-// === IMPRIMIR REPORTE Z CON DESGLOSE DE PAGO ===
+
+// === IMPRIMIR REPORTE Z (CORREGIDO: Detecta AM y PM) ===
 window.printDailyReport = async function (data) {
   const ticketArea = getPrintableArea();
 
-  // Formato de Fecha DD/MM/YYYY
+  // 1. Formato de Fecha
   let fechaFormateada = data.fecha;
   if (data.fecha && data.fecha.includes("-")) {
     const [anio, mes, dia] = data.fecha.split("-");
     fechaFormateada = `${dia}/${mes}/${anio}`;
   }
+  
+  // 2. RECUPERAR MONTO DE APERTURA (AM y PM)
+  // Buscamos en la memoria del navegador usando la fecha del reporte
+  const keyAM = `apertura_${data.fecha}_T1`;
+  const keyPM = `apertura_${data.fecha}_T2`;
+  
+  const aperturaAM = parseInt(localStorage.getItem(keyAM)) || 0;
+  const aperturaPM = parseInt(localStorage.getItem(keyPM)) || 0;
+  const totalApertura = aperturaAM + aperturaPM;
+  
+  // 3. CALCULAMOS TOTALES
+  const totalEfectivo = (data.turnos[1].efectivo || 0) + (data.turnos[2].efectivo || 0);
+  const totalTarjeta = (data.turnos[1].tarjeta || 0) + (data.turnos[2].tarjeta || 0);
+  const totalTransf = (data.turnos[1].transferencia || 0) + (data.turnos[2].transferencia || 0);
 
-  // 1. CALCULAMOS LOS TOTALES
-  const totalEfectivo =
-    (data.turnos[1].efectivo || 0) + (data.turnos[2].efectivo || 0);
-  const totalTarjeta =
-    (data.turnos[1].tarjeta || 0) + (data.turnos[2].tarjeta || 0);
-  const totalTransf =
-    (data.turnos[1].transferencia || 0) + (data.turnos[2].transferencia || 0);
-
-  // 2. Lógica de Productos (Nombres completos)
+  // 4. Lógica de Productos
   let prodHtml = "";
   const ranking = Object.entries(data.productos).sort((a, b) => b[1] - a[1]);
 
@@ -155,59 +156,65 @@ window.printDailyReport = async function (data) {
     });
   }
 
-  // 3. GENERAMOS EL HTML DEL REPORTE
-  // CORRECCIÓN: Se agregaron las comillas de cierre (") faltantes en los atributos style
+  // 5. GENERAR HTML
+  // Nota: Si hubo apertura en ambos turnos, se muestran sumados o separados.
+  // Aquí mostraré el total de apertura para simplificar el arqueo.
+  
   ticketArea.innerHTML = `
         <div class="ticket-header fs-big">REPORTE DE VENTAS<br><b>El Carro del 8</b></div>
-        
         <div class="text-center fs-big">Fecha: ${fechaFormateada}</div><br>
-        
         <div class="ticket-divider"></div>
         <br>
-        <div class="text-center fs-big">RESUMEN POR MEDIO DE PAGO</div>
         
-        <div class="d-flex-between fw-bold" style="font-size:1.3em;">
-            <span>Efectivo (Caja):</span>
+        <div class="d-flex-between fw-bold" style="font-size:1.1rem;">
+            <span>💰 Fondo Inicial (Total):</span>
+            <span>$${totalApertura.toLocaleString("es-CL")}</span>
+        </div>
+        <div class="d-flex-between fw-bold" style="font-size:1.1rem;">
+            <span>💵 Efectivo Venta:</span>
             <span>$${totalEfectivo.toLocaleString("es-CL")}</span>
         </div>
-        <div class="d-flex-between fw-bold" style="font-size:1.3em;">
-            <span>Tarjeta:</span>
-            <span>$${totalTarjeta.toLocaleString("es-CL")}</span>
+        <div class="ticket-divider"></div>
+        <div class="d-flex-between fw-bold" style="font-size:1.2rem;">
+            <span>TOTAL CAJA:</span>
+            <span>$${(totalApertura + totalEfectivo).toLocaleString("es-CL")}</span>
         </div>
-        <div class="d-flex-between fw-bold" style="font-size:1.3em;">
-            <span>Transferencia:</span>
-            <span>$${totalTransf.toLocaleString("es-CL")}</span>
-        </div><br>
+        <br>
         
         <div class="ticket-divider"></div>
+        <div class="d-flex-between" style="font-size:1.1rem;">
+            <span>💳 Tarjeta:</span>
+            <span>$${totalTarjeta.toLocaleString("es-CL")}</span>
+        </div>
+        <div class="d-flex-between" style="font-size:1.1rem;">
+            <span>🏦 Transferencia:</span>
+            <span>$${totalTransf.toLocaleString("es-CL")}</span>
+        </div>
         <br>
-        <div class="fs-big text-center">TOTALES POR TURNO</div>
-        
-        <div class="d-flex-between fw-bold" style="font-size:1.3em;">
-            <span>Venta Turno 1 (AM): </span>
+
+        <div class="ticket-divider"></div>
+        <div class="d-flex-between" style="font-size:1.1rem;">
+            <span>Venta Turno AM:</span>
             <span>$${data.turnos[1].total.toLocaleString("es-CL")}</span>
         </div>
-        <div class="d-flex-between fw-bold" style="font-size:1.3em;">
-            <span>Venta Turno 2 (PM): </span>
+        <div class="d-flex-between" style="font-size:1.1rem;">
+            <span>Venta Turno PM:</span>
             <span>$${data.turnos[2].total.toLocaleString("es-CL")}</span>
         </div>
         
         <br>
         <div class="ticket-divider"></div>
-        <br>
-        <div class="fs-big text-center">PRODUCTOS</div><br>
-        <div style="font-size:1.4em; font-weight:bold;">${prodHtml}</div>
+        <div class="fs-big text-center">PRODUCTOS VENDIDOS</div><br>
+        <div style="font-size:1.2em">${prodHtml}</div>
+        
         <br>
         <div class="ticket-divider"></div>
-        <br>
-        <div class="text-center fs-big">UNIDADES: <strong>${
-          data.total_unidades
-        }</strong></div><br>
-        <div class="text-center fs-huge" style="border:1px solid black; margin-top:5px;">
-            $${data.gran_total.toLocaleString("es-CL")}
+        <div class="text-center fs-big">UNIDADES: <strong>${data.total_unidades}</strong></div><br>
+        <div class="text-center fs-huge" style="border:2px solid black; padding:5px; margin-top:5px;">
+            TOTAL: $${data.gran_total.toLocaleString("es-CL")}
         </div>
         <br><br>.
-    `;
+  `;
 
   imprimirYLimpiar(ticketArea);
 };
