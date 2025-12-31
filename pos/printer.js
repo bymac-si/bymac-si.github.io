@@ -71,7 +71,7 @@ window.printTicket = async function (cart, total, method, orderNum) {
     });
     htmlCocina = `
             <div class="ticket-header fs-big">COCINA</div>
-            <div class="text-center fs-huge" style="font-size:1.1rem;font-weight: bold;">#${orderNum}</div>
+            <div class="text-center fs-huge" style="font-size:2.5rem;font-weight: bold;">#${orderNum}</div>
             <div class="text-center" style="font-size:1.1rem;font-weight: bold;">${soloHora}</div>
             <div class="ticket-divider"></div>
             <div class="fs-big text-uppercase" style="text-align:left; margin-bottom: 10px; font-size: 2.5rem;">${listadoCocina}</div>
