@@ -1,385 +1,210 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>POS El Carro del Ocho</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet" />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=point_of_sale" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=point_of_sale" />
     <style>
-        /* --- ESTILOS GENERALES POS --- */
-        body {
-          overflow: hidden;
-          background-color: #f8f9fa;
-        }
-        .product-card {
-          height: 100px;
-          cursor: pointer;
-          transition: transform 0.1s;
-          font-size: 0.85rem;
-        }
-        .product-card:active {
-          transform: scale(0.95);
-        }
-        .left-column {
-          height: 100vh;
-          display: flex;
-          flex-direction: column;
-          overflow: hidden;
-        }
-        .scroll-area {
-          flex-grow: 1;
-          overflow-y: auto;
-          min-height: 0;
-          padding-bottom: 20px;
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-          gap: 8px;
-          padding-right: 5px;
-        }
-        .ticket-area {
-          height: calc(100vh - 250px);
-          overflow-y: auto;
-          background: white;
-        }
-
-        /* --- ESTILOS DE IMPRESIÓN (TICKET) --- */
+        body { overflow: hidden; background-color: #f8f9fa; }
+        .product-card { height: 100px; cursor: pointer; transition: transform 0.1s; font-size: 0.85rem; }
+        .product-card:active { transform: scale(0.95); }
+        .left-column { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        .scroll-area { flex-grow: 1; overflow-y: auto; padding-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; padding-right: 5px; }
+        .ticket-area { height: calc(100vh - 250px); overflow-y: auto; background: white; }
+        
+        /* Modificadores en Modal */
+        .mod-group-title { font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; color: #555; border-bottom: 1px solid #ddd; }
+        .mod-check-label { font-size: 0.9rem; cursor: pointer; display: flex; justify-content: space-between; width: 100%; }
+        
         @media print {
-          body * {
-            visibility: hidden;
-            height: 0;
-            overflow: hidden;
-            font-size: 18px;
-            font-weight: bolder;
-          }
-
-          #printable-area,
-          #printable-area * {
-            visibility: visible;
-            height: auto;
-            overflow: visible;
-          }
-
-          #printable-area {
-            position: absolute;
-            left: 5mm;
-            top: 0;
-            width: 72mm; /* Ajuste para papel de 80mm */
-            margin: 0;
-            padding: 0;
-            font-family: "Courier New", monospace;
-            color: black;
-            background: white;
-            font-size: 13px;
-            line-height: 1.2;
-          }
-
-          @page {
-            size: auto;
-            margin: 5mm;
-          } /* Quita encabezados del navegador */
-
-          /* Utilidades Ticket */
-          .ticket-header {
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 5px;
-            font-size: 20px;
-          }
-          .ticket-divider {
-            border-bottom: 1px dashed black;
-            margin: 5px 0;
-          }
-          .ticket-cut {
-            border-bottom: 2px solid black;
-            margin: 15px 0;
-            text-align: center;
-            font-size: 10px;
-            padding: 5px 0;
-          }
-          .fs-huge {
-            font-size: 30px;
-            font-weight: bold;
-          }
-          .fs-big {
-            font-size: 20px;
-            font-weight: bold;
-          }
-          .text-center {
-            text-align: center;
-          }
-          .d-flex-between {
-            display: flex;
-            justify-content: space-between;
-            width: 95%;
-          }
+             body * { visibility: hidden; height: 0; overflow: hidden; }
+             #printable-area, #printable-area * { visibility: visible; height: auto; overflow: visible; }
+             #printable-area { position: absolute; left: 5mm; top: 0; width: 72mm; margin: 0; padding: 0; font-family: "Courier New", monospace; color: black; background: white; font-size: 13px; line-height: 1.2; }
+             @page { size: auto; margin: 5mm; }
+             .ticket-header { text-align: center; font-weight: bold; margin-bottom: 5px; font-size: 20px; }
+             .ticket-divider { border-bottom: 1px dashed black; margin: 5px 0; }
+             .fs-huge { font-size: 30px; font-weight: bold; }
+             .fs-big { font-size: 20px; font-weight: bold; }
+             .text-center { text-align: center; }
+             .d-flex-between { display: flex; justify-content: space-between; width: 95%; }
+             .force-break { display: block; page-break-before: always; break-before: page; height: 0; margin: 0; border: none; content: ""; }
         }
-
-        /* Ocultar área de impresión en pantalla normal */
-        #printable-area {
-          display: none;
-        }
-
-        .force-break {
-          display: block;
-          page-break-before: always;
-          break-before: page;
-          height: 0;
-          margin: 0;
-          border: none;
-          content: "";
-        }
+        #printable-area { display: none; }
     </style>
-  </head>
-  <body>
-    <div
-      class="modal fade"
-      id="loginModal"
-      data-bs-backdrop="static"
-      data-bs-keyboard="false"
-      tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content">
-          <div class="modal-header justify-content-center">
-            <h5 class="modal-title">🔓 Iniciar Turno</h5>
-          </div>
-          <div class="modal-body text-center">
-            <input
-              type="password"
-              id="pin-input"
-              class="form-control form-control-lg text-center mb-3"
-              placeholder="PIN"
-              maxlength="4" />
-            <div class="d-grid">
-              <button class="btn btn-primary btn-lg" onclick="attemptLogin()">
-                Entrar
-              </button>
-            </div>
-            <p id="login-error" class="text-danger mt-2 small"></p>
-          </div>
-        </div>
-      </div>
-    </div>
+</head>
+<body>
 
-    <div class="container-fluid vh-100">
-      <div class="row h-100">
+<div class="modal fade" id="loginModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header justify-content-center"><h5 class="modal-title">🔓 Iniciar Turno</h5></div>
+            <div class="modal-body text-center">
+                <input type="password" id="pin-input" class="form-control form-control-lg text-center mb-3" placeholder="PIN" maxlength="4">
+                <div class="d-grid"><button class="btn btn-primary btn-lg" onclick="attemptLogin()">Entrar</button></div>
+                <p id="login-error" class="text-danger mt-2 small"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid vh-100">
+    <div class="row h-100">
         <div class="col-8 p-2 left-column">
-          <div class="d-flex gap-2 mb-2 flex-shrink-0">
-            <div
-              class="d-flex gap-2 overflow-auto pb-1 flex-grow-1"
-              id="category-container">
-              <button
-                class="btn btn-primary shadow-sm flex-shrink-0"
-                onclick="filterProducts('Todo')">
-                Todo
-              </button>
+            <div class="d-flex gap-2 mb-2 flex-shrink-0">
+                <div class="d-flex gap-2 overflow-auto pb-1 flex-grow-1" id="category-container"></div>
+                <div class="flex-shrink-0 d-flex align-items-center">
+                    <span class="material-symbols-outlined me-2">point_of_sale</span>
+                    <div class="flex-shrink-0 d-flex align-items-center gap-2">
+                        <button class="btn btn-success shadow-sm" onclick="setOpeningBalance()" title="Ingresar Fondo Fijo">💰 Apertura</button>
+                        <button class="btn btn-warning shadow-sm" onclick="manualShiftChange()" title="Cambio Turno">👥 Turno</button>
+                        <button class="btn btn-primary shadow-sm" onclick="showDailyReport()" title="Cierre Diario">📜 Cierre</button>
+                        <button class="btn btn-primary shadow-sm" onclick="loadSystemData(false)" title="Sincronizar">🔄</button>
+                    </div>
+                </div>
             </div>
-            <div class="flex-shrink-0 d-flex align-items-center">
-              <span class="material-symbols-outlined me-2">point_of_sale</span>
-              &nbsp;Punto de Venta "El Carro del
-              <img src="img/logo_8_sf.png" width="30px" alt />"&nbsp;
-              <div class="flex-shrink-0 d-flex align-items-center gap-2">
-                <button class="btn btn-success shadow-sm"
-                  onclick="setOpeningBalance()" title="Ingresar Fondo Fijo">💰
-                  Apertura Caja</button>
-                <button class="btn btn-warning shadow-sm text-dark fw-bold"
-                  onclick="manualShiftChange()" title="Forzar Cambio de Turno">
-                  👥 Cambio Turno
-                </button>
-                <button
-                  class="btn btn-primary shadow-sm"
-                  onclick="showDailyReport()"
-                  title="Cierre de Día">
-                  📜 Cierre Diario
-                </button>
-
-                <button
-                  class="btn btn-primary shadow-sm"
-                  onclick="loadSystemData(false)"
-                  title="Sincronizar">
-                  🔄
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="scroll-area text-uppercase"
-            style="font: size 0.5rem; padding:2px;"
-            id="products-container"></div>
+            <div class="scroll-area text-uppercase" id="products-container"></div>
         </div>
 
-        <div
-          class="col-4 bg-white border-start p-0 d-flex flex-col flex-column shadow-lg">
-          <div
-            class="d-flex justify-content-between align-items-center bg-primary text-white p-2">
-            <div>
-              <h4 class="m-0 fs-5">Pedido Actual</h4>
-              <small
-                id="user-display"
-                class="d-block"
-                style="font-size: 0.8rem">Cajero: ---</small>
+        <div class="col-4 bg-white border-start p-0 d-flex flex-col flex-column shadow-lg">
+            <div class="d-flex justify-content-between align-items-center bg-primary text-white p-2">
+                <div><h4 class="m-0 fs-5">Pedido Actual</h4><small id="user-display">Cajero: ---</small></div>
+                <button class="btn btn-sm btn-success text-white border border-2 border-white" onclick="connectPrinter()">🖨️ OK</button>
             </div>
-            <button
-              class="btn btn-sm btn-success text-white border border-2 border-white"
-              onclick="connectPrinter()">
-              🖨️ OK
-            </button>
-          </div>
-
-          <div class="ticket-area p-3 text-uppercase" id="cart-container"></div>
-
-          <div class="mt-auto p-3 bg-light border-top">
-            <div class="d-flex justify-content-between mb-3">
-              <h3>Total:</h3>
-              <h3 class="fw-bold" id="total-display">$0</h3>
+            <div class="ticket-area p-3 text-uppercase" id="cart-container"></div>
+            <div class="mt-auto p-3 bg-light border-top">
+                <div class="d-flex justify-content-between mb-3"><h3>Total:</h3><h3 class="fw-bold" id="total-display">$0</h3></div>
+                <div class="d-grid gap-2 d-md-block mb-5">
+                    <button class="btn btn-success btn-lg w-100 py-3" onclick="openPaymentModal()">COBRAR</button>
+                </div>
             </div>
-            <div class="d-grid gap-2 d-md-block mb-5">
-              <button
-                class="btn btn-success btn-lg w-100 py-3"
-                onclick="openPaymentModal()">
-                COBRAR
-              </button>
-            </div>
-          </div>
         </div>
-      </div>
     </div>
+</div>
 
-    <div class="modal fade" id="paymentModal" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered">
+<div class="modal fade" id="productConfigModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Finalizar Venta</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <div class="mb-3 text-center">
-              <h2 class="display-4 fw-bold" id="modal-total-pagar">$0</h2>
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title fw-bold" id="configModalTitle">Configurar</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
+            <div class="modal-body">
+                <input type="hidden" id="config-mode">
+                <input type="hidden" id="config-index">
+                <input type="hidden" id="config-base-price">
+                
+                <h3 class="text-center mb-3 fw-bold text-uppercase" id="config-product-name">---</h3>
 
-            <div class="d-flex gap-2 mb-3 justify-content-center">
-              <input type="radio" class="btn-check" name="serviceType"
-                id="srv-servir" value="PARA SERVIR" checked>
-              <label class="btn btn-outline-primary btn-lg w-50"
-                for="srv-servir">🍽️ Para Servir</label>
+                <div class="d-flex gap-2 mb-4 justify-content-center">
+                    <input type="radio" class="btn-check" name="itemServiceType" id="item-srv" value="SERVIR" checked>
+                    <label class="btn btn-outline-dark px-4" for="item-srv">🍽️ SERVIR</label>
+                    <input type="radio" class="btn-check" name="itemServiceType" id="item-llv" value="LLEVAR">
+                    <label class="btn btn-outline-dark px-4" for="item-llv">🛍️ LLEVAR</label>
+                </div>
 
-              <input type="radio" class="btn-check" name="serviceType"
-                id="srv-llevar" value="PARA LLEVAR">
-              <label class="btn btn-outline-primary btn-lg w-50"
-                for="srv-llevar">🛍️ Para Llevar</label>
+                <div class="row g-3">
+                    <div class="col-md-4" id="col-cambios" style="display:none;">
+                        <div class="card h-100 bg-light border-warning">
+                            <div class="card-header bg-warning fw-bold small">🔁 CAMBIOS</div>
+                            <div class="card-body p-2 overflow-auto" style="max-height:200px;" id="list-cambios"></div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card h-100 bg-light border-success">
+                            <div class="card-header bg-success text-white fw-bold small">➕ AGREGADOS</div>
+                            <div class="card-body p-2 overflow-auto" style="max-height:200px;" id="list-agregados"></div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card h-100 bg-light border-danger">
+                            <div class="card-header bg-danger text-white fw-bold small">🚫 ELIMINAR (SIN)</div>
+                            <div class="card-body p-2 overflow-auto" style="max-height:200px;" id="list-elimina"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <label class="form-label fw-bold small">Nota Manual:</label>
+                    <input type="text" class="form-control text-uppercase" id="config-comments" placeholder="Escribir nota adicional...">
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                     <button type="button" class="btn btn-danger" id="btn-delete-item" onclick="deleteConfigItem()" style="display:none;">🗑️ BORRAR</button>
+                     <div class="text-end ms-auto">
+                         <div class="fs-5 me-3 d-inline-block">Total Item: <b id="modal-item-price">$0</b></div>
+                         <button type="button" class="btn btn-primary px-5 fw-bold btn-lg" onclick="saveConfigItem()">ACEPTAR</button>
+                     </div>
+                </div>
             </div>
-            <ul class="nav nav-pills mb-3 nav-fill" id="pills-tab">
-              <li class="nav-item"><button class="nav-link active"
-                  data-method="Efectivo"
-                  onclick="setPaymentMethod('Efectivo')">Efectivo
-                  💵</button></li>
-              <li class="nav-item"><button class="nav-link"
-                  data-method="Tarjeta"
-                  onclick="setPaymentMethod('Tarjeta')">Tarjeta 💳</button></li>
-              <li class="nav-item"><button class="nav-link"
-                  data-method="Transferencia"
-                  onclick="setPaymentMethod('Transferencia')">Transferencia
-                  🏦</button></li>
-              <li class="nav-item"><button class="nav-link" data-method="Mixto"
-                  onclick="setPaymentMethod('Mixto')">Mixto 🔀</button></li>
-            </ul>
-
-            <div id="cash-section">
-              <label>Dinero Recibido:</label>
-              <input type="number" class="form-control form-control-lg mb-2"
-                id="amount-tendered" placeholder="$0"
-                oninput="calculateChange()" />
-              <div class="alert alert-info fs-4 text-center">Vuelto: <strong
-                  id="change-display">$0</strong></div>
-            </div>
-
-            <div id="mixed-section" style="display:none;">
-              <div class="alert alert-warning small py-1 text-center">La suma
-                debe ser igual al Total</div>
-
-              <div class="input-group mb-2">
-                <span class="input-group-text w-25">💵 Efectivo</span>
-                <input type="number" class="form-control" id="mix-cash"
-                  placeholder="0" oninput="calculateMixed()">
-              </div>
-              <div class="input-group mb-2">
-                <span class="input-group-text w-25">💳 Tarjeta</span>
-                <input type="number" class="form-control" id="mix-card"
-                  placeholder="0" oninput="calculateMixed()">
-              </div>
-              <div class="input-group mb-2">
-                <span class="input-group-text w-25">🏦 Transf.</span>
-                <input type="number" class="form-control" id="mix-transfer"
-                  placeholder="0" oninput="calculateMixed()">
-              </div>
-
-              <div class="d-flex justify-content-between fw-bold px-2">
-                <span>Faltan:</span>
-                <span id="mix-remaining" class="text-danger">$0</span>
-              </div>
-            </div>
-          </div> <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary btn-lg"
-              data-bs-dismiss="modal">
-              Cancelar
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary btn-lg px-5"
-              onclick="processSale()">
-              CONFIRMAR
-            </button>
-          </div>
         </div>
-      </div>
-    </div> <div class="modal fade" id="reportModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header bg-dark text-white">
-            <h5 class="modal-title">📊 Reporte de Ventas</h5>
-            <button
-              type="button"
-              class="btn-close btn-close-white"
-              data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body" id="report-body">
-            <div class="text-center"><div class="spinner-border"></div></div>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal">
-              Cerrar
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              onclick="printReportAction()">
-              🖨️ IMPRIMIR
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
+</div>
 
-    <footer class="bg-primary text-white fixed-bottom py-1 border-top">
-      <p class="text-center m-0 small">Desarrollado por Marcos Castro Abarca</p>
-    </footer>
+<div class="modal fade" id="paymentModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Finalizar Venta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3 text-center"><h2 class="display-4 fw-bold" id="modal-total-pagar">$0</h2></div>
+                
+                <div class="d-flex gap-2 mb-3 justify-content-center">
+                    <input type="radio" class="btn-check" name="serviceType" id="srv-servir" value="PARA SERVIR" checked>
+                    <label class="btn btn-outline-primary btn-lg w-50" for="srv-servir">🍽️ Servir</label>
+                    <input type="radio" class="btn-check" name="serviceType" id="srv-llevar" value="PARA LLEVAR">
+                    <label class="btn btn-outline-primary btn-lg w-50" for="srv-llevar">🛍️ Llevar</label>
+                </div>
 
-    <div id="printable-area"></div>
+                <ul class="nav nav-pills mb-3 nav-fill" id="pills-tab">
+                    <li class="nav-item"><button class="nav-link active" data-method="Efectivo" onclick="setPaymentMethod('Efectivo')">Efec 💵</button></li>
+                    <li class="nav-item"><button class="nav-link" data-method="Tarjeta" onclick="setPaymentMethod('Tarjeta')">Tarjeta 💳</button></li>
+                    <li class="nav-item"><button class="nav-link" data-method="Transferencia" onclick="setPaymentMethod('Transferencia')">Transf 🏦</button></li>
+                    <li class="nav-item"><button class="nav-link" data-method="Mixto" onclick="setPaymentMethod('Mixto')">Mixto 🔀</button></li>
+                </ul>
 
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="printer.js"></script>
-    <script src="app.js"></script>
-  </body>
+                <div id="cash-section">
+                    <label>Dinero Recibido:</label>
+                    <input type="number" class="form-control form-control-lg mb-2" id="amount-tendered" placeholder="$0" oninput="calculateChange()">
+                    <div class="alert alert-info fs-4 text-center">Vuelto: <strong id="change-display">$0</strong></div>
+                </div>
+
+                <div id="mixed-section" style="display:none;">
+                    <div class="input-group mb-2"><span class="input-group-text w-25">💵 Efec</span><input type="number" class="form-control" id="mix-cash" placeholder="0" oninput="calculateMixed()"></div>
+                    <div class="input-group mb-2"><span class="input-group-text w-25">💳 Tarj</span><input type="number" class="form-control" id="mix-card" placeholder="0" oninput="calculateMixed()"></div>
+                    <div class="input-group mb-2"><span class="input-group-text w-25">🏦 Trans</span><input type="number" class="form-control" id="mix-transfer" placeholder="0" oninput="calculateMixed()"></div>
+                    <div class="d-flex justify-content-between fw-bold px-2"><span>Faltan:</span><span id="mix-remaining" class="text-danger">$0</span></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-lg" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary btn-lg px-5" onclick="processSale()">CONFIRMAR</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="reportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white"><h5 class="modal-title">📊 Reporte</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body" id="report-body"><div class="text-center"><div class="spinner-border"></div></div></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="printReportAction()">🖨️ IMPRIMIR</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="printable-area"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="printer.js"></script>
+<script src="app.js"></script>
+</body>
 </html>
