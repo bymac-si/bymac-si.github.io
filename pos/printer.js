@@ -74,7 +74,7 @@ window.printTicket = async function (cart, total, method, orderNum) {
             <div class="text-center fs-huge" style="font-size:2.5rem;font-weight: bold;">#${orderNum}</div>
             <div class="text-center" style="font-size:1.1rem;font-weight: bold;">${soloHora}</div>
             <div class="ticket-divider"></div>
-            <div class="fs-big text-uppercase" style="text-align:left; margin-bottom: 10px; font-size: 2.5rem;">${listadoCocina}</div>
+            <div class="fs-big text-uppercase" style="text-align:left; margin-bottom: 10px; font-size: 1.8rem;">${listadoCocina}</div>
             <div class="text-center">.</div><div class="force-break"></div>`;
   }
 
@@ -95,13 +95,13 @@ window.printTicket = async function (cart, total, method, orderNum) {
   const htmlCliente = `
         <div class="ticket-header"><img src="img/logo_8_sf.png" width="80px" alt="" /><br>EL CARRO DEL OCHO</div>
         <div class="text-center ticket-divider"><span class="fs-huge">PEDIDO: #${orderNum}</span></div>
-        <div class="text-center text-uppercase" style="font-size:1.4rem; margin-bottom:5px;">${fechaHora}<br>ATENDIDO POR: ${nombreCajero}</div>
-        <div class="ticket-divider text-uppercase" style="font-size: 1.2rem;">${listadoCliente}</div>
+        <div class="text-center text-uppercase" style="font-size:1.1rem; margin-bottom:5px;">${fechaHora}<br>ATENDIDO POR: ${nombreCajero}</div>
+        <div class="ticket-divider text-uppercase" style="font-size: 1rem;">${listadoCliente}</div>
         <div class="d-flex-between fs-big" style="margin-top:5px;"><span>TOTAL:</span><span>$${total.toLocaleString(
           "es-CL"
         )}</span></div>
-        <div style="font-size: 1.5rem;">Pago: ${displayMethod}</div>
-        <div class="text-center" style="margin-top:15px; font-size:1.3rem;">¡Gracias por su preferencia!</div>
+        <div style="font-size: 1.2rem;">Pago: ${displayMethod}</div>
+        <div class="text-center" style="margin-top:15px; font-size:1.1rem;">¡Gracias por su preferencia!</div>
         <div style="text-align:center; margin-top:10px;">.</div>`;
 
   ticketArea.innerHTML = htmlCocina + htmlCliente;
