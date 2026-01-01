@@ -32,8 +32,11 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
     />
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
       :root {
         --bymac-primary: #1a2b48;
         --bymac-bg: #f5f7fb;
@@ -175,10 +178,22 @@
 
   <body class="d-flex flex-column min-vh-100">
     <main class="container-fluid px-1 px-sm-2 flex-grow-1">
-      <div class="card mb-3 shadow-sm" style="background: linear-gradient(90deg, #a0c0f6, #3c475a);color: white;">
-        <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-center py-2">
+      <div
+        class="card mb-3 shadow-sm"
+        style="
+          background: linear-gradient(90deg, #a0c0f6, #3c475a);
+          color: white;
+        "
+      >
+        <div
+          class="card-body d-flex flex-column flex-md-row justify-content-between align-items-center py-2"
+        >
           <h1 class="m-0 fs-4">
-            <img src="https://bymac-si.github.io/img/logo_imma.png" alt="IMMA" style="width: 80px; margin-right: 10px" />Soluciones en Piping
+            <img
+              src="https://bymac-si.github.io/img/logo_imma.png"
+              alt="IMMA"
+              style="width: 80px; margin-right: 10px"
+            />Soluciones en Piping
           </h1>
           <div class="text-end small fs-5">Panel MasterBI Fluor</div>
         </div>
@@ -187,22 +202,40 @@
       <div class="card shadow-sm">
         <ul class="nav nav-tabs mb-3" id="tabsPanel" role="tablist">
           <li class="nav-item">
-            <button class="nav-link active tab" data-bs-toggle="tab" data-bs-target="#tab-ficha">
+            <button
+              class="nav-link active tab"
+              data-bs-toggle="tab"
+              data-bs-target="#tab-ficha"
+            >
               <i class="bi bi-file-earmark-medical"></i> consultar Ficha Técnica
             </button>
           </li>
           <li class="nav-item">
-            <button class="nav-link tab" data-bs-toggle="tab" data-bs-target="#tab-fechas">
+            <button
+              class="nav-link tab"
+              data-bs-toggle="tab"
+              data-bs-target="#tab-fechas"
+            >
               <i class="bi bi-pencil-square"></i> Gestión de Cambios
             </button>
           </li>
           <li class="nav-item">
-            <button class="nav-link tab" data-bs-toggle="tab" data-bs-target="#tab-dashboard" onclick="cargarDashboardLocal()">
+            <button
+              class="nav-link tab"
+              data-bs-toggle="tab"
+              data-bs-target="#tab-dashboard"
+              onclick="cargarDashboardLocal()"
+            >
               <i class="bi bi-bar-chart-line"></i> Dashboard KPIs
             </button>
           </li>
           <li class="nav-item">
-            <button class="nav-link text-danger fw-bold" data-bs-toggle="tab" data-bs-target="#tab-criticos" onclick="cargarTagsCriticos()">
+            <button
+              class="nav-link text-danger fw-bold"
+              data-bs-toggle="tab"
+              data-bs-target="#tab-criticos"
+              onclick="cargarTagsCriticos()"
+            >
               <i class="bi bi-exclamation-triangle-fill"></i> Spools 61+ días
             </button>
           </li>
@@ -213,52 +246,125 @@
             <div class="row justify-content-center mb-4">
               <div class="col-12 col-md-8 col-lg-6">
                 <div class="input-group input-group-lg shadow-sm">
-                  <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                  <input type="text" id="txtBuscarFicha" class="form-control" placeholder="Ingrese TAG Spool..." onkeyup="if(event.key==='Enter') buscarTagsFicha()" />
-                  <button class="btn btn-primary" onclick="buscarTagsFicha()">Consultar</button>
+                  <span class="input-group-text bg-white"
+                    ><i class="bi bi-search"></i
+                  ></span>
+                  <input
+                    type="text"
+                    id="txtBuscarFicha"
+                    class="form-control"
+                    placeholder="Ingrese TAG Spool..."
+                    onkeyup="if(event.key==='Enter') buscarTagsFicha()"
+                  />
+                  <button class="btn btn-primary" onclick="buscarTagsFicha()">
+                    Consultar
+                  </button>
                 </div>
-                <div id="resFicha" class="list-group mt-2 shadow-sm" style="position: absolute; z-index: 1000; width: inherit; display: none;"></div>
+                <div
+                  id="resFicha"
+                  class="list-group mt-2 shadow-sm"
+                  style="
+                    position: absolute;
+                    z-index: 1000;
+                    width: inherit;
+                    display: none;
+                  "
+                ></div>
               </div>
             </div>
 
-            <div id="contenedorFicha" class="d-none animate__animated animate__fadeIn">
+            <div
+              id="contenedorFicha"
+              class="d-none animate__animated animate__fadeIn"
+            >
               <div class="row g-0 align-items-stretch">
-                <div class="col-12 col-lg-4 pe-lg-3 mb-3 mb-lg-0 d-flex flex-column">
+                <div
+                  class="col-12 col-lg-4 pe-lg-3 mb-3 mb-lg-0 d-flex flex-column"
+                >
                   <div class="ficha-header flex-shrink-0">
-                    <h5 class="m-0"><i class="bi bi-info-circle"></i> Detalles del Spool</h5>
+                    <h5 class="m-0">
+                      <i class="bi bi-info-circle"></i> Detalles del Spool
+                    </h5>
                   </div>
                   <div class="ficha-body h-100 d-flex flex-column">
                     <div class="flex-shrink-0">
                       <div class="mb-4 text-center">
-                        <h2 id="ficha-tag" class="text-primary fw-bold mb-0">-</h2>
-                        <span id="ficha-status-badge" class="badge bg-secondary mt-2">...</span>
+                        <h2 id="ficha-tag" class="text-primary fw-bold mb-0">
+                          -
+                        </h2>
+                        <span
+                          id="ficha-status-badge"
+                          class="badge bg-secondary mt-2"
+                          >...</span
+                        >
                       </div>
                       <div class="row">
                         <div class="col-6">
                           <div class="ficha-label">Status Spool</div>
-                          <div id="ficha-estado-texto" class="ficha-value small">-</div>
+                          <div
+                            id="ficha-estado-texto"
+                            class="ficha-value small"
+                          >
+                            -
+                          </div>
                         </div>
                         <div class="col-6">
                           <div class="ficha-label">Status Fluor</div>
-                          <div id="ficha-fluor" class="ficha-value small text-info">-</div>
+                          <div
+                            id="ficha-fluor"
+                            class="ficha-value small text-info"
+                          >
+                            -
+                          </div>
                         </div>
                       </div>
-                      <div class="ficha-label mt-2 border-bottom pb-1 mb-2">Línea de Tiempo (Histórico)</div>
+                      <div class="ficha-label mt-2 border-bottom pb-1 mb-2">
+                        Línea de Tiempo (Histórico)
+                      </div>
                     </div>
-                    <div id="timeline-ficha" class="flex-grow-1" style="overflow-y: auto; min-height: 0"></div>
+                    <div
+                      id="timeline-ficha"
+                      class="flex-grow-1"
+                      style="overflow-y: auto; min-height: 0"
+                    ></div>
                   </div>
                 </div>
                 <div class="col-12 col-lg-8 d-flex flex-column">
-                  <div class="ficha-header d-flex justify-content-between align-items-center flex-shrink-0">
-                    <h5 class="m-0"><i class="bi bi-file-earmark-pdf"></i> Plano</h5>
-                    <a id="ficha-btn-abrir" href="#" target="_blank" class="btn btn-sm btn-outline-light d-none"><i class="bi bi-box-arrow-up-right"></i> Expandir</a>
+                  <div
+                    class="ficha-header d-flex justify-content-between align-items-center flex-shrink-0"
+                  >
+                    <h5 class="m-0">
+                      <i class="bi bi-file-earmark-pdf"></i> Plano
+                    </h5>
+                    <a
+                      id="ficha-btn-abrir"
+                      href="#"
+                      target="_blank"
+                      class="btn btn-sm btn-outline-light d-none"
+                      ><i class="bi bi-box-arrow-up-right"></i> Expandir</a
+                    >
                   </div>
-                  <div class="ficha-body p-0 position-relative" style="height: 600px">
-                    <div id="ficha-plano-loading" class="d-flex flex-column justify-content-center align-items-center h-100 text-muted" style="position: absolute; width: 100%">
-                      <div class="spinner-border text-primary d-none" id="spinner-plano" role="status"></div>
+                  <div
+                    class="ficha-body p-0 position-relative"
+                    style="height: 600px"
+                  >
+                    <div
+                      id="ficha-plano-loading"
+                      class="d-flex flex-column justify-content-center align-items-center h-100 text-muted"
+                      style="position: absolute; width: 100%"
+                    >
+                      <div
+                        class="spinner-border text-primary d-none"
+                        id="spinner-plano"
+                        role="status"
+                      ></div>
                       <span id="msg-plano-load">Seleccione un TAG</span>
                     </div>
-                    <iframe id="ficha-iframe" class="w-100 h-100 d-none" style="border: none"></iframe>
+                    <iframe
+                      id="ficha-iframe"
+                      class="w-100 h-100 d-none"
+                      style="border: none"
+                    ></iframe>
                   </div>
                 </div>
               </div>
@@ -271,10 +377,26 @@
                 <div class="card shadow-sm p-3">
                   <h5 class="card-title">Buscar para Editar</h5>
                   <div class="input-group input-group-sm">
-                    <input type="text" id="txtBuscarEdit" class="form-control" placeholder="Ej: 29044-005" onkeyup="if(event.key==='Enter') buscarTagsEdit()" />
-                    <button class="btn btn-secondary" onclick="buscarTagsEdit()" id="btnBuscarEdit">Buscar</button>
+                    <input
+                      type="text"
+                      id="txtBuscarEdit"
+                      class="form-control"
+                      placeholder="Ej: 29044-005"
+                      onkeyup="if(event.key==='Enter') buscarTagsEdit()"
+                    />
+                    <button
+                      class="btn btn-secondary"
+                      onclick="buscarTagsEdit()"
+                      id="btnBuscarEdit"
+                    >
+                      Buscar
+                    </button>
                   </div>
-                  <div id="resEdit" class="list-group mt-2" style="max-height: 200px; overflow: auto; display: none"></div>
+                  <div
+                    id="resEdit"
+                    class="list-group mt-2"
+                    style="max-height: 200px; overflow: auto; display: none"
+                  ></div>
                 </div>
               </div>
             </div>
@@ -286,14 +408,20 @@
                   <p class="mb-1 fw-bold fs-5 text-primary" id="lblTagSel">-</p>
                   <div class="row g-2 mb-2">
                     <div class="col-6">
-                      <small class="text-muted d-block">Status Spool</small><span id="lblEstadoEdit" class="fw-bold small">-</span>
+                      <small class="text-muted d-block">Status Spool</small
+                      ><span id="lblEstadoEdit" class="fw-bold small">-</span>
                     </div>
                     <div class="col-6">
-                      <small class="text-muted d-block">Status Fluor</small><span id="lblFluorEdit" class="fw-bold small text-info">-</span>
+                      <small class="text-muted d-block">Status Fluor</small
+                      ><span id="lblFluorEdit" class="fw-bold small text-info"
+                        >-</span
+                      >
                     </div>
                   </div>
                   <div class="alert alert-light border p-2 mb-0">
-                    <small class="text-muted d-block">Último Movimiento Registrado:</small>
+                    <small class="text-muted d-block"
+                      >Último Movimiento Registrado:</small
+                    >
                     <span id="lblUltimoMovEdit" class="fw-bold">-</span>
                   </div>
                 </div>
@@ -302,37 +430,82 @@
                   <h5 class="card-title">Registrar Movimiento</h5>
                   <label class="small text-muted">Etapa a actualizar:</label>
                   <select id="cmbEtapa" class="form-select form-select-sm mb-2">
-                    <option value="">Cargando columnas...</option>
+                    <option value>Cargando columnas...</option>
                   </select>
                   <label class="small text-muted">Fecha del evento:</label>
-                  <input type="date" id="dtFecha" class="form-control form-control-sm mb-2" />
+                  <input
+                    type="date"
+                    id="dtFecha"
+                    class="form-control form-control-sm mb-2"
+                  />
                   <div class="d-flex gap-2">
-                    <button class="btn btn-secondary btn-sm" onclick="setHoy()">Hoy</button>
-                    <button class="btn btn-primary btn-sm w-100" id="btnGuardar" onclick="guardarCambios()">Guardar</button>
+                    <button class="btn btn-secondary btn-sm" onclick="setHoy()">
+                      Hoy
+                    </button>
+                    <button
+                      class="btn btn-primary btn-sm w-100"
+                      id="btnGuardar"
+                      onclick="guardarCambios()"
+                    >
+                      Guardar
+                    </button>
                   </div>
                   <div id="msgGuardar" class="mt-2 small fw-bold"></div>
                 </div>
 
-                <div class="card shadow-sm p-3 flex-grow-1 d-flex flex-column" style="min-height: 200px">
+                <div
+                  class="card shadow-sm p-3 flex-grow-1 d-flex flex-column"
+                  style="min-height: 200px"
+                >
                   <h6 class="card-title border-bottom pb-2">Historial</h6>
-                  <div id="timeline-edit" class="flex-grow-1" style="overflow-y: auto">
-                    <small class="text-muted fst-italic">Seleccione un TAG</small>
+                  <div
+                    id="timeline-edit"
+                    class="flex-grow-1"
+                    style="overflow-y: auto"
+                  >
+                    <small class="text-muted fst-italic"
+                      >Seleccione un TAG</small
+                    >
                   </div>
                 </div>
               </div>
 
               <div class="col-12 col-lg-8">
                 <div class="card h-100 shadow-sm d-flex flex-column">
-                  <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h6 class="m-0"><i class="bi bi-file-earmark-pdf"></i> Referencia Plano</h6>
-                    <a id="edit-btn-abrir" href="#" target="_blank" class="btn btn-sm btn-outline-primary d-none"><i class="bi bi-box-arrow-up-right"></i></a>
+                  <div
+                    class="card-header bg-white d-flex justify-content-between align-items-center"
+                  >
+                    <h6 class="m-0">
+                      <i class="bi bi-file-earmark-pdf"></i> Referencia Plano
+                    </h6>
+                    <a
+                      id="edit-btn-abrir"
+                      href="#"
+                      target="_blank"
+                      class="btn btn-sm btn-outline-primary d-none"
+                      ><i class="bi bi-box-arrow-up-right"></i
+                    ></a>
                   </div>
-                  <div class="card-body p-0 bg-light position-relative flex-grow-1">
-                    <div id="edit-plano-loading" class="d-flex flex-column justify-content-center align-items-center h-100 text-muted" style="position: absolute; width: 100%; height: 100%">
-                      <div class="spinner-border text-primary d-none" id="edit-spinner-plano" role="status"></div>
+                  <div
+                    class="card-body p-0 bg-light position-relative flex-grow-1"
+                  >
+                    <div
+                      id="edit-plano-loading"
+                      class="d-flex flex-column justify-content-center align-items-center h-100 text-muted"
+                      style="position: absolute; width: 100%; height: 100%"
+                    >
+                      <div
+                        class="spinner-border text-primary d-none"
+                        id="edit-spinner-plano"
+                        role="status"
+                      ></div>
                       <span id="edit-msg-plano">Sin plano cargado</span>
                     </div>
-                    <iframe id="edit-iframe" class="w-100 h-100 d-none" style="border: none"></iframe>
+                    <iframe
+                      id="edit-iframe"
+                      class="w-100 h-100 d-none"
+                      style="border: none"
+                    ></iframe>
                   </div>
                 </div>
               </div>
@@ -343,12 +516,31 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
               <h5 class="mb-0">
                 Indicadores de Gestión
-                <span id="dash-time" class="badge bg-light text-success fw-normal border ms-2 border-success">--:--</span>
+                <span
+                  id="dash-time"
+                  class="badge bg-light text-success fw-normal border ms-2 border-success"
+                  >--:--</span
+                >
               </h5>
               <div>
-                <button class="btn btn-sm btn-outline-secondary" onclick="exportKpi('pdf')">PDF</button>
-                <button class="btn btn-sm btn-outline-secondary" onclick="exportKpi('jpg')">JPG</button>
-                <button class="btn btn-sm btn-outline-primary ms-2" onclick="cargarDashboardLocal(true)"><i class="bi bi-arrow-clockwise"></i></button>
+                <button
+                  class="btn btn-sm btn-outline-secondary"
+                  onclick="exportKpi('pdf')"
+                >
+                  PDF
+                </button>
+                <button
+                  class="btn btn-sm btn-outline-secondary"
+                  onclick="exportKpi('jpg')"
+                >
+                  JPG
+                </button>
+                <button
+                  class="btn btn-sm btn-outline-primary ms-2"
+                  onclick="cargarDashboardLocal(true)"
+                >
+                  <i class="bi bi-arrow-clockwise"></i>
+                </button>
               </div>
             </div>
 
@@ -451,7 +643,9 @@
                   </div>
                 </div>
                 <div class="col-12 col-lg-7">
-                  <div class="card p-3 h-100 d-flex align-items-center justify-content-center">
+                  <div
+                    class="card p-3 h-100 d-flex align-items-center justify-content-center"
+                  >
                     <div style="width: 300px; height: 300px">
                       <canvas id="chartFluor"></canvas>
                     </div>
@@ -464,7 +658,9 @@
                   <div class="card p-3 h-100">
                     <div class="d-flex justify-content-between">
                       <h6>Registrados Hoy</h6>
-                      <span class="badge bg-success" id="count-logs">0 registros</span>
+                      <span class="badge bg-success" id="count-logs"
+                        >0 registros</span
+                      >
                     </div>
                     <div class="table-responsive mb-2">
                       <table class="table table-sm small">
@@ -506,7 +702,9 @@
                   <div class="card p-3">
                     <h6>Tiempos promedio</h6>
                     <div class="table-responsive">
-                      <table class="table table-sm table-striped small text-center align-middle">
+                      <table
+                        class="table table-sm table-striped small text-center align-middle"
+                      >
                         <thead class="table-light">
                           <tr>
                             <th>Desde</th>
@@ -527,7 +725,8 @@
           <div class="tab-pane fade" id="tab-criticos">
             <div class="card p-3 border-danger shadow-sm">
               <h5 class="text-danger fw-bold">
-                <i class="bi bi-alarm"></i> Tags con más de 60 días sin movimiento
+                <i class="bi bi-alarm"></i> Tags con más de 60 días sin
+                movimiento
               </h5>
               <div class="table-responsive mt-3">
                 <table class="table table-hover align-middle">
@@ -546,7 +745,13 @@
           </div>
         </div>
       </div>
-      <footer class="card shadow-sm fixed-bottom d-flex flex-column flex-sm-row" style="background: linear-gradient(90deg, #a0c0f6, #3c475a); color: white;">
+      <footer
+        class="card shadow-sm fixed-bottom d-flex flex-column flex-sm-row"
+        style="
+          background: linear-gradient(90deg, #a0c0f6, #3c475a);
+          color: white;
+        "
+      >
         <div>
           <p class="text-center py-1" style="font-size: 0.7em">
             &nbsp; &nbsp; Desarrollado por Marcos Castro Abarca
@@ -671,7 +876,9 @@
             return await r.json();
           } catch (e) {
             intentos++;
-            console.warn(`Intento ${intentos} fallido para ${tableName}: ${e.message}`);
+            console.warn(
+              `Intento ${intentos} fallido para ${tableName}: ${e.message}`
+            );
             if (intentos >= maxIntentos) {
               throw e;
             }
@@ -729,9 +936,18 @@
 
       function esTagEliminado(row) {
         if (parseDateFlexible(row[COL_F_ELIMINADO])) return true;
-        const stFluor = String(row[COL_FLUOR] || "").trim().toUpperCase();
-        const stSpool = String(row[COL_STATUS] || "").trim().toUpperCase();
-        if (STATUS_ELIMINADOS.some((e) => stFluor.includes(e) || stSpool.includes(e))) return true;
+        const stFluor = String(row[COL_FLUOR] || "")
+          .trim()
+          .toUpperCase();
+        const stSpool = String(row[COL_STATUS] || "")
+          .trim()
+          .toUpperCase();
+        if (
+          STATUS_ELIMINADOS.some(
+            (e) => stFluor.includes(e) || stSpool.includes(e)
+          )
+        )
+          return true;
         return false;
       }
 
@@ -774,7 +990,8 @@
         events.sort((a, b) => a.date - b.date);
 
         if (events.length === 0) {
-          container.innerHTML = '<div class="timeline-empty">Sin movimientos registrados.</div>';
+          container.innerHTML =
+            '<div class="timeline-empty">Sin movimientos registrados.</div>';
           return null;
         }
         let html = '<div class="timeline">';
@@ -790,7 +1007,8 @@
       document.addEventListener("DOMContentLoaded", () => {
         setHoy();
         llenarComboEtapas();
-        if (typeof ChartDataLabels !== "undefined") Chart.register(ChartDataLabels);
+        if (typeof ChartDataLabels !== "undefined")
+          Chart.register(ChartDataLabels);
         startAutoRefresh();
       });
 
@@ -810,7 +1028,10 @@
         resultadosEditCache = [],
         rowEdit = null;
       function buscarTagsFicha() {
-        const txt = document.getElementById("txtBuscarFicha").value.trim().toUpperCase();
+        const txt = document
+          .getElementById("txtBuscarFicha")
+          .value.trim()
+          .toUpperCase();
         const resDiv = document.getElementById("resFicha");
         document.getElementById("contenedorFicha").classList.add("d-none");
 
@@ -825,7 +1046,12 @@
           if (!rows.length)
             h = '<div class="list-group-item text-danger">No encontrado</div>';
           else
-            rows.slice(0, 5).forEach((r, i) => (h += `<a href="#" class="list-group-item list-group-item-action" onclick="verFicha(${i});return false;">${r[COL_TAG]}</a>`));
+            rows
+              .slice(0, 5)
+              .forEach(
+                (r, i) =>
+                  (h += `<a href="#" class="list-group-item list-group-item-action" onclick="verFicha(${i});return false;">${r[COL_TAG]}</a>`)
+              );
           document.getElementById("resFicha").innerHTML = h;
         });
       }
@@ -834,14 +1060,27 @@
         document.getElementById("resFicha").style.display = "none";
         document.getElementById("contenedorFicha").classList.remove("d-none");
         document.getElementById("ficha-tag").textContent = r[COL_TAG];
-        document.getElementById("ficha-status-badge").textContent = r[COL_STATUS];
-        document.getElementById("ficha-estado-texto").textContent = r[COL_STATUS];
-        document.getElementById("ficha-fluor").textContent = r[COL_FLUOR] || "-";
+        document.getElementById("ficha-status-badge").textContent =
+          r[COL_STATUS];
+        document.getElementById("ficha-estado-texto").textContent =
+          r[COL_STATUS];
+        document.getElementById("ficha-fluor").textContent =
+          r[COL_FLUOR] || "-";
         renderTimeline(r, "timeline-ficha");
-        renderPlano(r[COL_PLANO], "ficha-iframe", "ficha-plano-loading", "ficha-btn-abrir", "spinner-plano", "msg-plano-load");
+        renderPlano(
+          r[COL_PLANO],
+          "ficha-iframe",
+          "ficha-plano-loading",
+          "ficha-btn-abrir",
+          "spinner-plano",
+          "msg-plano-load"
+        );
       }
       function buscarTagsEdit() {
-        const txt = document.getElementById("txtBuscarEdit").value.trim().toUpperCase();
+        const txt = document
+          .getElementById("txtBuscarEdit")
+          .value.trim()
+          .toUpperCase();
         const resDiv = document.getElementById("resEdit");
 
         rowEdit = null;
@@ -849,7 +1088,8 @@
         document.getElementById("lblEstadoEdit").textContent = "-";
         document.getElementById("lblFluorEdit").textContent = "-";
         document.getElementById("lblUltimoMovEdit").textContent = "-";
-        document.getElementById("timeline-edit").innerHTML = "<div class='text-muted small'>Realice una búsqueda...</div>";
+        document.getElementById("timeline-edit").innerHTML =
+          "<div class='text-muted small'>Realice una búsqueda...</div>";
 
         if (!txt) return;
         resDiv.style.display = "block";
@@ -862,7 +1102,12 @@
           if (!rows.length)
             h += '<div class="list-group-item text-danger">No encontrado</div>';
           else
-            rows.slice(0, 75).forEach((r, i) => (h += `<a href="#" class="list-group-item list-group-item-action" onclick="selEditInd(${i}); return false;">${r[COL_TAG]}</a>`));
+            rows
+              .slice(0, 75)
+              .forEach(
+                (r, i) =>
+                  (h += `<a href="#" class="list-group-item list-group-item-action" onclick="selEditInd(${i}); return false;">${r[COL_TAG]}</a>`)
+              );
           h += "</div>";
           document.getElementById("resEdit").innerHTML = h;
         });
@@ -871,16 +1116,30 @@
         rowEdit = resultadosEditCache[i];
         document.getElementById("resEdit").style.display = "none";
         document.getElementById("lblTagSel").textContent = rowEdit[COL_TAG];
-        document.getElementById("lblEstadoEdit").textContent = rowEdit[COL_STATUS];
-        document.getElementById("lblFluorEdit").textContent = rowEdit[COL_FLUOR] || "-";
+        document.getElementById("lblEstadoEdit").textContent =
+          rowEdit[COL_STATUS];
+        document.getElementById("lblFluorEdit").textContent =
+          rowEdit[COL_FLUOR] || "-";
 
         const lastEvt = renderTimeline(rowEdit, "timeline-edit");
         if (lastEvt)
-          document.getElementById("lblUltimoMovEdit").innerHTML = `${lastEvt.name} <br> <span class='text-primary'>${formatDateManual(lastEvt.date)}</span>`;
+          document.getElementById("lblUltimoMovEdit").innerHTML = `${
+            lastEvt.name
+          } <br> <span class='text-primary'>${formatDateManual(
+            lastEvt.date
+          )}</span>`;
         else
-          document.getElementById("lblUltimoMovEdit").textContent = "Sin movimientos";
+          document.getElementById("lblUltimoMovEdit").textContent =
+            "Sin movimientos";
 
-        renderPlano(rowEdit[COL_PLANO], "edit-iframe", "edit-plano-loading", "edit-btn-abrir", "edit-spinner-plano", "edit-msg-plano");
+        renderPlano(
+          rowEdit[COL_PLANO],
+          "edit-iframe",
+          "edit-plano-loading",
+          "edit-btn-abrir",
+          "edit-spinner-plano",
+          "edit-msg-plano"
+        );
         document.getElementById("msgGuardar").textContent = "";
       }
       function renderPlano(id, ifr, load, btn, spin, msg) {
@@ -908,7 +1167,7 @@
           s.classList.add("d-none");
         }
       }
-      
+
       // --- NUEVA FUNCIÓN PARA FECHA HORA SEGURA EN IPHONE ---
       function getFechaHoraSCL_String() {
         const now = new Date();
@@ -926,14 +1185,17 @@
       }
       // Generador de ID único simple para AppSheet
       function generarUniqueID() {
-        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-            return crypto.randomUUID();
+        if (typeof crypto !== "undefined" && crypto.randomUUID) {
+          return crypto.randomUUID();
         }
-        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-          var r = (Math.random() * 16) | 0,
-            v = c == "x" ? r : (r & 0x3) | 0x8;
-          return v.toString(16);
-        });
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+          /[xy]/g,
+          function (c) {
+            var r = (Math.random() * 16) | 0,
+              v = c == "x" ? r : (r & 0x3) | 0x8;
+            return v.toString(16);
+          }
+        );
       }
 
       async function guardarCambios() {
@@ -957,7 +1219,8 @@
 
         const rowNum = rowEdit["_RowNumber"];
         const colLetra = COL_LETTERS_MAP[colNombre] || "?";
-        const cellId = rowNum && colLetra !== "?" ? `${colLetra}${rowNum}` : "N/A";
+        const cellId =
+          rowNum && colLetra !== "?" ? `${colLetra}${rowNum}` : "N/A";
 
         const fechaLog = getFechaHoraSCL_String();
         const idLog = generarUniqueID();
@@ -966,18 +1229,18 @@
         // Convertimos cualquier formato extraño (ej: 06/27/2025) a dd/mm/yyyy
         let valAnt = "";
         if (valorExistente) {
-            // Intentamos interpretar la fecha existente
-            let dAnt = parseDateFlexible(valorExistente);
-            if (dAnt) {
-                // Si es fecha válida, forzamos formato dd/mm/yyyy
-                const d = String(dAnt.getDate()).padStart(2, '0');
-                const m = String(dAnt.getMonth() + 1).padStart(2, '0');
-                const y = dAnt.getFullYear();
-                valAnt = `${d}/${m}/${y}`;
-            } else {
-                // Si no es fecha (texto), lo dejamos tal cual
-                valAnt = String(valorExistente);
-            }
+          // Intentamos interpretar la fecha existente
+          let dAnt = parseDateFlexible(valorExistente);
+          if (dAnt) {
+            // Si es fecha válida, forzamos formato dd/mm/yyyy
+            const d = String(dAnt.getDate()).padStart(2, "0");
+            const m = String(dAnt.getMonth() + 1).padStart(2, "0");
+            const y = dAnt.getFullYear();
+            valAnt = `${d}/${m}/${y}`;
+          } else {
+            // Si no es fecha (texto), lo dejamos tal cual
+            valAnt = String(valorExistente);
+          }
         }
 
         try {
@@ -985,15 +1248,15 @@
           const respLog = await callAppSheet("ChangeLog", "Add", {
             Rows: [
               {
-                "ID": idLog,
-                "FechaHora": fechaLog,
-                "Usuario": "WebAdmin",
-                "Hoja": TABLE_MASTER,
-                "Celda": cellId,
-                "CabeceraColumna": colNombre,
+                ID: idLog,
+                FechaHora: fechaLog,
+                Usuario: "WebAdmin",
+                Hoja: TABLE_MASTER,
+                Celda: cellId,
+                CabeceraColumna: colNombre,
                 "TAG SPOOL": rowEdit[COL_TAG],
-                "ValorAnterior": valAnt, // <--- AQUI ESTÁ EL CAMBIO
-                "ValorNuevo": fec,
+                ValorAnterior: valAnt, // <--- AQUI ESTÁ EL CAMBIO
+                ValorNuevo: fec,
               },
             ],
           });
@@ -1012,7 +1275,11 @@
 
           const lastEvt = renderTimeline(rowEdit, "timeline-edit");
           if (lastEvt)
-            document.getElementById("lblUltimoMovEdit").innerHTML = `${lastEvt.name} <br> <span class='text-primary'>${formatDateManual(lastEvt.date)}</span>`;
+            document.getElementById("lblUltimoMovEdit").innerHTML = `${
+              lastEvt.name
+            } <br> <span class='text-primary'>${formatDateManual(
+              lastEvt.date
+            )}</span>`;
 
           btn.textContent = "Guardar";
           btn.disabled = false;
@@ -1033,7 +1300,11 @@
       }
       async function cargarDashboardLocal(force = false) {
         const now = new Date();
-        document.getElementById("dash-time").innerHTML = `<i class="bi bi-clock-history"></i> ${now.toLocaleString("es-CL")}`;
+        document.getElementById(
+          "dash-time"
+        ).innerHTML = `<i class="bi bi-clock-history"></i> ${now.toLocaleString(
+          "es-CL"
+        )}`;
 
         if (!force && dataCache.length > 0) {
           renderAll(dataCache, logCache);
@@ -1059,7 +1330,9 @@
           console.error(e);
         } finally {
           document.getElementById("loading-dashboard").classList.add("d-none");
-          document.getElementById("content-dashboard").classList.remove("d-none");
+          document
+            .getElementById("content-dashboard")
+            .classList.remove("d-none");
         }
       }
 
@@ -1113,7 +1386,8 @@
               }
             });
 
-            let fBase = maxDate || parseDateFlexible(r["F.Emision Plano"]) || today;
+            let fBase =
+              maxDate || parseDateFlexible(r["F.Emision Plano"]) || today;
             let dias = (today - fBase) / (1000 * 60 * 60 * 24);
             if (dias < 0) dias = 0;
 
@@ -1122,7 +1396,8 @@
             else d61_plus++;
 
             distFluor[fl] = (distFluor[fl] || 0) + 1;
-            distUltima[ultimaEtapaNombre] = (distUltima[ultimaEtapaNombre] || 0) + 1;
+            distUltima[ultimaEtapaNombre] =
+              (distUltima[ultimaEtapaNombre] || 0) + 1;
 
             if (dias > 60) {
               listaCriticos.push({
@@ -1146,11 +1421,23 @@
         document.getElementById("kpi-elim").textContent = elim;
 
         renderChart("chartEmbudo", "bar", {
-          labels: ["Total", "Activos", "Liberados", "Despachados", "Eliminados"],
+          labels: [
+            "Total",
+            "Activos",
+            "Liberados",
+            "Despachados",
+            "Eliminados",
+          ],
           datasets: [
             {
               data: [total, act, lib, desp, elim],
-              backgroundColor: ["#e0e0e0", "#1a2b48", "#0dcaf0", "#2ea043", "#888"],
+              backgroundColor: [
+                "#e0e0e0",
+                "#1a2b48",
+                "#0dcaf0",
+                "#2ea043",
+                "#888",
+              ],
             },
           ],
           options: { indexAxis: "x", plugins: { legend: { display: true } } },
@@ -1188,7 +1475,13 @@
           datasets: [
             {
               data: Object.values(distFluor),
-              backgroundColor: ["#36A2EB", "#FF6384", "#FFCE56", "#4BC0C0", "#9966FF"],
+              backgroundColor: [
+                "#36A2EB",
+                "#FF6384",
+                "#FFCE56",
+                "#4BC0C0",
+                "#9966FF",
+              ],
             },
           ],
           options: { plugins: { legend: { display: false } } },
@@ -1206,7 +1499,8 @@
         document.getElementById("tbodyFluor").innerHTML = hFluor;
 
         let logsHoy = logs;
-        document.getElementById("count-logs").textContent = logsHoy.length + " registros";
+        document.getElementById("count-logs").textContent =
+          logsHoy.length + " registros";
         let logCounts = {};
 
         logsHoy.forEach((l) => {
@@ -1247,7 +1541,13 @@
           datasets: [
             {
               data: Object.values(distUltima),
-              backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"],
+              backgroundColor: [
+                "#FF6384",
+                "#36A2EB",
+                "#FFCE56",
+                "#4BC0C0",
+                "#9966FF",
+              ],
             },
           ],
           options: { plugins: { legend: { display: false } } },
@@ -1289,7 +1589,8 @@
           hTiempos += `<tr><td>${p.from}</td><td>${p.to}</td><td class='fw-bold text-primary'>${avgStr}</td><td>${c}</td></tr>`;
         });
 
-        let generalAvg = countPromedios > 0 ? (sumPromedios / countPromedios).toFixed(1) : "-";
+        let generalAvg =
+          countPromedios > 0 ? (sumPromedios / countPromedios).toFixed(1) : "-";
         hTiempos += `<tr class="table-secondary"><th colspan="2" class="text-end">PROMEDIO GENERAL</th><th class="fw-bold text-primary">${generalAvg}</th><th>-</th></tr>`;
         document.getElementById("tbodyTiempos").innerHTML = hTiempos;
 
@@ -1297,7 +1598,8 @@
 
         let hCrit = "";
         if (listaCriticos.length === 0) {
-          hCrit = '<tr><td colspan="5" class="text-center text-success py-3"><i class="bi bi-check-circle"></i> ¡Excelente! No hay atrasos críticos (>60 días).</td></tr>';
+          hCrit =
+            '<tr><td colspan="5" class="text-center text-success py-3"><i class="bi bi-check-circle"></i> ¡Excelente! No hay atrasos críticos (>60 días).</td></tr>';
         } else {
           listaCriticos.forEach((item) => {
             hCrit += `<tr>
