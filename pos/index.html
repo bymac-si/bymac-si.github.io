@@ -31,6 +31,7 @@
         display: flex;
         flex-direction: column;
         overflow: hidden;
+        padding-bottom: 25px; /* Espacio para el footer */
       }
       .scroll-area {
         flex-grow: 1;
@@ -52,6 +53,15 @@
         display: flex;
         justify-content: space-between;
         width: 100%;
+      }
+
+      /* Footer discreto */
+      .pos-footer {
+        font-size: 0.65rem;
+        color: #adb5bd;
+        background-color: rgba(255, 255, 255, 0.9);
+        border-top: 1px solid #e9ecef;
+        z-index: 1050; /* Por encima de contenido, bajo modales */
       }
 
       @media print {
@@ -215,6 +225,7 @@
 
         <div
           class="col-4 bg-white border-start p-0 d-flex flex-col flex-column shadow-lg"
+          style="padding-bottom: 25px;" 
         >
           <div
             class="d-flex justify-content-between align-items-center bg-primary text-white p-2"
@@ -424,34 +435,7 @@
             <div class="mb-3 text-center">
               <h2 class="display-4 fw-bold" id="modal-total-pagar">$0</h2>
             </div>
-            <div class="d-flex gap-2 mb-3 justify-content-center">
-              <input
-                type="radio"
-                class="btn-check"
-                name="serviceType"
-                id="srv-servir"
-                value="PARA SERVIR"
-                checked
-              />
-              <label
-                class="btn btn-outline-primary btn-lg w-50"
-                for="srv-servir"
-                >🍽️ Servir</label
-              >
-              <input
-                type="radio"
-                class="btn-check"
-                name="serviceType"
-                id="srv-llevar"
-                value="PARA LLEVAR"
-              />
-              <label
-                class="btn btn-outline-primary btn-lg w-50"
-                for="srv-llevar"
-                >🛍️ Llevar</label
-              >
-            </div>
-
+            
             <ul class="nav nav-pills mb-3 nav-fill" id="pills-tab">
               <li class="nav-item">
                 <button
@@ -595,6 +579,10 @@
         </div>
       </div>
     </div>
+
+    <footer class="fixed-bottom text-center py-1 pos-footer">
+        Desarrollado por Asesorías Profesionales Marcos Alberto Castro Abarca E.I.R.L
+    </footer>
 
     <div id="printable-area"></div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
