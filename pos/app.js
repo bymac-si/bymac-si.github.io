@@ -227,9 +227,7 @@ function setupModalView(prodCategoria) {
   const isRestricted = restrictedCats.some((rc) => cat.includes(rc));
   const allowSwaps =
     cat.includes("VIENESA") ||
-    cat.includes("COMPLETO") ||
-    cat.includes("AS") ||
-    cat.includes("SANDWICH");
+    cat.includes("COMPLETO");
 
   const colAgregados = document.getElementById("col-agregados");
   const colElimina = document.getElementById("col-elimina");
