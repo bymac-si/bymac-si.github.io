@@ -79,12 +79,12 @@ function calcularTurno() {
   const santiagoDate = new Date(santiagoStr);
   const hora = santiagoDate.getHours();
   let fechaComercial = new Date(santiagoDate);
-  if (hora < 3) fechaComercial.setDate(fechaComercial.getDate() - 1);
+  if (hora < 4) fechaComercial.setDate(fechaComercial.getDate() - 1);
   const yyyy = fechaComercial.getFullYear();
   const mm = String(fechaComercial.getMonth() + 1).padStart(2, "0");
   const dd = String(fechaComercial.getDate()).padStart(2, "0");
   const fechaStr = `${yyyy}-${mm}-${dd}`;
-  let idTurno = hora >= 18 || hora < 3 ? 2 : 1;
+  let idTurno = hora >= 18 || hora < 4 ? 2 : 1;
   currentTurnData = { fechaHora: santiagoDate.toLocaleString("es-CL"), fechaComercial: fechaStr, idTurno: idTurno, turnoKey: `${fechaStr}-T${idTurno}` };
 }
 function updateClock() { calcularTurno(); }
