@@ -1,6 +1,5 @@
 // URL ACTUALIZADA
-const API_URL =
-  "https://script.google.com/macros/s/AKfycbyEZT3QEx6XycNpsLKCjK6TxGfCu3HMvyMwggssEJtD8Q0e1xuYM2-uoJTUmSlU8OX1/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbysFSSAiFnmnY2eX_7YmJHX7dm7JaMJula7KSIXUUxjbDdogjKU6B3bpA9yTDpToKh2/exec";
 
 let db = {
   menu: [],
@@ -217,17 +216,19 @@ function renderCheckboxes(containerId, list, type) {
 function setupModalView(prodCategoria) {
   const cat = prodCategoria.toUpperCase();
   const restrictedCats = [
-    "FRITOS",
     "BEBIDAS",
     "BEBIDA",
     "SNACKS",
     "OTROS",
-    "EMPANADAS",
   ];
   const isRestricted = restrictedCats.some((rc) => cat.includes(rc));
   const allowSwaps =
     cat.includes("VIENESA") ||
-    cat.includes("COMPLETO");
+    cat.includes("COMPLETO") ||
+    cat.includes("AS");
+
+  const notAllowdDel =
+    cat.includes("FRITOS");
 
   const colAgregados = document.getElementById("col-agregados");
   const colElimina = document.getElementById("col-elimina");
@@ -243,7 +244,7 @@ function setupModalView(prodCategoria) {
     colCambios.style.display = "none";
   } else {
     colAgregados.style.display = "block";
-    colElimina.style.display = "block";
+    colElimina.style.display = notAllowdDel ? "none" : "block";
     colCambios.style.display =
       allowSwaps && db.modifiers.cambia.length > 0 ? "block" : "none";
   }
@@ -272,6 +273,7 @@ function prepareAddToCart(id) {
   document.getElementById("item-srv").checked = true;
   document.getElementById("config-qty").value = 1;
   document.getElementById("btn-delete-item").style.display = "none";
+  document.getElementById("btn-split-item").style.display = "none"; // OCULTAR AL AGREGAR
 
   setupModalView(prod.Categoria);
   calculateModalTotal();
@@ -305,7 +307,16 @@ function editCartItem(index) {
     });
   }
 
+  // MOSTRAR BOTON BORRAR
   document.getElementById("btn-delete-item").style.display = "block";
+  
+  // MOSTRAR BOTON SEPARAR SOLO SI HAY > 1
+  if (item.cantidad > 1) {
+      document.getElementById("btn-split-item").style.display = "block";
+  } else {
+      document.getElementById("btn-split-item").style.display = "none";
+  }
+
   calculateModalTotal();
   new bootstrap.Modal(document.getElementById("productConfigModal")).show();
 }
@@ -403,6 +414,40 @@ function deleteConfigItem() {
   bootstrap.Modal.getInstance(
     document.getElementById("productConfigModal")
   ).hide();
+}
+
+// FUNCION NUEVA: Separar producto
+function splitConfigItem() {
+    const index = parseInt(document.getElementById('config-index').value);
+    const originalItem = cart[index];
+
+    // Seguridad
+    if (!originalItem || originalItem.cantidad <= 1) return;
+
+    // 1. Restamos 1 al item original
+    originalItem.cantidad -= 1;
+
+    // 2. Creamos clon exacto (con cantidad 1)
+    const newItem = JSON.parse(JSON.stringify(originalItem));
+    newItem.cantidad = 1;
+    newItem.uuid = Date.now() + Math.random();
+
+    // 3. Agregamos al final
+    cart.push(newItem);
+    
+    // 4. Actualizamos vista
+    updateCartUI();
+
+    // 5. Cambiamos modal para editar el nuevo
+    const newIndex = cart.length - 1;
+    document.getElementById('config-index').value = newIndex;
+    document.getElementById('config-qty').value = 1;
+    
+    // Ocultar botón separar
+    document.getElementById('btn-split-item').style.display = 'none';
+
+    calculateModalTotal();
+    alert("✅ Item separado. Modifique este item individualmente.");
 }
 
 function updateCartUI() {
@@ -546,10 +591,9 @@ async function processSale() {
     finalPaymentString = `MIXTO|E:${c}|T:${t}|Tr:${tr}`;
   }
 
-  const serviceRadio = document.querySelector(
-    'input[name="serviceType"]:checked'
-  );
-  const serviceType = serviceRadio ? serviceRadio.value : "PARA SERVIR";
+  // Nota: Ya no tomamos un servicio global, cada producto tiene su propio tipo
+  // Se envía un default para el encabezado del ticket
+  const serviceType = "MIXTO"; 
 
   bootstrap.Modal.getInstance(document.getElementById("paymentModal")).hide();
   calcularTurno();

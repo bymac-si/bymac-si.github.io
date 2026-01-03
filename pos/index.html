@@ -31,7 +31,7 @@
         display: flex;
         flex-direction: column;
         overflow: hidden;
-        padding-bottom: 25px; /* Espacio para el footer */
+        padding-bottom: 30px; /* Espacio para el footer */
       }
       .scroll-area {
         flex-grow: 1;
@@ -54,14 +54,14 @@
         justify-content: space-between;
         width: 100%;
       }
-
-      /* Footer discreto */
+      
+      /* ESTILO FOOTER PANTALLA */
       .pos-footer {
-        font-size: 0.65rem;
-        color: #adb5bd;
-        background-color: rgba(255, 255, 255, 0.9);
-        border-top: 1px solid #e9ecef;
-        z-index: 1050; /* Por encima de contenido, bajo modales */
+        font-size: 0.7rem;
+        color: #6c757d;
+        background-color: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+        z-index: 1060;
       }
 
       @media print {
@@ -225,7 +225,7 @@
 
         <div
           class="col-4 bg-white border-start p-0 d-flex flex-col flex-column shadow-lg"
-          style="padding-bottom: 25px;" 
+          style="padding-bottom: 30px;"
         >
           <div
             class="d-flex justify-content-between align-items-center bg-primary text-white p-2"
@@ -393,16 +393,29 @@
             <div
               class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top"
             >
-              <button
-                type="button"
-                class="btn btn-danger"
-                id="btn-delete-item"
-                onclick="deleteConfigItem()"
-                style="display: none"
-              >
-                🗑️ BORRAR
-              </button>
-              <div class="text-end ms-auto">
+              <div class="d-flex gap-2">
+                  <button
+                    type="button"
+                    class="btn btn-danger"
+                    id="btn-delete-item"
+                    onclick="deleteConfigItem()"
+                    style="display: none"
+                  >
+                    🗑️
+                  </button>
+                  
+                  <button
+                    type="button"
+                    class="btn btn-warning fw-bold"
+                    id="btn-split-item"
+                    onclick="splitConfigItem()"
+                    style="display: none"
+                  >
+                    🔀 SEPARAR 1
+                  </button>
+              </div>
+
+              <div class="text-end">
                 <div class="fs-5 me-3 d-inline-block">
                   Subtotal: <b id="modal-item-price">$0</b>
                 </div>
@@ -435,7 +448,7 @@
             <div class="mb-3 text-center">
               <h2 class="display-4 fw-bold" id="modal-total-pagar">$0</h2>
             </div>
-            
+
             <ul class="nav nav-pills mb-3 nav-fill" id="pills-tab">
               <li class="nav-item">
                 <button
@@ -581,7 +594,7 @@
     </div>
 
     <footer class="fixed-bottom text-center py-1 pos-footer">
-        Desarrollado por Asesorías Profesionales Marcos Alberto Castro Abarca E.I.R.L
+      Desarrollado por Asesorías Profesionales Marcos Alberto Castro Abarca E.I.R.L
     </footer>
 
     <div id="printable-area"></div>
