@@ -1,4 +1,7 @@
-// Helper para obtener/crear el área de impresión
+/**
+ * printer.js - VERSIÓN FINAL CON FOOTER Y REPORTE NUBE
+ */
+
 function getPrintableArea() {
   let area = document.getElementById("printable-area");
   if (!area) {
@@ -25,20 +28,18 @@ function imprimirYLimpiar(area) {
   }, 50);
 }
 
-// Variable para el footer unificado
+// FOOTER CORPORATIVO UNIFICADO
 const footerHtml = `
     <div class="text-center" style="font-size: 0.6rem; margin-top: 15px; margin-bottom: 5px; color: #444;">
-        Desarrollado por Asesorias Profesionales<br>
-        Marcos Alberrto Castro Abarca E.I.R.L
+        Desarrollado por Asesorías Profesionales<br>
+        Marcos Alberto Castro Abarca E.I.R.L
     </div>
 `;
 
 // === 1. TICKET DE APERTURA ===
 window.printOpeningTicket = async function (amount, cashier, turno) {
   const area = getPrintableArea();
-  const fecha = new Date().toLocaleString("es-CL", {
-    timeZone: "America/Santiago",
-  });
+  const fecha = new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" });
   area.innerHTML = `
         <div class="ticket-header fs-big">APERTURA CAJA</div>
         <div class="text-center fw-bold">El Carro del 8</div>
@@ -58,17 +59,12 @@ window.printOpeningTicket = async function (amount, cashier, turno) {
   imprimirYLimpiar(area);
 };
 
-// === 2. TICKET DE VENTA (Cocina + Cliente) ===
+// === 2. TICKET DE VENTA ===
 window.printTicket = async function (cart, total, method, orderNum) {
   const ticketArea = getPrintableArea();
-  const fechaHora = new Date().toLocaleString("es-CL", {
-    timeZone: "America/Santiago",
-  });
+  const fechaHora = new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" });
   const soloHora = fechaHora.split(" ")[1] || fechaHora;
-  const nombreCajero =
-    typeof currentUser !== "undefined" && currentUser
-      ? currentUser.Nombre
-      : "Cajero";
+  const nombreCajero = typeof currentUser !== "undefined" && currentUser ? currentUser.Nombre : "Cajero";
   
   let displayMethod = method;
   if (method.includes("MIXTO")) displayMethod = "Mixto";
@@ -80,9 +76,7 @@ window.printTicket = async function (cart, total, method, orderNum) {
     let listadoCocina = "";
     itemsCocina.forEach((item) => {
       const srvTag = item.tipoServicio === "LLEVAR" ? "LLEVAR" : "SERVIR";
-      const nota = item.comentario
-        ? `<div style="font-size:0.6em; font-weight:normal;">( ${item.comentario} )</div>`
-        : "";
+      const nota = item.comentario ? `<div style="font-size:0.6em; font-weight:normal;">( ${item.comentario} )</div>` : "";
       listadoCocina += `<div>${item.cantidad} x ${item.nombre} <b>${srvTag}</b> ${nota}</div>`;
     });
     htmlCocina = `
@@ -99,9 +93,7 @@ window.printTicket = async function (cart, total, method, orderNum) {
   cart.forEach((item) => {
     const totalItem = (item.precio * item.cantidad).toLocaleString("es-CL");
     const srvTag = item.tipoServicio === "LLEVAR" ? "(LLEVAR)" : "(SERVIR)";
-    const nota = item.comentario
-      ? `<div style="font-size:0.6em; font-style:italic;">* ${item.comentario}</div>`
-      : "";
+    const nota = item.comentario ? `<div style="font-size:0.6em; font-style:italic;">* ${item.comentario}</div>` : "";
     listadoCliente += `
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 2px; font-size:1.2rem;">
                 <span style="flex:1; padding-right:5px; text-align:left;">${item.cantidad} x ${item.nombre} ${srvTag} ${nota}</span>
@@ -133,26 +125,20 @@ window.printDailyReport = async function (data) {
     fechaFormateada = `${dia}/${mes}/${anio}`;
   }
 
-  const keyAM = `apertura_${data.fecha}_T1`;
-  const keyPM = `apertura_${data.fecha}_T2`;
-  const aperturaAM = parseInt(localStorage.getItem(keyAM)) || 0;
-  const aperturaPM = parseInt(localStorage.getItem(keyPM)) || 0;
-  const totalApertura = aperturaAM + aperturaPM;
+  // Ahora leemos el fondo inicial desde el objeto 'data' (traido de la nube)
+  // NO USAMOS localStorage
+  const totalApertura = parseInt(data.fondo_inicial) || 0;
 
-  const totalEfectivo =
-    (data.turnos[1].efectivo || 0) + (data.turnos[2].efectivo || 0);
-  const totalTarjeta =
-    (data.turnos[1].tarjeta || 0) + (data.turnos[2].tarjeta || 0);
-  const totalTransf =
-    (data.turnos[1].transferencia || 0) + (data.turnos[2].transferencia || 0);
+  const totalEfectivo = (data.turnos[1].efectivo || 0) + (data.turnos[2].efectivo || 0);
+  const totalTarjeta = (data.turnos[1].tarjeta || 0) + (data.turnos[2].tarjeta || 0);
+  const totalTransf = (data.turnos[1].transferencia || 0) + (data.turnos[2].transferencia || 0);
 
   let prodHtml = "";
   const ranking = Object.entries(data.productos).sort((a, b) => b[1] - a[1]);
   if (ranking.length === 0) prodHtml = "<div>Sin ventas.</div>";
   else
     ranking.forEach(
-      ([nom, cant]) =>
-        (prodHtml += `<div style="display:flex; justify-content:space-between;"><span style="flex:1;">${cant} x ${nom}</span></div>`)
+      ([nom, cant]) => (prodHtml += `<div style="display:flex; justify-content:space-between;"><span style="flex:1;">${cant} x ${nom}</span></div>`)
     );
 
   ticketArea.innerHTML = `
@@ -163,9 +149,7 @@ window.printDailyReport = async function (data) {
         <div class="d-flex-between fw-bold" style="font-size:1.1rem;"><span>💰 Fondo Inicial:</span><span>$${totalApertura.toLocaleString("es-CL")}</span></div>
         <div class="d-flex-between fw-bold" style="font-size:1.1rem;"><span>💵 Efec. Venta:</span><span>$${totalEfectivo.toLocaleString("es-CL")}</span></div>
         <div class="ticket-divider"></div>
-        <div class="d-flex-between fw-bold" style="font-size:1.2rem;"><span>TOTAL CAJA:</span><span>$${(
-          totalApertura + totalEfectivo
-        ).toLocaleString("es-CL")}</span></div>
+        <div class="d-flex-between fw-bold" style="font-size:1.2rem;"><span>TOTAL CAJA:</span><span>$${(totalApertura + totalEfectivo).toLocaleString("es-CL")}</span></div>
         <br>
         
         <div class="ticket-divider"></div>
