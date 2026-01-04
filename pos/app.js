@@ -2,16 +2,26 @@
  * POS El Carro del Ocho - Lógica Principal
  */
 
-const API_URL = "https://script.google.com/macros/s/AKfycbwYOERVmjA0wEmyuGS0zw_aaVCRKQheOAL5HkC9S4XXHmikewc2VUW0exVmWhqi-c49/exec";
+const API_URL =
+  "https://script.google.com/macros/s/AKfycbwYOERVmjA0wEmyuGS0zw_aaVCRKQheOAL5HkC9S4XXHmikewc2VUW0exVmWhqi-c49/exec";
 
-let db = { menu: [], modifiers: { agregados: [], elimina: [], cambia: [] }, categorias: [], usuarios: [] };
+let db = {
+  menu: [],
+  modifiers: { agregados: [], elimina: [], cambia: [] },
+  categorias: [],
+  usuarios: [],
+};
 let cart = [];
 let currentUser = null;
 let currentTurnData = null;
 let currentReportData = null;
 let selectedPaymentMethod = "Efectivo";
 
-const formatter = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", minimumFractionDigits: 0 });
+const formatter = new Intl.NumberFormat("es-CL", {
+  style: "currency",
+  currency: "CLP",
+  minimumFractionDigits: 0,
+});
 
 document.addEventListener("DOMContentLoaded", () => {
   loadSystemData();
@@ -26,12 +36,23 @@ async function loadSystemData(silent = false) {
   try {
     const response = await fetch(API_URL);
     const data = await response.json();
+    
+    // 1. Guardar copia cruda para el ADMIN (Incluye inactivos)
+    // Mapeamos para normalizar nombres de campos
+    db.allRawProducts = data.productos.map(p => ({
+        ...p,
+        // Normalizamos booleanos como strings para la tabla admin
+        Activo: String(p.Activo).trim().toUpperCase(), 
+        Imprimir_en_Cocina: String(p.Imprimir_en_Cocina).trim().toUpperCase()
+    }));
+
+    // 2. Lógica normal del POS (Solo Activos)
     db.usuarios = data.usuarios.filter(u => String(u.Activo).toLowerCase() === "true");
     db.categorias = data.categorias.sort((a, b) => (parseInt(a.Orden) || 99) - (parseInt(b.Orden) || 99));
 
-    const allProducts = data.productos
-      .filter(p => String(p.Activo).trim().toUpperCase() === "TRUE")
-      .map(p => ({
+    const activeProducts = data.productos
+      .filter((p) => String(p.Activo).trim().toUpperCase() === "TRUE")
+      .map((p) => ({
         ...p,
         Precio: parseInt(String(p.Precio).replace(/\D/g, "")) || 0,
         Cocina: String(p.Imprimir_en_Cocina).toUpperCase() === "TRUE",
@@ -40,7 +61,7 @@ async function loadSystemData(silent = false) {
       }));
 
     db.menu = []; db.modifiers.agregados = []; db.modifiers.elimina = []; db.modifiers.cambia = [];
-    allProducts.forEach(p => {
+    activeProducts.forEach((p) => {
       const cat = p.Categoria.toUpperCase();
       if (cat === "AGREGADOS") db.modifiers.agregados.push(p);
       else if (cat === "ELIMINA") db.modifiers.elimina.push(p);
@@ -48,31 +69,49 @@ async function loadSystemData(silent = false) {
       else db.menu.push(p);
     });
     db.menu.sort((a, b) => (parseInt(a.Orden) || 99) - (parseInt(b.Orden) || 99));
+    
     renderCategories();
     renderProducts(db.menu);
+    // Si el panel de admin está abierto, refrescar su lista también
+    if(document.getElementById('adminModal').classList.contains('show')) {
+        renderAdminProductList();
+    }
+
     if (!silent) checkLogin();
   } catch (error) {
     if (!silent) container.innerHTML = `<div class="alert alert-danger">Error de conexión.</div>`;
   }
 }
 
-function checkLogin() { if (!currentUser) new bootstrap.Modal(document.getElementById("loginModal"), { backdrop: "static", keyboard: false }).show(); }
+function checkLogin() {
+  if (!currentUser)
+    new bootstrap.Modal(document.getElementById("loginModal"), {
+      backdrop: "static",
+      keyboard: false,
+    }).show();
+}
 
 function attemptLogin() {
   const pin = document.getElementById("pin-input").value.trim();
-  const usuario = db.usuarios.find(u => String(u.PIN) === pin);
+  const usuario = db.usuarios.find((u) => String(u.PIN) === pin);
   if (usuario) {
     currentUser = usuario;
-    document.getElementById("user-display").innerText = `Cajero: ${usuario.Nombre}`;
+    document.getElementById(
+      "user-display"
+    ).innerText = `Cajero: ${usuario.Nombre}`;
     bootstrap.Modal.getInstance(document.getElementById("loginModal")).hide();
     document.getElementById("pin-input").value = "";
     calcularTurno();
-  } else { document.getElementById("login-error").innerText = "PIN incorrecto"; }
+  } else {
+    document.getElementById("login-error").innerText = "PIN incorrecto";
+  }
 }
 
 function calcularTurno() {
   const ahora = new Date();
-  const santiagoStr = ahora.toLocaleString("en-US", { timeZone: "America/Santiago" });
+  const santiagoStr = ahora.toLocaleString("en-US", {
+    timeZone: "America/Santiago",
+  });
   const santiagoDate = new Date(santiagoStr);
   const hora = santiagoDate.getHours();
   let fechaComercial = new Date(santiagoDate);
@@ -82,9 +121,16 @@ function calcularTurno() {
   const dd = String(fechaComercial.getDate()).padStart(2, "0");
   const fechaStr = `${yyyy}-${mm}-${dd}`;
   let idTurno = hora >= 18 || hora < 3 ? 2 : 1;
-  currentTurnData = { fechaHora: santiagoDate.toLocaleString("es-CL"), fechaComercial: fechaStr, idTurno: idTurno, turnoKey: `${fechaStr}-T${idTurno}` };
+  currentTurnData = {
+    fechaHora: santiagoDate.toLocaleString("es-CL"),
+    fechaComercial: fechaStr,
+    idTurno: idTurno,
+    turnoKey: `${fechaStr}-T${idTurno}`,
+  };
 }
-function updateClock() { calcularTurno(); }
+function updateClock() {
+  calcularTurno();
+}
 
 function getNextOrderNumber() {
   calcularTurno();
@@ -98,37 +144,71 @@ function getNextOrderNumber() {
 function renderCategories() {
   const container = document.getElementById("category-container");
   const techCats = ["AGREGADOS", "ELIMINA", "CAMBIA"];
-  const visibleCats = db.categorias.filter(c => !techCats.includes(c.Nombre.toUpperCase()));
+  const visibleCats = db.categorias.filter(
+    (c) => !techCats.includes(c.Nombre.toUpperCase())
+  );
   let html = `<button class="btn btn-dark shadow-sm flex-shrink-0" onclick="filterProducts('Todo')">Todo</button>`;
-  visibleCats.forEach(cat => {
+  visibleCats.forEach((cat) => {
     const color = cat.Color ? mapColor(cat.Color) : "secondary";
     html += `<button class="btn btn-${color} shadow-sm flex-shrink-0" onclick="filterProducts('${cat.Nombre}')">${cat.Nombre}</button>`;
   });
   container.innerHTML = html;
 }
-function filterProducts(catName) { renderProducts(catName === "Todo" ? db.menu : db.menu.filter(p => p.Categoria === catName)); }
+function filterProducts(catName) {
+  renderProducts(
+    catName === "Todo"
+      ? db.menu
+      : db.menu.filter((p) => p.Categoria === catName)
+  );
+}
 
 function renderProducts(lista) {
   const container = document.getElementById("products-container");
-  if (lista.length === 0) return (container.innerHTML = '<div style="grid-column:1/-1;" class="text-center text-muted mt-5">Sin productos</div>');
-  container.innerHTML = lista.map(p => {
+  if (lista.length === 0)
+    return (container.innerHTML =
+      '<div style="grid-column:1/-1;" class="text-center text-muted mt-5">Sin productos</div>');
+  container.innerHTML = lista
+    .map((p) => {
       const esHex = p.Color.startsWith("#");
       const claseBg = esHex ? "" : `bg-${mapColor(p.Color)}`;
-      const estiloBg = esHex ? `background-color: ${p.Color}; color: white;` : "";
-      return `<div class="card product-card h-100 shadow-sm border-0 ${claseBg}" style="${estiloBg}" onclick="prepareAddToCart('${p.ID_Producto}')">
+      const estiloBg = esHex
+        ? `background-color: ${p.Color}; color: white;`
+        : "";
+      return `<div class="card product-card h-100 shadow-sm border-0 ${claseBg}" style="${estiloBg}" onclick="prepareAddToCart('${
+        p.ID_Producto
+      }')">
             <div class="card-body d-flex flex-column align-items-center justify-content-center text-center p-1">
-                <h6 class="card-title fw-bold mb-1" style="color: inherit; font-size:0.9rem;">${p.Nombre}</h6>
-                <span class="badge bg-white text-dark bg-opacity-90 mt-auto px-2 py-1">${formatter.format(p.Precio)}</span>
+                <h6 class="card-title fw-bold mb-1" style="color: inherit; font-size:0.9rem;">${
+                  p.Nombre
+                }</h6>
+                <span class="badge bg-white text-dark bg-opacity-90 mt-auto px-2 py-1">${formatter.format(
+                  p.Precio
+                )}</span>
             </div></div>`;
-    }).join("");
+    })
+    .join("");
 }
-function mapColor(c) { if (!c) return "primary"; const map = { red: "danger", orange: "warning", yellow: "warning", green: "success", blue: "primary", cyan: "info", black: "dark", grey: "secondary" }; return map[String(c).toLowerCase()] || "primary"; }
+function mapColor(c) {
+  if (!c) return "primary";
+  const map = {
+    red: "danger",
+    orange: "warning",
+    yellow: "warning",
+    green: "success",
+    blue: "primary",
+    cyan: "info",
+    black: "dark",
+    grey: "secondary",
+  };
+  return map[String(c).toLowerCase()] || "primary";
+}
 
 // --- LOGICA MODAL CONFIGURACION ---
 
 function renderCheckboxes(containerId, list, type) {
   const container = document.getElementById(containerId);
-  container.innerHTML = list.map(item => {
+  container.innerHTML = list
+    .map((item) => {
       const priceText = item.Precio > 0 ? ` (+${item.Precio})` : "";
       return `
         <div class="form-check">
@@ -139,23 +219,24 @@ function renderCheckboxes(containerId, list, type) {
                 <span>${item.Nombre}</span><span class="fw-bold text-muted">${priceText}</span>
             </label>
         </div>`;
-    }).join("");
+    })
+    .join("");
 }
 
 // *** FUNCIÓN CORREGIDA PARA GESTIONAR VISTAS SEGÚN CATEGORÍA ***
 function setupModalView(prodCategoria) {
   const cat = prodCategoria.toUpperCase();
-  
+
   // Categorías que NO muestran nada (solo nota manual)
   const restrictedCats = ["BEBIDAS", "BEBIDA", "SNACKS", "OTROS", "EMPANADAS"];
-  
+
   // Categorías que permiten "CAMBIA" (Columna Amarilla)
   const allowSwaps = cat.includes("VIENESA") || cat.includes("COMPLETO");
-  
-  // Categorías que permiten "AGREGAR" pero NO "ELIMINAR"
-  const isFritos = cat.includes("FRITOS") || cat.includes("PAPAS"); 
 
-  const isRestricted = restrictedCats.some(rc => cat.includes(rc));
+  // Categorías que permiten "AGREGAR" pero NO "ELIMINAR"
+  const isFritos = cat.includes("FRITOS") || cat.includes("PAPAS");
+
+  const isRestricted = restrictedCats.some((rc) => cat.includes(rc));
 
   const colAgregados = document.getElementById("col-agregados");
   const colElimina = document.getElementById("col-elimina");
@@ -172,29 +253,33 @@ function setupModalView(prodCategoria) {
     colAgregados.style.display = "none";
     colElimina.style.display = "none";
     colCambios.style.display = "none";
-  } 
-  else if (isFritos) {
+  } else if (isFritos) {
     // Caso: Fritos -> Solo Agregados (Salsas, etc)
     colAgregados.style.display = "block";
     colElimina.style.display = "none"; // Ocultamos Eliminar
     colCambios.style.display = "none"; // Ocultamos Cambios
-  } 
-  else {
+  } else {
     // Caso: Completos, Sandwich, etc -> Todo Visible según corresponda
     colAgregados.style.display = "block";
     colElimina.style.display = "block";
-    colCambios.style.display = (allowSwaps && db.modifiers.cambia.length > 0) ? "block" : "none";
+    colCambios.style.display =
+      allowSwaps && db.modifiers.cambia.length > 0 ? "block" : "none";
   }
 
   // Ajuste de ancho de columnas (Bootstrap Grid)
-  const visibleCols = [colAgregados, colElimina, colCambios].filter(c => c.style.display !== "none");
-  if (visibleCols.length === 3) visibleCols.forEach(c => (c.className = "col-md-4"));
-  else if (visibleCols.length === 2) visibleCols.forEach(c => (c.className = "col-md-6"));
-  else if (visibleCols.length === 1) visibleCols.forEach(c => (c.className = "col-12"));
+  const visibleCols = [colAgregados, colElimina, colCambios].filter(
+    (c) => c.style.display !== "none"
+  );
+  if (visibleCols.length === 3)
+    visibleCols.forEach((c) => (c.className = "col-md-4"));
+  else if (visibleCols.length === 2)
+    visibleCols.forEach((c) => (c.className = "col-md-6"));
+  else if (visibleCols.length === 1)
+    visibleCols.forEach((c) => (c.className = "col-12"));
 }
 
 function prepareAddToCart(id) {
-  const prod = db.menu.find(p => p.ID_Producto === id);
+  const prod = db.menu.find((p) => p.ID_Producto === id);
   if (!prod) return;
 
   document.getElementById("configModalTitle").innerText = "Agregar Producto";
@@ -215,7 +300,7 @@ function prepareAddToCart(id) {
 
 function editCartItem(index) {
   const item = cart[index];
-  const originalProd = db.menu.find(p => p.ID_Producto === item.id);
+  const originalProd = db.menu.find((p) => p.ID_Producto === item.id);
   if (!originalProd) return alert("Producto no encontrado");
 
   document.getElementById("configModalTitle").innerText = "Modificar Item";
@@ -229,22 +314,23 @@ function editCartItem(index) {
   document.getElementById("config-qty").value = item.cantidad;
   document.getElementById("config-comments").value = item.manualNote || "";
 
-  if (item.tipoServicio === "LLEVAR") document.getElementById("item-llv").checked = true;
+  if (item.tipoServicio === "LLEVAR")
+    document.getElementById("item-llv").checked = true;
   else document.getElementById("item-srv").checked = true;
 
   if (item.selectedModifiers && item.selectedModifiers.length > 0) {
-    item.selectedModifiers.forEach(modId => {
+    item.selectedModifiers.forEach((modId) => {
       const chk = document.getElementById(`mod-${modId}`);
       if (chk) chk.checked = true;
     });
   }
 
   document.getElementById("btn-delete-item").style.display = "block";
-  
+
   if (item.cantidad > 1) {
-      document.getElementById("btn-split-item").style.display = "block";
+    document.getElementById("btn-split-item").style.display = "block";
   } else {
-      document.getElementById("btn-split-item").style.display = "none";
+    document.getElementById("btn-split-item").style.display = "none";
   }
 
   calculateModalTotal();
@@ -260,28 +346,36 @@ function adjustModalQty(delta) {
 }
 
 function calculateModalTotal() {
-  let unitPrice = parseInt(document.getElementById("config-base-price").value) || 0;
-  document.querySelectorAll(".mod-check:checked").forEach(chk => {
+  let unitPrice =
+    parseInt(document.getElementById("config-base-price").value) || 0;
+  document.querySelectorAll(".mod-check:checked").forEach((chk) => {
     unitPrice += parseInt(chk.dataset.price) || 0;
   });
   const qty = parseInt(document.getElementById("config-qty").value) || 1;
   const total = unitPrice * qty;
-  document.getElementById("modal-item-price").innerText = formatter.format(total);
+  document.getElementById("modal-item-price").innerText =
+    formatter.format(total);
 }
 
 function saveConfigItem() {
   const mode = document.getElementById("config-mode").value;
   const ref = document.getElementById("config-index").value;
-  const basePrice = parseInt(document.getElementById("config-base-price").value);
-  const manualNote = document.getElementById("config-comments").value.toUpperCase();
-  const serviceType = document.querySelector('input[name="itemServiceType"]:checked').value;
+  const basePrice = parseInt(
+    document.getElementById("config-base-price").value
+  );
+  const manualNote = document
+    .getElementById("config-comments")
+    .value.toUpperCase();
+  const serviceType = document.querySelector(
+    'input[name="itemServiceType"]:checked'
+  ).value;
   const qty = parseInt(document.getElementById("config-qty").value) || 1;
 
   let unitFinalPrice = basePrice;
   let modTextArray = [];
   let selectedModifiers = [];
 
-  document.querySelectorAll(".mod-check:checked").forEach(chk => {
+  document.querySelectorAll(".mod-check:checked").forEach((chk) => {
     unitFinalPrice += parseInt(chk.dataset.price) || 0;
     selectedModifiers.push(chk.value);
     const type = chk.dataset.type;
@@ -295,7 +389,7 @@ function saveConfigItem() {
   const finalComment = modTextArray.join(", ");
 
   if (mode === "add") {
-    const prod = db.menu.find(p => p.ID_Producto === ref);
+    const prod = db.menu.find((p) => p.ID_Producto === ref);
     cart.push({
       uuid: Date.now(),
       id: prod.ID_Producto,
@@ -321,7 +415,9 @@ function saveConfigItem() {
   }
 
   updateCartUI();
-  bootstrap.Modal.getInstance(document.getElementById("productConfigModal")).hide();
+  bootstrap.Modal.getInstance(
+    document.getElementById("productConfigModal")
+  ).hide();
 }
 
 function deleteConfigItem() {
@@ -331,52 +427,63 @@ function deleteConfigItem() {
     cart.splice(index, 1);
     updateCartUI();
   }
-  bootstrap.Modal.getInstance(document.getElementById("productConfigModal")).hide();
+  bootstrap.Modal.getInstance(
+    document.getElementById("productConfigModal")
+  ).hide();
 }
 
 function splitConfigItem() {
-    const index = parseInt(document.getElementById('config-index').value);
-    const originalItem = cart[index];
-    if (!originalItem || originalItem.cantidad <= 1) return;
+  const index = parseInt(document.getElementById("config-index").value);
+  const originalItem = cart[index];
+  if (!originalItem || originalItem.cantidad <= 1) return;
 
-    originalItem.cantidad -= 1;
-    const newItem = JSON.parse(JSON.stringify(originalItem));
-    newItem.cantidad = 1;
-    newItem.uuid = Date.now() + Math.random();
-    cart.push(newItem);
-    updateCartUI();
+  originalItem.cantidad -= 1;
+  const newItem = JSON.parse(JSON.stringify(originalItem));
+  newItem.cantidad = 1;
+  newItem.uuid = Date.now() + Math.random();
+  cart.push(newItem);
+  updateCartUI();
 
-    const newIndex = cart.length - 1;
-    document.getElementById('config-index').value = newIndex;
-    document.getElementById('config-qty').value = 1;
-    document.getElementById('btn-split-item').style.display = 'none';
+  const newIndex = cart.length - 1;
+  document.getElementById("config-index").value = newIndex;
+  document.getElementById("config-qty").value = 1;
+  document.getElementById("btn-split-item").style.display = "none";
 
-    calculateModalTotal();
-    alert("✅ Item separado.");
+  calculateModalTotal();
+  alert("✅ Item separado.");
 }
 
 function updateCartUI() {
   const container = document.getElementById("cart-container");
   let total = 0;
-  container.innerHTML = cart.map((item, index) => {
+  container.innerHTML = cart
+    .map((item, index) => {
       const subtotal = item.precio * item.cantidad;
       total += subtotal;
       const iconService = item.tipoServicio === "LLEVAR" ? "🛍️" : "🍽️";
-      const classService = item.tipoServicio === "LLEVAR" ? "text-primary" : "text-success";
-      const commentHtml = item.comentario ? `<div class="text-danger small fw-bold" style="font-size:0.75rem;">${item.comentario}</div>` : "";
+      const classService =
+        item.tipoServicio === "LLEVAR" ? "text-primary" : "text-success";
+      const commentHtml = item.comentario
+        ? `<div class="text-danger small fw-bold" style="font-size:0.75rem;">${item.comentario}</div>`
+        : "";
 
       return `
             <div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-2" onclick="editCartItem(${index})" style="cursor:pointer;">
                 <div style="overflow: hidden;">
                     <div class="fw-bold text-truncate">
-                        <span class="${classService}">${iconService}</span> ${item.nombre}
+                        <span class="${classService}">${iconService}</span> ${
+        item.nombre
+      }
                     </div>
                     ${commentHtml}
-                    <div class="small text-muted">${item.cantidad} x ${formatter.format(item.precio)}</div>
+                    <div class="small text-muted">${
+                      item.cantidad
+                    } x ${formatter.format(item.precio)}</div>
                 </div>
                 <span class="fw-bold">${formatter.format(subtotal)}</span>
             </div>`;
-    }).join("");
+    })
+    .join("");
 
   const totalFmt = formatter.format(total);
   document.getElementById("total-display").innerText = totalFmt;
@@ -386,34 +493,44 @@ function updateCartUI() {
 window.setOpeningBalance = async function () {
   if (!currentUser) return checkLogin();
   calcularTurno();
-  const input = prompt(`💰 FONDO DE CAJA (Turno ${currentTurnData.idTurno})\n\nIngrese monto inicial:`);
+  const input = prompt(
+    `💰 FONDO DE CAJA (Turno ${currentTurnData.idTurno})\n\nIngrese monto inicial:`
+  );
   if (input !== null) {
     const amount = parseInt(input.replace(/\D/g, "")) || 0;
     const payload = {
-        action: "save_opening",
-        fecha: currentTurnData.fechaComercial,
-        turno: currentTurnData.idTurno,
-        monto: amount,
-        usuario: currentUser.Nombre
+      action: "save_opening",
+      fecha: currentTurnData.fechaComercial,
+      turno: currentTurnData.idTurno,
+      monto: amount,
+      usuario: currentUser.Nombre,
     };
     try {
-        await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
-        if (window.printOpeningTicket) {
-            await window.printOpeningTicket(amount, currentUser.Nombre, currentTurnData.idTurno);
-        }
-        alert("✅ Apertura guardada.");
-    } catch(e) {
-        alert("Error guardando apertura.");
+      await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+      if (window.printOpeningTicket) {
+        await window.printOpeningTicket(
+          amount,
+          currentUser.Nombre,
+          currentTurnData.idTurno
+        );
+      }
+      alert("✅ Apertura guardada.");
+    } catch (e) {
+      alert("Error guardando apertura.");
     }
   }
 };
 
 function openPaymentModal() {
   if (cart.length === 0) return alert("Carrito vacío");
-  const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById("paymentModal"));
+  const modal = bootstrap.Modal.getOrCreateInstance(
+    document.getElementById("paymentModal")
+  );
   modal.show();
   setPaymentMethod("Efectivo");
-  ["amount-tendered", "mix-cash", "mix-card", "mix-transfer"].forEach(id => (document.getElementById(id).value = ""));
+  ["amount-tendered", "mix-cash", "mix-card", "mix-transfer"].forEach(
+    (id) => (document.getElementById(id).value = "")
+  );
   document.getElementById("change-display").innerText = "$0";
   document.getElementById("mix-remaining").innerText = "$0";
   setTimeout(() => document.getElementById("amount-tendered").focus(), 500);
@@ -425,14 +542,20 @@ window.setPaymentMethod = function (method) {
     if (btn.dataset.method === method) btn.classList.add("active");
     else btn.classList.remove("active");
   });
-  document.getElementById("cash-section").style.display = method === "Efectivo" ? "block" : "none";
-  document.getElementById("mixed-section").style.display = method === "Mixto" ? "block" : "none";
+  document.getElementById("cash-section").style.display =
+    method === "Efectivo" ? "block" : "none";
+  document.getElementById("mixed-section").style.display =
+    method === "Mixto" ? "block" : "none";
   if (method === "Mixto") calculateMixed();
 };
 
 function calculateChange() {
-  const total = cart.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
-  const received = parseInt(document.getElementById("amount-tendered").value) || 0;
+  const total = cart.reduce(
+    (acc, item) => acc + item.precio * item.cantidad,
+    0
+  );
+  const received =
+    parseInt(document.getElementById("amount-tendered").value) || 0;
   const change = received - total;
   const display = document.getElementById("change-display");
   if (change >= 0) {
@@ -469,7 +592,8 @@ async function processSale() {
   let finalPaymentString = selectedPaymentMethod;
 
   if (selectedPaymentMethod === "Efectivo") {
-    const received = parseInt(document.getElementById("amount-tendered").value) || 0;
+    const received =
+      parseInt(document.getElementById("amount-tendered").value) || 0;
     if (received < total) return alert("Monto insuficiente");
   }
 
@@ -489,7 +613,9 @@ async function processSale() {
   try {
     if (typeof window.printTicket === "function")
       await window.printTicket(cart, total, finalPaymentString, numeroDia);
-  } catch (e) { console.error(e); }
+  } catch (e) {
+    console.error(e);
+  }
 
   const saleData = {
     action: "create_order",
@@ -527,7 +653,10 @@ async function processSale() {
 async function saveToDatabase(payload) {
   try {
     await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
-  } catch (e) { console.error(e); alert("Error guardando."); }
+  } catch (e) {
+    console.error(e);
+    alert("Error guardando.");
+  }
 }
 
 async function showDailyReport() {
@@ -537,34 +666,43 @@ async function showDailyReport() {
   try {
     const response = await fetch(API_URL, {
       method: "POST",
-      body: JSON.stringify({ action: "get_daily_report", fecha: currentTurnData.fechaComercial }),
+      body: JSON.stringify({
+        action: "get_daily_report",
+        fecha: currentTurnData.fechaComercial,
+      }),
     });
     const result = await response.json();
     if (result.status === "success") {
       currentReportData = result.data;
       renderReportUI(result.data);
     } else {
-      document.getElementById("report-body").innerHTML = `<div class="alert alert-danger">${result.message}</div>`;
+      document.getElementById(
+        "report-body"
+      ).innerHTML = `<div class="alert alert-danger">${result.message}</div>`;
     }
   } catch (e) {
-    document.getElementById("report-body").innerHTML = `<div class="alert alert-danger">${e.message}</div>`;
+    document.getElementById(
+      "report-body"
+    ).innerHTML = `<div class="alert alert-danger">${e.message}</div>`;
   }
 }
 
 // 1. Modificar renderReportUI para agregar botón de Guardado
 function renderReportUI(data) {
-    const fmt = (n) => formatter.format(n);
-    
-    // Botón para guardar el cierre en la nube
-    const btnGuardar = `
+  const fmt = (n) => formatter.format(n);
+
+  // Botón para guardar el cierre en la nube
+  const btnGuardar = `
         <div class="d-grid mt-3">
             <button class="btn btn-danger btn-lg" onclick="confirmAndSaveZ()">🔒 CERRAR TURNO Y GUARDAR</button>
         </div>
     `;
 
-    document.getElementById('report-body').innerHTML = `
+  document.getElementById("report-body").innerHTML = `
         <h5 class="text-center fw-bold">RESUMEN DEL DÍA</h5>
-        <div class="text-center mb-3">Total Día: <b>${fmt(data.gran_total)}</b></div>
+        <div class="text-center mb-3">Total Día: <b>${fmt(
+          data.gran_total
+        )}</b></div>
         ${btnGuardar}
         <!-- <div class="text-center mt-2 text-muted small">Esto guardará el detalle en 'RecuentoDiario' y 'Cierres_Z'</div> -->
     `;
@@ -572,59 +710,73 @@ function renderReportUI(data) {
 
 // 2. Función para ejecutar el guardado
 async function confirmAndSaveZ() {
-    if(!currentReportData) return;
-    if(!currentUser) return checkLogin();
+  if (!currentReportData) return;
+  if (!currentUser) return checkLogin();
 
-    if(!confirm("¿Estás seguro de CERRAR el turno?\n\nEsto guardará la información en la base de datos y no se podrá modificar.")) return;
+  if (
+    !confirm(
+      "¿Estás seguro de CERRAR el turno?\n\nEsto guardará la información en la base de datos y no se podrá modificar."
+    )
+  )
+    return;
 
-    // Preparar payload
-    const payload = {
-        action: "save_z_report",
-        fecha: currentTurnData.fechaComercial,
-        turno: currentTurnData.idTurno,
-        usuario: currentUser.Nombre,
-        reporte: currentReportData // Enviamos el reporte calculado actual
-    };
+  // Preparar payload
+  const payload = {
+    action: "save_z_report",
+    fecha: currentTurnData.fechaComercial,
+    turno: currentTurnData.idTurno,
+    usuario: currentUser.Nombre,
+    reporte: currentReportData, // Enviamos el reporte calculado actual
+  };
 
-    try {
-        // Bloquear UI
-        document.getElementById('report-body').innerHTML = '<div class="text-center"><div class="spinner-border"></div><p>Guardando Cierre...</p></div>';
-        
-        const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
-        const result = await response.json();
+  try {
+    // Bloquear UI
+    document.getElementById("report-body").innerHTML =
+      '<div class="text-center"><div class="spinner-border"></div><p>Guardando Cierre...</p></div>';
 
-        if(result.status === 'success') {
-            alert("✅ TURNO CERRADO CORRECTAMENTE");
-            // Imprimir
-            printReportAction();
-        } else {
-            alert("⚠️ " + result.message);
-            // Recargar vista reporte
-            showDailyReport(); 
-        }
+    const response = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    const result = await response.json();
 
-    } catch(e) {
-        alert("Error de conexión");
-        showDailyReport();
+    if (result.status === "success") {
+      alert("✅ TURNO CERRADO CORRECTAMENTE");
+      // Imprimir
+      printReportAction();
+    } else {
+      alert("⚠️ " + result.message);
+      // Recargar vista reporte
+      showDailyReport();
     }
+  } catch (e) {
+    alert("Error de conexión");
+    showDailyReport();
+  }
 }
 
 // 3. Función EXTRA: Recuperar histórico (Para usarlo en el futuro, podrías poner un botón 'Buscar' en la UI)
 async function fetchHistoricalZ(fecha, turno) {
-    try {
-        const response = await fetch(API_URL, { 
-            method: 'POST', 
-            body: JSON.stringify({ action: "get_history_z", fecha: fecha, turno: turno }) 
-        });
-        const result = await response.json();
-        
-        if(result.status === 'success') {
-            // Usamos la misma función de impresión que ya tienes
-            window.printDailyReport(result.data);
-        } else {
-            alert(result.message);
-        }
-    } catch(e) { console.error(e); }
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "get_history_z",
+        fecha: fecha,
+        turno: turno,
+      }),
+    });
+    const result = await response.json();
+
+    if (result.status === "success") {
+      // Usamos la misma función de impresión que ya tienes
+      window.printDailyReport(result.data);
+    } else {
+      alert(result.message);
+    }
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 async function printReportAction() {
@@ -632,17 +784,26 @@ async function printReportAction() {
   const modalInstance = bootstrap.Modal.getInstance(modalElement);
   if (modalInstance) modalInstance.hide();
   if (currentReportData && window.printDailyReport)
-    setTimeout(async () => { await window.printDailyReport(currentReportData); }, 300);
+    setTimeout(async () => {
+      await window.printDailyReport(currentReportData);
+    }, 300);
 }
 
 function startAutoUpdate() {
-  setInterval(() => { if (cart.length === 0) loadSystemData(true); }, 300000);
-  setInterval(() => { updateClock(); checkAutoShiftChange(); }, 30000);
+  setInterval(() => {
+    if (cart.length === 0) loadSystemData(true);
+  }, 300000);
+  setInterval(() => {
+    updateClock();
+    checkAutoShiftChange();
+  }, 30000);
 }
 
 function checkAutoShiftChange() {
   const ahora = new Date();
-  const santiagoStr = ahora.toLocaleString("en-US", { timeZone: "America/Santiago" });
+  const santiagoStr = ahora.toLocaleString("en-US", {
+    timeZone: "America/Santiago",
+  });
   const santiagoDate = new Date(santiagoStr);
   if (santiagoDate.getHours() === 18 && santiagoDate.getMinutes() <= 1) {
     const key = `turno_cambiado_${santiagoDate.getDate()}`;
@@ -660,3 +821,219 @@ window.manualShiftChange = function () {
   }
   window.location.reload(true);
 };
+
+// ==========================================
+// SECCIÓN ADMINISTRACIÓN
+// ==========================================
+
+// 1. ABRIR PANEL
+function openAdminPanel() {
+  // Opcional: Pedir PIN extra para seguridad
+  // const pin = prompt("Ingrese PIN de Administrador:");
+  // if(pin !== "1234") return alert("Acceso denegado");
+
+  populateAdminCategories(); // Cargar categorías en el select
+  renderAdminProductList(); // Cargar tabla
+  new bootstrap.Modal(document.getElementById("adminModal")).show();
+}
+
+// --- PESTAÑA 1: HISTORIAL Z ---
+
+async function searchHistoryZ() {
+  const fecha = document.getElementById("hist-date").value;
+  const turno = document.getElementById("hist-turno").value;
+  const area = document.getElementById("history-result-area");
+
+  if (!fecha) return alert("Seleccione una fecha");
+
+  area.innerHTML =
+    '<div class="spinner-border text-primary"></div><br>Buscando...';
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "get_history_z",
+        fecha: fecha,
+        turno: turno,
+      }),
+    });
+    const result = await response.json();
+
+    if (result.status === "success") {
+      // Guardamos temporalmente para imprimir
+      currentReportData = result.data;
+
+      // Mostrar resumen visual simple
+      area.innerHTML = `
+                <div class="alert alert-success">
+                    <h5>✅ Reporte Encontrado</h5>
+                    <p>Fecha: ${result.data.fecha}</p>
+                    <p class="fs-4 fw-bold">Total: ${formatter.format(
+                      result.data.gran_total
+                    )}</p>
+                    <button class="btn btn-dark mt-2" onclick="reprintHistory()">🖨️ Reimprimir Ticket Z</button>
+                </div>
+            `;
+    } else {
+      area.innerHTML = `<div class="alert alert-warning">❌ ${result.message}</div>`;
+    }
+  } catch (e) {
+    area.innerHTML = `<div class="alert alert-danger">Error de conexión</div>`;
+  }
+}
+
+function reprintHistory() {
+  if (currentReportData && window.printDailyReport) {
+    window.printDailyReport(currentReportData);
+  }
+}
+
+// --- PESTAÑA 2: GESTIÓN PRODUCTOS ---
+
+// Variable global temporal para todos los productos (activos e inactivos)
+// Necesitamos que loadSystemData traiga TODOS, no solo los activos.
+// *IMPORTANTE*: Voy a modificar ligeramente loadSystemData abajo para que guarde todo en db.allRawProducts
+
+function renderAdminProductList() {
+  const filter = document
+    .getElementById("admin-search-prod")
+    .value.toUpperCase();
+  const tbody = document.getElementById("admin-prod-list");
+
+  // Usamos db.allRawProducts si existe, si no, usamos una petición fetch nueva o modificamos loadSystemData
+  // Para no romper lo actual, asumiremos que modificamos loadSystemData (ver punto 3 más abajo)
+
+  const list = db.allRawProducts || [];
+
+  let html = "";
+  list.forEach((p) => {
+    if (p.Nombre.toUpperCase().includes(filter)) {
+      const statusBadge =
+        String(p.Activo).toUpperCase() === "TRUE"
+          ? '<span class="badge bg-success">Activo</span>'
+          : '<span class="badge bg-secondary">Inactivo</span>';
+
+      const kitchenBadge =
+        String(p.Imprimir_en_Cocina).toUpperCase() === "TRUE" ? "👨‍🍳" : "";
+
+      html += `
+                <tr>
+                    <td class="fw-bold">${p.Nombre}</td>
+                    <td>${p.Categoria}</td>
+                    <td>${formatter.format(p.Precio)}</td>
+                    <td>${kitchenBadge}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="openProductForm('edit', '${
+                          p.ID_Producto
+                        }')">✏️</button>
+                    </td>
+                </tr>
+            `;
+    }
+  });
+  tbody.innerHTML = html;
+}
+
+function populateAdminCategories() {
+  const select = document.getElementById("pf-cat");
+  // Usamos las categorías existentes + las técnicas
+  const cats = db.categorias.map((c) => c.Nombre);
+  // Aseguramos que estén las técnicas
+  ["AGREGADOS", "ELIMINA", "CAMBIA"].forEach((c) => {
+    if (!cats.includes(c)) cats.push(c);
+  });
+
+  select.innerHTML = cats
+    .map((c) => `<option value="${c}">${c}</option>`)
+    .join("");
+}
+
+function openProductForm(mode, id) {
+  const modal = new bootstrap.Modal(document.getElementById("prodFormModal"));
+
+  if (mode === "new") {
+    document.getElementById("prodFormTitle").innerText = "Nuevo Producto";
+    document.getElementById("pf-id").value = "NEW";
+    document.getElementById("pf-name").value = "";
+    document.getElementById("pf-price").value = "";
+    document.getElementById("pf-order").value = "99";
+    document.getElementById("pf-active").checked = true;
+    document.getElementById("pf-kitchen").checked = false;
+  } else {
+    const prod = db.allRawProducts.find((p) => p.ID_Producto === id);
+    if (!prod) return;
+
+    document.getElementById("prodFormTitle").innerText =
+      "Editar: " + prod.Nombre;
+    document.getElementById("pf-id").value = prod.ID_Producto;
+    document.getElementById("pf-name").value = prod.Nombre;
+    document.getElementById("pf-cat").value = prod.Categoria;
+    // Limpiar precio de simbolos
+    document.getElementById("pf-price").value = String(prod.Precio).replace(
+      /\D/g,
+      ""
+    );
+    document.getElementById("pf-order").value = prod.Orden;
+    document.getElementById("pf-color").value = prod.ColorBoton || "primary";
+    document.getElementById("pf-active").checked =
+      String(prod.Activo).toUpperCase() === "TRUE";
+    document.getElementById("pf-kitchen").checked =
+      String(prod.Imprimir_en_Cocina).toUpperCase() === "TRUE";
+  }
+
+  modal.show();
+}
+
+async function saveProductForm() {
+  const id = document.getElementById("pf-id").value;
+  const isNew = id === "NEW";
+
+  const productData = {
+    ID_Producto: isNew ? `PROD-${Date.now()}` : id,
+    Nombre: document.getElementById("pf-name").value,
+    Categoria: document.getElementById("pf-cat").value,
+    Precio: document.getElementById("pf-price").value,
+    Orden: document.getElementById("pf-order").value,
+    Color: document.getElementById("pf-color").value,
+    Activo: document.getElementById("pf-active").checked, // Boolean
+    Cocina: document.getElementById("pf-kitchen").checked, // Boolean
+  };
+
+  if (!productData.Nombre || !productData.Precio)
+    return alert("Nombre y Precio obligatorios");
+
+  // UI Feedback
+  const btn = document.querySelector("#prodFormModal .btn-primary");
+  const oldText = btn.innerText;
+  btn.innerText = "Guardando...";
+  btn.disabled = true;
+
+  try {
+    const action = isNew ? "create_product" : "update_product";
+    const response = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: action, producto: productData }),
+    });
+    const result = await response.json();
+
+    if (result.status === "success") {
+      alert("✅ Guardado correctamente");
+      bootstrap.Modal.getInstance(
+        document.getElementById("prodFormModal")
+      ).hide();
+      // Recargar datos para actualizar la POS y la Tabla Admin
+      loadSystemData(true);
+      // Pequeño hack: esperar a que loadSystemData termine (es async pero no lo esperamos aquí)
+      setTimeout(renderAdminProductList, 2000);
+    } else {
+      alert("Error: " + result.message);
+    }
+  } catch (e) {
+    alert("Error de conexión");
+  } finally {
+    btn.innerText = oldText;
+    btn.disabled = false;
+  }
+}

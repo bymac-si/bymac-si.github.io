@@ -54,7 +54,7 @@
         justify-content: space-between;
         width: 100%;
       }
-      
+
       /* ESTILO FOOTER PANTALLA */
       .pos-footer {
         font-size: 0.7rem;
@@ -213,6 +213,13 @@
                 >
                   🔄
                 </button>
+                <button
+                  class="btn btn-dark shadow-sm"
+                  onclick="openAdminPanel()"
+                  title="Administración"
+                >
+                  ⚙️
+                </button>
               </div>
             </div>
           </div>
@@ -225,7 +232,7 @@
 
         <div
           class="col-4 bg-white border-start p-0 d-flex flex-col flex-column shadow-lg"
-          style="padding-bottom: 30px;"
+          style="padding-bottom: 30px"
         >
           <div
             class="d-flex justify-content-between align-items-center bg-primary text-white p-2"
@@ -394,25 +401,25 @@
               class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top"
             >
               <div class="d-flex gap-2">
-                  <button
-                    type="button"
-                    class="btn btn-danger"
-                    id="btn-delete-item"
-                    onclick="deleteConfigItem()"
-                    style="display: none"
-                  >
-                    🗑️
-                  </button>
-                  
-                  <button
-                    type="button"
-                    class="btn btn-warning fw-bold"
-                    id="btn-split-item"
-                    onclick="splitConfigItem()"
-                    style="display: none"
-                  >
-                    🔀 SEPARAR 1
-                  </button>
+                <button
+                  type="button"
+                  class="btn btn-danger"
+                  id="btn-delete-item"
+                  onclick="deleteConfigItem()"
+                  style="display: none"
+                >
+                  🗑️
+                </button>
+
+                <button
+                  type="button"
+                  class="btn btn-warning fw-bold"
+                  id="btn-split-item"
+                  onclick="splitConfigItem()"
+                  style="display: none"
+                >
+                  🔀 SEPARAR 1
+                </button>
               </div>
 
               <div class="text-end">
@@ -592,9 +599,213 @@
         </div>
       </div>
     </div>
+    <div class="modal fade" id="adminModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content bg-light">
+          <div class="modal-header bg-dark text-white">
+            <h5 class="modal-title">
+              ⚙️ PANEL DE ADMINISTRACIÓN - EL CARRO DEL OCHO
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <ul class="nav nav-tabs mb-3" id="adminTabs" role="tablist">
+              <li class="nav-item">
+                <button
+                  class="nav-link active"
+                  id="tab-history-btn"
+                  data-bs-toggle="tab"
+                  data-bs-target="#tab-history"
+                  type="button"
+                >
+                  📜 Historial Cierres Z
+                </button>
+              </li>
+              <li class="nav-item">
+                <button
+                  class="nav-link"
+                  id="tab-products-btn"
+                  data-bs-toggle="tab"
+                  data-bs-target="#tab-products"
+                  type="button"
+                >
+                  🍔 Gestión Productos
+                </button>
+              </li>
+            </ul>
 
+            <div class="tab-content" id="adminTabsContent">
+              <div class="tab-pane fade show active" id="tab-history">
+                <div class="card shadow-sm">
+                  <div class="card-body">
+                    <div class="row g-3 align-items-end">
+                      <div class="col-md-3">
+                        <label class="form-label">Fecha:</label>
+                        <input
+                          type="date"
+                          id="hist-date"
+                          class="form-control"
+                        />
+                      </div>
+                      <div class="col-md-3">
+                        <label class="form-label">Turno:</label>
+                        <select id="hist-turno" class="form-select">
+                          <option value="1">Turno 1 (AM)</option>
+                          <option value="2">Turno 2 (PM)</option>
+                        </select>
+                      </div>
+                      <div class="col-md-3">
+                        <button
+                          class="btn btn-primary w-100"
+                          onclick="searchHistoryZ()"
+                        >
+                          🔍 Buscar Reporte
+                        </button>
+                      </div>
+                    </div>
+                    <hr />
+                    <div
+                      id="history-result-area"
+                      class="text-center text-muted p-5"
+                    >
+                      Selecciona una fecha y turno para ver el reporte antiguo.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="tab-pane fade" id="tab-products">
+                <div class="d-flex justify-content-between mb-3">
+                  <input
+                    type="text"
+                    id="admin-search-prod"
+                    class="form-control w-50"
+                    placeholder="Buscar producto..."
+                    onkeyup="renderAdminProductList()"
+                  />
+                  <button
+                    class="btn btn-success"
+                    onclick="openProductForm('new')"
+                  >
+                    ➕ Nuevo Producto
+                  </button>
+                </div>
+                <div class="table-responsive bg-white shadow-sm rounded">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                      <tr>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Precio</th>
+                        <th>Cocina</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="admin-prod-list"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="prodFormModal"
+      tabindex="-1"
+      data-bs-backdrop="static"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-warning">
+            <h5 class="modal-title fw-bold" id="prodFormTitle">
+              Editar Producto
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="pf-id" />
+            <div class="mb-2">
+              <label class="form-label">Nombre:</label>
+              <input type="text" id="pf-name" class="form-control" />
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Categoría:</label>
+              <select id="pf-cat" class="form-select"></select>
+              <small class="text-muted"
+                >Usa: AGREGADOS, ELIMINA, CAMBIA para modificadores.</small
+              >
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Precio:</label>
+              <input type="number" id="pf-price" class="form-control" />
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Orden (Posición):</label>
+              <input type="number" id="pf-order" class="form-control" />
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Color Botón:</label>
+              <select id="pf-color" class="form-select">
+                <option value="primary">Azul (Primary)</option>
+                <option value="success">Verde (Success)</option>
+                <option value="warning">Amarillo (Warning)</option>
+                <option value="danger">Rojo (Danger)</option>
+                <option value="dark">Negro (Dark)</option>
+                <option value="info">Celeste (Info)</option>
+              </select>
+            </div>
+            <div class="form-check form-switch mt-3">
+              <input class="form-check-input" type="checkbox" id="pf-kitchen" />
+              <label class="form-check-label" for="pf-kitchen"
+                >🖨️ Imprimir en Cocina</label
+              >
+            </div>
+            <div class="form-check form-switch">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="pf-active"
+                checked
+              />
+              <label class="form-check-label" for="pf-active"
+                >✅ Activo (Visible en POS)</label
+              >
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="saveProductForm()"
+            >
+              Guardar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
     <footer class="fixed-bottom text-center py-1 pos-footer">
-      Desarrollado por Asesorías Profesionales Marcos Alberto Castro Abarca E.I.R.L
+      Desarrollado por Asesorías Profesionales Marcos Alberto Castro Abarca
+      E.I.R.L
     </footer>
 
     <div id="printable-area"></div>
