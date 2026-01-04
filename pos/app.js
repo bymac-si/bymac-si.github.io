@@ -1,8 +1,8 @@
 /**
- * APP.JS - Con Guardado de Apertura en Nube
+ * POS El Carro del Ocho - Lógica Principal
  */
 
-const API_URL = "https://script.google.com/macros/s/AKfycbwgeHgY0soRXr0uGmST3ao5ZybbXaNcPxbpabwEA_E6JPlY0cHUFBu8RwD6bIpfKGmZ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwYOERVmjA0wEmyuGS0zw_aaVCRKQheOAL5HkC9S4XXHmikewc2VUW0exVmWhqi-c49/exec";
 
 let db = { menu: [], modifiers: { agregados: [], elimina: [], cambia: [] }, categorias: [], usuarios: [] };
 let cart = [];
@@ -19,9 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
   startAutoUpdate();
   setInterval(updateClock, 60000);
 });
-
-// ... (loadSystemData, checkLogin, attemptLogin, calcularTurno, getNextOrderNumber, renderCategories, filterProducts, renderProducts, mapColor sin cambios) ...
-// PEGA AQUI LAS FUNCIONES DE ARRIBA QUE YA TENIAS, O USA ESTE BLOQUE COMPLETO SI QUIERES REEMPLAZAR TODO
 
 async function loadSystemData(silent = false) {
   const container = document.getElementById("products-container");
@@ -79,12 +76,12 @@ function calcularTurno() {
   const santiagoDate = new Date(santiagoStr);
   const hora = santiagoDate.getHours();
   let fechaComercial = new Date(santiagoDate);
-  if (hora < 4) fechaComercial.setDate(fechaComercial.getDate() - 1);
+  if (hora < 3) fechaComercial.setDate(fechaComercial.getDate() - 1);
   const yyyy = fechaComercial.getFullYear();
   const mm = String(fechaComercial.getMonth() + 1).padStart(2, "0");
   const dd = String(fechaComercial.getDate()).padStart(2, "0");
   const fechaStr = `${yyyy}-${mm}-${dd}`;
-  let idTurno = hora >= 18 || hora < 4 ? 2 : 1;
+  let idTurno = hora >= 18 || hora < 3 ? 2 : 1;
   currentTurnData = { fechaHora: santiagoDate.toLocaleString("es-CL"), fechaComercial: fechaStr, idTurno: idTurno, turnoKey: `${fechaStr}-T${idTurno}` };
 }
 function updateClock() { calcularTurno(); }
@@ -128,8 +125,6 @@ function renderProducts(lista) {
 function mapColor(c) { if (!c) return "primary"; const map = { red: "danger", orange: "warning", yellow: "warning", green: "success", blue: "primary", cyan: "info", black: "dark", grey: "secondary" }; return map[String(c).toLowerCase()] || "primary"; }
 
 // --- LOGICA MODAL CONFIGURACION ---
-// (renderCheckboxes, setupModalView, prepareAddToCart, editCartItem, adjustModalQty, calculateModalTotal, saveConfigItem, deleteConfigItem, splitConfigItem, updateCartUI IGUALES QUE ANTES)
-// Copiaremos el bloque completo para asegurar que no falte nada:
 
 function renderCheckboxes(containerId, list, type) {
   const container = document.getElementById(containerId);
@@ -147,30 +142,51 @@ function renderCheckboxes(containerId, list, type) {
     }).join("");
 }
 
+// *** FUNCIÓN CORREGIDA PARA GESTIONAR VISTAS SEGÚN CATEGORÍA ***
 function setupModalView(prodCategoria) {
   const cat = prodCategoria.toUpperCase();
-  const restrictedCats = ["FRITOS", "BEBIDAS", "BEBIDA", "SNACKS", "OTROS", "EMPANADAS"];
+  
+  // Categorías que NO muestran nada (solo nota manual)
+  const restrictedCats = ["BEBIDAS", "BEBIDA", "SNACKS", "OTROS", "EMPANADAS"];
+  
+  // Categorías que permiten "CAMBIA" (Columna Amarilla)
+  const allowSwaps = cat.includes("VIENESA") || cat.includes("COMPLETO");
+  
+  // Categorías que permiten "AGREGAR" pero NO "ELIMINAR"
+  const isFritos = cat.includes("FRITOS") || cat.includes("PAPAS"); 
+
   const isRestricted = restrictedCats.some(rc => cat.includes(rc));
-  const allowSwaps = cat.includes("VIENESA") || cat.includes("COMPLETO") || cat.includes("AS");
 
   const colAgregados = document.getElementById("col-agregados");
   const colElimina = document.getElementById("col-elimina");
   const colCambios = document.getElementById("col-cambios");
 
+  // Renderizar contenido
   renderCheckboxes("list-agregados", db.modifiers.agregados, "ADD");
   renderCheckboxes("list-elimina", db.modifiers.elimina, "DEL");
   renderCheckboxes("list-cambios", db.modifiers.cambia, "SWAP");
 
+  // Lógica de visualización
   if (isRestricted) {
+    // Caso: Bebidas, Empanadas -> Todo oculto
     colAgregados.style.display = "none";
     colElimina.style.display = "none";
     colCambios.style.display = "none";
-  } else {
+  } 
+  else if (isFritos) {
+    // Caso: Fritos -> Solo Agregados (Salsas, etc)
+    colAgregados.style.display = "block";
+    colElimina.style.display = "none"; // Ocultamos Eliminar
+    colCambios.style.display = "none"; // Ocultamos Cambios
+  } 
+  else {
+    // Caso: Completos, Sandwich, etc -> Todo Visible según corresponda
     colAgregados.style.display = "block";
     colElimina.style.display = "block";
     colCambios.style.display = (allowSwaps && db.modifiers.cambia.length > 0) ? "block" : "none";
   }
 
+  // Ajuste de ancho de columnas (Bootstrap Grid)
   const visibleCols = [colAgregados, colElimina, colCambios].filter(c => c.style.display !== "none");
   if (visibleCols.length === 3) visibleCols.forEach(c => (c.className = "col-md-4"));
   else if (visibleCols.length === 2) visibleCols.forEach(c => (c.className = "col-md-6"));
@@ -224,6 +240,7 @@ function editCartItem(index) {
   }
 
   document.getElementById("btn-delete-item").style.display = "block";
+  
   if (item.cantidad > 1) {
       document.getElementById("btn-split-item").style.display = "block";
   } else {
@@ -327,7 +344,6 @@ function splitConfigItem() {
     newItem.cantidad = 1;
     newItem.uuid = Date.now() + Math.random();
     cart.push(newItem);
-    
     updateCartUI();
 
     const newIndex = cart.length - 1;
@@ -367,17 +383,12 @@ function updateCartUI() {
   document.getElementById("modal-total-pagar").innerText = totalFmt;
 }
 
-// --- APERTURA CON GUARDADO EN NUBE ---
 window.setOpeningBalance = async function () {
-  if (!currentUser) return checkLogin(); // Obliga a loguear para saber quien abre
-  
+  if (!currentUser) return checkLogin();
   calcularTurno();
   const input = prompt(`💰 FONDO DE CAJA (Turno ${currentTurnData.idTurno})\n\nIngrese monto inicial:`);
-  
   if (input !== null) {
     const amount = parseInt(input.replace(/\D/g, "")) || 0;
-    
-    // Objeto para enviar a Google
     const payload = {
         action: "save_opening",
         fecha: currentTurnData.fechaComercial,
@@ -385,32 +396,18 @@ window.setOpeningBalance = async function () {
         monto: amount,
         usuario: currentUser.Nombre
     };
-
     try {
-        const btn = document.querySelector('button[title="Ingresar Fondo Fijo"]');
-        const originalText = btn.innerText;
-        btn.innerText = "Guardando...";
-        btn.disabled = true;
-
         await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
-        
-        // Imprimir comprobante
         if (window.printOpeningTicket) {
             await window.printOpeningTicket(amount, currentUser.Nombre, currentTurnData.idTurno);
         }
-        
-        btn.innerText = originalText;
-        btn.disabled = false;
-        alert("✅ Apertura guardada correctamente en la nube.");
-
+        alert("✅ Apertura guardada.");
     } catch(e) {
-        console.error(e);
-        alert("⚠️ Error guardando en la nube. Revise conexión.");
+        alert("Error guardando apertura.");
     }
   }
 };
 
-// ... (Resto de funciones openPaymentModal, setPaymentMethod, calculateChange, calculateMixed, processSale, saveToDatabase, showDailyReport, printReportAction... IGUALES)
 function openPaymentModal() {
   if (cart.length === 0) return alert("Carrito vacío");
   const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById("paymentModal"));
@@ -554,9 +551,80 @@ async function showDailyReport() {
   }
 }
 
+// 1. Modificar renderReportUI para agregar botón de Guardado
 function renderReportUI(data) {
-  const fmt = (n) => formatter.format(n);
-  document.getElementById("report-body").innerHTML = `<h5 class="text-center">Total Día: <b>${fmt(data.gran_total)}</b></h5>`;
+    const fmt = (n) => formatter.format(n);
+    
+    // Botón para guardar el cierre en la nube
+    const btnGuardar = `
+        <div class="d-grid mt-3">
+            <button class="btn btn-danger btn-lg" onclick="confirmAndSaveZ()">🔒 CERRAR TURNO Y GUARDAR</button>
+        </div>
+    `;
+
+    document.getElementById('report-body').innerHTML = `
+        <h5 class="text-center fw-bold">RESUMEN DEL DÍA</h5>
+        <div class="text-center mb-3">Total Día: <b>${fmt(data.gran_total)}</b></div>
+        ${btnGuardar}
+        <!-- <div class="text-center mt-2 text-muted small">Esto guardará el detalle en 'RecuentoDiario' y 'Cierres_Z'</div> -->
+    `;
+}
+
+// 2. Función para ejecutar el guardado
+async function confirmAndSaveZ() {
+    if(!currentReportData) return;
+    if(!currentUser) return checkLogin();
+
+    if(!confirm("¿Estás seguro de CERRAR el turno?\n\nEsto guardará la información en la base de datos y no se podrá modificar.")) return;
+
+    // Preparar payload
+    const payload = {
+        action: "save_z_report",
+        fecha: currentTurnData.fechaComercial,
+        turno: currentTurnData.idTurno,
+        usuario: currentUser.Nombre,
+        reporte: currentReportData // Enviamos el reporte calculado actual
+    };
+
+    try {
+        // Bloquear UI
+        document.getElementById('report-body').innerHTML = '<div class="text-center"><div class="spinner-border"></div><p>Guardando Cierre...</p></div>';
+        
+        const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const result = await response.json();
+
+        if(result.status === 'success') {
+            alert("✅ TURNO CERRADO CORRECTAMENTE");
+            // Imprimir
+            printReportAction();
+        } else {
+            alert("⚠️ " + result.message);
+            // Recargar vista reporte
+            showDailyReport(); 
+        }
+
+    } catch(e) {
+        alert("Error de conexión");
+        showDailyReport();
+    }
+}
+
+// 3. Función EXTRA: Recuperar histórico (Para usarlo en el futuro, podrías poner un botón 'Buscar' en la UI)
+async function fetchHistoricalZ(fecha, turno) {
+    try {
+        const response = await fetch(API_URL, { 
+            method: 'POST', 
+            body: JSON.stringify({ action: "get_history_z", fecha: fecha, turno: turno }) 
+        });
+        const result = await response.json();
+        
+        if(result.status === 'success') {
+            // Usamos la misma función de impresión que ya tienes
+            window.printDailyReport(result.data);
+        } else {
+            alert(result.message);
+        }
+    } catch(e) { console.error(e); }
 }
 
 async function printReportAction() {

@@ -76,7 +76,7 @@ window.printTicket = async function (cart, total, method, orderNum) {
     let listadoCocina = "";
     itemsCocina.forEach((item) => {
       const srvTag = item.tipoServicio === "LLEVAR" ? "LLEVAR" : "SERVIR";
-      const nota = item.comentario ? `<div style="font-size:0.6em; font-weight:normal;">( ${item.comentario} )</div>` : "";
+      const nota = item.comentario ? `<div style="font-size:1.1em; font-weight:normal;">( ${item.comentario} )</div>` : "";
       listadoCocina += `<div>${item.cantidad} x ${item.nombre} <b>${srvTag}</b> ${nota}</div>`;
     });
     htmlCocina = `
@@ -93,7 +93,7 @@ window.printTicket = async function (cart, total, method, orderNum) {
   cart.forEach((item) => {
     const totalItem = (item.precio * item.cantidad).toLocaleString("es-CL");
     const srvTag = item.tipoServicio === "LLEVAR" ? "(LLEVAR)" : "(SERVIR)";
-    const nota = item.comentario ? `<div style="font-size:0.6em; font-style:italic;">* ${item.comentario}</div>` : "";
+    const nota = item.comentario ? `<div style="font-size:0.9em; font-style:italic;">* ${item.comentario}</div>` : "";
     listadoCliente += `
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 2px; font-size:1.2rem;">
                 <span style="flex:1; padding-right:5px; text-align:left;">${item.cantidad} x ${item.nombre} ${srvTag} ${nota}</span>
