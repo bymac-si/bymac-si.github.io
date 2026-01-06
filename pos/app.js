@@ -1,6 +1,9 @@
-// URL ACTUALIZADA
+/**
+ * POS El Carro del Ocho - Lógica Principal
+ */
+
 const API_URL =
-  "https://script.google.com/macros/s/AKfycbyEZT3QEx6XycNpsLKCjK6TxGfCu3HMvyMwggssEJtD8Q0e1xuYM2-uoJTUmSlU8OX1/exec";
+  "https://script.google.com/macros/s/AKfycbwYOERVmjA0wEmyuGS0zw_aaVCRKQheOAL5HkC9S4XXHmikewc2VUW0exVmWhqi-c49/exec";
 
 let db = {
   menu: [],
@@ -29,19 +32,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function loadSystemData(silent = false) {
   const container = document.getElementById("products-container");
-  if (!silent)
-    container.innerHTML = `<div class="text-center mt-5"><div class="spinner-border text-primary"></div><p>Cargando...</p></div>`;
+  if (!silent) container.innerHTML = `<div class="text-center mt-5"><div class="spinner-border text-primary"></div><p>Cargando...</p></div>`;
   try {
     const response = await fetch(API_URL);
     const data = await response.json();
-    db.usuarios = data.usuarios.filter(
-      (u) => String(u.Activo).toLowerCase() === "true"
-    );
-    db.categorias = data.categorias.sort(
-      (a, b) => (parseInt(a.Orden) || 99) - (parseInt(b.Orden) || 99)
-    );
+    
+    // 1. Guardar copia cruda para el ADMIN (Incluye inactivos)
+    // Mapeamos para normalizar nombres de campos
+    db.allRawProducts = data.productos.map(p => ({
+        ...p,
+        // Normalizamos booleanos como strings para la tabla admin
+        Activo: String(p.Activo).trim().toUpperCase(), 
+        Imprimir_en_Cocina: String(p.Imprimir_en_Cocina).trim().toUpperCase()
+    }));
 
-    const allProducts = data.productos
+    // 2. Lógica normal del POS (Solo Activos)
+    db.usuarios = data.usuarios.filter(u => String(u.Activo).toLowerCase() === "true");
+    db.categorias = data.categorias.sort((a, b) => (parseInt(a.Orden) || 99) - (parseInt(b.Orden) || 99));
+
+    const activeProducts = data.productos
       .filter((p) => String(p.Activo).trim().toUpperCase() === "TRUE")
       .map((p) => ({
         ...p,
@@ -51,26 +60,26 @@ async function loadSystemData(silent = false) {
         Categoria: p.Categoria,
       }));
 
-    db.menu = [];
-    db.modifiers.agregados = [];
-    db.modifiers.elimina = [];
-    db.modifiers.cambia = [];
-    allProducts.forEach((p) => {
+    db.menu = []; db.modifiers.agregados = []; db.modifiers.elimina = []; db.modifiers.cambia = [];
+    activeProducts.forEach((p) => {
       const cat = p.Categoria.toUpperCase();
       if (cat === "AGREGADOS") db.modifiers.agregados.push(p);
       else if (cat === "ELIMINA") db.modifiers.elimina.push(p);
       else if (cat === "CAMBIA") db.modifiers.cambia.push(p);
       else db.menu.push(p);
     });
-    db.menu.sort(
-      (a, b) => (parseInt(a.Orden) || 99) - (parseInt(b.Orden) || 99)
-    );
+    db.menu.sort((a, b) => (parseInt(a.Orden) || 99) - (parseInt(b.Orden) || 99));
+    
     renderCategories();
     renderProducts(db.menu);
+    // Si el panel de admin está abierto, refrescar su lista también
+    if(document.getElementById('adminModal').classList.contains('show')) {
+        renderAdminProductList();
+    }
+
     if (!silent) checkLogin();
   } catch (error) {
-    if (!silent)
-      container.innerHTML = `<div class="alert alert-danger">Error de conexión.</div>`;
+    if (!silent) container.innerHTML = `<div class="alert alert-danger">Error de conexión.</div>`;
   }
 }
 
@@ -194,7 +203,7 @@ function mapColor(c) {
   return map[String(c).toLowerCase()] || "primary";
 }
 
-// --- LOGICA MODAL ---
+// --- LOGICA MODAL CONFIGURACION ---
 
 function renderCheckboxes(containerId, list, type) {
   const container = document.getElementById(containerId);
@@ -214,42 +223,50 @@ function renderCheckboxes(containerId, list, type) {
     .join("");
 }
 
+// *** FUNCIÓN CORREGIDA PARA GESTIONAR VISTAS SEGÚN CATEGORÍA ***
 function setupModalView(prodCategoria) {
   const cat = prodCategoria.toUpperCase();
-  const restrictedCats = [
-    "FRITOS",
-    "BEBIDAS",
-    "BEBIDA",
-    "SNACKS",
-    "OTROS",
-    "EMPANADAS",
-  ];
+
+  // Categorías que NO muestran nada (solo nota manual)
+  const restrictedCats = ["BEBIDAS", "BEBIDA", "SNACKS", "OTROS", "EMPANADAS"];
+
+  // Categorías que permiten "CAMBIA" (Columna Amarilla)
+  const allowSwaps = cat.includes("VIENESA") || cat.includes("COMPLETO");
+
+  // Categorías que permiten "AGREGAR" pero NO "ELIMINAR"
+  const isFritos = cat.includes("FRITOS") || cat.includes("PAPAS");
+
   const isRestricted = restrictedCats.some((rc) => cat.includes(rc));
-  const allowSwaps =
-    cat.includes("VIENESA") ||
-    cat.includes("COMPLETO") ||
-    cat.includes("AS") ||
-    cat.includes("SANDWICH");
 
   const colAgregados = document.getElementById("col-agregados");
   const colElimina = document.getElementById("col-elimina");
   const colCambios = document.getElementById("col-cambios");
 
+  // Renderizar contenido
   renderCheckboxes("list-agregados", db.modifiers.agregados, "ADD");
   renderCheckboxes("list-elimina", db.modifiers.elimina, "DEL");
   renderCheckboxes("list-cambios", db.modifiers.cambia, "SWAP");
 
+  // Lógica de visualización
   if (isRestricted) {
+    // Caso: Bebidas, Empanadas -> Todo oculto
     colAgregados.style.display = "none";
     colElimina.style.display = "none";
     colCambios.style.display = "none";
+  } else if (isFritos) {
+    // Caso: Fritos -> Solo Agregados (Salsas, etc)
+    colAgregados.style.display = "block";
+    colElimina.style.display = "none"; // Ocultamos Eliminar
+    colCambios.style.display = "none"; // Ocultamos Cambios
   } else {
+    // Caso: Completos, Sandwich, etc -> Todo Visible según corresponda
     colAgregados.style.display = "block";
     colElimina.style.display = "block";
     colCambios.style.display =
       allowSwaps && db.modifiers.cambia.length > 0 ? "block" : "none";
   }
 
+  // Ajuste de ancho de columnas (Bootstrap Grid)
   const visibleCols = [colAgregados, colElimina, colCambios].filter(
     (c) => c.style.display !== "none"
   );
@@ -274,6 +291,7 @@ function prepareAddToCart(id) {
   document.getElementById("item-srv").checked = true;
   document.getElementById("config-qty").value = 1;
   document.getElementById("btn-delete-item").style.display = "none";
+  document.getElementById("btn-split-item").style.display = "none";
 
   setupModalView(prod.Categoria);
   calculateModalTotal();
@@ -308,6 +326,13 @@ function editCartItem(index) {
   }
 
   document.getElementById("btn-delete-item").style.display = "block";
+
+  if (item.cantidad > 1) {
+    document.getElementById("btn-split-item").style.display = "block";
+  } else {
+    document.getElementById("btn-split-item").style.display = "none";
+  }
+
   calculateModalTotal();
   new bootstrap.Modal(document.getElementById("productConfigModal")).show();
 }
@@ -407,6 +432,27 @@ function deleteConfigItem() {
   ).hide();
 }
 
+function splitConfigItem() {
+  const index = parseInt(document.getElementById("config-index").value);
+  const originalItem = cart[index];
+  if (!originalItem || originalItem.cantidad <= 1) return;
+
+  originalItem.cantidad -= 1;
+  const newItem = JSON.parse(JSON.stringify(originalItem));
+  newItem.cantidad = 1;
+  newItem.uuid = Date.now() + Math.random();
+  cart.push(newItem);
+  updateCartUI();
+
+  const newIndex = cart.length - 1;
+  document.getElementById("config-index").value = newIndex;
+  document.getElementById("config-qty").value = 1;
+  document.getElementById("btn-split-item").style.display = "none";
+
+  calculateModalTotal();
+  alert("✅ Item separado.");
+}
+
 function updateCartUI() {
   const container = document.getElementById("cart-container");
   let total = 0;
@@ -414,7 +460,6 @@ function updateCartUI() {
     .map((item, index) => {
       const subtotal = item.precio * item.cantidad;
       total += subtotal;
-
       const iconService = item.tipoServicio === "LLEVAR" ? "🛍️" : "🍽️";
       const classService =
         item.tipoServicio === "LLEVAR" ? "text-primary" : "text-success";
@@ -446,19 +491,32 @@ function updateCartUI() {
 }
 
 window.setOpeningBalance = async function () {
+  if (!currentUser) return checkLogin();
   calcularTurno();
-  const key = `apertura_${currentTurnData.fechaComercial}_T${currentTurnData.idTurno}`;
-  const currentVal = localStorage.getItem(key) || "0";
   const input = prompt(
-    `💰 FONDO DE CAJA (Turno ${currentTurnData.idTurno})\n\nIngrese monto inicial:`,
-    currentVal
+    `💰 FONDO DE CAJA (Turno ${currentTurnData.idTurno})\n\nIngrese monto inicial:`
   );
   if (input !== null) {
     const amount = parseInt(input.replace(/\D/g, "")) || 0;
-    localStorage.setItem(key, amount);
-    if (window.printOpeningTicket) {
-      const cajero = currentUser ? currentUser.Nombre : "Admin";
-      await window.printOpeningTicket(amount, cajero, currentTurnData.idTurno);
+    const payload = {
+      action: "save_opening",
+      fecha: currentTurnData.fechaComercial,
+      turno: currentTurnData.idTurno,
+      monto: amount,
+      usuario: currentUser.Nombre,
+    };
+    try {
+      await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+      if (window.printOpeningTicket) {
+        await window.printOpeningTicket(
+          amount,
+          currentUser.Nombre,
+          currentTurnData.idTurno
+        );
+      }
+      alert("✅ Apertura guardada.");
+    } catch (e) {
+      alert("Error guardando apertura.");
     }
   }
 };
@@ -514,7 +572,6 @@ window.calculateMixed = function () {
   const c = parseInt(document.getElementById("mix-cash").value) || 0;
   const t = parseInt(document.getElementById("mix-card").value) || 0;
   const tr = parseInt(document.getElementById("mix-transfer").value) || 0;
-
   const diff = total - (c + t + tr);
   const lbl = document.getElementById("mix-remaining");
   if (diff > 0) {
@@ -547,11 +604,6 @@ async function processSale() {
     if (c + t + tr !== total) return alert("⚠️ El pago no cuadra.");
     finalPaymentString = `MIXTO|E:${c}|T:${t}|Tr:${tr}`;
   }
-
-  const serviceRadio = document.querySelector(
-    'input[name="serviceType"]:checked'
-  );
-  const serviceType = serviceRadio ? serviceRadio.value : "PARA SERVIR";
 
   bootstrap.Modal.getInstance(document.getElementById("paymentModal")).hide();
   calcularTurno();
@@ -597,6 +649,7 @@ async function processSale() {
   cart = [];
   updateCartUI();
 }
+
 async function saveToDatabase(payload) {
   try {
     await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
@@ -634,14 +687,98 @@ async function showDailyReport() {
   }
 }
 
+// 1. Modificar renderReportUI para agregar botón de Guardado
 function renderReportUI(data) {
   const fmt = (n) => formatter.format(n);
-  document.getElementById(
-    "report-body"
-  ).innerHTML = `<h5 class="text-center">Total Día: <b>${fmt(
-    data.gran_total
-  )}</b></h5>`;
+
+  // Botón para guardar el cierre en la nube
+  const btnGuardar = `
+        <div class="d-grid mt-3">
+            <button class="btn btn-danger btn-lg" onclick="confirmAndSaveZ()">🔒 CERRAR TURNO Y GUARDAR</button>
+        </div>
+    `;
+
+  document.getElementById("report-body").innerHTML = `
+        <h5 class="text-center fw-bold">RESUMEN DEL DÍA</h5>
+        <div class="text-center mb-3">Total Día: <b>${fmt(
+          data.gran_total
+        )}</b></div>
+        ${btnGuardar}
+        <!-- <div class="text-center mt-2 text-muted small">Esto guardará el detalle en 'RecuentoDiario' y 'Cierres_Z'</div> -->
+    `;
 }
+
+// 2. Función para ejecutar el guardado
+async function confirmAndSaveZ() {
+  if (!currentReportData) return;
+  if (!currentUser) return checkLogin();
+
+  if (
+    !confirm(
+      "¿Estás seguro de CERRAR el turno?\n\nEsto guardará la información en la base de datos y no se podrá modificar."
+    )
+  )
+    return;
+
+  // Preparar payload
+  const payload = {
+    action: "save_z_report",
+    fecha: currentTurnData.fechaComercial,
+    turno: currentTurnData.idTurno,
+    usuario: currentUser.Nombre,
+    reporte: currentReportData, // Enviamos el reporte calculado actual
+  };
+
+  try {
+    // Bloquear UI
+    document.getElementById("report-body").innerHTML =
+      '<div class="text-center"><div class="spinner-border"></div><p>Guardando Cierre...</p></div>';
+
+    const response = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    const result = await response.json();
+
+    if (result.status === "success") {
+      alert("✅ TURNO CERRADO CORRECTAMENTE");
+      // Imprimir
+      printReportAction();
+    } else {
+      alert("⚠️ " + result.message);
+      // Recargar vista reporte
+      showDailyReport();
+    }
+  } catch (e) {
+    alert("Error de conexión");
+    showDailyReport();
+  }
+}
+
+// 3. Función EXTRA: Recuperar histórico (Para usarlo en el futuro, podrías poner un botón 'Buscar' en la UI)
+async function fetchHistoricalZ(fecha, turno) {
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "get_history_z",
+        fecha: fecha,
+        turno: turno,
+      }),
+    });
+    const result = await response.json();
+
+    if (result.status === "success") {
+      // Usamos la misma función de impresión que ya tienes
+      window.printDailyReport(result.data);
+    } else {
+      alert(result.message);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 async function printReportAction() {
   const modalElement = document.getElementById("reportModal");
   const modalInstance = bootstrap.Modal.getInstance(modalElement);
@@ -651,6 +788,7 @@ async function printReportAction() {
       await window.printDailyReport(currentReportData);
     }, 300);
 }
+
 function startAutoUpdate() {
   setInterval(() => {
     if (cart.length === 0) loadSystemData(true);
@@ -660,6 +798,7 @@ function startAutoUpdate() {
     checkAutoShiftChange();
   }, 30000);
 }
+
 function checkAutoShiftChange() {
   const ahora = new Date();
   const santiagoStr = ahora.toLocaleString("en-US", {
@@ -675,9 +814,226 @@ function checkAutoShiftChange() {
     }
   }
 }
+
 window.manualShiftChange = function () {
   if (cart.length > 0) {
     if (!confirm("⚠️ Hay venta en curso. ¿Cambiar turno?")) return;
   }
   window.location.reload(true);
 };
+
+// ==========================================
+// SECCIÓN ADMINISTRACIÓN
+// ==========================================
+
+// 1. ABRIR PANEL
+function openAdminPanel() {
+  // Opcional: Pedir PIN extra para seguridad
+  // const pin = prompt("Ingrese PIN de Administrador:");
+  // if(pin !== "1234") return alert("Acceso denegado");
+
+  populateAdminCategories(); // Cargar categorías en el select
+  renderAdminProductList(); // Cargar tabla
+  new bootstrap.Modal(document.getElementById("adminModal")).show();
+}
+
+// --- PESTAÑA 1: HISTORIAL Z ---
+
+async function searchHistoryZ() {
+  const fecha = document.getElementById("hist-date").value;
+  const turno = document.getElementById("hist-turno").value;
+  const area = document.getElementById("history-result-area");
+
+  if (!fecha) return alert("Seleccione una fecha");
+
+  area.innerHTML =
+    '<div class="spinner-border text-primary"></div><br>Buscando...';
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "get_history_z",
+        fecha: fecha,
+        turno: turno,
+      }),
+    });
+    const result = await response.json();
+
+    if (result.status === "success") {
+      // Guardamos temporalmente para imprimir
+      currentReportData = result.data;
+
+      // Mostrar resumen visual simple
+      area.innerHTML = `
+                <div class="alert alert-success">
+                    <h5>✅ Reporte Encontrado</h5>
+                    <p>Fecha: ${result.data.fecha}</p>
+                    <p class="fs-4 fw-bold">Total: ${formatter.format(
+                      result.data.gran_total
+                    )}</p>
+                    <button class="btn btn-dark mt-2" onclick="reprintHistory()">🖨️ Reimprimir Ticket Z</button>
+                </div>
+            `;
+    } else {
+      area.innerHTML = `<div class="alert alert-warning">❌ ${result.message}</div>`;
+    }
+  } catch (e) {
+    area.innerHTML = `<div class="alert alert-danger">Error de conexión</div>`;
+  }
+}
+
+function reprintHistory() {
+  if (currentReportData && window.printDailyReport) {
+    window.printDailyReport(currentReportData);
+  }
+}
+
+// --- PESTAÑA 2: GESTIÓN PRODUCTOS ---
+
+// Variable global temporal para todos los productos (activos e inactivos)
+// Necesitamos que loadSystemData traiga TODOS, no solo los activos.
+// *IMPORTANTE*: Voy a modificar ligeramente loadSystemData abajo para que guarde todo en db.allRawProducts
+
+function renderAdminProductList() {
+  const filter = document
+    .getElementById("admin-search-prod")
+    .value.toUpperCase();
+  const tbody = document.getElementById("admin-prod-list");
+
+  // Usamos db.allRawProducts si existe, si no, usamos una petición fetch nueva o modificamos loadSystemData
+  // Para no romper lo actual, asumiremos que modificamos loadSystemData (ver punto 3 más abajo)
+
+  const list = db.allRawProducts || [];
+
+  let html = "";
+  list.forEach((p) => {
+    if (p.Nombre.toUpperCase().includes(filter)) {
+      const statusBadge =
+        String(p.Activo).toUpperCase() === "TRUE"
+          ? '<span class="badge bg-success">Activo</span>'
+          : '<span class="badge bg-secondary">Inactivo</span>';
+
+      const kitchenBadge =
+        String(p.Imprimir_en_Cocina).toUpperCase() === "TRUE" ? "👨‍🍳" : "";
+
+      html += `
+                <tr>
+                    <td class="fw-bold">${p.Nombre}</td>
+                    <td>${p.Categoria}</td>
+                    <td>${formatter.format(p.Precio)}</td>
+                    <td>${kitchenBadge}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="openProductForm('edit', '${
+                          p.ID_Producto
+                        }')">✏️</button>
+                    </td>
+                </tr>
+            `;
+    }
+  });
+  tbody.innerHTML = html;
+}
+
+function populateAdminCategories() {
+  const select = document.getElementById("pf-cat");
+  // Usamos las categorías existentes + las técnicas
+  const cats = db.categorias.map((c) => c.Nombre);
+  // Aseguramos que estén las técnicas
+  ["AGREGADOS", "ELIMINA", "CAMBIA"].forEach((c) => {
+    if (!cats.includes(c)) cats.push(c);
+  });
+
+  select.innerHTML = cats
+    .map((c) => `<option value="${c}">${c}</option>`)
+    .join("");
+}
+
+function openProductForm(mode, id) {
+  const modal = new bootstrap.Modal(document.getElementById("prodFormModal"));
+
+  if (mode === "new") {
+    document.getElementById("prodFormTitle").innerText = "Nuevo Producto";
+    document.getElementById("pf-id").value = "NEW";
+    document.getElementById("pf-name").value = "";
+    document.getElementById("pf-price").value = "";
+    document.getElementById("pf-order").value = "99";
+    document.getElementById("pf-active").checked = true;
+    document.getElementById("pf-kitchen").checked = false;
+  } else {
+    const prod = db.allRawProducts.find((p) => p.ID_Producto === id);
+    if (!prod) return;
+
+    document.getElementById("prodFormTitle").innerText =
+      "Editar: " + prod.Nombre;
+    document.getElementById("pf-id").value = prod.ID_Producto;
+    document.getElementById("pf-name").value = prod.Nombre;
+    document.getElementById("pf-cat").value = prod.Categoria;
+    // Limpiar precio de simbolos
+    document.getElementById("pf-price").value = String(prod.Precio).replace(
+      /\D/g,
+      ""
+    );
+    document.getElementById("pf-order").value = prod.Orden;
+    document.getElementById("pf-color").value = prod.ColorBoton || "primary";
+    document.getElementById("pf-active").checked =
+      String(prod.Activo).toUpperCase() === "TRUE";
+    document.getElementById("pf-kitchen").checked =
+      String(prod.Imprimir_en_Cocina).toUpperCase() === "TRUE";
+  }
+
+  modal.show();
+}
+
+async function saveProductForm() {
+  const id = document.getElementById("pf-id").value;
+  const isNew = id === "NEW";
+
+  const productData = {
+    ID_Producto: isNew ? `PROD-${Date.now()}` : id,
+    Nombre: document.getElementById("pf-name").value,
+    Categoria: document.getElementById("pf-cat").value,
+    Precio: document.getElementById("pf-price").value,
+    Orden: document.getElementById("pf-order").value,
+    Color: document.getElementById("pf-color").value,
+    Activo: document.getElementById("pf-active").checked, // Boolean
+    Cocina: document.getElementById("pf-kitchen").checked, // Boolean
+  };
+
+  if (!productData.Nombre || !productData.Precio)
+    return alert("Nombre y Precio obligatorios");
+
+  // UI Feedback
+  const btn = document.querySelector("#prodFormModal .btn-primary");
+  const oldText = btn.innerText;
+  btn.innerText = "Guardando...";
+  btn.disabled = true;
+
+  try {
+    const action = isNew ? "create_product" : "update_product";
+    const response = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: action, producto: productData }),
+    });
+    const result = await response.json();
+
+    if (result.status === "success") {
+      alert("✅ Guardado correctamente");
+      bootstrap.Modal.getInstance(
+        document.getElementById("prodFormModal")
+      ).hide();
+      // Recargar datos para actualizar la POS y la Tabla Admin
+      loadSystemData(true);
+      // Pequeño hack: esperar a que loadSystemData termine (es async pero no lo esperamos aquí)
+      setTimeout(renderAdminProductList, 2000);
+    } else {
+      alert("Error: " + result.message);
+    }
+  } catch (e) {
+    alert("Error de conexión");
+  } finally {
+    btn.innerText = oldText;
+    btn.disabled = false;
+  }
+}
