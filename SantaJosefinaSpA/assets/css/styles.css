@@ -510,41 +510,285 @@ footer {
     @keyframes spin{to{transform:rotate(360deg);}}
     .hidden{display:none!important;}
 
-    /* PRINT */
-    .print-only{display:none;}
-    @page{ size:Letter; margin:20mm; }
-    @media print{
-      #header, #footer, .no-print{display:none!important;}
-      body{max-width:100%;background:#fff;color:#000;font-size:10pt;line-height:1.4em;}
-      .card{border:none;}
-      thead{display:table-header-group;}
-      tr, img{page-break-inside:avoid;}
-      .print-only{display:block;text-align:justify;}
-      .print-short .hide-on-short{display:none!important;}
-      .salto{page-break-before:always;}
+    /* =========================================
+   BLOQUE DE IMPRESIÓN / PDF OPTIMIZADO
+   (Reemplaza el final de tu archivo con esto)
+   ========================================= */
 
-      /* Portada */
-      .print-cover{page-break-after:always;}
-      .print-cover .brand-logo{width:160px;margin-bottom:40px;}
-      .print-cover h1{font-size:36px;margin:40px 0 8px;}
-      .print-cover h2{font-size:22px;font-weight:400;color:#111;}
-      .print-cover .foot{position:fixed;bottom:20mm;left:0;right:0;text-align:center;font-size:12px;}
+/* 1. Ocultar en pantalla lo que es exclusivo de impresión */
+.print-only {
+    display: none !important;
+}
 
-      /* Títulos azules */
-      .print-section h2.title{color:var(--accent);font-size:28px;margin:0 0 14px;}
-      .print-section h3.stitle{color:var(--accent);font-size:18px;margin:18px 0 8px;}
+/* Configuración de página general */
+@page {
+    size: Letter;
+    margin: 1.5cm; /* Margen global del PDF */
+}
 
-      /* Tabla honorarios */
-      .print-table{width:100%;border-collapse:collapse;margin-top:10px;}
-      .print-table th{background:var(--accent);color:#fff;border:1px solid var(--accent);}
-      .print-table td{border:1px solid var(--line);}
-
-      /* Footer numeración */
-      .print-footer{
-        position:fixed;bottom:10mm;left:0;right:0;
-        display:flex;justify-content:center;font-size:12px;color:#333;
-      }
-      .print-footer .pnum::after{
-        content:"Propuesta Comercial | " attr(data-name) " | Página " counter(page) " de " counter(pages);
-      }
+/* Reglas que solo aplican al generar PDF/Imprimir */
+@media print {
+    
+    /* --- Resets y Ocultos --- */
+    #header, #footer, .no-print, .sidebar, .main-header, .btn-primary, .btn-outline {
+        display: none !important;
     }
+
+    body {
+        max-width: 100%;
+        background: #fff;
+        color: #000;
+        font-size: 11pt; /* Tamaño legible para papel */
+        line-height: 1.5;
+        margin: 0;
+        -webkit-print-color-adjust: exact; /* Importante para Chrome/Edge: imprime fondos de color */
+        print-color-adjust: exact;
+    }
+
+    /* Habilitar elementos exclusivos de impresión */
+    .print-only {
+        display: block !important;
+    }
+
+    /* --- CLASE 1: PRINT-COVER (Portada) --- */
+    /* Centra el contenido vertical y horizontalmente en la primera hoja */
+    .print-cover {
+        width: 100%;
+        height: 100vh; /* Altura completa de la hoja */
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* Centrado vertical */
+        align-items: center;     /* Centrado horizontal */
+        text-align: center;
+        page-break-after: always; /* Fuerza salto de página al terminar */
+        break-after: page;
+    }
+
+    /* Estilos internos de la portada */
+    .print-cover .brand-logo {
+        width: 180px;
+        margin-bottom: 2rem;
+    }
+    .print-cover h1 {
+        color: var(--brand);
+        font-size: 32px;
+        margin: 0 0 1rem 0;
+    }
+    .print-cover h2 {
+        color: var(--muted);
+        font-size: 20px;
+        font-weight: 400;
+    }
+
+    /* --- CLASE 2: PRINT-SECTION (Secciones) --- */
+    /* Evita que los títulos o párrafos se corten al final de la hoja */
+    .print-section {
+        width: 100%;
+        margin-bottom: 30px;
+        page-break-inside: avoid; /* Trata de no romper el bloque */
+        break-inside: avoid;
+    }
+
+    .print-section h2.title {
+        color: var(--accent); /* Tu azul definido */
+        border-bottom: 2px solid var(--line);
+        padding-bottom: 5px;
+        margin-bottom: 15px;
+        font-size: 22px;
+    }
+
+    /* --- CLASE 3: PRINT-TABLE (Tablas) --- */
+    .print-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        font-size: 10pt;
+    }
+
+    .print-table th {
+        background-color: var(--accent) !important; /* Fondo azul */
+        color: #fff !important; /* Texto blanco */
+        font-weight: bold;
+        padding: 8px;
+        text-align: left;
+        border: 1px solid var(--accent);
+    }
+
+    .print-table td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        color: #333;
+    }
+
+    /* Evitar que una fila se rompa a la mitad entre dos hojas */
+    .print-table tr {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+    
+    /* Alternar color filas (opcional, ayuda a la lectura) */
+    .print-table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    /* --- Footer de numeración (Tu lógica original mejorada) --- */
+    .print-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 9pt;
+        color: var(--muted);
+        border-top: 1px solid var(--line);
+        padding-top: 5px;
+    }
+    
+    /* Genera: "Propuesta Comercial | Pagina 1 de X" */
+    .print-footer::after {
+        content: attr(data-text) " | Página " counter(page) " de " counter(pages);
+    }
+}
+
+/* =========================================
+   ESTILOS DE IMPRESIÓN (Propuesta Comercial)
+   ========================================= */
+
+/* Ocultar elementos de navegación en pantalla */
+.print-only { display: none !important; }
+
+@page {
+    size: Letter;
+    margin: 2cm; /* Margen estándar elegante */
+}
+
+@media print {
+    /* Ocultar interfaz web */
+    #header, #footer, .no-print, .sidebar, .navbar, .btn-primary, .btn-outline {
+        display: none !important;
+    }
+
+    body {
+        background: #fff;
+        font-family: "Segoe UI", sans-serif; /* Tu fuente original */
+        color: #333;
+        font-size: 11pt;
+        line-height: 1.6; /* Mayor interlineado para lectura fácil */
+        margin: 0;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .print-only { display: block !important; }
+
+    /* --- PORTADA (Page 1) --- */
+    .print-cover {
+        width: 100%;
+        height: 90vh; /* Un poco menos de 100 para evitar desbordes */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        page-break-after: always;
+    }
+
+    .print-cover h1 {
+        color: var(--brand); /* Tu azul oscuro */
+        font-size: 28pt;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .print-cover h2 {
+        color: var(--accent); /* Tu color de acento */
+        font-size: 18pt;
+        font-weight: 300;
+        margin-bottom: 40px;
+        border-bottom: 1px solid var(--accent);
+        display: inline-block;
+        padding-bottom: 10px;
+    }
+
+    .print-cover h3 {
+        color: var(--muted);
+        font-size: 14pt;
+        margin-top: 60px;
+    }
+
+    /* --- SECCIONES DE TEXTO --- */
+    .print-section {
+        margin-bottom: 25px;
+        text-align: justify; /* Justificado para look formal */
+        page-break-inside: avoid;
+    }
+
+    .print-section h3.title {
+        color: var(--brand);
+        font-size: 16pt;
+        border-bottom: 2px solid var(--line);
+        margin-bottom: 15px;
+        padding-bottom: 5px;
+    }
+
+    .print-section ul {
+        list-style: none;
+        padding-left: 0;
+    }
+    
+    .print-section ul li {
+        margin-bottom: 8px;
+        padding-left: 15px;
+        border-left: 3px solid var(--accent); /* Detalle visual elegante */
+    }
+
+    /* --- TABLA DE HONORARIOS --- */
+    .print-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        font-size: 10pt;
+    }
+
+    .print-table th {
+        background-color: var(--brand) !important;
+        color: #fff !important;
+        padding: 10px;
+        text-transform: uppercase;
+        font-size: 9pt;
+        letter-spacing: 1px;
+    }
+
+    .print-table td {
+        border-bottom: 1px solid #ddd;
+        padding: 10px;
+    }
+
+    /* Alineación específica para precios */
+    .print-table .text-right {
+        text-align: right;
+    }
+    .print-table .text-center {
+        text-align: center;
+    }
+
+    .print-table tr:last-child td {
+        border-bottom: 2px solid var(--brand);
+    }
+
+    /* --- FIRMA (Final del documento) --- */
+    .signature-block {
+        margin-top: 60px;
+        page-break-inside: avoid;
+    }
+    .signature-line {
+        width: 250px;
+        border-top: 1px solid #000;
+        margin-bottom: 10px;
+    }
+    .signature-text {
+        font-weight: bold;
+        color: var(--brand);
+    }
+}

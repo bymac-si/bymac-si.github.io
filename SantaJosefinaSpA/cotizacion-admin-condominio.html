@@ -4,13 +4,56 @@
   <meta charset="UTF-8">
   <title>Propuesta Comercial — Administración de Condominios</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="assets/js/app.js"></script>
-  <script>/* requireAuth();  <-- Comentado para pruebas locales si es necesario */</script>
+  <script>/* requireAuth(); */</script>
+
+  <style>
+    /* =========================================
+       AJUSTES TÉCNICOS PARA PDF (INVISIBLE)
+       ========================================= */
+    
+    /* 1. Limpieza: Ocultar controles y mostrar lo imprimible */
+    body.generating-pdf .no-print { display: none !important; }
+    body.generating-pdf .print-only { display: block !important; }
+    body.generating-pdf { background: white !important; }
+    
+    /* 2. Estructura: Usar todo el ancho disponible */
+    body.generating-pdf .container { 
+        width: 98% !important; 
+        max-width: none !important; 
+        margin: 0 !important; 
+        padding: 0 !important; 
+    }
+
+    /* 3. LOGO: Tamaño controlado (Igual que en impresión) */
+    body.generating-pdf .brand-logo {
+        width: 60mm !important; 
+        height: auto !important; 
+        /* Mantiene la posición absoluta original */
+    }
+
+    /* 4. PORTADA: Forzar salto de página después de la carátula */
+    body.generating-pdf .print-cover {
+        position: relative;
+        min-height: 260mm; /* Ocupa casi toda la hoja */
+        width: 100%;
+        page-break-after: always; /* SALTO DE PÁGINA OBLIGATORIO */
+    }
+
+    /* 5. Márgenes laterales para que el texto no toque el borde */
+    body.generating-pdf .print-section {
+        padding-left: 15mm !important;
+        padding-right: 15mm !important;
+    }
+  </style>
 </head>
 <body>
 <div id="header" class="no-print"></div>
-<main class="container">
+<main class="container" id="contentToPrint">
   <h1 class="page-title no-print">Propuesta Comercial — Comunidad <span id="printNombre">—</span></h1>
 
   <div class="card no-print">
@@ -48,7 +91,7 @@
                style="font-size: 14px; width: 90%;">
       </div>
       <div>
-        <label class="label">Factor Comuna (TablaTarifas)</label>
+        <label class="label">Factor Comuna</label>
         <input id="inpFactor" class="mono" readonly style="font-size: 14px; width: 90%;">
       </div>
       <div>
@@ -56,9 +99,12 @@
         <input id="inpUTM" class="mono" placeholder="Ej: 67.000" inputmode="decimal" style="font-size: 14px; width: 90%;">
       </div>
     </div>
-    <div class="btns">
-      <button class="btn-primary" onclick="window.location.reload()">Actualizar</button>
-      <button class="btn-primary" onclick="window.print()">Imprimir</button>
+
+    <div class="btns" style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+      <button class="btn-primary" onclick="window.location.reload()" style="background-color: #6c757d;">⟳ Reiniciar</button>
+      <button class="btn-primary" onclick="window.print()">🖨 Imprimir</button>
+      <button class="btn-primary" onclick="compartirPDF('whatsapp')" style="background-color: #25D366; border-color: #25D366;">📱 PDF a WhatsApp</button>
+      <button class="btn-primary" onclick="compartirPDF('email')" style="background-color: #007bff; border-color: #007bff;">📧 PDF por Correo</button>
     </div>
   </div>
 
@@ -75,7 +121,7 @@
 
     <div id="secHonorarios" class="card no-print">
       <h2 class="section-title">Honorarios estimados</h2>
-      <p class="muted">Fórmula Ley N°21.442 (según factor y N° de unidades)</p>
+      <p class="muted">Fórmula Ley N°21.442</p>
       <table>
         <thead>
           <tr>
@@ -93,8 +139,9 @@
   </div>
 
   <section class="print-only print-cover">
-    <img class="brand-logo" src="assets/img/logo_santajosefina.png" alt="Santa Josefina SpA" style="position: absolute; top: -5mm; left: 10mm;">
-    <span style="position: relative; top: 50mm;">
+    <img class="brand-logo" src="assets/img/logo_santajosefina.png" alt="Santa Josefina SpA" style="position: absolute; top: 10mm; left: 10mm;">
+    
+    <span style="position: relative; top: 60mm; left: 10mm;">
       <h1>Propuesta Comercial</h1>
       <h2 id="coverSub">Condominio —</h2>
     </span>
@@ -163,165 +210,115 @@
       IVA: <span id="p_unit_iva" class="mono">—</span> ·
       Total: <span id="p_unit_total" class="mono">—</span>
     </p>
+  
+    <div style="margin-top: 50px; page-break-inside: avoid;">
+      <p style="text-align: left;">Atentamente,</p><br>
+      <p style="font-weight: bold; text-align: center;">Marcos Castro Abarca</p>
+      <p style="text-align: center;">Director de Santa Josefina SpA</p>
+    </div>
   </section>
+
 </main>
 
-<p class="print-only" style="text-align: left;">Atentamente,</p><br>
-  <p class="print-only" style="font-weight: bold; text-align: center;">Marcos Castro Abarca</p>
-  <p class="print-only" style="text-align: center;">Director de Santa Josefina SpA</p>
-
 <div id="pageSpinner" class="spinner-backdrop no-print" aria-hidden="true">
-  <div class="spinner-card">
-    <div class="spinner"></div>
-    <div id="spinnerText">Cargando datos...</div>
-  </div>
+  <div class="spinner-card"><div class="spinner"></div><div id="spinnerText">Cargando datos...</div></div>
 </div>
-
 <div id="footer" class="no-print"></div>
 
 <script>
 /* ===== Utilidades ===== */
-function showSpinner(msg){ const sp=document.getElementById('pageSpinner'); const txt=document.getElementById('spinnerText'); if(msg) txt.textContent=msg; sp.style.display='flex'; }
-function hideSpinner(){ const sp=document.getElementById('pageSpinner'); sp.style.display='none'; }
+function showSpinner(msg){ document.getElementById('pageSpinner').style.display='flex'; if(msg) document.getElementById('spinnerText').textContent=msg; }
+function hideSpinner(){ document.getElementById('pageSpinner').style.display='none'; }
 function clp(v){ return "$" + new Intl.NumberFormat("es-CL",{maximumFractionDigits:0}).format(Number(v||0)); }
 function norm(s){ return (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim(); }
-function printShort(){ document.body.classList.add('print-short'); window.print(); setTimeout(()=>document.body.classList.remove('print-short'), 800); }
-
-/* RUT helpers */
 function cleanRut(r){ return (r||'').toString().replace(/[^0-9kK]/g,'').toUpperCase(); }
 function rutDv(num){ let M=0,S=1; for(; num; num=Math.floor(num/10)) S=(S+num%10*(9-M++%6))%11; return S ? String(S-1) : 'K'; }
 function isRutValid(rut){ const s=cleanRut(rut); if(s.length<2) return false; const body=s.slice(0,-1), dv=s.slice(-1); const calc=rutDv(parseInt(body,10)||0); return String(calc)===String(dv); }
 function formatRut(r){ const s=cleanRut(r); if(s.length<2) return r||''; const body=s.slice(0,-1), dv=s.slice(-1); const withDots=body.replace(/\B(?=(\d{3})+(?!\d))/g,'.'); return withDots+'-'+dv; }
 
-/* Lectura payload (sessionStorage + querystring) */
+/* Read / Boot / Fetch Logic */
 function readIncoming(){
-  let data=null;
-  try{ data = JSON.parse(sessionStorage.getItem('cotizacionProspecto')||'null'); }catch(e){}
-  const qs = new URLSearchParams(location.search);
-  const payload = {
-    prospectoId: (data?.prospectoId) || qs.get('prospectoId') || null,
-    nombre:      (data?.nombre)      || qs.get('nombre')      || '',
-    comuna:      (data?.comuna)      || qs.get('comuna')      || '',
-    unidades:    (data?.unidades)    || Number(qs.get('unidades')||0),
-    direccion:   (data?.direccion)   || qs.get('direccion')   || '',
-    rut:         (data?.rut)         || qs.get('rut')         || '',
-    factor:      (data?.factor ?? (qs.get('factor')?Number(qs.get('factor')):null)),
-    utm:         (data?.utm    ?? (qs.get('utm')?Number(qs.get('utm')):null)),
+  let data=null; try{ data=JSON.parse(sessionStorage.getItem('cotizacionProspecto')||'null');}catch(e){}
+  const qs=new URLSearchParams(location.search);
+  return {
+    prospectoId: (data?.prospectoId)||qs.get('prospectoId')||null,
+    nombre: (data?.nombre)||qs.get('nombre')||'',
+    comuna: (data?.comuna)||qs.get('comuna')||'',
+    unidades: (data?.unidades)||Number(qs.get('unidades')||0),
+    direccion: (data?.direccion)||qs.get('direccion')||'',
+    rut: (data?.rut)||qs.get('rut')||'',
+    factor: (data?.factor??(qs.get('factor')?Number(qs.get('factor')):null)),
+    utm: (data?.utm??(qs.get('utm')?Number(qs.get('utm')):null)),
   };
-  return payload;
 }
 
-/* Estado */
 let TARIFAS=[], PROSPECTOS=[], COPROS=[];
 let origen='prospecto', entidadSel=null, factor=0, nUnidades=0, utmCLP=0;
 
-/* Cálculo honorarios — Ley 21.442 (corregida) */
 function calcularNeto(unidades, factor, utm){
   if(!(factor>0 && utm>0)) return 0;
-  const base = factor * 1.75 * utm;
+  const base = factor*1.75*utm;
   if(unidades<=20) return base;
-  const extra = unidades - 20;
-  return base + (extra * factor * 1.75 * utm * 0.013);
+  return base + ((unidades-20)*factor*1.75*utm*0.013);
 }
 
-/* Resumen impresión (compatibilidad con llamados previos) */
-function updatePrintResumen(neto, iva, total){
-  const mN = document.getElementById("printMontoNeto");
-  const mI = document.getElementById("printIVA");
-  const mT = document.getElementById("printTotal");
-  if(mN) mN.textContent = clp(neto||0);
-  if(mI) mI.textContent = clp(iva||0);
-  if(mT) mT.textContent = clp(total||0);
-}
+function updatePrintResumen(neto, iva, total){ /* Compatibilidad */ }
 window.updatePrintResume = updatePrintResumen; 
-
-/* Fallbacks de fetch */
 async function safeFetch(table){ try{ return await fetchData(table); }catch(e){ return []; } }
 
-/* Boot con failsafe anti-spinning */
 async function boot(){
-  showSpinner('Cargando datos...');
+  showSpinner('Cargando...');
   try{
-    [TARIFAS, PROSPECTOS, COPROS] = await Promise.all([
-      safeFetch('TablaTarifas'),
-      safeFetch('ProspectosCopro'),
-      safeFetch('Copropiedades')
-    ]);
-
-    const selOrigen = document.getElementById('selOrigen');
-    const selEntidad= document.getElementById('selEntidad');
-    selOrigen.onchange = () => { origen=selOrigen.value; renderEntidadOptions(); onEntidadChange(); };
-    selEntidad.onchange = onEntidadChange;
+    [TARIFAS, PROSPECTOS, COPROS] = await Promise.all([safeFetch('TablaTarifas'), safeFetch('ProspectosCopro'), safeFetch('Copropiedades')]);
+    
+    const selOrigen=document.getElementById('selOrigen');
+    const selEntidad=document.getElementById('selEntidad');
+    selOrigen.onchange=()=>{ origen=selOrigen.value; renderEntidadOptions(); onEntidadChange(); };
+    selEntidad.onchange=()=>onEntidadChange();
 
     renderEntidadOptions();
-
-    // Precarga desde session/query
-    const it = readIncoming();
+    const it=readIncoming();
     if(it.prospectoId){
-      const idx = [...selEntidad.options].findIndex(o => String(o.value)===String(it.prospectoId));
-      if(idx>=0) selEntidad.selectedIndex = idx;
+       const idx=[...selEntidad.options].findIndex(o=>String(o.value)===String(it.prospectoId));
+       if(idx>=0) selEntidad.selectedIndex=idx;
     }
     onEntidadChange(it);
 
     document.getElementById('inpUTM').addEventListener('input', ()=>{
-      const raw=(inpUTM.value||'').toString().replaceAll('.','').replace(',','.');
+      const raw=(document.getElementById('inpUTM').value||'').replaceAll('.','').replace(',','.');
       utmCLP=parseFloat(raw)||0;
-      document.getElementById('cxUTM').textContent = utmCLP>0 ? clp(utmCLP) : '—';
+      document.getElementById('cxUTM').textContent=utmCLP>0?clp(utmCLP):'—';
       renderHonorarios();
     });
-  }catch(err){
-    console.error('boot error:', err);
-    alert('Error al cargar datos: ' + (err.message||err));
-  }finally{
-    hideSpinner();
-  }
+  }catch(e){ alert('Error: '+e.message); }finally{ hideSpinner(); }
 }
-setTimeout(()=>hideSpinner(), 8000); 
-window.addEventListener('error', ()=>hideSpinner());
-window.addEventListener('unhandledrejection', ()=>hideSpinner());
 
-/* Cargar header/footer y arrancar */
 document.addEventListener('DOMContentLoaded', async ()=>{
   try{ document.getElementById('header').innerHTML = await (await fetch('header.html')).text(); }catch(e){}
   try{ document.getElementById('footer').innerHTML = await (await fetch('footer.html')).text(); }catch(e){}
   boot();
 });
 
-/* Poblado de opciones */
 function renderEntidadOptions(){
-  const selEntidad= document.getElementById('selEntidad');
-  let items = (origen==='prospecto' && PROSPECTOS.length) ? PROSPECTOS : COPROS;
-  selEntidad.innerHTML = items.map(x=>`<option value="${getKeyVal(x)}">${x.Nombre||x.RazonSocial||'—'}</option>`).join('');
+  const sel=document.getElementById('selEntidad');
+  let items=(origen==='prospecto'&&PROSPECTOS.length)?PROSPECTOS:COPROS;
+  sel.innerHTML=items.map(x=>`<option value="${getKeyVal(x)}">${x.Nombre||x.RazonSocial||'—'}</option>`).join('');
 }
 
-function markRutValidity(rutFmt, isValid){
-  const inp = document.getElementById('inpRUT');
-  const msg = document.getElementById('rutMsg');
-  const cx  = document.getElementById('cxRUT');
-  cx.textContent = rutFmt || '—';
-  if(isValid){ inp.classList.remove('is-invalid'); msg.style.display='none'; }
-  else{ inp.classList.add('is-invalid'); msg.style.display='block'; }
-}
-
-/* CAMBIO REALIZADO: Función modificada para manejar desbloqueo de unidades */
 function onEntidadChange(prefill){
-  const selEntidad= document.getElementById('selEntidad');
-  const id = selEntidad.value;
-  const list = (origen==='prospecto' && PROSPECTOS.length) ? PROSPECTOS : COPROS;
-  entidadSel = list.find(x => String(getKeyVal(x))===String(id)) || null;
+  const sel=document.getElementById('selEntidad');
+  const list=(origen==='prospecto'&&PROSPECTOS.length)?PROSPECTOS:COPROS;
+  entidadSel=list.find(x=>String(getKeyVal(x))===String(sel.value))||null;
 
   const nombre = prefill?.nombre ?? entidadSel?.Nombre ?? entidadSel?.RazonSocial ?? '—';
   const comuna = prefill?.comuna ?? entidadSel?.Comuna ?? '—';
   const dir    = prefill?.direccion ?? entidadSel?.Direccion ?? entidadSel?.Dirección ?? '—';
   const rutRaw = prefill?.rut ?? entidadSel?.RUT ?? '—';
   const rutFmt = (rutRaw && rutRaw!=='—') ? formatRut(rutRaw) : '—';
-  const rutOK  = rutRaw && rutRaw!=='—' ? isRutValid(rutRaw) : true;
-
-  // 1. Obtener dato crudo para ver si existe o no
+  
   const rawUnidades = prefill?.unidades ?? entidadSel?.Unidades ?? entidadSel?.NUnidades ?? entidadSel?.CantidadUnidades;
   nUnidades = Number(rawUnidades || 0);
 
-  // Factor
   let f=null;
   if(prefill?.factor!=null) f = Number(prefill.factor);
   if(f==null){
@@ -329,71 +326,52 @@ function onEntidadChange(prefill){
     f = t ? Number(t.Factor||0) : 0;
   }
   factor = f;
+  if(prefill?.utm!=null){ utmCLP = Number(prefill.utm)||0; if(utmCLP>0) document.getElementById('inpUTM').value=utmCLP; }
 
-  // UTM
-  if(prefill?.utm!=null){
-    utmCLP = Number(prefill.utm)||0;
-    if(utmCLP>0) document.getElementById('inpUTM').value = utmCLP;
-  }
-
-  // Pinta campos
   document.getElementById('inpComuna').value = comuna;
   document.getElementById('inpDireccion').value = dir;
   document.getElementById('inpRUT').value = rutFmt;
   document.getElementById('inpFactor').value = factor || '';
-
-  // 2. Lógica para el input de Unidades: Si viene > 0 se bloquea, si es 0 se desbloquea
+  
+  // Lógica de desbloqueo input
   const inpU = document.getElementById('inpUnidades');
-  inpU.value = nUnidades || ''; // Si es 0 deja vacío
-
+  inpU.value = nUnidades || ''; 
   if(nUnidades > 0) {
-      inpU.readOnly = true;
-      inpU.style.backgroundColor = ''; 
-      inpU.style.border = ''; 
+      inpU.readOnly = true; inpU.style.backgroundColor = ''; inpU.style.border = ''; 
   } else {
-      inpU.readOnly = false;
-      inpU.style.backgroundColor = '#fffbeb'; // Color suave para indicar editable
-      inpU.style.border = '1px solid #aaa';
+      inpU.readOnly = false; inpU.style.backgroundColor = '#fffbeb'; inpU.style.border = '1px solid #aaa';
   }
 
-  // Pinta Resumen
+  // UI Updates
   document.getElementById('cxNombre').textContent = nombre;
   document.getElementById('cxDir').textContent    = dir;
   document.getElementById('cxComuna').textContent = comuna;
   document.getElementById('cxFactor').textContent = factor || '—';
   document.getElementById('cxUnidades').textContent = nUnidades || '—';
 
-  // Título / portada
-  const printNameEl = document.getElementById('printNombre');
-  if(printNameEl) printNameEl.textContent = nombre;
-  const coverSub = document.getElementById('coverSub');
-  if(coverSub) coverSub.textContent = nombre ? ('Condominio ' + nombre) : 'Condominio';
-
-  markRutValidity(rutFmt, rutOK);
+  const printNameEl = document.getElementById('printNombre'); if(printNameEl) printNameEl.textContent = nombre;
+  const coverSub = document.getElementById('coverSub'); if(coverSub) coverSub.textContent = nombre ? ('Condominio ' + nombre) : 'Condominio';
+  
   renderHonorarios();
 }
 
-/* Render honorarios (pantalla + impresión) */
 function renderHonorarios(){
   const tb = document.getElementById('tbodyHonorarios');
-
-  // tomar/normalizar UTM
-  const raw = (inpUTM.value||'').toString().replaceAll('.','').replace(',','.');
+  const raw = (document.getElementById('inpUTM').value||'').replaceAll('.','').replace(',','.');
   if(raw) utmCLP = parseFloat(raw)||0;
 
   if(!(factor>0) || !(utmCLP>0) || !(nUnidades>=0)){
-    tb.innerHTML = `<tr><td colspan="6" class="muted">Ingresa el valor de la UTM para ver los honorarios.</td></tr>`;
+    tb.innerHTML = `<tr><td colspan="6" class="muted">Ingresa UTM...</td></tr>`;
     document.getElementById('cxUTM').textContent = utmCLP>0 ? clp(utmCLP) : '—';
-    updatePrintResumen(0,0,0);
     setPrintTable(0,0,0,nUnidades||0);
     return;
   }
   document.getElementById('cxUTM').textContent = clp(utmCLP);
 
   const escenarios = [
-    { nombre:'Según datos del prospecto', unidades:nUnidades },
-    { nombre:'Simulación 20 unidades', unidades:20 },
-    { nombre:'Simulación 40 unidades', unidades:40 }
+    { nombre:'Según datos', unidades:nUnidades },
+    { nombre:'Simulación 20', unidades:20 },
+    { nombre:'Simulación 40', unidades:40 }
   ];
 
   tb.innerHTML = escenarios.map(sc=>{
@@ -401,9 +379,7 @@ function renderHonorarios(){
     const iva  = Math.round(neto * 0.19);
     const tot  = neto + iva;
     const unit = sc.unidades>0 ? Math.round(tot / sc.unidades) : 0;
-    const formula = sc.unidades<=20
-      ? `Factor × 1,75 × UTM`
-      : `Factor × 1,75 × UTM + (${sc.unidades} − 20) × Factor × 1,75 × UTM × 0,013`;
+    const formula = sc.unidades<=20 ? `F x 1.75 x UTM` : `F x 1.75 x UTM + extra`;
     return `<tr>
       <td>${sc.nombre}</td>
       <td class="mono">${formula}</td>
@@ -414,35 +390,68 @@ function renderHonorarios(){
     </tr>`;
   }).join('');
 
-  // primer escenario para impresión
   const neto0 = Math.round(calcularNeto(nUnidades, factor, utmCLP));
-  const iva0  = Math.round(neto0 * 0.19);
-  const tot0  = neto0 + iva0;
-  updatePrintResumen(neto0, iva0, tot0);
-  setPrintTable(neto0, iva0, tot0, nUnidades||0);
+  const iva0 = Math.round(neto0*0.19);
+  setPrintTable(neto0, iva0, neto0+iva0, nUnidades||0);
 }
 
-/* Tabla de impresión + desglose por unidad */
 function setPrintTable(neto, iva, total, unidades){
   document.getElementById('p_unidades').textContent = unidades>0 ? unidades : '—';
   document.getElementById('p_neto').textContent = clp(neto);
   document.getElementById('p_total').textContent = clp(total);
-
   const unitTotal = (unidades>0) ? Math.round(total / unidades) : 0;
   const unitNeto  = (unidades>0) ? Math.round(neto  / unidades) : 0;
   const unitIva   = (unidades>0) ? Math.round(iva   / unidades) : 0;
-
   document.getElementById('p_unit').textContent = unitTotal>0 ? clp(unitTotal) : '—';
   document.getElementById('p_unit_neto').textContent = unitNeto>0 ? clp(unitNeto) : '—';
   document.getElementById('p_unit_iva').textContent  = unitIva>0 ? clp(unitIva) : '—';
   document.getElementById('p_unit_total').textContent = unitTotal>0 ? clp(unitTotal) : '—';
 }
 
-/* CAMBIO REALIZADO: Nueva función para actualizar cálculos al escribir manualmente */
-function actualizarUnidadesManual(valor){
-  nUnidades = Number(valor) || 0;
-  document.getElementById('cxUnidades').textContent = nUnidades || '—';
-  renderHonorarios();
+function actualizarUnidadesManual(val){ nUnidades=Number(val)||0; document.getElementById('cxUnidades').textContent=nUnidades||'—'; renderHonorarios(); }
+
+/* ================== GENERACIÓN DE PDF ================== */
+async function compartirPDF(tipo) {
+    showSpinner('Generando PDF...');
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    document.body.classList.add('generating-pdf');
+    
+    const element = document.body; 
+    const nombreEntidad = entidadSel?.Nombre || entidadSel?.RazonSocial || 'Comunidad';
+    const filename = `Propuesta_${nombreEntidad.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+
+    // CONFIGURACIÓN: Márgenes estándar para replicar "Vista Previa de Impresión"
+    const opt = {
+        margin:       10, /* 10mm de margen, similar al navegador */
+        filename:     filename,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
+        jsPDF:        { unit: 'mm', format: 'letter', orientation: 'portrait' },
+        pagebreak:    { mode: ['css', 'legacy'] } /* Respeta nuestros saltos CSS */
+    };
+
+    try {
+        if (isMobile && navigator.canShare) {
+            const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+            const file = new File([pdfBlob], filename, { type: "application/pdf" });
+            if (navigator.canShare({ files: [file] })) {
+                await navigator.share({ title: 'Propuesta', text: `Propuesta para ${nombreEntidad}`, files: [file] });
+            } else { throw new Error("No sharing support"); }
+        } else {
+            await html2pdf().set(opt).from(element).save();
+            setTimeout(() => {
+                alert(`✅ PDF Descargado.\n\nEl archivo se ha guardado como "${filename}".\nArrastralo a tu correo o WhatsApp.`);
+                if(tipo === 'whatsapp') window.open(`https://wa.me/`, '_blank');
+                else window.location.href = `mailto:?subject=Propuesta ${nombreEntidad}`;
+            }, 1000);
+        }
+    } catch (err) {
+        if(isMobile) { alert("Descargando archivo (share falló)..."); html2pdf().set(opt).from(element).save(); }
+        else { console.error(err); alert("Error PDF: " + err.message); }
+    } finally {
+        document.body.classList.remove('generating-pdf');
+        hideSpinner();
+    }
 }
 </script>
 </body>
