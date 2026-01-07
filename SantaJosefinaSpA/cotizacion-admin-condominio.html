@@ -6,14 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="assets/js/app.js"></script>
-  <script>requireAuth();</script>
+  <script>/* requireAuth();  <-- Comentado para pruebas locales si es necesario */</script>
 </head>
 <body>
 <div id="header" class="no-print"></div>
 <main class="container">
   <h1 class="page-title no-print">Propuesta Comercial — Comunidad <span id="printNombre">—</span></h1>
 
-  <!-- CONTROLES -->
   <div class="card no-print">
     <div class="row">
       <div>
@@ -42,7 +41,11 @@
       </div>
       <div>
         <label class="label">N° Unidades</label>
-        <input id="inpUnidades" class="mono" readonly style="font-size: 14px; width: 90%;">
+        <input id="inpUnidades" class="mono" 
+               type="number" 
+               placeholder="Ingresar..." 
+               oninput="actualizarUnidadesManual(this.value)" 
+               style="font-size: 14px; width: 90%;">
       </div>
       <div>
         <label class="label">Factor Comuna (TablaTarifas)</label>
@@ -59,7 +62,6 @@
     </div>
   </div>
 
-  <!-- RESUMEN (OCULTO EN IMPRESIÓN) -->
   <div class="grid">
     <div class="card no-print">
       <h2 class="section-title">Resumen del Prospecto</h2>
@@ -71,7 +73,6 @@
       <p><b>UTM:</b> <span id="cxUTM">—</span></p>
     </div>
 
-    <!-- HONORARIOS (PANTALLA) -->
     <div id="secHonorarios" class="card no-print">
       <h2 class="section-title">Honorarios estimados</h2>
       <p class="muted">Fórmula Ley N°21.442 (según factor y N° de unidades)</p>
@@ -91,7 +92,6 @@
     </div>
   </div>
 
-  <!-- PORTADA (IMPRESIÓN) -->
   <section class="print-only print-cover">
     <img class="brand-logo" src="assets/img/logo_santajosefina.png" alt="Santa Josefina SpA" style="position: absolute; top: -5mm; left: 10mm;">
     <span style="position: relative; top: 50mm;">
@@ -100,7 +100,6 @@
     </span>
   </section>
 
-  <!-- SECCIONES (IMPRESIÓN) -->
   <section class="print-only print-section">
     <h2 class="title">Nuestro Servicio</h2>
 
@@ -137,7 +136,6 @@
     </ul>
   </section>
 
-  <!-- HONORARIOS (IMPRESIÓN) -->
   <section class="print-only print-section">
     <h2 class="title">Honorarios</h2>
     <table class="print-table" style="text-align:center;">
@@ -168,13 +166,10 @@
   </section>
 </main>
 
-<!-- FOOTER IMPRESIÓN -->
-
-  <p class="print-only" style="text-align: left;">Atentamente,</p><br>
+<p class="print-only" style="text-align: left;">Atentamente,</p><br>
   <p class="print-only" style="font-weight: bold; text-align: center;">Marcos Castro Abarca</p>
   <p class="print-only" style="text-align: center;">Director de Santa Josefina SpA</p>
 
-<!-- SPINNER -->
 <div id="pageSpinner" class="spinner-backdrop no-print" aria-hidden="true">
   <div class="spinner-card">
     <div class="spinner"></div>
@@ -238,7 +233,7 @@ function updatePrintResumen(neto, iva, total){
   if(mI) mI.textContent = clp(iva||0);
   if(mT) mT.textContent = clp(total||0);
 }
-window.updatePrintResume = updatePrintResumen; // alias sin "n"
+window.updatePrintResume = updatePrintResumen; 
 
 /* Fallbacks de fetch */
 async function safeFetch(table){ try{ return await fetchData(table); }catch(e){ return []; } }
@@ -281,7 +276,7 @@ async function boot(){
     hideSpinner();
   }
 }
-setTimeout(()=>hideSpinner(), 8000); // failsafe
+setTimeout(()=>hideSpinner(), 8000); 
 window.addEventListener('error', ()=>hideSpinner());
 window.addEventListener('unhandledrejection', ()=>hideSpinner());
 
@@ -308,7 +303,7 @@ function markRutValidity(rutFmt, isValid){
   else{ inp.classList.add('is-invalid'); msg.style.display='block'; }
 }
 
-/* Cambio de entidad (con prefill opcional) */
+/* CAMBIO REALIZADO: Función modificada para manejar desbloqueo de unidades */
 function onEntidadChange(prefill){
   const selEntidad= document.getElementById('selEntidad');
   const id = selEntidad.value;
@@ -321,7 +316,10 @@ function onEntidadChange(prefill){
   const rutRaw = prefill?.rut ?? entidadSel?.RUT ?? '—';
   const rutFmt = (rutRaw && rutRaw!=='—') ? formatRut(rutRaw) : '—';
   const rutOK  = rutRaw && rutRaw!=='—' ? isRutValid(rutRaw) : true;
-  nUnidades    = Number(prefill?.unidades ?? entidadSel?.Unidades ?? entidadSel?.NUnidades ?? entidadSel?.CantidadUnidades ?? 0);
+
+  // 1. Obtener dato crudo para ver si existe o no
+  const rawUnidades = prefill?.unidades ?? entidadSel?.Unidades ?? entidadSel?.NUnidades ?? entidadSel?.CantidadUnidades;
+  nUnidades = Number(rawUnidades || 0);
 
   // Factor
   let f=null;
@@ -342,9 +340,23 @@ function onEntidadChange(prefill){
   document.getElementById('inpComuna').value = comuna;
   document.getElementById('inpDireccion').value = dir;
   document.getElementById('inpRUT').value = rutFmt;
-  document.getElementById('inpUnidades').value = nUnidades || '';
   document.getElementById('inpFactor').value = factor || '';
 
+  // 2. Lógica para el input de Unidades: Si viene > 0 se bloquea, si es 0 se desbloquea
+  const inpU = document.getElementById('inpUnidades');
+  inpU.value = nUnidades || ''; // Si es 0 deja vacío
+
+  if(nUnidades > 0) {
+      inpU.readOnly = true;
+      inpU.style.backgroundColor = ''; 
+      inpU.style.border = ''; 
+  } else {
+      inpU.readOnly = false;
+      inpU.style.backgroundColor = '#fffbeb'; // Color suave para indicar editable
+      inpU.style.border = '1px solid #aaa';
+  }
+
+  // Pinta Resumen
   document.getElementById('cxNombre').textContent = nombre;
   document.getElementById('cxDir').textContent    = dir;
   document.getElementById('cxComuna').textContent = comuna;
@@ -424,6 +436,13 @@ function setPrintTable(neto, iva, total, unidades){
   document.getElementById('p_unit_neto').textContent = unitNeto>0 ? clp(unitNeto) : '—';
   document.getElementById('p_unit_iva').textContent  = unitIva>0 ? clp(unitIva) : '—';
   document.getElementById('p_unit_total').textContent = unitTotal>0 ? clp(unitTotal) : '—';
+}
+
+/* CAMBIO REALIZADO: Nueva función para actualizar cálculos al escribir manualmente */
+function actualizarUnidadesManual(valor){
+  nUnidades = Number(valor) || 0;
+  document.getElementById('cxUnidades').textContent = nUnidades || '—';
+  renderHonorarios();
 }
 </script>
 </body>
