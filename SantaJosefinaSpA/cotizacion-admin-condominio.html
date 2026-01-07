@@ -16,12 +16,12 @@
        AJUSTES TÉCNICOS PARA PDF (INVISIBLE)
        ========================================= */
     
-    /* 1. Limpieza: Ocultar controles y mostrar lo imprimible */
+    /* 1. Limpieza */
     body.generating-pdf .no-print { display: none !important; }
     body.generating-pdf .print-only { display: block !important; }
     body.generating-pdf { background: white !important; }
     
-    /* 2. Estructura: Usar todo el ancho disponible */
+    /* 2. Estructura */
     body.generating-pdf .container { 
         width: 98% !important; 
         max-width: none !important; 
@@ -29,22 +29,21 @@
         padding: 0 !important; 
     }
 
-    /* 3. LOGO: Tamaño controlado (Igual que en impresión) */
+    /* 3. LOGO */
     body.generating-pdf .brand-logo {
         width: 60mm !important; 
         height: auto !important; 
-        /* Mantiene la posición absoluta original */
     }
 
-    /* 4. PORTADA: Forzar salto de página después de la carátula */
+    /* 4. PORTADA */
     body.generating-pdf .print-cover {
         position: relative;
-        min-height: 260mm; /* Ocupa casi toda la hoja */
+        min-height: 260mm; 
         width: 100%;
-        page-break-after: always; /* SALTO DE PÁGINA OBLIGATORIO */
+        page-break-after: always; 
     }
 
-    /* 5. Márgenes laterales para que el texto no toque el borde */
+    /* 5. Márgenes */
     body.generating-pdf .print-section {
         padding-left: 15mm !important;
         padding-right: 15mm !important;
@@ -121,16 +120,16 @@
 
     <div id="secHonorarios" class="card no-print">
       <h2 class="section-title">Honorarios estimados</h2>
-      <p class="muted">Fórmula Ley N°21.442</p>
+      <p class="muted">Fórmula corregida (Base 2.6 UTM)</p>
       <table>
         <thead>
           <tr>
             <th>Escenario</th>
-            <th>Fórmula</th>
+            <th>Fórmula Ref.</th>
             <th style="text-align:right;">Neto</th>
             <th style="text-align:right;">IVA (19%)</th>
             <th style="text-align:right;">Total</th>
-            <th style="text-align:right;">Prorrateo /unidad (con IVA)</th>
+            <th style="text-align:right;">x Unidad (Total)</th>
           </tr>
         </thead>
         <tbody id="tbodyHonorarios"></tbody>
@@ -153,7 +152,7 @@
     <h3 class="stitle">¿Por qué nace la Administración de Edificios y Condominios?</h3>
     <p>Para mantener funcionando en forma óptima un condominio se requiere tiempo, gastos, contratación de personal, planificación y control de mantenciones periódicas para la maquinaria e infraestructura de la comunidad. Son funciones que pocas personas dentro del condominio están capacitadas y/o dispuestas a desarrollar. La <b>Ley N°21.442 de Copropiedad Inmobiliaria</b> establece que estas funciones pueden ser desempeñadas por un copropietario o por una persona natural o empresa especializada contratada por acuerdo de la Asamblea de Copropietarios.</p>
 
-    <h3 class="stitle">¿Cuáles son las funciones de un Administrador de Edificios y Condominios?</h3>
+    <h3 class="stitle">¿Cuáles son las funciones de un Administrador?</h3>
     <p>El Administrador tendrá las funciones que se establezcan en el Reglamento de Copropiedad y las que expresamente le confiera la Asamblea de Copropietarios. Conforme a la <b>Ley N°21.442</b>, el Administrador se mantiene en sus funciones mientras cuente con la confianza de la Asamblea, pudiendo ser removido por acuerdo de ésta.</p>
 
     <h3 class="stitle">Nuestro Compromiso</h3>
@@ -233,7 +232,6 @@ function clp(v){ return "$" + new Intl.NumberFormat("es-CL",{maximumFractionDigi
 function norm(s){ return (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim(); }
 function cleanRut(r){ return (r||'').toString().replace(/[^0-9kK]/g,'').toUpperCase(); }
 function rutDv(num){ let M=0,S=1; for(; num; num=Math.floor(num/10)) S=(S+num%10*(9-M++%6))%11; return S ? String(S-1) : 'K'; }
-function isRutValid(rut){ const s=cleanRut(rut); if(s.length<2) return false; const body=s.slice(0,-1), dv=s.slice(-1); const calc=rutDv(parseInt(body,10)||0); return String(calc)===String(dv); }
 function formatRut(r){ const s=cleanRut(r); if(s.length<2) return r||''; const body=s.slice(0,-1), dv=s.slice(-1); const withDots=body.replace(/\B(?=(\d{3})+(?!\d))/g,'.'); return withDots+'-'+dv; }
 
 /* Read / Boot / Fetch Logic */
@@ -255,11 +253,37 @@ function readIncoming(){
 let TARIFAS=[], PROSPECTOS=[], COPROS=[];
 let origen='prospecto', entidadSel=null, factor=0, nUnidades=0, utmCLP=0;
 
-function calcularNeto(unidades, factor, utm){
-  if(!(factor>0 && utm>0)) return 0;
-  const base = factor*1.75*utm;
-  if(unidades<=20) return base;
-  return base + ((unidades-20)*factor*1.75*utm*0.013);
+// ==========================================
+// NUEVA LÓGICA DE CÁLCULO (Réplica exacta Excel)
+// ==========================================
+function calcularMontos(unidades, factor, utm){
+  if(!(factor>0 && utm>0)) return { neto:0, iva:0, total:0 };
+
+  const baseF1 = utm * 2.6; // Variable bases!F1 en Excel
+  let netoTeorico = 0;
+
+  if(unidades < 20){
+    // Caso < 20: Base * Factor
+    netoTeorico = baseF1 * factor;
+  } else {
+    // Caso >= 20: (Base + ((Unidades-20) * (Base*0.013))) * Factor
+    const extra = units = unidades - 20;
+    const valorExtraUnitario = baseF1 * 0.013;
+    const sumaBase = baseF1 + (extra * valorExtraUnitario);
+    
+    netoTeorico = sumaBase * factor;
+  }
+
+  // REDOND.MULT al 1000 más cercano
+  const neto = Math.round(netoTeorico / 1000) * 1000;
+  
+  // Total = Neto * 1.19
+  const total = Math.round(neto * 1.19);
+  
+  // IVA por diferencia
+  const iva = total - neto;
+
+  return { neto, iva, total };
 }
 
 function updatePrintResumen(neto, iva, total){ /* Compatibilidad */ }
@@ -333,7 +357,6 @@ function onEntidadChange(prefill){
   document.getElementById('inpRUT').value = rutFmt;
   document.getElementById('inpFactor').value = factor || '';
   
-  // Lógica de desbloqueo input
   const inpU = document.getElementById('inpUnidades');
   inpU.value = nUnidades || ''; 
   if(nUnidades > 0) {
@@ -342,7 +365,6 @@ function onEntidadChange(prefill){
       inpU.readOnly = false; inpU.style.backgroundColor = '#fffbeb'; inpU.style.border = '1px solid #aaa';
   }
 
-  // UI Updates
   document.getElementById('cxNombre').textContent = nombre;
   document.getElementById('cxDir').textContent    = dir;
   document.getElementById('cxComuna').textContent = comuna;
@@ -375,33 +397,40 @@ function renderHonorarios(){
   ];
 
   tb.innerHTML = escenarios.map(sc=>{
-    const neto = Math.round(calcularNeto(sc.unidades, factor, utmCLP));
-    const iva  = Math.round(neto * 0.19);
-    const tot  = neto + iva;
-    const unit = sc.unidades>0 ? Math.round(tot / sc.unidades) : 0;
-    const formula = sc.unidades<=20 ? `F x 1.75 x UTM` : `F x 1.75 x UTM + extra`;
+    // Llama a la nueva función de cálculo
+    const m = calcularMontos(sc.unidades, factor, utmCLP);
+    
+    const unit = sc.unidades>0 ? Math.round(m.total / sc.unidades) : 0;
+    
+    // Texto de fórmula para referencia visual
+    let formula = "";
+    if(sc.unidades < 20) formula = `(2,6 × UTM) × Factor`;
+    else formula = `[Base + Extra] × Factor`;
+
     return `<tr>
       <td>${sc.nombre}</td>
-      <td class="mono">${formula}</td>
-      <td class="mono" style="text-align:right;">${clp(neto)}</td>
-      <td class="mono" style="text-align:right;">${clp(iva)}</td>
-      <td class="mono" style="text-align:right;">${clp(tot)}</td>
+      <td class="mono" style="font-size:12px;">${formula}</td>
+      <td class="mono" style="text-align:right;">${clp(m.neto)}</td>
+      <td class="mono" style="text-align:right;">${clp(m.iva)}</td>
+      <td class="mono" style="text-align:right;">${clp(m.total)}</td>
       <td class="mono" style="text-align:right;">${clp(unit)}</td>
     </tr>`;
   }).join('');
 
-  const neto0 = Math.round(calcularNeto(nUnidades, factor, utmCLP));
-  const iva0 = Math.round(neto0*0.19);
-  setPrintTable(neto0, iva0, neto0+iva0, nUnidades||0);
+  // Actualizar tabla de impresión (Solo el caso real)
+  const m0 = calcularMontos(nUnidades, factor, utmCLP);
+  setPrintTable(m0.neto, m0.iva, m0.total, nUnidades||0);
 }
 
 function setPrintTable(neto, iva, total, unidades){
   document.getElementById('p_unidades').textContent = unidades>0 ? unidades : '—';
   document.getElementById('p_neto').textContent = clp(neto);
   document.getElementById('p_total').textContent = clp(total);
+  
   const unitTotal = (unidades>0) ? Math.round(total / unidades) : 0;
   const unitNeto  = (unidades>0) ? Math.round(neto  / unidades) : 0;
   const unitIva   = (unidades>0) ? Math.round(iva   / unidades) : 0;
+  
   document.getElementById('p_unit').textContent = unitTotal>0 ? clp(unitTotal) : '—';
   document.getElementById('p_unit_neto').textContent = unitNeto>0 ? clp(unitNeto) : '—';
   document.getElementById('p_unit_iva').textContent  = unitIva>0 ? clp(unitIva) : '—';
@@ -420,14 +449,13 @@ async function compartirPDF(tipo) {
     const nombreEntidad = entidadSel?.Nombre || entidadSel?.RazonSocial || 'Comunidad';
     const filename = `Propuesta_${nombreEntidad.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
 
-    // CONFIGURACIÓN: Márgenes estándar para replicar "Vista Previa de Impresión"
     const opt = {
-        margin:       10, /* 10mm de margen, similar al navegador */
+        margin:       10, 
         filename:     filename,
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
         jsPDF:        { unit: 'mm', format: 'letter', orientation: 'portrait' },
-        pagebreak:    { mode: ['css', 'legacy'] } /* Respeta nuestros saltos CSS */
+        pagebreak:    { mode: ['css', 'legacy'] } 
     };
 
     try {
@@ -440,13 +468,13 @@ async function compartirPDF(tipo) {
         } else {
             await html2pdf().set(opt).from(element).save();
             setTimeout(() => {
-                alert(`✅ PDF Descargado.\n\nEl archivo se ha guardado como "${filename}".\nArrastralo a tu correo o WhatsApp.`);
+                alert(`✅ PDF Descargado.\n\nArchivo: "${filename}"`);
                 if(tipo === 'whatsapp') window.open(`https://wa.me/`, '_blank');
                 else window.location.href = `mailto:?subject=Propuesta ${nombreEntidad}`;
             }, 1000);
         }
     } catch (err) {
-        if(isMobile) { alert("Descargando archivo (share falló)..."); html2pdf().set(opt).from(element).save(); }
+        if(isMobile) { alert("Descargando archivo..."); html2pdf().set(opt).from(element).save(); }
         else { console.error(err); alert("Error PDF: " + err.message); }
     } finally {
         document.body.classList.remove('generating-pdf');
