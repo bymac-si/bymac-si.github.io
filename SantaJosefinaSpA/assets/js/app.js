@@ -220,13 +220,25 @@ async function cargarDatosPropuesta() {
 // =====================
 // Inicialización
 // =====================
+// =====================
+// Inicialización Segura
+// =====================
 document.addEventListener('DOMContentLoaded', () => {
-    // Si estamos en la página de login, no hacemos nada de propuesta
-    if (window.location.pathname.includes('login.html')) return;
+    const path = window.location.pathname;
 
-    // Verificar auth (opcional, depende si la propuesta es pública o privada)
-    // requireAuth(); 
+    // 1. Si es login, no hacer nada
+    if (path.includes('login.html')) return;
 
-    // Intentar cargar datos si hay un ID en la URL
-    cargarDatosPropuesta();
+    // 2. DETECCIÓN INTELIGENTE:
+    // Solo ejecutamos "cargarDatosPropuesta" si estamos en la página de propuesta
+    // (buscamos si existe un elemento único de esa página, por ejemplo la tabla de precios)
+    const esPaginaPropuesta = document.querySelector('.print-table') && document.querySelector('.client-box');
+    
+    // Además, evitamos correr esto si estamos en "admin-condominios" (o como se llame tu archivo de contrato)
+    const esPaginaContrato = path.includes('admin-condominios') || path.includes('admin-copropiedades');
+
+    if (esPaginaPropuesta && !esPaginaContrato) {
+        // Solo aquí intentamos cargar la propuesta
+        cargarDatosPropuesta();
+    }
 });

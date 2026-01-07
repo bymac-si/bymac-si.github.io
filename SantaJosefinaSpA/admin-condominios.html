@@ -13,7 +13,6 @@
 <main class="container">
   <h2 class="page-title no-print">Contrato de Administración de Condominios</h2>
 
-  <!-- Controles -->
   <div class="card no-print">
     <div class="row">
       <div>
@@ -43,7 +42,6 @@
     </div>
   </div>
 
-  <!-- Resumen de cálculo -->
   <div class="grid no-print">
     <div class="card">
       <h2 class="section-title">Resumen</h2>
@@ -66,7 +64,6 @@
     </div>
   </div>
 
-  <!-- Contrato -->
   <div class="contrato print-only logo-print print-section" id="areaContrato">
     <div style="font-size:0.8em;">
       <img src="assets/img/logo_santajosefina.png" alt="Logo Santa Josefina" style="width: 140px; position: relative; top: -50px;" class="logo-print">
@@ -128,7 +125,6 @@
   </div>
 </main>
 
-<!-- SPINNER -->
 <div id="pageSpinner" class="spinner-backdrop hidden" aria-hidden="true">
   <div class="spinner-card">
     <div class="spinner"></div>
@@ -176,7 +172,7 @@ async function cargarDatos(){
     ]);
 
     const sel = document.getElementById("selCopro");
-    sel.innerHTML = COPROS.map(c=>`<option value="${getKeyVal(c)}">${c.Nombre}</option>`).join("");
+    sel.innerHTML = COPROS.map(c=>`<option value="${getKeyVal(c)}">${c.Nombre || c.RazonSocial || c['Nombre Condominio'] || "(Sin Nombre)"}</option>`).join("");
     sel.onchange = onSelectCopro;
 
     // LÓGICA DE AUTO-SELECCIÓN POR URL
@@ -233,13 +229,13 @@ async function onSelectCopro(){
   if(document.getElementById("c_factor")) document.getElementById("c_factor").textContent = factor || "[Factor]";
 
   // LÓGICA DE UNIDADES (CORREGIDA)
-  // 1. Intenta contar las filas en la tabla "Unidades" (Si ya cargaron el excel de propietarios)
+  // 1. Intenta contar las filas en la tabla "Unidades"
   const coproID = getKeyVal(coproSel);
   let countFromTable = UNIDADES.filter(u=> String(u.CopropiedadID)===String(coproID)).length;
   
-  // 2. Si la tabla está vacía (cliente nuevo), usa el campo numérico del registro de Copropiedad
+  // 2. Si es 0, busca en la columna Unidades de la tabla Copropiedades
   if(countFromTable === 0) {
-      countFromTable = Number(coproSel.Unidades || coproSel.CantidadUnidades || 0);
+      countFromTable = Number(coproSel.Unidades || coproSel.CantidadUnidades || coproSel.NUnidades || 0);
   }
   
   nUnidades = countFromTable;
@@ -252,35 +248,62 @@ async function onSelectCopro(){
 }
 
 function calcular(){
-  // Limpieza de input UTM (quita puntos y comas)
-  const rawUTM = (document.getElementById("inpUTM").value||"").toString().replaceAll(".","").replace(",", ".");
+  const inp = document.getElementById("inpUTM");
+  if(!inp) return;
+
+  // 1. Obtener valor UTM limpio
+  const rawUTM = inp.value.toString().replaceAll(".","").replace(",", ".");
   utmCLP = parseFloat(rawUTM) || 0;
 
+  // Actualizar UI de la UTM
   const fmtUTM = utmCLP>0 ? formatoCLP(utmCLP) : "—";
-  document.getElementById("cxUTM").textContent = fmtUTM;
-  document.getElementById("c_utm").textContent = fmtUTM;
+  if(document.getElementById("cxUTM")) document.getElementById("cxUTM").textContent = fmtUTM;
+  if(document.getElementById("c_utm")) document.getElementById("c_utm").textContent = fmtUTM;
 
   let neto = 0, iva = 0, total = 0, desc = "—";
 
-  if(factor>0 && utmCLP>0 && nUnidades>=0){
-    if(nUnidades <= 20){
-      // Fórmula <= 20
-      neto = factor * 1.75 * utmCLP;
-      desc = `Factor (${factor}) × 1,75 × UTM`;
+  if(factor > 0 && utmCLP > 0 && nUnidades >= 0){
+    
+    // VARIABLE EXCEL: bases!F1 = UTM * 2.6
+    const baseF1 = utmCLP * 2.6;
+
+    let netoTeorico = 0;
+
+    // CONDICIÓN EXCEL: SI(D6 < 20; ...)
+    if(nUnidades < 20){
+      // CASO VERDADERO: bases!F1 * E6 -> (UTM * 2.6) * Factor
+      netoTeorico = baseF1 * factor;
+      desc = `(2.6 × UTM) × Factor`;
+
     } else {
-      // Fórmula > 20
+      // CASO FALSO: (bases!F1 + ((D6-20)*(bases!F1*0,013))) * E6
       const extra = nUnidades - 20;
-      // Nota: Tu fórmula original usaba 0.013. Verifica si es correcto.
-      neto = extra * factor * 1.80 * utmCLP * 0.013; 
-      desc = `(${nUnidades} - 20) × Factor × 1,80 × UTM × 0,013`;
+      
+      // Parte interna: (bases!F1 * 0,013)
+      const valorExtraUnitario = baseF1 * 0.013; 
+      
+      // Suma: (bases!F1 + (extra * valorExtraUnitario))
+      const sumaBase = baseF1 + (extra * valorExtraUnitario);
+
+      // Multiplicación final por E6 (Factor)
+      netoTeorico = sumaBase * factor;
+
+      desc = `[Base + (Extra × Base × 0,013)] × Factor`;
     }
+
+    // EXCEL: REDOND.MULT(... ; 1000)
+    // Redondeamos el neto al 1000 más cercano
+    neto = Math.round(netoTeorico / 1000) * 1000;
+
+    // EXCEL: ... * 1,19 (Cálculo del Total)
+    total = Math.round(neto * 1.19);
+    
+    // Despejamos el IVA por diferencia para que cuadre exacto (Total = Neto + IVA)
+    iva = total - neto;
   }
   
-  neto = Math.round(neto);
-  iva  = Math.round(neto * 0.19);
-  total= Math.round(neto + iva);
-
-  document.getElementById("outFormula").textContent = desc;
+  // Actualizar Textos en Pantalla
+  if(document.getElementById("outFormula")) document.getElementById("outFormula").textContent = desc;
   
   const ids = ["outMontoNeto", "outIVA", "outTotal", "c_monto_neto", "c_monto_iva", "c_monto_tot"];
   const vals = [neto, iva, total, neto, iva, total];

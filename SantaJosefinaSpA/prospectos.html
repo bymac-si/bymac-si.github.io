@@ -376,19 +376,19 @@ function abrirCotizacion(id){
   window.location.href = `cotizacion-admin-condominio.html?${params.toString()}`;
 }
 
+/* EN TU ARCHIVO DE PROSPECTOS */
 async function agregarAClientes(id){
   if(!confirm('¿Deseas convertir este prospecto en una nueva Copropiedad?')) return;
 
   try{
     const row = PROS.find(x => String(getKeyVal(x)) === String(id));
-    if(!row){ alert('No se encontró el prospecto en memoria.'); return; }
+    if(!row){ alert('No se encontró el prospecto.'); return; }
 
     showSpinner('Creando Copropiedad...');
 
-    // 1. Generamos el ID
     const newID = generateKey('COPRO'); 
 
-    // 2. Preparamos el payload
+    // Payload corregido confirmando columna Unidades
     const payload = {
       "ID": newID,
       "Nombre": row.Nombre || row.RazonSocial || "",
@@ -403,27 +403,22 @@ async function agregarAClientes(id){
       "FondoReserva": 0,
       "ReglamentoURL": "",
       "LibroActasURL": "",
-      "Unidades": Number(row.Unidades || row.NUnidades || 0) // Importante: Guardamos el dato numérico aquí
+      "Unidades": Number(row.Unidades || row.NUnidades || 0) // <--- ESTO SE ENVIARÁ
     };
 
-    // 3. Guardar en AppSheet
-    if(typeof upsertData === 'function') {
-      await upsertData('Copropiedades', payload);
-    } else if(typeof appSheetCRUD === 'function') {
-      await appSheetCRUD('Copropiedades', 'Add', [payload]);
-    } else { 
-      throw new Error('No hay método de escritura disponible.'); 
-    }
+    if(typeof upsertData === 'function') await upsertData('Copropiedades', payload);
+    else if(typeof appSheetCRUD === 'function') await appSheetCRUD('Copropiedades', 'Add', [payload]);
+    else throw new Error('Sin método de escritura.');
 
-    // 4. REDIRECCIÓN INTELIGENTE
-    if(confirm('✅ Copropiedad creada.\n\n¿Deseas ir al Contrato de Administración ahora?')) {
-        // Redirige pasando el ID nuevo
-        window.location.href = `admin-condominios.html?id=${newID}`;
+    // --- REDIRECCIÓN ---
+    if(confirm('✅ Copropiedad creada.\n\n¿Ir al contrato?')) {
+        // ⚠️ VERIFICA QUE ESTE NOMBRE SEA EXACTO AL DE TU ARCHIVO HTML
+        window.location.href = `admin-condominios.html?id=${newID}`; 
     }
 
   } catch(e) { 
     console.error(e); 
-    alert('Error al crear Copropiedad: ' + (e.message || e)); 
+    alert('Error: ' + (e.message || e)); 
   } finally { 
     hideSpinner(); 
   }
