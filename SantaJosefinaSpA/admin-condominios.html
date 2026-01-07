@@ -140,44 +140,38 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", async ()=>{
-  document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
-  document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+  try { document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); } catch(e){}
+  try { document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); } catch(e){}
 
-  // Escribir la fecha con formato "dd de mmmm de yyyy"
+  // Fecha "dd de mmmm de yyyy"
   const nodoFecha = document.getElementById("c_fecha_hoy");
   if(nodoFecha) nodoFecha.textContent = fechaHoyTexto();
 
   await cargarDatos();
 });
 
-// Fecha "dd de mmmm de yyyy" (mes en español)
 function fechaHoyTexto(){
   const d = new Date();
-  const dd = String(d.getDate()).padStart(2,"0");
   const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
-  const mmmm = meses[d.getMonth()];
-  const yyyy = d.getFullYear();
-  return `${dd} de ${mmmm} de ${yyyy}`;
+  return `${String(d.getDate()).padStart(2,"0")} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
 }
 
-function showSpinner(msg){
-  const sp=document.getElementById('pageSpinner');
-  const txt=document.getElementById('spinnerText');
-  if(msg) txt.textContent=msg;
-  sp.classList.remove('hidden');
-}
+function showSpinner(msg){ document.getElementById('pageSpinner').classList.remove('hidden'); if(msg) document.getElementById('spinnerText').textContent=msg; }
 function hideSpinner(){ document.getElementById('pageSpinner').classList.add('hidden'); }
 function formatoCLP(v){ return "$" + new Intl.NumberFormat("es-CL",{maximumFractionDigits:0}).format(Number(v||0)); }
+function getKeyVal(o){ return o._id || o.ID || o.Id || o.id || ""; }
 
 let COPROS=[], UNIDADES=[], TARIFAS=[];
 let coproSel=null, factor=0, nUnidades=0, utmCLP=0;
 
 async function cargarDatos(){
   try{
-    showSpinner("Cargando tablas...");
+    showSpinner("Cargando datos...");
+    
+    // Carga paralela de datos
     [COPROS, UNIDADES, TARIFAS] = await Promise.all([
       fetchData("Copropiedades"),
-      fetchData("Unidades"),
+      fetchData("Unidades"),    // Puede venir vacía para el cliente nuevo
       fetchData("TablaTarifas")
     ]);
 
@@ -185,11 +179,24 @@ async function cargarDatos(){
     sel.innerHTML = COPROS.map(c=>`<option value="${getKeyVal(c)}">${c.Nombre}</option>`).join("");
     sel.onchange = onSelectCopro;
 
-    if(COPROS.length){
-      sel.value = getKeyVal(COPROS[0]);
-      await onSelectCopro();
+    // LÓGICA DE AUTO-SELECCIÓN POR URL
+    const params = new URLSearchParams(window.location.search);
+    const incomingId = params.get('id');
+
+    if(incomingId && COPROS.some(c => String(getKeyVal(c)) === String(incomingId))) {
+       // Si viene un ID en la URL y existe en la lista, lo seleccionamos
+       sel.value = incomingId;
+    } else if(COPROS.length) {
+       // Si no, seleccionamos el primero por defecto
+       sel.value = getKeyVal(COPROS[0]);
     }
+    
+    // Ejecutar la carga de datos del seleccionado
+    await onSelectCopro();
+
+    // Listener para recalcular si cambian la UTM manualmente
     document.getElementById("inpUTM").addEventListener("input", calcular);
+
   }catch(err){
     alert("Error al cargar datos: "+(err.message||err));
     console.error(err);
@@ -203,29 +210,40 @@ async function onSelectCopro(){
   coproSel = COPROS.find(c=> String(getKeyVal(c))===String(id));
   if(!coproSel) return;
 
-  document.getElementById("cxCopro").textContent = coproSel.Nombre||"—";
-  document.getElementById("cxDir").textContent   = coproSel.Direccion||"—";
-  document.getElementById("cxRUT").textContent   = coproSel.RUT||"—";
-  document.getElementById("cxComuna").textContent= coproSel.Comuna||"—";
-  document.getElementById("c_razon").textContent   = coproSel.Nombre||"[Nombre de la Comunidad]";
-  document.getElementById("c_razon_2").textContent = coproSel.Nombre||"[Nombre de la Comunidad]";
-  document.getElementById("c_razon_firma").textContent = coproSel.Nombre||"[Nombre de la Comunidad]";
-  document.getElementById("c_rut").textContent     = coproSel.RUT||"[RUT]";
-  document.getElementById("c_dir").textContent     = coproSel.Direccion||"[Dirección]";
-  document.getElementById("c_dir_2").textContent   = coproSel.Direccion||"[Dirección]";
-  document.getElementById("c_comuna").textContent  = coproSel.Comuna||"[Comuna]";
-  document.getElementById("c_comuna_2").textContent= coproSel.Comuna||"[Comuna]";
+  // Llenado de campos UI
+  const fields = {
+    "cxCopro": coproSel.Nombre, "c_razon": coproSel.Nombre, "c_razon_2": coproSel.Nombre, "c_razon_firma": coproSel.Nombre,
+    "cxDir": coproSel.Direccion, "c_dir": coproSel.Direccion, "c_dir_2": coproSel.Direccion,
+    "cxRUT": coproSel.RUT, "c_rut": coproSel.RUT,
+    "cxComuna": coproSel.Comuna, "c_comuna": coproSel.Comuna, "c_comuna_2": coproSel.Comuna
+  };
 
+  for(const [kid, val] of Object.entries(fields)) {
+    const el = document.getElementById(kid);
+    if(el) el.textContent = val || "—";
+  }
   document.getElementById("inpComuna").value = coproSel.Comuna||"";
 
+  // Buscar Factor
   const tarifa = TARIFAS.find(t => (t.Comuna||"").toLowerCase().trim() === (coproSel.Comuna||"").toLowerCase().trim());
   factor = tarifa ? Number(tarifa.Factor||0) : 0;
+  
   document.getElementById("inpFactor").value = factor || "";
   document.getElementById("cxFactor").textContent = factor || "—";
-  document.getElementById("c_factor").textContent = factor || "[Factor]";
+  if(document.getElementById("c_factor")) document.getElementById("c_factor").textContent = factor || "[Factor]";
 
+  // LÓGICA DE UNIDADES (CORREGIDA)
+  // 1. Intenta contar las filas en la tabla "Unidades" (Si ya cargaron el excel de propietarios)
   const coproID = getKeyVal(coproSel);
-  nUnidades = UNIDADES.filter(u=> String(u.CopropiedadID)===String(coproID)).length;
+  let countFromTable = UNIDADES.filter(u=> String(u.CopropiedadID)===String(coproID)).length;
+  
+  // 2. Si la tabla está vacía (cliente nuevo), usa el campo numérico del registro de Copropiedad
+  if(countFromTable === 0) {
+      countFromTable = Number(coproSel.Unidades || coproSel.CantidadUnidades || 0);
+  }
+  
+  nUnidades = countFromTable;
+
   document.getElementById("inpUnidades").value = nUnidades;
   document.getElementById("cxUnidades").textContent = nUnidades || "—";
   document.getElementById("c_unidades").textContent = nUnidades || "[Nº Unidades]";
@@ -233,42 +251,44 @@ async function onSelectCopro(){
   calcular();
 }
 
-/* Fórmulas:
-   - Si nUnidades <= 20: Neto = Factor × 1,75 × UTM
-   - Si nUnidades  > 20: Neto = (nUnidades – 20) × Factor × 1,80 × UTM × 0,013
-   - IVA = 19% del Neto
-   - Total = Neto + IVA
-*/
 function calcular(){
-  utmCLP = parseFloat((document.getElementById("inpUTM").value||"").toString().replaceAll(".","").replace(",", ".")) || 0;
+  // Limpieza de input UTM (quita puntos y comas)
+  const rawUTM = (document.getElementById("inpUTM").value||"").toString().replaceAll(".","").replace(",", ".");
+  utmCLP = parseFloat(rawUTM) || 0;
 
-  document.getElementById("cxUTM").textContent = utmCLP>0 ? formatoCLP(utmCLP) : "—";
-  document.getElementById("c_utm").textContent = utmCLP>0 ? formatoCLP(utmCLP) : "[UTM]";
+  const fmtUTM = utmCLP>0 ? formatoCLP(utmCLP) : "—";
+  document.getElementById("cxUTM").textContent = fmtUTM;
+  document.getElementById("c_utm").textContent = fmtUTM;
 
   let neto = 0, iva = 0, total = 0, desc = "—";
 
   if(factor>0 && utmCLP>0 && nUnidades>=0){
     if(nUnidades <= 20){
+      // Fórmula <= 20
       neto = factor * 1.75 * utmCLP;
-      desc = `FactorComuna × 1,75 × UTM`;
+      desc = `Factor (${factor}) × 1,75 × UTM`;
     } else {
+      // Fórmula > 20
       const extra = nUnidades - 20;
-      neto = extra * factor * 1.80 * utmCLP * 0.013;
-      desc = `(${nUnidades} - 20) × FactorComuna × 1,80 × UTM × 0,013`;
+      // Nota: Tu fórmula original usaba 0.013. Verifica si es correcto.
+      neto = extra * factor * 1.80 * utmCLP * 0.013; 
+      desc = `(${nUnidades} - 20) × Factor × 1,80 × UTM × 0,013`;
     }
   }
+  
   neto = Math.round(neto);
   iva  = Math.round(neto * 0.19);
   total= Math.round(neto + iva);
 
   document.getElementById("outFormula").textContent = desc;
-  document.getElementById("outMontoNeto").textContent = formatoCLP(neto);
-  document.getElementById("outIVA").textContent       = formatoCLP(iva);
-  document.getElementById("outTotal").textContent     = formatoCLP(total);
-
-  document.getElementById("c_monto_neto").textContent = formatoCLP(neto);
-  document.getElementById("c_monto_iva").textContent  = formatoCLP(iva);
-  document.getElementById("c_monto_tot").textContent  = formatoCLP(total);
+  
+  const ids = ["outMontoNeto", "outIVA", "outTotal", "c_monto_neto", "c_monto_iva", "c_monto_tot"];
+  const vals = [neto, iva, total, neto, iva, total];
+  
+  ids.forEach((id, i) => {
+      const el = document.getElementById(id);
+      if(el) el.textContent = formatoCLP(vals[i]);
+  });
 }
 
 function imprimir(){ window.print(); }

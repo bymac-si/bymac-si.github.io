@@ -377,24 +377,56 @@ function abrirCotizacion(id){
 }
 
 async function agregarAClientes(id){
+  if(!confirm('¿Deseas convertir este prospecto en una nueva Copropiedad?')) return;
+
   try{
-    const row = PROS.find(x=>String(getKeyVal(x))===String(id));
-    if(!row){ alert('No se encontró el prospecto.'); return; }
+    const row = PROS.find(x => String(getKeyVal(x)) === String(id));
+    if(!row){ alert('No se encontró el prospecto en memoria.'); return; }
+
+    showSpinner('Creando Copropiedad...');
+
+    // 1. Generamos el ID
+    const newID = generateKey('COPRO'); 
+
+    // 2. Preparamos el payload
     const payload = {
-      Nombre: row.Nombre || row.RazonSocial || '',
-      Comuna: row.Comuna || '',
-      Direccion: row.Direccion || row.Dirección || '',
-      RUT: row.RUT || '',
-      Unidades: row.Unidades || row.NUnidades || row.CantidadUnidades || 0,
-      Contacto: row.Contacto || row.Email || row.Telefono || ''
+      "ID": newID,
+      "Nombre": row.Nombre || row.RazonSocial || "",
+      "RUT": row.RUT || "",
+      "Direccion": row.Direccion || row.Dirección || "",
+      "Comuna": row.Comuna || "",
+      "Ciudad": row.Comuna || "", 
+      "Banco": "",
+      "Cuenta": "",
+      "EmailAdmin": row.Contacto || row.Email || "",
+      "Telefono": row.Telefono || "",
+      "FondoReserva": 0,
+      "ReglamentoURL": "",
+      "LibroActasURL": "",
+      "Unidades": Number(row.Unidades || row.NUnidades || 0) // Importante: Guardamos el dato numérico aquí
     };
-    showSpinner('Agregando a Clientes…');
-    if(typeof upsertData === 'function')      await upsertData('Clientes', payload);
-    else if(typeof appSheetCRUD === 'function') await appSheetCRUD('Clientes','Add',[payload]);
-    else { alert('No hay método de escritura disponible para Clientes.'); return; }
-    alert('Cliente agregado correctamente.');
-  }catch(e){ console.error(e); alert('Error al agregar a Clientes: '+(e.message||e)); }
-  finally{ hideSpinner(); }
+
+    // 3. Guardar en AppSheet
+    if(typeof upsertData === 'function') {
+      await upsertData('Copropiedades', payload);
+    } else if(typeof appSheetCRUD === 'function') {
+      await appSheetCRUD('Copropiedades', 'Add', [payload]);
+    } else { 
+      throw new Error('No hay método de escritura disponible.'); 
+    }
+
+    // 4. REDIRECCIÓN INTELIGENTE
+    if(confirm('✅ Copropiedad creada.\n\n¿Deseas ir al Contrato de Administración ahora?')) {
+        // Redirige pasando el ID nuevo
+        window.location.href = `admin-condominios.html?id=${newID}`;
+    }
+
+  } catch(e) { 
+    console.error(e); 
+    alert('Error al crear Copropiedad: ' + (e.message || e)); 
+  } finally { 
+    hideSpinner(); 
+  }
 }
 
 /* Export CSV */
