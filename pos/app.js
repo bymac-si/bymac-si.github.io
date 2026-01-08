@@ -3,7 +3,7 @@
  */
 
 const API_URL =
-  "https://script.google.com/macros/s/AKfycbwYOERVmjA0wEmyuGS0zw_aaVCRKQheOAL5HkC9S4XXHmikewc2VUW0exVmWhqi-c49/exec";
+  "https://script.google.com/macros/s/AKfycbzMS2BEJXdditHudvn-zv22rloj4M87Fla5hL2kCZu961XzqK2zsFpOjD3ywWisVMg/exec";
 
 let db = {
   menu: [],
