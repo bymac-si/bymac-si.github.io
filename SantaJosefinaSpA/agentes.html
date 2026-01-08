@@ -1,324 +1,690 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>CRM - Gestión de Agentes</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="assets/js/app.js"></script>
-  <script>requireAuth();</script>
+  <head>
+    <meta charset="UTF-8" />
+    <title>CRM - Gestión de Agentes</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <script src="assets/js/app.js"></script>
+    <script>
+      requireAuth();
+    </script>
 
-  <style>
-    /* ===== ESTILOS DASHBOARD (Unificados) ===== */
-    body{ max-width:1200px; margin:0 auto; color:#1A2B48; }
-    main{ padding:40px; }
-    .page-title{ font-size:28px; font-weight:700; margin-bottom:16px; }
-    
-    /* Tablas */
-    table{ width:100%; border-collapse:collapse; }
-    th,td{ padding:10px 8px; border-bottom:1px solid #e5e7eb; text-align:left; vertical-align: middle; }
-    th{ background:#fafafa; font-weight: 600; color: #4b5563; }
-    
-    /* Inputs y Layout */
-    input,select,textarea{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:6px; font-family:inherit;}
-    .label{ display:block; font-weight:600; margin-bottom:4px; font-size: 13px; color: #374151; }
-    
-    /* MODAL */
-    .modal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:10000; align-items:center; justify-content:center; }
-    .modal.active{ display:flex; }
-    /* Modal Normal */
-    .modal-content{ width:100%; max-width:500px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:25px; box-shadow:0 12px 30px rgba(0,0,0,.18); }
-    /* Modal Ancho (Para Tareas) */
-    .modal-content.wide{ max-width: 800px; }
-    
-    /* SPINNER */
-    .spinner-backdrop{ position:fixed; inset:0; background:rgba(255,255,255,0.85); display:none; place-items:center; z-index:12000; }
-    .spinner-card{ background:#fff; padding:18px 22px; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.08); text-align:center; min-width:260px; color:#1A2B48; font-weight:600; }
-    .spinner{ width:28px; height:28px; border-radius:50%; border:3px solid #eee; border-top-color:#B46A55; margin:0 auto 10px; animation:spin .9s linear infinite; }
-    @keyframes spin{ to{ transform:rotate(360deg); } }
-    
-    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace; }
-    .muted{ color:#666; font-size: 0.9em; }
-
-    /* DASHBOARD HEADER */
-    .dashboard-header { background-color: #fff; padding: 20px 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #f0f0f0; }
-    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-    .header-actions { display: flex; gap: 10px; align-items: center; }
-    
-    .header-filters { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; padding-top: 20px; border-top: 1px solid #e2e8f0; }
-    .filter-item { display: flex; flex-direction: column; gap: 6px; }
-    .input-modern { height: 44px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #f8fafc; }
-    
-    /* BOTONES ICONOS */
-    .acciones-group { display: flex; gap: 6px; justify-content: flex-start; align-items: center; }
-    .btn-icon { width: 34px; height: 34px; border: none; border-radius: 6px; background-color: #f3f4f6; color: #555; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s ease; }
-    .btn-icon:hover { transform: translateY(-2px); color: white; }
-    .btn-editar:hover { background-color: #f59e0b; }
-    .btn-eliminar:hover { background-color: #ef4444; }
-    /* Botón Tareas (Azul Info) */
-    .btn-tareas:hover { background-color: #0ea5e9; } 
-
-    /* BOTONES CABECERA */
-    .btn-head { height: 44px; padding: 0 20px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; transition: all 0.2s; }
-    .btn-head:hover { transform: translateY(-2px); }
-    .btn-nuevo { background-color: #0f172a; color: white; }
-    .btn-secundario { background-color: #fff; color: #475569; border: 1px solid #cbd5e1; }
-    .btn-secundario:hover { background-color: #f8fafc; border-color: #94a3b8; }
-    
-    /* Badges para Tareas */
-    .badge { padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
-    .bg-alta { background: #fee2e2; color: #b91c1c; }
-    .bg-media { background: #ffedd5; color: #c2410c; }
-    .bg-baja { background: #dcfce7; color: #15803d; }
-  </style>
-</head>
-<body>
-<div id="header"></div>
-
-<main>
-  <div class="dashboard-header no-print">
-    <div class="header-top">
-      <h1 class="page-title">Gestión de Agentes</h1>
-      
-      <div class="header-actions">
-        <button class="btn-head btn-secundario" id="btnReload" title="Recargar datos">
-          <i class="fa-solid fa-rotate-right"></i>
-          <span class="btn-text">Recargar</span>
-        </button>
-
-        <button class="btn-head btn-secundario" id="btnExport" title="Descargar CSV">
-          <i class="fa-solid fa-file-csv"></i>
-          <span class="btn-text">Exportar</span>
-        </button>
-
-        <button class="btn-head btn-secundario" onclick="window.print()" title="Imprimir vista">
-          <i class="fa-solid fa-print"></i>
-          <span class="btn-text">Imprimir</span>
-        </button>
-
-        <button class="btn-head btn-nuevo" id="btnNew">
-          <i class="fa-solid fa-plus"></i>
-          <span>Nuevo Agente</span>
-        </button>
-      </div>
-    </div>
-
-    <div class="header-filters">
-      <div class="filter-item" style="flex-grow: 1;"> 
-        <label class="label">Buscar</label>
-        <input id="inpBuscar" class="input-modern" placeholder="Nombre, email, teléfono..." type="text">
-      </div>
-    </div>
-  </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Email</th>
-        <th>Teléfono</th>
-        <th class="no-print" style="width: 140px;">Acciones</th>
-      </tr>
-    </thead>
-    <tbody id="tablaAgentes"><tr><td colspan="4" class="muted">Cargando datos...</td></tr></tbody>
-  </table>
-</main>
-
-<div id="modalAgente" class="modal" aria-hidden="true">
-  <div class="modal-content">
-    <h2 id="modalTitleAgente" style="margin-top:0;">Nuevo Agente</h2>
-    <form id="formAgente" style="margin-top:20px;">
-      <input type="hidden" id="agenteID">
-      
-      <div style="display:flex; flex-direction:column; gap:12px;">
-         <div><label class="label">Nombre</label><input type="text" id="agenteNombre" required></div>
-         <div><label class="label">Email</label><input type="email" id="agenteEmail" required></div>
-         <div><label class="label">Teléfono</label><input type="text" id="agenteTelefono"></div>
-      </div>
-
-      <div style="text-align:right; margin-top:20px;">
-        <button type="button" class="btn-primary" style="background:#6c757d; border:none;" onclick="cerrarFormAgente()">Cancelar</button>
-        <button class="btn-primary" style="border:none;">Guardar</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<div id="modalTareas" class="modal" aria-hidden="true">
-  <div class="modal-content wide">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-        <h2 style="margin:0;">Tareas: <span id="nombreAgenteTareas" style="color:#0f172a;"></span></h2>
-        <button class="btn-head btn-nuevo" onclick="abrirFormTarea()" style="height:36px; font-size:13px;">
-            <i class="fa-solid fa-plus"></i> Nueva Tarea
-        </button>
-    </div>
-    
-    <div style="max-height: 400px; overflow-y:auto; border: 1px solid #eee; border-radius:6px;">
-        <table style="margin:0;">
-          <thead>
-            <tr><th>Título</th><th>Estado</th><th>Prioridad</th><th>Fecha Límite</th><th>Acciones</th></tr>
-          </thead>
-          <tbody id="tablaTareas"></tbody>
-        </table>
-    </div>
-
-    <div style="text-align:right; margin-top:20px;">
-      <button type="button" class="btn-primary" style="background:#6c757d; border:none;" onclick="cerrarModalTareas()">Cerrar</button>
-    </div>
-  </div>
-</div>
-
-<div id="modalTareaForm" class="modal" aria-hidden="true" style="z-index:10001;">
-  <div class="modal-content">
-    <h2 id="modalTitleTarea" style="margin-top:0;">Nueva Tarea</h2>
-    <form id="formTarea" style="margin-top:15px;">
-      <input type="hidden" id="tareaID">
-      
-      <div style="display:flex; flex-direction:column; gap:10px;">
-          <div><label class="label">Título</label><input type="text" id="tareaTitulo" required></div>
-          <div><label class="label">Descripción</label><textarea id="tareaDescripcion" rows="2"></textarea></div>
-          
-          <div style="display:flex; gap:10px;">
-             <div style="flex:1;">
-                 <label class="label">Estado</label>
-                 <select id="tareaEstado">
-                    <option>Pendiente</option>
-                    <option>En progreso</option>
-                    <option>Completada</option>
-                 </select>
-             </div>
-             <div style="flex:1;">
-                 <label class="label">Prioridad</label>
-                 <select id="tareaPrioridad">
-                    <option>Baja</option>
-                    <option>Media</option>
-                    <option>Alta</option>
-                 </select>
-             </div>
-          </div>
-          
-          <div><label class="label">Fecha Límite</label><input type="date" id="tareaFechaLimite"></div>
-      </div>
-
-      <div style="text-align:right; margin-top:20px;">
-        <button type="button" class="btn-primary" style="background:#6c757d; border:none;" onclick="cerrarFormTarea()">Cancelar</button>
-        <button class="btn-primary" style="border:none;">Guardar</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<div id="pageSpinner" class="spinner-backdrop" aria-hidden="true">
-  <div class="spinner-card">
-    <div class="spinner"></div>
-    <div id="spinnerText">Cargando…</div>
-  </div>
-</div>
-
-<div id="footer"></div>
-
-<script>
-/* ===== Utilidades (Copiadas del estándar) ===== */
-function showSpinner(msg){ const sp=document.getElementById('pageSpinner'); const txt=document.getElementById('spinnerText'); if(msg) txt.textContent=msg; sp.style.display='grid'; }
-function hideSpinner(){ document.getElementById('pageSpinner').style.display='none'; }
-function norm(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim(); }
-function escapeCSV(v){ if(v==null) return ''; const s=String(v).replaceAll('"','""'); return /[",\n]/.test(s) ? '"'+s+'"' : s; }
-
-/* Helpers Claves */
-if(typeof window.getKeyVal !== 'function'){ window.getKeyVal = (o)=> o? (o._id ?? o.id ?? o.ID ?? o.Key ?? o.key ?? o.Id ?? o[Object.keys(o)[0]]):""; }
-if(typeof window.getKeyName !== 'function'){ window.getKeyName = (row)=>{ if(!row || typeof row!=='object') return 'ID'; const cands=['ID','_id','Id','id','Key','key']; for(const c of cands){ if(c in row) return c; } return Object.keys(row)[0] || 'ID'; }; }
-function generateKey(prefix='ID'){ return `${prefix}_${Date.now().toString(36)}${Math.random().toString(36).slice(2,8).toUpperCase()}`; }
-
-/* ===== Estado ===== */
-let AGENTES=[], TAREAS=[], VIEW_AGENTES=[];
-let KEY_AGENTE="ID", KEY_TAREA="ID";
-let agenteActual=null;
-
-/* ===== Inicialización ===== */
-document.addEventListener("DOMContentLoaded", async ()=>{
-  try{ document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); }catch(e){}
-  try{ document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); }catch(e){}
-  
-  bindUI();
-  await cargarTodo();
-});
-
-function bindUI(){
-  // Botones Header
-  document.getElementById('btnNew').addEventListener('click', ()=>abrirFormAgente());
-  document.getElementById('btnReload').addEventListener('click', cargarTodo);
-  document.getElementById('btnExport').addEventListener('click', exportCSV);
-  
-  // Filtros
-  document.getElementById('inpBuscar').addEventListener('input', aplicarFiltros);
-  
-  // Modals Close events
-  modalAgente.addEventListener('click', e=>{ if(e.target===modalAgente) cerrarFormAgente(); });
-  modalTareas.addEventListener('click', e=>{ if(e.target===modalTareas) cerrarModalTareas(); });
-  modalTareaForm.addEventListener('click', e=>{ if(e.target===modalTareaForm) cerrarFormTarea(); });
-  
-  document.addEventListener('keydown', e=>{ 
-      if(e.key==='Escape'){ 
-          if(modalTareaForm.classList.contains('active')) cerrarFormTarea();
-          else if(modalTareas.classList.contains('active')) cerrarModalTareas();
-          else cerrarFormAgente();
+    <style>
+      /* ===== ESTILOS DASHBOARD (Unificados) ===== */
+      body {
+        max-width: 1300px;
+        margin: 0 auto;
+        color: #1a2b48;
       }
-  });
-}
+      main {
+        padding: 40px;
+      }
+      .page-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 16px;
+      }
 
-/* ===== Carga de Datos ===== */
-async function cargarTodo(){
-  try{
-    showSpinner('Cargando agentes...');
-    const [a, t] = await Promise.all([
-      fetchData("Agentes").catch(()=>[]),
-      fetchData("Tareas").catch(()=>[])
-    ]);
-    
-    AGENTES = a || [];
-    TAREAS = t || [];
-    
-    if(AGENTES.length) KEY_AGENTE=getKeyName(AGENTES[0]);
-    if(TAREAS.length) KEY_TAREA=getKeyName(TAREAS[0]);
+      /* Tablas */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        padding: 10px 8px;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: left;
+        vertical-align: middle;
+      }
+      th {
+        background: #fafafa;
+        font-weight: 600;
+        color: #4b5563;
+      }
 
-    aplicarFiltros();
-    
-    // Si el modal de tareas está abierto, refrescar su contenido
-    if(modalTareas.classList.contains('active') && agenteActual){
-        renderTareas();
-    }
+      /* Inputs y Layout */
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-family: inherit;
+      }
+      .label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 13px;
+        color: #374151;
+      }
 
-  }catch(e){
-    console.error(e);
-    alert("Error cargando datos: " + e.message);
-  }finally{
-    hideSpinner();
-  }
-}
+      /* MODAL */
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.35);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal.active {
+        display: flex;
+      }
+      /* Modal Normal */
+      .modal-content {
+        width: 100%;
+        max-width: 500px;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+      }
+      /* Modal Ancho (Para Tareas) */
+      .modal-content.wide {
+        max-width: 800px;
+      }
 
-/* ===== Filtros y Render Agentes ===== */
-function aplicarFiltros(){
-  const q = norm(document.getElementById('inpBuscar').value);
-  
-  VIEW_AGENTES = AGENTES.filter(a => {
-      if(!q) return true;
-      const str = [a.Nombre, a.Email, a.Telefono].map(v=>norm(v)).join(" ");
-      return str.includes(q);
-  });
-  
-  renderTablaAgentes();
-}
+      /* SPINNER */
+      .spinner-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.85);
+        display: none;
+        place-items: center;
+        z-index: 12000;
+      }
+      .spinner-card {
+        background: #fff;
+        padding: 18px 22px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        text-align: center;
+        min-width: 260px;
+        color: #1a2b48;
+        font-weight: 600;
+      }
+      .spinner {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 3px solid #eee;
+        border-top-color: #b46a55;
+        margin: 0 auto 10px;
+        animation: spin 0.9s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
 
-function renderTablaAgentes(){
-  const tb = document.getElementById('tablaAgentes');
-  if(!VIEW_AGENTES.length){ tb.innerHTML = '<tr><td colspan="4" class="muted">No se encontraron agentes.</td></tr>'; return; }
+      .mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New",
+          monospace;
+      }
+      .muted {
+        color: #666;
+        font-size: 0.9em;
+      }
 
-  tb.innerHTML = VIEW_AGENTES.map(a=>{
-    const key=getKeyVal(a);
-    return `<tr>
-      <td><span style="font-weight:600; font-size:13px;">${a.Nombre||""}</span></td>
-      <td>${a.Email||""}</td>
-      <td class="mono">${a.Telefono||""}</td>
+      /* DASHBOARD HEADER */
+      .dashboard-header {
+        background-color: #fff;
+        padding: 20px 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        margin-bottom: 25px;
+        border: 1px solid #f0f0f0;
+      }
+      .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+      .header-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .header-filters {
+        display: flex;
+        gap: 15px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        padding-top: 20px;
+        border-top: 1px solid #e2e8f0;
+      }
+      .filter-item {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .input-modern {
+        height: 44px;
+        padding: 0 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 14px;
+        background-color: #f8fafc;
+      }
+
+      /* BOTONES ICONOS */
+      .acciones-group {
+        display: flex;
+        gap: 6px;
+        justify-content: flex-start;
+        align-items: center;
+      }
+      .btn-icon {
+        width: 34px;
+        height: 34px;
+        border: none;
+        border-radius: 6px;
+        background-color: #f3f4f6;
+        color: #555;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        transition: all 0.2s ease;
+      }
+      .btn-icon:hover {
+        transform: translateY(-2px);
+        color: white;
+      }
+      .btn-editar:hover {
+        background-color: #f59e0b;
+      }
+      .btn-eliminar:hover {
+        background-color: #ef4444;
+      }
+      /* Botón Tareas (Azul Info) */
+      .btn-tareas:hover {
+        background-color: #0ea5e9;
+      }
+
+      /* BOTONES CABECERA */
+      .btn-head {
+        height: 44px;
+        padding: 0 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.2s;
+      }
+      .btn-head:hover {
+        transform: translateY(-2px);
+      }
+      .btn-nuevo {
+        background-color: #0f172a;
+        color: white;
+      }
+      .btn-secundario {
+        background-color: #fff;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+      }
+      .btn-secundario:hover {
+        background-color: #f8fafc;
+        border-color: #94a3b8;
+      }
+
+      /* Badges para Tareas */
+      .badge {
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+      .bg-alta {
+        background: #fee2e2;
+        color: #b91c1c;
+      }
+      .bg-media {
+        background: #ffedd5;
+        color: #c2410c;
+      }
+      .bg-baja {
+        background: #dcfce7;
+        color: #15803d;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="header"></div>
+
+    <main>
+      <div class="dashboard-header no-print">
+        <div class="header-top">
+          <h1 class="page-title">Gestión de Agentes</h1>
+
+          <div class="header-actions">
+            <button
+              class="btn-head btn-secundario"
+              id="btnReload"
+              title="Recargar datos"
+            >
+              <i class="fa-solid fa-rotate-right"></i>
+              <span class="btn-text">Recargar</span>
+            </button>
+
+            <button
+              class="btn-head btn-secundario"
+              id="btnExport"
+              title="Descargar CSV"
+            >
+              <i class="fa-solid fa-file-csv"></i>
+              <span class="btn-text">Exportar</span>
+            </button>
+
+            <button
+              class="btn-head btn-secundario"
+              onclick="window.print()"
+              title="Imprimir vista"
+            >
+              <i class="fa-solid fa-print"></i>
+              <span class="btn-text">Imprimir</span>
+            </button>
+
+            <button class="btn-head btn-nuevo" id="btnNew">
+              <i class="fa-solid fa-plus"></i>
+              <span>Nuevo Agente</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="header-filters">
+          <div class="filter-item" style="flex-grow: 1">
+            <label class="label">Buscar</label>
+            <input
+              id="inpBuscar"
+              class="input-modern"
+              placeholder="Nombre, email, teléfono..."
+              type="text"
+            />
+          </div>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+            <th class="no-print" style="width: 140px">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tablaAgentes">
+          <tr>
+            <td colspan="4" class="muted">Cargando datos...</td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
+
+    <div id="modalAgente" class="modal" aria-hidden="true">
+      <div class="modal-content">
+        <h2 id="modalTitleAgente" style="margin-top: 0">Nuevo Agente</h2>
+        <form id="formAgente" style="margin-top: 20px">
+          <input type="hidden" id="agenteID" />
+
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <div>
+              <label class="label">Nombre</label
+              ><input type="text" id="agenteNombre" required />
+            </div>
+            <div>
+              <label class="label">Email</label
+              ><input type="email" id="agenteEmail" required />
+            </div>
+            <div>
+              <label class="label">Teléfono</label
+              ><input type="text" id="agenteTelefono" />
+            </div>
+          </div>
+
+          <div style="text-align: right; margin-top: 20px">
+            <button
+              type="button"
+              class="btn-primary"
+              style="background: #6c757d; border: none"
+              onclick="cerrarFormAgente()"
+            >
+              Cancelar
+            </button>
+            <button class="btn-primary" style="border: none">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="modalTareas" class="modal" aria-hidden="true">
+      <div class="modal-content wide">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+          "
+        >
+          <h2 style="margin: 0">
+            Tareas: <span id="nombreAgenteTareas" style="color: #0f172a"></span>
+          </h2>
+          <button
+            class="btn-head btn-nuevo"
+            onclick="abrirFormTarea()"
+            style="height: 36px; font-size: 13px"
+          >
+            <i class="fa-solid fa-plus"></i> Nueva Tarea
+          </button>
+        </div>
+
+        <div
+          style="
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 6px;
+          "
+        >
+          <table style="margin: 0">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Estado</th>
+                <th>Prioridad</th>
+                <th>Fecha Límite</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaTareas"></tbody>
+          </table>
+        </div>
+
+        <div style="text-align: right; margin-top: 20px">
+          <button
+            type="button"
+            class="btn-primary"
+            style="background: #6c757d; border: none"
+            onclick="cerrarModalTareas()"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="modalTareaForm"
+      class="modal"
+      aria-hidden="true"
+      style="z-index: 10001"
+    >
+      <div class="modal-content">
+        <h2 id="modalTitleTarea" style="margin-top: 0">Nueva Tarea</h2>
+        <form id="formTarea" style="margin-top: 15px">
+          <input type="hidden" id="tareaID" />
+
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <div>
+              <label class="label">Título</label
+              ><input type="text" id="tareaTitulo" required />
+            </div>
+            <div>
+              <label class="label">Descripción</label
+              ><textarea id="tareaDescripcion" rows="2"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 10px">
+              <div style="flex: 1">
+                <label class="label">Estado</label>
+                <select id="tareaEstado">
+                  <option>Pendiente</option>
+                  <option>En progreso</option>
+                  <option>Completada</option>
+                </select>
+              </div>
+              <div style="flex: 1">
+                <label class="label">Prioridad</label>
+                <select id="tareaPrioridad">
+                  <option>Baja</option>
+                  <option>Media</option>
+                  <option>Alta</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="label">Fecha Límite</label
+              ><input type="date" id="tareaFechaLimite" />
+            </div>
+          </div>
+
+          <div style="text-align: right; margin-top: 20px">
+            <button
+              type="button"
+              class="btn-primary"
+              style="background: #6c757d; border: none"
+              onclick="cerrarFormTarea()"
+            >
+              Cancelar
+            </button>
+            <button class="btn-primary" style="border: none">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="pageSpinner" class="spinner-backdrop" aria-hidden="true">
+      <div class="spinner-card">
+        <div class="spinner"></div>
+        <div id="spinnerText">Cargando…</div>
+      </div>
+    </div>
+
+    <div id="footer"></div>
+
+    <script>
+      /* ===== Utilidades (Copiadas del estándar) ===== */
+      function showSpinner(msg) {
+        const sp = document.getElementById("pageSpinner");
+        const txt = document.getElementById("spinnerText");
+        if (msg) txt.textContent = msg;
+        sp.style.display = "grid";
+      }
+      function hideSpinner() {
+        document.getElementById("pageSpinner").style.display = "none";
+      }
+      function norm(s) {
+        return (s || "")
+          .toString()
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .trim();
+      }
+      function escapeCSV(v) {
+        if (v == null) return "";
+        const s = String(v).replaceAll('"', '""');
+        return /[",\n]/.test(s) ? '"' + s + '"' : s;
+      }
+
+      /* Helpers Claves */
+      if (typeof window.getKeyVal !== "function") {
+        window.getKeyVal = (o) =>
+          o
+            ? o._id ??
+              o.id ??
+              o.ID ??
+              o.Key ??
+              o.key ??
+              o.Id ??
+              o[Object.keys(o)[0]]
+            : "";
+      }
+      if (typeof window.getKeyName !== "function") {
+        window.getKeyName = (row) => {
+          if (!row || typeof row !== "object") return "ID";
+          const cands = ["ID", "_id", "Id", "id", "Key", "key"];
+          for (const c of cands) {
+            if (c in row) return c;
+          }
+          return Object.keys(row)[0] || "ID";
+        };
+      }
+      function generateKey(prefix = "ID") {
+        return `${prefix}_${Date.now().toString(36)}${Math.random()
+          .toString(36)
+          .slice(2, 8)
+          .toUpperCase()}`;
+      }
+
+      /* ===== Estado ===== */
+      let AGENTES = [],
+        TAREAS = [],
+        VIEW_AGENTES = [];
+      let KEY_AGENTE = "ID",
+        KEY_TAREA = "ID";
+      let agenteActual = null;
+
+      /* ===== Inicialización ===== */
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          document.getElementById("header").innerHTML = await (
+            await fetch("header.html")
+          ).text();
+        } catch (e) {}
+        try {
+          document.getElementById("footer").innerHTML = await (
+            await fetch("footer.html")
+          ).text();
+        } catch (e) {}
+
+        bindUI();
+        await cargarTodo();
+      });
+
+      function bindUI() {
+        // Botones Header
+        document
+          .getElementById("btnNew")
+          .addEventListener("click", () => abrirFormAgente());
+        document
+          .getElementById("btnReload")
+          .addEventListener("click", cargarTodo);
+        document
+          .getElementById("btnExport")
+          .addEventListener("click", exportCSV);
+
+        // Filtros
+        document
+          .getElementById("inpBuscar")
+          .addEventListener("input", aplicarFiltros);
+
+        // Modals Close events
+        modalAgente.addEventListener("click", (e) => {
+          if (e.target === modalAgente) cerrarFormAgente();
+        });
+        modalTareas.addEventListener("click", (e) => {
+          if (e.target === modalTareas) cerrarModalTareas();
+        });
+        modalTareaForm.addEventListener("click", (e) => {
+          if (e.target === modalTareaForm) cerrarFormTarea();
+        });
+
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") {
+            if (modalTareaForm.classList.contains("active")) cerrarFormTarea();
+            else if (modalTareas.classList.contains("active"))
+              cerrarModalTareas();
+            else cerrarFormAgente();
+          }
+        });
+      }
+
+      /* ===== Carga de Datos ===== */
+      async function cargarTodo() {
+        try {
+          showSpinner("Cargando agentes...");
+          const [a, t] = await Promise.all([
+            fetchData("Agentes").catch(() => []),
+            fetchData("Tareas").catch(() => []),
+          ]);
+
+          AGENTES = a || [];
+          TAREAS = t || [];
+
+          if (AGENTES.length) KEY_AGENTE = getKeyName(AGENTES[0]);
+          if (TAREAS.length) KEY_TAREA = getKeyName(TAREAS[0]);
+
+          aplicarFiltros();
+
+          // Si el modal de tareas está abierto, refrescar su contenido
+          if (modalTareas.classList.contains("active") && agenteActual) {
+            renderTareas();
+          }
+        } catch (e) {
+          console.error(e);
+          alert("Error cargando datos: " + e.message);
+        } finally {
+          hideSpinner();
+        }
+      }
+
+      /* ===== Filtros y Render Agentes ===== */
+      function aplicarFiltros() {
+        const q = norm(document.getElementById("inpBuscar").value);
+
+        VIEW_AGENTES = AGENTES.filter((a) => {
+          if (!q) return true;
+          const str = [a.Nombre, a.Email, a.Telefono]
+            .map((v) => norm(v))
+            .join(" ");
+          return str.includes(q);
+        });
+
+        renderTablaAgentes();
+      }
+
+      function renderTablaAgentes() {
+        const tb = document.getElementById("tablaAgentes");
+        if (!VIEW_AGENTES.length) {
+          tb.innerHTML =
+            '<tr><td colspan="4" class="muted">No se encontraron agentes.</td></tr>';
+          return;
+        }
+
+        tb.innerHTML = VIEW_AGENTES.map((a) => {
+          const key = getKeyVal(a);
+          return `<tr>
+      <td><span style="font-weight:600; font-size:13px;">${
+        a.Nombre || ""
+      }</span></td>
+      <td>${a.Email || ""}</td>
+      <td class="mono">${a.Telefono || ""}</td>
       <td class="no-print">
          <div class="acciones-group">
             <button class="btn-icon btn-editar" onclick="abrirFormAgente('${key}')" title="Editar Datos">
@@ -333,98 +699,125 @@ function renderTablaAgentes(){
          </div>
       </td>
     </tr>`;
-  }).join("");
-}
+        }).join("");
+      }
 
-/* ---------------- Agentes CRUD ---------------- */
-function abrirFormAgente(id){
-  const title = document.getElementById('modalTitleAgente');
-  document.getElementById('formAgente').reset();
-  document.getElementById('agenteID').value="";
-  
-  if(id){
-    title.textContent = "Editar Agente";
-    const a = AGENTES.find(x=>String(getKeyVal(x))===String(id));
-    if(!a){ alert("No encontrado"); return; }
-    document.getElementById('agenteID').value=id;
-    document.getElementById('agenteNombre').value=a.Nombre||"";
-    document.getElementById('agenteEmail').value=a.Email||"";
-    document.getElementById('agenteTelefono').value=a.Telefono||"";
-  } else {
-    title.textContent = "Nuevo Agente";
-  }
-  document.getElementById('modalAgente').classList.add("active");
-}
-function cerrarFormAgente(){ document.getElementById('modalAgente').classList.remove("active"); }
+      /* ---------------- Agentes CRUD ---------------- */
+      function abrirFormAgente(id) {
+        const title = document.getElementById("modalTitleAgente");
+        document.getElementById("formAgente").reset();
+        document.getElementById("agenteID").value = "";
 
-document.getElementById('formAgente').onsubmit=async(e)=>{
-  e.preventDefault();
-  const id = document.getElementById('agenteID').value;
-  const payload={
-    Nombre: document.getElementById('agenteNombre').value.trim(),
-    Email: document.getElementById('agenteEmail').value.trim(),
-    Telefono: document.getElementById('agenteTelefono').value.trim()
-  };
-  
-  const keyField = (id ? KEY_AGENTE : KEY_AGENTE);
-  if(id) payload[keyField] = id;
-  else payload[keyField] = generateKey('AGE');
+        if (id) {
+          title.textContent = "Editar Agente";
+          const a = AGENTES.find((x) => String(getKeyVal(x)) === String(id));
+          if (!a) {
+            alert("No encontrado");
+            return;
+          }
+          document.getElementById("agenteID").value = id;
+          document.getElementById("agenteNombre").value = a.Nombre || "";
+          document.getElementById("agenteEmail").value = a.Email || "";
+          document.getElementById("agenteTelefono").value = a.Telefono || "";
+        } else {
+          title.textContent = "Nuevo Agente";
+        }
+        document.getElementById("modalAgente").classList.add("active");
+      }
+      function cerrarFormAgente() {
+        document.getElementById("modalAgente").classList.remove("active");
+      }
 
-  try{
-    showSpinner("Guardando...");
-    if(typeof upsertData === 'function') await upsertData("Agentes", payload);
-    else if(id) await appSheetCRUD("Agentes","Edit",[payload]);
-    else await appSheetCRUD("Agentes","Add",[payload]);
-    
-    cerrarFormAgente();
-    await cargarTodo();
-  }catch(err){
-      alert("Error: "+err.message);
-  }finally{ hideSpinner(); }
-};
+      document.getElementById("formAgente").onsubmit = async (e) => {
+        e.preventDefault();
+        const id = document.getElementById("agenteID").value;
+        const payload = {
+          Nombre: document.getElementById("agenteNombre").value.trim(),
+          Email: document.getElementById("agenteEmail").value.trim(),
+          Telefono: document.getElementById("agenteTelefono").value.trim(),
+        };
 
-async function eliminarAgente(id){
-  if(!confirm("¿Eliminar este agente? Se perderán sus tareas asignadas si no se reasignan.")) return;
-  try{
-     showSpinner("Eliminando...");
-     if(typeof deleteByKey === 'function') await deleteByKey("Agentes", id);
-     else await appSheetCRUD("Agentes","Delete",[{[KEY_AGENTE]:id}]);
-     await cargarTodo();
-  }catch(err){ alert("Error: "+err.message); }
-  finally{ hideSpinner(); }
-}
+        const keyField = id ? KEY_AGENTE : KEY_AGENTE;
+        if (id) payload[keyField] = id;
+        else payload[keyField] = generateKey("AGE");
 
-/* ---------------- Tareas Logic ---------------- */
-function abrirModalTareas(agenteID){
-  agenteActual = AGENTES.find(a=>String(getKeyVal(a))===String(agenteID));
-  if(!agenteActual) return;
-  document.getElementById('nombreAgenteTareas').textContent = agenteActual.Nombre;
-  renderTareas();
-  document.getElementById('modalTareas').classList.add("active");
-}
-function cerrarModalTareas(){ document.getElementById('modalTareas').classList.remove("active"); agenteActual=null; }
+        try {
+          showSpinner("Guardando...");
+          if (typeof upsertData === "function")
+            await upsertData("Agentes", payload);
+          else if (id) await appSheetCRUD("Agentes", "Edit", [payload]);
+          else await appSheetCRUD("Agentes", "Add", [payload]);
 
-function renderTareas(){
-  const tareasAgente = TAREAS.filter(t=>String(t.AgenteID)===String(getKeyVal(agenteActual)));
-  const tb = document.getElementById('tablaTareas');
-  
-  if(!tareasAgente.length){
-      tb.innerHTML = '<tr><td colspan="5" class="muted" style="text-align:center;">Este agente no tiene tareas asignadas.</td></tr>';
-      return;
-  }
+          cerrarFormAgente();
+          await cargarTodo();
+        } catch (err) {
+          alert("Error: " + err.message);
+        } finally {
+          hideSpinner();
+        }
+      };
 
-  tb.innerHTML = tareasAgente.map(t=>{
-    const key=getKeyVal(t);
-    // Badge de prioridad
-    let pClass = "bg-baja";
-    if(t.Prioridad === 'Alta') pClass = "bg-alta";
-    if(t.Prioridad === 'Media') pClass = "bg-media";
+      async function eliminarAgente(id) {
+        if (
+          !confirm(
+            "¿Eliminar este agente? Se perderán sus tareas asignadas si no se reasignan."
+          )
+        )
+          return;
+        try {
+          showSpinner("Eliminando...");
+          if (typeof deleteByKey === "function")
+            await deleteByKey("Agentes", id);
+          else await appSheetCRUD("Agentes", "Delete", [{ [KEY_AGENTE]: id }]);
+          await cargarTodo();
+        } catch (err) {
+          alert("Error: " + err.message);
+        } finally {
+          hideSpinner();
+        }
+      }
 
-    return `<tr>
-      <td style="font-weight:500;">${t.Titulo||""}</td>
-      <td>${t.Estado||""}</td>
-      <td><span class="badge ${pClass}">${t.Prioridad||""}</span></td>
-      <td>${t.FechaLimite||""}</td>
+      /* ---------------- Tareas Logic ---------------- */
+      function abrirModalTareas(agenteID) {
+        agenteActual = AGENTES.find(
+          (a) => String(getKeyVal(a)) === String(agenteID)
+        );
+        if (!agenteActual) return;
+        document.getElementById("nombreAgenteTareas").textContent =
+          agenteActual.Nombre;
+        renderTareas();
+        document.getElementById("modalTareas").classList.add("active");
+      }
+      function cerrarModalTareas() {
+        document.getElementById("modalTareas").classList.remove("active");
+        agenteActual = null;
+      }
+
+      function renderTareas() {
+        const tareasAgente = TAREAS.filter(
+          (t) => String(t.AgenteID) === String(getKeyVal(agenteActual))
+        );
+        const tb = document.getElementById("tablaTareas");
+
+        if (!tareasAgente.length) {
+          tb.innerHTML =
+            '<tr><td colspan="5" class="muted" style="text-align:center;">Este agente no tiene tareas asignadas.</td></tr>';
+          return;
+        }
+
+        tb.innerHTML = tareasAgente
+          .map((t) => {
+            const key = getKeyVal(t);
+            // Badge de prioridad
+            let pClass = "bg-baja";
+            if (t.Prioridad === "Alta") pClass = "bg-alta";
+            if (t.Prioridad === "Media") pClass = "bg-media";
+
+            return `<tr>
+      <td style="font-weight:500;">${t.Titulo || ""}</td>
+      <td>${t.Estado || ""}</td>
+      <td><span class="badge ${pClass}">${t.Prioridad || ""}</span></td>
+      <td>${t.FechaLimite || ""}</td>
       <td>
          <div class="acciones-group">
             <button class="btn-icon btn-editar" onclick="abrirFormTarea('${key}')" title="Editar Tarea">
@@ -436,94 +829,118 @@ function renderTareas(){
          </div>
       </td>
     </tr>`;
-  }).join("");
-}
+          })
+          .join("");
+      }
 
-function abrirFormTarea(id){
-  const title = document.getElementById('modalTitleTarea');
-  document.getElementById('formTarea').reset();
-  document.getElementById('tareaID').value="";
-  
-  if(id){
-    title.textContent = "Editar Tarea";
-    const t = TAREAS.find(x=>String(getKeyVal(x))===String(id));
-    if(!t){ alert("No encontrada"); return; }
-    document.getElementById('tareaID').value=id;
-    document.getElementById('tareaTitulo').value=t.Titulo||"";
-    document.getElementById('tareaDescripcion').value=t.Descripcion||"";
-    document.getElementById('tareaEstado').value=t.Estado||"Pendiente";
-    document.getElementById('tareaPrioridad').value=t.Prioridad||"Media";
-    document.getElementById('tareaFechaLimite').value=t.FechaLimite||"";
-  } else {
-    title.textContent = "Nueva Tarea";
-    // Fecha hoy por defecto
-    document.getElementById('tareaFechaLimite').value = new Date().toISOString().split('T')[0];
-  }
-  document.getElementById('modalTareaForm').classList.add("active");
-}
-function cerrarFormTarea(){ document.getElementById('modalTareaForm').classList.remove("active"); }
+      function abrirFormTarea(id) {
+        const title = document.getElementById("modalTitleTarea");
+        document.getElementById("formTarea").reset();
+        document.getElementById("tareaID").value = "";
 
-document.getElementById('formTarea').onsubmit=async(e)=>{
-  e.preventDefault();
-  const id = document.getElementById('tareaID').value;
-  const payload={
-    AgenteID: getKeyVal(agenteActual),
-    Titulo: document.getElementById('tareaTitulo').value.trim(),
-    Descripcion: document.getElementById('tareaDescripcion').value.trim(),
-    Estado: document.getElementById('tareaEstado').value,
-    Prioridad: document.getElementById('tareaPrioridad').value,
-    FechaLimite: document.getElementById('tareaFechaLimite').value
-  };
+        if (id) {
+          title.textContent = "Editar Tarea";
+          const t = TAREAS.find((x) => String(getKeyVal(x)) === String(id));
+          if (!t) {
+            alert("No encontrada");
+            return;
+          }
+          document.getElementById("tareaID").value = id;
+          document.getElementById("tareaTitulo").value = t.Titulo || "";
+          document.getElementById("tareaDescripcion").value =
+            t.Descripcion || "";
+          document.getElementById("tareaEstado").value =
+            t.Estado || "Pendiente";
+          document.getElementById("tareaPrioridad").value =
+            t.Prioridad || "Media";
+          document.getElementById("tareaFechaLimite").value =
+            t.FechaLimite || "";
+        } else {
+          title.textContent = "Nueva Tarea";
+          // Fecha hoy por defecto
+          document.getElementById("tareaFechaLimite").value = new Date()
+            .toISOString()
+            .split("T")[0];
+        }
+        document.getElementById("modalTareaForm").classList.add("active");
+      }
+      function cerrarFormTarea() {
+        document.getElementById("modalTareaForm").classList.remove("active");
+      }
 
-  const keyField = (id ? KEY_TAREA : KEY_TAREA);
-  if(id) payload[keyField] = id;
-  else payload[keyField] = generateKey('TASK');
+      document.getElementById("formTarea").onsubmit = async (e) => {
+        e.preventDefault();
+        const id = document.getElementById("tareaID").value;
+        const payload = {
+          AgenteID: getKeyVal(agenteActual),
+          Titulo: document.getElementById("tareaTitulo").value.trim(),
+          Descripcion: document.getElementById("tareaDescripcion").value.trim(),
+          Estado: document.getElementById("tareaEstado").value,
+          Prioridad: document.getElementById("tareaPrioridad").value,
+          FechaLimite: document.getElementById("tareaFechaLimite").value,
+        };
 
-  try{
-    showSpinner("Guardando tarea...");
-    if(typeof upsertData === 'function') await upsertData("Tareas", payload);
-    else if(id) await appSheetCRUD("Tareas","Edit",[payload]);
-    else await appSheetCRUD("Tareas","Add",[payload]);
-    
-    cerrarFormTarea();
-    await cargarTodo(); // Esto refrescará la lista principal y la lista dentro del modal
-  }catch(err){
-      alert("Error: "+err.message);
-  }finally{ hideSpinner(); }
-};
+        const keyField = id ? KEY_TAREA : KEY_TAREA;
+        if (id) payload[keyField] = id;
+        else payload[keyField] = generateKey("TASK");
 
-async function eliminarTarea(id){
-  if(!confirm("¿Eliminar esta tarea?")) return;
-  try{
-     showSpinner("Eliminando...");
-     if(typeof deleteByKey === 'function') await deleteByKey("Tareas", id);
-     else await appSheetCRUD("Tareas","Delete",[{[KEY_TAREA]:id}]);
-     await cargarTodo();
-  }catch(err){ alert("Error: "+err.message); }
-  finally{ hideSpinner(); }
-}
+        try {
+          showSpinner("Guardando tarea...");
+          if (typeof upsertData === "function")
+            await upsertData("Tareas", payload);
+          else if (id) await appSheetCRUD("Tareas", "Edit", [payload]);
+          else await appSheetCRUD("Tareas", "Add", [payload]);
 
-/* ===== Exportar ===== */
-function exportCSV(){
-  const headers = ['ID','Nombre','Email','Telefono'];
-  const lines = [headers.join(',')];
-  
-  VIEW_AGENTES.forEach(r => {
-    lines.push([
-      escapeCSV(getKeyVal(r)),
-      escapeCSV(r.Nombre),
-      escapeCSV(r.Email),
-      escapeCSV(r.Telefono)
-    ].join(','));
-  });
+          cerrarFormTarea();
+          await cargarTodo(); // Esto refrescará la lista principal y la lista dentro del modal
+        } catch (err) {
+          alert("Error: " + err.message);
+        } finally {
+          hideSpinner();
+        }
+      };
 
-  const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); 
-  a.href = url; a.download = 'Agentes.csv'; 
-  a.click(); 
-  URL.revokeObjectURL(url);
-}
-</script>
-</body>
+      async function eliminarTarea(id) {
+        if (!confirm("¿Eliminar esta tarea?")) return;
+        try {
+          showSpinner("Eliminando...");
+          if (typeof deleteByKey === "function")
+            await deleteByKey("Tareas", id);
+          else await appSheetCRUD("Tareas", "Delete", [{ [KEY_TAREA]: id }]);
+          await cargarTodo();
+        } catch (err) {
+          alert("Error: " + err.message);
+        } finally {
+          hideSpinner();
+        }
+      }
+
+      /* ===== Exportar ===== */
+      function exportCSV() {
+        const headers = ["ID", "Nombre", "Email", "Telefono"];
+        const lines = [headers.join(",")];
+
+        VIEW_AGENTES.forEach((r) => {
+          lines.push(
+            [
+              escapeCSV(getKeyVal(r)),
+              escapeCSV(r.Nombre),
+              escapeCSV(r.Email),
+              escapeCSV(r.Telefono),
+            ].join(",")
+          );
+        });
+
+        const blob = new Blob([lines.join("\n")], {
+          type: "text/csv;charset=utf-8;",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "Agentes.csv";
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    </script>
+  </body>
 </html>
