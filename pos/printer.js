@@ -59,31 +59,28 @@ window.printOpeningTicket = async function (amount, cashier, turno) {
   imprimirYLimpiar(area);
 };
 
-// === 2. TICKET DE VENTA ===
-window.printTicket = async function (cart, total, method, orderNum) {
+// --- EN printer.js ---
+
+// Modificamos la firma para aceptar 'cashInfo' al final
+window.printTicket = async function (cart, total, method, orderNum, cashInfo = null) {
   const ticketArea = getPrintableArea();
-  
-  // Usamos hora actual del sistema (que app.js ya ajustó comercialmente, pero aquí mostramos la real de impresión)
   const fechaHora = new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" });
   const soloHora = fechaHora.split(" ")[1] || fechaHora;
-  
   const nombreCajero = typeof currentUser !== "undefined" && currentUser ? currentUser.Nombre : "Cajero";
   
   let displayMethod = method;
   if (method.includes("MIXTO")) displayMethod = "Mixto";
 
-  // COCINA
+  // SECCIÓN COCINA (Sin cambios)
   const itemsCocina = cart.filter((i) => i.cocina);
   let htmlCocina = "";
   if (itemsCocina.length > 0) {
     let listadoCocina = "";
     itemsCocina.forEach((item) => {
       const srvTag = item.tipoServicio === "LLEVAR" ? "LLEVAR" : "SERVIR";
-      // Aumenté un poco el tamaño de la nota para legibilidad en cocina
       const nota = item.comentario ? `<div style="font-size:0.85em; font-weight:normal;">( ${item.comentario} )</div>` : "";
       listadoCocina += `<div>${item.cantidad} x ${item.nombre} <b>${srvTag}</b> ${nota}</div>`;
     });
-    
     htmlCocina = `
             <div class="ticket-header fs-big">COCINA</div>
             <div class="text-center fs-huge" style="font-size:2.5rem;font-weight: bold;">#${orderNum}</div>
@@ -93,13 +90,12 @@ window.printTicket = async function (cart, total, method, orderNum) {
             <div class="text-center">.</div><div class="force-break"></div>`;
   }
 
-  // CLIENTE
+  // SECCIÓN CLIENTE
   let listadoCliente = "";
   cart.forEach((item) => {
     const totalItem = (item.precio * item.cantidad).toLocaleString("es-CL");
     const srvTag = item.tipoServicio === "LLEVAR" ? "(LLEVAR)" : "(SERVIR)";
     const nota = item.comentario ? `<div style="font-size:0.7em; font-style:italic;">* ${item.comentario}</div>` : "";
-    
     listadoCliente += `
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 2px; font-size:1.2rem;">
                 <span style="flex:1; padding-right:5px; text-align:left;">${item.cantidad} x ${item.nombre} ${srvTag} ${nota}</span>
@@ -107,13 +103,36 @@ window.printTicket = async function (cart, total, method, orderNum) {
             </div>`;
   });
 
+  // --- LÓGICA DE EFECTIVO / VUELTO ---
+  let cashHtml = "";
+  if (cashInfo) {
+      // Si recibimos información de efectivo, creamos el bloque HTML
+      cashHtml = `
+        <div class="d-flex-between" style="font-size:1.1rem;">
+            <span>Efectivo:</span>
+            <span>$${cashInfo.recibido.toLocaleString("es-CL")}</span>
+        </div>
+        <div class="d-flex-between fw-bold" style="font-size:1.3rem;">
+            <span>Vuelto:</span>
+            <span>$${cashInfo.vuelto.toLocaleString("es-CL")}</span>
+        </div>
+      `;
+  }
+
   const htmlCliente = `
         <div class="ticket-header"><img src="img/logo_8_sf.png" width="80px" alt="" /><br>EL CARRO DEL OCHO</div>
         <div class="text-center ticket-divider"><span class="fs-huge">PEDIDO: #${orderNum}</span></div>
         <div class="text-center text-uppercase" style="font-size:1.1rem; margin-bottom:5px;">${fechaHora}<br>ATENDIDO POR: ${nombreCajero}</div>
         <div class="ticket-divider text-uppercase" style="font-size: 1rem;">${listadoCliente}</div>
-        <div class="d-flex-between fs-big" style="margin-top:5px;"><span>TOTAL:</span><span>$${total.toLocaleString("es-CL")}</span></div>
-        <div style="font-size: 1.2rem;">Pago: ${displayMethod}</div>
+        
+        <div class="d-flex-between fs-big" style="margin-top:5px;">
+            <span>TOTAL:</span>
+            <span>$${total.toLocaleString("es-CL")}</span>
+        </div>
+        
+        ${cashHtml}
+        
+        <div style="font-size: 1.2rem; margin-top:5px;">Pago: ${displayMethod}</div>
         <div class="text-center" style="margin-top:15px; font-size:1.1rem;">¡Gracias por su preferencia!</div>
         ${footerHtml}
         <div style="text-align:center; margin-top:10px;">.</div>`;

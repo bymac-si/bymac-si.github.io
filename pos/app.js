@@ -602,68 +602,85 @@ window.calculateMixed = function () {
   }
 };
 
+// --- EN app.js ---
+
 async function processSale() {
-  if (!currentUser) return checkLogin();
-  const total = cart.reduce((acc, i) => acc + i.precio * i.cantidad, 0);
-  let finalPaymentString = selectedPaymentMethod;
+    if (!currentUser) return checkLogin();
+    
+    const total = cart.reduce((acc, i) => acc + (i.precio * i.cantidad), 0);
+    let finalPaymentString = selectedPaymentMethod; 
+    let cashInfo = null; // Variable para guardar datos de efectivo
+    
+    // 1. LÓGICA EFECTIVO
+    if (selectedPaymentMethod === 'Efectivo') {
+        const received = parseInt(document.getElementById('amount-tendered').value) || 0;
+        if (received < total) return alert("Monto insuficiente");
+        
+        // Guardamos los datos para imprimir
+        cashInfo = {
+            recibido: received,
+            vuelto: received - total
+        };
+    }
+    
+    // 2. LÓGICA MIXTO
+    if (selectedPaymentMethod === 'Mixto') {
+        const c = parseInt(document.getElementById('mix-cash').value) || 0;
+        const t = parseInt(document.getElementById('mix-card').value) || 0;
+        const tr = parseInt(document.getElementById('mix-transfer').value) || 0;
+        if (c + t + tr !== total) return alert("⚠️ El pago no cuadra.");
+        
+        finalPaymentString = `MIXTO|E:${c}|T:${t}|Tr:${tr}`;
+        
+        // Opcional: Si quieres mostrar vuelto en mixto, tendrías que cambiar la lógica, 
+        // pero por ahora solo lo haremos para Efectivo puro como pediste.
+    }
 
-  if (selectedPaymentMethod === "Efectivo") {
-    const received =
-      parseInt(document.getElementById("amount-tendered").value) || 0;
-    if (received < total) return alert("Monto insuficiente");
-  }
+    bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
+    calcularTurno();
+    const idPedido = `PED-${Date.now()}`;
+    const numeroDia = getNextOrderNumber();
 
-  if (selectedPaymentMethod === "Mixto") {
-    const c = parseInt(document.getElementById("mix-cash").value) || 0;
-    const t = parseInt(document.getElementById("mix-card").value) || 0;
-    const tr = parseInt(document.getElementById("mix-transfer").value) || 0;
-    if (c + t + tr !== total) return alert("⚠️ El pago no cuadra.");
-    finalPaymentString = `MIXTO|E:${c}|T:${t}|Tr:${tr}`;
-  }
+    // 3. IMPRIMIR (Pasamos cashInfo como nuevo parámetro)
+    try {
+        if (typeof window.printTicket === 'function') {
+            // AHORA PASAMOS 5 ARGUMENTOS: cart, total, metodo, numero, infoEfectivo
+            await window.printTicket(cart, total, finalPaymentString, numeroDia, cashInfo);
+        }
+    } catch (e) { console.error(e); }
 
-  bootstrap.Modal.getInstance(document.getElementById("paymentModal")).hide();
-  calcularTurno();
-  const idPedido = `PED-${Date.now()}`;
-  const numeroDia = getNextOrderNumber();
-
-  try {
-    if (typeof window.printTicket === "function")
-      await window.printTicket(cart, total, finalPaymentString, numeroDia);
-  } catch (e) {
-    console.error(e);
-  }
-
-  const saleData = {
-    action: "create_order",
-    pedido: {
-      ID_Pedido: idPedido,
-      Numero_Turno: numeroDia,
-      FechaHora: currentTurnData.fechaHora,
-      Fecha_Comercial: currentTurnData.fechaComercial,
-      Turno: currentTurnData.idTurno,
-      ID_Turno: currentTurnData.turnoKey,
-      Usuario_Caja: currentUser.Nombre,
-      Total_Bruto: total,
-      Total_Neto: total,
-      Medio_Pago: finalPaymentString,
-      Estado: "Pagado",
-    },
-    detalles: cart.map((item) => ({
-      ID_Detalle: `DET-${Math.random().toString(36).substr(2, 9)}`,
-      ID_Pedido: idPedido,
-      Fecha_Comercial: currentTurnData.fechaComercial,
-      Turno: currentTurnData.idTurno,
-      ID_Producto: item.id,
-      Nombre_Producto: item.nombre,
-      Cantidad: item.cantidad,
-      Precio_Unitario: item.precio,
-      Subtotal: item.cantidad * item.precio,
-      Comentarios: `[${item.tipoServicio}] ${item.comentario || ""}`,
-    })),
-  };
-  saveToDatabase(saleData);
-  cart = [];
-  updateCartUI();
+    // 4. GUARDAR EN GOOGLE SHEETS
+    const saleData = {
+        action: "create_order",
+        pedido: {
+            ID_Pedido: idPedido, 
+            Numero_Turno: numeroDia, 
+            FechaHora: currentTurnData.fechaHora, 
+            Fecha_Comercial: currentTurnData.fechaComercial, 
+            Turno: currentTurnData.idTurno, 
+            ID_Turno: currentTurnData.turnoKey, 
+            Usuario_Caja: currentUser.Nombre, 
+            Total_Bruto: total, 
+            Total_Neto: total,
+            Medio_Pago: finalPaymentString, 
+            Estado: "Pagado"
+        },
+        detalles: cart.map(item => ({
+            ID_Detalle: `DET-${Math.random().toString(36).substr(2, 9)}`, 
+            ID_Pedido: idPedido, 
+            Fecha_Comercial: currentTurnData.fechaComercial, 
+            Turno: currentTurnData.idTurno, 
+            ID_Producto: item.id, 
+            Nombre_Producto: item.nombre, 
+            Cantidad: item.cantidad, 
+            Precio_Unitario: item.precio, 
+            Subtotal: item.cantidad * item.precio,
+            Comentarios: `[${item.tipoServicio}] ${item.comentario || ''}`
+        }))
+    };
+    saveToDatabase(saleData);
+    cart = [];
+    updateCartUI();
 }
 
 async function saveToDatabase(payload) {
