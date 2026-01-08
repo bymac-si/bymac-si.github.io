@@ -18,15 +18,29 @@
     .label{ display:block; font-weight:600; margin-bottom:4px; }
     input,select{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:6px; }
     .btns{ display:flex; gap:6px; flex-wrap:wrap; }
+    
+    /* MODAL */
     .modal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:10000; align-items:center; justify-content:center; }
     .modal.active{ display:flex; }
     .modal-content{ width:100%; max-width:680px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:18px; box-shadow:0 12px 30px rgba(0,0,0,.18); }
+    
+    /* SPINNER */
     .spinner-backdrop{ position:fixed; inset:0; background:rgba(255,255,255,0.85); display:none; place-items:center; z-index:12000; }
     .spinner-card{ background:#fff; padding:18px 22px; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.08); text-align:center; min-width:260px; color:#1A2B48; font-weight:600; }
     .spinner{ width:28px; height:28px; border-radius:50%; border:3px solid #eee; border-top-color:#B46A55; margin:0 auto 10px; animation:spin .9s linear infinite; }
     @keyframes spin{ to{ transform:rotate(360deg); } }
+    
     .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace; }
     .muted{ color:#666; }
+
+    /* ESTILOS DE ESTADO (BADGES) */
+    .badge-status { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
+    .st-nuevo { background: #e0f2fe; color: #0369a1; }       
+    .st-contactado { background: #fef3c7; color: #b45309; }  
+    .st-propuesta { background: #f3e8ff; color: #7e22ce; }   
+    .st-negociacion { background: #ffedd5; color: #c2410c; } 
+    .st-ganado { background: #dcfce7; color: #15803d; }      
+    .st-perdido { background: #fee2e2; color: #b91c1c; }     
   </style>
 </head>
 <body>
@@ -46,7 +60,7 @@
     </div>
     <div>
       <label class="label">UTM (CLP) para cotización</label>
-      <input id="inpUTMPros" class="mono" placeholder="Ej: 67.000" inputmode="decimal" style="width: 90%; font-size: 14px;">
+      <input id="inpUTMPros" class="mono" placeholder="Cargando..." inputmode="decimal" style="width: 90%; font-size: 14px;">
     </div>
     <div style="display:flex; gap:8px;">
       <button class="btn-primary" style="height: 60px;" id="btnNew">Nuevo Prospecto</button>
@@ -59,9 +73,13 @@
   <table>
     <thead>
       <tr>
-        <th>ID</th><th>Nombre</th><th>Comuna</th>
-        <th style="text-align:right;">Unidades</th><th>Dirección</th>
-        <th>RUT</th><th>Contacto</th><th class="no-print">Acciones</th>
+        <th>ID</th>
+        <th>Nombre / Estado</th> <th>Comuna</th>
+        <th style="text-align:right;">Unidades</th>
+        <th>Dirección</th>
+        <th>RUT</th>
+        <th>Contacto</th>
+        <th class="no-print">Acciones</th>
       </tr>
     </thead>
     <tbody id="tablaProspectos"><tr><td colspan="8" class="muted">Cargando…</td></tr></tbody>
@@ -73,15 +91,28 @@
     <h2 id="modalTitleProspecto">Nuevo Prospecto</h2>
     <form id="formProspecto">
       <input type="hidden" id="prospectoID">
+      
+      <label class="label">Estado del Negocio</label>
+      <select id="prosEstado" style="margin-bottom:15px;">
+          <option value="Nuevo">Nuevo</option>
+          <option value="Contactado">Contactado</option>
+          <option value="Propuesta Enviada">Propuesta Enviada</option>
+          <option value="En Negociación">En Negociación</option>
+          <option value="Cerrado Ganado">Cerrado Ganado</option>
+          <option value="Cerrado Perdido">Cerrado Perdido</option>
+      </select>
+
       <label>Nombre</label><input id="prosNombre" required>
       <label>Comuna</label>
       <input id="prosComuna" list="dlComunas" placeholder="Ej: Santiago">
       <datalist id="dlComunas"></datalist>
       <div class="muted" style="font-size:12px;">Sugerencias basadas en <b>TablaTarifas</b>.</div>
+      
       <label>Unidades</label><input id="prosUnidades" type="number" min="0">
       <label>Dirección</label><input id="prosDireccion">
       <label>RUT</label><input id="prosRUT" placeholder="12.345.678-9">
       <label>Contacto</label><input id="prosContacto" placeholder="Nombre / email / teléfono">
+      
       <div style="text-align:right;margin-top:10px;">
         <button type="button" class="btn-primary" onclick="cerrarModalProspecto()">Cancelar</button>
         <button class="btn-primary">Guardar</button>
@@ -157,7 +188,6 @@ function bindUI(){
   inpBuscar.addEventListener('input', aplicarFiltros);
   selComuna.addEventListener('change', aplicarFiltros);
 
-  // cerrar modales
   const m1=modalProspecto, m2=modalDetalle;
   m1.addEventListener('click', e=>{ if(e.target===m1) cerrarModalProspecto(); });
   m2.addEventListener('click', e=>{ if(e.target===m2) cerrarModalDetalle(); });
@@ -168,6 +198,8 @@ function bindUI(){
 async function cargarTodo(){
   try{
     showSpinner('Cargando datos…');
+
+    // 1. CARGA DE DATOS
     const [pros, tarifas] = await Promise.all([
       fetchData('ProspectosCopro'),
       fetchData('TablaTarifas').catch(()=>[])
@@ -177,13 +209,20 @@ async function cargarTodo(){
     if(PROS.length) KEY_NAME = getKeyName(PROS[0]);
     TARIFAS = tarifas || [];
 
-    // filtros de comuna
+    // 2. POBLAR SELECT COMUNAS
     const comunasPros=[...new Set(PROS.map(p=>p.Comuna).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
     selComuna.innerHTML = '<option value="">(Todas)</option>' + comunasPros.map(c=>`<option value="${c}">${c}</option>`).join('');
 
-    // datalist comunas (desde tarifas)
+    // 3. POBLAR DATALIST TARIFAS
     const comunasTar=[...new Set(TARIFAS.map(t=>t.Comuna).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
     dlComunas.innerHTML = comunasTar.map(c=>`<option value="${c}">`).join('');
+
+    // 4. NUEVO: CARGAR UTM AUTOMÁTICA EN EL INPUT
+    // Usamos window.UTM_VALOR que viene de app.js
+    if(typeof window.UTM_VALOR !== 'undefined' && window.UTM_VALOR > 0) {
+        // Formateamos con puntos (Ej: 69.751)
+        inpUTMPros.value = new Intl.NumberFormat("es-CL").format(window.UTM_VALOR);
+    }
 
     aplicarFiltros();
   }catch(err){
@@ -200,7 +239,7 @@ function aplicarFiltros(){
   VIEW = PROS.filter(p=>{
     if(comuna && p.Comuna!==comuna) return false;
     if(!q) return true;
-    return [getKeyVal(p), p.Nombre, p.RazonSocial, p.Comuna, p.Unidades, p.NUnidades, p.CantidadUnidades, p.Direccion, p.Dirección, p.RUT, p.Contacto, p.Email, p.Telefono]
+    return [getKeyVal(p), p.Nombre, p.Estado, p.Comuna, p.Unidades, p.Direccion, p.RUT, p.Contacto]
       .map(v=>norm(v))
       .some(s=>s.includes(q));
   });
@@ -221,10 +260,23 @@ function renderTabla(){
     const direccion = p.Direccion || p.Dirección || "—";
     const rut = p.RUT || "—";
     const contacto = p.Contacto || p.Email || p.Telefono || "—";
+    
+    // --- LÓGICA DE ESTADO (LEER) ---
+    const estado = p.Estado || "Nuevo";
+    let claseBadge = "st-nuevo";
+    if(estado.includes("Contactado")) claseBadge = "st-contactado";
+    if(estado.includes("Propuesta")) claseBadge = "st-propuesta";
+    if(estado.includes("Negociación")) claseBadge = "st-negociacion";
+    if(estado.includes("Ganado")) claseBadge = "st-ganado";
+    if(estado.includes("Perdido")) claseBadge = "st-perdido";
+
     return `
       <tr>
         <td class="mono">${key}</td>
-        <td>${nombre}</td>
+        <td>
+            <div style="font-weight:600; margin-bottom:4px;">${nombre}</div>
+            <span class="badge-status ${claseBadge}">${estado}</span>
+        </td>
         <td>${comuna}</td>
         <td class="mono" style="text-align:right;">${unidades||0}</td>
         <td>${direccion}</td>
@@ -249,6 +301,7 @@ function abrirDetalle(id){
   if(!p){ alert('No encontrado'); return; }
   detalleContenido.innerHTML = `
     <p><b>ID:</b> ${getKeyVal(p)||"—"}</p>
+    <p><b>Estado:</b> ${p.Estado||"Nuevo"}</p>
     <p><b>Nombre:</b> ${p.Nombre||p.RazonSocial||"—"}</p>
     <p><b>Comuna:</b> ${p.Comuna||"—"}</p>
     <p><b>Unidades:</b> ${p.Unidades||p.NUnidades||p.CantidadUnidades||0}</p>
@@ -269,6 +322,9 @@ function abrirFormProspecto(id){
     if(!p){ alert("No encontrado"); return; }
     LAST_EDIT_ORIGINAL_KEY = getKeyName(p);
     prospectoID.value = getKeyVal(p);
+    
+    // CARGAR VALORES (Incluido Estado)
+    prosEstado.value = p.Estado || "Nuevo"; // <--- IMPORTANTE
     prosNombre.value = p.Nombre || p.RazonSocial || "";
     prosComuna.value = p.Comuna || "";
     prosUnidades.value = p.Unidades || p.NUnidades || p.CantidadUnidades || 0;
@@ -277,6 +333,7 @@ function abrirFormProspecto(id){
     prosContacto.value = p.Contacto || p.Email || p.Telefono || "";
   }else{
     title.textContent = "Nuevo Prospecto";
+    prosEstado.value = "Nuevo";
   }
   modalProspecto.classList.add('active');
 }
@@ -288,6 +345,8 @@ formProspecto.onsubmit = async (e)=>{
   const idValue = prospectoID.value || null;
 
   const payload = {
+    // ESCRIBIR VALORES (Incluido Estado)
+    Estado: prosEstado.value, // <--- IMPORTANTE
     Nombre: (prosNombre.value||"").trim(),
     Comuna: (prosComuna.value||"").trim(),
     Unidades: Number(prosUnidades.value||0),
@@ -298,11 +357,9 @@ formProspecto.onsubmit = async (e)=>{
 
   const keyField = (idValue ? (LAST_EDIT_ORIGINAL_KEY || KEY_NAME) : KEY_NAME);
 
-  // EDIT -> enviar clave exacta
   if(idValue){
     payload[keyField] = idValue;
   }else{
-    // ADD -> generar clave si el backend la exige
     payload[keyField] = generateKey(keyField.toUpperCase());
   }
 
@@ -315,7 +372,7 @@ formProspecto.onsubmit = async (e)=>{
       if(idValue) await appSheetCRUD('ProspectosCopro','Edit',[payload]);
       else        await appSheetCRUD('ProspectosCopro','Add', [payload]);
     }else{
-      alert('No hay método de escritura disponible (upsertData/appSheetCRUD).');
+      alert('No hay método de escritura disponible.');
       return;
     }
     cerrarModalProspecto();
@@ -336,8 +393,6 @@ async function eliminarProspecto(id){
       await deleteByKey('ProspectosCopro', id);
     }else if(typeof appSheetCRUD === 'function'){
       await appSheetCRUD('ProspectosCopro','Delete',[{[KEY_NAME]:id}]);
-    }else{
-      alert('No hay método de borrado disponible (deleteByKey/appSheetCRUD).'); return;
     }
     await cargarTodo();
   }catch(err){
@@ -357,7 +412,14 @@ function abrirCotizacion(id){
   const row = PROS.find(x=>String(getKeyVal(x))===String(id));
   if(!row){ alert('No se encontró el prospecto.'); return; }
   const factor = getFactorByComuna(row.Comuna);
-  const utm = parseCLPInput(inpUTMPros.value);
+  
+  // 1. INTENTAR LEER DEL INPUT MANUAL
+  let utm = parseCLPInput(inpUTMPros.value);
+  
+  // 2. SI EL INPUT ESTÁ VACÍO O ES 0, USAR EL VALOR GLOBAL AUTOMÁTICO
+  if ((!utm || utm <= 0) && typeof window.UTM_VALOR !== 'undefined') {
+      utm = window.UTM_VALOR;
+  }
 
   const params = new URLSearchParams({
     prospectoId: getKeyVal(row),
@@ -373,24 +435,21 @@ function abrirCotizacion(id){
   window.location.href = `cotizacion-admin-condominio.html?${params.toString()}`;
 }
 
-/* EN TU ARCHIVO DE PROSPECTOS - ACTUALIZADO */
 async function agregarAClientes(id){
-  if(!confirm('¿Deseas convertir este prospecto en una nueva Copropiedad?')) return;
+  if(!confirm('¿Deseas convertir este prospecto en una nueva Copropiedad?\n\nEsto también cambiará su estado a "Cerrado Ganado".')) return;
 
   try{
     const row = PROS.find(x => String(getKeyVal(x)) === String(id));
     if(!row){ alert('No se encontró el prospecto.'); return; }
 
-    showSpinner('Creando Copropiedad...');
+    showSpinner('Procesando conversión...');
 
+    // PASO 1: PREPARAR DATOS DEL NUEVO CLIENTE
     const newID = generateKey('COPRO'); 
-
-    // 1. Sanitización estricta de Unidades para evitar errores "Bad Request"
     let numUnidades = parseInt(row.Unidades || row.NUnidades || row.CantidadUnidades || 0);
     if (isNaN(numUnidades)) numUnidades = 0;
 
-    // 2. Payload corregido con Unidades sanitizadas
-    const payload = {
+    const payloadCliente = {
       "ID": newID,
       "Nombre": (row.Nombre || row.RazonSocial || "").trim(),
       "RUT": (row.RUT || "").trim(),
@@ -404,22 +463,34 @@ async function agregarAClientes(id){
       "FondoReserva": 0,
       "ReglamentoURL": "",
       "LibroActasURL": "",
-      "Unidades": numUnidades // Se envía como Number
+      "Unidades": numUnidades 
     };
 
-    if(typeof upsertData === 'function') await upsertData('Copropiedades', payload);
-    else if(typeof appSheetCRUD === 'function') await appSheetCRUD('Copropiedades', 'Add', [payload]);
-    else throw new Error('Sin método de escritura.');
+    // PASO 2: ENVIAR CREACIÓN DE CLIENTE
+    if(typeof upsertData === 'function') await upsertData('Copropiedades', payloadCliente);
+    else await appSheetCRUD('Copropiedades', 'Add', [payloadCliente]);
 
-    // --- REDIRECCIÓN AL CONTRATO ---
-    if(confirm('✅ Copropiedad creada.\n\n¿Ir al contrato?')) {
-        // Asegúrate que el nombre del archivo HTML sea exacto
+    // --- NUEVO: ACTUALIZAR EL ESTADO DEL PROSPECTO ---
+    const keyField = getKeyName(row); // Detectar si la columna se llama ID, Row ID, etc.
+    const payloadProspecto = {
+        [keyField]: id,
+        "Estado": "Cerrado Ganado"
+    };
+
+    if(typeof upsertData === 'function') await upsertData('ProspectosCopro', payloadProspecto);
+    else await appSheetCRUD('ProspectosCopro', 'Edit', [payloadProspecto]);
+    // --------------------------------------------------
+
+    // Refrescar tabla visualmente
+    await cargarTodo();
+
+    if(confirm('✅ ¡Felicidades! Nuevo cliente creado.\nEl prospecto ha pasado a "Cerrado Ganado".\n\n¿Ir al panel del nuevo condominio?')) {
         window.location.href = `admin-condominios.html?id=${newID}`; 
     }
 
   } catch(e) { 
     console.error(e); 
-    alert('Error: ' + (e.message || e)); 
+    alert('Error al procesar: ' + (e.message || e)); 
   } finally { 
     hideSpinner(); 
   }
@@ -427,17 +498,18 @@ async function agregarAClientes(id){
 
 /* Export CSV */
 function exportCSV(){
-  const headers = ['ID','Nombre','Comuna','Unidades','Direccion','RUT','Contacto'];
+  const headers = ['ID','Estado','Nombre','Comuna','Unidades','Direccion','RUT','Contacto'];
   const lines = [headers.join(',')];
   VIEW.forEach(r=>{
     lines.push([
       escapeCSV(getKeyVal(r)),
+      escapeCSV(r.Estado || 'Nuevo'),
       escapeCSV(r.Nombre || r.RazonSocial || ''),
       escapeCSV(r.Comuna || ''),
-      escapeCSV(r.Unidades || r.NUnidades || r.CantidadUnidades || 0),
-      escapeCSV(r.Direccion || r.Dirección || ''),
+      escapeCSV(r.Unidades || 0),
+      escapeCSV(r.Direccion || ''),
       escapeCSV(r.RUT || ''),
-      escapeCSV(r.Contacto || r.Email || r.Telefono || '')
+      escapeCSV(r.Contacto || '')
     ].join(','));
   });
   const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'});

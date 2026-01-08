@@ -2,105 +2,492 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>CRM - Dashboard Copropiedades</title>
+  <title>CRM - Dashboard Financiero</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="assets/css/styles.css">
+  
   <script src="assets/js/app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>requireAuth();</script>
-  <script>
-    document.addEventListener("DOMContentLoaded", async ()=>{
-      document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
-      document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
-    });
-  </script>
+  
+  <style>
+    body { background-color: #f3f4f6; }
+    main { max-width: 1400px; margin: 0 auto; padding: 20px; }
+    
+    /* 1. KPIs Grid */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    
+    .kpi-card {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border-left: 5px solid var(--brand);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .kpi-title { font-size: 0.75rem; color: #666; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 1.6rem; font-weight: 700; color: #1A2B48; margin-top: 8px; }
+    .kpi-sub { font-size: 0.8rem; color: #888; margin-top: 5px; }
+
+    /* 2. ESTRUCTURA TABLAS */
+    .finance-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    
+    .table-finance { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .table-finance th { text-align: left; color: #666; border-bottom: 2px solid #eee; padding: 8px; }
+    .table-finance td { border-bottom: 1px solid #eee; padding: 8px; }
+    .row-highlight { background-color: #f9fafb; font-weight: bold; }
+
+    /* 3. GRÁFICOS */
+    .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+    .chart-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: 100%; min-height: 350px; display: flex; flex-direction: column; }
+    .chart-header { margin-bottom: 15px; font-weight: 700; color: #1A2B48; }
+    .chart-container { position: relative; flex-grow: 1; min-height: 250px; width: 100%; }
+
+    /* UTILIDADES */
+    .text-success { color: #10B981; } 
+    .text-danger { color: #EF4444; }  
+    .text-info { color: #3B82F6; }
+    .text-purple { color: #8B5CF6; }
+    
+    /* MODAL */
+    .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; }
+    .modal.active { display:flex; }
+    .modal-card { background:white; padding:25px; border-radius:10px; width:400px; max-width:90%; }
+    .form-group { margin-bottom:15px; }
+    .form-group label { display:block; margin-bottom:5px; font-weight:600; font-size:0.9rem; }
+    .form-group input, .form-group select { width:100%; padding:8px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box;} 
+  </style>
 </head>
 <body>
+
 <div id="header"></div>
 
-<main style="padding:40px;">
-  <h1 class="page-title">Dashboard Copropiedades</h1>
-
-  <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-    <!-- Gastos por categoría -->
-    <div class="card">
-      <h2>Gastos por Categoría</h2>
-      <canvas id="chartGastosCategoria" height="200"></canvas>
+<main>
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <div>
+        <h1 class="page-title" style="margin:0;">Dashboard Financiero</h1>
+        <p class="muted" style="margin:5px 0 0; font-size:0.9em;">Control de Gestión y Tributario</p>
     </div>
-
-    <!-- Alícuotas vs Metros -->
-    <div class="card">
-      <h2>Alicuotas vs Metros</h2>
-      <canvas id="chartAlicuotas" height="200"></canvas>
-    </div>
-
-    <!-- Evolución mensual de gastos -->
-    <div class="card" style="grid-column:span 2;">
-      <h2>Evolución de Gastos Comunes</h2>
-      <canvas id="chartEvolucion" height="120"></canvas>
+    <div style="text-align:right;">
+        <span class="muted" style="font-size:0.9em; margin-right: 10px;">UTM: <span class="mono" id="lblUTM">...</span></span>
+        <button class="btn-primary" onclick="abrirModalGasto()">+ Registrar Gasto</button>
+        <button class="btn-primary" onclick="location.reload()" style="background:#64748b;">↻</button>
     </div>
   </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card" style="border-left-color: #1A2B48;">
+        <span class="kpi-title">Comunidades</span>
+        <span class="kpi-value" id="kpiClientes">0</span>
+        <span class="kpi-sub">Unidades: <span id="kpiUnidades">0</span></span>
+    </div>
+    <div class="kpi-card" style="border-left-color: #F59E0B;">
+        <span class="kpi-title">Prospectos</span>
+        <span class="kpi-value" id="kpiProspectos">0</span>
+        <span class="kpi-sub">Activos</span>
+    </div>
+    <div class="kpi-card" style="border-left-color: #10B981;">
+        <span class="kpi-title">Ingreso Neto (Est.)</span>
+        <span class="kpi-value text-success mono" id="kpiIngresos">$0</span>
+        <span class="kpi-sub">Facturación Mensual</span>
+    </div>
+    <div class="kpi-card" style="border-left-color: #EF4444;">
+        <span class="kpi-title">Gastos Operativos</span>
+        <span class="kpi-value text-danger mono" id="kpiGastosOp">$0</span>
+        <span class="kpi-sub">Mes Actual</span>
+    </div>
+    <div class="kpi-card" style="border-left-color: #8B5CF6;">
+        <span class="kpi-title">Margen Operacional</span>
+        <span class="kpi-value text-purple" id="kpiMargenPct">0%</span>
+        <span class="kpi-sub">Rentabilidad Mes</span>
+    </div>
+    <div class="kpi-card" style="border-left-color: #3B82F6;">
+        <span class="kpi-title">IVA Débito (F29)</span>
+        <span class="kpi-value text-info mono" id="kpiIVA">$0</span>
+        <span class="kpi-sub">Proyección Fiscal</span>
+    </div>
+  </div>
+
+  <div class="finance-grid">
+      <div class="card">
+          <h3 style="margin-top:0;">Resultado Operacional (Mes)</h3>
+          <table class="table-finance">
+              <thead><tr><th>Ítem</th><th style="text-align:right;">Monto Neto</th></tr></thead>
+              <tbody>
+                  <tr>
+                      <td>(+) Ingresos Honorarios</td>
+                      <td style="text-align:right;" class="mono text-success" id="finIngresos">$0</td>
+                  </tr>
+                  <tr>
+                      <td>(-) Gastos Operativos</td>
+                      <td style="text-align:right;" class="mono text-danger" id="finGastos">$0</td>
+                  </tr>
+                  <tr class="row-highlight" style="background:#f0f9ff;">
+                      <td>(=) Margen ($)</td>
+                      <td style="text-align:right;" class="mono text-info" id="finMargen">$0</td>
+                  </tr>
+              </tbody>
+          </table>
+      </div>
+
+      <div class="card">
+          <h3 style="margin-top:0;">Detalle Tributario (Estimado)</h3>
+          <table class="table-finance">
+              <thead><tr><th>Impuesto</th><th style="text-align:right;">Monto IVA</th></tr></thead>
+              <tbody>
+                  <tr>
+                      <td>(+) IVA Débito (Ventas)</td>
+                      <td style="text-align:right;" class="mono text-danger" id="taxDebito">$0</td>
+                  </tr>
+                  <tr>
+                      <td>(-) IVA Crédito (Compras)</td>
+                      <td style="text-align:right;" class="mono text-success" id="taxCredito">$0</td>
+                  </tr>
+                  <tr class="row-highlight">
+                      <td>(=) A Pagar F29</td>
+                      <td style="text-align:right;" class="mono" id="taxPagar">$0</td>
+                  </tr>
+              </tbody>
+          </table>
+      </div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card">
+        <div class="chart-header">Ingresos Netos por Cliente (Top 5)</div>
+        <div class="chart-container">
+            <canvas id="chartIngresosNetos"></canvas>
+        </div>
+    </div>
+    
+    <div class="chart-card">
+        <div class="chart-header">Distribución de Gastos (Mes Actual)</div>
+        <div class="chart-container">
+            <canvas id="chartGastosCat"></canvas>
+        </div>
+    </div>
+
+    <div class="chart-card">
+        <div class="chart-header">Evolución Gastos Operativos (6 Meses)</div>
+        <div class="chart-container">
+            <canvas id="chartEvolucionOp"></canvas>
+        </div>
+    </div>
+  </div>
+
 </main>
+
+<div id="modalGasto" class="modal">
+    <div class="modal-card">
+        <h3 style="margin-top:0;">Nuevo Gasto</h3>
+        <form id="formGastoOp">
+            <div class="form-group">
+                <label>Categoría</label>
+                <select id="gastoCat" required>
+                    <option value="General">General</option>
+                    <option value="Sueldos">Sueldos</option>
+                    <option value="Arriendo">Arriendo</option>
+                    <option value="Software">Software</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Impuestos">Impuestos</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Descripción</label>
+                <input id="gastoDesc" required>
+            </div>
+            <div class="form-group">
+                <label>Monto Neto</label>
+                <input id="gastoMonto" type="number" min="0" required oninput="calcIVAGasto()">
+            </div>
+            <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+                <label style="margin:0;">Con IVA</label>
+                <input type="checkbox" id="gastoCheckIVA" onchange="calcIVAGasto()" style="width:auto;">
+            </div>
+            <div class="form-group">
+                <label>Monto IVA</label>
+                <input id="gastoIVA" type="number" readonly value="0" style="background:#eee;">
+            </div>
+            <div style="text-align:right; margin-top:20px;">
+                <button type="button" class="btn-primary" style="background:#999;" onclick="document.getElementById('modalGasto').classList.remove('active')">Cerrar</button>
+                <button type="submit" class="btn-primary">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="pageSpinner" class="spinner-backdrop" style="display:none;">
+  <div class="spinner-card"><div class="spinner"></div><div>Procesando...</div></div>
+</div>
 
 <div id="footer"></div>
 
 <script>
-let gastos=[], unidades=[];
+/* ================= VARIABLES ================= */
+let UTM_ACTUAL = 67000; 
+let COPROS=[], PROS=[], GASTOS_OP=[], TARIFAS=[];
+let charts = {}; 
 
+document.addEventListener("DOMContentLoaded", async ()=>{
+    try { document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); } catch(e){}
+    try { document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); } catch(e){}
+    cargarDashboard();
+});
+
+/* ================= CARGA DATOS ================= */
 async function cargarDashboard(){
-  [gastos, unidades] = await Promise.all([
-    fetchData("Gastos"),
-    fetchData("Unidades")
-  ]);
+    document.getElementById('pageSpinner').style.display = 'flex';
+    try {
+        if(typeof obtenerUTM === 'function') { UTM_ACTUAL = await obtenerUTM(); }
+        const lblUTM = document.getElementById('lblUTM');
+        if(lblUTM) lblUTM.textContent = formatoPrecio(UTM_ACTUAL);
 
-  renderGastosCategoria();
-  renderAlicuotasVsMetros();
-  renderEvolucionGastos();
+        const res = await Promise.allSettled([
+            fetchData("Copropiedades"),
+            fetchData("ProspectosCopro"),
+            fetchData("GastosOperativos"),
+            fetchData("TablaTarifas")
+        ]);
+
+        COPROS = res[0].value || [];
+        PROS = res[1].value || [];
+        GASTOS_OP = res[2].value || [];
+        TARIFAS = res[3].value || [];
+
+        // Debug fecha para ver qué llega en consola
+        if(GASTOS_OP.length > 0) console.warn("FECHA CRUDA:", GASTOS_OP[0].Fecha);
+
+        calcularMetricas();
+
+    } catch(err) { console.error("Error Dashboard:", err); } 
+    finally { document.getElementById('pageSpinner').style.display = 'none'; }
 }
 
-// 1. Gastos por categoría
-function renderGastosCategoria(){
-  const categorias={};
-  gastos.forEach(g=> categorias[g.Tipo] = (categorias[g.Tipo]||0)+(parseFloat(g.Monto)||0) );
-  new Chart(document.getElementById("chartGastosCategoria"),{
-    type:"pie",
-    data:{
-      labels:Object.keys(categorias),
-      datasets:[{data:Object.values(categorias)}]
+/* ================= PARSEADOR CORREGIDO (COMPATIBLE CON APPSHEET) ================= */
+function fechaSegura(fechaStr) {
+    if (!fechaStr) return null;
+
+    // Caso 1: Viene con barras (AppSheet API envía MM/DD/YYYY)
+    // Ejemplo recibido: 01/08/2026 (Para 8 de Enero)
+    if (fechaStr.includes("/")) {
+        const partes = fechaStr.split("/"); 
+        // Invertimos lógica: [0] es MES, [1] es DÍA
+        const mes = parseInt(partes[0], 10) - 1; // JS 0-11
+        const dia = parseInt(partes[1], 10);
+        const anio = parseInt(partes[2], 10);
+        
+        // Validación de seguridad (por si acaso sí era DD/MM)
+        // Si el "mes" es > 11 (ej: 13/01/2026), entonces estaba bien como DD/MM
+        if (mes > 11) {
+             const diaReal = parseInt(partes[0], 10);
+             const mesReal = parseInt(partes[1], 10) - 1;
+             return new Date(anio, mesReal, diaReal);
+        }
+
+        return new Date(anio, mes, dia);
+    } 
+    
+    // Caso 2: Viene con guiones (ISO Standard YYYY-MM-DD)
+    if (fechaStr.includes("-")) {
+        const partes = fechaStr.split("-");
+        // [0]Año, [1]Mes, [2]Día
+        return new Date(parseInt(partes[0], 10), parseInt(partes[1], 10) - 1, parseInt(partes[2], 10));
     }
-  });
+
+    return new Date(fechaStr);
 }
 
-// 2. Alícuotas vs Metros
-function renderAlicuotasVsMetros(){
-  const labels=unidades.map(u=>u.Numero);
-  const data=unidades.map(u=>({x:parseFloat(u.Metros)||0,y:parseFloat(u.Alicuota)||0}));
-  new Chart(document.getElementById("chartAlicuotas"),{
-    type:"scatter",
-    data:{datasets:[{label:"Unidades",data:data}]},
-    options:{
-      scales:{x:{title:{display:true,text:"Metros²"}},y:{title:{display:true,text:"Alicuota (%)"}}}
+/* ================= LÓGICA DE NEGOCIO ================= */
+function calcularHonorarioLocal(unidades, factor, utm){
+    if (!(factor > 0 && utm > 0)) return { neto: 0, iva: 0, total: 0 };
+    const baseF1 = utm * 2.6; 
+    let netoTeorico = 0;
+    if (unidades < 20) { netoTeorico = baseF1 * factor; } 
+    else {
+        const extra = unidades - 20;
+        const incremento = baseF1 * 0.013;
+        const sumaBase = baseF1 + (extra * incremento);
+        netoTeorico = sumaBase * factor;
     }
-  });
+    const neto = Math.round(netoTeorico / 1000) * 1000;
+    const total = Math.round(neto * 1.19);
+    const iva = total - neto;
+    return { neto, iva, total };
 }
 
-// 3. Evolución de gastos comunes
-function renderEvolucionGastos(){
-  const mensual={};
-  gastos.forEach(g=>{
-    if(!g.Fecha) return;
-    const d=new Date(g.Fecha);
-    const mes=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-    mensual[mes]=(mensual[mes]||0)+(parseFloat(g.Monto)||0);
-  });
-  const labels=Object.keys(mensual).sort();
-  const data=labels.map(m=>mensual[m]);
-  new Chart(document.getElementById("chartEvolucion"),{
-    type:"line",
-    data:{labels:labels,datasets:[{label:"Gastos",data:data,fill:true}]}
-  });
+function calcularMetricas() {
+    // 1. INGRESOS
+    let netosTotal = 0, ivaTotal = 0;
+    let dataIngresosChart = [];
+
+    COPROS.forEach(c => {
+        const u = parseInt(c.Unidades || c.CantidadUnidades || 0) || 0;
+        const tarifa = TARIFAS.find(t => norm(t.Comuna) === norm(c.Comuna));
+        const factor = tarifa ? parseFloat(tarifa.Factor) : 0;
+
+        if(factor > 0 && u > 0) {
+            const desglose = calcularHonorarioLocal(u, factor, UTM_ACTUAL);
+            netosTotal += desglose.neto;
+            ivaTotal += desglose.iva;
+            dataIngresosChart.push({ l: c.Nombre, v: desglose.neto });
+        }
+    });
+
+    // 2. GASTOS
+    let gastoNetoMes = 0, gastoIvaMes = 0;
+    
+    // Fecha Sistema
+    const fechaHoy = new Date();
+    const mesActual = fechaHoy.getMonth(); 
+    const anoActual = fechaHoy.getFullYear(); 
+    
+    const historialGastos = {};
+    const categoriasMes = {}; 
+
+    GASTOS_OP.forEach(g => {
+        if(!g.Fecha) return;
+        
+        // USAMOS LA FUNCIÓN SEGURA
+        const d = fechaSegura(g.Fecha);
+
+        if (!d || isNaN(d.getTime())) return;
+
+        const montoNeto = parseFloat(g.MontoNeto || 0);
+        const montoIVA = parseFloat(g.MontoIVA || 0);
+        const total = parseFloat(g.Total) || (montoNeto + montoIVA);
+
+        // A. KPI Mes Actual
+        if(d.getMonth() === mesActual && d.getFullYear() === anoActual){
+            gastoNetoMes += montoNeto;
+            gastoIvaMes += montoIVA;
+            
+            // Acumular Categoría
+            const cat = g.Categoria || "Otros";
+            categoriasMes[cat] = (categoriasMes[cat] || 0) + montoNeto;
+        }
+
+        // B. Historial (YYYY-MM)
+        const mesStr = (d.getMonth() + 1).toString().padStart(2, '0');
+        const keyMes = `${d.getFullYear()}-${mesStr}`;
+        historialGastos[keyMes] = (historialGastos[keyMes] || 0) + total;
+    });
+
+    // 3. RESULTADOS
+    const resultadoOp = netosTotal - gastoNetoMes;
+    const f29Estimado = ivaTotal - gastoIvaMes;
+    
+    // Margen %
+    let margenPct = 0;
+    if (netosTotal > 0) {
+        margenPct = Math.round((resultadoOp / netosTotal) * 100);
+    }
+
+    // 4. RENDERIZADO
+    setText('kpiClientes', COPROS.length);
+    setText('kpiUnidades', COPROS.reduce((a,c)=>a+(parseInt(c.Unidades||0)||0),0));
+    const prosActivos = PROS.filter(p=>!norm(p.Estado||"").includes("ganado") && !norm(p.Estado||"").includes("perdido")).length;
+    setText('kpiProspectos', prosActivos);
+
+    setText('kpiIngresos', formatoPrecio(netosTotal));
+    setText('kpiGastosOp', formatoPrecio(gastoNetoMes));
+    setText('kpiIVA', formatoPrecio(ivaTotal));
+    
+    const elMargen = document.getElementById('kpiMargenPct');
+    elMargen.textContent = margenPct + "%";
+    elMargen.style.color = margenPct >= 20 ? "#10B981" : (margenPct >= 0 ? "#F59E0B" : "#EF4444");
+
+    // Tablas
+    setText('finIngresos', formatoPrecio(netosTotal));
+    setText('finGastos', formatoPrecio(gastoNetoMes));
+    setText('finMargen', formatoPrecio(resultadoOp));
+    setText('taxDebito', formatoPrecio(ivaTotal));
+    setText('taxCredito', formatoPrecio(gastoIvaMes));
+    setText('taxPagar', formatoPrecio(f29Estimado));
+
+    renderChartIngresos(dataIngresosChart);
+    renderChartGastos(historialGastos);
+    renderChartCategorias(categoriasMes);
 }
 
-cargarDashboard();
+/* ================= GRÁFICOS & HELPERS ================= */
+const commonOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } };
+
+function newChart(id, config) {
+    if (charts[id]) charts[id].destroy();
+    const ctx = document.getElementById(id);
+    if(ctx) charts[id] = new Chart(ctx, config);
+}
+
+function renderChartIngresos(dataArr) {
+    dataArr.sort((a,b) => b.v - a.v);
+    const top = dataArr.slice(0, 5);
+    newChart("chartIngresosNetos", {
+        type: 'bar', indexAxis: 'y',
+        data: { labels: top.map(d => d.l), datasets: [{ label: 'Ingreso Neto ($)', data: top.map(d => d.v), backgroundColor: '#10B981', borderRadius: 4 }] },
+        options: commonOptions
+    });
+}
+
+function renderChartGastos(historialObj) {
+    const labels = Object.keys(historialObj).sort();
+    const data = labels.map(k => historialObj[k]);
+    newChart("chartEvolucionOp", {
+        type: 'line',
+        data: { labels: labels, datasets: [{ label: 'Gastos Totales ($)', data: data, borderColor: '#EF4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', fill: true, tension: 0.3 }] },
+        options: commonOptions
+    });
+}
+
+function renderChartCategorias(catObj) {
+    const labels = Object.keys(catObj);
+    const data = Object.values(catObj);
+    newChart("chartGastosCat", {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{ data: data, backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#64748B'], borderWidth: 1 }]
+        }, options: commonOptions
+    });
+}
+
+// FORMULARIO GASTOS
+function abrirModalGasto(){ document.getElementById('modalGasto').classList.add('active'); }
+function calcIVAGasto(){
+    const m = parseFloat(document.getElementById('gastoMonto').value)||0;
+    const iva = document.getElementById('gastoCheckIVA').checked ? Math.round(m*0.19) : 0;
+    document.getElementById('gastoIVA').value = iva;
+}
+const formGasto = document.getElementById('formGastoOp');
+if(formGasto) {
+    formGasto.onsubmit = async (e)=>{
+        e.preventDefault();
+        if(!confirm("¿Confirmar Gasto?")) return;
+        const neto = parseFloat(document.getElementById('gastoMonto').value)||0;
+        const iva = parseFloat(document.getElementById('gastoIVA').value)||0;
+        const newID = "GAS_" + Date.now();
+        // Guardamos en formato ISO (YYYY-MM-DD) para evitar problemas futuros
+        const hoy = new Date();
+        const fechaStr = hoy.getFullYear() + "-" + String(hoy.getMonth()+1).padStart(2,'0') + "-" + String(hoy.getDate()).padStart(2,'0');
+        const payload = {
+            ID: newID, Fecha: fechaStr, Categoria: document.getElementById('gastoCat').value, Descripcion: document.getElementById('gastoDesc').value,
+            MontoNeto: neto, TieneIVA: document.getElementById('gastoCheckIVA').checked ? "TRUE" : "FALSE", MontoIVA: iva, Total: neto + iva, Estado: "Pagado"
+        };
+        try {
+            if(typeof upsertData === 'function') await upsertData('GastosOperativos', payload);
+            else await appSheetCRUD('GastosOperativos', 'Add', [payload]);
+            alert("Gasto Registrado");
+            document.getElementById('modalGasto').classList.remove('active');
+            formGasto.reset();
+            cargarDashboard();
+        } catch(err){ alert("Error: " + err.message); }
+    };
+}
+
+function setText(id, val) { const el = document.getElementById(id); if(el) el.textContent = val; }
+function norm(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim(); }
+function clp(v){ return "$" + new Intl.NumberFormat("es-CL",{maximumFractionDigits:0}).format(v); }
+function formatoPrecio(v){ return clp(v); }
 </script>
-</body>
-</html>

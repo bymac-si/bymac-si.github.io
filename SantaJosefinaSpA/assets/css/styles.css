@@ -1,12 +1,12 @@
 /* General */
-:root{
-      --brand:#1A2B48;
-      --accent:#E74E35;
-      --muted:#5B5B5B;
-      --line:#e5e7eb;
-      --max:1200px;
-      --shadow:0 10px 30px rgba(0,0,0,.15);
-    }
+:root {
+  --brand: #1a2b48;
+  --accent: #e74e35;
+  --muted: #5b5b5b;
+  --line: #e5e7eb;
+  --max: 1200px;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
 body {
   font-family: "Segoe UI", sans-serif;
   background-color: #f7f7f7;
@@ -51,16 +51,16 @@ button {
   transition: all 0.3s;
 }
 
-.btn-primary{
-  background:var(--accent); 
-  border-color:var(--accent); 
-  padding:.6rem 1rem; 
-  border-radius:999px; 
-  font-weight:700
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  font-weight: 700;
 }
-  .btn-primary:hover{
-    filter:brightness(.95)
-  }
+.btn-primary:hover {
+  filter: brightness(0.95);
+}
 
 .btn-outline {
   border: 1px solid #9e9789;
@@ -476,178 +476,293 @@ footer {
   width: 140px;
   height: auto;
 }
-:root{
-      --brand:#1A2B48;
-      --accent:#2A6AA9;  /* azul títulos impresión */
-      --muted:#555;
-      --line:#e5e7eb;
-    }
-    html{scroll-behavior:smooth;}
-    body{max-width:1200px;margin:0 auto;color:var(--brand);}
-    .container{padding:40px;}
-    .page-title{font-size:28px;font-weight:700;margin-bottom:16px;}
-    .section-title{font-size:18px;font-weight:700;margin:18px 0 8px;}
-    .muted{color:var(--muted);}
-    .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));}
-    .card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:18px;}
-    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:end;}
-    .row>*{flex:1 1 240px;}
-    .label{font-weight:600;display:block;margin-bottom:4px;}
-    input,select,textarea{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:6px;}
-    .btns{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap;}
-    .badge{display:inline-block;padding:2px 8px;border-radius:999px;background:#f4f4f5;font-size:12px;}
-    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,"Courier New",monospace;}
-    table{width:100%;border-collapse:collapse;}
-    th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left;}
-    th{background:#fafafa;}
-    .is-invalid{border-color:#ef4444!important;background:#fff7f7;}
-    .text-error{color:#b91c1c;font-size:12px;margin-top:6px;display:none;}
+:root {
+  --brand: #1a2b48;
+  --accent: #2a6aa9; /* azul títulos impresión */
+  --muted: #555;
+  --line: #e5e7eb;
+}
+html {
+  scroll-behavior: smooth;
+}
+body {
+  max-width: 1200px;
+  margin: 0 auto;
+  color: var(--brand);
+}
+.container {
+  padding: 40px;
+}
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 18px 0 8px;
+}
+.muted {
+  color: var(--muted);
+}
+.grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+.card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 18px;
+}
+.row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: end;
+}
+.row > * {
+  flex: 1 1 240px;
+}
+.label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 4px;
+}
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+.btns {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f4f4f5;
+  font-size: 12px;
+}
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New",
+    monospace;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th,
+td {
+  padding: 8px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+th {
+  background: #fafafa;
+}
+.is-invalid {
+  border-color: #ef4444 !important;
+  background: #fff7f7;
+}
+.text-error {
+  color: #b91c1c;
+  font-size: 12px;
+  margin-top: 6px;
+  display: none;
+}
 
-    /* Spinner */
-    .spinner-backdrop{position:fixed;inset:0;background:rgba(255,255,255,.85);display:none;align-items:center;justify-content:center;z-index:9999;}
-    .spinner-card{background:#fff;padding:18px 22px;border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.08);text-align:center;min-width:260px;color:var(--brand);font-weight:600;}
-    .spinner{width:28px;height:28px;border-radius:50%;border:3px solid #eee;border-top-color:#B46A55;margin:0 auto 10px auto;animation:spin .9s linear infinite;}
-    @keyframes spin{to{transform:rotate(360deg);}}
-    .hidden{display:none!important;}
+/* Spinner */
+.spinner-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.spinner-card {
+  background: #fff;
+  padding: 18px 22px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  min-width: 260px;
+  color: var(--brand);
+  font-weight: 600;
+}
+.spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid #eee;
+  border-top-color: #b46a55;
+  margin: 0 auto 10px auto;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.hidden {
+  display: none !important;
+}
 
-    /* =========================================
+/* =========================================
    BLOQUE DE IMPRESIÓN / PDF OPTIMIZADO
    (Reemplaza el final de tu archivo con esto)
    ========================================= */
 
 /* 1. Ocultar en pantalla lo que es exclusivo de impresión */
 .print-only {
-    display: none !important;
+  display: none !important;
 }
 
 /* Configuración de página general */
 @page {
-    size: Letter;
-    margin: 1.5cm; /* Margen global del PDF */
+  size: Letter;
+  margin: 1.5cm; /* Margen global del PDF */
 }
 
 /* Reglas que solo aplican al generar PDF/Imprimir */
 @media print {
-    
-    /* --- Resets y Ocultos --- */
-    #header, #footer, .no-print, .sidebar, .main-header, .btn-primary, .btn-outline {
-        display: none !important;
-    }
+  /* --- Resets y Ocultos --- */
+  #header,
+  #footer,
+  .no-print,
+  .sidebar,
+  .main-header,
+  .btn-primary,
+  .btn-outline {
+    display: none !important;
+  }
 
-    body {
-        max-width: 100%;
-        background: #fff;
-        color: #000;
-        font-size: 11pt; /* Tamaño legible para papel */
-        line-height: 1.5;
-        margin: 0;
-        -webkit-print-color-adjust: exact; /* Importante para Chrome/Edge: imprime fondos de color */
-        print-color-adjust: exact;
-    }
+  body {
+    max-width: 100%;
+    background: #fff;
+    color: #000;
+    font-size: 11pt; /* Tamaño legible para papel */
+    line-height: 1.5;
+    margin: 0;
+    -webkit-print-color-adjust: exact; /* Importante para Chrome/Edge: imprime fondos de color */
+    print-color-adjust: exact;
+  }
 
-    /* Habilitar elementos exclusivos de impresión */
-    .print-only {
-        display: block !important;
-    }
+  /* Habilitar elementos exclusivos de impresión */
+  .print-only {
+    display: block !important;
+  }
 
-    /* --- CLASE 1: PRINT-COVER (Portada) --- */
-    /* Centra el contenido vertical y horizontalmente en la primera hoja */
-    .print-cover {
-        width: 100%;
-        height: 100vh; /* Altura completa de la hoja */
-        display: flex;
-        flex-direction: column;
-        justify-content: center; /* Centrado vertical */
-        align-items: center;     /* Centrado horizontal */
-        text-align: center;
-        page-break-after: always; /* Fuerza salto de página al terminar */
-        break-after: page;
-    }
+  /* --- CLASE 1: PRINT-COVER (Portada) --- */
+  /* Centra el contenido vertical y horizontalmente en la primera hoja */
+  .print-cover {
+    width: 100%;
+    height: 100vh; /* Altura completa de la hoja */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical */
+    align-items: center; /* Centrado horizontal */
+    text-align: center;
+    page-break-after: always; /* Fuerza salto de página al terminar */
+    break-after: page;
+  }
 
-    /* Estilos internos de la portada */
-    .print-cover .brand-logo {
-        width: 180px;
-        margin-bottom: 2rem;
-    }
-    .print-cover h1 {
-        color: var(--brand);
-        font-size: 32px;
-        margin: 0 0 1rem 0;
-    }
-    .print-cover h2 {
-        color: var(--muted);
-        font-size: 20px;
-        font-weight: 400;
-    }
+  /* Estilos internos de la portada */
+  .print-cover .brand-logo {
+    width: 180px;
+    margin-bottom: 2rem;
+  }
+  .print-cover h1 {
+    color: var(--brand);
+    font-size: 32px;
+    margin: 0 0 1rem 0;
+  }
+  .print-cover h2 {
+    color: var(--muted);
+    font-size: 20px;
+    font-weight: 400;
+  }
 
-    /* --- CLASE 2: PRINT-SECTION (Secciones) --- */
-    /* Evita que los títulos o párrafos se corten al final de la hoja */
-    .print-section {
-        width: 100%;
-        margin-bottom: 30px;
-        page-break-inside: avoid; /* Trata de no romper el bloque */
-        break-inside: avoid;
-    }
+  /* --- CLASE 2: PRINT-SECTION (Secciones) --- */
+  /* Evita que los títulos o párrafos se corten al final de la hoja */
+  .print-section {
+    width: 100%;
+    margin-bottom: 30px;
+    page-break-inside: avoid; /* Trata de no romper el bloque */
+    break-inside: avoid;
+  }
 
-    .print-section h2.title {
-        color: var(--accent); /* Tu azul definido */
-        border-bottom: 2px solid var(--line);
-        padding-bottom: 5px;
-        margin-bottom: 15px;
-        font-size: 22px;
-    }
+  .print-section h2.title {
+    color: var(--accent); /* Tu azul definido */
+    border-bottom: 2px solid var(--line);
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+    font-size: 22px;
+  }
 
-    /* --- CLASE 3: PRINT-TABLE (Tablas) --- */
-    .print-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-        font-size: 10pt;
-    }
+  /* --- CLASE 3: PRINT-TABLE (Tablas) --- */
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 10pt;
+  }
 
-    .print-table th {
-        background-color: var(--accent) !important; /* Fondo azul */
-        color: #fff !important; /* Texto blanco */
-        font-weight: bold;
-        padding: 8px;
-        text-align: left;
-        border: 1px solid var(--accent);
-    }
+  .print-table th {
+    background-color: var(--accent) !important; /* Fondo azul */
+    color: #fff !important; /* Texto blanco */
+    font-weight: bold;
+    padding: 8px;
+    text-align: left;
+    border: 1px solid var(--accent);
+  }
 
-    .print-table td {
-        border: 1px solid #ccc;
-        padding: 8px;
-        color: #333;
-    }
+  .print-table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    color: #333;
+  }
 
-    /* Evitar que una fila se rompa a la mitad entre dos hojas */
-    .print-table tr {
-        page-break-inside: avoid;
-        break-inside: avoid;
-    }
-    
-    /* Alternar color filas (opcional, ayuda a la lectura) */
-    .print-table tr:nth-child(even) {
-        background-color: #f9f9f9;
-    }
+  /* Evitar que una fila se rompa a la mitad entre dos hojas */
+  .print-table tr {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
 
-    /* --- Footer de numeración (Tu lógica original mejorada) --- */
-    .print-footer {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        text-align: center;
-        font-size: 9pt;
-        color: var(--muted);
-        border-top: 1px solid var(--line);
-        padding-top: 5px;
-    }
-    
-    /* Genera: "Propuesta Comercial | Pagina 1 de X" */
-    .print-footer::after {
-        content: attr(data-text) " | Página " counter(page) " de " counter(pages);
-    }
+  /* Alternar color filas (opcional, ayuda a la lectura) */
+  .print-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  /* --- Footer de numeración (Tu lógica original mejorada) --- */
+  .print-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 9pt;
+    color: var(--muted);
+    border-top: 1px solid var(--line);
+    padding-top: 5px;
+  }
+
+  /* Genera: "Propuesta Comercial | Pagina 1 de X" */
+  .print-footer::after {
+    content: attr(data-text) " | Página " counter(page) " de " counter(pages);
+  }
 }
 
 /* =========================================
@@ -655,140 +770,182 @@ footer {
    ========================================= */
 
 /* Ocultar elementos de navegación en pantalla */
-.print-only { display: none !important; }
+.print-only {
+  display: none !important;
+}
 
 @page {
-    size: Letter;
-    margin: 2cm; /* Margen estándar elegante */
+  size: Letter;
+  margin: 2cm; /* Margen estándar elegante */
 }
 
 @media print {
-    /* Ocultar interfaz web */
-    #header, #footer, .no-print, .sidebar, .navbar, .btn-primary, .btn-outline {
-        display: none !important;
-    }
+  /* Ocultar interfaz web */
+  #header,
+  #footer,
+  .no-print,
+  .sidebar,
+  .navbar,
+  .btn-primary,
+  .btn-outline {
+    display: none !important;
+  }
 
-    body {
-        background: #fff;
-        font-family: "Segoe UI", sans-serif; /* Tu fuente original */
-        color: #333;
-        font-size: 11pt;
-        line-height: 1.6; /* Mayor interlineado para lectura fácil */
-        margin: 0;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
+  body {
+    background: #fff;
+    font-family: "Segoe UI", sans-serif; /* Tu fuente original */
+    color: #333;
+    font-size: 11pt;
+    line-height: 1.6; /* Mayor interlineado para lectura fácil */
+    margin: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 
-    .print-only { display: block !important; }
+  .print-only {
+    display: block !important;
+  }
 
-    /* --- PORTADA (Page 1) --- */
-    .print-cover {
-        width: 100%;
-        height: 90vh; /* Un poco menos de 100 para evitar desbordes */
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        page-break-after: always;
-    }
+  /* --- PORTADA (Page 1) --- */
+  .print-cover {
+    width: 100%;
+    height: 90vh; /* Un poco menos de 100 para evitar desbordes */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    page-break-after: always;
+  }
 
-    .print-cover h1 {
-        color: var(--brand); /* Tu azul oscuro */
-        font-size: 28pt;
-        margin-bottom: 10px;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-    }
+  .print-cover h1 {
+    color: var(--brand); /* Tu azul oscuro */
+    font-size: 28pt;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
 
-    .print-cover h2 {
-        color: var(--accent); /* Tu color de acento */
-        font-size: 18pt;
-        font-weight: 300;
-        margin-bottom: 40px;
-        border-bottom: 1px solid var(--accent);
-        display: inline-block;
-        padding-bottom: 10px;
-    }
+  .print-cover h2 {
+    color: var(--accent); /* Tu color de acento */
+    font-size: 18pt;
+    font-weight: 300;
+    margin-bottom: 40px;
+    border-bottom: 1px solid var(--accent);
+    display: inline-block;
+    padding-bottom: 10px;
+  }
 
-    .print-cover h3 {
-        color: var(--muted);
-        font-size: 14pt;
-        margin-top: 60px;
-    }
+  .print-cover h3 {
+    color: var(--muted);
+    font-size: 14pt;
+    margin-top: 60px;
+  }
 
-    /* --- SECCIONES DE TEXTO --- */
-    .print-section {
-        margin-bottom: 25px;
-        text-align: justify; /* Justificado para look formal */
-        page-break-inside: avoid;
-    }
+  /* --- SECCIONES DE TEXTO --- */
+  .print-section {
+    margin-bottom: 25px;
+    text-align: justify; /* Justificado para look formal */
+    page-break-inside: avoid;
+  }
 
-    .print-section h3.title {
-        color: var(--brand);
-        font-size: 16pt;
-        border-bottom: 2px solid var(--line);
-        margin-bottom: 15px;
-        padding-bottom: 5px;
-    }
+  .print-section h3.title {
+    color: var(--brand);
+    font-size: 16pt;
+    border-bottom: 2px solid var(--line);
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+  }
 
-    .print-section ul {
-        list-style: none;
-        padding-left: 0;
-    }
-    
-    .print-section ul li {
-        margin-bottom: 8px;
-        padding-left: 15px;
-        border-left: 3px solid var(--accent); /* Detalle visual elegante */
-    }
+  .print-section ul {
+    list-style: none;
+    padding-left: 0;
+  }
 
-    /* --- TABLA DE HONORARIOS --- */
-    .print-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 20px 0;
-        font-size: 10pt;
-    }
+  .print-section ul li {
+    margin-bottom: 8px;
+    padding-left: 15px;
+    border-left: 3px solid var(--accent); /* Detalle visual elegante */
+  }
 
-    .print-table th {
-        background-color: var(--brand) !important;
-        color: #fff !important;
-        padding: 10px;
-        text-transform: uppercase;
-        font-size: 9pt;
-        letter-spacing: 1px;
-    }
+  /* --- TABLA DE HONORARIOS --- */
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 10pt;
+  }
 
-    .print-table td {
-        border-bottom: 1px solid #ddd;
-        padding: 10px;
-    }
+  .print-table th {
+    background-color: var(--brand) !important;
+    color: #fff !important;
+    padding: 10px;
+    text-transform: uppercase;
+    font-size: 9pt;
+    letter-spacing: 1px;
+  }
 
-    /* Alineación específica para precios */
-    .print-table .text-right {
-        text-align: right;
-    }
-    .print-table .text-center {
-        text-align: center;
-    }
+  .print-table td {
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+  }
 
-    .print-table tr:last-child td {
-        border-bottom: 2px solid var(--brand);
-    }
+  /* Alineación específica para precios */
+  .print-table .text-right {
+    text-align: right;
+  }
+  .print-table .text-center {
+    text-align: center;
+  }
 
-    /* --- FIRMA (Final del documento) --- */
-    .signature-block {
-        margin-top: 60px;
-        page-break-inside: avoid;
-    }
-    .signature-line {
-        width: 250px;
-        border-top: 1px solid #000;
-        margin-bottom: 10px;
-    }
-    .signature-text {
-        font-weight: bold;
-        color: var(--brand);
-    }
+  .print-table tr:last-child td {
+    border-bottom: 2px solid var(--brand);
+  }
+
+  /* --- FIRMA (Final del documento) --- */
+  .signature-block {
+    margin-top: 60px;
+    page-break-inside: avoid;
+  }
+  .signature-line {
+    width: 250px;
+    border-top: 1px solid #000;
+    margin-bottom: 10px;
+  }
+  .signature-text {
+    font-weight: bold;
+    color: var(--brand);
+  }
 }
+/* Badges de estado */
+.badge-status {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.st-nuevo {
+  background: #e0f2fe;
+  color: #0369a1;
+} /* Azul claro */
+.st-contactado {
+  background: #fef3c7;
+  color: #b45309;
+} /* Amarillo */
+.st-propuesta {
+  background: #f3e8ff;
+  color: #7e22ce;
+} /* Morado */
+.st-negociacion {
+  background: #ffedd5;
+  color: #c2410c;
+} /* Naranja */
+.st-ganado {
+  background: #dcfce7;
+  color: #15803d;
+} /* Verde */
+.st-perdido {
+  background: #fee2e2;
+  color: #b91c1c;
+} /* Rojo */

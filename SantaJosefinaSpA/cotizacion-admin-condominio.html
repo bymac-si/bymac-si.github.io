@@ -8,20 +8,71 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   
   <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="assets/js/app.js"></script>
+  
+  <script>
+    // Configuración de la fórmula
+    const CONFIG_CALCULO = {
+        BASE_UTM_MULTIPLIER: 2.6, // Base 2.6 UTM
+        UMBRAL_UNIDADES: 20,      // Hasta 20 unidades es precio base
+        EXTRA_PCT: 0.013,         // 1.3% extra por cada unidad adicional
+        IVA: 1.19                 // 19% IVA
+    };
+
+    /**
+     * Función Global de Cálculo de Honorarios
+     * Disponible en toda la página como window.calcularMontos
+     */
+    window.calcularMontos = function(unidades, factor, utm) {
+        // 1. Validaciones de seguridad
+        if (!factor || factor <= 0 || !utm || utm <= 0) {
+            return { neto: 0, iva: 0, total: 0 };
+        }
+
+        const { BASE_UTM_MULTIPLIER, UMBRAL_UNIDADES, EXTRA_PCT, IVA } = CONFIG_CALCULO;
+
+        // 2. Calcular base monetaria (F1 en Excel)
+        const baseDinero = utm * BASE_UTM_MULTIPLIER;
+        let netoTeorico = 0;
+
+        // 3. Aplicar lógica de negocio
+        if (unidades < UMBRAL_UNIDADES) {
+            // Caso Pequeño (<20): Base * Factor
+            netoTeorico = baseDinero * factor;
+        } else {
+            // Caso Estándar (>=20): (Base + Extra) * Factor
+            const unidadesExtra = unidades - UMBRAL_UNIDADES;
+            const valorExtra = baseDinero * EXTRA_PCT; 
+            const sumaBase = baseDinero + (unidadesExtra * valorExtra);
+            
+            netoTeorico = sumaBase * factor;
+        }
+
+        // 4. Redondeo financiero (al 1.000 más cercano)
+        const neto = Math.round(netoTeorico / 1000) * 1000;
+
+        // 5. Cálculo final con IVA
+        const total = Math.round(neto * IVA);
+        const iva = total - neto;
+
+        return { neto, iva, total };
+    };
+
+    // Función mock por si no existe app.js externo con fetchData
+    if (typeof window.fetchData === 'undefined') {
+        window.fetchData = async function(tabla) { console.warn("Simulando carga de "+tabla); return []; };
+    }
+  </script>
+
   <script>/* requireAuth(); */</script>
 
   <style>
     /* =========================================
-       AJUSTES TÉCNICOS PARA PDF (INVISIBLE)
+       AJUSTES TÉCNICOS PARA PDF
        ========================================= */
-    
-    /* 1. Limpieza */
     body.generating-pdf .no-print { display: none !important; }
     body.generating-pdf .print-only { display: block !important; }
     body.generating-pdf { background: white !important; }
     
-    /* 2. Estructura */
     body.generating-pdf .container { 
         width: 98% !important; 
         max-width: none !important; 
@@ -29,13 +80,8 @@
         padding: 0 !important; 
     }
 
-    /* 3. LOGO */
-    body.generating-pdf .brand-logo {
-        width: 60mm !important; 
-        height: auto !important; 
-    }
-
-    /* 4. PORTADA */
+    body.generating-pdf .brand-logo { width: 60mm !important; height: auto !important; }
+    
     body.generating-pdf .print-cover {
         position: relative;
         min-height: 260mm; 
@@ -43,7 +89,6 @@
         page-break-after: always; 
     }
 
-    /* 5. Márgenes */
     body.generating-pdf .print-section {
         padding-left: 15mm !important;
         padding-right: 15mm !important;
@@ -52,6 +97,7 @@
 </head>
 <body>
 <div id="header" class="no-print"></div>
+
 <main class="container" id="contentToPrint">
   <h1 class="page-title no-print">Propuesta Comercial — Comunidad <span id="printNombre">—</span></h1>
 
@@ -139,7 +185,6 @@
 
   <section class="print-only print-cover">
     <img class="brand-logo" src="assets/img/logo_santajosefina.png" alt="Santa Josefina SpA" style="position: absolute; top: 10mm; left: 10mm;">
-    
     <span style="position: relative; top: 60mm; left: 10mm;">
       <h1>Propuesta Comercial</h1>
       <h2 id="coverSub">Condominio —</h2>
@@ -148,7 +193,6 @@
 
   <section class="print-only print-section">
     <h2 class="title">Nuestro Servicio</h2>
-
     <h3 class="stitle">¿Por qué nace la Administración de Edificios y Condominios?</h3>
     <p>Para mantener funcionando en forma óptima un condominio se requiere tiempo, gastos, contratación de personal, planificación y control de mantenciones periódicas para la maquinaria e infraestructura de la comunidad. Son funciones que pocas personas dentro del condominio están capacitadas y/o dispuestas a desarrollar. La <b>Ley N°21.442 de Copropiedad Inmobiliaria</b> establece que estas funciones pueden ser desempeñadas por un copropietario o por una persona natural o empresa especializada contratada por acuerdo de la Asamblea de Copropietarios.</p>
 
@@ -225,14 +269,14 @@
 <div id="footer" class="no-print"></div>
 
 <script>
-/* ===== Utilidades ===== */
+/* ===== Utilidades UI ===== */
 function showSpinner(msg){ document.getElementById('pageSpinner').style.display='flex'; if(msg) document.getElementById('spinnerText').textContent=msg; }
 function hideSpinner(){ document.getElementById('pageSpinner').style.display='none'; }
 function clp(v){ return "$" + new Intl.NumberFormat("es-CL",{maximumFractionDigits:0}).format(Number(v||0)); }
 function norm(s){ return (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim(); }
 function cleanRut(r){ return (r||'').toString().replace(/[^0-9kK]/g,'').toUpperCase(); }
-function rutDv(num){ let M=0,S=1; for(; num; num=Math.floor(num/10)) S=(S+num%10*(9-M++%6))%11; return S ? String(S-1) : 'K'; }
-function formatRut(r){ const s=cleanRut(r); if(s.length<2) return r||''; const body=s.slice(0,-1), dv=s.slice(-1); const withDots=body.replace(/\B(?=(\d{3})+(?!\d))/g,'.'); return withDots+'-'+dv; }
+function formatRut(r){ const s=cleanRut(r); if(s.length<2) return r||''; const body=s.slice(0,-1), dv=s.slice(-1); return body.replace(/\B(?=(\d{3})+(?!\d))/g,'.')+'-'+dv; }
+function getKeyVal(obj){ return obj.ID || obj.id || obj.Id; }
 
 /* Read / Boot / Fetch Logic */
 function readIncoming(){
@@ -252,39 +296,6 @@ function readIncoming(){
 
 let TARIFAS=[], PROSPECTOS=[], COPROS=[];
 let origen='prospecto', entidadSel=null, factor=0, nUnidades=0, utmCLP=0;
-
-// ==========================================
-// NUEVA LÓGICA DE CÁLCULO (Réplica exacta Excel)
-// ==========================================
-function calcularMontos(unidades, factor, utm){
-  if(!(factor>0 && utm>0)) return { neto:0, iva:0, total:0 };
-
-  const baseF1 = utm * 2.6; // Variable bases!F1 en Excel
-  let netoTeorico = 0;
-
-  if(unidades < 20){
-    // Caso < 20: Base * Factor
-    netoTeorico = baseF1 * factor;
-  } else {
-    // Caso >= 20: (Base + ((Unidades-20) * (Base*0.013))) * Factor
-    const extra = units = unidades - 20;
-    const valorExtraUnitario = baseF1 * 0.013;
-    const sumaBase = baseF1 + (extra * valorExtraUnitario);
-    
-    netoTeorico = sumaBase * factor;
-  }
-
-  // REDOND.MULT al 1000 más cercano
-  const neto = Math.round(netoTeorico / 1000) * 1000;
-  
-  // Total = Neto * 1.19
-  const total = Math.round(neto * 1.19);
-  
-  // IVA por diferencia
-  const iva = total - neto;
-
-  return { neto, iva, total };
-}
 
 function updatePrintResumen(neto, iva, total){ /* Compatibilidad */ }
 window.updatePrintResume = updatePrintResumen; 
@@ -397,12 +408,11 @@ function renderHonorarios(){
   ];
 
   tb.innerHTML = escenarios.map(sc=>{
-    // Llama a la nueva función de cálculo
-    const m = calcularMontos(sc.unidades, factor, utmCLP);
+    // ¡AHORA SÍ! Llamada a la función integrada en el head
+    const m = window.calcularMontos(sc.unidades, factor, utmCLP);
     
     const unit = sc.unidades>0 ? Math.round(m.total / sc.unidades) : 0;
     
-    // Texto de fórmula para referencia visual
     let formula = "";
     if(sc.unidades < 20) formula = `(2,6 × UTM) × Factor`;
     else formula = `[Base + Extra] × Factor`;
@@ -417,8 +427,8 @@ function renderHonorarios(){
     </tr>`;
   }).join('');
 
-  // Actualizar tabla de impresión (Solo el caso real)
-  const m0 = calcularMontos(nUnidades, factor, utmCLP);
+  // Actualizar tabla de impresión
+  const m0 = window.calcularMontos(nUnidades, factor, utmCLP);
   setPrintTable(m0.neto, m0.iva, m0.total, nUnidades||0);
 }
 
