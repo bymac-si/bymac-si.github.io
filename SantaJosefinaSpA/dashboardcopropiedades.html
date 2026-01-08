@@ -139,6 +139,9 @@
       .text-purple {
         color: #8b5cf6;
       }
+      .text-warning {
+        color: #f59e0b;
+      }
       /* MODAL */
       .modal {
         display: none;
@@ -462,15 +465,34 @@
           <span class="kpi-value text-danger mono" id="kpiGastosOp">$0</span>
           <span class="kpi-sub">Mes Actual</span>
         </div>
+        
+        <div class="kpi-card" style="border-left-color: #6366f1">
+          <span class="kpi-title">Gasto Sueldos</span>
+          <span class="kpi-value text-danger mono" id="kpiSueldos">$0</span>
+          <span class="kpi-sub">Personal</span>
+        </div>
+
         <div class="kpi-card" style="border-left-color: #8b5cf6">
-          <span class="kpi-title">Margen Operacional</span>
+          <span class="kpi-title">Margen %</span>
           <span class="kpi-value text-purple" id="kpiMargenPct">0%</span>
           <span class="kpi-sub">Rentabilidad Mes</span>
         </div>
+
+        <div class="kpi-card" style="border-left-color: #10b981">
+          <span class="kpi-title">Margen Operacional ($)</span>
+          <span class="kpi-value text-success mono" id="kpiMargenMonto">$0</span>
+          <span class="kpi-sub">Utilidad Neta</span>
+        </div>
+
         <div class="kpi-card" style="border-left-color: #3b82f6">
           <span class="kpi-title">IVA Débito (F29)</span>
           <span class="kpi-value text-info mono" id="kpiIVA">$0</span>
           <span class="kpi-sub">Proyección Fiscal</span>
+        </div>
+        <div class="kpi-card" style="border-left-color: #f97316">
+          <span class="kpi-title">IVA Crédito (F29)</span>
+          <span class="kpi-value text-warning mono" id="kpiIVACredito">$0</span>
+          <span class="kpi-sub">Compras con Factura</span>
         </div>
       </div>
 
@@ -793,6 +815,7 @@
         // 2. GASTOS
         let gastoNetoMes = 0,
           gastoIvaMes = 0;
+        let gastoSueldosMes = 0; // NUEVO VARIABLE PARA KPI SUELDOS
 
         // Fecha Sistema
         const fechaHoy = new Date();
@@ -813,14 +836,19 @@
           const montoNeto = parseFloat(g.MontoNeto || 0);
           const montoIVA = parseFloat(g.MontoIVA || 0);
           const total = parseFloat(g.Total) || montoNeto + montoIVA;
+          const cat = g.Categoria || "Otros";
 
           // A. KPI Mes Actual
           if (d.getMonth() === mesActual && d.getFullYear() === anoActual) {
             gastoNetoMes += montoNeto;
             gastoIvaMes += montoIVA;
 
+            // Logica para KPI Sueldos
+            if (cat.toLowerCase() === "sueldos") {
+                gastoSueldosMes += montoNeto;
+            }
+
             // Acumular Categoría
-            const cat = g.Categoria || "Otros";
             categoriasMes[cat] = (categoriasMes[cat] || 0) + montoNeto;
           }
 
@@ -856,6 +884,11 @@
         setText("kpiIngresos", formatoPrecio(netosTotal));
         setText("kpiGastosOp", formatoPrecio(gastoNetoMes));
         setText("kpiIVA", formatoPrecio(ivaTotal));
+        
+        // Renderizar Nuevos KPIs
+        setText("kpiIVACredito", formatoPrecio(gastoIvaMes));
+        setText("kpiSueldos", formatoPrecio(gastoSueldosMes));
+        setText("kpiMargenMonto", formatoPrecio(resultadoOp));
 
         const elMargen = document.getElementById("kpiMargenPct");
         elMargen.textContent = margenPct + "%";

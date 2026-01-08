@@ -103,6 +103,10 @@ tr:nth-child(even) {
 }
 
 /* Modal */
+ .modal input{
+        width: 95%;
+      }
+      
 .modal {
   position: fixed;
   inset: 0;
