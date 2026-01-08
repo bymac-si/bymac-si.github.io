@@ -1,6 +1,5 @@
 /**
- * printer.js - VERSIÓN REPORTE Z UNIFICADO (DÍA COMPLETO)
- * Diseñado para cuadrar caja sumando Turno 1 + Turno 2
+ * printer.js - VERSIÓN FINAL UNIFICADA (Soporte Cierre hasta 8:00 AM)
  */
 
 function getPrintableArea() {
@@ -15,7 +14,7 @@ function getPrintableArea() {
 
 function connectPrinter() {
   console.log("🖨️ Sistema de impresión listo");
-  alert("✅ Impresión Nativa Activada.");
+  // alert("✅ Impresión Nativa Activada."); // Opcional: comentar si molesta
 }
 
 function imprimirYLimpiar(area) {
@@ -36,10 +35,11 @@ const footerHtml = `
     </div>
 `;
 
-// === 1. TICKET DE APERTURA (Se mantiene igual) ===
+// === 1. TICKET DE APERTURA ===
 window.printOpeningTicket = async function (amount, cashier, turno) {
   const area = getPrintableArea();
   const fecha = new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" });
+  
   area.innerHTML = `
         <div class="ticket-header fs-big">APERTURA CAJA</div>
         <div class="text-center fw-bold">El Carro del 8</div>
@@ -59,11 +59,14 @@ window.printOpeningTicket = async function (amount, cashier, turno) {
   imprimirYLimpiar(area);
 };
 
-// === 2. TICKET DE VENTA (Se mantiene igual) ===
+// === 2. TICKET DE VENTA ===
 window.printTicket = async function (cart, total, method, orderNum) {
   const ticketArea = getPrintableArea();
+  
+  // Usamos hora actual del sistema (que app.js ya ajustó comercialmente, pero aquí mostramos la real de impresión)
   const fechaHora = new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" });
   const soloHora = fechaHora.split(" ")[1] || fechaHora;
+  
   const nombreCajero = typeof currentUser !== "undefined" && currentUser ? currentUser.Nombre : "Cajero";
   
   let displayMethod = method;
@@ -76,9 +79,11 @@ window.printTicket = async function (cart, total, method, orderNum) {
     let listadoCocina = "";
     itemsCocina.forEach((item) => {
       const srvTag = item.tipoServicio === "LLEVAR" ? "LLEVAR" : "SERVIR";
-      const nota = item.comentario ? `<div style="font-size:0.8em; font-weight:normal;">( ${item.comentario} )</div>` : "";
+      // Aumenté un poco el tamaño de la nota para legibilidad en cocina
+      const nota = item.comentario ? `<div style="font-size:0.85em; font-weight:normal;">( ${item.comentario} )</div>` : "";
       listadoCocina += `<div>${item.cantidad} x ${item.nombre} <b>${srvTag}</b> ${nota}</div>`;
     });
+    
     htmlCocina = `
             <div class="ticket-header fs-big">COCINA</div>
             <div class="text-center fs-huge" style="font-size:2.5rem;font-weight: bold;">#${orderNum}</div>
@@ -93,7 +98,8 @@ window.printTicket = async function (cart, total, method, orderNum) {
   cart.forEach((item) => {
     const totalItem = (item.precio * item.cantidad).toLocaleString("es-CL");
     const srvTag = item.tipoServicio === "LLEVAR" ? "(LLEVAR)" : "(SERVIR)";
-    const nota = item.comentario ? `<div style="font-size:0.8em; font-style:italic;">* ${item.comentario}</div>` : "";
+    const nota = item.comentario ? `<div style="font-size:0.7em; font-style:italic;">* ${item.comentario}</div>` : "";
+    
     listadoCliente += `
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 2px; font-size:1.2rem;">
                 <span style="flex:1; padding-right:5px; text-align:left;">${item.cantidad} x ${item.nombre} ${srvTag} ${nota}</span>
@@ -116,7 +122,7 @@ window.printTicket = async function (cart, total, method, orderNum) {
   imprimirYLimpiar(ticketArea);
 };
 
-// === 3. REPORTE Z (UNIFICADO DIARIO) ===
+// === 3. REPORTE Z (UNIFICADO) ===
 window.printDailyReport = async function (data) {
   const ticketArea = getPrintableArea();
   
@@ -127,32 +133,29 @@ window.printDailyReport = async function (data) {
     fechaFormateada = `${dia}/${mes}/${anio}`;
   }
 
-  // 1. OBTENER DATOS UNIFICADOS (T1 + T2)
-  // 'fondo_inicial' viene de la nube y es la suma de TODAS las aperturas de hoy
+  // DATOS DESDE LA NUBE (Code.gs ya sumó todo)
   const totalApertura = parseInt(data.fondo_inicial) || 0;
 
-  // Sumar ventas de ambos turnos
+  // VENTAS (Sumamos Turno 1 + Turno 2)
+  // Nota: Si es pago MIXTO, el backend ya distribuyó el dinero en .efectivo y .tarjeta
+  // Por lo tanto, aquí solo sumamos las columnas finales.
   const totalEfectivo = (data.turnos[1].efectivo || 0) + (data.turnos[2].efectivo || 0);
   const totalTarjeta = (data.turnos[1].tarjeta || 0) + (data.turnos[2].tarjeta || 0);
   const totalTransf = (data.turnos[1].transferencia || 0) + (data.turnos[2].transferencia || 0);
   
-  // Total Venta (Sin fondo)
   const totalVentaDia = totalEfectivo + totalTarjeta + totalTransf;
+  const totalEnCaja = totalApertura + totalEfectivo; // Lo que debe haber físicamente
 
-  // Total Dinero en Caja (Lo que el cajero debe contar físicamente en billetes)
-  const totalEnCaja = totalApertura + totalEfectivo;
-
-  // Lógica de Productos (Ranking)
+  // PRODUCTOS
   let prodHtml = "";
   const ranking = Object.entries(data.productos).sort((a, b) => b[1] - a[1]);
   if (ranking.length === 0) prodHtml = "<div>Sin ventas.</div>";
   else ranking.forEach(([nom, cant]) => (prodHtml += `<div style="display:flex; justify-content:space-between;"><span style="flex:1;">${cant} x ${nom}</span></div>`));
 
-  // --- GENERAR HTML DEL TICKET ---
   ticketArea.innerHTML = `
         <div class="ticket-header fs-big">REPORTE Z (DIARIO)<br><b>El Carro del 8</b></div>
         <div class="text-center fs-big">Fecha: ${fechaFormateada}</div>
-        <div class="text-center small">Consolidado Turno 1 + Turno 2</div>
+        <div class="text-center small">Cierre Unificado (T1 + T2)</div>
         <div class="ticket-divider"></div>
         <br>
         
@@ -169,16 +172,16 @@ window.printDailyReport = async function (data) {
         
         <div class="ticket-divider"></div>
         
-        <div class="d-flex-between fw-bold fs-big" style="margin: 5px 0;">
+        <div class="d-flex-between fw-bold fs-huge" style="margin: 5px 0;">
             <span>EN CAJA:</span>
             <span>$${totalEnCaja.toLocaleString("es-CL")}</span>
         </div>
-        <div class="text-center small">(Dinero físico que debe haber)</div>
+        <div class="text-center small">(Debe coincidir con efectivo físico)</div>
         <br>
         
         <div class="ticket-divider"></div>
         <div class="d-flex-between" style="font-size:1.1rem;">
-            <span>💳 Tarjetas (Total):</span>
+            <span>💳 Tarjetas:</span>
             <span>$${totalTarjeta.toLocaleString("es-CL")}</span>
         </div>
         <div class="d-flex-between" style="font-size:1.1rem;">

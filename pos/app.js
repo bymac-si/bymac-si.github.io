@@ -107,27 +107,43 @@ function attemptLogin() {
   }
 }
 
+// --- EN APP.JS ---
+
 function calcularTurno() {
-  const ahora = new Date();
-  const santiagoStr = ahora.toLocaleString("en-US", {
-    timeZone: "America/Santiago",
-  });
-  const santiagoDate = new Date(santiagoStr);
-  const hora = santiagoDate.getHours();
-  let fechaComercial = new Date(santiagoDate);
-  if (hora < 3) fechaComercial.setDate(fechaComercial.getDate() - 1);
-  const yyyy = fechaComercial.getFullYear();
-  const mm = String(fechaComercial.getMonth() + 1).padStart(2, "0");
-  const dd = String(fechaComercial.getDate()).padStart(2, "0");
-  const fechaStr = `${yyyy}-${mm}-${dd}`;
-  let idTurno = hora >= 18 || hora < 3 ? 2 : 1;
-  currentTurnData = {
-    fechaHora: santiagoDate.toLocaleString("es-CL"),
-    fechaComercial: fechaStr,
-    idTurno: idTurno,
-    turnoKey: `${fechaStr}-T${idTurno}`,
-  };
+    const ahora = new Date();
+    // Forzamos zona horaria de Chile para evitar errores de servidor/cliente
+    const santiagoStr = ahora.toLocaleString("en-US", { timeZone: "America/Santiago" });
+    const santiagoDate = new Date(santiagoStr);
+    
+    const hora = santiagoDate.getHours();
+    
+    let fechaComercial = new Date(santiagoDate);
+
+    // LÓGICA DE 8:00 AM
+    // Si son las 00:00, 01:00 ... hasta las 07:59, restamos un día.
+    // Ej: Si es Martes 03:00 AM, para el sistema sigue siendo Lunes.
+    if (hora < 8) { 
+        fechaComercial.setDate(fechaComercial.getDate() - 1);
+    }
+    
+    const yyyy = fechaComercial.getFullYear();
+    const mm = String(fechaComercial.getMonth() + 1).padStart(2, '0');
+    const dd = String(fechaComercial.getDate()).padStart(2, '0');
+    const fechaStr = `${yyyy}-${mm}-${dd}`;
+
+    // DEFINICIÓN DE TURNOS CON CORTE A LAS 8 AM
+    // Turno 1 (AM): Desde las 08:00 hasta las 17:59
+    // Turno 2 (PM): Desde las 18:00 hasta las 07:59 del día siguiente
+    let idTurno = (hora >= 18 || hora < 8) ? 2 : 1;
+
+    currentTurnData = { 
+        fechaHora: santiagoDate.toLocaleString("es-CL"), 
+        fechaComercial: fechaStr, 
+        idTurno: idTurno, 
+        turnoKey: `${fechaStr}-T${idTurno}` 
+    };
 }
+
 function updateClock() {
   calcularTurno();
 }
