@@ -1,186 +1,782 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-<meta charset="UTF-8">
-<title>CRM Inmobiliario - Propiedades</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="assets/css/styles.css">
-<script src="assets/js/app.js"></script>
-<script>requireAuth();</script>
-</head>
-<body style="max-width:1200px; margin: 0 auto;">
-<div id="header"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <title>CRM - Gestión de Propiedades</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <script src="assets/js/app.js"></script>
+    <script>
+      requireAuth();
+    </script>
 
-<main style="padding:40px;">
-  <h1 class="page-title">Gestión de Propiedades</h1>
-  <button onclick="abrirFormPropiedad()" class="btn-primary" style="margin-bottom:20px;">+ Nueva Propiedad</button>
+    <style>
+      /* ===== ESTILOS DASHBOARD (Unificados) ===== */
+      body {
+        max-width: 1300px;
+        margin: 0 auto;
+        color: #1a2b48;
+      }
+      main {
+        padding: 40px;
+      }
+      .page-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 16px;
+      }
 
-  <table>
-    <thead>
-      <tr>
-        <th>Título</th>
-        <th>Dirección</th>
-        <th>Tipo</th>
-        <th>Precio</th>
-        <th>Estado</th>
-        <th>Propietario</th>
-        <th>Agente</th>
-        <th>Imagen</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody id="tablaPropiedades"></tbody>
-  </table>
-</main>
+      /* Tablas */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        padding: 10px 8px;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: left;
+        vertical-align: middle;
+      }
+      th {
+        background: #fafafa;
+        font-weight: 600;
+        color: #4b5563;
+      }
 
-<!-- MODAL FORM -->
-<div id="modalPropiedad" class="modal">
-  <div class="modal-content">
-    <h2 id="modalTitlePropiedad">Nueva Propiedad</h2>
-    <form id="formPropiedad">
-      <input type="hidden" id="propiedadID">
-      <label>Título</label><input id="propiedadTitulo" required>
-      <label>Dirección</label><input id="propiedadDireccion" required>
-      <label>Tipo</label><input id="propiedadTipo">
-      <label>Precio</label><input type="number" id="propiedadPrecio">
-      <label>Estado</label><input id="propiedadEstado">
-      <label>Propietario</label><input id="propiedadPropietario">
-      <label>Agente</label><input id="propiedadAgente">
-      <label>URL Imagen</label><input id="propiedadImagen">
-      <div style="text-align:right;margin-top:10px;">
-        <button type="button" onclick="cerrarModalPropiedad()" class="btn-primary">Cancelar</button>
-        <button class="btn-primary">Guardar</button>
+      /* Inputs y Layout */
+      input,
+      select,
+      textarea {
+        width: 97%;
+        padding: 10px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-family: inherit;
+      }
+      .label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 13px;
+        color: #374151;
+      }
+
+      /* MODAL */
+      .modal input{
+        width: 95%;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.35);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal.active {
+        display: flex;
+      }
+      .modal-content {
+        width: 100%;
+        max-width: 600px;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      /* SPINNER */
+      .spinner-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.85);
+        display: none;
+        place-items: center;
+        z-index: 12000;
+      }
+      .spinner-card {
+        background: #fff;
+        padding: 18px 22px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        text-align: center;
+        min-width: 260px;
+        color: #1a2b48;
+        font-weight: 600;
+      }
+      .spinner {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 3px solid #eee;
+        border-top-color: #b46a55;
+        margin: 0 auto 10px;
+        animation: spin 0.9s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New",
+          monospace;
+      }
+      .muted {
+        color: #666;
+        font-size: 0.9em;
+      }
+
+      /* DASHBOARD HEADER */
+      .dashboard-header {
+        background-color: #fff;
+        padding: 20px 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        margin-bottom: 25px;
+        border: 1px solid #f0f0f0;
+      }
+      .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+      .header-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .header-filters {
+        display: flex;
+        gap: 15px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        padding-top: 20px;
+        border-top: 1px solid #e2e8f0;
+      }
+      .filter-item {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .input-modern {
+        height: 40px;
+        width: 97%;
+        padding: 0 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 14px;
+        background-color: #f8fafc;
+      }
+
+      /* BOTONES ICONOS */
+      .acciones-group {
+        display: flex;
+        gap: 6px;
+        justify-content: flex-start;
+        align-items: center;
+      }
+      .btn-icon {
+        width: 34px;
+        height: 34px;
+        border: none;
+        border-radius: 6px;
+        background-color: #f3f4f6;
+        color: #555;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        transition: all 0.2s ease;
+      }
+      .btn-icon:hover {
+        transform: translateY(-2px);
+        color: white;
+      }
+      .btn-ver:hover {
+        background-color: #3b82f6;
+      }
+      .btn-editar:hover {
+        background-color: #f59e0b;
+      }
+      .btn-eliminar:hover {
+        background-color: #ef4444;
+      }
+
+      /* BOTONES CABECERA */
+      .btn-head {
+        height: 44px;
+        padding: 0 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.2s;
+      }
+      .btn-head:hover {
+        transform: translateY(-2px);
+      }
+      .btn-nuevo {
+        background-color: #0f172a;
+        color: white;
+      }
+      .btn-secundario {
+        background-color: #fff;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+      }
+      .btn-secundario:hover {
+        background-color: #f8fafc;
+        border-color: #94a3b8;
+      }
+
+      /* Imagen Miniatura */
+      .thumb-img {
+        width: 60px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 4px;
+        border: 1px solid #e2e8f0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="header"></div>
+
+    <main>
+      <div class="dashboard-header no-print">
+        <div class="header-top">
+          <h1 class="page-title">Gestión de Propiedades</h1>
+
+          <div class="header-actions">
+            <button
+              class="btn-head btn-secundario"
+              id="btnReload"
+              title="Recargar datos"
+            >
+              <i class="fa-solid fa-rotate-right"></i>
+              <span class="btn-text">Recargar</span>
+            </button>
+
+            <button
+              class="btn-head btn-secundario"
+              id="btnExport"
+              title="Descargar CSV"
+            >
+              <i class="fa-solid fa-file-csv"></i>
+              <span class="btn-text">Exportar</span>
+            </button>
+
+            <button
+              class="btn-head btn-secundario"
+              onclick="window.print()"
+              title="Imprimir vista"
+            >
+              <i class="fa-solid fa-print"></i>
+              <span class="btn-text">Imprimir</span>
+            </button>
+
+            <button class="btn-head btn-nuevo" id="btnNew">
+              <i class="fa-solid fa-plus"></i>
+              <span>Nueva Propiedad</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="header-filters">
+          <div class="filter-item" style="flex-grow: 1">
+            <label class="label">Buscar</label>
+            <input
+              id="inpBuscar"
+              class="input-modern"
+              placeholder="Título, dirección, tipo, propietario..."
+              type="text"
+            />
+          </div>
+        </div>
       </div>
-    </form>
-  </div>
-</div>
 
-<!-- MODAL DETALLE -->
-<div id="modalDetalle" class="modal">
-  <div class="modal-content">
-    <h2>Detalle Propiedad</h2>
-    <div id="detalleContenido"></div>
-    <div style="text-align:right;margin-top:10px;">
-      <button class="btn-primary" type="button" onclick="cerrarModalDetalle()">Cerrar</button>
+      <table>
+        <thead>
+          <tr>
+            <th>Imagen</th>
+            <th>Título / Dirección</th>
+            <th>Tipo</th>
+            <th>Precio</th>
+            <th>Estado</th>
+            <th>Propietario / Agente</th>
+            <th class="no-print" style="width: 140px">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tablaPropiedades">
+          <tr>
+            <td colspan="7" class="muted">Cargando datos...</td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
+
+    <div id="modalPropiedad" class="modal" aria-hidden="true">
+      <div class="modal-content">
+        <h2 id="modalTitlePropiedad" style="margin-top: 0">Nueva Propiedad</h2>
+        <form id="formPropiedad" style="margin-top: 20px">
+          <input type="hidden" id="propiedadID" />
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+            <div style="grid-column: 1 / -1">
+              <label class="label">Título</label
+              ><input id="propiedadTitulo" required />
+            </div>
+            <div style="grid-column: 1 / -1">
+              <label class="label">Dirección</label
+              ><input id="propiedadDireccion" required />
+            </div>
+
+            <div>
+              <label class="label">Tipo</label><input id="propiedadTipo" />
+            </div>
+            <div>
+              <label class="label">Precio (CLP)</label
+              ><input type="number" id="propiedadPrecio" />
+            </div>
+
+            <div>
+              <label class="label">Estado</label><input id="propiedadEstado" />
+            </div>
+            <div>
+              <label class="label">Propietario</label
+              ><input id="propiedadPropietario" />
+            </div>
+
+            <div>
+              <label class="label">Agente</label><input id="propiedadAgente" />
+            </div>
+            <div style="grid-column: 1 / -1">
+              <label class="label">URL Imagen</label
+              ><input id="propiedadImagen" placeholder="https://..." />
+            </div>
+          </div>
+
+          <div style="text-align: right; margin-top: 20px">
+            <button
+              type="button"
+              class="btn-primary"
+              style="background: #6c757d; border: none"
+              onclick="cerrarModalPropiedad()"
+            >
+              Cancelar
+            </button>
+            <button class="btn-primary" style="border: none">Guardar</button>
+          </div>
+        </form>
+      </div>
     </div>
-  </div>
-</div>
 
-<div id="footer"></div>
+    <div id="modalDetalle" class="modal" aria-hidden="true">
+      <div class="modal-content">
+        <h2 style="margin-top: 0">Detalle Propiedad</h2>
+        <div id="detalleContenido" style="margin: 20px 0"></div>
+        <div style="text-align: right">
+          <button
+            class="btn-primary"
+            type="button"
+            onclick="cerrarModalDetalle()"
+            style="background: #6c757d; border: none"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
 
-<script>
-document.addEventListener("DOMContentLoaded", async ()=>{
-  document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
-  document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
-});
+    <div id="pageSpinner" class="spinner-backdrop" aria-hidden="true">
+      <div class="spinner-card">
+        <div class="spinner"></div>
+        <div id="spinnerText">Cargando…</div>
+      </div>
+    </div>
 
-let propiedadesGlobal=[], KEY_NAME="ID";
-const hoyISO = ()=> new Date().toISOString().split("T")[0];
-const formatoCLP = v => "$"+new Intl.NumberFormat("es-CL").format(Number(v||0));
+    <div id="footer"></div>
 
-async function cargarPropiedades(){
-  propiedadesGlobal = await fetchData("Propiedades");
-  if(propiedadesGlobal.length) KEY_NAME = getKeyName(propiedadesGlobal[0]);
+    <script>
+      /* ===== Utilidades Standard ===== */
+      function showSpinner(msg) {
+        const sp = document.getElementById("pageSpinner");
+        const txt = document.getElementById("spinnerText");
+        if (msg) txt.textContent = msg;
+        sp.style.display = "grid";
+      }
+      function hideSpinner() {
+        document.getElementById("pageSpinner").style.display = "none";
+      }
+      function norm(s) {
+        return (s || "")
+          .toString()
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .trim();
+      }
+      function escapeCSV(v) {
+        if (v == null) return "";
+        const s = String(v).replaceAll('"', '""');
+        return /[",\n]/.test(s) ? '"' + s + '"' : s;
+      }
+      const formatoCLP = (v) =>
+        "$" + new Intl.NumberFormat("es-CL").format(Number(v || 0));
+      const hoyISO = () => new Date().toISOString().split("T")[0];
 
-  tablaPropiedades.innerHTML = propiedadesGlobal.map(p=>{
-    const key = getKeyVal(p);
-    return `<tr>
-      <td>${p.Titulo||""}</td>
-      <td>${p.Direccion||""}</td>
-      <td>${p.Tipo||""}</td>
-      <td>${formatoCLP(p.Precio)}</td>
-      <td>${p.Estado||""}</td>
-      <td>${p.Propietario||""}</td>
-      <td>${p.Agente||""}</td>
-      <td>${p.ImagenURL?`<img src="${p.ImagenURL}" style="width:80px;border-radius:4px;">`:"—"}</td>
+      /* Helpers Claves */
+      if (typeof window.getKeyVal !== "function") {
+        window.getKeyVal = (o) =>
+          o
+            ? o._id ??
+              o.id ??
+              o.ID ??
+              o.Key ??
+              o.key ??
+              o.Id ??
+              o[Object.keys(o)[0]]
+            : "";
+      }
+      if (typeof window.getKeyName !== "function") {
+        window.getKeyName = (row) => {
+          if (!row || typeof row !== "object") return "ID";
+          const cands = ["ID", "_id", "Id", "id", "Key", "key"];
+          for (const c of cands) {
+            if (c in row) return c;
+          }
+          return Object.keys(row)[0] || "ID";
+        };
+      }
+      function generateKey(prefix = "ID") {
+        return `${prefix}_${Date.now().toString(36)}${Math.random()
+          .toString(36)
+          .slice(2, 8)
+          .toUpperCase()}`;
+      }
+
+      /* ===== Estado ===== */
+      let PROPIEDADES = [],
+        VIEW_PROPIEDADES = [];
+      let KEY_PROP = "ID";
+
+      /* ===== Inicialización ===== */
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          document.getElementById("header").innerHTML = await (
+            await fetch("header.html")
+          ).text();
+        } catch (e) {}
+        try {
+          document.getElementById("footer").innerHTML = await (
+            await fetch("footer.html")
+          ).text();
+        } catch (e) {}
+
+        bindUI();
+        await cargarTodo();
+      });
+
+      function bindUI() {
+        document
+          .getElementById("btnNew")
+          .addEventListener("click", () => abrirFormPropiedad());
+        document
+          .getElementById("btnReload")
+          .addEventListener("click", cargarTodo);
+        document
+          .getElementById("btnExport")
+          .addEventListener("click", exportCSV);
+        document
+          .getElementById("inpBuscar")
+          .addEventListener("input", aplicarFiltros);
+
+        modalPropiedad.addEventListener("click", (e) => {
+          if (e.target === modalPropiedad) cerrarModalPropiedad();
+        });
+        modalDetalle.addEventListener("click", (e) => {
+          if (e.target === modalDetalle) cerrarModalDetalle();
+        });
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") {
+            cerrarModalPropiedad();
+            cerrarModalDetalle();
+          }
+        });
+      }
+
+      /* ===== Carga de Datos ===== */
+      async function cargarTodo() {
+        try {
+          showSpinner("Cargando propiedades...");
+          PROPIEDADES = (await fetchData("Propiedades")) || [];
+
+          if (PROPIEDADES.length) KEY_PROP = getKeyName(PROPIEDADES[0]);
+
+          aplicarFiltros();
+        } catch (e) {
+          console.error(e);
+          alert("Error cargando datos: " + e.message);
+        } finally {
+          hideSpinner();
+        }
+      }
+
+      /* ===== Filtros y Render ===== */
+      function aplicarFiltros() {
+        const q = norm(document.getElementById("inpBuscar").value);
+
+        VIEW_PROPIEDADES = PROPIEDADES.filter((p) => {
+          if (!q) return true;
+          const str = [
+            p.Titulo,
+            p.Direccion,
+            p.Tipo,
+            p.Propietario,
+            p.Agente,
+            p.Estado,
+          ]
+            .map((v) => norm(v))
+            .join(" ");
+          return str.includes(q);
+        });
+
+        renderTabla();
+      }
+
+      function renderTabla() {
+        const tb = document.getElementById("tablaPropiedades");
+        if (!VIEW_PROPIEDADES.length) {
+          tb.innerHTML =
+            '<tr><td colspan="7" class="muted">No se encontraron propiedades.</td></tr>';
+          return;
+        }
+
+        tb.innerHTML = VIEW_PROPIEDADES.map((p) => {
+          const key = getKeyVal(p);
+          const img = p.ImagenURL
+            ? `<img src="${p.ImagenURL}" class="thumb-img">`
+            : '<div style="width:60px;height:40px;background:#f1f5f9;border-radius:4px;"></div>';
+
+          return `<tr>
+      <td>${img}</td>
       <td>
-        <button class="btn-primary btn-ver" data-id="${key}">Ver</button>
-        <button class="btn-primary btn-edit" data-id="${key}">Editar</button>
-        <button class="btn-primary" onclick="eliminarPropiedad('${key}')">Eliminar</button>
+         <div style="font-weight:600;font-size:13px;">${p.Titulo || ""}</div>
+         <div class="muted" style="font-size:12px;">${p.Direccion || ""}</div>
+      </td>
+      <td>${p.Tipo || ""}</td>
+      <td class="mono">${formatoCLP(p.Precio)}</td>
+      <td><span class="badge" style="background:#e0f2fe;color:#0284c7;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;">${
+        p.Estado || ""
+      }</span></td>
+      <td style="font-size:13px;">
+         <div><i class="fa-solid fa-user" style="color:#cbd5e1;margin-right:4px;"></i>${
+           p.Propietario || "—"
+         }</div>
+         <div><i class="fa-solid fa-user-tie" style="color:#cbd5e1;margin-right:4px;"></i>${
+           p.Agente || "—"
+         }</div>
+      </td>
+      <td class="no-print">
+         <div class="acciones-group">
+            <button class="btn-icon btn-ver" onclick="abrirDetallePropiedad('${key}')" title="Ver Detalle">
+               <i class="fa-solid fa-eye"></i>
+            </button>
+            <button class="btn-icon btn-editar" onclick="abrirFormPropiedad('${key}')" title="Editar">
+               <i class="fa-solid fa-pen"></i>
+            </button>
+            <button class="btn-icon btn-eliminar" onclick="eliminarPropiedad('${key}')" title="Eliminar">
+               <i class="fa-solid fa-trash"></i>
+            </button>
+         </div>
       </td>
     </tr>`;
-  }).join("");
+        }).join("");
+      }
 
-  tablaPropiedades.onclick = (e)=>{
-    const v = e.target.closest(".btn-ver");
-    const ed = e.target.closest(".btn-edit");
-    if(v) abrirDetallePropiedad(v.dataset.id);
-    if(ed) abrirFormPropiedad(ed.dataset.id);
-  };
-}
+      /* ---------------- CRUD Propiedades ---------------- */
+      function abrirFormPropiedad(id) {
+        const title = document.getElementById("modalTitlePropiedad");
+        document.getElementById("formPropiedad").reset();
+        document.getElementById("propiedadID").value = "";
 
-function abrirFormPropiedad(id){
-  modalTitlePropiedad.textContent = id ? "Editar Propiedad" : "Nueva Propiedad";
-  if(id){
-    const p = propiedadesGlobal.find(x=>String(getKeyVal(x))===String(id));
-    if(!p){ alert("No encontrada"); return; }
-    propiedadID.value = id;
-    propiedadTitulo.value = p.Titulo||"";
-    propiedadDireccion.value = p.Direccion||"";
-    propiedadTipo.value = p.Tipo||"";
-    propiedadPrecio.value = p.Precio||0;
-    propiedadEstado.value = p.Estado||"";
-    propiedadPropietario.value = p.Propietario||"";
-    propiedadAgente.value = p.Agente||"";
-    propiedadImagen.value = p.ImagenURL||"";
-  }else{
-    formPropiedad.reset();
-    propiedadID.value = "";
-  }
-  modalPropiedad.classList.add("active");
-}
-function cerrarModalPropiedad(){ modalPropiedad.classList.remove("active"); }
+        if (id) {
+          title.textContent = "Editar Propiedad";
+          const p = PROPIEDADES.find((x) => String(getKeyVal(x)) === String(id));
+          if (!p) {
+            alert("No encontrada");
+            return;
+          }
+          document.getElementById("propiedadID").value = id;
+          document.getElementById("propiedadTitulo").value = p.Titulo || "";
+          document.getElementById("propiedadDireccion").value =
+            p.Direccion || "";
+          document.getElementById("propiedadTipo").value = p.Tipo || "";
+          document.getElementById("propiedadPrecio").value = p.Precio || 0;
+          document.getElementById("propiedadEstado").value = p.Estado || "";
+          document.getElementById("propiedadPropietario").value =
+            p.Propietario || "";
+          document.getElementById("propiedadAgente").value = p.Agente || "";
+          document.getElementById("propiedadImagen").value = p.ImagenURL || "";
+        } else {
+          title.textContent = "Nueva Propiedad";
+        }
+        document.getElementById("modalPropiedad").classList.add("active");
+      }
 
-formPropiedad.onsubmit = async (e)=>{
-  e.preventDefault();
-  const id = propiedadID.value || undefined;
+      function cerrarModalPropiedad() {
+        document.getElementById("modalPropiedad").classList.remove("active");
+      }
 
-  const payload = {
-    ...(id?{[KEY_NAME]:id}:{}),
-    Direccion: propiedadDireccion.value.trim(),
-    Titulo: propiedadTitulo.value.trim(),
-    Tipo: propiedadTipo.value.trim(),
-    Precio: parseFloat(propiedadPrecio.value)||0,
-    Estado: propiedadEstado.value.trim(),
-    Propietario: propiedadPropietario.value.trim(),
-    Agente: propiedadAgente.value.trim(),
-    // IMPORTANTE: nombre exacto de columna en AppSheet/Sheet
-    "Fecha Captacion": id 
-      ? (propiedadesGlobal.find(x=>String(getKeyVal(x))===String(id))?.["Fecha Captacion"] || hoyISO())
-      : hoyISO(),
-    ImagenURL: propiedadImagen.value.trim()||null
-  };
-  // console.log(payload);
-  if(id) await appSheetCRUD("Propiedades","Edit",[payload]);
-  else   await appSheetCRUD("Propiedades","Add",[payload]);
-  cerrarModalPropiedad(); location.reload();
-};
+      document.getElementById("formPropiedad").onsubmit = async (e) => {
+        e.preventDefault();
+        const id = document.getElementById("propiedadID").value;
+        const payload = {
+          Titulo: document.getElementById("propiedadTitulo").value.trim(),
+          Direccion: document.getElementById("propiedadDireccion").value.trim(),
+          Tipo: document.getElementById("propiedadTipo").value.trim(),
+          Precio:
+            parseFloat(document.getElementById("propiedadPrecio").value) || 0,
+          Estado: document.getElementById("propiedadEstado").value.trim(),
+          Propietario: document
+            .getElementById("propiedadPropietario")
+            .value.trim(),
+          Agente: document.getElementById("propiedadAgente").value.trim(),
+          ImagenURL: document.getElementById("propiedadImagen").value.trim(),
+          "Fecha Captacion": id
+            ? PROPIEDADES.find((x) => String(getKeyVal(x)) === String(id))?.[
+                "Fecha Captacion"
+              ] || hoyISO()
+            : hoyISO(),
+        };
 
-async function eliminarPropiedad(id){
-  if(!confirm("¿Eliminar?")) return;
-  await appSheetCRUD("Propiedades","Delete",[{[KEY_NAME]:id}]);
-  location.reload();
-}
+        const keyField = id ? KEY_PROP : KEY_PROP;
+        if (id) payload[keyField] = id;
+        else payload[keyField] = generateKey("PROP");
 
-function abrirDetallePropiedad(id){
-  const p = propiedadesGlobal.find(x=>String(getKeyVal(x))===String(id));
-  if(!p){ alert("No encontrada"); return; }
-  detalleContenido.innerHTML = `
-    <p><b>Título:</b> ${p.Titulo||""}</p>
-    <p><b>Dirección:</b> ${p.Direccion||""}</p>
-    <p><b>Tipo:</b> ${p.Tipo||""}</p>
-    <p><b>Precio:</b> ${formatoCLP(p.Precio)}</p>
-    <p><b>Estado:</b> ${p.Estado||""}</p>
-    <p><b>Propietario:</b> ${p.Propietario||""}</p>
-    <p><b>Agente:</b> ${p.Agente||""}</p>
-    <p><b>Fecha Captación:</b> ${p["Fecha Captacion"]||""}</p>
-    <p><b>Imagen:</b><br>${p.ImagenURL?`<img src="${p.ImagenURL}" style="width:200px;border-radius:6px;">`:"—"}</p>
+        try {
+          showSpinner("Guardando...");
+          if (typeof upsertData === "function")
+            await upsertData("Propiedades", payload);
+          else if (id) await appSheetCRUD("Propiedades", "Edit", [payload]);
+          else await appSheetCRUD("Propiedades", "Add", [payload]);
+
+          cerrarModalPropiedad();
+          await cargarTodo();
+        } catch (err) {
+          alert("Error: " + err.message);
+        } finally {
+          hideSpinner();
+        }
+      };
+
+      async function eliminarPropiedad(id) {
+        if (!confirm("¿Eliminar propiedad?")) return;
+        try {
+          showSpinner("Eliminando...");
+          if (typeof deleteByKey === "function")
+            await deleteByKey("Propiedades", id);
+          else
+            await appSheetCRUD("Propiedades", "Delete", [{ [KEY_PROP]: id }]);
+          await cargarTodo();
+        } catch (err) {
+          alert("Error: " + err.message);
+        } finally {
+          hideSpinner();
+        }
+      }
+
+      function abrirDetallePropiedad(id) {
+        const p = PROPIEDADES.find((x) => String(getKeyVal(x)) === String(id));
+        if (!p) return;
+
+        const imgHtml = p.ImagenURL
+          ? `<img src="${p.ImagenURL}" style="width:100%;max-width:300px;border-radius:8px;margin-top:10px;">`
+          : "";
+
+        document.getElementById("detalleContenido").innerHTML = `
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+       <div>
+          <p><b>Título:</b> ${p.Titulo || "—"}</p>
+          <p><b>Dirección:</b> ${p.Direccion || "—"}</p>
+          <p><b>Tipo:</b> ${p.Tipo || "—"}</p>
+          <p><b>Precio:</b> ${formatoCLP(p.Precio)}</p>
+          <p><b>Estado:</b> ${p.Estado || "—"}</p>
+       </div>
+       <div>
+          <p><b>Propietario:</b> ${p.Propietario || "—"}</p>
+          <p><b>Agente:</b> ${p.Agente || "—"}</p>
+          <p><b>Fecha Captación:</b> ${p["Fecha Captacion"] || "—"}</p>
+       </div>
+    </div>
+    ${imgHtml}
   `;
-  modalDetalle.classList.add("active");
-}
-function cerrarModalDetalle(){ modalDetalle.classList.remove("active"); }
+        document.getElementById("modalDetalle").classList.add("active");
+      }
+      function cerrarModalDetalle() {
+        document.getElementById("modalDetalle").classList.remove("active");
+      }
 
-cargarPropiedades();
-</script>
-</body>
+      /* ===== Exportar ===== */
+      function exportCSV() {
+        const headers = [
+          "ID",
+          "Titulo",
+          "Direccion",
+          "Tipo",
+          "Precio",
+          "Estado",
+          "Propietario",
+          "Agente",
+        ];
+        const lines = [headers.join(",")];
+
+        VIEW_PROPIEDADES.forEach((r) => {
+          lines.push(
+            [
+              escapeCSV(getKeyVal(r)),
+              escapeCSV(r.Titulo),
+              escapeCSV(r.Direccion),
+              escapeCSV(r.Tipo),
+              escapeCSV(r.Precio),
+              escapeCSV(r.Estado),
+              escapeCSV(r.Propietario),
+              escapeCSV(r.Agente),
+            ].join(",")
+          );
+        });
+
+        const blob = new Blob([lines.join("\n")], {
+          type: "text/csv;charset=utf-8;",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "Propiedades.csv";
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    </script>
+  </body>
 </html>

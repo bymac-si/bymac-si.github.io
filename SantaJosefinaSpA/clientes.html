@@ -1,128 +1,665 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>CRM - Clientes</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="assets/js/app.js"></script>
-  <script>requireAuth();</script>
-</head>
-<body style="max-width:1200px; margin: 0 auto;">
-<div id="header"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <title>CRM - Gestión de Clientes</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <script src="assets/js/app.js"></script>
+    <script>
+      requireAuth();
+    </script>
 
-<main style="padding:40px;">
-  <h1 class="page-title">Gestión de Clientes</h1>
-  <button class="btn-primary" onclick="abrirFormCliente()">Nuevo Cliente</button>
+    <style>
+      /* ===== ESTILOS DASHBOARD (Unificados) ===== */
+      body {
+        max-width: 1300px;
+        margin: 0 auto;
+        color: #1a2b48;
+      }
+      main {
+        padding: 40px;
+      }
+      .page-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 16px;
+      }
 
-  <table style="margin-top:16px;">
-    <thead>
-      <tr>
-        <th>Nombre</th><th>Email</th><th>Teléfono</th><th>Canal</th><th>Segmento</th><th>Estado</th><th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody id="tablaClientes"></tbody>
-  </table>
-</main>
+      /* Tablas */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        padding: 10px 8px;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: left;
+        vertical-align: middle;
+      }
+      th {
+        background: #fafafa;
+        font-weight: 600;
+        color: #4b5563;
+      }
 
-<div id="modalCliente" class="modal">
-  <div class="modal-content">
-    <h2 id="modalTitleCliente">Nuevo Cliente</h2>
-    <form id="formCliente">
-      <input type="hidden" id="clienteID">
-      <label>Nombre</label><input id="clienteNombre" required>
-      <label>Email</label><input id="clienteEmail" type="email">
-      <label>Teléfono</label><input id="clienteTelefono">
-      <label>Canal</label><input id="clienteCanal">
-      <label>Segmento</label><input id="clienteSegmento">
-      <label>Estado</label><input id="clienteEstado">
-      <div style="text-align:right;margin-top:10px;">
-        <button type="button" class="btn-primary" onclick="cerrarModalCliente()">Cancelar</button>
-        <button class="btn-primary">Guardar</button>
+      /* Inputs y Layout */
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-family: inherit;
+      }
+      .label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 13px;
+        color: #374151;
+      }
+
+      /* MODAL */
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.35);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal.active {
+        display: flex;
+      }
+      .modal-content {
+        width: 100%;
+        max-width: 500px;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+      }
+
+      /* SPINNER */
+      .spinner-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.85);
+        display: none;
+        place-items: center;
+        z-index: 12000;
+      }
+      .spinner-card {
+        background: #fff;
+        padding: 18px 22px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        text-align: center;
+        min-width: 260px;
+        color: #1a2b48;
+        font-weight: 600;
+      }
+      .spinner {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 3px solid #eee;
+        border-top-color: #b46a55;
+        margin: 0 auto 10px;
+        animation: spin 0.9s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New",
+          monospace;
+      }
+      .muted {
+        color: #666;
+        font-size: 0.9em;
+      }
+
+      /* DASHBOARD HEADER */
+      .dashboard-header {
+        background-color: #fff;
+        padding: 20px 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        margin-bottom: 25px;
+        border: 1px solid #f0f0f0;
+      }
+      .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+      .header-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .header-filters {
+        display: flex;
+        gap: 15px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        padding-top: 20px;
+        border-top: 1px solid #e2e8f0;
+      }
+      .filter-item {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .input-modern {
+        height: 44px;
+        padding: 0 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 14px;
+        background-color: #f8fafc;
+      }
+
+      /* BOTONES ICONOS */
+      .acciones-group {
+        display: flex;
+        gap: 6px;
+        justify-content: flex-start;
+        align-items: center;
+      }
+      .btn-icon {
+        width: 34px;
+        height: 34px;
+        border: none;
+        border-radius: 6px;
+        background-color: #f3f4f6;
+        color: #555;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        transition: all 0.2s ease;
+      }
+      .btn-icon:hover {
+        transform: translateY(-2px);
+        color: white;
+      }
+      .btn-editar:hover {
+        background-color: #f59e0b;
+      }
+      .btn-eliminar:hover {
+        background-color: #ef4444;
+      }
+
+      /* BOTONES CABECERA */
+      .btn-head {
+        height: 44px;
+        padding: 0 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.2s;
+      }
+      .btn-head:hover {
+        transform: translateY(-2px);
+      }
+      .btn-nuevo {
+        background-color: #0f172a;
+        color: white;
+      }
+      .btn-secundario {
+        background-color: #fff;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+      }
+      .btn-secundario:hover {
+        background-color: #f8fafc;
+        border-color: #94a3b8;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="header"></div>
+
+    <main>
+      <div class="dashboard-header no-print">
+        <div class="header-top">
+          <h1 class="page-title">Gestión de Clientes</h1>
+
+          <div class="header-actions">
+            <button
+              class="btn-head btn-secundario"
+              id="btnReload"
+              title="Recargar datos"
+            >
+              <i class="fa-solid fa-rotate-right"></i>
+              <span class="btn-text">Recargar</span>
+            </button>
+
+            <button
+              class="btn-head btn-secundario"
+              id="btnExport"
+              title="Descargar CSV"
+            >
+              <i class="fa-solid fa-file-csv"></i>
+              <span class="btn-text">Exportar</span>
+            </button>
+
+            <button
+              class="btn-head btn-secundario"
+              onclick="window.print()"
+              title="Imprimir vista"
+            >
+              <i class="fa-solid fa-print"></i>
+              <span class="btn-text">Imprimir</span>
+            </button>
+
+            <button class="btn-head btn-nuevo" id="btnNew">
+              <i class="fa-solid fa-plus"></i>
+              <span>Nuevo Cliente</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="header-filters">
+          <div class="filter-item" style="flex-grow: 1">
+            <label class="label">Buscar</label>
+            <input
+              id="inpBuscar"
+              class="input-modern"
+              placeholder="Nombre, email, teléfono, segmento..."
+              type="text"
+            />
+          </div>
+        </div>
       </div>
-    </form>
-  </div>
-</div>
 
-<div id="footer"></div>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+            <th>Canal</th>
+            <th>Segmento</th>
+            <th>Estado</th>
+            <th class="no-print" style="width: 120px">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tablaClientes">
+          <tr>
+            <td colspan="7" class="muted">Cargando datos...</td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
 
-<script>
-document.addEventListener("DOMContentLoaded", async ()=>{
-  document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
-  document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
-});
+    <div id="modalCliente" class="modal" aria-hidden="true">
+      <div class="modal-content">
+        <h2 id="modalTitleCliente" style="margin-top: 0">Nuevo Cliente</h2>
+        <form id="formCliente" style="margin-top: 20px">
+          <input type="hidden" id="clienteID" />
 
-let clientesGlobal=[], KEY_NAME="ID";
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <div>
+              <label class="label">Nombre</label
+              ><input id="clienteNombre" required />
+            </div>
+            <div>
+              <label class="label">Email</label
+              ><input id="clienteEmail" type="email" />
+            </div>
+            <div>
+              <label class="label">Teléfono</label
+              ><input id="clienteTelefono" />
+            </div>
+            <div>
+              <label class="label">Canal</label><input id="clienteCanal" />
+            </div>
+            <div>
+              <label class="label">Segmento</label
+              ><input id="clienteSegmento" />
+            </div>
+            <div>
+              <label class="label">Estado</label><input id="clienteEstado" />
+            </div>
+          </div>
 
-async function cargarClientes(){
-  clientesGlobal = await fetchData("Clientes");
-  if(clientesGlobal.length) KEY_NAME = getKeyName(clientesGlobal[0]);
+          <div style="text-align: right; margin-top: 20px">
+            <button
+              type="button"
+              class="btn-primary"
+              style="background: #6c757d; border: none"
+              onclick="cerrarModalCliente()"
+            >
+              Cancelar
+            </button>
+            <button class="btn-primary" style="border: none">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
 
-  tablaClientes.innerHTML = clientesGlobal.map(c=>{
-    const key = getKeyVal(c);
-    return `<tr>
-      <td>${c.Nombre||""}</td>
-      <td>${c.Email||""}</td>
-      <td>${c.Telefono||c["Teléfono"]||""}</td>
-      <td>${c.Canal||""}</td>
-      <td>${c.Segmento||""}</td>
-      <td>${c.Estado||""}</td>
-      <td>
-        <button class="btn-primary btn-edit" data-id="${key}">Editar</button>
-        <button class="btn-primary" onclick="eliminarCliente('${key}')">Eliminar</button>
+    <div id="pageSpinner" class="spinner-backdrop" aria-hidden="true">
+      <div class="spinner-card">
+        <div class="spinner"></div>
+        <div id="spinnerText">Cargando…</div>
+      </div>
+    </div>
+
+    <div id="footer"></div>
+
+    <script>
+      /* ===== Utilidades Standard ===== */
+      function showSpinner(msg) {
+        const sp = document.getElementById("pageSpinner");
+        const txt = document.getElementById("spinnerText");
+        if (msg) txt.textContent = msg;
+        sp.style.display = "grid";
+      }
+      function hideSpinner() {
+        document.getElementById("pageSpinner").style.display = "none";
+      }
+      function norm(s) {
+        return (s || "")
+          .toString()
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .trim();
+      }
+      function escapeCSV(v) {
+        if (v == null) return "";
+        const s = String(v).replaceAll('"', '""');
+        return /[",\n]/.test(s) ? '"' + s + '"' : s;
+      }
+
+      /* Helpers Claves */
+      if (typeof window.getKeyVal !== "function") {
+        window.getKeyVal = (o) =>
+          o
+            ? o._id ??
+              o.id ??
+              o.ID ??
+              o.Key ??
+              o.key ??
+              o.Id ??
+              o[Object.keys(o)[0]]
+            : "";
+      }
+      if (typeof window.getKeyName !== "function") {
+        window.getKeyName = (row) => {
+          if (!row || typeof row !== "object") return "ID";
+          const cands = ["ID", "_id", "Id", "id", "Key", "key"];
+          for (const c of cands) {
+            if (c in row) return c;
+          }
+          return Object.keys(row)[0] || "ID";
+        };
+      }
+      function generateKey(prefix = "ID") {
+        return `${prefix}_${Date.now().toString(36)}${Math.random()
+          .toString(36)
+          .slice(2, 8)
+          .toUpperCase()}`;
+      }
+
+      /* ===== Estado ===== */
+      let CLIENTES = [],
+        VIEW_CLIENTES = [];
+      let KEY_CLIENTE = "ID";
+
+      /* ===== Inicialización ===== */
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          document.getElementById("header").innerHTML = await (
+            await fetch("header.html")
+          ).text();
+        } catch (e) {}
+        try {
+          document.getElementById("footer").innerHTML = await (
+            await fetch("footer.html")
+          ).text();
+        } catch (e) {}
+
+        bindUI();
+        await cargarTodo();
+      });
+
+      function bindUI() {
+        document
+          .getElementById("btnNew")
+          .addEventListener("click", () => abrirFormCliente());
+        document
+          .getElementById("btnReload")
+          .addEventListener("click", cargarTodo);
+        document
+          .getElementById("btnExport")
+          .addEventListener("click", exportCSV);
+        document
+          .getElementById("inpBuscar")
+          .addEventListener("input", aplicarFiltros);
+
+        modalCliente.addEventListener("click", (e) => {
+          if (e.target === modalCliente) cerrarModalCliente();
+        });
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") cerrarModalCliente();
+        });
+      }
+
+      /* ===== Carga de Datos ===== */
+      async function cargarTodo() {
+        try {
+          showSpinner("Cargando clientes...");
+          CLIENTES = (await fetchData("Clientes")) || [];
+
+          if (CLIENTES.length) KEY_CLIENTE = getKeyName(CLIENTES[0]);
+
+          aplicarFiltros();
+        } catch (e) {
+          console.error(e);
+          alert("Error cargando datos: " + e.message);
+        } finally {
+          hideSpinner();
+        }
+      }
+
+      /* ===== Filtros y Render ===== */
+      function aplicarFiltros() {
+        const q = norm(document.getElementById("inpBuscar").value);
+
+        VIEW_CLIENTES = CLIENTES.filter((c) => {
+          if (!q) return true;
+          const str = [
+            c.Nombre,
+            c.Email,
+            c.Telefono,
+            c["Teléfono"],
+            c.Segmento,
+            c.Canal,
+            c.Estado,
+          ]
+            .map((v) => norm(v))
+            .join(" ");
+          return str.includes(q);
+        });
+
+        renderTabla();
+      }
+
+      function renderTabla() {
+        const tb = document.getElementById("tablaClientes");
+        if (!VIEW_CLIENTES.length) {
+          tb.innerHTML =
+            '<tr><td colspan="7" class="muted">No se encontraron clientes.</td></tr>';
+          return;
+        }
+
+        tb.innerHTML = VIEW_CLIENTES.map((c) => {
+          const key = getKeyVal(c);
+          return `<tr>
+      <td><span style="font-weight:600; font-size:13px;">${
+        c.Nombre || ""
+      }</span></td>
+      <td>${c.Email || ""}</td>
+      <td class="mono">${c.Telefono || c["Teléfono"] || ""}</td>
+      <td>${c.Canal || ""}</td>
+      <td>${c.Segmento || ""}</td>
+      <td>${c.Estado || ""}</td>
+      <td class="no-print">
+         <div class="acciones-group">
+            <button class="btn-icon btn-editar" onclick="abrirFormCliente('${key}')" title="Editar Cliente">
+               <i class="fa-solid fa-pen"></i>
+            </button>
+            <button class="btn-icon btn-eliminar" onclick="eliminarCliente('${key}')" title="Eliminar Cliente">
+               <i class="fa-solid fa-trash"></i>
+            </button>
+         </div>
       </td>
     </tr>`;
-  }).join("");
+        }).join("");
+      }
 
-  tablaClientes.onclick = (e)=>{
-    const b=e.target.closest(".btn-edit");
-    if(b) abrirFormCliente(b.dataset.id);
-  };
-}
+      /* ---------------- CRUD Clientes ---------------- */
+      function abrirFormCliente(id) {
+        const title = document.getElementById("modalTitleCliente");
+        document.getElementById("formCliente").reset();
+        document.getElementById("clienteID").value = "";
 
-function abrirFormCliente(id){
-  modalTitleCliente.textContent = id ? "Editar Cliente" : "Nuevo Cliente";
-  if(id){
-    const c = clientesGlobal.find(x=>String(getKeyVal(x))===String(id));
-    if(!c){ alert("No encontrado"); return; }
-    clienteID.value = id;
-    clienteNombre.value = c.Nombre||"";
-    clienteEmail.value = c.Email||"";
-    clienteTelefono.value = c.Telefono||c["Teléfono"]||"";
-    clienteCanal.value = c.Canal||"";
-    clienteSegmento.value = c.Segmento||"";
-    clienteEstado.value = c.Estado||"";
-  } else {
-    formCliente.reset(); clienteID.value="";
-  }
-  modalCliente.classList.add("active");
-}
-function cerrarModalCliente(){ modalCliente.classList.remove("active"); }
+        if (id) {
+          title.textContent = "Editar Cliente";
+          const c = CLIENTES.find((x) => String(getKeyVal(x)) === String(id));
+          if (!c) {
+            alert("No encontrado");
+            return;
+          }
+          document.getElementById("clienteID").value = id;
+          document.getElementById("clienteNombre").value = c.Nombre || "";
+          document.getElementById("clienteEmail").value = c.Email || "";
+          document.getElementById("clienteTelefono").value =
+            c.Telefono || c["Teléfono"] || "";
+          document.getElementById("clienteCanal").value = c.Canal || "";
+          document.getElementById("clienteSegmento").value = c.Segmento || "";
+          document.getElementById("clienteEstado").value = c.Estado || "";
+        } else {
+          title.textContent = "Nuevo Cliente";
+        }
+        document.getElementById("modalCliente").classList.add("active");
+      }
 
-formCliente.onsubmit = async (e)=>{
-  e.preventDefault();
-  const id = clienteID.value || undefined;
-  const payload = {
-    ...(id?{[KEY_NAME]:id}:{}),
-    Nombre: clienteNombre.value.trim(),
-    Email: (clienteEmail.value||"").trim().toLowerCase(),
-    Telefono: (clienteTelefono.value||"").trim(),
-    Canal: (clienteCanal.value||"").trim(),
-    Segmento: (clienteSegmento.value||"").trim(),
-    Estado: (clienteEstado.value||"").trim()
-  };
-  if(id) await appSheetCRUD("Clientes","Edit",[payload]);
-  else   await appSheetCRUD("Clientes","Add",[payload]);
-  cerrarModalCliente(); location.reload();
-};
+      function cerrarModalCliente() {
+        document.getElementById("modalCliente").classList.remove("active");
+      }
 
-async function eliminarCliente(id){
-  if(!confirm("¿Eliminar?")) return;
-  await appSheetCRUD("Clientes","Delete",[{[KEY_NAME]:id}]);
-  location.reload();
-}
+      document.getElementById("formCliente").onsubmit = async (e) => {
+        e.preventDefault();
+        const id = document.getElementById("clienteID").value;
+        const payload = {
+          Nombre: document.getElementById("clienteNombre").value.trim(),
+          Email: document.getElementById("clienteEmail").value.trim(),
+          Telefono: document.getElementById("clienteTelefono").value.trim(),
+          Canal: document.getElementById("clienteCanal").value.trim(),
+          Segmento: document.getElementById("clienteSegmento").value.trim(),
+          Estado: document.getElementById("clienteEstado").value.trim(),
+        };
 
-cargarClientes();
-</script>
-</body>
+        const keyField = id ? KEY_CLIENTE : KEY_CLIENTE;
+        if (id) payload[keyField] = id;
+        else payload[keyField] = generateKey("CLI");
+
+        try {
+          showSpinner("Guardando...");
+          if (typeof upsertData === "function")
+            await upsertData("Clientes", payload);
+          else if (id) await appSheetCRUD("Clientes", "Edit", [payload]);
+          else await appSheetCRUD("Clientes", "Add", [payload]);
+
+          cerrarModalCliente();
+          await cargarTodo();
+        } catch (err) {
+          alert("Error: " + err.message);
+        } finally {
+          hideSpinner();
+        }
+      };
+
+      async function eliminarCliente(id) {
+        if (!confirm("¿Eliminar este cliente?")) return;
+        try {
+          showSpinner("Eliminando...");
+          if (typeof deleteByKey === "function")
+            await deleteByKey("Clientes", id);
+          else
+            await appSheetCRUD("Clientes", "Delete", [{ [KEY_CLIENTE]: id }]);
+          await cargarTodo();
+        } catch (err) {
+          alert("Error: " + err.message);
+        } finally {
+          hideSpinner();
+        }
+      }
+
+      /* ===== Exportar ===== */
+      function exportCSV() {
+        const headers = [
+          "ID",
+          "Nombre",
+          "Email",
+          "Telefono",
+          "Canal",
+          "Segmento",
+          "Estado",
+        ];
+        const lines = [headers.join(",")];
+
+        VIEW_CLIENTES.forEach((r) => {
+          lines.push(
+            [
+              escapeCSV(getKeyVal(r)),
+              escapeCSV(r.Nombre),
+              escapeCSV(r.Email),
+              escapeCSV(r.Telefono || r["Teléfono"]),
+              escapeCSV(r.Canal),
+              escapeCSV(r.Segmento),
+              escapeCSV(r.Estado),
+            ].join(",")
+          );
+        });
+
+        const blob = new Blob([lines.join("\n")], {
+          type: "text/csv;charset=utf-8;",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "Clientes.csv";
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    </script>
+  </body>
 </html>
