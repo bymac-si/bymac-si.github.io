@@ -2,134 +2,455 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>CRM - Gastos</title>
+  <title>CRM - Gastos Comunes</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="assets/js/app.js"></script>
   <script>requireAuth();</script>
+
+  <style>
+    /* ===== ESTILOS DASHBOARD (Idénticos a Prospectos/Proveedores) ===== */
+    body{ max-width:1200px; margin:0 auto; color:#1A2B48; }
+    main{ padding:40px; }
+    .page-title{ font-size:28px; font-weight:700; margin-bottom:16px; }
+    
+    /* Tablas */
+    table{ width:100%; border-collapse:collapse; }
+    th,td{ padding:10px 8px; border-bottom:1px solid #e5e7eb; text-align:left; vertical-align: middle; }
+    th{ background:#fafafa; font-weight: 600; color: #4b5563; }
+    
+    /* Inputs y Layout */
+    input,select,textarea{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:6px; font-family:inherit;}
+    .label{ display:block; font-weight:600; margin-bottom:4px; font-size: 13px; color: #374151; }
+    
+    /* MODAL */
+    .modal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:10000; align-items:center; justify-content:center; }
+    .modal.active{ display:flex; }
+    .modal-content{ width:100%; max-width:600px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:25px; box-shadow:0 12px 30px rgba(0,0,0,.18); }
+    
+    /* SPINNER */
+    .spinner-backdrop{ position:fixed; inset:0; background:rgba(255,255,255,0.85); display:none; place-items:center; z-index:12000; }
+    .spinner-card{ background:#fff; padding:18px 22px; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.08); text-align:center; min-width:260px; color:#1A2B48; font-weight:600; }
+    .spinner{ width:28px; height:28px; border-radius:50%; border:3px solid #eee; border-top-color:#B46A55; margin:0 auto 10px; animation:spin .9s linear infinite; }
+    @keyframes spin{ to{ transform:rotate(360deg); } }
+    
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace; }
+    .muted{ color:#666; font-size: 0.9em; }
+
+    /* CABECERA DASHBOARD */
+    .dashboard-header { background-color: #fff; padding: 20px 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #f0f0f0; }
+    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+    
+    .header-filters { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; padding-top: 20px; border-top: 1px solid #e2e8f0; }
+    .filter-item { display: flex; flex-direction: column; gap: 6px; }
+    .input-modern { height: 44px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #f8fafc; }
+    
+    /* BOTONES ICONOS (Tabla) */
+    .acciones-group { display: flex; gap: 6px; justify-content: flex-start; align-items: center; }
+    .btn-icon { width: 34px; height: 34px; border: none; border-radius: 6px; background-color: #f3f4f6; color: #555; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s ease; }
+    .btn-icon:hover { transform: translateY(-2px); color: white; }
+    .btn-editar:hover { background-color: #f59e0b; }
+    .btn-eliminar:hover { background-color: #ef4444; }
+
+    /* BOTONES CABECERA */
+    .btn-head { height: 44px; padding: 0 20px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; transition: all 0.2s; }
+    .btn-head:hover { transform: translateY(-2px); }
+    .btn-nuevo { background-color: #0f172a; color: white; }
+    .btn-secundario { background-color: #fff; color: #475569; border: 1px solid #cbd5e1; }
+    .btn-secundario:hover { background-color: #f8fafc; border-color: #94a3b8; }
+  </style>
 </head>
-<body style="max-width:1200px; margin: 0 auto;">
+<body>
 <div id="header"></div>
 
-<main style="padding:40px;">
-  <h1 class="page-title">Gastos Comunes</h1>
-  <button class="btn-primary" onclick="abrirForm()">Nuevo Gasto</button>
+<main>
+  <div class="dashboard-header no-print">
+    <div class="header-top">
+      <h1 class="page-title">Gastos Comunes</h1>
+      
+      <div class="header-actions">
+        <button class="btn-head btn-secundario" id="btnReload" title="Recargar datos">
+          <i class="fa-solid fa-rotate-right"></i>
+          <span class="btn-text">Recargar</span>
+        </button>
 
-  <table style="margin-top:16px;">
+        <button class="btn-head btn-secundario" id="btnExport" title="Descargar CSV">
+          <i class="fa-solid fa-file-csv"></i>
+          <span class="btn-text">Exportar</span>
+        </button>
+
+        <button class="btn-head btn-secundario" onclick="window.print()" title="Imprimir vista">
+          <i class="fa-solid fa-print"></i>
+          <span class="btn-text">Imprimir</span>
+        </button>
+
+        <button class="btn-head btn-nuevo" id="btnNew">
+          <i class="fa-solid fa-plus"></i>
+          <span>Nuevo Gasto</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="header-filters">
+      <div class="filter-item" style="flex-grow: 2;"> 
+        <label class="label">Buscar</label>
+        <input id="inpBuscar" class="input-modern" placeholder="Proveedor, Tipo de Gasto, Documento..." type="text" style="width:95%;height:42px;">
+      </div>
+
+      <div class="filter-item" style="flex-grow: 1;">
+        <label class="label">Filtrar por Copropiedad</label>
+        <select id="selCoproFilter" class="input-modern">
+          <option value="">(Todas)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <table>
     <thead>
-      <tr><th>Copropiedad</th><th>Proveedor</th><th>Tipo</th><th>Monto</th><th>Fecha</th><th>Documento</th><th>Obs.</th><th>Acciones</th></tr>
+      <tr>
+        <th>Copropiedad</th>
+        <th>Proveedor</th>
+        <th>Tipo</th>
+        <th style="text-align:right;">Monto</th>
+        <th>Fecha</th>
+        <th>Documento</th>
+        <th>Obs.</th>
+        <th class="no-print">Acciones</th>
+      </tr>
     </thead>
-    <tbody id="tablaG"></tbody>
+    <tbody id="tablaG"><tr><td colspan="8" class="muted">Cargando datos...</td></tr></tbody>
   </table>
 </main>
 
-<div id="modalG" class="modal">
+<div id="modalG" class="modal" aria-hidden="true">
   <div class="modal-content">
-    <h2 id="modalTitle">Nuevo Gasto</h2>
-    <form id="formG">
+    <h2 id="modalTitle" style="margin-top:0;">Nuevo Gasto</h2>
+    
+    <form id="formG" style="margin-top:20px;">
       <input type="hidden" id="gID">
-      <label>Copropiedad</label><select id="gCopro" required></select>
-      <label>Proveedor</label><select id="gProv" required></select>
-      <label>Tipo de Gasto</label><input id="gTipo" required>
-      <label>Monto</label><input type="number" id="gMonto" required>
-      <label>Fecha</label><input type="date" id="gFecha" required>
-      <label>Documento</label><input id="gDocumento">
-      <label>Observaciones</label><textarea id="gObs" rows="3"></textarea>
-      <div style="text-align:right;margin-top:10px;">
-        <button type="button" class="btn-primary" onclick="cerrarForm()">Cancelar</button>
-        <button class="btn-primary">Guardar</button>
+      
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+        <div style="grid-column: 1 / -1;">
+          <label class="label">Copropiedad</label>
+          <select id="gCopro" required></select>
+        </div>
+
+        <div style="grid-column: 1 / -1;">
+          <label class="label">Proveedor</label>
+          <select id="gProv" required></select>
+        </div>
+
+        <div>
+          <label class="label">Tipo de Gasto</label>
+          <input id="gTipo" list="dlTipos" placeholder="Ej: Mantención Ascensores" required>
+          <datalist id="dlTipos">
+            <option value="Mantención">
+            <option value="Reparación">
+            <option value="Insumos">
+            <option value="Honorarios">
+            <option value="Servicios Básicos">
+          </datalist>
+        </div>
+        
+        <div>
+           <label class="label">Fecha</label>
+           <input type="date" id="gFecha" required>
+        </div>
+
+        <div>
+           <label class="label">Monto ($)</label>
+           <input type="number" id="gMonto" required min="0">
+        </div>
+
+        <div>
+           <label class="label">N° Documento</label>
+           <input id="gDocumento" placeholder="Factura/Boleta">
+        </div>
+
+        <div style="grid-column: 1 / -1;">
+           <label class="label">Observaciones</label>
+           <textarea id="gObs" rows="3" style="resize:vertical;"></textarea>
+        </div>
+      </div>
+
+      <div style="text-align:right; margin-top:20px;">
+        <button type="button" class="btn-primary" style="background:#6c757d; border:none;" onclick="cerrarForm()">Cancelar</button>
+        <button class="btn-primary" style="border:none;">Guardar</button>
       </div>
     </form>
+  </div>
+</div>
+
+<div id="pageSpinner" class="spinner-backdrop" aria-hidden="true">
+  <div class="spinner-card">
+    <div class="spinner"></div>
+    <div id="spinnerText">Cargando…</div>
   </div>
 </div>
 
 <div id="footer"></div>
 
 <script>
+/* ===== Utilidades ===== */
+function showSpinner(msg){ const sp=document.getElementById('pageSpinner'); const txt=document.getElementById('spinnerText'); if(msg) txt.textContent=msg; sp.style.display='grid'; }
+function hideSpinner(){ document.getElementById('pageSpinner').style.display='none'; }
+function norm(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim(); }
+function escapeCSV(v){ if(v==null) return ''; const s=String(v).replaceAll('"','""'); return /[",\n]/.test(s) ? '"'+s+'"' : s; }
+function clp(v){ return "$" + new Intl.NumberFormat("es-CL",{maximumFractionDigits:0}).format(Number(v||0)); }
+function fmtFecha(iso){ 
+  if(!iso) return ""; 
+  // Intentar manejar formatos de fecha (YYYY-MM-DDT... o YYYY-MM-DD)
+  const d = new Date(iso);
+  // Ajuste zona horaria simple si es necesario, o uso directo UTC
+  return d.toLocaleDateString("es-CL", { timeZone: 'UTC' }); 
+}
+
+/* Helpers Claves */
+if(typeof window.getKeyVal !== 'function'){ window.getKeyVal = (o)=> o? (o._id ?? o.id ?? o.ID ?? o.Key ?? o.key ?? o.Id ?? o[Object.keys(o)[0]]):""; }
+if(typeof window.getKeyName !== 'function'){ window.getKeyName = (row)=>{ if(!row || typeof row!=='object') return 'ID'; const cands=['ID','_id','Id','id','Key','key']; for(const c of cands){ if(c in row) return c; } return Object.keys(row)[0] || 'ID'; }; }
+function generateKey(prefix='ID'){ return `${prefix}_${Date.now().toString(36)}${Math.random().toString(36).slice(2,8).toUpperCase()}`; }
+
+/* ===== Estado ===== */
+let GASTOS=[], COPROS=[], PROVS=[], VIEW=[];
+let KEY_NAME="ID";
+
+/* ===== Inicialización ===== */
 document.addEventListener("DOMContentLoaded", async ()=>{
-  document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
-  document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+  try{ document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); }catch(e){}
+  try{ document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); }catch(e){}
+  
+  bindUI();
+  await cargarTodo();
 });
 
-let gastos=[], copros=[], provs=[], KEY_NAME="ID";
+function bindUI(){
+  // Botones
+  document.getElementById('btnNew').addEventListener('click', ()=>abrirForm());
+  document.getElementById('btnReload').addEventListener('click', cargarTodo);
+  document.getElementById('btnExport').addEventListener('click', exportCSV);
+  
+  // Filtros
+  document.getElementById('inpBuscar').addEventListener('input', aplicarFiltros);
+  document.getElementById('selCoproFilter').addEventListener('change', aplicarFiltros);
+  
+  // Modal
+  modalG.addEventListener('click', e=>{ if(e.target===modalG) cerrarForm(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') cerrarForm(); });
+}
 
-function fmtFecha(iso){ return iso? new Date(iso).toLocaleDateString("es-CL"): ""; }
+/* ===== Carga de Datos ===== */
+async function cargarTodo(){
+  try{
+    showSpinner('Cargando gastos...');
+    const [g, c, p] = await Promise.all([
+      fetchData("Gastos").catch(()=>[]),
+      fetchData("Copropiedades").catch(()=>[]),
+      fetchData("Proveedores").catch(()=>[])
+    ]);
 
-async function cargar(){
-  [gastos, copros, provs] = await Promise.all([
-    fetchData("Gastos"),
-    fetchData("Copropiedades"),
-    fetchData("Proveedores")
-  ]);
-  if(gastos.length) KEY_NAME = getKeyName(gastos[0]);
+    GASTOS = g || [];
+    COPROS = c || [];
+    PROVS  = p || [];
 
-  const coproMap={}, provMap={};
-  copros.forEach(c=>coproMap[getKeyVal(c)]=c.Nombre);
-  provs.forEach(p=>provMap[getKeyVal(p)]=p.Nombre);
+    if(GASTOS.length) KEY_NAME = getKeyName(GASTOS[0]);
 
-  tablaG.innerHTML = gastos.map(g=>{
-    const key=getKeyVal(g);
+    // Llenar Selects Copropiedades
+    const coprosHTML = COPROS.map(x=>`<option value="${getKeyVal(x)}">${x.Nombre}</option>`).join("");
+    document.getElementById('selCoproFilter').innerHTML = '<option value="">(Todas)</option>' + coprosHTML;
+    document.getElementById('gCopro').innerHTML = coprosHTML;
+
+    // Llenar Select Proveedores (Para el Formulario)
+    document.getElementById('gProv').innerHTML = PROVS.map(x=>`<option value="${getKeyVal(x)}">${x.Nombre}</option>`).join("");
+
+    aplicarFiltros();
+
+  }catch(e){
+    console.error(e);
+    alert("Error cargando datos: " + e.message);
+  }finally{
+    hideSpinner();
+  }
+}
+
+/* ===== Filtros y Render ===== */
+function aplicarFiltros(){
+  const q = norm(document.getElementById('inpBuscar').value);
+  const coproID = document.getElementById('selCoproFilter').value;
+
+  // Mapas para búsqueda rápida de nombres
+  const provMap = {}; PROVS.forEach(p => provMap[getKeyVal(p)] = norm(p.Nombre));
+  
+  VIEW = GASTOS.filter(g => {
+    // Filtro Copropiedad
+    if(coproID && String(g.CopropiedadID) !== String(coproID)) return false;
+
+    // Filtro Texto
+    if(!q) return true;
+    
+    // Buscar en: Tipo, Documento, Obs, y Nombre del Proveedor (cruzado)
+    const nombreProv = provMap[g.ProveedorID] || "";
+    const searchStr = [g.TipoGasto, g.Documento, g.Observaciones, nombreProv].map(v=>norm(v)).join(" ");
+    
+    return searchStr.includes(q);
+  });
+
+  renderTabla();
+}
+
+function renderTabla(){
+  const tb = document.getElementById('tablaG');
+  if(!VIEW.length){ tb.innerHTML = '<tr><td colspan="8" class="muted">No hay gastos registrados.</td></tr>'; return; }
+
+  // Mapas para mostrar Nombres en la tabla
+  const coproMap={}; COPROS.forEach(c => coproMap[getKeyVal(c)] = c.Nombre);
+  const provMap={};  PROVS.forEach(p => provMap[getKeyVal(p)] = p.Nombre);
+
+  tb.innerHTML = VIEW.map(g => {
+    const key = getKeyVal(g);
+    const nombreCopro = coproMap[g.CopropiedadID] || "—";
+    const nombreProv  = provMap[g.ProveedorID] || "—";
+
     return `<tr>
-      <td>${coproMap[g.CopropiedadID]||"—"}</td>
-      <td>${provMap[g.ProveedorID]||"—"}</td>
+      <td><span style="font-weight:600; font-size:13px;">${nombreCopro}</span></td>
+      <td>${nombreProv}</td>
       <td>${g.TipoGasto||""}</td>
-      <td>${formatoPrecio(g.Monto)}</td>
+      <td class="mono" style="text-align:right;">${clp(g.Monto)}</td>
       <td>${fmtFecha(g.Fecha)}</td>
-      <td>${g.Documento||""}</td>
-      <td>${g.Observaciones||""}</td>
-      <td>
-        <button class="btn-primary" onclick="abrirForm('${key}')">Editar</button>
-        <button class="btn-primary" onclick="eliminar('${key}')">Eliminar</button>
+      <td class="mono">${g.Documento||""}</td>
+      <td style="font-size:12px; max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${g.Observaciones||""}">${g.Observaciones||""}</td>
+      <td class="no-print">
+         <div class="acciones-group">
+            <button class="btn-icon btn-editar" onclick="abrirForm('${key}')" title="Editar">
+               <i class="fa-solid fa-pen"></i>
+            </button>
+            <button class="btn-icon btn-eliminar" onclick="eliminar('${key}')" title="Eliminar">
+               <i class="fa-solid fa-trash"></i>
+            </button>
+         </div>
       </td>
     </tr>`;
   }).join("");
-
-  gCopro.innerHTML = copros.map(c=>`<option value="${getKeyVal(c)}">${c.Nombre}</option>`).join("");
-  gProv.innerHTML = provs.map(p=>`<option value="${getKeyVal(p)}">${p.Nombre}</option>`).join("");
 }
 
+/* ===== CRUD ===== */
 function abrirForm(id){
-  modalTitle.textContent = id ? "Editar Gasto" : "Nuevo Gasto";
-  if(id){
-    const g = gastos.find(x=>String(getKeyVal(x))===String(id));
-    if(!g){ alert("No encontrado"); return; }
-    gID.value=id;
-    gCopro.value=g.CopropiedadID;
-    gProv.value=g.ProveedorID;
-    gTipo.value=g.TipoGasto||"";
-    gMonto.value=g.Monto||0;
-    gFecha.value=g.Fecha||"";
-    gDocumento.value=g.Documento||"";
-    gObs.value=g.Observaciones||"";
-  } else { formG.reset(); gID.value=""; }
-  modalG.classList.add("active");
-}
-function cerrarForm(){ modalG.classList.remove("active"); }
+  const title = document.getElementById('modalTitle');
+  document.getElementById('formG').reset();
+  document.getElementById('gID').value = "";
 
-formG.onsubmit = async (e)=>{
+  if(id){
+    title.textContent = "Editar Gasto";
+    const g = GASTOS.find(x => String(getKeyVal(x)) === String(id));
+    if(!g){ alert("No encontrado"); return; }
+    
+    document.getElementById('gID').value = id;
+    document.getElementById('gCopro').value = g.CopropiedadID;
+    document.getElementById('gProv').value = g.ProveedorID;
+    document.getElementById('gTipo').value = g.TipoGasto||"";
+    document.getElementById('gMonto').value = g.Monto||0;
+    
+    // Manejo seguro de fecha para el input type="date"
+    if(g.Fecha){
+        const d = new Date(g.Fecha);
+        if(!isNaN(d)) document.getElementById('gFecha').value = d.toISOString().split('T')[0];
+    }
+    
+    document.getElementById('gDocumento').value = g.Documento||"";
+    document.getElementById('gObs').value = g.Observaciones||"";
+  } else {
+    title.textContent = "Nuevo Gasto";
+    // Fecha hoy por defecto
+    document.getElementById('gFecha').value = new Date().toISOString().split('T')[0];
+  }
+  document.getElementById('modalG').classList.add("active");
+}
+
+function cerrarForm(){ document.getElementById('modalG').classList.remove("active"); }
+
+document.getElementById('formG').onsubmit = async (e)=>{
   e.preventDefault();
-  const id = gID.value || undefined;
+  const idValue = document.getElementById('gID').value;
+  
   const payload = {
-    ...(id?{[KEY_NAME]:id}:{}),
-    CopropiedadID: gCopro.value,
-    ProveedorID: gProv.value,
-    TipoGasto: gTipo.value.trim(),
-    Monto: parseFloat(gMonto.value)||0,
-    Fecha: gFecha.value,
-    Documento: gDocumento.value.trim(),
-    Observaciones: gObs.value.trim()
+    CopropiedadID: document.getElementById('gCopro').value,
+    ProveedorID: document.getElementById('gProv').value,
+    TipoGasto: document.getElementById('gTipo').value.trim(),
+    Monto: parseFloat(document.getElementById('gMonto').value)||0,
+    Fecha: document.getElementById('gFecha').value,
+    Documento: document.getElementById('gDocumento').value.trim(),
+    Observaciones: document.getElementById('gObs').value.trim()
   };
-  if(id) await appSheetCRUD("Gastos","Edit",[payload]);
-  else   await appSheetCRUD("Gastos","Add",[payload]);
-  cerrarForm(); location.reload();
+
+  const keyField = (idValue ? KEY_NAME : KEY_NAME);
+
+  if(idValue){
+     payload[keyField] = idValue;
+  } else {
+     payload[keyField] = generateKey('GST');
+  }
+
+  try{
+    showSpinner(idValue ? 'Guardando...' : 'Creando...');
+    if(typeof upsertData === 'function'){
+       await upsertData("Gastos", payload);
+    } else {
+       if(idValue) await appSheetCRUD("Gastos","Edit",[payload]);
+       else        await appSheetCRUD("Gastos","Add",[payload]);
+    }
+    cerrarForm();
+    await cargarTodo();
+  }catch(err){
+    console.error(err);
+    alert("Error al guardar: " + err.message);
+  }finally{
+    hideSpinner();
+  }
 };
 
 async function eliminar(id){
-  if(!confirm("¿Eliminar?")) return;
-  await appSheetCRUD("Gastos","Delete",[{[KEY_NAME]:id}]);
-  location.reload();
+  if(!confirm("¿Eliminar este registro de gasto?")) return;
+  try{
+    showSpinner("Eliminando...");
+    if(typeof deleteByKey === 'function'){
+       await deleteByKey("Gastos", id);
+    } else {
+       await appSheetCRUD("Gastos","Delete",[{[KEY_NAME]:id}]);
+    }
+    await cargarTodo();
+  }catch(err){
+    alert("Error: " + err.message);
+  }finally{
+    hideSpinner();
+  }
 }
 
-cargar();
+/* ===== Exportar ===== */
+function exportCSV(){
+  const headers = ['ID','CopropiedadID','ProveedorID','TipoGasto','Monto','Fecha','Documento','Obs'];
+  const lines = [headers.join(',')];
+  
+  VIEW.forEach(r => {
+    lines.push([
+      escapeCSV(getKeyVal(r)),
+      escapeCSV(r.CopropiedadID),
+      escapeCSV(r.ProveedorID),
+      escapeCSV(r.TipoGasto),
+      escapeCSV(r.Monto),
+      escapeCSV(r.Fecha),
+      escapeCSV(r.Documento),
+      escapeCSV(r.Observaciones)
+    ].join(','));
+  });
+
+  const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); 
+  a.href = url; a.download = 'GastosComunes.csv'; 
+  a.click(); 
+  URL.revokeObjectURL(url);
+}
 </script>
 </body>
 </html>

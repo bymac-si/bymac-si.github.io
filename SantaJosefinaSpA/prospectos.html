@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>CRM - Prospectos</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="assets/js/app.js"></script>
   <script>requireAuth();</script>
@@ -47,33 +48,59 @@
 <div id="header"></div>
 
 <main>
-  <h1 class="page-title">Gestión de Prospectos</h1>
+  <div class="dashboard-header no-print">
+  
+  <div class="header-top">
+    <h1 class="page-title">Gestión de Prospectos</h1>
+    
+    <div class="header-actions">
+      <button class="btn-head btn-secundario" id="btnReload" title="Recargar datos">
+        <i class="fa-solid fa-rotate-right"></i>
+        <span class="btn-text">Recargar</span>
+      </button>
 
-  <div class="row" style="margin-bottom:12px;">
-    <div>
-      <label class="label">Buscar</label>
-      <input id="inpBuscar" placeholder="Nombre, comuna, dirección, RUT o contacto" style="width: 90%; font-size: 14px;">
-    </div>
-    <div>
-      <label class="label">Comuna</label>
-      <select id="selComuna" style="width: 100%; height: 40px; font-size: 14px;"><option value="">(Todas)</option></select>
-    </div>
-    <div>
-      <label class="label">UTM (CLP) para cotización</label>
-      <input id="inpUTMPros" class="mono" placeholder="Cargando..." inputmode="decimal" style="width: 90%; font-size: 14px;">
-    </div>
-    <div style="display:flex; gap:8px;">
-      <button class="btn-primary" style="height: 60px;" id="btnNew">Nuevo Prospecto</button>
-      <button class="btn-primary" style="height: 60px;" id="btnReload">Recargar</button>
-      <button class="btn-primary" style="height: 60px;" id="btnExport">Exportar CSV</button>
-      <button class="btn-primary" style="height: 60px;" onclick="window.print()">Imprimir</button>
+      <button class="btn-head btn-secundario" id="btnExport" title="Descargar Excel/CSV">
+        <i class="fa-solid fa-file-csv"></i>
+        <span class="btn-text">Exportar</span>
+      </button>
+
+      <button class="btn-head btn-secundario" onclick="window.print()" title="Imprimir vista">
+        <i class="fa-solid fa-print"></i>
+        <span class="btn-text">Imprimir</span>
+      </button>
+
+      <button class="btn-head btn-nuevo" id="btnNew">
+        <i class="fa-solid fa-plus"></i>
+        <span>Nuevo Prospecto</span>
+      </button>
     </div>
   </div>
+
+  <div class="header-filters">
+    
+    <div class="filter-item" style="flex-grow: 2;"> <label class="label">Buscar</label>
+      <input id="inpBuscar" class="input-modern" placeholder="Nombre, comuna, dirección, RUT..." type="text" style="width: 95%; height:40px;">
+    </div>
+
+    <div class="filter-item">
+      <label class="label">Comuna</label>
+      <select id="selComuna" class="input-modern" style="height: 42px;">
+        <option value="">(Todas)</option>
+      </select>
+    </div>
+
+    <div class="filter-item">
+      <label class="label">UTM (CLP)</label>
+      <input id="inpUTMPros" class="input-modern mono" placeholder="Cargando..." inputmode="decimal" style="width: 110px; height:40px;" readonly>
+    </div>
+
+  </div>
+</div>
 
   <table>
     <thead>
       <tr>
-        <th>ID</th>
+       <!-- <th>ID</th> -->
         <th>Nombre / Estado</th> <th>Comuna</th>
         <th style="text-align:right;">Unidades</th>
         <th>Dirección</th>
@@ -272,25 +299,41 @@ function renderTabla(){
 
     return `
       <tr>
-        <td class="mono">${key}</td>
+       <!-- <td class="mono">${key}</td>-->
         <td>
             <div style="font-weight:600; margin-bottom:4px;">${nombre}</div>
             <span class="badge-status ${claseBadge}">${estado}</span>
         </td>
-        <td>${comuna}</td>
-        <td class="mono" style="text-align:right;">${unidades||0}</td>
+        <td style="min-width: 100px;">${comuna}</td>
+        <td class="mono" style="text-align:center;">${unidades||0}</td>
         <td>${direccion}</td>
         <td class="mono">${rut}</td>
         <td>${contacto}</td>
-        <td class="no-print" style="min-width:300px;">
-          <div class="btns">
-            <button class="btn-primary" onclick='abrirDetalle(${JSON.stringify(key)})'>Ver</button>
-            <button class="btn-primary" onclick='abrirFormProspecto(${JSON.stringify(key)})'>Editar</button>
-            <button class="btn-primary" onclick='eliminarProspecto(${JSON.stringify(key)})'>Eliminar</button>
-            <button class="btn-primary" onclick='abrirCotizacion(${JSON.stringify(key)})'>Cotizar</button>
-            <button class="btn-primary" onclick='agregarAClientes(${JSON.stringify(key)})'>Cliente</button>
-          </div>
-        </td>
+        <td class="no-print" style="min-width: 200px;">
+  <div class="acciones-group">
+    
+    <button class="btn-icon btn-ver" onclick='abrirDetalle(${JSON.stringify(key)})' title="Ver Detalle">
+      <i class="fa-solid fa-eye"></i>
+    </button>
+
+    <button class="btn-icon btn-editar" onclick='abrirFormProspecto(${JSON.stringify(key)})' title="Editar">
+      <i class="fa-solid fa-pen"></i>
+    </button>
+
+    <button class="btn-icon btn-eliminar" onclick='eliminarProspecto(${JSON.stringify(key)})' title="Eliminar">
+      <i class="fa-solid fa-trash"></i>
+    </button>
+
+    <button class="btn-icon btn-cotizar" onclick='abrirCotizacion(${JSON.stringify(key)})' title="Cotizar">
+      <i class="fa-solid fa-file-invoice-dollar"></i>
+    </button>
+
+    <button class="btn-icon btn-cliente" onclick='agregarAClientes(${JSON.stringify(key)})' title="Convertir a Cliente">
+      <i class="fa-solid fa-user-check"></i>
+    </button>
+
+  </div>
+</td>
       </tr>`;
   }).join('');
 }

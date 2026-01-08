@@ -3,197 +3,430 @@
 <head>
   <meta charset="UTF-8">
   <title>CRM - Copropiedades</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="assets/js/app.js"></script>
   <script>requireAuth();</script>
-  <script>
-    document.addEventListener("DOMContentLoaded", async ()=>{
-      const headerResp = await fetch("header.html");
-      document.getElementById("header").innerHTML = await headerResp.text();
-      const footerResp = await fetch("footer.html");
-      document.getElementById("footer").innerHTML = await footerResp.text();
-    });
-  </script>
+
+  <style>
+    /* ===== ESTILOS DASHBOARD UNIFICADOS ===== */
+    body{ max-width:1200px; margin:0 auto; color:#1A2B48; }
+    main{ padding:40px; }
+    .page-title{ font-size:28px; font-weight:700; margin-bottom:16px; }
+    
+    /* Tablas */
+    table{ width:100%; border-collapse:collapse; }
+    th,td{ padding:10px 8px; border-bottom:1px solid #e5e7eb; text-align:left; vertical-align: middle; }
+    th{ background:#fafafa; font-weight: 600; color: #4b5563; }
+    
+    /* Inputs y Layout */
+    input,select,textarea{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:6px; font-family:inherit;}
+    .label{ display:block; font-weight:600; margin-bottom:4px; font-size: 13px; color: #374151; }
+    
+    /* MODAL */
+    .modal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:10000; align-items:center; justify-content:center; }
+    .modal.active{ display:flex; }
+    .modal-content{ width:100%; max-width:600px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:25px; box-shadow:0 12px 30px rgba(0,0,0,.18); max-height: 90vh; overflow-y: auto; }
+    
+    /* SPINNER */
+    .spinner-backdrop{ position:fixed; inset:0; background:rgba(255,255,255,0.85); display:none; place-items:center; z-index:12000; }
+    .spinner-card{ background:#fff; padding:18px 22px; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.08); text-align:center; min-width:260px; color:#1A2B48; font-weight:600; }
+    .spinner{ width:28px; height:28px; border-radius:50%; border:3px solid #eee; border-top-color:#B46A55; margin:0 auto 10px; animation:spin .9s linear infinite; }
+    @keyframes spin{ to{ transform:rotate(360deg); } }
+    
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace; }
+    .muted{ color:#666; font-size: 0.9em; }
+
+    /* DASHBOARD HEADER */
+    .dashboard-header { background-color: #fff; padding: 20px 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #f0f0f0; }
+    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+    
+    .header-filters { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; padding-top: 20px; border-top: 1px solid #e2e8f0; }
+    .filter-item { display: flex; flex-direction: column; gap: 6px; }
+    .input-modern { width: 95%;height: 42px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #f8fafc; }
+    
+    /* BOTONES ICONOS */
+    .acciones-group { display: flex; gap: 6px; justify-content: flex-start; align-items: center; }
+    .btn-icon { width: 34px; height: 34px; border: none; border-radius: 6px; background-color: #f3f4f6; color: #555; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s ease; }
+    .btn-icon:hover { transform: translateY(-2px); color: white; }
+    
+    /* Colores Específicos */
+    .btn-editar:hover { background-color: #f59e0b; }
+    .btn-eliminar:hover { background-color: #ef4444; }
+    .btn-admin { background-color: #e0f2fe; color: #0284c7; } /* Azul Admin */
+    .btn-admin:hover { background-color: #0ea5e9; color: white; }
+
+    /* BOTONES CABECERA */
+    .btn-head { height: 44px; padding: 0 20px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; transition: all 0.2s; }
+    .btn-head:hover { transform: translateY(-2px); }
+    .btn-nuevo { background-color: #0f172a; color: white; }
+    .btn-secundario { background-color: #fff; color: #475569; border: 1px solid #cbd5e1; }
+    .btn-secundario:hover { background-color: #f8fafc; border-color: #94a3b8; }
+  </style>
 </head>
-<body style="max-width:1200px; margin: 0 auto;">
+<body>
 <div id="header"></div>
 
-<main style="padding:40px;">
-  <h1 style="font-size:28px;font-weight:600;color:#1A2B48;">Copropiedades</h1>
-  <button onclick="abrirFormCopro()" class="btn-primary" style="margin:20px 0;">+ Nueva Copropiedad</button>
+<main>
+  <div class="dashboard-header no-print">
+    <div class="header-top">
+      <h1 class="page-title">Copropiedades</h1>
+      
+      <div class="header-actions">
+        <button class="btn-head btn-secundario" id="btnReload" title="Recargar datos">
+          <i class="fa-solid fa-rotate-right"></i>
+          <span class="btn-text">Recargar</span>
+        </button>
+
+        <button class="btn-head btn-secundario" id="btnExport" title="Descargar CSV">
+          <i class="fa-solid fa-file-csv"></i>
+          <span class="btn-text">Exportar</span>
+        </button>
+
+        <button class="btn-head btn-secundario" onclick="window.print()" title="Imprimir vista">
+          <i class="fa-solid fa-print"></i>
+          <span class="btn-text">Imprimir</span>
+        </button>
+
+        <button class="btn-head btn-nuevo" id="btnNew">
+          <i class="fa-solid fa-plus"></i>
+          <span>Nueva Copropiedad</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="header-filters">
+      <div class="filter-item" style="flex-grow: 1;"> 
+        <label class="label">Buscar</label>
+        <input id="inpBuscar" class="input-modern" placeholder="Nombre, RUT, Dirección, Comuna..." type="text">
+      </div>
+    </div>
+  </div>
 
   <table>
     <thead>
       <tr>
         <th>Nombre</th>
         <th>RUT</th>
-        <th>Direccion</th>
+        <th>Dirección</th>
         <th>Comuna</th>
         <th>Ciudad</th>
-        <th>Fondo Reserva</th>
-        <th>Acciones</th>
+        <th>Fondo R.</th>
+        <th class="no-print" style="width: 140px;">Acciones</th>
       </tr>
     </thead>
-    <tbody id="tablaCopros"></tbody>
+    <tbody id="tablaCopros"><tr><td colspan="7" class="muted">Cargando datos...</td></tr></tbody>
   </table>
 </main>
 
-<!-- MODAL FORM -->
-<div id="modalCopro" class="modal">
+<div id="modalCopro" class="modal" aria-hidden="true">
   <div class="modal-content">
-    <h2 id="modalTitleCopro">Nueva Copropiedad</h2>
-    <form id="formCopro">
+    <h2 id="modalTitleCopro" style="margin-top:0;">Nueva Copropiedad</h2>
+    <form id="formCopro" style="margin-top:20px;">
       <input type="hidden" id="coproID">
-      <label>Nombre</label><input id="coproNombre" required>
-      <label>RUT</label><input id="coproRUT">
-      <label>Direccion</label><input id="coproDireccion">
-      <label>Comuna</label><input id="coproComuna">
-      <label>Ciudad</label><input id="coproCiudad">
-      <label>Banco</label><input id="coproBanco">
-      <label>Cuenta</label><input id="coproCuenta">
-      <label>Email Admin</label><input id="coproEmailAdmin" type="email">
-      <label>Telefono</label><input id="coproTelefono">
-      <label>Fondo Reserva</label><input id="coproFondo" type="number" step="0.01">
-      <label>Reglamento URL</label><input id="coproReglamento">
-      <label>Libro Actas URL</label><input id="coproLibro">
-      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:12px;">
-        <button type="button" class="btn-primary" onclick="cerrarModalCopro()">Cancelar</button>
-        <button type="submit" class="btn-primary">Guardar</button>
+      
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+        
+        <div style="grid-column: 1 / -1;">
+           <label class="label">Nombre del Condominio</label>
+           <input id="coproNombre" required>
+        </div>
+
+        <div>
+           <label class="label">RUT</label>
+           <input id="coproRUT">
+        </div>
+        <div>
+           <label class="label">Fondo de Reserva (%)</label>
+           <input id="coproFondo" type="number" step="0.01" placeholder="Ej: 5">
+        </div>
+
+        <div style="grid-column: 1 / -1;">
+           <label class="label">Dirección</label>
+           <input id="coproDireccion">
+        </div>
+
+        <div>
+           <label class="label">Comuna</label>
+           <input id="coproComuna">
+        </div>
+        <div>
+           <label class="label">Ciudad</label>
+           <input id="coproCiudad">
+        </div>
+
+        <div>
+           <label class="label">Banco</label>
+           <input id="coproBanco">
+        </div>
+        <div>
+           <label class="label">Cuenta</label>
+           <input id="coproCuenta">
+        </div>
+
+        <div>
+           <label class="label">Email Admin.</label>
+           <input id="coproEmailAdmin" type="email">
+        </div>
+        <div>
+           <label class="label">Teléfono</label>
+           <input id="coproTelefono">
+        </div>
+
+        <div style="grid-column: 1 / -1;">
+           <label class="label">URL Reglamento</label>
+           <input id="coproReglamento" placeholder="https://...">
+        </div>
+        <div style="grid-column: 1 / -1;">
+           <label class="label">URL Libro Actas</label>
+           <input id="coproLibro" placeholder="https://...">
+        </div>
+      </div>
+
+      <div style="text-align:right; margin-top:20px;">
+        <button type="button" class="btn-primary" style="background:#6c757d; border:none;" onclick="cerrarModalCopro()">Cancelar</button>
+        <button class="btn-primary" style="border:none;">Guardar</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- MODAL DETALLE -->
-<div id="modalDetalle" class="modal">
-  <div class="modal-content">
-    <h2>Detalle Copropiedad</h2>
-    <div id="detalleContenido"></div>
-    <div style="text-align:right;margin-top:12px;">
-      <button class="btn-primary" onclick="cerrarModalDetalle()">Cerrar</button>
-    </div>
+<div id="pageSpinner" class="spinner-backdrop" aria-hidden="true">
+  <div class="spinner-card">
+    <div class="spinner"></div>
+    <div id="spinnerText">Cargando…</div>
   </div>
 </div>
 
 <div id="footer"></div>
 
 <script>
-let coprosGlobal=[], KEY_NAME="ID";
+/* ===== Utilidades ===== */
+function showSpinner(msg){ const sp=document.getElementById('pageSpinner'); const txt=document.getElementById('spinnerText'); if(msg) txt.textContent=msg; sp.style.display='grid'; }
+function hideSpinner(){ document.getElementById('pageSpinner').style.display='none'; }
+function norm(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim(); }
+function escapeCSV(v){ if(v==null) return ''; const s=String(v).replaceAll('"','""'); return /[",\n]/.test(s) ? '"'+s+'"' : s; }
 
-function formatoCLP(v){ return "$" + new Intl.NumberFormat("es-CL").format(Number(v||0)); }
+/* Helpers Claves */
+if(typeof window.getKeyVal !== 'function'){ window.getKeyVal = (o)=> o? (o._id ?? o.id ?? o.ID ?? o.Key ?? o.key ?? o.Id ?? o[Object.keys(o)[0]]):""; }
+if(typeof window.getKeyName !== 'function'){ window.getKeyName = (row)=>{ if(!row || typeof row!=='object') return 'ID'; const cands=['ID','_id','Id','id','Key','key']; for(const c of cands){ if(c in row) return c; } return Object.keys(row)[0] || 'ID'; }; }
+function generateKey(prefix='ID'){ return `${prefix}_${Date.now().toString(36)}${Math.random().toString(36).slice(2,8).toUpperCase()}`; }
 
-async function cargarCopros(){
-  coprosGlobal = await fetchData("Copropiedades");
-  if (coprosGlobal.length) KEY_NAME = getKeyName(coprosGlobal[0]);
+/* ===== Estado ===== */
+let COPROS=[], VIEW=[];
+let KEY_NAME="ID";
 
-  const tbody = document.getElementById("tablaCopros");
-  tbody.innerHTML = coprosGlobal.map(c=>{
-    const key = getKeyVal(c);
-    return `
-      <tr>
-        <td>${c.Nombre ?? ""}</td>
-        <td>${c.RUT ?? ""}</td>
-        <td>${c.Direccion ?? ""}</td>
-        <td>${c.Comuna ?? ""}</td>
-        <td>${c.Ciudad ?? ""}</td>
-        <td>${c.FondoReserva ?? ""}%</td>
-        <td>
-          <button class="btn-primary btn-ver" data-id="${key}">Ver</button>
-          <button class="btn-primary btn-edit" data-id="${key}">Editar</button>
-          <button class="btn-primary" onclick="eliminarCopro('${key}')">Eliminar</button>
-        </td>
-      </tr>
-    `;
-  }).join("");
+/* ===== Inicialización ===== */
+document.addEventListener("DOMContentLoaded", async ()=>{
+  try{ document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); }catch(e){}
+  try{ document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); }catch(e){}
+  
+  bindUI();
+  await cargarTodo();
+});
 
-  tbody.onclick = (e)=>{
-    const ver = e.target.closest(".btn-ver");
-    const edit = e.target.closest(".btn-edit");
-    if (ver) abrirDetalleCopro(ver.dataset.id);
-    if (edit) abrirFormCopro(edit.dataset.id);
-  };
+function bindUI(){
+  // Botones
+  document.getElementById('btnNew').addEventListener('click', ()=>abrirFormCopro());
+  document.getElementById('btnReload').addEventListener('click', cargarTodo);
+  document.getElementById('btnExport').addEventListener('click', exportCSV);
+  
+  // Filtros
+  document.getElementById('inpBuscar').addEventListener('input', aplicarFiltros);
+  
+  // Modal
+  modalCopro.addEventListener('click', e=>{ if(e.target===modalCopro) cerrarModalCopro(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') cerrarModalCopro(); });
 }
 
-const modal = document.getElementById("modalCopro");
-const form = document.getElementById("formCopro");
-function abrirFormCopro(id){
-  document.getElementById("modalTitleCopro").textContent = id ? "Editar Copropiedad" : "Nueva Copropiedad";
-  if(id){
-    const c = coprosGlobal.find(x => String(getKeyVal(x))===String(id));
-    if(!c) return alert("No encontrada");
-    document.getElementById("coproID").value = id;
-    coproNombre.value = c.Nombre ?? "";
-    coproRUT.value = c.RUT ?? "";
-    coproDireccion.value = c.Direccion ?? "";
-    coproComuna.value = c.Comuna ?? "";
-    coproCiudad.value = c.Ciudad ?? "";
-    coproBanco.value = c.Banco ?? "";
-    coproCuenta.value = c.Cuenta ?? "";
-    coproEmailAdmin.value = c.EmailAdmin ?? "";
-    coproTelefono.value = c.Telefono ?? "";
-    coproFondo.value = c.FondoReserva ?? 0;
-    coproReglamento.value = c.ReglamentoURL ?? "";
-    coproLibro.value = c.LibroActasURL ?? "";
-  }else{
-    form.reset();
-    document.getElementById("coproID").value = "";
-  }
-  modal.classList.add("active");
-}
-function cerrarModalCopro(){ modal.classList.remove("active"); }
-
-form.onsubmit = async (e)=>{
-  e.preventDefault();
-  const id = coproID.value || undefined;
-  const payload = {
-    ...(id ? { [KEY_NAME]: id } : {}),
-    Nombre: coproNombre.value.trim(),
-    RUT: coproRUT.value.trim(),
-    Direccion: coproDireccion.value.trim(),
-    Comuna: coproComuna.value.trim(),
-    Ciudad: coproCiudad.value.trim(),
-    Banco: coproBanco.value.trim(),
-    Cuenta: coproCuenta.value.trim(),
-    EmailAdmin: coproEmailAdmin.value.trim().toLowerCase(),
-    Telefono: coproTelefono.value.trim(),
-    FondoReserva: parseFloat(coproFondo.value) || 0,
-    ReglamentoURL: coproReglamento.value.trim() || null,
-    LibroActasURL: coproLibro.value.trim() || null
-  };
+/* ===== Carga de Datos ===== */
+async function cargarTodo(){
   try{
-    if(id) await appSheetCRUD("Copropiedades","Edit",[payload]);
-    else   await appSheetCRUD("Copropiedades","Add",[payload]);
+    showSpinner("Cargando condominios...");
+    COPROS = await fetchData("Copropiedades");
+    if (!COPROS) COPROS = [];
+    
+    if (COPROS.length) KEY_NAME = getKeyName(COPROS[0]);
+
+    aplicarFiltros();
+
+  }catch(err){
+    console.error(err);
+    alert("Error cargando datos: " + err.message);
+  }finally{
+    hideSpinner();
+  }
+}
+
+/* ===== Filtros y Render ===== */
+function aplicarFiltros(){
+  const q = norm(document.getElementById('inpBuscar').value);
+
+  VIEW = COPROS.filter(c => {
+    if(!q) return true;
+    const searchStr = [c.Nombre, c.RUT, c.Direccion, c.Comuna].map(v=>norm(v)).join(" ");
+    return searchStr.includes(q);
+  });
+
+  renderTabla();
+}
+
+function renderTabla(){
+  const tb = document.getElementById('tablaCopros');
+  if(!VIEW.length){ tb.innerHTML = '<tr><td colspan="7" class="muted">No se encontraron copropiedades.</td></tr>'; return; }
+
+  tb.innerHTML = VIEW.map(c => {
+    const key = getKeyVal(c);
+    
+    return `<tr>
+      <td><span style="font-weight:600; font-size:13px;">${c.Nombre||""}</span></td>
+      <td class="mono">${c.RUT||""}</td>
+      <td>${c.Direccion||""}</td>
+      <td>${c.Comuna||""}</td>
+      <td>${c.Ciudad||""}</td>
+      <td class="mono" style="text-align:center;">${c.FondoReserva||0}%</td>
+      <td class="no-print">
+         <div class="acciones-group">
+            <button class="btn-icon btn-admin" onclick="irAlPanel('${key}')" title="Ir al Panel de Administración">
+               <i class="fa-solid fa-building-user"></i>
+            </button>
+            <button class="btn-icon btn-editar" onclick="abrirFormCopro('${key}')" title="Editar">
+               <i class="fa-solid fa-pen"></i>
+            </button>
+            <button class="btn-icon btn-eliminar" onclick="eliminarCopro('${key}')" title="Eliminar">
+               <i class="fa-solid fa-trash"></i>
+            </button>
+         </div>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+/* ===== Acciones ===== */
+function irAlPanel(id){
+    // Redirige al panel de administración de ese edificio
+    window.location.href = `admin-condominios.html?id=${id}`;
+}
+
+function abrirFormCopro(id){
+  const title = document.getElementById('modalTitleCopro');
+  document.getElementById('formCopro').reset();
+  document.getElementById('coproID').value = "";
+
+  if(id){
+    title.textContent = "Editar Copropiedad";
+    const c = COPROS.find(x => String(getKeyVal(x)) === String(id));
+    if(!c){ alert("No encontrada"); return; }
+    
+    document.getElementById('coproID').value = id;
+    document.getElementById('coproNombre').value = c.Nombre||"";
+    document.getElementById('coproRUT').value = c.RUT||"";
+    document.getElementById('coproDireccion').value = c.Direccion||"";
+    document.getElementById('coproComuna').value = c.Comuna||"";
+    document.getElementById('coproCiudad').value = c.Ciudad||"";
+    document.getElementById('coproBanco').value = c.Banco||"";
+    document.getElementById('coproCuenta').value = c.Cuenta||"";
+    document.getElementById('coproEmailAdmin').value = c.EmailAdmin||"";
+    document.getElementById('coproTelefono').value = c.Telefono||"";
+    document.getElementById('coproFondo').value = c.FondoReserva||"";
+    document.getElementById('coproReglamento').value = c.ReglamentoURL||"";
+    document.getElementById('coproLibro').value = c.LibroActasURL||"";
+  } else {
+    title.textContent = "Nueva Copropiedad";
+  }
+  document.getElementById('modalCopro').classList.add("active");
+}
+
+function cerrarModalCopro(){ document.getElementById('modalCopro').classList.remove("active"); }
+
+document.getElementById('formCopro').onsubmit = async (e)=>{
+  e.preventDefault();
+  const idValue = document.getElementById('coproID').value;
+  
+  const payload = {
+    Nombre: document.getElementById('coproNombre').value.trim(),
+    RUT: document.getElementById('coproRUT').value.trim(),
+    Direccion: document.getElementById('coproDireccion').value.trim(),
+    Comuna: document.getElementById('coproComuna').value.trim(),
+    Ciudad: document.getElementById('coproCiudad').value.trim(),
+    Banco: document.getElementById('coproBanco').value.trim(),
+    Cuenta: document.getElementById('coproCuenta').value.trim(),
+    EmailAdmin: document.getElementById('coproEmailAdmin').value.trim(),
+    Telefono: document.getElementById('coproTelefono').value.trim(),
+    FondoReserva: parseFloat(document.getElementById('coproFondo').value)||0,
+    ReglamentoURL: document.getElementById('coproReglamento').value.trim(),
+    LibroActasURL: document.getElementById('coproLibro').value.trim()
+  };
+
+  const keyField = (idValue ? KEY_NAME : KEY_NAME);
+
+  if(idValue){
+     payload[keyField] = idValue;
+  } else {
+     payload[keyField] = generateKey('COPRO');
+  }
+
+  try{
+    showSpinner(idValue ? 'Guardando...' : 'Creando...');
+    if(typeof upsertData === 'function'){
+       await upsertData("Copropiedades", payload);
+    } else {
+       if(idValue) await appSheetCRUD("Copropiedades","Edit",[payload]);
+       else        await appSheetCRUD("Copropiedades","Add",[payload]);
+    }
     cerrarModalCopro();
-    location.reload();
-  }catch(err){ alert("Error: " + (err.message||err)); }
+    await cargarTodo();
+  }catch(err){
+    console.error(err);
+    alert("Error al guardar: " + err.message);
+  }finally{
+    hideSpinner();
+  }
 };
 
 async function eliminarCopro(id){
-  if(!confirm("¿Eliminar esta copropiedad?")) return;
-  await appSheetCRUD("Copropiedades","Delete",[{[KEY_NAME]:id}]);
-  location.reload();
+  if(!confirm("¿Eliminar esta Copropiedad?\n\nCUIDADO: Esto podría dejar huérfanos a los residentes y gastos asociados.")) return;
+  try{
+    showSpinner("Eliminando...");
+    if(typeof deleteByKey === 'function'){
+       await deleteByKey("Copropiedades", id);
+    } else {
+       await appSheetCRUD("Copropiedades","Delete",[{[KEY_NAME]:id}]);
+    }
+    await cargarTodo();
+  }catch(err){
+    alert("Error: " + err.message);
+  }finally{
+    hideSpinner();
+  }
 }
 
-const modalDetalle = document.getElementById("modalDetalle");
-const detalleContenido = document.getElementById("detalleContenido");
-function abrirDetalleCopro(id){
-  const c = coprosGlobal.find(x => String(getKeyVal(x))===String(id));
-  if(!c) return alert("No encontrada");
-  detalleContenido.innerHTML = `
-    <p><b>Nombre:</b> ${c.Nombre??""}</p>
-    <p><b>RUT:</b> ${c.RUT??""}</p>
-    <p><b>Direccion:</b> ${c.Direccion??""}</p>
-    <p><b>Comuna:</b> ${c.Comuna??""}</p>
-    <p><b>Ciudad:</b> ${c.Ciudad??""}</p>
-    <p><b>Fondo Reserva:</b> ${formatoCLP(c.FondoReserva)}</p>
-    <p><b>Reglamento:</b> ${c.ReglamentoURL?`<a href="${c.ReglamentoURL}" target="_blank">Ver</a>`:"—"}</p>
-    <p><b>Libro Actas:</b> ${c.LibroActasURL?`<a href="${c.LibroActasURL}" target="_blank">Ver</a>`:"—"}</p>
-  `;
-  modalDetalle.classList.add("active");
-}
-function cerrarModalDetalle(){ modalDetalle.classList.remove("active"); }
+/* ===== Exportar ===== */
+function exportCSV(){
+  const headers = ['ID','Nombre','RUT','Direccion','Comuna','Ciudad','FondoReserva','EmailAdmin'];
+  const lines = [headers.join(',')];
+  
+  VIEW.forEach(r => {
+    lines.push([
+      escapeCSV(getKeyVal(r)),
+      escapeCSV(r.Nombre),
+      escapeCSV(r.RUT),
+      escapeCSV(r.Direccion),
+      escapeCSV(r.Comuna),
+      escapeCSV(r.Ciudad),
+      escapeCSV(r.FondoReserva),
+      escapeCSV(r.EmailAdmin)
+    ].join(','));
+  });
 
-cargarCopros();
+  const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); 
+  a.href = url; a.download = 'Copropiedades.csv'; 
+  a.click(); 
+  URL.revokeObjectURL(url);
+}
 </script>
 </body>
 </html>

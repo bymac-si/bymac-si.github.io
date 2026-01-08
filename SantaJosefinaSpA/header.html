@@ -1,58 +1,264 @@
-<header class="main-header">
-  <nav class="navbar container-fluid">
-    <!-- Toggle (si en algún momento quieres volver a usar sidebar, hoy no hace nada) -->
-    <button id="mobileToggle" class="mobile-toggle" style="display:none;">☰</button>
+<style>
+  /* Base del Header */
+  .main-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    padding: 0 25px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
 
-    <!-- Logo -->
-    <a href="index.html" class="logo">
-      <img src="assets/img/logo_santajosefina.png"
-           alt="Logo Santa Josefina" style="width:140px;height:auto;">
+  /* Logo */
+  .logo-img {
+    height: 45px;
+    width: auto;
+    transition: transform 0.2s;
+  }
+  .logo-img:hover { transform: scale(1.02); }
+
+  /* Navegación */
+  .nav-container {
+    display: flex;
+    gap: 5px;
+    height: 100%;
+    align-items: center;
+  }
+
+  .nav-link {
+    text-decoration: none;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-link:hover {
+    color: #0f172a;
+    background-color: #f1f5f9;
+  }
+
+  .nav-link.active {
+    color: #3b82f6; /* Azul activo */
+    background-color: #eff6ff;
+  }
+
+  .nav-link i { font-size: 14px; }
+
+  /* Dropdown */
+  .nav-dropdown {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .dropdown-menu {
+    display: none; /* Oculto por defecto */
+    position: absolute;
+    top: 60px; /* Debajo del header */
+    left: 0;
+    background: white;
+    min-width: 200px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    padding: 8px 0;
+    list-style: none;
+    z-index: 1001;
+    animation: fadeIn 0.2s ease;
+  }
+
+  /* Mostrar dropdown al pasar el mouse por el contenedor */
+  .nav-dropdown:hover .dropdown-menu {
+    display: block;
+  }
+
+  .dropdown-menu li a {
+    display: block;
+    padding: 10px 20px;
+    color: #475569;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background 0.2s;
+  }
+
+  .dropdown-menu li a:hover {
+    background-color: #f8fafc;
+    color: #0f172a;
+    padding-left: 25px; /* Pequeño desplazamiento */
+  }
+
+  /* Sección Usuario (Derecha) */
+  .user-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-left: 20px;
+    padding-left: 20px;
+    border-left: 1px solid #e2e8f0;
+  }
+
+  .user-info {
+    text-align: right;
+    line-height: 1.2;
+  }
+  .user-name { font-weight: 700; font-size: 13px; color: #1e293b; display: block; }
+  .user-role { font-size: 11px; color: #94a3b8; text-transform: uppercase; }
+
+  .btn-logout {
+    color: #ef4444;
+    border: 1px solid #fee2e2;
+    background: #fef2f2;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-logout:hover { background: #fee2e2; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+  
+  /* Mobile Toggle simple */
+  .mobile-toggle { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: #1e293b; }
+
+  @media (max-width: 1024px) {
+    .nav-container { display: none; } /* Ocultar menú en móvil por ahora */
+    .mobile-toggle { display: block; }
+    .main-header { justify-content: space-between; }
+  }
+</style>
+
+<header class="main-header no-print">
+  
+  <a href="index.html">
+    <img src="assets/img/logo_santajosefina.png" alt="Santa Josefina" class="logo-img">
+  </a>
+
+  <button class="mobile-toggle" onclick="alert('Menú móvil pendiente de implementar')">
+    <i class="fa-solid fa-bars"></i>
+  </button>
+
+  <nav class="nav-container">
+    
+    <a href="dashboard.html" class="nav-link">
+      <i class="fa-solid fa-chart-line"></i> KPIs
+    </a>
+    
+    <a href="clientes.html" class="nav-link">
+      <i class="fa-solid fa-users"></i> Clientes
+    </a>
+    
+    <a href="propiedades.html" class="nav-link">
+      <i class="fa-solid fa-house"></i> Propiedades
     </a>
 
-    <!-- Menú principal -->
-    <nav class="nav-links" id="navLinks">
-      <a href="dashboard.html">KPIs Corretaje</a>
-      <a href="dashboardcopropiedades.html">KPIs Condominios</a>
-      <a href="clientes.html">Clientes</a>
-      <a href="propiedades.html">Propiedades</a>
-      <a href="visitas.html">Visitas</a>
-      <a href="marketing.html">Marketing</a>
+    <div class="nav-dropdown">
+      <a href="#" class="nav-link dropdown-toggle">
+        <i class="fa-solid fa-building"></i> Condominios <i class="fa-solid fa-chevron-down" style="font-size:10px; margin-left:4px;"></i>
+      </a>
+      <ul class="dropdown-menu">
+        <li><a href="dashboardcopropiedades.html">📊 KPIs Condominios</a></li>
+        <li style="border-top:1px solid #f1f5f9; margin:4px 0;"></li>
+        <li><a href="prospectos.html">Prospectos</a></li>
+        <li><a href="copropiedades.html">Comunidades</a></li>
+        <li><a href="unidades.html">Unidades</a></li>
+        <li><a href="copropietarios.html">Copropietarios</a></li>
+        <li><a href="proveedores.html">Proveedores</a></li>
+        <li><a href="gastos.html">Gastos Comunes</a></li>
+        <li><a href="reportes.html">Reportes</a></li>
+      </ul>
+    </div>
 
-      <!-- Submenú Administración de Condominios -->
-      <div class="dropdown">
-        <a href="#">Condominios ▾</a>
-        <ul class="dropdown-menu">
-          <li><a href="prospectos.html">Prospectos</a></li>
-          <li><a href="copropietarios.html">Copropietarios</a></li>
-          <li><a href="copropiedades.html">Comunidades</a></li>
-          <li><a href="unidades.html">Unidades</a></li>
-          <li><a href="proveedores.html">Proveedores</a></li>
-          <li><a href="gastos.html">Gastos</a></li>
-          <li><a href="reportes.html">Reportes</a></li>
-        </ul>
+    <a href="visitas.html" class="nav-link">
+      <i class="fa-regular fa-calendar-check"></i> Visitas
+    </a>
+    
+    <a href="marketing.html" class="nav-link">
+      <i class="fa-solid fa-bullhorn"></i> Marketing
+    </a>
+
+    <a id="linkAgentes" href="usuarios.html?tipo=agentes" class="nav-link">
+      <i class="fa-solid fa-user-tie"></i> Agentes
+    </a>
+    <a id="linkUsuarios" href="usuarios.html?tipo=usuarios" class="nav-link" style="display:none;">
+      <i class="fa-solid fa-user-gear"></i> Admins
+    </a>
+
+    <div class="user-actions">
+      <div class="user-info">
+        <span class="user-name" id="headerUserName">Usuario</span>
+        <span class="user-role" id="headerUserRole">Agente</span>
       </div>
+      <a href="#" class="btn-logout" onclick="logout()" title="Cerrar Sesión">
+        <i class="fa-solid fa-power-off"></i>
+      </a>
+    </div>
 
-      <!-- Agentes: visible para todos -->
-      <a id="linkAgentes" href="usuarios.html?tipo=agentes">Agentes</a>
-
-      <!-- Usuarios: solo Admin (oculto por defecto) -->
-      <a id="linkUsuarios" href="usuarios.html?tipo=usuarios" style="display:none;">Usuarios</a>
-
-      <!-- Salir -->
-      <a href="#" class="btn-outline" onclick="logout()">Salir</a>
-    </nav>
   </nav>
 </header>
 
 <script>
-  // Muestra el link "Usuarios" solo si el usuario logueado es Admin
-  document.addEventListener('DOMContentLoaded', () => {
-    const au = getAuthUser && getAuthUser();
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Detectar Usuario
+  const au = typeof getAuthUser === 'function' ? getAuthUser() : null;
+  
+  if (au) {
+    // Mostrar nombre y rol
+    const nameEl = document.getElementById('headerUserName');
+    const roleEl = document.getElementById('headerUserRole');
+    if(nameEl) nameEl.textContent = au.Nombre || au.email || "Usuario";
+    if(roleEl) roleEl.textContent = au.rol || "Agente";
+
+    // Mostrar link Admin solo si corresponde
     const adminLink = document.getElementById('linkUsuarios');
-    if (au && (au.rol || '').toLowerCase() === 'admin') {
-      adminLink.style.display = '';
+    if ((au.rol || '').toLowerCase() === 'admin') {
+      adminLink.style.display = 'flex';
     } else {
-      adminLink.remove(); // o déjalo hidden si prefieres
+      adminLink.remove();
+    }
+  }
+
+  // 2. Resaltar Link Activo
+  const path = window.location.pathname.split("/").pop(); // Ej: prospectos.html
+  const links = document.querySelectorAll('.nav-link');
+  
+  links.forEach(link => {
+    // Obtener el href limpio (sin query params)
+    const href = link.getAttribute('href')?.split('?')[0];
+    
+    // Si coincide exactamente
+    if (href === path) {
+      link.classList.add('active');
+      // Si está dentro de un dropdown, activar el padre también
+      const parentDropdown = link.closest('.nav-dropdown');
+      if(parentDropdown) {
+        parentDropdown.querySelector('.dropdown-toggle').classList.add('active');
+      }
     }
   });
+  
+  // Caso especial para items dentro del dropdown (que no tienen clase .nav-link directa)
+  const dropdownLinks = document.querySelectorAll('.dropdown-menu a');
+  dropdownLinks.forEach(link => {
+      const href = link.getAttribute('href');
+      if(href === path) {
+          link.style.fontWeight = "bold";
+          link.style.color = "#3b82f6";
+          link.closest('.nav-dropdown').querySelector('.dropdown-toggle').classList.add('active');
+      }
+  });
+});
 </script>

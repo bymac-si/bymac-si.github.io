@@ -949,3 +949,217 @@ th {
   background: #fee2e2;
   color: #b91c1c;
 } /* Rojo */
+/* --- Contenedor Flex para alinear todo --- */
+.acciones-group {
+  display: flex;
+  gap: 8px; /* Espacio entre botones */
+  align-items: center;
+}
+
+/* Contenedor para alinear los iconos */
+.acciones-group {
+  display: flex;
+  gap: 6px; /* Espacio entre botones */
+  justify-content: flex-start; /* Alineados a la izquierda */
+  align-items: center;
+}
+
+/* Estilo Base del Botón */
+.btn-icon {
+  width: 34px; /* Tamaño cuadrado */
+  height: 34px;
+  border: none;
+  border-radius: 6px; /* Bordes ligeramente redondeados */
+  background-color: #f3f4f6; /* Gris muy suave por defecto */
+  color: #555; /* Icono gris oscuro */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px; /* Tamaño del icono */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Efecto Hover General (Sube un poco y sombrea) */
+.btn-icon:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.15);
+  color: white; /* El icono se vuelve blanco */
+}
+
+/* --- COLORES ESPECÍFICOS AL PASAR EL MOUSE --- */
+
+/* Ver: Azul Claro */
+.btn-ver:hover {
+  background-color: #17a2b8;
+}
+
+/* Editar: Amarillo Ocre */
+.btn-editar:hover {
+  background-color: #f59e0b;
+}
+
+/* Eliminar: Rojo Suave */
+.btn-eliminar:hover {
+  background-color: #ef4444;
+}
+
+/* Cotizar: Verde (Este tiene fondo verde claro siempre para destacar) */
+.btn-cotizar {
+  background-color: #e6fffa;
+  color: #059669;
+}
+.btn-cotizar:hover {
+  background-color: #10b981;
+  color: white;
+}
+
+/* Cliente: Azul Oscuro */
+.btn-cliente:hover {
+  background-color: #1e3a8a;
+}
+/* Contenedor de la barra de herramientas */
+.header-actions {
+  display: flex;
+  gap: 12px; /* Un poco más de espacio que en la tabla */
+  flex-wrap: wrap; /* Para que se adapte en móviles */
+  margin-bottom: 20px;
+}
+
+/* --- Estilo Base de Botones de Cabecera --- */
+.btn-head {
+  height: 44px; /* 44px-48px es el estándar moderno, 60px es demasiado alto */
+  padding: 0 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600; /* Letra un poco más gruesa */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Espacio entre icono y texto */
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Efecto Hover General (Elevación) */
+.btn-head:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* --- Botón PRINCIPAL (Nuevo Prospecto) --- */
+/* Usamos un color fuerte para la acción más importante */
+.btn-nuevo {
+  background-color: #0f172a; /* Azul oscuro elegante (o tu color corporativo) */
+  color: white;
+}
+.btn-nuevo:hover {
+  background-color: #1e293b; /* Un tono un poco más claro al pasar el mouse */
+}
+
+/* --- Botones SECUNDARIOS (Recargar, Exportar, Imprimir) --- */
+/* Blancos o gris muy claro para no saturar la vista */
+.btn-secundario {
+  background-color: #ffffff;
+  color: #475569; /* Gris oscuro */
+  border: 1px solid #cbd5e1; /* Borde sutil */
+}
+
+.btn-secundario:hover {
+  background-color: #f8fafc;
+  color: #0f172a; /* Texto se oscurece */
+  border-color: #94a3b8;
+}
+
+/* (Opcional) Responsividad: En pantallas chicas, escondemos el texto de los secundarios */
+@media (max-width: 600px) {
+  .btn-secundario .btn-text {
+    display: none;
+  }
+  .btn-secundario {
+    padding: 0 15px; /* Botones cuadrados en móvil */
+  }
+}
+/* --- Contenedor Principal --- */
+.dashboard-header {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03); /* Sombra muy sutil para separar del fondo */
+    margin-bottom: 20px;
+}
+
+/* --- Fila Superior (Título vs Botones) --- */
+.header-top {
+    display: flex;
+    justify-content: space-between; /* Empuja título a la izq y botones a la der */
+    align-items: center;
+    margin-bottom: 20px; /* Separación con los filtros */
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.page-title {
+    margin: 0;
+    font-size: 24px;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+/* --- Botonera (Alineación Horizontal) --- */
+.header-actions {
+    display: flex;
+    gap: 10px; /* Espacio entre botones */
+    align-items: center;
+}
+
+/* Ajuste para que los botones secundarios sean cuadrados si se desea (opcional) */
+.btn-secundario {
+    width: 104px; /* Cuadrados para solo mostrar icono si prefieres */
+    padding: 0;
+    justify-content: center;
+}
+
+/* --- Fila Inferior (Filtros) --- */
+.header-filters {
+    display: flex;
+    gap: 20px;
+    align-items: flex-end; /* Alinea los inputs abajo */
+    flex-wrap: wrap;
+    padding-top: 15px;
+    border-top: 1px solid #f1f5f9; /* Línea separadora sutil */
+}
+
+.filter-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filter-item label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Estilo para los Inputs (para que hagan juego con los botones) */
+.input-modern {
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #334155;
+    background-color: #f8fafc;
+    min-width: 200px; /* Ancho mínimo */
+}
+
+.input-modern:focus {
+    outline: none;
+    border-color: #3b82f6; /* Azul al escribir */
+    background-color: #fff;
+}

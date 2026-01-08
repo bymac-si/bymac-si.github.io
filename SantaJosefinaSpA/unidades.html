@@ -3,135 +3,400 @@
 <head>
   <meta charset="UTF-8">
   <title>CRM - Unidades</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="assets/js/app.js"></script>
   <script>requireAuth();</script>
+
+  <style>
+    /* ===== ESTILOS DASHBOARD UNIFICADOS ===== */
+    body{ max-width:1200px; margin:0 auto; color:#1A2B48; }
+    main{ padding:40px; }
+    .page-title{ font-size:28px; font-weight:700; margin-bottom:16px; }
+    
+    /* Tablas */
+    table{ width:100%; border-collapse:collapse; }
+    th,td{ padding:10px 8px; border-bottom:1px solid #e5e7eb; text-align:left; vertical-align: middle; }
+    th{ background:#fafafa; font-weight: 600; color: #4b5563; }
+    
+    /* Inputs y Layout */
+    input,select,textarea{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:6px; font-family:inherit;}
+    .label{ display:block; font-weight:600; margin-bottom:4px; font-size: 13px; color: #374151; }
+    
+    /* MODAL */
+    .modal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:10000; align-items:center; justify-content:center; }
+    .modal.active{ display:flex; }
+    .modal-content{ width:100%; max-width:500px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:25px; box-shadow:0 12px 30px rgba(0,0,0,.18); }
+    
+    /* SPINNER */
+    .spinner-backdrop{ position:fixed; inset:0; background:rgba(255,255,255,0.85); display:none; place-items:center; z-index:12000; }
+    .spinner-card{ background:#fff; padding:18px 22px; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.08); text-align:center; min-width:260px; color:#1A2B48; font-weight:600; }
+    .spinner{ width:28px; height:28px; border-radius:50%; border:3px solid #eee; border-top-color:#B46A55; margin:0 auto 10px; animation:spin .9s linear infinite; }
+    @keyframes spin{ to{ transform:rotate(360deg); } }
+    
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace; }
+    .muted{ color:#666; font-size: 0.9em; }
+
+    /* DASHBOARD HEADER */
+    .dashboard-header { background-color: #fff; padding: 20px 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #f0f0f0; }
+    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+    
+    .header-filters { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; padding-top: 20px; border-top: 1px solid #e2e8f0; }
+    .filter-item { display: flex; flex-direction: column; gap: 6px; }
+    .input-modern { width: 95%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #f8fafc; }
+    
+    /* BOTONES ICONOS */
+    .acciones-group { display: flex; gap: 6px; justify-content: flex-start; align-items: center; }
+    .btn-icon { width: 34px; height: 34px; border: none; border-radius: 6px; background-color: #f3f4f6; color: #555; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s ease; }
+    .btn-icon:hover { transform: translateY(-2px); color: white; }
+    .btn-editar:hover { background-color: #f59e0b; }
+    .btn-eliminar:hover { background-color: #ef4444; }
+
+    /* BOTONES CABECERA */
+    .btn-head { height: 44px; padding: 0 20px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; transition: all 0.2s; }
+    .btn-head:hover { transform: translateY(-2px); }
+    .btn-nuevo { background-color: #0f172a; color: white; }
+    .btn-secundario { background-color: #fff; color: #475569; border: 1px solid #cbd5e1; }
+    .btn-secundario:hover { background-color: #f8fafc; border-color: #94a3b8; }
+  </style>
 </head>
-<body style="max-width:1200px; margin: 0 auto;">
+<body>
 <div id="header"></div>
 
-<main style="padding:40px;">
-  <h1 class="page-title">Unidades</h1>
-  <button class="btn-primary" onclick="abrirForm()">Nueva Unidad</button>
+<main>
+  <div class="dashboard-header no-print">
+    <div class="header-top">
+      <h1 class="page-title">Unidades</h1>
+      
+      <div class="header-actions">
+        <button class="btn-head btn-secundario" id="btnReload" title="Recargar datos">
+          <i class="fa-solid fa-rotate-right"></i>
+          <span class="btn-text">Recargar</span>
+        </button>
 
-  <table style="margin-top:16px;">
+        <button class="btn-head btn-secundario" id="btnExport" title="Descargar CSV">
+          <i class="fa-solid fa-file-csv"></i>
+          <span class="btn-text">Exportar</span>
+        </button>
+
+        <button class="btn-head btn-secundario" onclick="window.print()" title="Imprimir vista">
+          <i class="fa-solid fa-print"></i>
+          <span class="btn-text">Imprimir</span>
+        </button>
+
+        <button class="btn-head btn-nuevo" id="btnNew">
+          <i class="fa-solid fa-plus"></i>
+          <span>Nueva Unidad</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="header-filters">
+      <div class="filter-item" style="flex-grow: 2;"> 
+        <label class="label">Buscar</label>
+        <input id="inpBuscar" class="input-modern" placeholder="Número, Propietario..." type="text">
+      </div>
+
+      <div class="filter-item" style="flex-grow: 1;">
+        <label class="label">Filtrar por Copropiedad</label>
+        <select id="selCoproFilter" class="input-modern">
+          <option value="">(Todas)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <table>
     <thead>
       <tr>
         <th>Copropiedad</th>
-        <th>N°</th>
+        <th>N° Unidad</th>
         <th>Propietario</th>
         <th>Alicuota (%)</th>
-        <th>Acciones</th>
+        <th class="no-print">Acciones</th>
       </tr>
     </thead>
-    <tbody id="tablaU"></tbody>
+    <tbody id="tablaU"><tr><td colspan="5" class="muted">Cargando datos...</td></tr></tbody>
   </table>
 </main>
 
-<div id="modalU" class="modal">
+<div id="modalU" class="modal" aria-hidden="true">
   <div class="modal-content">
-    <h2 id="modalTitle">Nueva Unidad</h2>
-    <form id="formU">
+    <h2 id="modalTitle" style="margin-top:0;">Nueva Unidad</h2>
+    <form id="formU" style="margin-top:20px;">
       <input type="hidden" id="uID">
-      <label>Copropiedad</label>
-      <select id="uCopro" required></select>
-      <label>Número</label>
-      <input id="uNumero" required>
-      <label>Propietario</label>
-      <select id="uPropietario" required></select>
-      <label>Alicuota (%)</label>
-      <!-- 🔹 Permitimos 3 decimales -->
-      <input type="number" id="uAlicuota" min="0" step="0.001">
-      <div style="text-align:right;margin-top:10px;">
-        <button type="button" class="btn-primary" onclick="cerrarForm()">Cancelar</button>
-        <button class="btn-primary">Guardar</button>
+      
+      <div style="display:flex; flex-direction:column; gap:15px;">
+        <div>
+           <label class="label">Copropiedad</label>
+           <select id="uCopro" required></select>
+        </div>
+
+        <div style="display:flex; gap:15px;">
+           <div style="flex:1;">
+               <label class="label">N° Unidad</label>
+               <input id="uNumero" required placeholder="Ej: 101">
+           </div>
+           <div style="flex:1;">
+               <label class="label">Alicuota (%)</label>
+               <input type="number" id="uAlicuota" min="0" step="0.001" placeholder="Ej: 1.250">
+           </div>
+        </div>
+
+        <div>
+           <label class="label">Propietario Asignado</label>
+           <select id="uPropietario" required></select>
+        </div>
+      </div>
+
+      <div style="text-align:right; margin-top:20px;">
+        <button type="button" class="btn-primary" style="background:#6c757d; border:none;" onclick="cerrarForm()">Cancelar</button>
+        <button class="btn-primary" style="border:none;">Guardar</button>
       </div>
     </form>
+  </div>
+</div>
+
+<div id="pageSpinner" class="spinner-backdrop" aria-hidden="true">
+  <div class="spinner-card">
+    <div class="spinner"></div>
+    <div id="spinnerText">Cargando…</div>
   </div>
 </div>
 
 <div id="footer"></div>
 
 <script>
+/* ===== Utilidades ===== */
+function showSpinner(msg){ const sp=document.getElementById('pageSpinner'); const txt=document.getElementById('spinnerText'); if(msg) txt.textContent=msg; sp.style.display='grid'; }
+function hideSpinner(){ document.getElementById('pageSpinner').style.display='none'; }
+function norm(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim(); }
+function escapeCSV(v){ if(v==null) return ''; const s=String(v).replaceAll('"','""'); return /[",\n]/.test(s) ? '"'+s+'"' : s; }
+
+/* Helpers Claves */
+if(typeof window.getKeyVal !== 'function'){ window.getKeyVal = (o)=> o? (o._id ?? o.id ?? o.ID ?? o.Key ?? o.key ?? o.Id ?? o[Object.keys(o)[0]]):""; }
+if(typeof window.getKeyName !== 'function'){ window.getKeyName = (row)=>{ if(!row || typeof row!=='object') return 'ID'; const cands=['ID','_id','Id','id','Key','key']; for(const c of cands){ if(c in row) return c; } return Object.keys(row)[0] || 'ID'; }; }
+function generateKey(prefix='ID'){ return `${prefix}_${Date.now().toString(36)}${Math.random().toString(36).slice(2,8).toUpperCase()}`; }
+
+/* ===== Estado ===== */
+let COPROS=[], UNITS=[], COPS=[], VIEW=[];
+let KEY_NAME="ID";
+
+/* ===== Inicialización ===== */
 document.addEventListener("DOMContentLoaded", async ()=>{
-  document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
-  document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+  try{ document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); }catch(e){}
+  try{ document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); }catch(e){}
+  
+  bindUI();
+  await cargarTodo();
 });
 
-let copros=[], units=[], cops=[], KEY_NAME="ID";
+function bindUI(){
+  // Botones
+  document.getElementById('btnNew').addEventListener('click', ()=>abrirForm());
+  document.getElementById('btnReload').addEventListener('click', cargarTodo);
+  document.getElementById('btnExport').addEventListener('click', exportCSV);
+  
+  // Filtros
+  document.getElementById('inpBuscar').addEventListener('input', aplicarFiltros);
+  document.getElementById('selCoproFilter').addEventListener('change', aplicarFiltros);
+  
+  // Modal
+  modalU.addEventListener('click', e=>{ if(e.target===modalU) cerrarForm(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') cerrarForm(); });
+}
 
-async function cargar(){
-  [copros, units, cops] = await Promise.all([
-    fetchData("Copropiedades"),
-    fetchData("Unidades"),
-    fetchData("Copropietarios")
-  ]);
-  if(units.length) KEY_NAME = getKeyName(units[0]);
+/* ===== Carga de Datos ===== */
+async function cargarTodo(){
+  try{
+    showSpinner("Cargando unidades...");
+    const [c, u, p] = await Promise.all([
+      fetchData("Copropiedades").catch(()=>[]),
+      fetchData("Unidades").catch(()=>[]),
+      fetchData("Copropietarios").catch(()=>[])
+    ]);
+    
+    COPROS = c || [];
+    UNITS = u || [];
+    COPS = p || [];
+    
+    if(UNITS.length) KEY_NAME = getKeyName(UNITS[0]);
 
-  const coproMap={}, copropMap={};
-  copros.forEach(c=>coproMap[getKeyVal(c)] = c.Nombre);
-  cops.forEach(c=>copropMap[getKeyVal(c)] = c.Nombre);
+    // Llenar Selects Copropiedades
+    const coprosHTML = COPROS.map(x=>`<option value="${getKeyVal(x)}">${x.Nombre}</option>`).join("");
+    document.getElementById('selCoproFilter').innerHTML = '<option value="">(Todas)</option>' + coprosHTML;
+    document.getElementById('uCopro').innerHTML = coprosHTML;
 
-  // 🔹 Mostrar siempre 3 decimales en la tabla
-  tablaU.innerHTML = units.map(u=>{
-    const key=getKeyVal(u);
+    // Llenar Select Propietarios (Ordenados alfabéticamente)
+    const propsSorted = [...COPS].sort((a,b)=>(a.Nombre||"").localeCompare(b.Nombre||""));
+    document.getElementById('uPropietario').innerHTML = propsSorted.map(x=>`<option value="${getKeyVal(x)}">${x.Nombre}</option>`).join("");
+
+    aplicarFiltros();
+
+  }catch(err){
+    console.error(err);
+    alert("Error cargando datos: " + err.message);
+  }finally{
+    hideSpinner();
+  }
+}
+
+/* ===== Filtros y Render ===== */
+function aplicarFiltros(){
+  const q = norm(document.getElementById('inpBuscar').value);
+  const coproID = document.getElementById('selCoproFilter').value;
+
+  // Mapas rápidos
+  const coproMap={}; COPROS.forEach(c=>coproMap[getKeyVal(c)] = c.Nombre);
+  const propMap={}; COPS.forEach(c=>propMap[getKeyVal(c)] = c.Nombre);
+
+  VIEW = UNITS.filter(u => {
+    // Filtro Copropiedad
+    if(coproID && String(u.CopropiedadID) !== String(coproID)) return false;
+    
+    // Filtro Texto (Numero o Nombre Propietario)
+    if(!q) return true;
+    const nombreProp = propMap[u.PropietarioID] || "";
+    const searchStr = [u.Numero, nombreProp].map(v=>norm(v)).join(" ");
+    
+    return searchStr.includes(q);
+  });
+
+  renderTabla();
+}
+
+function renderTabla(){
+  const tb = document.getElementById('tablaU');
+  if(!VIEW.length){ tb.innerHTML = '<tr><td colspan="5" class="muted">No se encontraron unidades.</td></tr>'; return; }
+
+  const coproMap={}; COPROS.forEach(c=>coproMap[getKeyVal(c)] = c.Nombre);
+  const propMap={}; COPS.forEach(c=>propMap[getKeyVal(c)] = c.Nombre);
+
+  tb.innerHTML = VIEW.map(u => {
+    const key = getKeyVal(u);
+    const nombreCopro = coproMap[u.CopropiedadID] || "—";
+    const nombreProp = propMap[u.PropietarioID] || "—";
+    
     return `<tr>
-      <td>${coproMap[u.CopropiedadID]||"—"}</td>
-      <td>${u.Numero||""}</td>
-      <td>${copropMap[u.PropietarioID]||"—"}</td>
-      <td>${(parseFloat(u.Alicuota)||0).toFixed(3)}</td>
-      <td>
-        <button class="btn-primary" onclick="abrirForm('${key}')">Editar</button>
-        <button class="btn-primary" onclick="eliminar('${key}')">Eliminar</button>
+      <td><span style="font-weight:600; font-size:13px;">${nombreCopro}</span></td>
+      <td class="mono" style="font-weight:bold;">${u.Numero||""}</td>
+      <td>${nombreProp}</td>
+      <td class="mono">${(parseFloat(u.Alicuota)||0).toFixed(3)}%</td>
+      <td class="no-print">
+         <div class="acciones-group">
+            <button class="btn-icon btn-editar" onclick="abrirForm('${key}')" title="Editar">
+               <i class="fa-solid fa-pen"></i>
+            </button>
+            <button class="btn-icon btn-eliminar" onclick="eliminar('${key}')" title="Eliminar">
+               <i class="fa-solid fa-trash"></i>
+            </button>
+         </div>
       </td>
     </tr>`;
   }).join("");
-
-  uCopro.innerHTML = copros.map(c=>`<option value="${getKeyVal(c)}">${c.Nombre}</option>`).join("");
-  uPropietario.innerHTML = cops.map(c=>`<option value="${getKeyVal(c)}">${c.Nombre}</option>`).join("");
 }
 
+/* ===== CRUD ===== */
 function abrirForm(id){
-  modalTitle.textContent = id ? "Editar Unidad" : "Nueva Unidad";
-  if(id){
-    const u = units.find(x=>String(getKeyVal(x))===String(id));
-    if(!u){ alert("No encontrada"); return; }
-    uID.value=id;
-    uCopro.value=u.CopropiedadID;
-    uNumero.value=u.Numero||"";
-    uPropietario.value=u.PropietarioID;
-    uAlicuota.value=(parseFloat(u.Alicuota)||0).toFixed(3);
-  }else{
-    formU.reset();
-    uID.value="";
-  }
-  modalU.classList.add("active");
-}
-function cerrarForm(){ modalU.classList.remove("active"); }
+  const title = document.getElementById('modalTitle');
+  document.getElementById('formU').reset();
+  document.getElementById('uID').value = "";
 
-formU.onsubmit = async (e)=>{
+  if(id){
+    title.textContent = "Editar Unidad";
+    const u = UNITS.find(x => String(getKeyVal(x)) === String(id));
+    if(!u){ alert("No encontrada"); return; }
+    
+    document.getElementById('uID').value = id;
+    document.getElementById('uCopro').value = u.CopropiedadID;
+    document.getElementById('uNumero').value = u.Numero||"";
+    document.getElementById('uPropietario').value = u.PropietarioID;
+    document.getElementById('uAlicuota').value = (parseFloat(u.Alicuota)||0).toFixed(3);
+  } else {
+    title.textContent = "Nueva Unidad";
+  }
+  document.getElementById('modalU').classList.add("active");
+}
+
+function cerrarForm(){ document.getElementById('modalU').classList.remove("active"); }
+
+document.getElementById('formU').onsubmit = async (e)=>{
   e.preventDefault();
-  const id = uID.value || undefined;
+  const idValue = document.getElementById('uID').value;
+  
   const payload = {
-    ...(id?{[KEY_NAME]:id}:{}),
-    CopropiedadID: uCopro.value,
-    Numero: uNumero.value.trim(),
-    PropietarioID: uPropietario.value,
-    // 🔹 Guardar siempre con 3 decimales
-    Alicuota: parseFloat(parseFloat(uAlicuota.value).toFixed(3)) || 0
+    CopropiedadID: document.getElementById('uCopro').value,
+    Numero: document.getElementById('uNumero').value.trim(),
+    PropietarioID: document.getElementById('uPropietario').value,
+    Alicuota: parseFloat(parseFloat(document.getElementById('uAlicuota').value).toFixed(3)) || 0
   };
-  if(id) await appSheetCRUD("Unidades","Edit",[payload]);
-  else   await appSheetCRUD("Unidades","Add",[payload]);
-  cerrarForm(); location.reload();
+
+  const keyField = (idValue ? KEY_NAME : KEY_NAME);
+
+  if(idValue){
+     payload[keyField] = idValue;
+  } else {
+     payload[keyField] = generateKey('UNI');
+  }
+
+  try{
+    showSpinner(idValue ? 'Guardando...' : 'Creando...');
+    if(typeof upsertData === 'function'){
+       await upsertData("Unidades", payload);
+    } else {
+       if(idValue) await appSheetCRUD("Unidades","Edit",[payload]);
+       else        await appSheetCRUD("Unidades","Add",[payload]);
+    }
+    cerrarForm();
+    await cargarTodo();
+  }catch(err){
+    console.error(err);
+    alert("Error al guardar: " + err.message);
+  }finally{
+    hideSpinner();
+  }
 };
 
 async function eliminar(id){
-  if(!confirm("¿Eliminar?")) return;
-  await appSheetCRUD("Unidades","Delete",[{[KEY_NAME]:id}]);
-  location.reload();
+  if(!confirm("¿Eliminar esta unidad?")) return;
+  try{
+    showSpinner("Eliminando...");
+    if(typeof deleteByKey === 'function'){
+       await deleteByKey("Unidades", id);
+    } else {
+       await appSheetCRUD("Unidades","Delete",[{[KEY_NAME]:id}]);
+    }
+    await cargarTodo();
+  }catch(err){
+    alert("Error: " + err.message);
+  }finally{
+    hideSpinner();
+  }
 }
 
-cargar();
+/* ===== Exportar ===== */
+function exportCSV(){
+  const headers = ['ID','CopropiedadID','Numero','PropietarioID','Alicuota'];
+  const lines = [headers.join(',')];
+  
+  VIEW.forEach(r => {
+    lines.push([
+      escapeCSV(getKeyVal(r)),
+      escapeCSV(r.CopropiedadID),
+      escapeCSV(r.Numero),
+      escapeCSV(r.PropietarioID),
+      escapeCSV(r.Alicuota)
+    ].join(','));
+  });
+
+  const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); 
+  a.href = url; a.download = 'Unidades.csv'; 
+  a.click(); 
+  URL.revokeObjectURL(url);
+}
 </script>
 </body>
 </html>

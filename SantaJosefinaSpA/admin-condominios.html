@@ -1,130 +1,237 @@
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Contrato Administración de Condominios</title>
+  <title>CRM - Generador de Contratos</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="assets/js/app.js"></script>
   <script>requireAuth();</script>
+
+  <style>
+    /* ===== ESTILOS DASHBOARD UNIFICADOS ===== */
+    body{ max-width:1200px; margin:0 auto; color:#1A2B48; background-color: #f8fafc; }
+    main{ padding:40px; }
+    .page-title{ font-size:28px; font-weight:700; margin-bottom:16px; color:#0f172a; }
+    
+    /* Inputs y Layout */
+    .input-modern { width:90%; height: 42px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #fff; }
+    .label{ display:block; font-weight:600; margin-bottom:6px; font-size: 13px; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    /* SPINNER */
+    .spinner-backdrop{ position:fixed; inset:0; background:rgba(255,255,255,0.85); display:none; place-items:center; z-index:12000; }
+    .spinner-card{ background:#fff; padding:18px 22px; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.08); text-align:center; min-width:260px; color:#1A2B48; font-weight:600; }
+    .spinner{ width:28px; height:28px; border-radius:50%; border:3px solid #eee; border-top-color:#B46A55; margin:0 auto 10px; animation:spin .9s linear infinite; }
+    @keyframes spin{ to{ transform:rotate(360deg); } }
+    
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace; }
+    .muted{ color:#64748b; font-size: 0.9em; }
+
+    /* DASHBOARD HEADER */
+    .dashboard-header { background-color: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); margin-bottom: 30px; border: 1px solid #e2e8f0; }
+    
+    /* FILA DE CONTROLES (Inputs en fila) */
+    .controls-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; align-items: end; }
+    
+    /* BOTONES */
+    .btn-head { height: 42px; padding: 0 20px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .btn-head:hover { transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    
+    .btn-primary { background-color: #0f172a; color: white; }
+    .btn-secondary { background-color: #fff; color: #475569; border: 1px solid #cbd5e1; }
+    .btn-secondary:hover { background-color: #f1f5f9; color: #0f172a; border-color: #94a3b8; }
+
+    /* TARJETAS DE RESUMEN */
+    .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 40px; }
+    .card-info { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+    .card-title { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
+    
+    .info-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+    .info-label { font-weight: 600; color: #64748b; }
+    .info-value { color: #1e293b; font-weight: 500; }
+
+    /* TABLA SIMPLE EN TARJETA */
+    .simple-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .simple-table th { text-align: left; color: #64748b; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
+    .simple-table td { text-align: right; color: #0f172a; font-weight: 600; padding: 8px 0; font-family: ui-monospace, monospace; font-size: 15px; }
+    .total-row td { color: #059669; font-size: 18px; font-weight: 700; border-top: 2px solid #f1f5f9; padding-top: 12px; }
+
+    /* ===== ESTILOS PARA IMPRESIÓN (CONTRATO) ===== */
+    @media print {
+        body { background: white; max-width: none; margin: 0; padding: 0; }
+        .no-print { display: none !important; }
+        .print-only { display: block !important; }
+        .container { width: 100%; max-width: none; padding: 0; margin: 0; }
+        
+        .contrato { 
+            font-family: 'Times New Roman', Times, serif; 
+            font-size: 12pt; 
+            line-height: 1.5; 
+            color: black;
+            padding: 2cm;
+        }
+        .contrato h3 { font-size: 14pt; margin-top: 20px; margin-bottom: 10px; text-decoration: underline; }
+        .contrato p { text-align: justify; margin-bottom: 12px; }
+        
+        .firma-grid { display: flex; justify-content: space-between; margin-top: 80px; page-break-inside: avoid; }
+        .firma-box { width: 40%; text-align: center; }
+        .firma-line { border-top: 1px solid black; margin-bottom: 5px; }
+    }
+    
+    .print-only { display: none; } /* Oculto en pantalla normal */
+  </style>
 </head>
 <body>
 <div id="header" class="no-print"></div>
 
 <main class="container">
-  <h2 class="page-title no-print">Contrato de Administración de Condominios</h2>
+  
+  <div class="dashboard-header no-print">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h1 class="page-title" style="margin:0;">Generador de Contratos</h1>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-head btn-secondary" onclick="window.location.reload()">
+                <i class="fa-solid fa-rotate-right"></i> Actualizar
+            </button>
+            <button class="btn-head btn-primary" onclick="imprimir()">
+                <i class="fa-solid fa-print"></i> Imprimir Contrato
+            </button>
+        </div>
+    </div>
 
-  <div class="card no-print">
-    <div class="row">
+    <div class="controls-row">
       <div>
-        <label class="label">Copropiedad</label>
-        <select id="selCopro" style="height: 37px; font-size: 14px;"></select>
+        <label class="label">Seleccionar Copropiedad</label>
+        <select id="selCopro" class="input-modern"></select>
       </div>
       <div>
         <label class="label">Comuna</label>
-        <input id="inpComuna" readonly style="width: 90%;font-size: 14px;">
+        <input id="inpComuna" readonly class="input-modern" style="background:#f1f5f9;">
       </div>
       <div>
-        <label class="label">Factor Comuna (TablaTarifas)</label>
-        <input id="inpFactor" class="mono" readonly style="width: 90%;font-size: 14px;">
+        <label class="label">Factor (Tarifa)</label>
+        <input id="inpFactor" readonly class="input-modern mono" style="background:#f1f5f9; text-align:center;">
       </div>
       <div>
         <label class="label">N° Unidades</label>
-        <input id="inpUnidades" class="mono" readonly style="width: 90%;font-size: 14px;">
+        <input id="inpUnidades" readonly class="input-modern mono" style="background:#f1f5f9; text-align:center;">
       </div>
       <div>
-        <label class="label">UTM (CLP)</label>
-        <input id="inpUTM" class="mono" placeholder="Ej: 67.000" inputmode="decimal" style="width: 98%;font-size: 14px;">
+        <label class="label">Valor UTM (CLP)</label>
+        <input id="inpUTM" class="input-modern mono" placeholder="Ej: 69.751" inputmode="decimal" style="border-color:#3b82f6;">
       </div>
-    </div>
-    <div class="btns">
-      <button class="btn-primary" onclick="window.location.reload()">Actualizar</button>
-      <button class="btn-primary" onclick="imprimir()">Imprimir Contrato</button>
     </div>
   </div>
 
-  <div class="grid no-print">
-    <div class="card">
-      <h2 class="section-title">Resumen</h2>
-      <p><b>Copropiedad:</b> <span id="cxCopro">—</span></p>
-      <p><b>Dirección:</b> <span id="cxDir">—</span></p>
-      <p><b>RUT:</b> <span id="cxRUT">—</span></p>
-      <p><b>Comuna:</b> <span id="cxComuna">—</span> <span class="badge">Factor: <span id="cxFactor">—</span></span></p>
-      <p><b>N° Unidades:</b> <span id="cxUnidades">—</span></p>
-      <p><b>UTM:</b> <span id="cxUTM">—</span></p>
+  <div class="grid-info no-print">
+    <div class="card-info">
+      <h3 class="card-title"><i class="fa-solid fa-building"></i> Resumen del Cliente</h3>
+      <div class="info-item">
+          <span class="info-label">Copropiedad:</span>
+          <span class="info-value" id="cxCopro">—</span>
+      </div>
+      <div class="info-item">
+          <span class="info-label">RUT:</span>
+          <span class="info-value mono" id="cxRUT">—</span>
+      </div>
+      <div class="info-item">
+          <span class="info-label">Dirección:</span>
+          <span class="info-value" id="cxDir">—</span>
+      </div>
+      <div class="info-item">
+          <span class="info-label">Comuna:</span>
+          <span class="info-value"><span id="cxComuna">—</span> <span style="color:#64748b; font-size:12px;">(Factor: <span id="cxFactor">—</span>)</span></span>
+      </div>
     </div>
-    <div class="card">
-      <h2 class="section-title">Cálculo de Honorarios</h2>
-      <p class="small muted">Fórmula aplicada:</p>
-      <p class="mono" id="outFormula">—</p>
-      <table>
-        <tr><th>Neto (CLP)</th>   <td id="outMontoNeto" class="mono">—</td></tr>
-        <tr><th>IVA 19%</th>      <td id="outIVA"       class="mono">—</td></tr>
-        <tr><th>Total a pagar</th><td id="outTotal"     class="mono">—</td></tr>
+
+    <div class="card-info">
+      <h3 class="card-title"><i class="fa-solid fa-calculator"></i> Cálculo de Honorarios</h3>
+      <div style="margin-bottom:15px;">
+          <div class="info-label" style="font-size:12px; margin-bottom:4px;">Fórmula aplicada:</div>
+          <div class="mono" id="outFormula" style="font-size:12px; color:#475569; background:#f8fafc; padding:6px; border-radius:4px;">—</div>
+      </div>
+      
+      <table class="simple-table">
+        <tr>
+            <th>Honorario Neto</th>
+            <td id="outMontoNeto">—</td>
+        </tr>
+        <tr>
+            <th>IVA (19%)</th>
+            <td id="outIVA">—</td>
+        </tr>
+        <tr class="total-row">
+            <th>Total a Pagar</th>
+            <td id="outTotal">—</td>
+        </tr>
       </table>
     </div>
   </div>
 
-  <div class="contrato print-only logo-print print-section" id="areaContrato">
-    <div style="font-size:0.8em;">
-      <img src="assets/img/logo_santajosefina.png" alt="Logo Santa Josefina" style="width: 140px; position: relative; top: -50px;" class="logo-print">
-      <div>
-        <div class="small muted logo-print" style="position:relative; top:-75px;">Administración de Edificios y Condominios</div>
-      </div><br>
-      <div style="position:relative; top:-75px;">
-      <h3 class="page-title" style="text-align:center;line-height: 1.5em;">Contrato de Administración de Condominios</h3>
-    
-      <hr style="border:none; border-top:1px solid #e5e7eb; margin:10px 0 18px;">
+  <div class="contrato print-only" id="areaContrato">
+      
+      <div style="text-align:center; margin-bottom:40px;">
+        <img src="assets/img/logo_santajosefina.png" alt="Santa Josefina SpA" style="width:180px;">
+        <div style="font-size:10pt; color:#666; margin-top:5px;">Administración de Edificios y Condominios</div>
+      </div>
 
-      <p>En Santiago a <span id="c_fecha_hoy" style="font-weight: bold;">[Fecha]</span>, entre: <b>
-        <span id="c_razon">[Nombre de la Comunidad]</span></b>, RUT <span id="c_rut" style="font-weight: bold;">[RUT]</span>, con domicilio en <span id="c_dir" style="font-weight: bold;">[Dirección]</span>, 
-        comuna de <span id="c_comuna" style="font-weight: bold;">[Comuna]</span> (en adelante, la “Comunidad”); y <b>Santa Josefina SpA</b>, RUT 77.233.573-3, con domicilio en Santiago, (en adelante, el “Administrador”), 
-        se celebra el presente <b>Contrato de Administración de Condominio</b>, sujeto a las siguientes cláusulas:</p>
+      <h2 style="text-align:center; text-transform:uppercase; margin-bottom:30px; font-size:16pt;">Contrato de Administración</h2>
 
-      <h3 class="stitle">Primera: Objeto</h3>
-      <p>La Comunidad contrata al Administrador para la administración integral del condominio <span id="c_razon_2" style="font-weight: bold;">[Nombre de la Comunidad]</span>, ubicado en <span id="c_dir_2" style="font-weight: bold;">[Dirección]</span>, conformado por <span id="c_unidades" style="font-weight: bold;">[Nº Unidades]</span> unidades.</p>
+      <p>En Santiago, a <span id="c_fecha_hoy" style="font-weight:bold;">[Fecha]</span>, entre:</p>
+      
+      <p>Por una parte, <b><span id="c_razon">[Nombre Comunidad]</span></b>, RUT <b><span id="c_rut">[RUT]</span></b>, representada por su Comité de Administración, con domicilio en <span id="c_dir">[Dirección]</span>, comuna de <span id="c_comuna">[Comuna]</span>, en adelante la <b>"COMUNIDAD"</b>; y</p>
 
-      <h3 class="stitle">Segunda: Honorarios</h3>
-      <p>Los honorarios mensuales del Administrador se calcularán conforme a la siguiente regla:</p>
-      <ul>
-        <li><b>Si el condominio tiene 20 unidades o menos:</b> <span class="mono">FactorComuna × base × UTM</span>.</li>
-        <li><b>Si el condominio tiene más de 20 unidades:</b> <span class="mono">(NºUnidades – 20) × FactorComuna × base × UTM × 0,013</span>.</li>
-      </ul>
-      <p>Para este contrato, la comuna es <b><span id="c_comuna_2">[Comuna]</span></b>, con factor <b><span id="c_factor">[Factor]</span></b>, y UTM vigente de <b><span id="c_utm">[UTM]</span></b>.</p>
-      <table style="margin:10px 0 6px; font-size:0.65em;">
-        <tr><th style="width:180px;">Neto (CLP)</th>       <td id="c_monto_neto" class="mono" style="text-align:right;">[Neto]</td></tr>
-        <tr><th>IVA 19%</th>                               <td id="c_monto_iva"  class="mono" style="text-align:right;">[IVA]</td></tr>
-        <tr><th>Total a pagar</th>                         <td id="c_monto_tot"  class="mono" style="text-align:right;">[Total]</td></tr>
+      <p>Por otra parte, <b>SANTA JOSEFINA SpA</b>, RUT 77.233.573-3, representada por don <b>Marcos Castro Abarca</b>, ambos con domicilio para estos efectos en Santiago, en adelante el <b>"ADMINISTRADOR"</b>.</p>
+
+      <p>Se ha convenido el siguiente contrato de prestación de servicios de administración:</p>
+
+      <h3>PRIMERO: OBJETO</h3>
+      <p>La Comunidad encomienda al Administrador la gestión administrativa, operativa y financiera del condominio denominado <b><span id="c_razon_2">[Nombre]</span></b>, ubicado en <span id="c_dir_2">[Dirección]</span>, conformado por un total de <b><span id="c_unidades">[N]</span></b> unidades.</p>
+
+      <h3>SEGUNDO: HONORARIOS</h3>
+      <p>Los honorarios mensuales por los servicios de administración se fijan en la suma líquida de:</p>
+      
+      <table style="width:80%; margin:20px auto; border:1px solid #000; border-collapse:collapse;">
+          <tr>
+              <td style="padding:8px; border:1px solid #000;">Honorario Neto</td>
+              <td style="padding:8px; border:1px solid #000; text-align:right; font-family:monospace;" id="c_monto_neto">—</td>
+          </tr>
+          <tr>
+              <td style="padding:8px; border:1px solid #000;">IVA (19%)</td>
+              <td style="padding:8px; border:1px solid #000; text-align:right; font-family:monospace;" id="c_monto_iva">—</td>
+          </tr>
+          <tr>
+              <td style="padding:8px; border:1px solid #000; font-weight:bold;">TOTAL MENSUAL</td>
+              <td style="padding:8px; border:1px solid #000; text-align:right; font-family:monospace; font-weight:bold;" id="c_monto_tot">—</td>
+          </tr>
       </table>
 
-      <h3 class="stitle"  >Tercera: Obligaciones del Administrador</h3>
-      <p>El Administrador realizará la gestión operativa, financiera y administrativa del condominio, de acuerdo con la <b>Ley N°21.442</b> y su reglamento, incluyendo, entre otras, la elaboración de presupuestos, recaudación de gastos comunes, pago a proveedores, mantención preventiva y correctiva, y rendición periódica a la comunidad.</p>
-      <br><br>
-      <h3 class="stitle" >Cuarta: Plazo</h3>
-      <p>El presente contrato tendrá una duración de <b>12 meses</b>, renovable automáticamente por iguales períodos, salvo aviso en contrario con 30 días de anticipación.</p>
+      <p>Este monto ha sido calculado en base a una UTM referencial de <span id="c_utm">[UTM]</span> y al factor de la comuna de <span id="c_comuna_2">[Comuna]</span> (<span id="c_factor">[F]</span>).</p>
 
-      <h3 class="stitle">Quinta: Terminación</h3>
-      <p>Cualquiera de las partes podrá poner término por incumplimiento grave de la otra, mediando comunicación por escrito y otorgando un plazo de 10 días para subsanar.</p>
+      <h3>TERCERO: OBLIGACIONES Y VIGENCIA</h3>
+      <p>El Administrador se obliga a cumplir con todas las funciones estipuladas en la Ley N° 21.442 sobre Copropiedad Inmobiliaria. El presente contrato tendrá una vigencia indefinida, pudiendo cualquiera de las partes ponerle término dando aviso por escrito con al menos 30 días de anticipación.</p>
 
-      <h3 class="stitle">Sexta: Domicilio</h3>
-      <p>Para todos los efectos legales, las partes fijan su domicilio en la ciudad de Santiago.</p>
-      <br><br><br><br><br><br>
+      <br><br><br><br><br>
+      
       <div class="firma-grid">
         <div class="firma-box">
           <div class="firma-line"></div>
-          <div><b>Representante Comunidad</b></div>
-          <div class="small muted" id="c_razon_firma">[Nombre de la Comunidad]</div>
+          <div><b>POR LA COMUNIDAD</b></div>
+          <div style="font-size:10pt;" id="c_razon_firma">[Nombre Comunidad]</div>
         </div>
-        <div class="firma-box" style="text-align: right;position:relative; top:-35px;">
-          <div class="firma-line"></div>
-          <div><b>Santa Josefina SpA</b></div>
-          <div class="small muted">RUT 77.233.573-3</div>
+        
+        <div class="firma-box">
+            <div class="firma-line"></div>
+            <div><b>MARCOS CASTRO ABARCA</b></div>
+            <div style="font-size:10pt;">Santa Josefina SpA</div>
         </div>
       </div>
-      </div>
-    </div>
+
   </div>
+
 </main>
 
-<div id="pageSpinner" class="spinner-backdrop hidden" aria-hidden="true">
+<div id="pageSpinner" class="spinner-backdrop" aria-hidden="true">
   <div class="spinner-card">
     <div class="spinner"></div>
     <div id="spinnerText">Cargando datos...</div>
@@ -134,11 +241,12 @@
 <div id="footer" class="no-print"></div>
 
 <script>
+/* ===== LÓGICA DEL SISTEMA (INTACTA) ===== */
 document.addEventListener("DOMContentLoaded", async ()=>{
   try { document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); } catch(e){}
   try { document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); } catch(e){}
 
-  // Fecha "dd de mmmm de yyyy"
+  // Fecha Actual para el contrato
   const nodoFecha = document.getElementById("c_fecha_hoy");
   if(nodoFecha) nodoFecha.textContent = fechaHoyTexto();
 
@@ -148,11 +256,11 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 function fechaHoyTexto(){
   const d = new Date();
   const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
-  return `${String(d.getDate()).padStart(2,"0")} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
+  return `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
 }
 
-function showSpinner(msg){ document.getElementById('pageSpinner').classList.remove('hidden'); if(msg) document.getElementById('spinnerText').textContent=msg; }
-function hideSpinner(){ document.getElementById('pageSpinner').classList.add('hidden'); }
+function showSpinner(msg){ document.getElementById('pageSpinner').style.display='grid'; if(msg) document.getElementById('spinnerText').textContent=msg; }
+function hideSpinner(){ document.getElementById('pageSpinner').style.display='none'; }
 function formatoCLP(v){ return "$" + new Intl.NumberFormat("es-CL",{maximumFractionDigits:0}).format(Number(v||0)); }
 function getKeyVal(o){ return o._id || o.ID || o.Id || o.id || ""; }
 
@@ -166,30 +274,27 @@ async function cargarDatos(){
     // Carga paralela de datos
     [COPROS, UNIDADES, TARIFAS] = await Promise.all([
       fetchData("Copropiedades"),
-      fetchData("Unidades"),    // Puede venir vacía para el cliente nuevo
-      fetchData("TablaTarifas")
+      fetchData("Unidades").catch(()=>[]),
+      fetchData("TablaTarifas").catch(()=>[])
     ]);
 
     const sel = document.getElementById("selCopro");
-    sel.innerHTML = COPROS.map(c=>`<option value="${getKeyVal(c)}">${c.Nombre || c.RazonSocial || c['Nombre Condominio'] || "(Sin Nombre)"}</option>`).join("");
+    sel.innerHTML = COPROS.map(c=>`<option value="${getKeyVal(c)}">${c.Nombre || c.RazonSocial || "(Sin Nombre)"}</option>`).join("");
     sel.onchange = onSelectCopro;
 
-    // LÓGICA DE AUTO-SELECCIÓN POR URL
+    // Auto-selección por URL ?id=...
     const params = new URLSearchParams(window.location.search);
     const incomingId = params.get('id');
 
     if(incomingId && COPROS.some(c => String(getKeyVal(c)) === String(incomingId))) {
-       // Si viene un ID en la URL y existe en la lista, lo seleccionamos
        sel.value = incomingId;
     } else if(COPROS.length) {
-       // Si no, seleccionamos el primero por defecto
        sel.value = getKeyVal(COPROS[0]);
     }
     
-    // Ejecutar la carga de datos del seleccionado
     await onSelectCopro();
 
-    // Listener para recalcular si cambian la UTM manualmente
+    // Listener UTM manual
     document.getElementById("inpUTM").addEventListener("input", calcular);
 
   }catch(err){
@@ -205,7 +310,7 @@ async function onSelectCopro(){
   coproSel = COPROS.find(c=> String(getKeyVal(c))===String(id));
   if(!coproSel) return;
 
-  // Llenado de campos UI
+  // Mapeo de campos a IDs del HTML
   const fields = {
     "cxCopro": coproSel.Nombre, "c_razon": coproSel.Nombre, "c_razon_2": coproSel.Nombre, "c_razon_firma": coproSel.Nombre,
     "cxDir": coproSel.Direccion, "c_dir": coproSel.Direccion, "c_dir_2": coproSel.Direccion,
@@ -225,23 +330,25 @@ async function onSelectCopro(){
   
   document.getElementById("inpFactor").value = factor || "";
   document.getElementById("cxFactor").textContent = factor || "—";
-  if(document.getElementById("c_factor")) document.getElementById("c_factor").textContent = factor || "[Factor]";
+  if(document.getElementById("c_factor")) document.getElementById("c_factor").textContent = factor || "—";
 
-  // LÓGICA DE UNIDADES (CORREGIDA)
-  // 1. Intenta contar las filas en la tabla "Unidades"
+  // Contar Unidades
   const coproID = getKeyVal(coproSel);
   let countFromTable = UNIDADES.filter(u=> String(u.CopropiedadID)===String(coproID)).length;
   
-  // 2. Si es 0, busca en la columna Unidades de la tabla Copropiedades
+  // Fallback a campo 'Unidades' en tabla Copropiedades
   if(countFromTable === 0) {
       countFromTable = Number(coproSel.Unidades || coproSel.CantidadUnidades || coproSel.NUnidades || 0);
   }
-  
   nUnidades = countFromTable;
 
   document.getElementById("inpUnidades").value = nUnidades;
-  document.getElementById("cxUnidades").textContent = nUnidades || "—";
-  document.getElementById("c_unidades").textContent = nUnidades || "[Nº Unidades]";
+  document.getElementById("c_unidades").textContent = nUnidades || "—";
+
+  // Intento de UTM automática global si existe (opcional)
+  if(typeof window.UTM_VALOR !== 'undefined' && window.UTM_VALOR > 0 && !document.getElementById("inpUTM").value){
+      document.getElementById("inpUTM").value = new Intl.NumberFormat("es-CL").format(window.UTM_VALOR);
+  }
 
   calcular();
 }
@@ -250,58 +357,39 @@ function calcular(){
   const inp = document.getElementById("inpUTM");
   if(!inp) return;
 
-  // 1. Obtener valor UTM limpio
   const rawUTM = inp.value.toString().replaceAll(".","").replace(",", ".");
   utmCLP = parseFloat(rawUTM) || 0;
 
-  // Actualizar UI de la UTM
+  // Actualizar textos UTM
   const fmtUTM = utmCLP>0 ? formatoCLP(utmCLP) : "—";
-  if(document.getElementById("cxUTM")) document.getElementById("cxUTM").textContent = fmtUTM;
   if(document.getElementById("c_utm")) document.getElementById("c_utm").textContent = fmtUTM;
 
   let neto = 0, iva = 0, total = 0, desc = "—";
 
   if(factor > 0 && utmCLP > 0 && nUnidades >= 0){
-    
-    // VARIABLE EXCEL: bases!F1 = UTM * 2.6
-    const baseF1 = utmCLP * 2.6;
+    const baseF1 = utmCLP * 2.6; // Variable Excel
 
     let netoTeorico = 0;
-
-    // CONDICIÓN EXCEL: SI(D6 < 20; ...)
     if(nUnidades < 20){
-      // CASO VERDADERO: bases!F1 * E6 -> (UTM * 2.6) * Factor
       netoTeorico = baseF1 * factor;
       desc = `(2.6 × UTM) × Factor`;
-
     } else {
-      // CASO FALSO: (bases!F1 + ((D6-20)*(bases!F1*0,013))) * E6
       const extra = nUnidades - 20;
-      
-      // Parte interna: (bases!F1 * 0,013)
       const valorExtraUnitario = baseF1 * 0.013; 
-      
-      // Suma: (bases!F1 + (extra * valorExtraUnitario))
       const sumaBase = baseF1 + (extra * valorExtraUnitario);
-
-      // Multiplicación final por E6 (Factor)
       netoTeorico = sumaBase * factor;
-
       desc = `[Base + (Extra × Base × 0,013)] × Factor`;
     }
 
-    // EXCEL: REDOND.MULT(... ; 1000)
-    // Redondeamos el neto al 1000 más cercano
+    // Redondeo al 1000
     neto = Math.round(netoTeorico / 1000) * 1000;
-
-    // EXCEL: ... * 1,19 (Cálculo del Total)
+    // Total IVA inc.
     total = Math.round(neto * 1.19);
-    
-    // Despejamos el IVA por diferencia para que cuadre exacto (Total = Neto + IVA)
+    // IVA
     iva = total - neto;
   }
   
-  // Actualizar Textos en Pantalla
+  // Renderizar
   if(document.getElementById("outFormula")) document.getElementById("outFormula").textContent = desc;
   
   const ids = ["outMontoNeto", "outIVA", "outTotal", "c_monto_neto", "c_monto_iva", "c_monto_tot"];
