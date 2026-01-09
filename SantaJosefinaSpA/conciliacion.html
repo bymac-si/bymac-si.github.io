@@ -2,55 +2,52 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>CRM - Conciliación Bancaria</title>
+  <title>CRM - Conciliación de Pagos</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="assets/js/app.js"></script>
   <script>requireAuth();</script>
 
   <style>
-    /* Estilos base unificados */
+    /* Estilos Dashboard Unificados */
     body { max-width: 1300px; margin: 0 auto; color: #1a2b48; }
     main { padding: 40px; }
     .page-title { font-size: 28px; font-weight: 700; margin-bottom: 16px; }
 
-    /* Header y Filtros */
+    /* Header */
     .dashboard-header { background: #fff; padding: 20px 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #f0f0f0; }
     .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .header-actions { display: flex; gap: 10px; }
     .header-filters { display: flex; gap: 15px; border-top: 1px solid #e2e8f0; padding-top: 20px; }
     
     /* Inputs */
-    .input-modern, select {width: 95%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: #f8fafc; width: 100%; }
-    
-    /* Tablas */
+    .input-modern, select { height: 44px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: #f8fafc; width: 100%; }
+
+    /* Tabla */
     table { width: 100%; border-collapse: collapse; }
     th, td { padding: 12px 15px; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: middle; }
     th { background: #fafafa; font-weight: 600; color: #4b5563; }
 
-    /* Estados (Badges) */
+    /* Badges Estado */
     .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-    .st-pendiente { background: #fef3c7; color: #b45309; } /* Amarillo */
-    .st-aprobado { background: #dcfce7; color: #15803d; }  /* Verde */
-    .st-rechazado { background: #fee2e2; color: #b91c1c; } /* Rojo */
+    .st-pendiente { background: #fef3c7; color: #b45309; }
+    .st-aprobado { background: #dcfce7; color: #15803d; }
+    .st-rechazado { background: #fee2e2; color: #b91c1c; }
 
-    /* Botones de Acción */
+    /* Botones */
     .btn-icon { width: 34px; height: 34px; border: none; border-radius: 6px; background: #f3f4f6; color: #555; cursor: pointer; transition: all 0.2s; }
-    .btn-icon:hover { transform: translateY(-2px); color: white; }
-    .btn-check:hover { background: #10b981; } /* Aprobar */
-    .btn-cross:hover { background: #ef4444; } /* Rechazar */
-    .btn-view:hover { background: #3b82f6; }  /* Ver */
+    .btn-icon:hover { transform: translateY(-2px); color: white; background: #3b82f6; }
+    .btn-primary { background: #1A2B48; color: white; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; }
 
     /* Modal Comprobante */
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center; }
     .modal.active { display: flex; }
     .modal-content { background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; text-align: center; }
-    .comprobante-img { max-width: 100%; max-height: 400px; border-radius: 8px; border: 1px solid #eee; margin: 15px 0; }
+    .comprobante-img { max-width: 100%; max-height: 400px; border-radius: 8px; border: 1px solid #eee; margin: 15px 0; object-fit: contain; background: #f9fafb;}
     
-    /* Botones Generales */
-    .btn-head { height: 44px; padding: 0 20px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; background: #fff; border: 1px solid #cbd5e1; color: #475569; }
-    .btn-head:hover { background: #f8fafc; }
-    .btn-primary { background: #1A2B48; color: white; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; }
+    /* Spinner */
+    .spinner-backdrop { position: fixed; inset: 0; background: rgba(255,255,255,0.8); display: none; place-items: center; z-index: 12000; }
+    .spinner { width: 30px; height: 30px; border-radius: 50%; border: 3px solid #eee; border-top-color: #1A2B48; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -61,10 +58,10 @@
       <div class="header-top">
         <div>
           <h1 class="page-title" style="margin:0;">Conciliación Bancaria</h1>
-          <p class="muted" style="margin:5px 0 0; font-size:13px;">Revisión de pagos reportados por residentes</p>
+          <p class="muted" style="margin:5px 0 0; font-size:13px;">Valida los pagos reportados por los residentes.</p>
         </div>
-        <div class="header-actions">
-          <button class="btn-head" onclick="cargarPagos()">
+        <div>
+          <button class="btn-primary" onclick="cargarDatos()" style="background: white; color: #475569; border: 1px solid #cbd5e1;">
             <i class="fa-solid fa-rotate-right"></i> Recargar
           </button>
         </div>
@@ -72,14 +69,13 @@
 
       <div class="header-filters">
         <div style="flex: 1;">
-          <label class="label">Buscar Unidad / ID</label>
-          <input id="inpBuscar" class="input-modern" style="width: 97%; height: 38px;" placeholder="Ej: 101, PAY_..." oninput="aplicarFiltros()">
+          <label class="label">Buscar</label>
+          <input id="inpBuscar" class="input-modern" style="width: 97%; height: 42px;" placeholder="Unidad, monto, ID..." oninput="aplicarFiltros()">
         </div>
         <div style="width: 200px;">
           <label class="label">Estado</label>
           <select id="selEstado" onchange="aplicarFiltros()">
-            <option value="Pendiente Revisión">Pendientes</option>
-            <option value="Aprobado">Aprobados</option>
+            <option value="Pendiente">Pendientes</option> <option value="Aprobado">Aprobados</option>
             <option value="Rechazado">Rechazados</option>
             <option value="">(Todos)</option>
           </select>
@@ -92,9 +88,9 @@
         <tr>
           <th>Fecha</th>
           <th>Unidad</th>
-          <th>Método</th>
           <th>Monto</th>
-          <th>Comprobante</th>
+          <th>Método</th>
+          <th style="text-align:center;">Comprobante</th>
           <th>Estado</th>
           <th>Acciones</th>
         </tr>
@@ -107,17 +103,17 @@
 
   <div id="modalRevision" class="modal">
     <div class="modal-content">
-      <h2 style="margin:0 0 10px;">Revisar Pago</h2>
-      <p class="muted" id="modalSubtitulo">Unidad 101 - $100.000</p>
+      <h2 style="margin:0 0 5px;">Revisar Pago</h2>
+      <p class="muted" id="modalSubtitulo">...</p>
       
-      <div id="modalImgContainer" style="background:#f9fafb; min-height:150px; display:flex; align-items:center; justify-content:center; border-radius:8px;">
-        <img id="modalImg" class="comprobante-img" src="" alt="Comprobante">
-        <div id="modalNoImg" class="muted" style="display:none;">Sin comprobante visual</div>
+      <div style="background:#f9fafb; min-height:150px; display:flex; align-items:center; justify-content:center; border-radius:8px;">
+        <img id="modalImg" class="comprobante-img" src="" alt="Sin imagen">
+        <div id="modalNoImg" style="display:none; color:#999;">Sin comprobante visual</div>
       </div>
 
       <div style="text-align:left; margin-top:15px; font-size:13px; color:#555;">
-        <p><b>Nota del Residente:</b> <span id="modalObs">—</span></p>
-        <p><b>ID Transacción:</b> <span id="modalTxID" class="mono">—</span></p>
+        <p><b>Nota:</b> <span id="modalObs">—</span></p>
+        <p><b>Deuda Asociada (ID):</b> <span id="modalCobroID" class="mono">—</span></p>
       </div>
 
       <div style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
@@ -132,9 +128,9 @@
     </div>
   </div>
 
-  <div id="pageSpinner" class="spinner-backdrop" style="display:none; position:fixed; inset:0; background:rgba(255,255,255,0.8); align-items:center; justify-content:center; z-index:11000;">
-    <div class="spinner-card">
-      <div class="spinner" style="border-top-color:#1A2B48;"></div>
+  <div id="pageSpinner" class="spinner-backdrop">
+    <div style="background:white; padding:20px; border-radius:10px; text-align:center;">
+      <div class="spinner" style="margin:0 auto 10px;"></div>
       <div>Procesando...</div>
     </div>
   </div>
@@ -143,30 +139,32 @@
 
   <script>
     /* VARIABLES GLOBAL */
-    let PAGOS = [], VIEW = [];
-    let PAGO_ACTUAL = null; // Para el modal
+    let PAGOS = [], UNIDADES = [], COBROS = [], VIEW = [];
+    let PAGO_ACTUAL = null;
 
     document.addEventListener("DOMContentLoaded", async () => {
       try { document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); } catch(e){}
       try { document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); } catch(e){}
-      cargarPagos();
+      cargarDatos();
     });
 
-    async function cargarPagos() {
-      // Simulación o carga real
+    async function cargarDatos() {
       try {
-        if(typeof fetchData === 'function') {
-            PAGOS = await fetchData("Pagos");
-        } else {
-            // Mock Data si no hay backend
-            PAGOS = [
-               { ID:'PAY_001', UnidadID:'101', FechaPago:'2026-01-08', Monto:101750, Metodo:'Transferencia', Estado:'Pendiente Revisión', ComprobanteURL:'assets/img/demo-receipt.png', Observaciones:'Pago enero' },
-               { ID:'PAY_002', UnidadID:'205', FechaPago:'2026-01-07', Monto:95000, Metodo:'Flow', Estado:'Aprobado', TransaccionExterna:'FLW-9912', Observaciones:'' }
-            ];
-        }
-      } catch(e) { PAGOS = []; }
-      
-      aplicarFiltros();
+        // Cargamos también COBROS para poder cruzarlos y cerrar deudas
+        const [pagos, unidades, cobros] = await Promise.all([
+            fetchData("Pagos").catch(()=>[]),
+            fetchData("Unidades").catch(()=>[]),
+            fetchData("Cobros").catch(()=>[]) 
+        ]);
+        PAGOS = pagos;
+        UNIDADES = unidades;
+        COBROS = cobros;
+        
+        // Ordenar por fecha descendente
+        PAGOS.sort((a,b) => new Date(b.FechaPago) - new Date(a.FechaPago));
+
+        aplicarFiltros();
+      } catch(e) { console.error(e); }
     }
 
     function aplicarFiltros() {
@@ -174,36 +172,44 @@
       const estado = document.getElementById("selEstado").value;
 
       VIEW = PAGOS.filter(p => {
-        if(estado && p.Estado !== estado) return false;
-        if(q && !String(p.UnidadID).toLowerCase().includes(q) && !String(p.ID).toLowerCase().includes(q)) return false;
+        if(estado && !p.Estado.includes(estado)) return false;
+        
+        const unidadNum = resolverUnidad(p.UnidadID);
+        const searchStr = [unidadNum, p.Monto, p.ID, p.Metodo].join(" ").toLowerCase();
+        if(q && !searchStr.includes(q)) return false;
+        
         return true;
       });
 
       renderTabla();
     }
 
+    function resolverUnidad(id) {
+        const u = UNIDADES.find(x => String(getKeyVal(x)) === String(id));
+        return u ? (u.Numero || u.Nombre) : id;
+    }
+
     function renderTabla() {
       const tb = document.getElementById("tablaPagos");
-      if(VIEW.length === 0) { tb.innerHTML = '<tr><td colspan="7" class="muted">No hay pagos que coincidan.</td></tr>'; return; }
+      if(VIEW.length === 0) { tb.innerHTML = '<tr><td colspan="7" class="muted">No hay pagos con estos filtros.</td></tr>'; return; }
 
       tb.innerHTML = VIEW.map(p => {
-        // Estilos de Badge
         let badgeClass = "st-pendiente";
         if(p.Estado === 'Aprobado') badgeClass = "st-aprobado";
         if(p.Estado === 'Rechazado') badgeClass = "st-rechazado";
 
-        const tieneImg = p.ComprobanteURL ? '<i class="fa-solid fa-image text-info"></i>' : '<span class="muted">—</span>';
+        const tieneImg = p.ComprobanteURL ? '<i class="fa-solid fa-image" style="color:#3b82f6;"></i>' : '<span class="muted">-</span>';
 
         return `
           <tr>
             <td class="mono">${formatearFecha(p.FechaPago)}</td>
-            <td style="font-weight:700;">${p.UnidadID}</td>
-            <td>${p.Metodo || "Transferencia"}</td>
+            <td style="font-weight:700;">${resolverUnidad(p.UnidadID)}</td>
             <td class="mono">${clp(p.Monto)}</td>
+            <td>${p.Metodo}</td>
             <td style="text-align:center;">${tieneImg}</td>
             <td><span class="badge ${badgeClass}">${p.Estado}</span></td>
             <td>
-              <button class="btn-icon btn-view" onclick='abrirRevision("${p.ID}")' title="Revisar">
+              <button class="btn-icon" onclick='abrirRevision("${getKeyVal(p)}")' title="Revisar">
                 <i class="fa-solid fa-magnifying-glass"></i>
               </button>
             </td>
@@ -213,24 +219,28 @@
     }
 
     function abrirRevision(id) {
-      PAGO_ACTUAL = PAGOS.find(p => p.ID === id);
+      PAGO_ACTUAL = PAGOS.find(p => String(getKeyVal(p)) === String(id));
       if(!PAGO_ACTUAL) return;
 
-      document.getElementById("modalSubtitulo").textContent = `Unidad ${PAGO_ACTUAL.UnidadID} - ${clp(PAGO_ACTUAL.Monto)}`;
-      document.getElementById("modalObs").textContent = PAGO_ACTUAL.Observaciones || "Sin observaciones";
-      document.getElementById("modalTxID").textContent = PAGO_ACTUAL.ID;
+      const numUnidad = resolverUnidad(PAGO_ACTUAL.UnidadID);
+      document.getElementById("modalSubtitulo").textContent = `Unidad ${numUnidad} - ${clp(PAGO_ACTUAL.Monto)}`;
+      document.getElementById("modalObs").textContent = PAGO_ACTUAL.Observaciones || "Sin nota";
+      
+      // Mostrar etiqueta amigable en vez de ID técnico si es un tag
+      let etiquetaDeuda = PAGO_ACTUAL.CobroID;
+      if(etiquetaDeuda === "TOTAL_DEUDA") etiquetaDeuda = "Pago Total Deuda";
+      if(etiquetaDeuda === "GC_MES_ACTUAL") etiquetaDeuda = "Gasto Común Mes Actual";
+      
+      document.getElementById("modalCobroID").textContent = etiquetaDeuda || "Pago Genérico";
 
-      // Manejo de Imagen (Base64 o URL)
       const img = document.getElementById("modalImg");
       const noImg = document.getElementById("modalNoImg");
       
       if(PAGO_ACTUAL.ComprobanteURL) {
         img.src = PAGO_ACTUAL.ComprobanteURL;
-        img.style.display = "block";
-        noImg.style.display = "none";
+        img.style.display = "block"; noImg.style.display = "none";
       } else {
-        img.style.display = "none";
-        noImg.style.display = "block";
+        img.style.display = "none"; noImg.style.display = "block";
       }
 
       document.getElementById("modalRevision").classList.add("active");
@@ -241,40 +251,74 @@
       PAGO_ACTUAL = null;
     }
 
+    // --- LÓGICA INTELIGENTE DE APROBACIÓN ---
     async function procesarPago(nuevoEstado) {
       if(!PAGO_ACTUAL) return;
       if(!confirm(`¿Confirmas marcar este pago como ${nuevoEstado}?`)) return;
 
-      document.getElementById("pageSpinner").style.display = "flex";
+      document.getElementById("pageSpinner").style.display = "grid";
       
       try {
-        const payload = {
-            ID: PAGO_ACTUAL.ID, // O la key correcta
-            Estado: nuevoEstado,
-            // Opcional: FechaAprobacion: new Date().toISOString()
+        // 1. Actualizar el estado en la tabla PAGOS (Siempre se hace)
+        const payloadPago = {
+            ID: getKeyVal(PAGO_ACTUAL),
+            Estado: nuevoEstado
         };
 
         if(typeof appSheetCRUD === 'function') {
-            await appSheetCRUD("Pagos", "Edit", [payload]);
             
-            // *LÓGICA ADICIONAL*: Si se aprueba, deberíamos actualizar la deuda (Tabla Cobros)
+            // Paso A: Actualizar Pago
+            await appSheetCRUD("Pagos", "Edit", [payloadPago]);
+            
+            // Paso B: Actualizar Deuda en COBROS (Solo si se aprueba)
             if(nuevoEstado === 'Aprobado' && PAGO_ACTUAL.CobroID) {
-                // Esto es conceptual, depende de tu backend real
-                console.log("Actualizando deuda CobroID:", PAGO_ACTUAL.CobroID);
-                // await appSheetCRUD("Cobros", "Edit", [{ ID: PAGO_ACTUAL.CobroID, Estado: "Pagado" }]);
+                
+                const cobroRef = PAGO_ACTUAL.CobroID;
+                const unidadID = PAGO_ACTUAL.UnidadID;
+                let filasAEditar = [];
+
+                // CASO 1: Es un ID Específico (ej: COB_ENE_2026)
+                // Verificamos si existe en la lista de cobros cargada
+                const cobroEspecifico = COBROS.find(c => String(getKeyVal(c)) === String(cobroRef));
+                
+                if (cobroEspecifico) {
+                    filasAEditar.push({ ID: cobroRef, Estado: "Pagado" });
+                
+                } else if (["TOTAL_DEUDA", "GC_MES_ACTUAL", "MORA_HISTORICA"].includes(cobroRef)) {
+                    // CASO 2: Es una etiqueta genérica ("TOTAL_DEUDA")
+                    // Buscamos TODOS los cobros pendientes de esa unidad
+                    const pendientes = COBROS.filter(c => 
+                        String(c.UnidadID) === String(unidadID) && 
+                        c.Estado === 'Pendiente'
+                    );
+                    
+                    // Los marcamos todos como pagados
+                    pendientes.forEach(p => {
+                        filasAEditar.push({ ID: getKeyVal(p), Estado: "Pagado" });
+                    });
+                }
+
+                // Ejecutar actualización masiva o individual en Cobros
+                if (filasAEditar.length > 0) {
+                    console.log("Actualizando Cobros:", filasAEditar);
+                    await appSheetCRUD("Cobros", "Edit", filasAEditar);
+                } else {
+                    console.warn("No se encontraron cobros vinculados para actualizar.");
+                }
             }
+
         } else {
-            // Simulacion local
-            PAGO_ACTUAL.Estado = nuevoEstado;
+            // Mock local
             await new Promise(r => setTimeout(r, 1000));
         }
 
         cerrarModal();
-        cargarPagos(); // Refrescar tabla
+        await cargarDatos(); 
         alert(`Pago ${nuevoEstado} exitosamente.`);
 
       } catch(e) {
-        alert("Error al procesar: " + e.message);
+        console.error(e);
+        alert("Error al procesar: " + (e.message || e));
       } finally {
         document.getElementById("pageSpinner").style.display = "none";
       }
@@ -282,13 +326,8 @@
 
     /* Helpers */
     function clp(v) { return "$" + new Intl.NumberFormat("es-CL").format(v); }
-    function formatearFecha(iso) { 
-        if(!iso) return ""; 
-        // Intenta parsear YYYY-MM-DD
-        const parts = iso.split("T")[0].split("-");
-        if(parts.length===3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
-        return iso;
-    }
-  </script>
+    function formatearFecha(iso) { if(!iso) return ""; return iso.split("T")[0]; }
+    function getKeyVal(o) { return o.ID || o.id || ""; }
+</script>
 </body>
 </html>

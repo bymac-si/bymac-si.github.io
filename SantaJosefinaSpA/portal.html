@@ -15,13 +15,12 @@
     <script src="assets/js/app.js"></script>
 
     <style>
-      /* ESTILOS APP */
+      /* Estilos App Mobile */
       body {
         background-color: #f8fafc;
         padding-bottom: 40px;
       }
 
-      /* Header Compacto */
       .app-header {
         background: #1a2b48;
         color: white;
@@ -46,7 +45,7 @@
         margin-top: 5px;
       }
 
-      /* NUEVO: Accesos Rápidos (Arriba) */
+      /* Accesos Rápidos */
       .quick-actions {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -72,7 +71,7 @@
         height: 45px;
         background: #f1f5f9;
         border-radius: 12px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #99b2d6;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -95,7 +94,16 @@
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
         border: 1px solid #e2e8f0;
         text-align: center;
+        position: relative;
+        overflow: hidden;
       }
+      .debt-card.clean {
+        border-left: 5px solid #10b981;
+      } /* Borde verde si al día */
+      .debt-card.pending {
+        border-left: 5px solid #ef4444;
+      } /* Borde rojo si debe */
+
       .debt-label {
         color: #64748b;
         font-size: 12px;
@@ -121,14 +129,13 @@
       .btn-pay {
         background: #2563eb;
         color: white;
-        width: 98%;
+        width: 100%;
         padding: 14px;
         border: none;
         border-radius: 12px;
         font-weight: 700;
         font-size: 15px;
         margin-top: 15px;
-        margin: auto;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -137,29 +144,59 @@
         text-decoration: none;
       }
 
-      /* Listas y Detalles */
-      .section-title {
-        font-size: 15px;
+      /* Tablero de Notificaciones */
+      .notifications-board {
+        margin: 0 15px;
+      }
+      .notif-card {
+        background: white;
+        padding: 15px;
+        border-radius: 12px;
+        margin-bottom: 10px;
+        display: flex;
+        gap: 15px;
+        align-items: start;
+        border: 1px solid #e2e8f0;
+      }
+      .notif-icon {
+        min-width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+      }
+      .icon-success {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .icon-info {
+        background: #e0f2fe;
+        color: #075985;
+      }
+      .icon-warn {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      .notif-content h4 {
+        margin: 0 0 4px;
+        font-size: 14px;
         font-weight: 700;
         color: #334155;
-        margin: 25px 15px 10px;
       }
-      .detail-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 12px 0;
-        border-bottom: 1px dashed #e2e8f0;
-        font-size: 14px;
-      }
-      .detail-row:last-child {
-        border-bottom: none;
-      }
-      .detail-label {
+      .notif-content p {
+        margin: 0;
+        font-size: 12px;
         color: #64748b;
+        line-height: 1.4;
       }
-      .detail-value {
-        font-weight: 600;
-        color: #1e293b;
+      .notif-time {
+        font-size: 10px;
+        color: #94a3b8;
+        margin-top: 6px;
+        display: block;
       }
 
       /* Spinner */
@@ -185,38 +222,31 @@
         "
       >
         <div>
-          <div class="user-welcome">Hola, <b id="residenteNombre">...</b></div>
-          <div class="unit-badge" style="height: 50px; font-size: 36px">
+          <div class="user-welcome" style="font-size: 18px;">Hola, <b id="residenteNombre">...</b></div>
+          <div class="unit-badge" style="font-size: 24px;">
             <i class="fa-solid fa-building"></i>
             <span id="nombreEdificio">Cargando...</span>
-            <span style="opacity: 0.5; margin: 0 5px">|</span>
+            <span style="margin: 0 5px">| &nbsp;Casa/Depto. </span>
             <span id="residenteUnidad">...</span>
           </div>
         </div>
         <button
-          onclick="logoutResidente()"
-          style="
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            text-align: center;
-          "
-        >
-          <i
-            class="fa-solid fa-power-off"
-            style="
-              font-size: 16px;
-              position: relative;
-              top: 42%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-            "
-          ></i>
-        </button>
+  onclick="logoutResidente()"
+  style="
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  "
+>
+  <i class="fa-solid fa-power-off" style="font-size: 14px;"></i>
+</button>
       </div>
     </div>
 
@@ -231,90 +261,52 @@
         </div>
         Reclamos
       </a>
-      <a href="#" class="qa-item" onclick="alert('Histórico de Pagos')">
+      <a href="#historial" class="qa-item">
         <div class="qa-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
         Historial
       </a>
-      <a href="#" class="qa-item" onclick="alert('Reglamento y Actas')">
+      <a href="#" class="qa-item" onclick="alert('Documentos de la comunidad')">
         <div class="qa-icon"><i class="fa-solid fa-book-open"></i></div>
         Docs
       </a>
     </div>
 
-    <div class="debt-card">
-      <div class="debt-label">
-        Gasto Común <span id="periodoCobro">...</span>
-      </div>
-      <div class="debt-amount" id="montoTotal">$0</div>
-      <div class="debt-period">
-        Vence el: <span id="fechaVencimiento">...</span>
-      </div>
+    <div class="debt-card" id="cardDeudaContainer">
+      <div class="debt-label">Total a Pagar</div>
+      <div class="debt-amount" id="montoTotal">...</div>
+      <div class="debt-period" id="textoEstadoDeuda">Calculando...</div>
 
-      <a href="reportar_pago.html" class="btn-pay">
-        <i class="fa-solid fa-paper-plane"></i> Reportar Pago
-      </a>
+      <div id="btnPagarContainer" style="display: none">
+        <a
+          href="reportar_pago.html"
+          class="btn-pay"
+          style="width: 98%; margin: auto"
+        >
+          <i class="fa-solid fa-paper-plane"></i> Reportar Pago
+        </a>
+      </div>
     </div>
 
-    <div style="margin: 0 15px">
+    <h3
+      style="
+        font-size: 15px;
+        font-weight: 700;
+        color: #334155;
+        margin: 25px 15px 15px;
+      "
+    >
+      Tablero de Avisos
+    </h3>
+    <div class="notifications-board" id="notifBoard">
       <div
         style="
-          background: white;
+          text-align: center;
           padding: 20px;
-          border-radius: 16px;
-          border: 1px solid #e2e8f0;
+          color: #94a3b8;
+          font-size: 13px;
         "
       >
-        <h4
-          style="
-            margin: 0 0 15px;
-            font-size: 14px;
-            font-weight: 700;
-            color: #1a2b48;
-          "
-        >
-          Detalle del Cálculo
-        </h4>
-
-        <div class="detail-row">
-          <span class="detail-label">Total Gasto Comunidad</span>
-          <span class="detail-value" id="totalComunidad">$0</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label"
-            >Tu Alícuota (<span id="lblAlicuota">0%</span>)</span
-          >
-          <span class="detail-value" id="montoAlicuota">$0</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label"
-            >Fondo Reserva (<span id="lblFondoPct">0%</span>)</span
-          >
-          <span class="detail-value" id="montoFondo">$0</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label" style="color: #ef4444">Mora / Otros</span>
-          <span class="detail-value" style="color: #ef4444" id="montoMora"
-            >$0</span
-          >
-        </div>
-
-        <div
-          style="
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 2px solid #f1f5f9;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-          "
-        >
-          <span style="font-weight: 700; color: #1a2b48">TOTAL A PAGAR</span>
-          <span
-            style="font-weight: 800; font-size: 18px; color: #1a2b48"
-            id="montoTotalAbajo"
-            >$0</span
-          >
-        </div>
+        No hay notificaciones recientes.
       </div>
     </div>
 
@@ -337,7 +329,7 @@
           color: #1a2b48;
         "
       >
-        Calculando Gastos...
+        Sincronizando datos...
       </div>
     </div>
 
@@ -346,156 +338,340 @@
       let DATOS_COMUNIDAD = null;
       let DATOS_UNIDAD = null;
 
-      // Inicializar
+      // --- FUNCIÓN SEGURA PARA ACTUALIZAR TEXTO ---
+      // Si el ID no existe en el HTML, no hace nada (y no da error)
+      function safeUpdate(id, valor) {
+        const el = document.getElementById(id);
+        if (el) {
+          el.textContent = valor;
+        } else {
+          console.warn(`Elemento HTML no encontrado: ${id}`);
+        }
+      }
+
+      // --- FUNCIÓN DE LIMPIEZA DE NÚMEROS ---
+      function parseMonto(valor) {
+        if (valor === undefined || valor === null || valor === "") return 0;
+        const limpio = String(valor)
+          .replace(/\$/g, "")
+          .replace(/\s/g, "")
+          .replace(/\./g, "")
+          .replace(",", ".")
+          .trim();
+        const numero = parseFloat(limpio);
+        return isNaN(numero) ? 0 : numero;
+      }
+
+      function parsePorcentaje(valor) {
+        if (!valor) return 0;
+        const limpio = String(valor).replace(",", ".");
+        return parseFloat(limpio) || 0;
+      }
+
       document.addEventListener("DOMContentLoaded", async () => {
         try {
           const sesion = localStorage.getItem("sesion_residente");
           if (!sesion) throw new Error("No session");
           USUARIO = JSON.parse(sesion);
 
-          // Render Básico
-          document.getElementById("residenteNombre").textContent =
-            USUARIO.Nombre.split(" ")[0]; // Solo primer nombre
-          document.getElementById("residenteUnidad").textContent =
-            USUARIO.UnidadLabel || USUARIO.UnidadID;
+          // Render Header
+          const nombre = (USUARIO.Nombre || "Residente").split(" ")[0];
+          safeUpdate("residenteNombre", nombre);
+          safeUpdate(
+            "residenteUnidad",
+            USUARIO.UnidadLabel || USUARIO.UnidadID
+          );
 
-          await cargarDatosReales();
+          await cargarTodo();
         } catch (e) {
-          console.error(e);
-          window.location.href = "login_residente.html";
+          console.error("Error inicio:", e);
         } finally {
-          document.getElementById("loader").style.display = "none";
+          const loader = document.getElementById("loader");
+          if (loader) loader.style.display = "none";
         }
       });
 
-      async function cargarDatosReales() {
+      async function cargarTodo() {
         try {
-          // 1. Cargar Tablas Maestras
-          const [copropiedades, unidades, gastosComunes, gastos, cobrosInd] =
-            await Promise.all([
-              fetchData("Copropiedades"),
-              fetchData("Unidades"),
-              fetchData("GastosComunes").catch(() => []), // Tabla resumen (opcional, si existe es más rápido)
-              fetchData("Gastos"), // Gastos individuales para sumar si no hay resumen
-              fetchData("Cobros").catch(() => []), // Cobros individuales (Mora, Multas)
-            ]);
+          console.log("Cargando tablas...");
+          const [
+            copropiedades,
+            unidades,
+            gastosComunes,
+            gastos,
+            cobros,
+            pagos,
+            reservas,
+          ] = await Promise.all([
+            fetchData("Copropiedades"),
+            fetchData("Unidades"),
+            fetchData("GastosComunes").catch(() => []),
+            fetchData("Gastos").catch(() => []),
+            fetchData("Cobros").catch(() => []),
+            fetchData("Pagos").catch(() => []),
+            fetchData("Reservas").catch(() => []),
+          ]);
 
-          // 2. Identificar Comunidad y Unidad
-          const coproID = USUARIO.CopropiedadID;
+          const myCoproID = String(USUARIO.CopropiedadID).trim();
+          const myUnidadID = String(USUARIO.UnidadID).trim();
+
           DATOS_COMUNIDAD = copropiedades.find(
-            (c) => String(getKeyVal(c)) === String(coproID)
+            (c) => String(getKeyVal(c)) === myCoproID
           );
           DATOS_UNIDAD = unidades.find(
-            (u) => String(getKeyVal(u)) === String(USUARIO.UnidadID)
-          ); // Ojo: UnidadID del usuario es el ID interno
+            (u) => String(getKeyVal(u)) === myUnidadID
+          );
 
-          if (!DATOS_COMUNIDAD || !DATOS_UNIDAD)
-            throw new Error("Datos de comunidad no encontrados");
+          if (DATOS_COMUNIDAD)
+            safeUpdate("nombreEdificio", DATOS_COMUNIDAD.Nombre);
 
-          document.getElementById("nombreEdificio").textContent =
-            DATOS_COMUNIDAD.Nombre;
+          if (!DATOS_UNIDAD) {
+            console.error("Unidad no encontrada. ID:", myUnidadID);
+            document.getElementById("montoTotal").innerHTML =
+              "<span style='font-size:16px; color:red'>Error Unidad</span>";
+            return;
+          }
 
-          // 3. Determinar Mes Actual (o último cerrado)
-          // Lógica: Tomamos el mes actual del sistema. En producción real, esto debería ser el "Mes de Cobro Activo".
+          await procesarDeudaDelMes(gastosComunes, gastos, cobros);
+          renderNotificaciones(pagos, reservas);
+        } catch (err) {
+          console.error("Error general:", err);
+          safeUpdate("montoTotal", "Error Carga");
+        }
+      }
+
+      async function procesarDeudaDelMes(
+        gastosComunes,
+        gastos,
+        cobrosExistentes
+      ) {
+        try {
+          // A. Periodo
           const fechaHoy = new Date();
           const mesStr = `${String(fechaHoy.getMonth() + 1).padStart(
             2,
             "0"
-          )}-${fechaHoy.getFullYear()}`; // "01-2026"
+          )}-${fechaHoy.getFullYear()}`;
 
-          document.getElementById("periodoCobro").textContent =
-            formatMes(mesStr);
+          safeUpdate("periodoCobro", formatMes(mesStr));
 
-          // Fecha Vencimiento (Ej: día 5 del próximo mes)
-          const diaVenc = new Date(
+          const vencimientoDate = new Date(
             fechaHoy.getFullYear(),
             fechaHoy.getMonth() + 1,
             5
           );
-          document.getElementById("fechaVencimiento").textContent =
-            diaVenc.toLocaleDateString("es-CL");
-
-          // 4. Calcular Gasto Total Comunidad
-          let totalGastoComunidad = 0;
-
-          // A) Intentar leer de tabla resumen 'GastosComunes'
-          const resumenMes = gastosComunes.find(
-            (g) => g.CopropiedadID === coproID && g.Mes === mesStr
+          safeUpdate(
+            "fechaVencimiento",
+            vencimientoDate.toLocaleDateString("es-CL")
           );
 
-          if (resumenMes && resumenMes.TotalGastos) {
-            totalGastoComunidad = parseFloat(resumenMes.TotalGastos);
+          // B. Calcular Gasto Total
+          let totalGastoComunidad = 0;
+          const resumenMes = gastosComunes.find(
+            (g) =>
+              String(g.CopropiedadID) === String(USUARIO.CopropiedadID) &&
+              g.Mes === mesStr
+          );
+
+          if (resumenMes) {
+            totalGastoComunidad = parseMonto(resumenMes.TotalGastos);
           } else {
-            // B) Si no hay resumen, sumar 'Gastos' individuales del mes
             const gastosMes = gastos.filter(
               (g) =>
-                String(g.CopropiedadID) === String(coproID) && g.Mes === mesStr
+                String(g.CopropiedadID) === String(USUARIO.CopropiedadID) &&
+                g.Mes === mesStr
             );
             totalGastoComunidad = gastosMes.reduce(
-              (sum, g) => sum + (parseFloat(g.Monto) || 0),
+              (sum, g) => sum + parseMonto(g.Monto),
               0
             );
           }
 
-          // 5. Calcular Alícuota y Fondo
-          const alicuotaPct =
-            parseFloat(
-              DATOS_UNIDAD.Alicuota && DATOS_UNIDAD.Alicuota.replace(",", ".")
-            ) || 0;
-          const fondoPct = parseFloat(DATOS_COMUNIDAD.FondoReserva) || 0; // Ej: 5 (que es 5%) o 0.05
+          // C. Datos Unitarios
+          const alicuota = parsePorcentaje(DATOS_UNIDAD.Alicuota);
+          const fondoRaw = parsePorcentaje(DATOS_COMUNIDAD?.FondoReserva);
+          const factorFondo = fondoRaw > 1 ? fondoRaw / 100 : fondoRaw;
 
-          // Conversión porcentaje: Si viene "5", asumimos 5%. Si viene "0.05", es 5%.
-          const factorFondo = fondoPct > 1 ? fondoPct / 100 : fondoPct;
+          // D. Cálculo
+          const montoGC = Math.round(totalGastoComunidad * (alicuota / 100));
+          const montoFondo = Math.round(montoGC * factorFondo);
 
-          // --- CÁLCULOS MATEMÁTICOS ---
-
-          // a) Gasto por Alícuota
-          const montoPorAlicuota = Math.round(
-            totalGastoComunidad * (alicuotaPct / 100)
+          // E. Lógica de Cobros
+          const idCobroMes = `COB_${USUARIO.UnidadID}_${mesStr}`;
+          const cobroRegistrado = cobrosExistentes.find(
+            (c) => String(getKeyVal(c)) === idCobroMes
           );
 
-          // b) Fondo de Reserva (Calculado sobre el Gasto Común de la unidad)
-          const montoFondo = Math.round(montoPorAlicuota * factorFondo);
+          let moraVisual = 0;
+          let totalVisual = 0;
 
-          // c) Mora / Multas (Desde tabla 'Cobros' - Pendientes anteriores)
-          // Buscamos si hay cobros en estado 'Pendiente' que NO sean del mes actual
-          let montoMora = 0;
-          const cobrosPendientes = cobrosInd.filter(
-            (c) =>
-              String(c.UnidadID) === String(USUARIO.UnidadID) &&
-              c.Estado === "Pendiente" &&
-              c.Mes !== mesStr // Excluir mes actual si ya estuviera generado
-          );
+          if (cobroRegistrado) {
+            // YA EXISTE EN BD
+            if (cobroRegistrado.Estado === "Pagado") {
+              const otrasMoras = cobrosExistentes.filter(
+                (c) =>
+                  String(c.UnidadID) === String(USUARIO.UnidadID) &&
+                  c.Estado === "Pendiente" &&
+                  c.ID !== idCobroMes
+              );
+              moraVisual = otrasMoras.reduce(
+                (sum, c) => sum + parseMonto(c.TotalAPagar),
+                0
+              );
+              totalVisual = moraVisual;
 
-          cobrosPendientes.forEach((c) => {
-            montoMora += parseFloat(c.TotalAPagar) || 0;
-          });
+              safeUpdate("montoAlicuota", "$0 (Pagado)");
+              safeUpdate("montoFondo", "$0");
+            } else {
+              moraVisual = parseMonto(cobroRegistrado.MontoMoraAnterior);
+              totalVisual = parseMonto(cobroRegistrado.TotalAPagar);
 
-          // d) Total Final
-          const totalFinal = montoPorAlicuota + montoFondo + montoMora;
+              safeUpdate(
+                "montoAlicuota",
+                clp(parseMonto(cobroRegistrado.MontoGastoComun))
+              );
 
-          // 6. Renderizar en Pantalla
-          document.getElementById("totalComunidad").textContent =
-            clp(totalGastoComunidad);
+              const multas = parseMonto(cobroRegistrado.MontoMultas);
+              const gcReg = parseMonto(cobroRegistrado.MontoGastoComun);
+              const fondoCalc = totalVisual - gcReg - moraVisual - multas;
+              safeUpdate("montoFondo", clp(fondoCalc > 0 ? fondoCalc : 0));
+            }
+          } else {
+            // NO EXISTE -> CALCULAR Y CREAR
+            const morasPrevias = cobrosExistentes
+              .filter(
+                (c) =>
+                  String(c.UnidadID) === String(USUARIO.UnidadID) &&
+                  c.Estado === "Pendiente"
+              )
+              .reduce((sum, c) => sum + parseMonto(c.TotalAPagar), 0);
 
-          document.getElementById("lblAlicuota").textContent =
-            alicuotaPct.toString().replace(".", ",") + "%";
-          document.getElementById("montoAlicuota").textContent =
-            clp(montoPorAlicuota);
+            moraVisual = morasPrevias;
+            totalVisual = montoGC + montoFondo + morasPrevias;
 
-          document.getElementById("lblFondoPct").textContent =
-            factorFondo * 100 + "%";
-          document.getElementById("montoFondo").textContent = clp(montoFondo);
+            if (montoGC > 0) {
+              console.log("Generando cobro auto:", idCobroMes);
+              const nuevoCobro = {
+                ID: idCobroMes,
+                UnidadID: String(USUARIO.UnidadID),
+                Mes: mesStr,
+                MontoGastoComun: montoGC,
+                MontoMultas: 0,
+                MontoMoraAnterior: morasPrevias,
+                TotalAPagar: totalVisual,
+                Estado: "Pendiente",
+                FechaVencimiento: vencimientoDate.toISOString().split("T")[0],
+              };
+              if (typeof appSheetCRUD === "function") {
+                appSheetCRUD("Cobros", "Add", [nuevoCobro]).catch(
+                  console.error
+                );
+              }
+            }
 
-          document.getElementById("montoMora").textContent = clp(montoMora);
+            safeUpdate("montoAlicuota", clp(montoGC));
+            safeUpdate("montoFondo", clp(montoFondo));
+          }
 
-          document.getElementById("montoTotal").textContent = clp(totalFinal);
-          document.getElementById("montoTotalAbajo").textContent =
-            clp(totalFinal);
-        } catch (err) {
-          console.error("Error calculando:", err);
-          alert("Hubo un error calculando los gastos: " + err.message);
+          // Render Final (Usando safeUpdate para evitar crash)
+          safeUpdate("totalComunidad", clp(totalGastoComunidad));
+          safeUpdate("lblAlicuota", alicuota + "%");
+          safeUpdate("lblFondoPct", factorFondo * 100 + "%");
+          safeUpdate("montoMora", clp(moraVisual));
+
+          safeUpdate("montoTotal", clp(totalVisual));
+          safeUpdate("montoTotalAbajo", clp(totalVisual));
+
+          // Estado Tarjeta
+          const card = document.getElementById("cardDeudaContainer");
+          const txt = document.getElementById("textoEstadoDeuda");
+          const btn = document.getElementById("btnPagarContainer");
+
+          if (card && txt && btn) {
+            if (totalVisual > 0) {
+              card.style.borderLeft = "5px solid #ef4444";
+              txt.textContent = "Pagos Pendientes";
+              txt.style.color = "#ef4444";
+              btn.style.display = "block";
+            } else {
+              card.style.borderLeft = "5px solid #10b981";
+              txt.textContent = "¡Estás al día!";
+              txt.style.color = "#10b981";
+              btn.style.display = "none";
+            }
+          }
+        } catch (e) {
+          console.error("Error en procesarDeuda:", e);
+          safeUpdate("montoTotal", "Error");
         }
+      }
+
+      function renderNotificaciones(pagos, reservas) {
+        const board = document.getElementById("notifBoard");
+        if (!board) return;
+
+        const items = [];
+        const misPagos = pagos.filter(
+          (p) => String(p.UnidadID) === String(USUARIO.UnidadID)
+        );
+
+        misPagos.forEach((p) => {
+          if (p.Estado === "Aprobado")
+            items.push({
+              type: "success",
+              title: "Pago Aprobado",
+              desc: `Monto: ${clp(parseMonto(p.Monto))}`,
+              date: p.FechaRegistro,
+            });
+          if (p.Estado === "Rechazado")
+            items.push({
+              type: "error",
+              title: "Pago Rechazado",
+              desc: p.Observaciones || "Datos incorrectos",
+              date: p.FechaRegistro,
+            });
+        });
+
+        const misReservas = reservas.filter(
+          (r) => String(r.UnidadID) === String(USUARIO.UnidadID)
+        );
+        misReservas.forEach((r) => {
+          if (r.Estado === "Confirmada")
+            items.push({
+              type: "info",
+              title: "Reserva Confirmada",
+              desc: `${r.EspacioNombre || "Espacio"} - ${r.Fecha}`,
+              date: r.FechaCreacion,
+            });
+        });
+
+        items.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+        const ultimos = items.slice(0, 5);
+
+        if (ultimos.length === 0) {
+          board.innerHTML =
+            '<div style="text-align:center; padding:20px; color:#94a3b8; font-size:13px;">No hay notificaciones recientes.</div>';
+          return;
+        }
+
+        board.innerHTML = ultimos
+          .map((it) => {
+            let icon = "fa-check",
+              color = "icon-success";
+            if (it.type === "error") {
+              icon = "fa-xmark";
+              color = "icon-warn";
+            }
+            if (it.type === "info") {
+              icon = "fa-calendar-check";
+              color = "icon-info";
+            }
+            const fechaStr = it.date
+              ? new Date(it.date).toLocaleDateString("es-CL")
+              : "";
+            return `<div class="notif-card"><div class="notif-icon ${color}"><i class="fa-solid ${icon}"></i></div><div class="notif-content"><h4>${it.title}</h4><p>${it.desc}</p><span class="notif-time">${fechaStr}</span></div></div>`;
+          })
+          .join("");
       }
 
       function logoutResidente() {
@@ -503,7 +679,6 @@
         window.location.href = "login_residente.html";
       }
 
-      /* Helpers */
       function clp(v) {
         return "$" + new Intl.NumberFormat("es-CL").format(v);
       }
@@ -511,10 +686,10 @@
         return o.ID || o.id || "";
       }
       function formatMes(str) {
-        // str = "01-2026" -> "Enero 2026"
+        if (!str) return "";
         const [m, y] = str.split("-");
-        const date = new Date(y, m - 1, 1);
-        return date.toLocaleDateString("es-CL", {
+        const d = new Date(y, m - 1, 1);
+        return d.toLocaleDateString("es-CL", {
           month: "long",
           year: "numeric",
         });
