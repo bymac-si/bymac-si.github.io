@@ -507,440 +507,371 @@
 
     <div id="footer"></div>
 
-    <script>
-      /* ===== Utilidades (Copiadas del estándar) ===== */
-      function showSpinner(msg) {
-        const sp = document.getElementById("pageSpinner");
-        const txt = document.getElementById("spinnerText");
-        if (msg) txt.textContent = msg;
-        sp.style.display = "grid";
+   <script>
+  /* ===== Utilidades ===== */
+  function showSpinner(msg) {
+    const sp = document.getElementById("pageSpinner");
+    if (msg) document.getElementById("spinnerText").textContent = msg;
+    sp.style.display = "grid";
+  }
+  function hideSpinner() {
+    document.getElementById("pageSpinner").style.display = "none";
+  }
+  function norm(s) {
+    return (s || "").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+  }
+  function escapeCSV(v) {
+    if (v == null) return "";
+    const s = String(v).replaceAll('"', '""');
+    return /[",\n]/.test(s) ? '"' + s + '"' : s;
+  }
+
+  /* Helpers de Claves */
+  if (typeof window.getKeyVal !== "function") {
+    window.getKeyVal = (o) => o ? (o.ID || o.id || o.Id || o.Key || o.key || o._id) : "";
+  }
+  if (typeof window.getKeyName !== "function") {
+    window.getKeyName = (row) => {
+      if (!row || typeof row !== "object") return "ID";
+      const cands = ["ID", "Id", "id", "Key", "key"];
+      for (const c of cands) { if (c in row) return c; }
+      return Object.keys(row)[0] || "ID";
+    };
+  }
+  function generateKey(prefix = "ID") {
+    return `${prefix}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+  }
+
+  /* ===== Estado Global ===== */
+  let AGENTES = [], TAREAS = [], VIEW_AGENTES = [];
+  let KEY_AGENTE = "ID", KEY_TAREA = "ID";
+  let agenteActual = null;
+
+  /* ===== Inicialización ===== */
+  document.addEventListener("DOMContentLoaded", async () => {
+    try { document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); } catch (e) {}
+    try { document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); } catch (e) {}
+
+    bindUI();
+    await cargarTodo();
+  });
+
+  function bindUI() {
+    document.getElementById("btnNew").addEventListener("click", () => abrirFormAgente());
+    document.getElementById("btnReload").addEventListener("click", cargarTodo);
+    document.getElementById("btnExport").addEventListener("click", exportCSV);
+    document.getElementById("inpBuscar").addEventListener("input", aplicarFiltros);
+
+    const modals = [modalAgente, modalTareas, modalTareaForm];
+    modals.forEach(m => m.addEventListener("click", (e) => { if(e.target === m) cerrarModalX(m.id); }));
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        if (modalTareaForm.classList.contains("active")) cerrarFormTarea();
+        else if (modalTareas.classList.contains("active")) cerrarModalTareas();
+        else cerrarFormAgente();
       }
-      function hideSpinner() {
-        document.getElementById("pageSpinner").style.display = "none";
-      }
-      function norm(s) {
-        return (s || "")
-          .toString()
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .trim();
-      }
-      function escapeCSV(v) {
-        if (v == null) return "";
-        const s = String(v).replaceAll('"', '""');
-        return /[",\n]/.test(s) ? '"' + s + '"' : s;
-      }
+    });
+  }
+  
+  function cerrarModalX(id) {
+      if(id === 'modalTareaForm') cerrarFormTarea();
+      else if(id === 'modalTareas') cerrarModalTareas();
+      else cerrarFormAgente();
+  }
 
-      /* Helpers Claves */
-      if (typeof window.getKeyVal !== "function") {
-        window.getKeyVal = (o) =>
-          o
-            ? o._id ??
-              o.id ??
-              o.ID ??
-              o.Key ??
-              o.key ??
-              o.Id ??
-              o[Object.keys(o)[0]]
-            : "";
-      }
-      if (typeof window.getKeyName !== "function") {
-        window.getKeyName = (row) => {
-          if (!row || typeof row !== "object") return "ID";
-          const cands = ["ID", "_id", "Id", "id", "Key", "key"];
-          for (const c of cands) {
-            if (c in row) return c;
-          }
-          return Object.keys(row)[0] || "ID";
-        };
-      }
-      function generateKey(prefix = "ID") {
-        return `${prefix}_${Date.now().toString(36)}${Math.random()
-          .toString(36)
-          .slice(2, 8)
-          .toUpperCase()}`;
-      }
+  /* ===== Carga de Datos ===== */
+  async function cargarTodo() {
+    try {
+      showSpinner("Cargando datos...");
+      
+      const [a, t] = await Promise.all([
+        fetchData("Agentes").catch(err => []),
+        fetchData("Tareas").catch(err => []),
+      ]);
 
-      /* ===== Estado ===== */
-      let AGENTES = [],
-        TAREAS = [],
-        VIEW_AGENTES = [];
-      let KEY_AGENTE = "ID",
-        KEY_TAREA = "ID";
-      let agenteActual = null;
+      AGENTES = a || [];
+      TAREAS = t || [];
 
-      /* ===== Inicialización ===== */
-      document.addEventListener("DOMContentLoaded", async () => {
-        try {
-          document.getElementById("header").innerHTML = await (
-            await fetch("header.html")
-          ).text();
-        } catch (e) {}
-        try {
-          document.getElementById("footer").innerHTML = await (
-            await fetch("footer.html")
-          ).text();
-        } catch (e) {}
+      if (AGENTES.length) KEY_AGENTE = getKeyName(AGENTES[0]);
+      if (TAREAS.length) KEY_TAREA = getKeyName(TAREAS[0]);
 
-        bindUI();
-        await cargarTodo();
-      });
+      aplicarFiltros();
 
-      function bindUI() {
-        // Botones Header
-        document
-          .getElementById("btnNew")
-          .addEventListener("click", () => abrirFormAgente());
-        document
-          .getElementById("btnReload")
-          .addEventListener("click", cargarTodo);
-        document
-          .getElementById("btnExport")
-          .addEventListener("click", exportCSV);
-
-        // Filtros
-        document
-          .getElementById("inpBuscar")
-          .addEventListener("input", aplicarFiltros);
-
-        // Modals Close events
-        modalAgente.addEventListener("click", (e) => {
-          if (e.target === modalAgente) cerrarFormAgente();
-        });
-        modalTareas.addEventListener("click", (e) => {
-          if (e.target === modalTareas) cerrarModalTareas();
-        });
-        modalTareaForm.addEventListener("click", (e) => {
-          if (e.target === modalTareaForm) cerrarFormTarea();
-        });
-
-        document.addEventListener("keydown", (e) => {
-          if (e.key === "Escape") {
-            if (modalTareaForm.classList.contains("active")) cerrarFormTarea();
-            else if (modalTareas.classList.contains("active"))
-              cerrarModalTareas();
-            else cerrarFormAgente();
-          }
-        });
-      }
-
-      /* ===== Carga de Datos ===== */
-      async function cargarTodo() {
-        try {
-          showSpinner("Cargando agentes...");
-          const [a, t] = await Promise.all([
-            fetchData("Agentes").catch(() => []),
-            fetchData("Tareas").catch(() => []),
-          ]);
-
-          AGENTES = a || [];
-          TAREAS = t || [];
-
-          if (AGENTES.length) KEY_AGENTE = getKeyName(AGENTES[0]);
-          if (TAREAS.length) KEY_TAREA = getKeyName(TAREAS[0]);
-
-          aplicarFiltros();
-
-          // Si el modal de tareas está abierto, refrescar su contenido
-          if (modalTareas.classList.contains("active") && agenteActual) {
-            renderTareas();
-          }
-        } catch (e) {
-          console.error(e);
-          alert("Error cargando datos: " + e.message);
-        } finally {
-          hideSpinner();
-        }
-      }
-
-      /* ===== Filtros y Render Agentes ===== */
-      function aplicarFiltros() {
-        const q = norm(document.getElementById("inpBuscar").value);
-
-        VIEW_AGENTES = AGENTES.filter((a) => {
-          if (!q) return true;
-          const str = [a.Nombre, a.Email, a.Telefono]
-            .map((v) => norm(v))
-            .join(" ");
-          return str.includes(q);
-        });
-
-        renderTablaAgentes();
-      }
-
-      function renderTablaAgentes() {
-        const tb = document.getElementById("tablaAgentes");
-        if (!VIEW_AGENTES.length) {
-          tb.innerHTML =
-            '<tr><td colspan="4" class="muted">No se encontraron agentes.</td></tr>';
-          return;
-        }
-
-        tb.innerHTML = VIEW_AGENTES.map((a) => {
-          const key = getKeyVal(a);
-          return `<tr>
-      <td><span style="font-weight:600; font-size:13px;">${
-        a.Nombre || ""
-      }</span></td>
-      <td>${a.Email || ""}</td>
-      <td class="mono">${a.Telefono || ""}</td>
-      <td class="no-print">
-         <div class="acciones-group">
-            <button class="btn-icon btn-editar" onclick="abrirFormAgente('${key}')" title="Editar Datos">
-               <i class="fa-solid fa-pen"></i>
-            </button>
-            <button class="btn-icon btn-tareas" onclick="abrirModalTareas('${key}')" title="Ver Tareas">
-               <i class="fa-solid fa-list-check"></i>
-            </button>
-            <button class="btn-icon btn-eliminar" onclick="eliminarAgente('${key}')" title="Eliminar Agente">
-               <i class="fa-solid fa-trash"></i>
-            </button>
-         </div>
-      </td>
-    </tr>`;
-        }).join("");
-      }
-
-      /* ---------------- Agentes CRUD ---------------- */
-      function abrirFormAgente(id) {
-        const title = document.getElementById("modalTitleAgente");
-        document.getElementById("formAgente").reset();
-        document.getElementById("agenteID").value = "";
-
-        if (id) {
-          title.textContent = "Editar Agente";
-          const a = AGENTES.find((x) => String(getKeyVal(x)) === String(id));
-          if (!a) {
-            alert("No encontrado");
-            return;
-          }
-          document.getElementById("agenteID").value = id;
-          document.getElementById("agenteNombre").value = a.Nombre || "";
-          document.getElementById("agenteEmail").value = a.Email || "";
-          document.getElementById("agenteTelefono").value = a.Telefono || "";
-        } else {
-          title.textContent = "Nuevo Agente";
-        }
-        document.getElementById("modalAgente").classList.add("active");
-      }
-      function cerrarFormAgente() {
-        document.getElementById("modalAgente").classList.remove("active");
-      }
-
-      document.getElementById("formAgente").onsubmit = async (e) => {
-        e.preventDefault();
-        const id = document.getElementById("agenteID").value;
-        const payload = {
-          Nombre: document.getElementById("agenteNombre").value.trim(),
-          Email: document.getElementById("agenteEmail").value.trim(),
-          Telefono: document.getElementById("agenteTelefono").value.trim(),
-        };
-
-        const keyField = id ? KEY_AGENTE : KEY_AGENTE;
-        if (id) payload[keyField] = id;
-        else payload[keyField] = generateKey("AGE");
-
-        try {
-          showSpinner("Guardando...");
-          if (typeof upsertData === "function")
-            await upsertData("Agentes", payload);
-          else if (id) await appSheetCRUD("Agentes", "Edit", [payload]);
-          else await appSheetCRUD("Agentes", "Add", [payload]);
-
-          cerrarFormAgente();
-          await cargarTodo();
-        } catch (err) {
-          alert("Error: " + err.message);
-        } finally {
-          hideSpinner();
-        }
-      };
-
-      async function eliminarAgente(id) {
-        if (
-          !confirm(
-            "¿Eliminar este agente? Se perderán sus tareas asignadas si no se reasignan."
-          )
-        )
-          return;
-        try {
-          showSpinner("Eliminando...");
-          if (typeof deleteByKey === "function")
-            await deleteByKey("Agentes", id);
-          else await appSheetCRUD("Agentes", "Delete", [{ [KEY_AGENTE]: id }]);
-          await cargarTodo();
-        } catch (err) {
-          alert("Error: " + err.message);
-        } finally {
-          hideSpinner();
-        }
-      }
-
-      /* ---------------- Tareas Logic ---------------- */
-      function abrirModalTareas(agenteID) {
-        agenteActual = AGENTES.find(
-          (a) => String(getKeyVal(a)) === String(agenteID)
-        );
-        if (!agenteActual) return;
-        document.getElementById("nombreAgenteTareas").textContent =
-          agenteActual.Nombre;
+      if (document.getElementById("modalTareas").classList.contains("active") && agenteActual) {
         renderTareas();
-        document.getElementById("modalTareas").classList.add("active");
       }
-      function cerrarModalTareas() {
-        document.getElementById("modalTareas").classList.remove("active");
-        agenteActual = null;
+    } catch (e) {
+      console.error(e);
+      alert("Error de conexión: " + e.message);
+    } finally {
+      hideSpinner();
+    }
+  }
+
+  /* ===== Agentes ===== */
+  function aplicarFiltros() {
+    const q = norm(document.getElementById("inpBuscar").value);
+    VIEW_AGENTES = AGENTES.filter((a) => {
+      if (!q) return true;
+      const str = [a.Nombre, a.Email, a.Telefono].map(v => norm(v)).join(" ");
+      return str.includes(q);
+    });
+    renderTablaAgentes();
+  }
+
+  function renderTablaAgentes() {
+    const tb = document.getElementById("tablaAgentes");
+    if (!VIEW_AGENTES.length) {
+      tb.innerHTML = '<tr><td colspan="4" class="muted">No hay agentes registrados.</td></tr>';
+      return;
+    }
+    tb.innerHTML = VIEW_AGENTES.map((a) => {
+      const key = getKeyVal(a);
+      return `<tr>
+        <td><span style="font-weight:600; font-size:13px;">${a.Nombre || ""}</span></td>
+        <td>${a.Email || ""}</td>
+        <td class="mono">${a.Telefono || ""}</td>
+        <td class="no-print">
+           <div class="acciones-group">
+              <button class="btn-icon btn-editar" onclick="abrirFormAgente('${key}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
+              <button class="btn-icon btn-tareas" onclick="abrirModalTareas('${key}')" title="Tareas"><i class="fa-solid fa-list-check"></i></button>
+              <button class="btn-icon btn-eliminar" onclick="eliminarAgente('${key}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+           </div>
+        </td>
+      </tr>`;
+    }).join("");
+  }
+
+  function abrirFormAgente(id) {
+    const title = document.getElementById("modalTitleAgente");
+    document.getElementById("formAgente").reset();
+    document.getElementById("agenteID").value = "";
+
+    if (id) {
+      title.textContent = "Editar Agente";
+      const a = AGENTES.find(x => String(getKeyVal(x)) === String(id));
+      if (!a) return alert("Agente no encontrado");
+      
+      document.getElementById("agenteID").value = id;
+      document.getElementById("agenteNombre").value = a.Nombre || "";
+      document.getElementById("agenteEmail").value = a.Email || "";
+      document.getElementById("agenteTelefono").value = a.Telefono || "";
+    } else {
+      title.textContent = "Nuevo Agente";
+    }
+    document.getElementById("modalAgente").classList.add("active");
+  }
+  function cerrarFormAgente() { document.getElementById("modalAgente").classList.remove("active"); }
+
+  document.getElementById("formAgente").onsubmit = async (e) => {
+    e.preventDefault();
+    const id = document.getElementById("agenteID").value;
+    const payload = {
+      Nombre: document.getElementById("agenteNombre").value.trim(),
+      Email: document.getElementById("agenteEmail").value.trim(),
+      Telefono: document.getElementById("agenteTelefono").value.trim(),
+    };
+    
+    const keyField = id ? KEY_AGENTE : KEY_AGENTE; 
+    if (id) payload[keyField] = id;
+    else payload[keyField] = generateKey("AGE");
+
+    try {
+      showSpinner("Guardando Agente...");
+      if (id) await appSheetCRUD("Agentes", "Edit", [payload]);
+      else await appSheetCRUD("Agentes", "Add", [payload]);
+      cerrarFormAgente();
+      await cargarTodo();
+    } catch (err) {
+      alert("Error al guardar: " + err.message);
+    } finally {
+      hideSpinner();
+    }
+  };
+
+  async function eliminarAgente(id) {
+    if (!confirm("¿Eliminar agente?")) return;
+    try {
+      showSpinner("Eliminando...");
+      await appSheetCRUD("Agentes", "Delete", [{ [KEY_AGENTE]: id }]);
+      await cargarTodo();
+    } catch (err) {
+      alert("Error: " + err.message);
+    } finally {
+      hideSpinner();
+    }
+  }
+
+  /* ===== Lógica de Tareas (CORREGIDA) ===== */
+  
+  function abrirModalTareas(agenteID) {
+    agenteActual = AGENTES.find(a => String(getKeyVal(a)) === String(agenteID));
+    if (!agenteActual) return alert("Error identificando al agente");
+    
+    document.getElementById("nombreAgenteTareas").textContent = agenteActual.Nombre;
+    renderTareas();
+    document.getElementById("modalTareas").classList.add("active");
+  }
+  function cerrarModalTareas() {
+    document.getElementById("modalTareas").classList.remove("active");
+    agenteActual = null;
+  }
+
+  function renderTareas() {
+    // Filtrar tareas del agente
+    const tareasFiltradas = TAREAS.filter(t => String(t.AgenteID) === String(getKeyVal(agenteActual)));
+    const tb = document.getElementById("tablaTareas");
+
+    if (!tareasFiltradas.length) {
+      tb.innerHTML = '<tr><td colspan="5" class="muted" style="text-align:center; padding:20px;">Sin tareas asignadas.</td></tr>';
+      return;
+    }
+
+    tb.innerHTML = tareasFiltradas.map(t => {
+      const key = getKeyVal(t);
+      // === CORRECCIÓN VISUAL: Leer columnas con tilde ===
+      const titulo = t["Título"] || t.Titulo || "—";
+      // =================================================
+      
+      let pClass = "bg-baja";
+      if ((t.Prioridad||"").toLowerCase() === "alta") pClass = "bg-alta";
+      if ((t.Prioridad||"").toLowerCase() === "media") pClass = "bg-media";
+
+      return `<tr>
+        <td style="font-weight:500;">${titulo}</td>
+        <td>${t.Estado || "Pendiente"}</td>
+        <td><span class="badge ${pClass}">${t.Prioridad || "Normal"}</span></td>
+        <td class="mono" style="font-size:12px;">${t.FechaLimite || "—"}</td>
+        <td>
+           <div class="acciones-group">
+              <button class="btn-icon btn-editar" onclick="abrirFormTarea('${key}')"><i class="fa-solid fa-pen"></i></button>
+              <button class="btn-icon btn-eliminar" onclick="eliminarTarea('${key}')"><i class="fa-solid fa-trash"></i></button>
+           </div>
+        </td>
+      </tr>`;
+    }).join("");
+  }
+
+  function abrirFormTarea(id) {
+    const title = document.getElementById("modalTitleTarea");
+    document.getElementById("formTarea").reset();
+    document.getElementById("tareaID").value = "";
+
+    if (id) {
+      title.textContent = "Editar Tarea";
+      const t = TAREAS.find(x => String(getKeyVal(x)) === String(id));
+      if (!t) return alert("Tarea no encontrada");
+      
+      document.getElementById("tareaID").value = id;
+      // === CORRECCIÓN CARGA: Leer columnas con tilde ===
+      document.getElementById("tareaTitulo").value = t["Título"] || t.Titulo || "";
+      document.getElementById("tareaDescripcion").value = t["Descripción"] || t.Descripcion || "";
+      // =================================================
+      document.getElementById("tareaEstado").value = t.Estado || "Pendiente";
+      document.getElementById("tareaPrioridad").value = t.Prioridad || "Media";
+      document.getElementById("tareaFechaLimite").value = t.FechaLimite || "";
+    } else {
+      title.textContent = "Nueva Tarea";
+      document.getElementById("tareaFechaLimite").value = new Date().toISOString().split("T")[0];
+    }
+    document.getElementById("modalTareaForm").classList.add("active");
+  }
+  function cerrarFormTarea() { document.getElementById("modalTareaForm").classList.remove("active"); }
+
+  // --- GUARDADO DE TAREAS (CORREGIDO PARA TU TABLA) ---
+  document.getElementById("formTarea").onsubmit = async (e) => {
+    e.preventDefault();
+    if(!agenteActual) { alert("Error: Referencia de agente perdida."); return; }
+    
+    const id = document.getElementById("tareaID").value;
+    
+    // === AQUÍ ESTÁ LA CORRECCIÓN CLAVE ===
+    // Las claves (keys) del objeto deben coincidir con tus columnas de Excel/AppSheet
+    const payload = {
+      "AgenteID": getKeyVal(agenteActual),
+      "Título": document.getElementById("tareaTitulo").value.trim(),       // Con tilde
+      "Descripción": document.getElementById("tareaDescripcion").value.trim(), // Con tilde
+      "Estado": document.getElementById("tareaEstado").value,
+      "Prioridad": document.getElementById("tareaPrioridad").value,
+      "FechaLimite": document.getElementById("tareaFechaLimite").value,
+      "Comentarios": "" // Campo requerido según tu definición, lo enviamos vacío por ahora
+    };
+
+    // Agregar fecha de creación solo si es nuevo
+    if(!id) {
+        payload["FechaCreación"] = new Date().toISOString().split('T')[0]; // Ojo: FechaCreación con tilde
+    }
+
+    // Determinar ID
+    const keyField = id ? KEY_TAREA : KEY_TAREA;
+    if(id) {
+        payload[keyField] = id;
+    } else {
+        payload[keyField] = generateKey("TSK");
+    }
+
+    try {
+      showSpinner("Guardando Tarea...");
+      
+      // 1. Guardar en Backend
+      if (id) await appSheetCRUD("Tareas", "Edit", [payload]);
+      else await appSheetCRUD("Tareas", "Add", [payload]);
+
+      // 2. Actualización Optimista
+      if(id) {
+         const idx = TAREAS.findIndex(t => String(getKeyVal(t)) === String(id));
+         if(idx >= 0) TAREAS[idx] = { ...TAREAS[idx], ...payload };
+      } else {
+         TAREAS.push(payload);
       }
 
-      function renderTareas() {
-        const tareasAgente = TAREAS.filter(
-          (t) => String(t.AgenteID) === String(getKeyVal(agenteActual))
-        );
-        const tb = document.getElementById("tablaTareas");
+      cerrarFormTarea();
+      renderTareas();
+      cargarTodo(); 
 
-        if (!tareasAgente.length) {
-          tb.innerHTML =
-            '<tr><td colspan="5" class="muted" style="text-align:center;">Este agente no tiene tareas asignadas.</td></tr>';
-          return;
-        }
+    } catch (err) {
+      console.error(err);
+      alert("Error al guardar tarea: " + (err.message || err));
+    } finally {
+      hideSpinner();
+    }
+  };
 
-        tb.innerHTML = tareasAgente
-          .map((t) => {
-            const key = getKeyVal(t);
-            // Badge de prioridad
-            let pClass = "bg-baja";
-            if (t.Prioridad === "Alta") pClass = "bg-alta";
-            if (t.Prioridad === "Media") pClass = "bg-media";
+  async function eliminarTarea(id) {
+    if (!confirm("¿Eliminar tarea permanentemente?")) return;
+    try {
+      showSpinner("Eliminando...");
+      await appSheetCRUD("Tareas", "Delete", [{ [KEY_TAREA]: id }]);
+      
+      TAREAS = TAREAS.filter(t => String(getKeyVal(t)) !== String(id));
+      renderTareas();
+      await cargarTodo();
+    } catch (err) {
+      alert("Error: " + err.message);
+    } finally {
+      hideSpinner();
+    }
+  }
 
-            return `<tr>
-      <td style="font-weight:500;">${t.Titulo || ""}</td>
-      <td>${t.Estado || ""}</td>
-      <td><span class="badge ${pClass}">${t.Prioridad || ""}</span></td>
-      <td>${t.FechaLimite || ""}</td>
-      <td>
-         <div class="acciones-group">
-            <button class="btn-icon btn-editar" onclick="abrirFormTarea('${key}')" title="Editar Tarea">
-               <i class="fa-solid fa-pen"></i>
-            </button>
-            <button class="btn-icon btn-eliminar" onclick="eliminarTarea('${key}')" title="Eliminar Tarea">
-               <i class="fa-solid fa-trash"></i>
-            </button>
-         </div>
-      </td>
-    </tr>`;
-          })
-          .join("");
-      }
-
-      function abrirFormTarea(id) {
-        const title = document.getElementById("modalTitleTarea");
-        document.getElementById("formTarea").reset();
-        document.getElementById("tareaID").value = "";
-
-        if (id) {
-          title.textContent = "Editar Tarea";
-          const t = TAREAS.find((x) => String(getKeyVal(x)) === String(id));
-          if (!t) {
-            alert("No encontrada");
-            return;
-          }
-          document.getElementById("tareaID").value = id;
-          document.getElementById("tareaTitulo").value = t.Titulo || "";
-          document.getElementById("tareaDescripcion").value =
-            t.Descripcion || "";
-          document.getElementById("tareaEstado").value =
-            t.Estado || "Pendiente";
-          document.getElementById("tareaPrioridad").value =
-            t.Prioridad || "Media";
-          document.getElementById("tareaFechaLimite").value =
-            t.FechaLimite || "";
-        } else {
-          title.textContent = "Nueva Tarea";
-          // Fecha hoy por defecto
-          document.getElementById("tareaFechaLimite").value = new Date()
-            .toISOString()
-            .split("T")[0];
-        }
-        document.getElementById("modalTareaForm").classList.add("active");
-      }
-      function cerrarFormTarea() {
-        document.getElementById("modalTareaForm").classList.remove("active");
-      }
-
-      document.getElementById("formTarea").onsubmit = async (e) => {
-        e.preventDefault();
-        const id = document.getElementById("tareaID").value;
-        const payload = {
-          AgenteID: getKeyVal(agenteActual),
-          Titulo: document.getElementById("tareaTitulo").value.trim(),
-          Descripcion: document.getElementById("tareaDescripcion").value.trim(),
-          Estado: document.getElementById("tareaEstado").value,
-          Prioridad: document.getElementById("tareaPrioridad").value,
-          FechaLimite: document.getElementById("tareaFechaLimite").value,
-        };
-
-        const keyField = id ? KEY_TAREA : KEY_TAREA;
-        if (id) payload[keyField] = id;
-        else payload[keyField] = generateKey("TASK");
-
-        try {
-          showSpinner("Guardando tarea...");
-          if (typeof upsertData === "function")
-            await upsertData("Tareas", payload);
-          else if (id) await appSheetCRUD("Tareas", "Edit", [payload]);
-          else await appSheetCRUD("Tareas", "Add", [payload]);
-
-          cerrarFormTarea();
-          await cargarTodo(); // Esto refrescará la lista principal y la lista dentro del modal
-        } catch (err) {
-          alert("Error: " + err.message);
-        } finally {
-          hideSpinner();
-        }
-      };
-
-      async function eliminarTarea(id) {
-        if (!confirm("¿Eliminar esta tarea?")) return;
-        try {
-          showSpinner("Eliminando...");
-          if (typeof deleteByKey === "function")
-            await deleteByKey("Tareas", id);
-          else await appSheetCRUD("Tareas", "Delete", [{ [KEY_TAREA]: id }]);
-          await cargarTodo();
-        } catch (err) {
-          alert("Error: " + err.message);
-        } finally {
-          hideSpinner();
-        }
-      }
-
-      /* ===== Exportar ===== */
-      function exportCSV() {
-        const headers = ["ID", "Nombre", "Email", "Telefono"];
-        const lines = [headers.join(",")];
-
-        VIEW_AGENTES.forEach((r) => {
-          lines.push(
-            [
-              escapeCSV(getKeyVal(r)),
-              escapeCSV(r.Nombre),
-              escapeCSV(r.Email),
-              escapeCSV(r.Telefono),
-            ].join(",")
-          );
-        });
-
-        const blob = new Blob([lines.join("\n")], {
-          type: "text/csv;charset=utf-8;",
-        });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "Agentes.csv";
-        a.click();
-        URL.revokeObjectURL(url);
-      }
-    </script>
+  function exportCSV() {
+    const headers = ["ID", "Nombre", "Email", "Telefono"];
+    const lines = [headers.join(",")];
+    VIEW_AGENTES.forEach(r => {
+      lines.push([
+        escapeCSV(getKeyVal(r)),
+        escapeCSV(r.Nombre),
+        escapeCSV(r.Email),
+        escapeCSV(r.Telefono)
+      ].join(","));
+    });
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "Agentes.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+</script>
   </body>
 </html>

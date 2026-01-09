@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <title>Acceso Residentes - Santa Josefina</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <script src="assets/js/app.js"></script>
+
+    <style>
+      /* Estilos del Login */
+      body {
+        background: #f0f2f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: auto;
+        padding: 20px;
+        font-family: sans-serif;
+      }
+      .login-card {
+        background: white;
+        width: 100%;
+        max-width: 400px;
+        padding: 40px 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        text-align: center;
+      }
+      .logo {
+        width: 150px;
+        margin-bottom: 20px;
+      }
+      h1 {
+        font-size: 22px;
+        color: #1e293b;
+        margin-bottom: 10px;
+      }
+      p {
+        color: #64748b;
+        font-size: 14px;
+        margin-bottom: 30px;
+      }
+      .input-group {
+        text-align: left;
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 8px;
+      }
+      input {
+        width: 100%;
+        padding: 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        font-size: 16px;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+      }
+      input:focus {
+        border-color: #2563eb;
+        outline: none;
+      }
+      .btn-login {
+        background: #1a2b48;
+        color: white;
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .btn-login:hover {
+        background: #0f172a;
+      }
+      .btn-login:disabled {
+        background: #94a3b8;
+        cursor: not-allowed;
+      }
+      .links {
+        margin-top: 20px;
+        font-size: 13px;
+      }
+      .links a {
+        color: #2563eb;
+        text-decoration: none;
+      }
+      .error-msg {
+        background: #fee2e2;
+        color: #991b1b;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 13px;
+        margin-bottom: 20px;
+        display: none;
+        border: 1px solid #fecaca;
+      }
+      .loader {
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top: 3px solid white;
+        width: 18px;
+        height: 18px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 8px;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-card">
+      <a href="index.html"
+        ><img
+          src="assets/img/logo_santajosefina.png"
+          alt="Santa Josefina"
+          class="logo"
+      /></a>
+      <h1>Portal Residentes</h1>
+      <p>Gestiona tus pagos, reservas y reclamos.</p>
+
+      <div id="errorBox" class="error-msg"></div>
+
+      <form id="formLogin">
+        <div class="input-group">
+          <label>RUT o Email</label>
+          <input
+            type="text"
+            id="user"
+            placeholder="Ej: 12.345.678-9"
+            required
+          />
+        </div>
+        <div class="input-group">
+          <label>Contraseña</label>
+          <input type="password" id="pass" placeholder="••••" required />
+        </div>
+        <button type="submit" class="btn-login" id="btnSubmit">
+          <span id="btnText">Ingresar</span>
+        </button>
+      </form>
+
+      <div class="links">
+        <a href="#">¿Olvidaste tu clave?</a><br /><br />
+        <a href="index.html" style="color: #64748b">← Volver al inicio</a>
+      </div>
+    </div>
+
+    <script>
+      document.getElementById("formLogin").onsubmit = async (e) => {
+        e.preventDefault();
+
+        const userVal = document
+          .getElementById("user")
+          .value.trim()
+          .toLowerCase();
+        const passVal = document.getElementById("pass").value.trim();
+        const btn = document.getElementById("btnSubmit");
+        const btnText = document.getElementById("btnText");
+        const errBox = document.getElementById("errorBox");
+
+        btn.disabled = true;
+        btnText.innerHTML = '<div class="loader"></div> Verificando...';
+        errBox.style.display = "none";
+
+        try {
+          // 1. CARGA PARALELA: Usuarios (Login) y Unidades (Para sacar el número 304, 101, etc.)
+          // Asume que tienes una tabla 'Unidades' con la estructura que me pasaste.
+          const [usuarios, unidades] = await Promise.all([
+            fetchData("Copropietarios").catch(() => []),
+            fetchData("Unidades").catch(() => []),
+          ]);
+
+          if (!usuarios || usuarios.length === 0) {
+            throw new Error("No hay conexión con la base de datos.");
+          }
+
+          // 2. VALIDAR CREDENCIALES
+          const match = usuarios.find((u) => {
+            const uRut = (u.RUT || "").toString().toLowerCase().trim();
+            const uEmail = (u.Email || "").toString().toLowerCase().trim();
+            const uPass = (u.password || "").toString().trim();
+            return (
+              (uRut === userVal || uEmail === userVal) && uPass === passVal
+            );
+          });
+
+          if (match) {
+            // 3. ENCONTRAR NÚMERO DE UNIDAD REAL
+            // Cruzamos el UnidadID del usuario (ej: 8e9bfe71) con la tabla de Unidades
+            let etiquetaUnidad = "Sin Unidad";
+
+            if (unidades.length > 0) {
+              // Buscamos la fila donde el ID coincida
+              const unidadReal = unidades.find(
+                (un) => String(getKeyVal(un)) === String(match.UnidadID)
+              );
+
+              if (unidadReal) {
+                // Usamos la columna 'Numero' de tu tabla
+                etiquetaUnidad = unidadReal.Numero || match.UnidadID;
+              }
+            }
+
+            // 4. GUARDAR SESIÓN
+            const userData = {
+              ID: match.ID,
+              Nombre: match.Nombre,
+              UnidadID: match.UnidadID, // ID Técnico (para filtrar base de datos)
+              UnidadLabel: etiquetaUnidad, // NOMBRE VISIBLE (Ej: "304")
+              CopropiedadID: match.CopropiedadID,
+              Email: match.Email,
+              Rol: match.rol || "Residente",
+            };
+
+            localStorage.setItem("sesion_residente", JSON.stringify(userData));
+            window.location.href = "portal.html";
+          } else {
+            throw new Error("Usuario o contraseña incorrectos.");
+          }
+        } catch (error) {
+          console.error(error);
+          errBox.textContent = error.message || "Error inesperado.";
+          errBox.style.display = "block";
+          btn.disabled = false;
+          btnText.textContent = "Ingresar";
+        }
+      };
+
+      // Helper para leer ID (La tabla Unidades tiene columna 'ID')
+      function getKeyVal(o) {
+        return o.ID || o.id || o.Id || "";
+      }
+    </script>
+  </body>
+</html>

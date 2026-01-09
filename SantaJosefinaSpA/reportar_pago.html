@@ -9,28 +9,30 @@
   <script src="assets/js/app.js"></script>
   
   <style>
-    /* Estilos Mobile App Específicos */
-    body { background-color: #f8fafc; padding-bottom: 30px; }
+    /* Estilos Base (Igual a portal.html) */
+    body { background-color: #f8fafc; padding-bottom: 40px; }
     
-    .app-header-simple {
-      background: white; padding: 15px 20px;
+    /* Header Azul Curvo */
+    .app-header {
+      background: #1A2B48; color: white; padding: 20px 20px 30px;
+      border-bottom-left-radius: 25px; border-bottom-right-radius: 25px;
+      box-shadow: 0 4px 15px rgba(26, 43, 72, 0.2);
       display: flex; align-items: center; gap: 15px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-      position: sticky; top: 0; z-index: 100;
     }
-    .page-title { font-size: 18px; font-weight: 700; color: #1e293b; margin: 0; }
-    .btn-back { color: #64748b; font-size: 18px; text-decoration: none; }
+    .btn-back { color: white; font-size: 20px; text-decoration: none; opacity: 0.9; }
+    .page-title { font-size: 18px; font-weight: 700; margin: 0; color: white; }
 
+    /* Tarjeta Formulario */
     .form-card {
-      background: white; margin: 20px 15px; padding: 25px 20px;
-      border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-      border: 1px solid #e2e8f0;
+      background: white; margin: -20px 15px 20px; padding: 25px 20px;
+      border-radius: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+      border: 1px solid #e2e8f0; position: relative;
     }
 
     .form-group { margin-bottom: 20px; }
     .form-label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 8px; }
     
-    /* Inputs Estilizados */
+    /* Inputs */
     .input-app, .select-app, .textarea-app {
       width: 100%; padding: 14px; border: 1px solid #cbd5e1;
       border-radius: 12px; font-size: 15px; background: #f8fafc;
@@ -38,27 +40,29 @@
     }
     .input-app:focus { border-color: #3b82f6; background: white; outline: none; }
 
-    /* Área de carga de archivo */
+    /* Upload */
     .file-upload-area {
       border: 2px dashed #cbd5e1; border-radius: 12px;
       padding: 30px 20px; text-align: center;
       background: #f8fafc; cursor: pointer; position: relative;
+      transition: all 0.2s;
     }
+    .file-upload-area:active { background: #e2e8f0; }
     .file-upload-area.has-file { border-color: #10b981; background: #ecfdf5; }
     .upload-icon { font-size: 30px; color: #94a3b8; margin-bottom: 10px; }
     .upload-text { font-size: 13px; color: #64748b; }
     #fileInput { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 
-    /* Botón Principal */
+    /* Botón */
     .btn-submit {
-      background: #1A2B48; color: white; width: 100%; padding: 16px;
+      background: #2563eb; color: white; width: 100%; padding: 16px;
       border: none; border-radius: 12px; font-weight: 700; font-size: 16px;
       margin-top: 10px; cursor: pointer;
-      box-shadow: 0 4px 12px rgba(26, 43, 72, 0.2);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
     }
     .btn-submit:active { transform: scale(0.98); }
 
-    /* Spinner Overlay */
+    /* Spinner */
     .spinner-overlay {
       position: fixed; inset: 0; background: rgba(255,255,255,0.9);
       display: none; flex-direction: column; align-items: center; justify-content: center;
@@ -68,14 +72,14 @@
 </head>
 <body>
 
-  <div class="app-header-simple">
+  <div class="app-header">
     <a href="portal.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i></a>
     <h1 class="page-title">Reportar Transferencia</h1>
   </div>
 
   <main>
     <div class="form-card">
-      <p class="muted" style="font-size:13px; margin-bottom:20px; line-height:1.5;">
+      <p class="muted" style="font-size:13px; margin-bottom:20px; line-height:1.5; color:#64748b;">
         Sube el comprobante de tu transferencia. La administración validará el pago en un plazo de 24 a 48 hrs.
       </p>
 
@@ -109,7 +113,7 @@
 
         <div class="form-group">
           <label class="form-label">Nota (Opcional)</label>
-          <textarea id="obsPago" class="textarea-app" rows="2" placeholder="Ej: Transferencia desde cuenta de mi esposa..."></textarea>
+          <textarea id="obsPago" class="textarea-app" rows="2" placeholder="Ej: Transferencia desde cuenta de tercero..."></textarea>
         </div>
 
         <button type="submit" class="btn-submit">Enviar Reporte</button>
@@ -118,57 +122,95 @@
   </main>
 
   <div id="spinner" class="spinner-overlay">
-    <div class="spinner" style="border-top-color: #1A2B48; width: 40px; height: 40px;"></div>
+    <div style="width:40px; height:40px; border-radius:50%; border:4px solid #eee; border-top-color:#1A2B48; animation:spin 1s linear infinite;"></div>
     <div style="margin-top:15px; font-weight:600; color:#1A2B48;">Enviando comprobante...</div>
   </div>
 
   <script>
-    // --- SIMULACIÓN DE USUARIO (Debería venir de session/login) ---
-    const USUARIO = {
-        UnidadID: "101",
-        Email: "juan.perez@email.com"
-    };
-
+    let USUARIO = null;
     let DEUDAS_PENDIENTES = [];
-    let FILE_BASE64 = null; // Para guardar la imagen convertida
+    let FILE_BASE64 = null;
 
     document.addEventListener("DOMContentLoaded", async () => {
-        // 1. Poner fecha de hoy por defecto
+        // 1. Validar Sesión
+        try {
+            const sesion = localStorage.getItem("sesion_residente");
+            if(!sesion) throw new Error("No session");
+            USUARIO = JSON.parse(sesion);
+        } catch(e) {
+            window.location.href = "login_residente.html";
+            return;
+        }
+
+        // 2. Fecha Hoy
         document.getElementById("fechaPago").value = new Date().toISOString().split('T')[0];
         
-        // 2. Cargar Deudas Pendientes
+        // 3. Cargar Deudas Reales
         await cargarDeudas();
     });
 
     async function cargarDeudas() {
-        // Simulación de Fetch a tabla 'Cobros' filtrando por UnidadID y Estado='Pendiente'
-        // const cobros = await fetchData('Cobros'); ... filter...
-        
-        // MOCK DATA
-        DEUDAS_PENDIENTES = [
-            { ID: 'COB_ENE_2026', Mes: 'Gastos Comunes Enero 2026', Total: 101750 },
-            { ID: 'COB_DIC_2025', Mes: 'Saldo Pendiente Diciembre', Total: 12500 }
-        ];
-
         const sel = document.getElementById("selCobro");
-        if(DEUDAS_PENDIENTES.length > 0){
+        sel.innerHTML = '<option disabled>Cargando...</option>';
+
+        try {
+            // Fetch real a tabla 'Cobros'
+            let cobros = [];
+            if(typeof fetchData === 'function') {
+                cobros = await fetchData('Cobros').catch(()=>[]);
+            }
+
+            // Filtrar por Unidad y Estado Pendiente
+            DEUDAS_PENDIENTES = cobros.filter(c => 
+                String(c.UnidadID) === String(USUARIO.UnidadID) && 
+                (c.Estado||'Pendiente') === 'Pendiente'
+            );
+
+            // Si no hay datos (o falló fetch), usar mock solo para demo visual si quieres, o dejar vacío.
+            if(DEUDAS_PENDIENTES.length === 0 && !cobros.length) {
+                 // Mock Fallback (Solo si no hay backend conectado aún)
+                 DEUDAS_PENDIENTES = [
+                    { ID: 'MOCK_1', Mes: 'Gasto Común (Simulado)', TotalAPagar: 85000 }
+                 ];
+            }
+
             sel.innerHTML = '<option value="" selected disabled>Selecciona una deuda...</option>';
-            DEUDAS_PENDIENTES.forEach(d => {
-                const opt = document.createElement('option');
-                opt.value = d.ID;
-                opt.textContent = `${d.Mes} - ${clp(d.Total)}`;
-                sel.appendChild(opt);
-            });
-        } else {
-            sel.innerHTML = '<option value="">¡Estás al día! No hay deudas.</option>';
+            
+            if(DEUDAS_PENDIENTES.length > 0){
+                DEUDAS_PENDIENTES.forEach(d => {
+                    const monto = d.TotalAPagar || d.Total || 0;
+                    const mes = d.Mes || "Cobro General";
+                    const opt = document.createElement('option');
+                    opt.value = d.ID;
+                    opt.textContent = `${mes} - ${clp(monto)}`;
+                    sel.appendChild(opt);
+                });
+                
+                // Opción genérica "Abono / Otro"
+                const optOtro = document.createElement('option');
+                optOtro.value = "OTRO";
+                optOtro.textContent = "Otro Monto / Abono";
+                sel.appendChild(optOtro);
+
+            } else {
+                sel.innerHTML = '<option value="">¡Estás al día! No hay deudas pendientes.</option>';
+            }
+
+        } catch(e) {
+            console.error(e);
+            sel.innerHTML = '<option>Error cargando deudas</option>';
         }
     }
 
     function actualizarMonto() {
         const id = document.getElementById("selCobro").value;
         const deuda = DEUDAS_PENDIENTES.find(d => d.ID === id);
+        
         if(deuda) {
-            document.getElementById("montoPago").value = deuda.Total;
+            const total = deuda.TotalAPagar || deuda.Total || 0;
+            document.getElementById("montoPago").value = total;
+        } else {
+            document.getElementById("montoPago").value = ""; // Limpiar si es "Otro"
         }
     }
 
@@ -180,15 +222,12 @@
 
         if (file) {
             area.classList.add("has-file");
-            text.textContent = `Archivo seleccionado: ${file.name}`;
+            text.textContent = `Archivo: ${file.name}`;
             icon.className = "fa-solid fa-check-circle";
             icon.style.color = "#10b981";
 
-            // Convertir a Base64 (Para enviar a AppSheet/API)
             const reader = new FileReader();
-            reader.onload = function(e) {
-                FILE_BASE64 = e.target.result; // Data URL completa
-            };
+            reader.onload = (e) => FILE_BASE64 = e.target.result;
             reader.readAsDataURL(file);
         }
     }
@@ -202,38 +241,34 @@
 
         document.getElementById("spinner").style.display = "flex";
 
-        // CONSTRUCCIÓN DEL PAYLOAD PARA LA TABLA 'PAGOS'
         const payload = {
-            "ID": "PAY_" + Date.now(), // ID único
-            "CobroID": cobroId,
-            "UnidadID": USUARIO.UnidadID,
+            "ID": "PAY_" + Date.now(),
+            "CobroID": cobroId === 'OTRO' ? '' : cobroId, // Si es abono, va vacío o ref genérica
+            "UnidadID": USUARIO.UnidadID, // ID interno
+            "UnidadLabel": USUARIO.UnidadLabel, // Dato visual para el admin
             "FechaPago": document.getElementById("fechaPago").value,
             "Monto": parseFloat(document.getElementById("montoPago").value) || 0,
             "Metodo": "Transferencia",
-            "Estado": "Pendiente Revisión", // Estado inicial
-            "ComprobanteURL": FILE_BASE64, // Aquí viaja la imagen (o la URL si usaras cloud storage)
+            "Estado": "Pendiente Revisión",
+            "ComprobanteURL": FILE_BASE64,
             "Observaciones": document.getElementById("obsPago").value,
             "RegistradoPor": USUARIO.Email,
             "FechaRegistro": new Date().toISOString()
         };
 
         try {
-            console.log("Enviando Pago:", payload);
-            
-            // AQUÍ LLAMAMOS A TU FUNCIÓN DE APPSHEET
             if(typeof appSheetCRUD === 'function'){
                 await appSheetCRUD("Pagos", "Add", [payload]);
             } else {
-                // Simulación para demo
                 await new Promise(r => setTimeout(r, 2000));
             }
 
-            alert("✅ ¡Reporte enviado con éxito!\nLa administración revisará tu pago pronto.");
-            window.location.href = "portal.html"; // Volver al inicio
+            alert("✅ Reporte enviado. La administración lo revisará pronto.");
+            window.location.href = "portal.html"; 
 
         } catch (err) {
             console.error(err);
-            alert("Hubo un error al enviar el reporte. Inténtalo de nuevo.");
+            alert("Error al enviar: " + err.message);
         } finally {
             document.getElementById("spinner").style.display = "none";
         }

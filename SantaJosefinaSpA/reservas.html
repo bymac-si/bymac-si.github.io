@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Reservas - Santa Josefina</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="assets/js/app.js"></script>
+  
+  <style>
+    /* Estilos App Mobile (Unificados con Portal) */
+    body { background-color: #f8fafc; padding-bottom: 90px; }
+    
+    /* Header Simple (Con botón atrás) */
+    .app-header-simple {
+      background: #1A2B48; padding: 20px; color: white;
+      display: flex; align-items: center; gap: 15px;
+      box-shadow: 0 4px 15px rgba(26, 43, 72, 0.2);
+      border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .page-title { font-size: 18px; font-weight: 700; margin: 0; color: white; }
+    .btn-back { color: white; font-size: 20px; text-decoration: none; opacity: 0.9; }
+
+    /* Carrusel de Espacios */
+    .spaces-scroller {
+      display: flex; gap: 12px; overflow-x: auto; padding: 20px 15px;
+      scrollbar-width: none;
+    }
+    .spaces-scroller::-webkit-scrollbar { display: none; }
+
+    .space-card {
+      min-width: 130px; background: white; border-radius: 16px;
+      border: 2px solid transparent; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      padding: 15px; cursor: pointer; transition: all 0.2s; text-align: center;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .space-card.active { border-color: #2563eb; background: #eff6ff; transform: translateY(-2px); }
+    .space-icon { font-size: 28px; color: #1A2B48; margin-bottom: 8px; }
+    .space-card.active .space-icon { color: #2563eb; }
+    .space-name { font-size: 12px; font-weight: 700; color: #334155; line-height: 1.2; }
+
+    /* Selector de Fecha */
+    .date-selector {
+      margin: 0 15px 20px; background: white; padding: 15px;
+      border-radius: 16px; display: flex; align-items: center; justify-content: space-between;
+      border: 1px solid #e2e8f0; box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+    .date-input { border: none; font-family: inherit; font-size: 16px; font-weight: 700; color: #1A2B48; outline: none; text-align: right; background: transparent;}
+
+    /* Grilla de Horarios */
+    .slots-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 10px; margin: 0 15px;
+    }
+    .time-slot {
+      background: white; border: 1px solid #e2e8f0; border-radius: 12px;
+      padding: 12px 5px; text-align: center; cursor: pointer; position: relative;
+      transition: all 0.2s;
+    }
+    .time-slot.available { border-color: #10b981; color: #065f46; background: #ecfdf5; }
+    .time-slot.occupied { background: #f1f5f9; color: #94a3b8; border-color: #e2e8f0; cursor: not-allowed; }
+    .time-slot.selected { background: #1A2B48; color: white; border-color: #1A2B48; transform: scale(1.05); box-shadow: 0 4px 12px rgba(26, 43, 72, 0.3); }
+    
+    .slot-time { font-weight: 800; font-size: 15px; margin-bottom: 2px; }
+    .slot-price { font-size: 10px; font-weight: 600; display: block; }
+
+    /* Reglas y Footer */
+    .rules-card { margin: 20px 15px; padding: 15px; background: #fff7ed; border-radius: 12px; border-left: 4px solid #f97316; font-size: 13px; color: #9a3412; display: flex; gap: 10px; align-items: start; }
+    
+    .booking-footer {
+      position: fixed; bottom: 0; left: 0; width: 100%;
+      background: white; padding: 15px 20px; box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+      display: flex; justify-content: space-between; align-items: center;
+      z-index: 200; border-top-left-radius: 20px; border-top-right-radius: 20px;
+    }
+    .total-label { font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase; }
+    .total-price { font-size: 20px; font-weight: 800; color: #1A2B48; }
+    .btn-book {
+      background: #2563eb; color: white; border: none;
+      padding: 12px 30px; border-radius: 30px; font-weight: 700;
+      font-size: 15px; cursor: pointer; transition: opacity 0.2s;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+    }
+    .btn-book:disabled { background: #cbd5e1; cursor: not-allowed; box-shadow: none; }
+
+    /* Mis Reservas */
+    .my-bookings { margin: 30px 15px; }
+    .booking-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #10b981; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
+    
+    /* Spinner */
+    .spinner-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; }
+  </style>
+</head>
+<body>
+
+  <div class="app-header-simple">
+    <a href="portal.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i></a>
+    <h1 class="page-title">Reservar Espacio</h1>
+  </div>
+
+  <div class="spaces-scroller" id="listaEspacios">
+    <div class="space-card active" style="width: 100%;">
+       <div style="font-size:12px; color:#64748b;">Cargando espacios...</div>
+    </div>
+  </div>
+
+  <div class="date-selector">
+    <label style="font-size:13px; color:#64748b; font-weight:600;"><i class="fa-regular fa-calendar"></i> Fecha Reserva:</label>
+    <input type="date" id="inputFecha" class="date-input">
+  </div>
+
+  <div id="rulesContainer" class="rules-card" style="display:none;">
+    <i class="fa-solid fa-circle-info" style="margin-top:2px;"></i> 
+    <span id="rulesText"></span>
+  </div>
+
+  <h3 style="margin: 0 15px 15px; font-size:14px; font-weight:700; color:#334155; text-transform:uppercase; letter-spacing:0.5px;">Horarios Disponibles</h3>
+  <div class="slots-grid" id="slotsContainer">
+    <div style="grid-column: 1/-1; text-align:center; color:#94a3b8; padding:30px; font-size:13px;">
+      Selecciona un espacio y fecha para ver disponibilidad.
+    </div>
+  </div>
+
+  <div class="my-bookings">
+    <h3 style="font-size:14px; font-weight:700; color:#334155; margin-bottom:15px; text-transform:uppercase; letter-spacing:0.5px;">Mis Reservas Activas</h3>
+    <div id="listaMisReservas">
+        <div style="text-align:center; color:#94a3b8; font-size:13px;">No tienes reservas futuras.</div>
+    </div>
+  </div>
+
+  <div style="height: 100px;"></div> <div class="booking-footer">
+    <div>
+      <div class="total-label">Total a pagar</div>
+      <div class="total-price" id="totalPrice">$0</div>
+    </div>
+    <button class="btn-book" id="btnConfirmar" disabled onclick="confirmarReserva()">Confirmar</button>
+  </div>
+
+  <div id="spinner" class="spinner-overlay" style="display:none;">
+    <div style="width:40px; height:40px; border-radius:50%; border:4px solid #eee; border-top-color:#1A2B48; animation:spin 1s linear infinite;"></div>
+    <div style="margin-top:15px; font-size:13px; font-weight:600; color:#1A2B48;">Procesando...</div>
+  </div>
+
+  <script>
+    let USUARIO = null;
+    let espacioSeleccionado = null;
+    let bloquesSeleccionados = [];
+
+    // --- CONFIGURACIÓN DE DATOS (MOCKUP INICIAL) ---
+    // Esto luego lo reemplazarás con fetchData('Espacios')
+    const ESPACIOS = [
+      { ID: 'EQ_01', Nombre: 'Quincho Norte', Icono: 'fa-fire-burner', Costo: 20000, Reglas: 'Máx 15 personas. Limpieza incluida. Horario máx 23:00.' },
+      { ID: 'EQ_02', Nombre: 'Quincho Sur', Icono: 'fa-fire-burner', Costo: 20000, Reglas: 'Máx 10 personas. Música moderada.' },
+      { ID: 'SAL_01', Nombre: 'Sala Eventos', Icono: 'fa-champagne-glasses', Costo: 35000, Reglas: 'Garantía $50.000 (cheque/transferencia).' },
+      { ID: 'LAV_01', Nombre: 'Lavandería', Icono: 'fa-shirt', Costo: 1500, Reglas: 'Ficha por carga de 1 hora.' },
+      { ID: 'EST_V',  Nombre: 'Estac. Visita', Icono: 'fa-car', Costo: 0, Reglas: 'Máx 4 horas gratis. Registrar patente.' }
+    ];
+
+    // Simulación de reservas ya tomadas en la BD
+    const RESERVAS_DB = [
+      { EspacioID: 'EQ_01', Fecha: '2026-01-10', Bloque: '18:00' }, 
+      { EspacioID: 'EQ_01', Fecha: '2026-01-10', Bloque: '22:00' }
+    ];
+
+    document.addEventListener("DOMContentLoaded", () => {
+        // 1. Validar Sesión
+        try {
+            const sesion = localStorage.getItem("sesion_residente");
+            if(!sesion) throw new Error("No session");
+            USUARIO = JSON.parse(sesion);
+        } catch(e) {
+            window.location.href = "login_residente.html";
+            return;
+        }
+
+        // 2. Configurar Fecha (Hoy por defecto)
+        const hoy = new Date().toISOString().split('T')[0];
+        const inputFecha = document.getElementById("inputFecha");
+        inputFecha.value = hoy;
+        inputFecha.min = hoy;
+        inputFecha.addEventListener("change", renderSlots);
+
+        // 3. Renderizar Espacios
+        renderEspacios();
+        
+        // 4. Seleccionar el primero
+        seleccionarEspacio(ESPACIOS[0]);
+    });
+
+    function renderEspacios() {
+        const container = document.getElementById("listaEspacios");
+        container.innerHTML = ESPACIOS.map(e => `
+            <div class="space-card" id="card_${e.ID}" onclick='seleccionarEspacio(${JSON.stringify(e)})'>
+                <i class="fa-solid ${e.Icono} space-icon"></i>
+                <div class="space-name">${e.Nombre}</div>
+            </div>
+        `).join("");
+    }
+
+    function seleccionarEspacio(espacio) {
+        espacioSeleccionado = espacio;
+        bloquesSeleccionados = []; 
+        actualizarFooter();
+
+        // UI Activa
+        document.querySelectorAll(".space-card").forEach(c => c.classList.remove("active"));
+        document.getElementById(`card_${espacio.ID}`).classList.add("active");
+
+        // Mostrar Reglas
+        const rulesDiv = document.getElementById("rulesContainer");
+        if(espacio.Reglas) {
+            rulesDiv.style.display = "flex";
+            document.getElementById("rulesText").textContent = espacio.Reglas;
+        } else {
+            rulesDiv.style.display = "none";
+        }
+
+        renderSlots();
+    }
+
+    function renderSlots() {
+        if(!espacioSeleccionado) return;
+        
+        const fecha = document.getElementById("inputFecha").value;
+        const container = document.getElementById("slotsContainer");
+        
+        // Lógica de bloques (Ejemplo)
+        let bloques = [];
+        if(espacioSeleccionado.ID.includes("LAV")) {
+            // Lavandería: cada hora
+            bloques = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
+        } else if(espacioSeleccionado.ID.includes("EST")) {
+             // Estacionamiento
+             bloques = ["Mañana", "Tarde", "Noche"];
+        } else {
+            // Quinchos / Salas
+            bloques = ["12:00", "16:00", "20:00", "22:00"]; 
+        }
+
+        container.innerHTML = bloques.map(hora => {
+            // Verificar ocupación
+            const ocupado = RESERVAS_DB.some(r => 
+                r.EspacioID === espacioSeleccionado.ID && 
+                r.Fecha === fecha && 
+                r.Bloque === hora
+            );
+
+            const estadoClass = ocupado ? "occupied" : "available";
+            const estadoClick = ocupado ? "" : `onclick="toggleSlot('${hora}', this)"`;
+            const precioTxt = espacioSeleccionado.Costo > 0 ? clp(espacioSeleccionado.Costo) : "GRATIS";
+            const labelOcupado = ocupado ? '<i class="fa-solid fa-lock"></i>' : "";
+
+            return `
+                <div class="time-slot ${estadoClass}" ${estadoClick}>
+                    <div class="slot-time">${hora}</div>
+                    <span class="slot-price">${ocupado ? "OCUPADO" : precioTxt}</span>
+                    ${ocupado ? `<div style="position:absolute; top:2px; right:5px; font-size:10px; color:#94a3b8;">${labelOcupado}</div>` : ''}
+                </div>
+            `;
+        }).join("");
+    }
+
+    function toggleSlot(hora, el) {
+        // Lógica Selección Única (para simplificar MVP)
+        document.querySelectorAll(".time-slot.selected").forEach(d => d.classList.remove("selected"));
+        bloquesSeleccionados = [hora];
+        el.classList.add("selected");
+        
+        actualizarFooter();
+    }
+
+    function actualizarFooter() {
+        const btn = document.getElementById("btnConfirmar");
+        const priceEl = document.getElementById("totalPrice");
+        
+        if(bloquesSeleccionados.length > 0 && espacioSeleccionado) {
+            const total = bloquesSeleccionados.length * espacioSeleccionado.Costo;
+            priceEl.textContent = clp(total);
+            btn.disabled = false;
+        } else {
+            priceEl.textContent = "$0";
+            btn.disabled = true;
+        }
+    }
+
+    async function confirmarReserva() {
+        const fecha = document.getElementById("inputFecha").value;
+        const bloque = bloquesSeleccionados[0];
+        const costo = espacioSeleccionado.Costo;
+
+        if(!confirm(`¿Confirmar Reserva?\n\nEspacio: ${espacioSeleccionado.Nombre}\nFecha: ${fecha}\nBloque: ${bloque}`)) return;
+
+        document.getElementById("spinner").style.display = "flex";
+
+        // CONSTRUCCIÓN DEL PAYLOAD PARA TABLA 'RESERVAS'
+        const payload = {
+            ID: "RES_" + Date.now(),
+            UnidadID: USUARIO.UnidadID, // ID interno
+            UnidadLabel: USUARIO.UnidadLabel, // Dato para visualización fácil admin
+            EspacioID: espacioSeleccionado.ID,
+            EspacioNombre: espacioSeleccionado.Nombre,
+            Fecha: fecha,
+            BloqueInicio: bloque,
+            Estado: "Confirmada", // O 'Pendiente Pago'
+            Costo: costo,
+            FechaCreacion: new Date().toISOString()
+        };
+
+        try {
+            if(typeof appSheetCRUD === 'function') {
+                await appSheetCRUD("Reservas", "Add", [payload]);
+            } else {
+                await new Promise(r => setTimeout(r, 1500)); // Simulación
+            }
+            
+            alert("✅ ¡Reserva Exitosa!\nPuedes verla en 'Mis Reservas'.");
+            location.reload();
+
+        } catch(e) {
+            alert("Error al reservar: " + e.message);
+        } finally {
+            document.getElementById("spinner").style.display = "none";
+        }
+    }
+
+    function clp(v) { return "$" + new Intl.NumberFormat("es-CL").format(v); }
+  </script>
+</body>
+</html>

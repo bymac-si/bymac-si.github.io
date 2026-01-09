@@ -1,251 +1,524 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>App Santa Josefina</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="assets/js/app.js"></script>
-  
-  <style>
-    /* ===== ESTILOS MOBILE APP ===== */
-    body { background-color: #f8fafc; padding-bottom: 80px; } /* Espacio para menú inferior */
-    
-    /* Header App */
-    .app-header {
-      background: #1A2B48; color: white; padding: 20px;
-      border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
-      box-shadow: 0 4px 15px rgba(26, 43, 72, 0.2);
-    }
-    .user-welcome { font-size: 14px; opacity: 0.9; }
-    .unit-badge { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 5px;}
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <title>App Santa Josefina</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <script src="assets/js/app.js"></script>
 
-    /* Tarjeta de Deuda (Hero) */
-    .debt-card {
-      background: white; margin: -30px 15px 20px 15px; padding: 20px;
-      border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-      text-align: center; position: relative;
-    }
-    .debt-label { color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; }
-    .debt-amount { font-size: 32px; font-weight: 800; color: #1e293b; margin: 5px 0; }
-    .debt-status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-    .st-dia { background: #dcfce7; color: #166534; }
-    .st-mora { background: #fee2e2; color: #991b1b; }
+    <style>
+      /* ESTILOS APP */
+      body {
+        background-color: #f8fafc;
+        padding-bottom: 40px;
+      }
 
-    /* Botón de Pago (Call to Action) */
-    .btn-pay {
-      background: #2563eb; color: white; width: 100%; padding: 12px;
-      border: none; border-radius: 12px; font-weight: 600; font-size: 16px;
-      margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 8px;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-    }
-    .btn-pay:active { transform: scale(0.98); }
+      /* Header Compacto */
+      .app-header {
+        background: #1a2b48;
+        color: white;
+        padding: 20px 20px 30px;
+        border-bottom-left-radius: 25px;
+        border-bottom-right-radius: 25px;
+        box-shadow: 0 4px 15px rgba(26, 43, 72, 0.2);
+      }
+      .user-welcome {
+        font-size: 14px;
+        opacity: 0.9;
+      }
+      .unit-badge {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 5px;
+      }
 
-    /* Secciones */
-    .section-title { font-size: 16px; font-weight: 700; color: #334155; margin: 20px 15px 10px; }
-    
-    /* Lista de Movimientos */
-    .transaction-list { list-style: none; padding: 0; margin: 0 15px; }
-    .t-item {
-      background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px;
-      display: flex; justify-content: space-between; align-items: center;
-      border: 1px solid #e2e8f0;
-    }
-    .t-icon { width: 40px; height: 40px; border-radius: 10px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #64748b; margin-right: 12px; }
-    .t-info { flex-grow: 1; }
-    .t-date { font-size: 11px; color: #94a3b8; }
-    .t-desc { font-weight: 600; font-size: 14px; color: #1e293b; }
-    .t-amount { font-weight: 700; font-size: 14px; }
-    .is-negative { color: #ef4444; } /* Gasto/Cobro */
-    .is-positive { color: #10b981; } /* Pago realizado */
+      /* NUEVO: Accesos Rápidos (Arriba) */
+      .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin: -25px 15px 20px;
+        padding: 15px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+      }
+      .qa-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 600;
+        text-align: center;
+      }
+      .qa-icon {
+        width: 45px;
+        height: 45px;
+        background: #f1f5f9;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #1a2b48;
+        margin-bottom: 6px;
+        transition: all 0.2s;
+      }
+      .qa-item:active .qa-icon {
+        transform: scale(0.95);
+        background: #e2e8f0;
+      }
 
-    /* Menú Inferior (App Navigation) */
-    .bottom-nav {
-      position: fixed; bottom: 0; left: 0; width: 100%; background: white;
-      border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around;
-      padding: 10px 0; z-index: 1000;
-    }
-    .nav-item { text-align: center; color: #94a3b8; text-decoration: none; font-size: 10px; }
-    .nav-item i { display: block; font-size: 20px; margin-bottom: 4px; }
-    .nav-item.active { color: #1A2B48; }
-  </style>
-</head>
-<body>
+      /* Tarjeta Deuda */
+      .debt-card {
+        background: white;
+        margin: 0 15px 20px;
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        border: 1px solid #e2e8f0;
+        text-align: center;
+      }
+      .debt-label {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .debt-amount {
+        font-size: 36px;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 10px 0;
+      }
+      .debt-period {
+        font-size: 13px;
+        color: #94a3b8;
+        background: #f8fafc;
+        padding: 4px 12px;
+        border-radius: 20px;
+        display: inline-block;
+      }
 
-  <div class="app-header">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <div>
-        <div class="user-welcome">Hola, <span id="residenteNombre">Cargando...</span></div>
-        <div style="font-size:18px; font-weight:700; margin-top:2px;">
-          Unidad <span id="residenteUnidad" class="unit-badge">...</span>
+      .btn-pay {
+        background: #2563eb;
+        color: white;
+        width: 98%;
+        padding: 14px;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 15px;
+        margin-top: 15px;
+        margin: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        text-decoration: none;
+      }
+
+      /* Listas y Detalles */
+      .section-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #334155;
+        margin: 25px 15px 10px;
+      }
+      .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px dashed #e2e8f0;
+        font-size: 14px;
+      }
+      .detail-row:last-child {
+        border-bottom: none;
+      }
+      .detail-label {
+        color: #64748b;
+      }
+      .detail-value {
+        font-weight: 600;
+        color: #1e293b;
+      }
+
+      /* Spinner */
+      .spinner-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.95);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-header">
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: start;
+        "
+      >
+        <div>
+          <div class="user-welcome">Hola, <b id="residenteNombre">...</b></div>
+          <div class="unit-badge" style="height: 50px; font-size: 36px">
+            <i class="fa-solid fa-building"></i>
+            <span id="nombreEdificio">Cargando...</span>
+            <span style="opacity: 0.5; margin: 0 5px">|</span>
+            <span id="residenteUnidad">...</span>
+          </div>
+        </div>
+        <button
+          onclick="logoutResidente()"
+          style="
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            text-align: center;
+          "
+        >
+          <i
+            class="fa-solid fa-power-off"
+            style="
+              font-size: 16px;
+              position: relative;
+              top: 42%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+            "
+          ></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <a href="reservas.html" class="qa-item">
+        <div class="qa-icon"><i class="fa-regular fa-calendar-check"></i></div>
+        Reservas
+      </a>
+      <a href="reclamos.html" class="qa-item">
+        <div class="qa-icon">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        Reclamos
+      </a>
+      <a href="#" class="qa-item" onclick="alert('Histórico de Pagos')">
+        <div class="qa-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+        Historial
+      </a>
+      <a href="#" class="qa-item" onclick="alert('Reglamento y Actas')">
+        <div class="qa-icon"><i class="fa-solid fa-book-open"></i></div>
+        Docs
+      </a>
+    </div>
+
+    <div class="debt-card">
+      <div class="debt-label">
+        Gasto Común <span id="periodoCobro">...</span>
+      </div>
+      <div class="debt-amount" id="montoTotal">$0</div>
+      <div class="debt-period">
+        Vence el: <span id="fechaVencimiento">...</span>
+      </div>
+
+      <a href="reportar_pago.html" class="btn-pay">
+        <i class="fa-solid fa-paper-plane"></i> Reportar Pago
+      </a>
+    </div>
+
+    <div style="margin: 0 15px">
+      <div
+        style="
+          background: white;
+          padding: 20px;
+          border-radius: 16px;
+          border: 1px solid #e2e8f0;
+        "
+      >
+        <h4
+          style="
+            margin: 0 0 15px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a2b48;
+          "
+        >
+          Detalle del Cálculo
+        </h4>
+
+        <div class="detail-row">
+          <span class="detail-label">Total Gasto Comunidad</span>
+          <span class="detail-value" id="totalComunidad">$0</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label"
+            >Tu Alícuota (<span id="lblAlicuota">0%</span>)</span
+          >
+          <span class="detail-value" id="montoAlicuota">$0</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label"
+            >Fondo Reserva (<span id="lblFondoPct">0%</span>)</span
+          >
+          <span class="detail-value" id="montoFondo">$0</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label" style="color: #ef4444">Mora / Otros</span>
+          <span class="detail-value" style="color: #ef4444" id="montoMora"
+            >$0</span
+          >
+        </div>
+
+        <div
+          style="
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <span style="font-weight: 700; color: #1a2b48">TOTAL A PAGAR</span>
+          <span
+            style="font-weight: 800; font-size: 18px; color: #1a2b48"
+            id="montoTotalAbajo"
+            >$0</span
+          >
         </div>
       </div>
-      <div style="position:relative;">
-        <i class="fa-regular fa-bell" style="font-size:20px;"></i>
-        <div style="position:absolute; top:-2px; right:-2px; width:8px; height:8px; background:#ef4444; border-radius:50%;"></div>
+    </div>
+
+    <div id="loader" class="spinner-overlay">
+      <div
+        style="
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          border: 4px solid #eee;
+          border-top-color: #1a2b48;
+          animation: spin 1s linear infinite;
+        "
+      ></div>
+      <div
+        style="
+          margin-top: 15px;
+          font-size: 13px;
+          font-weight: 600;
+          color: #1a2b48;
+        "
+      >
+        Calculando Gastos...
       </div>
     </div>
-    <br> </div>
 
-  <div class="debt-card">
-    <div class="debt-label">Total a Pagar (Mes Actual + Mora)</div>
-    <div class="debt-amount" id="montoTotalDeuda">$0</div>
-    
-    <div id="badgeEstado" class="debt-status st-dia">Al día</div>
-    
-    <p style="font-size:11px; color:#64748b; margin-top:8px;">
-      Vence el: <span id="fechaVencimiento" style="font-weight:700;">—</span>
-    </p>
+    <script>
+      let USUARIO = null;
+      let DATOS_COMUNIDAD = null;
+      let DATOS_UNIDAD = null;
 
-    <button class="btn-pay" onclick="iniciarPagoFlow()">
-      <i class="fa-solid fa-credit-card"></i> Pagar Online
-    </button>
-  </div>
+      // Inicializar
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          const sesion = localStorage.getItem("sesion_residente");
+          if (!sesion) throw new Error("No session");
+          USUARIO = JSON.parse(sesion);
 
-  <h3 class="section-title">Detalle del Cobro</h3>
-  <div style="background:white; margin:0 15px; padding:15px; border-radius:12px; border:1px solid #e2e8f0; font-size:13px;">
-    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-      <span class="muted">Gasto Común Base</span>
-      <span id="detBase">$0</span>
-    </div>
-    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-      <span class="muted">Fondo de Reserva</span>
-      <span id="detFondo">$0</span>
-    </div>
-    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-      <span class="muted" style="color:#ef4444;">Mora/Deuda Anterior</span>
-      <span id="detMora" style="color:#ef4444; font-weight:600;">$0</span>
-    </div>
-    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-      <span class="muted">Multas</span>
-      <span id="detMultas">$0</span>
-    </div>
-    <hr style="border:none; border-top:1px dashed #cbd5e1; margin:10px 0;">
-    <div style="display:flex; justify-content:space-between; font-weight:700;">
-      <span>TOTAL</span>
-      <span id="detTotal">$0</span>
-    </div>
-  </div>
+          // Render Básico
+          document.getElementById("residenteNombre").textContent =
+            USUARIO.Nombre.split(" ")[0]; // Solo primer nombre
+          document.getElementById("residenteUnidad").textContent =
+            USUARIO.UnidadLabel || USUARIO.UnidadID;
 
-  <h3 class="section-title">Historial & Documentos</h3>
-  <ul class="transaction-list" id="listaMovimientos">
-    <li style="text-align:center; padding:20px; color:#94a3b8;">Cargando historial...</li>
-  </ul>
-
-  <nav class="bottom-nav">
-    <a href="#" class="nav-item active">
-      <i class="fa-solid fa-house"></i> Inicio
-    </a>
-    <a href="#" class="nav-item" onclick="alert('Próximamente: Reservas de Quinchos y Salas')">
-      <i class="fa-regular fa-calendar-check"></i> Reservas
-    </a>
-    <a href="#" class="nav-item" onclick="alert('Próximamente: Módulo de Reclamos')">
-      <i class="fa-solid fa-triangle-exclamation"></i> Reclamos
-    </a>
-    <a href="#" class="nav-item" onclick="alert('Próximamente: Documentos de la comunidad')">
-      <i class="fa-solid fa-file-invoice"></i> Comunidad
-    </a>
-  </nav>
-
-  <script>
-    /* LÓGICA DEL PORTAL */
-    
-    // Simulación de Usuario Logueado (Esto vendría de tu login real)
-    const USUARIO_ACTUAL = {
-        Nombre: "Juan Pérez",
-        UnidadID: "101", // Depto 101
-        EdificioID: "ED_001"
-    };
-
-    document.addEventListener("DOMContentLoaded", async () => {
-        // Cargar datos del usuario en header
-        document.getElementById("residenteNombre").textContent = USUARIO_ACTUAL.Nombre;
-        document.getElementById("residenteUnidad").textContent = USUARIO_ACTUAL.UnidadID;
-
-        await cargarDatosFinancieros();
-    });
-
-    async function cargarDatosFinancieros() {
-        // En un caso real, harías fetchData('Cobros') filtrando por unidad
-        // Aquí simulo la respuesta de la base de datos para esa unidad
-        
-        // Simulación: fetchData('Cobros', { UnidadID: '101' })
-        const cobroMes = {
-            Mes: "Enero 2026",
-            GastoComun: 85000,
-            FondoReserva: 4250,
-            MoraAnterior: 12500, // Deuda arrastrada
-            Multas: 0,
-            Vencimiento: "2026-01-30",
-            Estado: "Pendiente" // Pendiente o Pagado
-        };
-
-        const total = cobroMes.GastoComun + cobroMes.FondoReserva + cobroMes.MoraAnterior + cobroMes.Multas;
-
-        // 1. Renderizar Tarjeta Principal
-        document.getElementById("montoTotalDeuda").textContent = clp(total);
-        document.getElementById("fechaVencimiento").textContent = formatearFecha(cobroMes.Vencimiento);
-        
-        const badge = document.getElementById("badgeEstado");
-        if(cobroMes.MoraAnterior > 0 || total > 0) {
-            badge.className = "debt-status st-mora";
-            badge.textContent = "Pago Pendiente";
-        } else {
-            badge.className = "debt-status st-dia";
-            badge.textContent = "Al Día";
+          await cargarDatosReales();
+        } catch (e) {
+          console.error(e);
+          window.location.href = "login_residente.html";
+        } finally {
+          document.getElementById("loader").style.display = "none";
         }
+      });
 
-        // 2. Renderizar Detalle
-        document.getElementById("detBase").textContent = clp(cobroMes.GastoComun);
-        document.getElementById("detFondo").textContent = clp(cobroMes.FondoReserva);
-        document.getElementById("detMora").textContent = clp(cobroMes.MoraAnterior);
-        document.getElementById("detMultas").textContent = clp(cobroMes.Multas);
-        document.getElementById("detTotal").textContent = clp(total);
+      async function cargarDatosReales() {
+        try {
+          // 1. Cargar Tablas Maestras
+          const [copropiedades, unidades, gastosComunes, gastos, cobrosInd] =
+            await Promise.all([
+              fetchData("Copropiedades"),
+              fetchData("Unidades"),
+              fetchData("GastosComunes").catch(() => []), // Tabla resumen (opcional, si existe es más rápido)
+              fetchData("Gastos"), // Gastos individuales para sumar si no hay resumen
+              fetchData("Cobros").catch(() => []), // Cobros individuales (Mora, Multas)
+            ]);
 
-        // 3. Renderizar Historial (Mezcla de Cobros y Pagos)
-        const historial = [
-            { tipo: 'cobro', fecha: '2026-01-05', desc: 'Gasto Común Enero', monto: -101750 },
-            { tipo: 'pago',  fecha: '2025-12-30', desc: 'Pago Web Flow #9932', monto: 95000 },
-            { tipo: 'cobro', fecha: '2025-12-05', desc: 'Gasto Común Diciembre', monto: -95000 },
-        ];
+          // 2. Identificar Comunidad y Unidad
+          const coproID = USUARIO.CopropiedadID;
+          DATOS_COMUNIDAD = copropiedades.find(
+            (c) => String(getKeyVal(c)) === String(coproID)
+          );
+          DATOS_UNIDAD = unidades.find(
+            (u) => String(getKeyVal(u)) === String(USUARIO.UnidadID)
+          ); // Ojo: UnidadID del usuario es el ID interno
 
-        const lista = document.getElementById("listaMovimientos");
-        lista.innerHTML = historial.map(h => {
-            const isPago = h.tipo === 'pago';
-            const icon = isPago ? 'fa-arrow-up' : 'fa-arrow-down';
-            const colorClass = isPago ? 'is-positive' : 'is-negative';
-            const signo = isPago ? '+' : '';
-            
-            return `
-            <li class="t-item">
-                <div class="t-icon">
-                    <i class="fa-solid ${icon}"></i>
-                </div>
-                <div class="t-info">
-                    <div class="t-desc">${h.desc}</div>
-                    <div class="t-date">${formatearFecha(h.fecha)}</div>
-                </div>
-                <div class="t-amount ${colorClass}">${signo}${clp(h.monto)}</div>
-                ${!isPago ? `<div style="margin-left:10px;"><i class="fa-solid fa-file-pdf" style="color:#ef4444;"></i></div>` : ''} 
-            </li>`;
-        }).join("");
-    }
+          if (!DATOS_COMUNIDAD || !DATOS_UNIDAD)
+            throw new Error("Datos de comunidad no encontrados");
 
-    /* Funciones Auxiliares */
-    function clp(valor) {
-        return "$" + new Intl.NumberFormat("es-CL").format(valor);
-    }
-    function formatearFecha(iso) {
-        if(!iso) return "";
-        const [y, m, d] = iso.split("-");
-        return `${d}/${m}/${y}`;
-    }
+          document.getElementById("nombreEdificio").textContent =
+            DATOS_COMUNIDAD.Nombre;
 
-    function iniciarPagoFlow() {
-        // Aquí iría la lógica para llamar a tu backend que genera la URL de pago
-        alert("Redirigiendo a pasarela de pago segura (Flow/Transbank)...");
-    }
-  </script>
-</body>
+          // 3. Determinar Mes Actual (o último cerrado)
+          // Lógica: Tomamos el mes actual del sistema. En producción real, esto debería ser el "Mes de Cobro Activo".
+          const fechaHoy = new Date();
+          const mesStr = `${String(fechaHoy.getMonth() + 1).padStart(
+            2,
+            "0"
+          )}-${fechaHoy.getFullYear()}`; // "01-2026"
+
+          document.getElementById("periodoCobro").textContent =
+            formatMes(mesStr);
+
+          // Fecha Vencimiento (Ej: día 5 del próximo mes)
+          const diaVenc = new Date(
+            fechaHoy.getFullYear(),
+            fechaHoy.getMonth() + 1,
+            5
+          );
+          document.getElementById("fechaVencimiento").textContent =
+            diaVenc.toLocaleDateString("es-CL");
+
+          // 4. Calcular Gasto Total Comunidad
+          let totalGastoComunidad = 0;
+
+          // A) Intentar leer de tabla resumen 'GastosComunes'
+          const resumenMes = gastosComunes.find(
+            (g) => g.CopropiedadID === coproID && g.Mes === mesStr
+          );
+
+          if (resumenMes && resumenMes.TotalGastos) {
+            totalGastoComunidad = parseFloat(resumenMes.TotalGastos);
+          } else {
+            // B) Si no hay resumen, sumar 'Gastos' individuales del mes
+            const gastosMes = gastos.filter(
+              (g) =>
+                String(g.CopropiedadID) === String(coproID) && g.Mes === mesStr
+            );
+            totalGastoComunidad = gastosMes.reduce(
+              (sum, g) => sum + (parseFloat(g.Monto) || 0),
+              0
+            );
+          }
+
+          // 5. Calcular Alícuota y Fondo
+          const alicuotaPct =
+            parseFloat(
+              DATOS_UNIDAD.Alicuota && DATOS_UNIDAD.Alicuota.replace(",", ".")
+            ) || 0;
+          const fondoPct = parseFloat(DATOS_COMUNIDAD.FondoReserva) || 0; // Ej: 5 (que es 5%) o 0.05
+
+          // Conversión porcentaje: Si viene "5", asumimos 5%. Si viene "0.05", es 5%.
+          const factorFondo = fondoPct > 1 ? fondoPct / 100 : fondoPct;
+
+          // --- CÁLCULOS MATEMÁTICOS ---
+
+          // a) Gasto por Alícuota
+          const montoPorAlicuota = Math.round(
+            totalGastoComunidad * (alicuotaPct / 100)
+          );
+
+          // b) Fondo de Reserva (Calculado sobre el Gasto Común de la unidad)
+          const montoFondo = Math.round(montoPorAlicuota * factorFondo);
+
+          // c) Mora / Multas (Desde tabla 'Cobros' - Pendientes anteriores)
+          // Buscamos si hay cobros en estado 'Pendiente' que NO sean del mes actual
+          let montoMora = 0;
+          const cobrosPendientes = cobrosInd.filter(
+            (c) =>
+              String(c.UnidadID) === String(USUARIO.UnidadID) &&
+              c.Estado === "Pendiente" &&
+              c.Mes !== mesStr // Excluir mes actual si ya estuviera generado
+          );
+
+          cobrosPendientes.forEach((c) => {
+            montoMora += parseFloat(c.TotalAPagar) || 0;
+          });
+
+          // d) Total Final
+          const totalFinal = montoPorAlicuota + montoFondo + montoMora;
+
+          // 6. Renderizar en Pantalla
+          document.getElementById("totalComunidad").textContent =
+            clp(totalGastoComunidad);
+
+          document.getElementById("lblAlicuota").textContent =
+            alicuotaPct.toString().replace(".", ",") + "%";
+          document.getElementById("montoAlicuota").textContent =
+            clp(montoPorAlicuota);
+
+          document.getElementById("lblFondoPct").textContent =
+            factorFondo * 100 + "%";
+          document.getElementById("montoFondo").textContent = clp(montoFondo);
+
+          document.getElementById("montoMora").textContent = clp(montoMora);
+
+          document.getElementById("montoTotal").textContent = clp(totalFinal);
+          document.getElementById("montoTotalAbajo").textContent =
+            clp(totalFinal);
+        } catch (err) {
+          console.error("Error calculando:", err);
+          alert("Hubo un error calculando los gastos: " + err.message);
+        }
+      }
+
+      function logoutResidente() {
+        localStorage.removeItem("sesion_residente");
+        window.location.href = "login_residente.html";
+      }
+
+      /* Helpers */
+      function clp(v) {
+        return "$" + new Intl.NumberFormat("es-CL").format(v);
+      }
+      function getKeyVal(o) {
+        return o.ID || o.id || "";
+      }
+      function formatMes(str) {
+        // str = "01-2026" -> "Enero 2026"
+        const [m, y] = str.split("-");
+        const date = new Date(y, m - 1, 1);
+        return date.toLocaleDateString("es-CL", {
+          month: "long",
+          year: "numeric",
+        });
+      }
+    </script>
+  </body>
 </html>
