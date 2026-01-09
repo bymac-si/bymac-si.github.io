@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CRM - Gestión de Horarios</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="assets/js/app.js"></script>
+  <script>requireAuth();</script>
+
+  <style>
+    /* Estilos Dashboard */
+    body { max-width: 1000px; margin: 0 auto; color: #1a2b48; background-color: #f8fafc; }
+    main { padding: 40px; }
+    
+    .dashboard-header { background: #fff; padding: 20px 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; }
+    .page-title { font-size: 24px; font-weight: 700; margin: 0; color: #1e293b; }
+    
+    /* Filtro Superior */
+    .filter-area { margin-top: 15px; display: flex; gap: 15px; align-items: center; }
+    .select-modern { padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; min-width: 250px; font-size: 14px; }
+
+    /* Cards de Bloques */
+    .blocks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+    
+    .block-card { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); transition: all 0.2s; }
+    .block-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+    
+    .block-info h4 { margin: 0 0 5px; font-size: 16px; color: #1A2B48; }
+    .block-time { font-family: monospace; font-size: 14px; color: #64748b; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; }
+    
+    .btn-delete { color: #ef4444; background: #fef2f2; border: none; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .btn-delete:hover { background: #ef4444; color: white; }
+
+    /* Formulario Inline */
+    .add-card { background: #eff6ff; border: 2px dashed #bfdbfe; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; cursor: pointer; color: #2563eb; font-weight: 600; min-height: 100px; transition: all 0.2s; }
+    .add-card:hover { background: #dbeafe; border-color: #3b82f6; }
+
+    /* Modal */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center; }
+    .modal.active { display: flex; }
+    .modal-content { background: white; padding: 25px; border-radius: 12px; width: 350px; }
+    .form-group { margin-bottom: 15px; }
+    .label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 5px; color: #475569; }
+    input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; }
+    .btn-primary { width: 100%; padding: 12px; background: #1A2B48; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
+
+    /* Spinner */
+    .spinner-backdrop { position: fixed; inset: 0; background: rgba(255,255,255,0.8); display: none; place-items: center; z-index: 12000; }
+    .spinner { width: 30px; height: 30px; border-radius: 50%; border: 3px solid #eee; border-top-color: #1A2B48; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div id="header"></div>
+
+  <main>
+    <div class="dashboard-header no-print">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <h1 class="page-title">Configuración de Horarios</h1>
+          <p style="color:#64748b; font-size:14px; margin:5px 0 0;">Define los bloques disponibles para reserva.</p>
+        </div>
+        <a href="admin-espacios.html" style="text-decoration:none; color:#1A2B48; font-weight:600; font-size:14px;">
+          <i class="fa-solid fa-arrow-left"></i> Volver a Espacios
+        </a>
+      </div>
+
+      <div class="filter-area">
+        <label style="font-weight:600;">Selecciona Espacio:</label>
+        <select id="selEspacio" class="select-modern" onchange="filtrarBloques()">
+          <option value="">Cargando espacios...</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="gridBloques" class="blocks-grid">
+      </div>
+  </main>
+
+  <div id="modalBloque" class="modal">
+    <div class="modal-content">
+      <h3 style="margin-top:0;">Nuevo Bloque Horario</h3>
+      <form id="formBloque">
+        <div class="form-group">
+          <label class="label">Nombre del Turno</label>
+          <input id="blkNombre" placeholder="Ej: Mañana, Tarde, Turno 1" required>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <div class="form-group" style="flex:1;">
+            <label class="label">Hora Inicio</label>
+            <input type="time" id="blkInicio" required>
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label class="label">Hora Fin</label>
+            <input type="time" id="blkFin" required>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary">Guardar Horario</button>
+        <button type="button" onclick="cerrarModal()" style="width:100%; margin-top:10px; background:none; border:none; color:#64748b; cursor:pointer;">Cancelar</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="pageSpinner" class="spinner-backdrop"><div class="spinner"></div></div>
+  <div id="footer"></div>
+
+  <script>
+    let ESPACIOS = [];
+    let BLOQUES = [];
+    let espacioActualID = null;
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      try { document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); } catch(e){}
+      try { document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); } catch(e){}
+      
+      // Leer parámetro URL si venimos de la otra página (admin-espacios.html?id=XYZ)
+      const params = new URLSearchParams(window.location.search);
+      espacioActualID = params.get('id');
+
+      await cargarTodo();
+    });
+
+    async function cargarTodo() {
+      showSpinner(true);
+      try {
+        const [espacios, bloques] = await Promise.all([
+          fetchData("Espacios"),
+          fetchData("Bloques").catch(()=>[]) // Si no existe tabla aun, retorna vacío
+        ]);
+        ESPACIOS = espacios || [];
+        BLOQUES = bloques || [];
+
+        // Llenar Select
+        const sel = document.getElementById("selEspacio");
+        sel.innerHTML = ESPACIOS.map(e => `<option value="${getKeyVal(e)}">${e.Nombre}</option>`).join("");
+        
+        // Seleccionar el de la URL o el primero
+        if(espacioActualID && ESPACIOS.some(e => String(getKeyVal(e)) === espacioActualID)) {
+            sel.value = espacioActualID;
+        } else if(ESPACIOS.length > 0) {
+            espacioActualID = getKeyVal(ESPACIOS[0]);
+            sel.value = espacioActualID;
+        }
+
+        filtrarBloques();
+
+      } catch(e) {
+        console.error(e);
+        alert("Error cargando datos: " + e.message);
+      } finally {
+        showSpinner(false);
+      }
+    }
+
+    function filtrarBloques() {
+      espacioActualID = document.getElementById("selEspacio").value;
+      const contenedor = document.getElementById("gridBloques");
+      
+      // Filtrar bloques del espacio seleccionado
+      const misBloques = BLOQUES.filter(b => String(b.EspacioID) === String(espacioActualID));
+      
+      // Ordenar por hora de inicio
+      misBloques.sort((a,b) => (a.HoraInicio || "").localeCompare(b.HoraInicio || ""));
+
+      let html = "";
+
+      // Renderizar Cards
+      misBloques.forEach(b => {
+        html += `
+          <div class="block-card">
+            <div class="block-info">
+              <h4>${b.Nombre}</h4>
+              <span class="block-time">
+                <i class="fa-regular fa-clock"></i> ${b.HoraInicio} - ${b.HoraFin}
+              </span>
+            </div>
+            <button class="btn-delete" onclick="eliminarBloque('${getKeyVal(b)}')" title="Eliminar Turno">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        `;
+      });
+
+      // Card para agregar nuevo (Siempre al final)
+      html += `
+        <div class="add-card" onclick="abrirModal()">
+          <i class="fa-solid fa-plus-circle" style="font-size:24px;"></i>
+          <span>Agregar Turno</span>
+        </div>
+      `;
+
+      contenedor.innerHTML = html;
+    }
+
+    /* --- CRUD --- */
+    function abrirModal() {
+      if(!espacioActualID) return alert("Selecciona un espacio primero");
+      document.getElementById("formBloque").reset();
+      document.getElementById("modalBloque").classList.add("active");
+    }
+    function cerrarModal() { document.getElementById("modalBloque").classList.remove("active"); }
+
+    document.getElementById("formBloque").onsubmit = async (e) => {
+      e.preventDefault();
+      
+      const nombre = document.getElementById("blkNombre").value.trim();
+      const inicio = document.getElementById("blkInicio").value;
+      const fin = document.getElementById("blkFin").value;
+
+      if(inicio >= fin) return alert("La hora de inicio debe ser anterior a la de fin.");
+
+      const payload = {
+        ID: "BLK_" + Date.now().toString(36).toUpperCase(),
+        EspacioID: espacioActualID,
+        Nombre: nombre,
+        HoraInicio: inicio,
+        HoraFin: fin,
+        Activo: true
+      };
+
+      showSpinner(true);
+      try {
+        if(typeof appSheetCRUD === 'function') {
+          await appSheetCRUD("Bloques", "Add", [payload]);
+        } else {
+          // Mock local para pruebas sin backend
+          BLOQUES.push(payload);
+          await new Promise(r => setTimeout(r, 500));
+        }
+        cerrarModal();
+        await cargarTodo(); // Recargar para asegurar sync
+      } catch(err) {
+        alert("Error al guardar: " + err.message);
+      } finally {
+        showSpinner(false);
+      }
+    };
+
+    async function eliminarBloque(id) {
+      if(!confirm("¿Eliminar este horario?")) return;
+      showSpinner(true);
+      try {
+        if(typeof appSheetCRUD === 'function') {
+          await appSheetCRUD("Bloques", "Delete", [{ "ID": id }]);
+        } else {
+          BLOQUES = BLOQUES.filter(b => b.ID !== id);
+        }
+        await cargarTodo();
+      } catch(err) {
+        alert("Error al eliminar: " + err.message);
+      } finally {
+        showSpinner(false);
+      }
+    }
+
+    // Helpers
+    function showSpinner(show) { document.getElementById("pageSpinner").style.display = show ? "grid" : "none"; }
+    function getKeyVal(o) { return o.ID || o.id || ""; }
+  </script>
+</body>
+</html>

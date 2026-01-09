@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CRM - Gestión de Reservas</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="assets/js/app.js"></script>
+  <script>requireAuth();</script>
+
+  <style>
+    /* Estilos Base Admin */
+    body { max-width: 1300px; margin: 0 auto; color: #1a2b48; background: #f8fafc; }
+    main { padding: 40px; }
+    
+    /* Header Dashboard */
+    .dashboard-header { background: #fff; padding: 20px 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; }
+    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .page-title { font-size: 24px; font-weight: 700; margin: 0; color: #1e293b; }
+    .header-filters { display: flex; gap: 15px; border-top: 1px solid #e2e8f0; padding-top: 20px; flex-wrap: wrap; }
+    
+    /* Inputs y Selects */
+    .input-modern { height: 42px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: #fff; }
+    .filter-group { display: flex; flex-direction: column; gap: 5px; }
+    .label { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; }
+
+    /* Tabla */
+    .table-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 14px 20px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+    th { background: #f8fafc; font-weight: 600; color: #475569; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
+    tr:hover { background: #f8fafc; }
+
+    /* Estados (Badges) */
+    .badge { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; display: inline-block; }
+    .st-pendiente { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; } /* Naranja */
+    .st-confirmada { background: #ecfdf5; color: #15803d; border: 1px solid #dcfce7; } /* Verde */
+    .st-rechazada { background: #fef2f2; color: #b91c1c; border: 1px solid #fee2e2; } /* Rojo */
+
+    /* Botones Acciones */
+    .btn-icon { width: 32px; height: 32px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s; margin-right: 4px; }
+    .btn-approve { background: #dcfce7; color: #166534; }
+    .btn-approve:hover { background: #166534; color: white; }
+    .btn-reject { background: #fee2e2; color: #991b1b; }
+    .btn-reject:hover { background: #991b1b; color: white; }
+    .btn-delete { background: #f1f5f9; color: #64748b; }
+    .btn-delete:hover { background: #64748b; color: white; }
+
+    /* Alerta Conflicto */
+    .conflict-row { background-color: #fff1f2 !important; }
+    .conflict-msg { color: #e11d48; font-size: 11px; font-weight: 700; display: block; margin-top: 4px; }
+
+    /* Spinner */
+    .spinner-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); display: none; place-items: center; z-index: 999; }
+  </style>
+</head>
+<body>
+  <div id="header"></div>
+
+  <main>
+    <div class="dashboard-header">
+      <div class="header-top">
+        <div>
+          <h1 class="page-title">Gestión de Espacios Comunes</h1>
+          <p style="color:#64748b; font-size:14px; margin:5px 0 0;">Administra las reservas de quinchos, salas y estacionamientos.</p>
+        </div>
+        <button class="input-modern" style="background:#1A2B48; color:white; border:none; font-weight:600; cursor:pointer;" onclick="cargarDatos()">
+          <i class="fa-solid fa-rotate"></i> Actualizar
+        </button>
+      </div>
+
+      <div class="header-filters">
+        <div class="filter-group">
+          <label class="label">Fecha Inicio</label>
+          <input type="date" id="filtroFecha" class="input-modern" onchange="aplicarFiltros()">
+        </div>
+        <div class="filter-group">
+          <label class="label">Espacio</label>
+          <select id="filtroEspacio" class="input-modern" onchange="aplicarFiltros()">
+            <option value="">(Todos)</option>
+            </select>
+        </div>
+        <div class="filter-group">
+          <label class="label">Estado</label>
+          <select id="filtroEstado" class="input-modern" onchange="aplicarFiltros()">
+            <option value="Pendiente">Pendientes</option>
+            <option value="Confirmada">Confirmadas</option>
+            <option value="Rechazada">Rechazadas</option>
+            <option value="">(Todas)</option>
+          </select>
+        </div>
+        <div class="filter-group" style="flex-grow:1;">
+          <label class="label">Buscar Unidad</label>
+          <input type="text" id="filtroBuscar" class="input-modern" placeholder="Ej: 304..." onkeyup="aplicarFiltros()">
+        </div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha / Hora</th>
+            <th>Espacio</th>
+            <th>Unidad</th>
+            <th>Costo</th>
+            <th>Estado</th>
+            <th style="text-align:right;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tablaReservas">
+          <tr><td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;">Cargando reservas...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <div id="spinner" class="spinner-overlay">
+    <div style="width:40px; height:40px; border-radius:50%; border:4px solid #e2e8f0; border-top-color:#1A2B48; animation:spin 1s linear infinite;"></div>
+  </div>
+
+  <div id="footer"></div>
+
+  <script>
+    let RESERVAS = [], ESPACIOS = [], UNIDADES = [], VIEW = [];
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      try { document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); } catch(e){}
+      try { document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); } catch(e){}
+      
+      // Fecha por defecto: Hoy
+      document.getElementById("filtroFecha").value = new Date().toISOString().split('T')[0];
+      
+      await cargarDatos();
+    });
+
+    async function cargarDatos() {
+      showSpinner(true);
+      try {
+        const [reservas, espacios, unidades] = await Promise.all([
+          fetchData("Reservas").catch(()=>[]),
+          fetchData("Espacios").catch(()=>[]), // Si tienes tabla Espacios
+          fetchData("Unidades").catch(()=>[])
+        ]);
+
+        RESERVAS = reservas;
+        ESPACIOS = espacios; // Usar si existe tabla maestra de espacios
+        UNIDADES = unidades;
+
+        // Llenar select espacios (si hay tabla, sino usar los únicos de reservas)
+        const uniqueSpaces = [...new Set(RESERVAS.map(r => r.EspacioNombre || r.EspacioID))].filter(Boolean);
+        const selEspacio = document.getElementById("filtroEspacio");
+        selEspacio.innerHTML = '<option value="">(Todos)</option>' + 
+          uniqueSpaces.map(s => `<option value="${s}">${s}</option>`).join("");
+
+        aplicarFiltros();
+
+      } catch(e) {
+        console.error(e);
+        alert("Error cargando datos: " + e.message);
+      } finally {
+        showSpinner(false);
+      }
+    }
+
+    function aplicarFiltros() {
+      const fecha = document.getElementById("filtroFecha").value;
+      const espacio = document.getElementById("filtroEspacio").value.toLowerCase();
+      const estado = document.getElementById("filtroEstado").value;
+      const busqueda = document.getElementById("filtroBuscar").value.toLowerCase();
+
+      VIEW = RESERVAS.filter(r => {
+        // Filtro Fecha (Opcional: Si está vacío muestra todo, sino coincidencia exacta)
+        if(fecha && (!r.Fecha || !r.Fecha.includes(fecha))) return false;
+        
+        // Filtro Estado
+        if(estado && r.Estado !== estado) return false;
+
+        // Filtro Espacio
+        const spName = (r.EspacioNombre || r.EspacioID || "").toLowerCase();
+        if(espacio && !spName.includes(espacio)) return false;
+
+        // Filtro Unidad
+        const uLabel = resolverUnidad(r.UnidadID).toLowerCase();
+        if(busqueda && !uLabel.includes(busqueda)) return false;
+
+        return true;
+      });
+
+      // Ordenar: Pendientes primero, luego por hora
+      VIEW.sort((a,b) => {
+        if(a.Estado === 'Pendiente' && b.Estado !== 'Pendiente') return -1;
+        if(a.Estado !== 'Pendiente' && b.Estado === 'Pendiente') return 1;
+        return (a.BloqueInicio || "").localeCompare(b.BloqueInicio || "");
+      });
+
+      renderTabla();
+    }
+
+    function renderTabla() {
+      const tb = document.getElementById("tablaReservas");
+      if(VIEW.length === 0) {
+        tb.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:#64748b;">No hay reservas con estos filtros.</td></tr>';
+        return;
+      }
+
+      // Detectar Conflictos (Mismo Espacio, Misma Fecha, Mismo Bloque, Ambas NO rechazadas)
+      // Esto es un cálculo visual simple
+      const conflictMap = {};
+      VIEW.forEach(r => {
+        if(r.Estado === 'Rechazada') return;
+        const key = `${r.Fecha}_${r.EspacioID}_${r.BloqueInicio}`;
+        conflictMap[key] = (conflictMap[key] || 0) + 1;
+      });
+
+      tb.innerHTML = VIEW.map(r => {
+        const uLabel = resolverUnidad(r.UnidadID);
+        
+        // Estilos Estado
+        let stClass = "st-pendiente";
+        if(r.Estado === 'Confirmada') stClass = "st-confirmada";
+        if(r.Estado === 'Rechazada') stClass = "st-rechazada";
+
+        // Conflicto?
+        const key = `${r.Fecha}_${r.EspacioID}_${r.BloqueInicio}`;
+        const isConflict = (conflictMap[key] > 1 && r.Estado !== 'Rechazada');
+        const rowClass = isConflict ? "conflict-row" : "";
+        const conflictHtml = isConflict ? `<span class="conflict-msg"><i class="fa-solid fa-triangle-exclamation"></i> Tope de horario</span>` : "";
+
+        // Botones
+        let acciones = "";
+        if(r.Estado === 'Pendiente') {
+          acciones = `
+            <button class="btn-icon btn-approve" onclick="cambiarEstado('${r.ID}', 'Confirmada')" title="Aprobar">
+              <i class="fa-solid fa-check"></i>
+            </button>
+            <button class="btn-icon btn-reject" onclick="cambiarEstado('${r.ID}', 'Rechazada')" title="Rechazar">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          `;
+        } else if (r.Estado === 'Confirmada') {
+           acciones = `
+            <button class="btn-icon btn-reject" onclick="cambiarEstado('${r.ID}', 'Rechazada')" title="Cancelar Reserva">
+              <i class="fa-solid fa-ban"></i>
+            </button>
+           `;
+        }
+        
+        acciones += `
+          <button class="btn-icon btn-delete" onclick="eliminarReserva('${r.ID}')" title="Eliminar registro">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        `;
+
+        return `
+          <tr class="${rowClass}">
+            <td>
+              <div style="font-weight:700;">${formatearFecha(r.Fecha)}</div>
+              <div style="color:#64748b; font-size:13px;">${r.BloqueInicio || "Todo el día"}</div>
+              ${conflictHtml}
+            </td>
+            <td>${r.EspacioNombre || r.EspacioID}</td>
+            <td style="font-weight:600; color:#1e293b;">${uLabel}</td>
+            <td class="mono">${clp(r.Costo)}</td>
+            <td><span class="badge ${stClass}">${r.Estado || "Pendiente"}</span></td>
+            <td style="text-align:right;">${acciones}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    async function cambiarEstado(id, nuevoEstado) {
+      if(!confirm(`¿Marcar reserva como ${nuevoEstado}?`)) return;
+      showSpinner(true);
+      try {
+        if(typeof appSheetCRUD === 'function') {
+          await appSheetCRUD("Reservas", "Edit", [{ "ID": id, "Estado": nuevoEstado }]);
+        } else {
+          // Mock local
+          const idx = RESERVAS.findIndex(r => r.ID === id);
+          if(idx>=0) RESERVAS[idx].Estado = nuevoEstado;
+          await new Promise(r => setTimeout(r, 500));
+        }
+        await cargarDatos(); // Recargar para ver cambios y actualizar conflictos
+      } catch(e) {
+        alert("Error: " + e.message);
+      } finally {
+        showSpinner(false);
+      }
+    }
+
+    async function eliminarReserva(id) {
+      if(!confirm("¿Eliminar este registro permanentemente?")) return;
+      showSpinner(true);
+      try {
+        if(typeof appSheetCRUD === 'function') {
+          await appSheetCRUD("Reservas", "Delete", [{ "ID": id }]);
+        }
+        await cargarDatos();
+      } catch(e) {
+        alert("Error: " + e.message);
+      } finally {
+        showSpinner(false);
+      }
+    }
+
+    // --- Helpers ---
+    function resolverUnidad(id) {
+      const u = UNIDADES.find(x => String(x.ID || x.id) === String(id));
+      return u ? (u.Numero || u.Nombre) : id;
+    }
+    function formatearFecha(iso) { 
+      if(!iso) return ""; 
+      // Manejo básico de fecha string YYYY-MM-DD
+      const [y,m,d] = iso.split("-");
+      return `${d}/${m}/${y}`;
+    }
+    function clp(v) { return "$" + new Intl.NumberFormat("es-CL").format(v || 0); }
+    function showSpinner(show) { document.getElementById("spinner").style.display = show ? "grid" : "none"; }
+
+  </script>
+</body>
+</html>
