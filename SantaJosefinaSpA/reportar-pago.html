@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Reportar Pago - Santa Josefina</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="assets/js/app.js"></script>
+  
+  <style>
+    /* Estilos Mobile App Específicos */
+    body { background-color: #f8fafc; padding-bottom: 30px; }
+    
+    .app-header-simple {
+      background: white; padding: 15px 20px;
+      display: flex; align-items: center; gap: 15px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .page-title { font-size: 18px; font-weight: 700; color: #1e293b; margin: 0; }
+    .btn-back { color: #64748b; font-size: 18px; text-decoration: none; }
+
+    .form-card {
+      background: white; margin: 20px 15px; padding: 25px 20px;
+      border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+      border: 1px solid #e2e8f0;
+    }
+
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 8px; }
+    
+    /* Inputs Estilizados */
+    .input-app, .select-app, .textarea-app {
+      width: 100%; padding: 14px; border: 1px solid #cbd5e1;
+      border-radius: 12px; font-size: 15px; background: #f8fafc;
+      color: #1e293b; transition: all 0.2s; box-sizing: border-box;
+    }
+    .input-app:focus { border-color: #3b82f6; background: white; outline: none; }
+
+    /* Área de carga de archivo */
+    .file-upload-area {
+      border: 2px dashed #cbd5e1; border-radius: 12px;
+      padding: 30px 20px; text-align: center;
+      background: #f8fafc; cursor: pointer; position: relative;
+    }
+    .file-upload-area.has-file { border-color: #10b981; background: #ecfdf5; }
+    .upload-icon { font-size: 30px; color: #94a3b8; margin-bottom: 10px; }
+    .upload-text { font-size: 13px; color: #64748b; }
+    #fileInput { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+    /* Botón Principal */
+    .btn-submit {
+      background: #1A2B48; color: white; width: 100%; padding: 16px;
+      border: none; border-radius: 12px; font-weight: 700; font-size: 16px;
+      margin-top: 10px; cursor: pointer;
+      box-shadow: 0 4px 12px rgba(26, 43, 72, 0.2);
+    }
+    .btn-submit:active { transform: scale(0.98); }
+
+    /* Spinner Overlay */
+    .spinner-overlay {
+      position: fixed; inset: 0; background: rgba(255,255,255,0.9);
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-header-simple">
+    <a href="portal.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i></a>
+    <h1 class="page-title">Reportar Transferencia</h1>
+  </div>
+
+  <main>
+    <div class="form-card">
+      <p class="muted" style="font-size:13px; margin-bottom:20px; line-height:1.5;">
+        Sube el comprobante de tu transferencia. La administración validará el pago en un plazo de 24 a 48 hrs.
+      </p>
+
+      <form id="formPago">
+        
+        <div class="form-group">
+          <label class="form-label">¿Qué estás pagando?</label>
+          <select id="selCobro" class="select-app" required onchange="actualizarMonto()">
+            <option value="" disabled selected>Cargando deudas...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Fecha de Transferencia</label>
+          <input type="date" id="fechaPago" class="input-app" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Monto Transferido</label>
+          <input type="number" id="montoPago" class="input-app" placeholder="$0" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Comprobante (Imagen o PDF)</label>
+          <div class="file-upload-area" id="uploadArea">
+            <i class="fa-solid fa-cloud-arrow-up upload-icon" id="uploadIcon"></i>
+            <div class="upload-text" id="uploadText">Toca para subir foto</div>
+            <input type="file" id="fileInput" accept="image/*,application/pdf" required onchange="previewFile()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Nota (Opcional)</label>
+          <textarea id="obsPago" class="textarea-app" rows="2" placeholder="Ej: Transferencia desde cuenta de mi esposa..."></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit">Enviar Reporte</button>
+      </form>
+    </div>
+  </main>
+
+  <div id="spinner" class="spinner-overlay">
+    <div class="spinner" style="border-top-color: #1A2B48; width: 40px; height: 40px;"></div>
+    <div style="margin-top:15px; font-weight:600; color:#1A2B48;">Enviando comprobante...</div>
+  </div>
+
+  <script>
+    // --- SIMULACIÓN DE USUARIO (Debería venir de session/login) ---
+    const USUARIO = {
+        UnidadID: "101",
+        Email: "juan.perez@email.com"
+    };
+
+    let DEUDAS_PENDIENTES = [];
+    let FILE_BASE64 = null; // Para guardar la imagen convertida
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        // 1. Poner fecha de hoy por defecto
+        document.getElementById("fechaPago").value = new Date().toISOString().split('T')[0];
+        
+        // 2. Cargar Deudas Pendientes
+        await cargarDeudas();
+    });
+
+    async function cargarDeudas() {
+        // Simulación de Fetch a tabla 'Cobros' filtrando por UnidadID y Estado='Pendiente'
+        // const cobros = await fetchData('Cobros'); ... filter...
+        
+        // MOCK DATA
+        DEUDAS_PENDIENTES = [
+            { ID: 'COB_ENE_2026', Mes: 'Gastos Comunes Enero 2026', Total: 101750 },
+            { ID: 'COB_DIC_2025', Mes: 'Saldo Pendiente Diciembre', Total: 12500 }
+        ];
+
+        const sel = document.getElementById("selCobro");
+        if(DEUDAS_PENDIENTES.length > 0){
+            sel.innerHTML = '<option value="" selected disabled>Selecciona una deuda...</option>';
+            DEUDAS_PENDIENTES.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d.ID;
+                opt.textContent = `${d.Mes} - ${clp(d.Total)}`;
+                sel.appendChild(opt);
+            });
+        } else {
+            sel.innerHTML = '<option value="">¡Estás al día! No hay deudas.</option>';
+        }
+    }
+
+    function actualizarMonto() {
+        const id = document.getElementById("selCobro").value;
+        const deuda = DEUDAS_PENDIENTES.find(d => d.ID === id);
+        if(deuda) {
+            document.getElementById("montoPago").value = deuda.Total;
+        }
+    }
+
+    function previewFile() {
+        const file = document.getElementById("fileInput").files[0];
+        const area = document.getElementById("uploadArea");
+        const text = document.getElementById("uploadText");
+        const icon = document.getElementById("uploadIcon");
+
+        if (file) {
+            area.classList.add("has-file");
+            text.textContent = `Archivo seleccionado: ${file.name}`;
+            icon.className = "fa-solid fa-check-circle";
+            icon.style.color = "#10b981";
+
+            // Convertir a Base64 (Para enviar a AppSheet/API)
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                FILE_BASE64 = e.target.result; // Data URL completa
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    document.getElementById("formPago").onsubmit = async (e) => {
+        e.preventDefault();
+        
+        const cobroId = document.getElementById("selCobro").value;
+        if(!cobroId) { alert("Por favor selecciona qué deuda estás pagando."); return; }
+        if(!FILE_BASE64) { alert("Debes adjuntar el comprobante."); return; }
+
+        document.getElementById("spinner").style.display = "flex";
+
+        // CONSTRUCCIÓN DEL PAYLOAD PARA LA TABLA 'PAGOS'
+        const payload = {
+            "ID": "PAY_" + Date.now(), // ID único
+            "CobroID": cobroId,
+            "UnidadID": USUARIO.UnidadID,
+            "FechaPago": document.getElementById("fechaPago").value,
+            "Monto": parseFloat(document.getElementById("montoPago").value) || 0,
+            "Metodo": "Transferencia",
+            "Estado": "Pendiente Revisión", // Estado inicial
+            "ComprobanteURL": FILE_BASE64, // Aquí viaja la imagen (o la URL si usaras cloud storage)
+            "Observaciones": document.getElementById("obsPago").value,
+            "RegistradoPor": USUARIO.Email,
+            "FechaRegistro": new Date().toISOString()
+        };
+
+        try {
+            console.log("Enviando Pago:", payload);
+            
+            // AQUÍ LLAMAMOS A TU FUNCIÓN DE APPSHEET
+            if(typeof appSheetCRUD === 'function'){
+                await appSheetCRUD("Pagos", "Add", [payload]);
+            } else {
+                // Simulación para demo
+                await new Promise(r => setTimeout(r, 2000));
+            }
+
+            alert("✅ ¡Reporte enviado con éxito!\nLa administración revisará tu pago pronto.");
+            window.location.href = "portal.html"; // Volver al inicio
+
+        } catch (err) {
+            console.error(err);
+            alert("Hubo un error al enviar el reporte. Inténtalo de nuevo.");
+        } finally {
+            document.getElementById("spinner").style.display = "none";
+        }
+    };
+
+    function clp(v) { return "$" + new Intl.NumberFormat("es-CL").format(v); }
+  </script>
+</body>
+</html>

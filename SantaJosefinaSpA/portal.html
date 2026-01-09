@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>App Santa Josefina</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="assets/js/app.js"></script>
+  
+  <style>
+    /* ===== ESTILOS MOBILE APP ===== */
+    body { background-color: #f8fafc; padding-bottom: 80px; } /* Espacio para menú inferior */
+    
+    /* Header App */
+    .app-header {
+      background: #1A2B48; color: white; padding: 20px;
+      border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+      box-shadow: 0 4px 15px rgba(26, 43, 72, 0.2);
+    }
+    .user-welcome { font-size: 14px; opacity: 0.9; }
+    .unit-badge { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 5px;}
+
+    /* Tarjeta de Deuda (Hero) */
+    .debt-card {
+      background: white; margin: -30px 15px 20px 15px; padding: 20px;
+      border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      text-align: center; position: relative;
+    }
+    .debt-label { color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+    .debt-amount { font-size: 32px; font-weight: 800; color: #1e293b; margin: 5px 0; }
+    .debt-status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .st-dia { background: #dcfce7; color: #166534; }
+    .st-mora { background: #fee2e2; color: #991b1b; }
+
+    /* Botón de Pago (Call to Action) */
+    .btn-pay {
+      background: #2563eb; color: white; width: 100%; padding: 12px;
+      border: none; border-radius: 12px; font-weight: 600; font-size: 16px;
+      margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+    .btn-pay:active { transform: scale(0.98); }
+
+    /* Secciones */
+    .section-title { font-size: 16px; font-weight: 700; color: #334155; margin: 20px 15px 10px; }
+    
+    /* Lista de Movimientos */
+    .transaction-list { list-style: none; padding: 0; margin: 0 15px; }
+    .t-item {
+      background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px;
+      display: flex; justify-content: space-between; align-items: center;
+      border: 1px solid #e2e8f0;
+    }
+    .t-icon { width: 40px; height: 40px; border-radius: 10px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #64748b; margin-right: 12px; }
+    .t-info { flex-grow: 1; }
+    .t-date { font-size: 11px; color: #94a3b8; }
+    .t-desc { font-weight: 600; font-size: 14px; color: #1e293b; }
+    .t-amount { font-weight: 700; font-size: 14px; }
+    .is-negative { color: #ef4444; } /* Gasto/Cobro */
+    .is-positive { color: #10b981; } /* Pago realizado */
+
+    /* Menú Inferior (App Navigation) */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; width: 100%; background: white;
+      border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around;
+      padding: 10px 0; z-index: 1000;
+    }
+    .nav-item { text-align: center; color: #94a3b8; text-decoration: none; font-size: 10px; }
+    .nav-item i { display: block; font-size: 20px; margin-bottom: 4px; }
+    .nav-item.active { color: #1A2B48; }
+  </style>
+</head>
+<body>
+
+  <div class="app-header">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div class="user-welcome">Hola, <span id="residenteNombre">Cargando...</span></div>
+        <div style="font-size:18px; font-weight:700; margin-top:2px;">
+          Unidad <span id="residenteUnidad" class="unit-badge">...</span>
+        </div>
+      </div>
+      <div style="position:relative;">
+        <i class="fa-regular fa-bell" style="font-size:20px;"></i>
+        <div style="position:absolute; top:-2px; right:-2px; width:8px; height:8px; background:#ef4444; border-radius:50%;"></div>
+      </div>
+    </div>
+    <br> </div>
+
+  <div class="debt-card">
+    <div class="debt-label">Total a Pagar (Mes Actual + Mora)</div>
+    <div class="debt-amount" id="montoTotalDeuda">$0</div>
+    
+    <div id="badgeEstado" class="debt-status st-dia">Al día</div>
+    
+    <p style="font-size:11px; color:#64748b; margin-top:8px;">
+      Vence el: <span id="fechaVencimiento" style="font-weight:700;">—</span>
+    </p>
+
+    <button class="btn-pay" onclick="iniciarPagoFlow()">
+      <i class="fa-solid fa-credit-card"></i> Pagar Online
+    </button>
+  </div>
+
+  <h3 class="section-title">Detalle del Cobro</h3>
+  <div style="background:white; margin:0 15px; padding:15px; border-radius:12px; border:1px solid #e2e8f0; font-size:13px;">
+    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+      <span class="muted">Gasto Común Base</span>
+      <span id="detBase">$0</span>
+    </div>
+    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+      <span class="muted">Fondo de Reserva</span>
+      <span id="detFondo">$0</span>
+    </div>
+    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+      <span class="muted" style="color:#ef4444;">Mora/Deuda Anterior</span>
+      <span id="detMora" style="color:#ef4444; font-weight:600;">$0</span>
+    </div>
+    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+      <span class="muted">Multas</span>
+      <span id="detMultas">$0</span>
+    </div>
+    <hr style="border:none; border-top:1px dashed #cbd5e1; margin:10px 0;">
+    <div style="display:flex; justify-content:space-between; font-weight:700;">
+      <span>TOTAL</span>
+      <span id="detTotal">$0</span>
+    </div>
+  </div>
+
+  <h3 class="section-title">Historial & Documentos</h3>
+  <ul class="transaction-list" id="listaMovimientos">
+    <li style="text-align:center; padding:20px; color:#94a3b8;">Cargando historial...</li>
+  </ul>
+
+  <nav class="bottom-nav">
+    <a href="#" class="nav-item active">
+      <i class="fa-solid fa-house"></i> Inicio
+    </a>
+    <a href="#" class="nav-item" onclick="alert('Próximamente: Reservas de Quinchos y Salas')">
+      <i class="fa-regular fa-calendar-check"></i> Reservas
+    </a>
+    <a href="#" class="nav-item" onclick="alert('Próximamente: Módulo de Reclamos')">
+      <i class="fa-solid fa-triangle-exclamation"></i> Reclamos
+    </a>
+    <a href="#" class="nav-item" onclick="alert('Próximamente: Documentos de la comunidad')">
+      <i class="fa-solid fa-file-invoice"></i> Comunidad
+    </a>
+  </nav>
+
+  <script>
+    /* LÓGICA DEL PORTAL */
+    
+    // Simulación de Usuario Logueado (Esto vendría de tu login real)
+    const USUARIO_ACTUAL = {
+        Nombre: "Juan Pérez",
+        UnidadID: "101", // Depto 101
+        EdificioID: "ED_001"
+    };
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        // Cargar datos del usuario en header
+        document.getElementById("residenteNombre").textContent = USUARIO_ACTUAL.Nombre;
+        document.getElementById("residenteUnidad").textContent = USUARIO_ACTUAL.UnidadID;
+
+        await cargarDatosFinancieros();
+    });
+
+    async function cargarDatosFinancieros() {
+        // En un caso real, harías fetchData('Cobros') filtrando por unidad
+        // Aquí simulo la respuesta de la base de datos para esa unidad
+        
+        // Simulación: fetchData('Cobros', { UnidadID: '101' })
+        const cobroMes = {
+            Mes: "Enero 2026",
+            GastoComun: 85000,
+            FondoReserva: 4250,
+            MoraAnterior: 12500, // Deuda arrastrada
+            Multas: 0,
+            Vencimiento: "2026-01-30",
+            Estado: "Pendiente" // Pendiente o Pagado
+        };
+
+        const total = cobroMes.GastoComun + cobroMes.FondoReserva + cobroMes.MoraAnterior + cobroMes.Multas;
+
+        // 1. Renderizar Tarjeta Principal
+        document.getElementById("montoTotalDeuda").textContent = clp(total);
+        document.getElementById("fechaVencimiento").textContent = formatearFecha(cobroMes.Vencimiento);
+        
+        const badge = document.getElementById("badgeEstado");
+        if(cobroMes.MoraAnterior > 0 || total > 0) {
+            badge.className = "debt-status st-mora";
+            badge.textContent = "Pago Pendiente";
+        } else {
+            badge.className = "debt-status st-dia";
+            badge.textContent = "Al Día";
+        }
+
+        // 2. Renderizar Detalle
+        document.getElementById("detBase").textContent = clp(cobroMes.GastoComun);
+        document.getElementById("detFondo").textContent = clp(cobroMes.FondoReserva);
+        document.getElementById("detMora").textContent = clp(cobroMes.MoraAnterior);
+        document.getElementById("detMultas").textContent = clp(cobroMes.Multas);
+        document.getElementById("detTotal").textContent = clp(total);
+
+        // 3. Renderizar Historial (Mezcla de Cobros y Pagos)
+        const historial = [
+            { tipo: 'cobro', fecha: '2026-01-05', desc: 'Gasto Común Enero', monto: -101750 },
+            { tipo: 'pago',  fecha: '2025-12-30', desc: 'Pago Web Flow #9932', monto: 95000 },
+            { tipo: 'cobro', fecha: '2025-12-05', desc: 'Gasto Común Diciembre', monto: -95000 },
+        ];
+
+        const lista = document.getElementById("listaMovimientos");
+        lista.innerHTML = historial.map(h => {
+            const isPago = h.tipo === 'pago';
+            const icon = isPago ? 'fa-arrow-up' : 'fa-arrow-down';
+            const colorClass = isPago ? 'is-positive' : 'is-negative';
+            const signo = isPago ? '+' : '';
+            
+            return `
+            <li class="t-item">
+                <div class="t-icon">
+                    <i class="fa-solid ${icon}"></i>
+                </div>
+                <div class="t-info">
+                    <div class="t-desc">${h.desc}</div>
+                    <div class="t-date">${formatearFecha(h.fecha)}</div>
+                </div>
+                <div class="t-amount ${colorClass}">${signo}${clp(h.monto)}</div>
+                ${!isPago ? `<div style="margin-left:10px;"><i class="fa-solid fa-file-pdf" style="color:#ef4444;"></i></div>` : ''} 
+            </li>`;
+        }).join("");
+    }
+
+    /* Funciones Auxiliares */
+    function clp(valor) {
+        return "$" + new Intl.NumberFormat("es-CL").format(valor);
+    }
+    function formatearFecha(iso) {
+        if(!iso) return "";
+        const [y, m, d] = iso.split("-");
+        return `${d}/${m}/${y}`;
+    }
+
+    function iniciarPagoFlow() {
+        // Aquí iría la lógica para llamar a tu backend que genera la URL de pago
+        alert("Redirigiendo a pasarela de pago segura (Flow/Transbank)...");
+    }
+  </script>
+</body>
+</html>

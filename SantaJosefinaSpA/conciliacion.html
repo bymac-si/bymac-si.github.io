@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CRM - Conciliación Bancaria</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="assets/js/app.js"></script>
+  <script>requireAuth();</script>
+
+  <style>
+    /* Estilos base unificados */
+    body { max-width: 1300px; margin: 0 auto; color: #1a2b48; }
+    main { padding: 40px; }
+    .page-title { font-size: 28px; font-weight: 700; margin-bottom: 16px; }
+
+    /* Header y Filtros */
+    .dashboard-header { background: #fff; padding: 20px 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #f0f0f0; }
+    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .header-actions { display: flex; gap: 10px; }
+    .header-filters { display: flex; gap: 15px; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+    
+    /* Inputs */
+    .input-modern, select {width: 95%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: #f8fafc; width: 100%; }
+    
+    /* Tablas */
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px 15px; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: middle; }
+    th { background: #fafafa; font-weight: 600; color: #4b5563; }
+
+    /* Estados (Badges) */
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .st-pendiente { background: #fef3c7; color: #b45309; } /* Amarillo */
+    .st-aprobado { background: #dcfce7; color: #15803d; }  /* Verde */
+    .st-rechazado { background: #fee2e2; color: #b91c1c; } /* Rojo */
+
+    /* Botones de Acción */
+    .btn-icon { width: 34px; height: 34px; border: none; border-radius: 6px; background: #f3f4f6; color: #555; cursor: pointer; transition: all 0.2s; }
+    .btn-icon:hover { transform: translateY(-2px); color: white; }
+    .btn-check:hover { background: #10b981; } /* Aprobar */
+    .btn-cross:hover { background: #ef4444; } /* Rechazar */
+    .btn-view:hover { background: #3b82f6; }  /* Ver */
+
+    /* Modal Comprobante */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center; }
+    .modal.active { display: flex; }
+    .modal-content { background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; text-align: center; }
+    .comprobante-img { max-width: 100%; max-height: 400px; border-radius: 8px; border: 1px solid #eee; margin: 15px 0; }
+    
+    /* Botones Generales */
+    .btn-head { height: 44px; padding: 0 20px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; background: #fff; border: 1px solid #cbd5e1; color: #475569; }
+    .btn-head:hover { background: #f8fafc; }
+    .btn-primary { background: #1A2B48; color: white; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="header"></div>
+
+  <main>
+    <div class="dashboard-header no-print">
+      <div class="header-top">
+        <div>
+          <h1 class="page-title" style="margin:0;">Conciliación Bancaria</h1>
+          <p class="muted" style="margin:5px 0 0; font-size:13px;">Revisión de pagos reportados por residentes</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-head" onclick="cargarPagos()">
+            <i class="fa-solid fa-rotate-right"></i> Recargar
+          </button>
+        </div>
+      </div>
+
+      <div class="header-filters">
+        <div style="flex: 1;">
+          <label class="label">Buscar Unidad / ID</label>
+          <input id="inpBuscar" class="input-modern" style="width: 97%; height: 38px;" placeholder="Ej: 101, PAY_..." oninput="aplicarFiltros()">
+        </div>
+        <div style="width: 200px;">
+          <label class="label">Estado</label>
+          <select id="selEstado" onchange="aplicarFiltros()">
+            <option value="Pendiente Revisión">Pendientes</option>
+            <option value="Aprobado">Aprobados</option>
+            <option value="Rechazado">Rechazados</option>
+            <option value="">(Todos)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Unidad</th>
+          <th>Método</th>
+          <th>Monto</th>
+          <th>Comprobante</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tablaPagos">
+        <tr><td colspan="7" class="muted">Cargando pagos...</td></tr>
+      </tbody>
+    </table>
+  </main>
+
+  <div id="modalRevision" class="modal">
+    <div class="modal-content">
+      <h2 style="margin:0 0 10px;">Revisar Pago</h2>
+      <p class="muted" id="modalSubtitulo">Unidad 101 - $100.000</p>
+      
+      <div id="modalImgContainer" style="background:#f9fafb; min-height:150px; display:flex; align-items:center; justify-content:center; border-radius:8px;">
+        <img id="modalImg" class="comprobante-img" src="" alt="Comprobante">
+        <div id="modalNoImg" class="muted" style="display:none;">Sin comprobante visual</div>
+      </div>
+
+      <div style="text-align:left; margin-top:15px; font-size:13px; color:#555;">
+        <p><b>Nota del Residente:</b> <span id="modalObs">—</span></p>
+        <p><b>ID Transacción:</b> <span id="modalTxID" class="mono">—</span></p>
+      </div>
+
+      <div style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
+        <button class="btn-primary" style="background:#ef4444;" onclick="procesarPago('Rechazado')">
+          <i class="fa-solid fa-xmark"></i> Rechazar
+        </button>
+        <button class="btn-primary" style="background:#10b981;" onclick="procesarPago('Aprobado')">
+          <i class="fa-solid fa-check"></i> Aprobar Pago
+        </button>
+      </div>
+      <button onclick="cerrarModal()" style="margin-top:15px; background:none; border:none; color:#666; cursor:pointer; text-decoration:underline;">Cancelar</button>
+    </div>
+  </div>
+
+  <div id="pageSpinner" class="spinner-backdrop" style="display:none; position:fixed; inset:0; background:rgba(255,255,255,0.8); align-items:center; justify-content:center; z-index:11000;">
+    <div class="spinner-card">
+      <div class="spinner" style="border-top-color:#1A2B48;"></div>
+      <div>Procesando...</div>
+    </div>
+  </div>
+
+  <div id="footer"></div>
+
+  <script>
+    /* VARIABLES GLOBAL */
+    let PAGOS = [], VIEW = [];
+    let PAGO_ACTUAL = null; // Para el modal
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      try { document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); } catch(e){}
+      try { document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); } catch(e){}
+      cargarPagos();
+    });
+
+    async function cargarPagos() {
+      // Simulación o carga real
+      try {
+        if(typeof fetchData === 'function') {
+            PAGOS = await fetchData("Pagos");
+        } else {
+            // Mock Data si no hay backend
+            PAGOS = [
+               { ID:'PAY_001', UnidadID:'101', FechaPago:'2026-01-08', Monto:101750, Metodo:'Transferencia', Estado:'Pendiente Revisión', ComprobanteURL:'assets/img/demo-receipt.png', Observaciones:'Pago enero' },
+               { ID:'PAY_002', UnidadID:'205', FechaPago:'2026-01-07', Monto:95000, Metodo:'Flow', Estado:'Aprobado', TransaccionExterna:'FLW-9912', Observaciones:'' }
+            ];
+        }
+      } catch(e) { PAGOS = []; }
+      
+      aplicarFiltros();
+    }
+
+    function aplicarFiltros() {
+      const q = (document.getElementById("inpBuscar").value || "").toLowerCase();
+      const estado = document.getElementById("selEstado").value;
+
+      VIEW = PAGOS.filter(p => {
+        if(estado && p.Estado !== estado) return false;
+        if(q && !String(p.UnidadID).toLowerCase().includes(q) && !String(p.ID).toLowerCase().includes(q)) return false;
+        return true;
+      });
+
+      renderTabla();
+    }
+
+    function renderTabla() {
+      const tb = document.getElementById("tablaPagos");
+      if(VIEW.length === 0) { tb.innerHTML = '<tr><td colspan="7" class="muted">No hay pagos que coincidan.</td></tr>'; return; }
+
+      tb.innerHTML = VIEW.map(p => {
+        // Estilos de Badge
+        let badgeClass = "st-pendiente";
+        if(p.Estado === 'Aprobado') badgeClass = "st-aprobado";
+        if(p.Estado === 'Rechazado') badgeClass = "st-rechazado";
+
+        const tieneImg = p.ComprobanteURL ? '<i class="fa-solid fa-image text-info"></i>' : '<span class="muted">—</span>';
+
+        return `
+          <tr>
+            <td class="mono">${formatearFecha(p.FechaPago)}</td>
+            <td style="font-weight:700;">${p.UnidadID}</td>
+            <td>${p.Metodo || "Transferencia"}</td>
+            <td class="mono">${clp(p.Monto)}</td>
+            <td style="text-align:center;">${tieneImg}</td>
+            <td><span class="badge ${badgeClass}">${p.Estado}</span></td>
+            <td>
+              <button class="btn-icon btn-view" onclick='abrirRevision("${p.ID}")' title="Revisar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function abrirRevision(id) {
+      PAGO_ACTUAL = PAGOS.find(p => p.ID === id);
+      if(!PAGO_ACTUAL) return;
+
+      document.getElementById("modalSubtitulo").textContent = `Unidad ${PAGO_ACTUAL.UnidadID} - ${clp(PAGO_ACTUAL.Monto)}`;
+      document.getElementById("modalObs").textContent = PAGO_ACTUAL.Observaciones || "Sin observaciones";
+      document.getElementById("modalTxID").textContent = PAGO_ACTUAL.ID;
+
+      // Manejo de Imagen (Base64 o URL)
+      const img = document.getElementById("modalImg");
+      const noImg = document.getElementById("modalNoImg");
+      
+      if(PAGO_ACTUAL.ComprobanteURL) {
+        img.src = PAGO_ACTUAL.ComprobanteURL;
+        img.style.display = "block";
+        noImg.style.display = "none";
+      } else {
+        img.style.display = "none";
+        noImg.style.display = "block";
+      }
+
+      document.getElementById("modalRevision").classList.add("active");
+    }
+
+    function cerrarModal() {
+      document.getElementById("modalRevision").classList.remove("active");
+      PAGO_ACTUAL = null;
+    }
+
+    async function procesarPago(nuevoEstado) {
+      if(!PAGO_ACTUAL) return;
+      if(!confirm(`¿Confirmas marcar este pago como ${nuevoEstado}?`)) return;
+
+      document.getElementById("pageSpinner").style.display = "flex";
+      
+      try {
+        const payload = {
+            ID: PAGO_ACTUAL.ID, // O la key correcta
+            Estado: nuevoEstado,
+            // Opcional: FechaAprobacion: new Date().toISOString()
+        };
+
+        if(typeof appSheetCRUD === 'function') {
+            await appSheetCRUD("Pagos", "Edit", [payload]);
+            
+            // *LÓGICA ADICIONAL*: Si se aprueba, deberíamos actualizar la deuda (Tabla Cobros)
+            if(nuevoEstado === 'Aprobado' && PAGO_ACTUAL.CobroID) {
+                // Esto es conceptual, depende de tu backend real
+                console.log("Actualizando deuda CobroID:", PAGO_ACTUAL.CobroID);
+                // await appSheetCRUD("Cobros", "Edit", [{ ID: PAGO_ACTUAL.CobroID, Estado: "Pagado" }]);
+            }
+        } else {
+            // Simulacion local
+            PAGO_ACTUAL.Estado = nuevoEstado;
+            await new Promise(r => setTimeout(r, 1000));
+        }
+
+        cerrarModal();
+        cargarPagos(); // Refrescar tabla
+        alert(`Pago ${nuevoEstado} exitosamente.`);
+
+      } catch(e) {
+        alert("Error al procesar: " + e.message);
+      } finally {
+        document.getElementById("pageSpinner").style.display = "none";
+      }
+    }
+
+    /* Helpers */
+    function clp(v) { return "$" + new Intl.NumberFormat("es-CL").format(v); }
+    function formatearFecha(iso) { 
+        if(!iso) return ""; 
+        // Intenta parsear YYYY-MM-DD
+        const parts = iso.split("T")[0].split("-");
+        if(parts.length===3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        return iso;
+    }
+  </script>
+</body>
+</html>
