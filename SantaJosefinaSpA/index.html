@@ -101,9 +101,17 @@
         padding: 0.6rem 1rem;
         border-radius: 999px;
         font-weight: 700;
+        color: #fff !important;
       }
+      
+      .nav-links a:hover{
+         filter: brightness(0.95);
+        text-decoration: none;
+      }
+      
       .btn-primary:hover {
         filter: brightness(0.95);
+        text-decoration: none;
       }
 
       /* HERO */
@@ -122,7 +130,7 @@
         inset: 0;
         background: url("assets/img/administracion-hero.png") center/cover
           no-repeat;
-        opacity: 0.7;
+        opacity: 0.3;
         z-index: -1;
       }
       .hero::after {
@@ -133,21 +141,20 @@
       }
       .hero-wrap {
         color: #fff;
-        text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.55);
       }
       .hero-kicker {
-        color: #fff;
+        color: #455c78;
         font-weight: 700;
         letter-spacing: 0.06em;
         text-transform: uppercase;
         margin-bottom: 6px;
       }
       .hero-title {
-        color: #c53b2c;
+        color: #cd241c;
         font-weight: 900;
         line-height: 1.15;
-        font-size: clamp(24px, 6vw, 56px);
-        max-width: 1400px;
+        font-size: clamp(24px, 6vw, 50px);
+        max-width: 2000px;
         margin: 0 0 14px;
       }
       .hero-cta {
@@ -476,118 +483,63 @@
           font-weight: 700;
         }
       }
-    </style>
+
+
+</style>
   </head>
   <body>
     <!-- NAV -->
     <header class="main-header" id="mainHeader">
-      <div class="navbar container-fluid">
-        <!-- Logo -->
-        <a class="navbar-brand" href="index.html" aria-label="Inicio">
-          <img
-            src="assets/img/logo_santajosefina.png"
-            alt="Santa Josefina"
-            style="width: 140px; height: auto"
-          />
+  <div class="navbar container-fluid">
+    <a class="navbar-brand" href="index.html" aria-label="Inicio">
+      <img src="assets/img/logo_santajosefina.png" alt="Santa Josefina" style="width: 140px; height: auto" />
+    </a>
+
+    <button class="btn d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" style="border: 1px solid #ddd; border-radius: 10px; padding: 8px 12px; background: #fff;">
+      <i class="fa-solid fa-bars" style="color: var(--brand)"></i>
+    </button>
+
+    <nav class="nav-links d-none d-md-block">
+      <a href="#servicios" style="color: var(--brand); font-weight: 600; margin-right: 15px;">Servicios</a>
+      <a href="#copropiedad" style="color: var(--brand); font-weight: 600; margin-right: 15px;">Copropiedades</a>
+      <a href="#contacto" style="color: var(--brand); font-weight: 600;">Contacto</a>
+    </nav>
+    <div class="btn-group-custom">
+        <a href="login_residente.html" class="btn btn-primary">
+          <i class="fa-solid fa-house-user"></i> Portal Residentes
         </a>
-
-        <!-- Botón hamburguesa (solo móvil) -->
-        <button
-          class="btn d-md-none"
-          type="button"
-          aria-label="Abrir menú"
-          data-bs-toggle="offcanvas"
-          data-bs-target="#mobileMenu"
-          aria-controls="mobileMenu"
-          style="
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 8px 12px;
-            background: #fff;
-          "
-        >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-          >
-            <path
-              d="M3 6h18M3 12h18M3 18h18"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
-          </svg>
-          <span style="font-weight: 600; color: var(--brand)">Menú</span>
-        </button>
-
-        <!-- Links escritorio -->
-        <nav class="nav-links d-none d-md-block">
-          <a href="#servicios">Servicios</a>
-          <a href="#copropiedad">Copropiedades</a>
-          <a href="#contacto">Contacto</a>
-          <a href="dashboard.html" class="btn btn-primary text-white"
-            >Acceso Corporativo</a
-          >
-        </nav>
-      </div>
-    </header>
+        
+        <a href="dashboard.html" class="btn btn-primary">
+           Acceso Empresa
+        </a> 
+        </div>
+  </div>
+</header>
 
     <!-- Menú móvil (Offcanvas Bootstrap) -->
-    <div
-      class="offcanvas offcanvas-end"
-      tabindex="-1"
-      id="mobileMenu"
-      aria-labelledby="mobileMenuLabel"
-      style="width: 80vw; max-width: 360px"
-    >
-      <div class="offcanvas-header">
-        <h5
-          class="offcanvas-title"
-          id="mobileMenuLabel"
-          style="display: flex; align-items: center; gap: 10px"
-        >
-          <img
-            src="assets/img/logo_santajosefina.png"
-            alt="Santa Josefina"
-            style="height: 28px; width: auto"
-          />
-          <span style="color: var(--brand); font-weight: 800"
-            >Santa Josefina</span
-          >
-        </h5>
-        <button
-          type="button"
-          class="btn-close text-reset"
-          data-bs-dismiss="offcanvas"
-          aria-label="Cerrar"
-        ></button>
-      </div>
-      <div class="offcanvas-body">
-        <nav
-          class="list-group list-group-flush"
-          style="gap: 8px; display: grid"
-        >
-          <a class="list-group-item list-group-item-action" href="#servicios"
-            >Servicios</a
-          >
-          <a class="list-group-item list-group-item-action" href="#copropiedad"
-            >Copropiedades</a
-          >
-          <a class="list-group-item list-group-item-action" href="#contacto"
-            >Contacto</a
-          >
-          <a class="btn btn-primary" href="dashboard.html"
-            >Acceso Corporativo</a
-          >
-        </nav>
-      </div>
-    </div>
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel" style="width: 80vw; max-width: 360px">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="mobileMenuLabel">
+      <img src="assets/img/logo_santajosefina.png" alt="Santa Josefina" style="height: 28px; width: auto" />
+    </h5>
+    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+  </div>
+  <div class="offcanvas-body">
+    <nav class="list-group list-group-flush" style="gap: 8px; display: grid">
+      <a class="list-group-item list-group-item-action" href="#servicios">Servicios</a>
+      <a class="list-group-item list-group-item-action" href="#copropiedad">Copropiedades</a>
+      <a class="list-group-item list-group-item-action" href="#contacto">Contacto</a>
+      
+      <hr>
+      <a class="btn btn-primary w-100" href="login_residente.html" >
+        <i class="fa-solid fa-house-user"></i> Portal Residentes
+      </a>
+      <a class="btn btn-outline-dark w-100 mt-2" href="dashboard.html">
+        Acceso Corporativo
+      </a>
+    </nav>
+  </div>
+</div>
 
     <!-- HERO -->
     <section class="hero">
@@ -633,46 +585,53 @@
         </div>
         <div class="features-copy" style="position: relative; top: -220px">
           <p class="kicker">lo que nos define</p>
-          <h2 class="h2">Transparencia • Proyección • Disponibilidad</h2>
+          <h2 class="h4">* Gastos comunes claros y bien explicados <br> * Administración alineada con la Ley 21.442 <br>
+* Respuesta oportuna y trato directo</h2>
           <div class="list">
             <div class="item">
-              <b>TRANSPARENCIA</b>
+              <b style="text-transform: uppercase;">Transparencia real</b>
               <p>
-                Gestión transparente en la administración y ejecución de los
-                gastos comunes.
+                Gastos comunes claros, bien explicados y siempre disponibles para el comité.
               </p>
             </div>
             <div class="item">
-              <b>PROYECCIÓN</b>
+              <b style="text-transform: uppercase;">Planificación que da tranquilidad</b>
               <p>
-                Estimamos presupuestos para proyectar el gasto común en períodos
-                semestrales, anuales o bianuales.
+                Presupuestos semestrales y anuales que permiten anticipar gastos y evitar imprevistos.
               </p>
             </div>
             <div class="item">
-              <b>DISPONIBILIDAD</b>
+              <b  style="text-transform: uppercase;">Acompañamiento permanente</b>
               <p>
-                Equipo experto en la Ley 21.442, con tiempo dedicado para su
-                comunidad.
+                Presencia, respuesta oportuna y trabajo conjunto con su comunidad.
               </p>
             </div>
           </div>
         </div>
       </div>
     </section>
+    <!-- COPROPIEDAD -->
+    <section id="copropiedad" class="container-narrow" style="position: relative; top: -280px;">
+      <h2>Una administración cercana, que se hace cargo</h2>
+      <p class="text-muted" style="max-width: 800px">
+        En Santa Josefina SpA entendemos que administrar un edificio no es solo manejar números, es acompañar a personas, comités y comunidades.Trabajamos con orden, transparencia y responsabilidad, siempre alineados con la Ley 21.442 de Copropiedad Inmobiliaria, para que su comunidad funcione mejor
+      </p>
+     <h3> Cuando la administración funciona, la comunidad se siente tranquila. </h3>
+    </section>
 
     <!-- PROPIEDADES -->
     <section
       id="propiedades"
       class="container-narrow"
-      style="position: relative; top: -200px; margin-bottom: -100px"
+      style="position: relative; top: -300px; margin-bottom: -100px"
     >
+    <h1>Corretaje de Propiedades</h1>
       <h2>Propiedades Disponibles</h2>
       <div id="listaPropiedades"></div>
     </section>
 
     <!-- SERVICIOS + CONTACTO TARJETA -->
-    <section id="servicios">
+    <section id="servicios" style="position: relative; top: -200px; margin-bottom: -100px">
       <div class="container-narrow services">
         <div>
           <h2>Servicios Especializados</h2>
@@ -690,7 +649,7 @@
           </ul>
         </div>
         <aside id="contacto" class="contact">
-          <strong>Hablemos hoy</strong>
+          <strong>Solicite una evaluación gratuita de su edificio </strong><i>(sin compromiso)</i>
           <a href="tel:+56998647190">+56 9 9864 7190</a>
           <a href="mailto:marcos.castro@santajosefinaspa.cl"
             >marcos.castro@santajosefinaspa.cl</a
@@ -712,31 +671,10 @@
       </div>
     </section>
 
-    <!-- COPROPIEDAD -->
-    <section id="copropiedad" class="container-narrow">
-      <h2>Administración de Copropiedades</h2>
-      <p class="text-muted" style="max-width: 800px">
-        Con la entrada en vigencia de la
-        <strong>Ley N°21.442 de Copropiedad Inmobiliaria</strong>, ofrecemos
-        administración profesional de condominios y edificios, asegurando
-        transparencia, eficiencia y cumplimiento normativo. Inscritos en el
-        Registro Nacional de Administradores del Minvu.
-      </p>
-      <ul class="text-muted" style="max-width: 800px">
-        <li>
-          Gestión financiera y contable con reportes claros a la comunidad.
-        </li>
-        <li>Mantención preventiva y correctiva de áreas comunes.</li>
-        <li>Protocolos de seguridad y convivencia.</li>
-        <li>Asesoría legal en conflictos de copropiedad.</li>
-        <li>Plataforma digital para comunicación con residentes.</li>
-      </ul>
-    </section>
-
     <!-- CONTACTO FORM -->
-    <section class="container-narrow" style="padding: 44px 0">
+    <section class="container-narrow" style="padding: 44px 0; " >
       <h2>Contáctenos</h2>
-      <form id="formContacto">
+      <form id="formContacto" style="width: 800px;">
         <input
           id="contactoNombre"
           type="text"

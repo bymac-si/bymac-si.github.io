@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <title>App Santa Josefina</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <script src="assets/js/app.js"></script>
+
+    <style>
+      /* Estilos App Mobile */
+      body {
+        background-color: #f8fafc;
+        padding-bottom: 40px;
+      }
+
+      .app-header {
+        background: #1a2b48;
+        color: white;
+        padding: 20px 20px 30px;
+        border-bottom-left-radius: 25px;
+        border-bottom-right-radius: 25px;
+        box-shadow: 0 4px 15px rgba(26, 43, 72, 0.2);
+      }
+      .user-welcome {
+        font-size: 14px;
+        opacity: 0.9;
+      }
+      .unit-badge {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 5px;
+      }
+
+      /* Accesos Rápidos */
+      .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin: -25px 15px 20px;
+        padding: 15px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+      }
+      .qa-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 600;
+        text-align: center;
+      }
+      .qa-icon {
+        width: 45px;
+        height: 45px;
+        background: #f1f5f9;
+        border-radius: 12px;
+        border: 1px solid #99b2d6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #1a2b48;
+        margin-bottom: 6px;
+        transition: all 0.2s;
+      }
+      .qa-item:active .qa-icon {
+        transform: scale(0.95);
+        background: #e2e8f0;
+      }
+
+      /* Tarjeta Deuda */
+      .debt-card {
+        background: white;
+        margin: 0 15px 20px;
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        border: 1px solid #e2e8f0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .debt-card.clean {
+        border-left: 5px solid #10b981;
+      } /* Borde verde si al día */
+      .debt-card.pending {
+        border-left: 5px solid #ef4444;
+      } /* Borde rojo si debe */
+
+      .debt-label {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .debt-amount {
+        font-size: 36px;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 10px 0;
+      }
+      .debt-period {
+        font-size: 13px;
+        color: #94a3b8;
+        background: #f8fafc;
+        padding: 4px 12px;
+        border-radius: 20px;
+        display: inline-block;
+      }
+
+      .btn-pay {
+        background: #2563eb;
+        color: white;
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 15px;
+        margin-top: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        text-decoration: none;
+      }
+
+      /* Tablero de Notificaciones */
+      .notifications-board {
+        margin: 0 15px;
+      }
+      .notif-card {
+        background: white;
+        padding: 15px;
+        border-radius: 12px;
+        margin-bottom: 10px;
+        display: flex;
+        gap: 15px;
+        align-items: start;
+        border: 1px solid #e2e8f0;
+      }
+      .notif-icon {
+        min-width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+      }
+      .icon-success {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .icon-info {
+        background: #e0f2fe;
+        color: #075985;
+      }
+      .icon-warn {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      .notif-content h4 {
+        margin: 0 0 4px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #334155;
+      }
+      .notif-content p {
+        margin: 0;
+        font-size: 12px;
+        color: #64748b;
+        line-height: 1.4;
+      }
+      .notif-time {
+        font-size: 10px;
+        color: #94a3b8;
+        margin-top: 6px;
+        display: block;
+      }
+
+      /* Spinner */
+      .spinner-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.95);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-header">
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: start;
+        "
+      >
+        <div>
+          <div class="user-welcome" style="font-size: 18px;">Hola, <b id="residenteNombre">...</b></div>
+          <div class="unit-badge" style="font-size: 24px;">
+            <i class="fa-solid fa-building"></i>
+            <span id="nombreEdificio">Cargando...</span>
+            <span style="margin: 0 5px">| &nbsp;Casa/Depto. </span>
+            <span id="residenteUnidad">...</span>
+          </div>
+        </div>
+        <button
+  onclick="logoutResidente()"
+  style="
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  "
+>
+  <i class="fa-solid fa-power-off" style="font-size: 14px;"></i>
+</button>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <a href="reservas.html" class="qa-item">
+        <div class="qa-icon"><i class="fa-regular fa-calendar-check"></i></div>
+        Reservas
+      </a>
+      <a href="reclamos.html" class="qa-item">
+        <div class="qa-icon">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        Reclamos
+      </a>
+      <a href="#historial" class="qa-item">
+        <div class="qa-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+        Historial
+      </a>
+      <a href="#" class="qa-item" onclick="alert('Documentos de la comunidad')">
+        <div class="qa-icon"><i class="fa-solid fa-book-open"></i></div>
+        Docs
+      </a>
+    </div>
+
+    <div class="debt-card" id="cardDeudaContainer">
+      <div class="debt-label">Total a Pagar</div>
+      <div class="debt-amount" id="montoTotal">...</div>
+      <div class="debt-period" id="textoEstadoDeuda">Calculando...</div>
+
+      <div id="btnPagarContainer" style="display: none">
+        <a
+          href="reportar_pago.html"
+          class="btn-pay"
+          style="width: 98%; margin: auto"
+        >
+          <i class="fa-solid fa-paper-plane"></i> Reportar Pago
+        </a>
+      </div>
+    </div>
+
+    <h3
+      style="
+        font-size: 15px;
+        font-weight: 700;
+        color: #334155;
+        margin: 25px 15px 15px;
+      "
+    >
+      Tablero de Avisos
+    </h3>
+    <div class="notifications-board" id="notifBoard">
+      <div
+        style="
+          text-align: center;
+          padding: 20px;
+          color: #94a3b8;
+          font-size: 13px;
+        "
+      >
+        No hay notificaciones recientes.
+      </div>
+    </div>
+
+    <div id="loader" class="spinner-overlay">
+      <div
+        style="
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          border: 4px solid #eee;
+          border-top-color: #1a2b48;
+          animation: spin 1s linear infinite;
+        "
+      ></div>
+      <div
+        style="
+          margin-top: 15px;
+          font-size: 13px;
+          font-weight: 600;
+          color: #1a2b48;
+        "
+      >
+        Sincronizando datos...
+      </div>
+    </div>
+
+    <script>
+      let USUARIO = null;
+      let DATOS_COMUNIDAD = null;
+      let DATOS_UNIDAD = null;
+
+      // --- FUNCIÓN SEGURA PARA ACTUALIZAR TEXTO ---
+      // Si el ID no existe en el HTML, no hace nada (y no da error)
+      function safeUpdate(id, valor) {
+        const el = document.getElementById(id);
+        if (el) {
+          el.textContent = valor;
+        } else {
+          console.warn(`Elemento HTML no encontrado: ${id}`);
+        }
+      }
+
+      // --- FUNCIÓN DE LIMPIEZA DE NÚMEROS ---
+      function parseMonto(valor) {
+        if (valor === undefined || valor === null || valor === "") return 0;
+        const limpio = String(valor)
+          .replace(/\$/g, "")
+          .replace(/\s/g, "")
+          .replace(/\./g, "")
+          .replace(",", ".")
+          .trim();
+        const numero = parseFloat(limpio);
+        return isNaN(numero) ? 0 : numero;
+      }
+
+      function parsePorcentaje(valor) {
+        if (!valor) return 0;
+        const limpio = String(valor).replace(",", ".");
+        return parseFloat(limpio) || 0;
+      }
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          const sesion = localStorage.getItem("sesion_residente");
+          if (!sesion) throw new Error("No session");
+          USUARIO = JSON.parse(sesion);
+
+          // Render Header
+          const nombre = (USUARIO.Nombre || "Residente").split(" ")[0];
+          safeUpdate("residenteNombre", nombre);
+          safeUpdate(
+            "residenteUnidad",
+            USUARIO.UnidadLabel || USUARIO.UnidadID
+          );
+
+          await cargarTodo();
+        } catch (e) {
+          console.error("Error inicio:", e);
+        } finally {
+          const loader = document.getElementById("loader");
+          if (loader) loader.style.display = "none";
+        }
+      });
+
+      async function cargarTodo() {
+        try {
+          console.log("Cargando tablas...");
+          const [
+            copropiedades,
+            unidades,
+            gastosComunes,
+            gastos,
+            cobros,
+            pagos,
+            reservas,
+          ] = await Promise.all([
+            fetchData("Copropiedades"),
+            fetchData("Unidades"),
+            fetchData("GastosComunes").catch(() => []),
+            fetchData("Gastos").catch(() => []),
+            fetchData("Cobros").catch(() => []),
+            fetchData("Pagos").catch(() => []),
+            fetchData("Reservas").catch(() => []),
+          ]);
+
+          const myCoproID = String(USUARIO.CopropiedadID).trim();
+          const myUnidadID = String(USUARIO.UnidadID).trim();
+
+          DATOS_COMUNIDAD = copropiedades.find(
+            (c) => String(getKeyVal(c)) === myCoproID
+          );
+          DATOS_UNIDAD = unidades.find(
+            (u) => String(getKeyVal(u)) === myUnidadID
+          );
+
+          if (DATOS_COMUNIDAD)
+            safeUpdate("nombreEdificio", DATOS_COMUNIDAD.Nombre);
+
+          if (!DATOS_UNIDAD) {
+            console.error("Unidad no encontrada. ID:", myUnidadID);
+            document.getElementById("montoTotal").innerHTML =
+              "<span style='font-size:16px; color:red'>Error Unidad</span>";
+            return;
+          }
+
+          await procesarDeudaDelMes(gastosComunes, gastos, cobros);
+          renderNotificaciones(pagos, reservas);
+        } catch (err) {
+          console.error("Error general:", err);
+          safeUpdate("montoTotal", "Error Carga");
+        }
+      }
+
+      async function procesarDeudaDelMes(
+        gastosComunes,
+        gastos,
+        cobrosExistentes
+      ) {
+        try {
+          // A. Periodo
+          const fechaHoy = new Date();
+          const mesStr = `${String(fechaHoy.getMonth() + 1).padStart(
+            2,
+            "0"
+          )}-${fechaHoy.getFullYear()}`;
+
+          safeUpdate("periodoCobro", formatMes(mesStr));
+
+          const vencimientoDate = new Date(
+            fechaHoy.getFullYear(),
+            fechaHoy.getMonth() + 1,
+            5
+          );
+          safeUpdate(
+            "fechaVencimiento",
+            vencimientoDate.toLocaleDateString("es-CL")
+          );
+
+          // B. Calcular Gasto Total
+          let totalGastoComunidad = 0;
+          const resumenMes = gastosComunes.find(
+            (g) =>
+              String(g.CopropiedadID) === String(USUARIO.CopropiedadID) &&
+              g.Mes === mesStr
+          );
+
+          if (resumenMes) {
+            totalGastoComunidad = parseMonto(resumenMes.TotalGastos);
+          } else {
+            const gastosMes = gastos.filter(
+              (g) =>
+                String(g.CopropiedadID) === String(USUARIO.CopropiedadID) &&
+                g.Mes === mesStr
+            );
+            totalGastoComunidad = gastosMes.reduce(
+              (sum, g) => sum + parseMonto(g.Monto),
+              0
+            );
+          }
+
+          // C. Datos Unitarios
+          const alicuota = parsePorcentaje(DATOS_UNIDAD.Alicuota);
+          const fondoRaw = parsePorcentaje(DATOS_COMUNIDAD?.FondoReserva);
+          const factorFondo = fondoRaw > 1 ? fondoRaw / 100 : fondoRaw;
+
+          // D. Cálculo
+          const montoGC = Math.round(totalGastoComunidad * (alicuota / 100));
+          const montoFondo = Math.round(montoGC * factorFondo);
+
+          // E. Lógica de Cobros
+          const idCobroMes = `COB_${USUARIO.UnidadID}_${mesStr}`;
+          const cobroRegistrado = cobrosExistentes.find(
+            (c) => String(getKeyVal(c)) === idCobroMes
+          );
+
+          let moraVisual = 0;
+          let totalVisual = 0;
+
+          if (cobroRegistrado) {
+            // YA EXISTE EN BD
+            if (cobroRegistrado.Estado === "Pagado") {
+              const otrasMoras = cobrosExistentes.filter(
+                (c) =>
+                  String(c.UnidadID) === String(USUARIO.UnidadID) &&
+                  c.Estado === "Pendiente" &&
+                  c.ID !== idCobroMes
+              );
+              moraVisual = otrasMoras.reduce(
+                (sum, c) => sum + parseMonto(c.TotalAPagar),
+                0
+              );
+              totalVisual = moraVisual;
+
+              safeUpdate("montoAlicuota", "$0 (Pagado)");
+              safeUpdate("montoFondo", "$0");
+            } else {
+              moraVisual = parseMonto(cobroRegistrado.MontoMoraAnterior);
+              totalVisual = parseMonto(cobroRegistrado.TotalAPagar);
+
+              safeUpdate(
+                "montoAlicuota",
+                clp(parseMonto(cobroRegistrado.MontoGastoComun))
+              );
+
+              const multas = parseMonto(cobroRegistrado.MontoMultas);
+              const gcReg = parseMonto(cobroRegistrado.MontoGastoComun);
+              const fondoCalc = totalVisual - gcReg - moraVisual - multas;
+              safeUpdate("montoFondo", clp(fondoCalc > 0 ? fondoCalc : 0));
+            }
+          } else {
+            // NO EXISTE -> CALCULAR Y CREAR
+            const morasPrevias = cobrosExistentes
+              .filter(
+                (c) =>
+                  String(c.UnidadID) === String(USUARIO.UnidadID) &&
+                  c.Estado === "Pendiente"
+              )
+              .reduce((sum, c) => sum + parseMonto(c.TotalAPagar), 0);
+
+            moraVisual = morasPrevias;
+            totalVisual = montoGC + montoFondo + morasPrevias;
+
+            if (montoGC > 0) {
+              console.log("Generando cobro auto:", idCobroMes);
+              const nuevoCobro = {
+                ID: idCobroMes,
+                UnidadID: String(USUARIO.UnidadID),
+                Mes: mesStr,
+                MontoGastoComun: montoGC,
+                MontoMultas: 0,
+                MontoMoraAnterior: morasPrevias,
+                TotalAPagar: totalVisual,
+                Estado: "Pendiente",
+                FechaVencimiento: vencimientoDate.toISOString().split("T")[0],
+              };
+              if (typeof appSheetCRUD === "function") {
+                appSheetCRUD("Cobros", "Add", [nuevoCobro]).catch(
+                  console.error
+                );
+              }
+            }
+
+            safeUpdate("montoAlicuota", clp(montoGC));
+            safeUpdate("montoFondo", clp(montoFondo));
+          }
+
+          // Render Final (Usando safeUpdate para evitar crash)
+          safeUpdate("totalComunidad", clp(totalGastoComunidad));
+          safeUpdate("lblAlicuota", alicuota + "%");
+          safeUpdate("lblFondoPct", factorFondo * 100 + "%");
+          safeUpdate("montoMora", clp(moraVisual));
+
+          safeUpdate("montoTotal", clp(totalVisual));
+          safeUpdate("montoTotalAbajo", clp(totalVisual));
+
+          // Estado Tarjeta
+          const card = document.getElementById("cardDeudaContainer");
+          const txt = document.getElementById("textoEstadoDeuda");
+          const btn = document.getElementById("btnPagarContainer");
+
+          if (card && txt && btn) {
+            if (totalVisual > 0) {
+              card.style.borderLeft = "5px solid #ef4444";
+              txt.textContent = "Pagos Pendientes";
+              txt.style.color = "#ef4444";
+              btn.style.display = "block";
+            } else {
+              card.style.borderLeft = "5px solid #10b981";
+              txt.textContent = "¡Estás al día!";
+              txt.style.color = "#10b981";
+              btn.style.display = "none";
+            }
+          }
+        } catch (e) {
+          console.error("Error en procesarDeuda:", e);
+          safeUpdate("montoTotal", "Error");
+        }
+      }
+
+      function renderNotificaciones(pagos, reservas) {
+        const board = document.getElementById("notifBoard");
+        if (!board) return;
+
+        const items = [];
+        const misPagos = pagos.filter(
+          (p) => String(p.UnidadID) === String(USUARIO.UnidadID)
+        );
+
+        misPagos.forEach((p) => {
+          if (p.Estado === "Aprobado")
+            items.push({
+              type: "success",
+              title: "Pago Aprobado",
+              desc: `Monto: ${clp(parseMonto(p.Monto))}`,
+              date: p.FechaRegistro,
+            });
+          if (p.Estado === "Rechazado")
+            items.push({
+              type: "error",
+              title: "Pago Rechazado",
+              desc: p.Observaciones || "Datos incorrectos",
+              date: p.FechaRegistro,
+            });
+        });
+
+        const misReservas = reservas.filter(
+          (r) => String(r.UnidadID) === String(USUARIO.UnidadID)
+        );
+        misReservas.forEach((r) => {
+          if (r.Estado === "Confirmada")
+            items.push({
+              type: "info",
+              title: "Reserva Confirmada",
+              desc: `${r.EspacioNombre || "Espacio"} - ${r.Fecha}`,
+              date: r.FechaCreacion,
+            });
+        });
+
+        items.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+        const ultimos = items.slice(0, 5);
+
+        if (ultimos.length === 0) {
+          board.innerHTML =
+            '<div style="text-align:center; padding:20px; color:#94a3b8; font-size:13px;">No hay notificaciones recientes.</div>';
+          return;
+        }
+
+        board.innerHTML = ultimos
+          .map((it) => {
+            let icon = "fa-check",
+              color = "icon-success";
+            if (it.type === "error") {
+              icon = "fa-xmark";
+              color = "icon-warn";
+            }
+            if (it.type === "info") {
+              icon = "fa-calendar-check";
+              color = "icon-info";
+            }
+            const fechaStr = it.date
+              ? new Date(it.date).toLocaleDateString("es-CL")
+              : "";
+            return `<div class="notif-card"><div class="notif-icon ${color}"><i class="fa-solid ${icon}"></i></div><div class="notif-content"><h4>${it.title}</h4><p>${it.desc}</p><span class="notif-time">${fechaStr}</span></div></div>`;
+          })
+          .join("");
+      }
+
+      function logoutResidente() {
+        localStorage.removeItem("sesion_residente");
+        window.location.href = "login_residente.html";
+      }
+
+      function clp(v) {
+        return "$" + new Intl.NumberFormat("es-CL").format(v);
+      }
+      function getKeyVal(o) {
+        return o.ID || o.id || "";
+      }
+      function formatMes(str) {
+        if (!str) return "";
+        const [m, y] = str.split("-");
+        const d = new Date(y, m - 1, 1);
+        return d.toLocaleDateString("es-CL", {
+          month: "long",
+          year: "numeric",
+        });
+      }
+    </script>
+  </body>
+</html>
