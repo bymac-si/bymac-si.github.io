@@ -777,7 +777,7 @@
       /* ================= LÓGICA DE NEGOCIO ================= */
       function calcularHonorarioLocal(unidades, factor, utm) {
         if (!(factor > 0 && utm > 0)) return { neto: 0, iva: 0, total: 0 };
-        const baseF1 = utm * 2.6;
+        const baseF1 = utm * 2.15;
         let netoTeorico = 0;
         if (unidades < 20) {
           netoTeorico = baseF1 * factor;

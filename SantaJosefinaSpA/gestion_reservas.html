@@ -8,45 +8,106 @@
   <script src="assets/js/app.js"></script>
   <script>requireAuth();</script>
 
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-  <script type="text/javascript">
-     (function(){
-        // TU PUBLIC KEY
-        emailjs.init("7Il4AhmGHchP7qfxu"); 
-        console.log(">>> EmailJS Inicializado Correctamente");
-     })();
-  </script>
+    <style>
+      /* Estilos Base Admin */
+      body {
+        max-width: 1300px;
+        margin: 0 auto;
+        color: #1a2b48;
+        background: #f8fafc;
+      }
+      main {
+        padding: 40px;
+      }
 
-  <style>
-    /* Estilos Base Admin */
-    body { max-width: 1300px; margin: 0 auto; color: #1a2b48; background: #f8fafc; }
-    main { padding: 40px; }
-    
-    /* Header Dashboard */
-    .dashboard-header { background: #fff; padding: 20px 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; }
-    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .page-title { font-size: 24px; font-weight: 700; margin: 0; color: #1e293b; }
-    .header-filters { display: flex; gap: 15px; border-top: 1px solid #e2e8f0; padding-top: 20px; flex-wrap: wrap; }
-    
-    /* Inputs y Selects */
-    .input-modern { height: 42px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: #fff; }
-    .filter-group { display: flex; flex-direction: column; gap: 5px; }
-    .label { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; }
+      /* Header Dashboard */
+      .dashboard-header {
+        background: #fff;
+        padding: 20px 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        margin-bottom: 25px;
+        border: 1px solid #e2e8f0;
+      }
+      .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0;
+        color: #1e293b;
+      }
+      .header-filters {
+        display: flex;
+        gap: 15px;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 20px;
+        flex-wrap: wrap;
+      }
 
-    /* Tabla */
-    .table-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 14px 20px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-    th { background: #f8fafc; font-weight: 600; color: #475569; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
-    tr:hover { background: #f8fafc; }
+      /* Inputs y Selects */
+      .input-modern {
+        height: 42px;
+        padding: 0 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 14px;
+        background: #fff;
+      }
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+      }
 
-    /* Estados */
+      /* Tabla */
+      .table-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        padding: 14px 20px;
+        text-align: left;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 14px;
+      }
+      th {
+        background: #f8fafc;
+        font-weight: 600;
+        color: #475569;
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+      }
+      tr:hover {
+        background: #f8fafc;
+      }
+
+    /* Estados (Badges) */
     .badge { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; display: inline-block; }
-    .st-pendiente { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
-    .st-confirmada { background: #ecfdf5; color: #15803d; border: 1px solid #dcfce7; }
-    .st-rechazada { background: #fef2f2; color: #b91c1c; border: 1px solid #fee2e2; }
+    .st-pendiente { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; } /* Naranja */
+    .st-confirmada { background: #ecfdf5; color: #15803d; border: 1px solid #dcfce7; } /* Verde */
+    .st-rechazada { background: #fef2f2; color: #b91c1c; border: 1px solid #fee2e2; } /* Rojo */
 
-    /* Botones */
+    /* Botones Acciones */
     .btn-icon { width: 32px; height: 32px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s; margin-right: 4px; }
     .btn-approve { background: #dcfce7; color: #166534; }
     .btn-approve:hover { background: #166534; color: white; }
@@ -55,38 +116,51 @@
     .btn-delete { background: #f1f5f9; color: #64748b; }
     .btn-delete:hover { background: #64748b; color: white; }
 
-    /* Conflicto */
+    /* Alerta Conflicto */
     .conflict-row { background-color: #fff1f2 !important; }
     .conflict-msg { color: #e11d48; font-size: 11px; font-weight: 700; display: block; margin-top: 4px; }
 
+    /* Spinner */
     .spinner-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); display: none; place-items: center; z-index: 999; }
   </style>
 </head>
 <body>
   <div id="header"></div>
 
-  <main>
-    <div class="dashboard-header">
-      <div class="header-top">
-        <div>
-          <h1 class="page-title">Gestión de Espacios Comunes</h1>
-          <p style="color:#64748b; font-size:14px; margin:5px 0 0;">Administra las reservas de quinchos, salas y estacionamientos.</p>
+    <main>
+      <div class="dashboard-header">
+        <div class="header-top">
+          <div>
+            <h1 class="page-title">Gestión de Espacios Comunes</h1>
+            <p style="color: #64748b; font-size: 14px; margin: 5px 0 0">
+              Administra las reservas de quinchos, salas y estacionamientos.
+            </p>
+          </div>
+          <button
+            class="input-modern"
+            style="
+              background: #1a2b48;
+              color: white;
+              border: none;
+              font-weight: 600;
+              cursor: pointer;
+            "
+            onclick="cargarDatos()"
+          >
+            <i class="fa-solid fa-rotate"></i> Actualizar
+          </button>
         </div>
-        <button class="input-modern" style="background:#1A2B48; color:white; border:none; font-weight:600; cursor:pointer;" onclick="cargarDatos()">
-          <i class="fa-solid fa-rotate"></i> Actualizar
-        </button>
-      </div>
 
       <div class="header-filters">
         <div class="filter-group">
           <label class="label">Fecha Inicio</label>
-          <input type="date" id="filtroFecha" class="input-modern" onchange="aplicarFiltros()" style="width: 90%;height:40px;">
+          <input type="date" id="filtroFecha" class="input-modern" onchange="aplicarFiltros()">
         </div>
         <div class="filter-group">
           <label class="label">Espacio</label>
           <select id="filtroEspacio" class="input-modern" onchange="aplicarFiltros()">
             <option value="">(Todos)</option>
-          </select>
+            </select>
         </div>
         <div class="filter-group">
           <label class="label">Estado</label>
@@ -99,7 +173,7 @@
         </div>
         <div class="filter-group" style="flex-grow:1;">
           <label class="label">Buscar Unidad</label>
-          <input type="text" id="filtroBuscar" class="input-modern" placeholder="Ej: 304..." onkeyup="aplicarFiltros()" style="width: 90%;height:40px;">
+          <input type="text" id="filtroBuscar" class="input-modern" placeholder="Ej: 304..." onkeyup="aplicarFiltros()">
         </div>
       </div>
     </div>
@@ -108,7 +182,7 @@
       <table>
         <thead>
           <tr>
-            <th>Fecha / Bloque</th>
+            <th>Fecha / Hora</th>
             <th>Espacio</th>
             <th>Unidad</th>
             <th>Costo</th>
@@ -123,20 +197,29 @@
     </div>
   </main>
 
-  <div id="spinner" class="spinner-overlay">
-    <div style="width:40px; height:40px; border-radius:50%; border:4px solid #e2e8f0; border-top-color:#1A2B48; animation:spin 1s linear infinite;"></div>
-  </div>
+    <div id="spinner" class="spinner-overlay">
+      <div
+        style="
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          border: 4px solid #e2e8f0;
+          border-top-color: #1a2b48;
+          animation: spin 1s linear infinite;
+        "
+      ></div>
+    </div>
 
-  <div id="footer"></div>
+    <div id="footer"></div>
 
   <script>
-    let RESERVAS = [], ESPACIOS = [], UNIDADES = [], BLOQUES = [], VIEW = [];
+    let RESERVAS = [], ESPACIOS = [], UNIDADES = [], VIEW = [];
 
     document.addEventListener("DOMContentLoaded", async () => {
       try { document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); } catch(e){}
       try { document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); } catch(e){}
       
-      // Fecha por defecto
+      // Fecha por defecto: Hoy
       document.getElementById("filtroFecha").value = new Date().toISOString().split('T')[0];
       
       await cargarDatos();
@@ -145,18 +228,17 @@
     async function cargarDatos() {
       showSpinner(true);
       try {
-        const [reservas, espacios, unidades, bloques] = await Promise.all([
+        const [reservas, espacios, unidades] = await Promise.all([
           fetchData("Reservas").catch(()=>[]),
-          fetchData("Espacios").catch(()=>[]),
-          fetchData("Unidades").catch(()=>[]),
-          fetchData("Bloques").catch(()=>[])
+          fetchData("Espacios").catch(()=>[]), // Si tienes tabla Espacios
+          fetchData("Unidades").catch(()=>[])
         ]);
 
-        RESERVAS = reservas || [];
-        ESPACIOS = espacios || [];
-        UNIDADES = unidades || [];
-        BLOQUES = bloques || [];
+        RESERVAS = reservas;
+        ESPACIOS = espacios; // Usar si existe tabla maestra de espacios
+        UNIDADES = unidades;
 
+        // Llenar select espacios (si hay tabla, sino usar los únicos de reservas)
         const uniqueSpaces = [...new Set(RESERVAS.map(r => r.EspacioNombre || r.EspacioID))].filter(Boolean);
         const selEspacio = document.getElementById("filtroEspacio");
         selEspacio.innerHTML = '<option value="">(Todos)</option>' + 
@@ -191,14 +273,11 @@
         return true;
       });
 
-      // Ordenar por hora real del bloque
+      // Ordenar: Pendientes primero, luego por hora
       VIEW.sort((a,b) => {
         if(a.Estado === 'Pendiente' && b.Estado !== 'Pendiente') return -1;
         if(a.Estado !== 'Pendiente' && b.Estado === 'Pendiente') return 1;
-        
-        const horaA = getBlockStart(a.Bloque);
-        const horaB = getBlockStart(b.Bloque);
-        return horaA.localeCompare(horaB);
+        return (a.BloqueInicio || "").localeCompare(b.BloqueInicio || "");
       });
 
       renderTabla();
@@ -220,8 +299,8 @@
 
       tb.innerHTML = VIEW.map(r => {
         const uLabel = resolverUnidad(r.UnidadID);
-        const bloqueInfo = resolveBlockInfo(r.Bloque);
-
+        
+        // Estilos Estado
         let stClass = "st-pendiente";
         if(r.Estado === 'Confirmada') stClass = "st-confirmada";
         if(r.Estado === 'Rechazada') stClass = "st-rechazada";
@@ -234,32 +313,20 @@
         let acciones = "";
         if(r.Estado === 'Pendiente') {
           acciones = `
-            <button class="btn-icon btn-approve" onclick="cambiarEstado('${r.ID}', 'Confirmada')" title="Aprobar">
-              <i class="fa-solid fa-check"></i>
-            </button>
-            <button class="btn-icon btn-reject" onclick="cambiarEstado('${r.ID}', 'Rechazada')" title="Rechazar">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
+            <button class="btn-icon btn-approve" onclick="cambiarEstado('${r.ID}', 'Confirmada')" title="Aprobar"><i class="fa-solid fa-check"></i></button>
+            <button class="btn-icon btn-reject" onclick="cambiarEstado('${r.ID}', 'Rechazada')" title="Rechazar"><i class="fa-solid fa-xmark"></i></button>
           `;
         } else if (r.Estado === 'Confirmada') {
-           acciones = `
-            <button class="btn-icon btn-reject" onclick="cambiarEstado('${r.ID}', 'Rechazada')" title="Cancelar Reserva">
-              <i class="fa-solid fa-ban"></i>
-            </button>
-           `;
+           acciones = `<button class="btn-icon btn-reject" onclick="cambiarEstado('${r.ID}', 'Rechazada')" title="Cancelar"><i class="fa-solid fa-ban"></i></button>`;
         }
         
-        acciones += `
-          <button class="btn-icon btn-delete" onclick="eliminarReserva('${r.ID}')" title="Eliminar registro">
-            <i class="fa-solid fa-trash"></i>
-          </button>
-        `;
+        acciones += `<button class="btn-icon btn-delete" onclick="eliminarReserva('${r.ID}')"><i class="fa-solid fa-trash"></i></button>`;
 
         return `
           <tr class="${rowClass}">
             <td>
               <div style="font-weight:700;">${formatearFecha(r.Fecha)}</div>
-              ${bloqueInfo}
+              <div style="color:#64748b; font-size:13px;">${r.BloqueInicio || "Todo el día"}</div>
               ${conflictHtml}
             </td>
             <td>${r.EspacioNombre || r.EspacioID}</td>
@@ -272,51 +339,42 @@
       }).join("");
     }
 
+    /* --- LÓGICA PRINCIPAL DE CAMBIO DE ESTADO Y CORREO --- */
     async function cambiarEstado(id, nuevoEstado) {
       console.log(">>> 1. INICIANDO CAMBIO DE ESTADO", id, nuevoEstado);
       if(!confirm(`¿Marcar reserva como ${nuevoEstado}?`)) return;
       showSpinner(true);
       
       try {
-        // 1. Datos Reserva
-        const reserva = RESERVAS.find(r => r.ID === id);
-        if (!reserva) throw new Error("Reserva no encontrada localmente");
-        console.log(">>> 2. RESERVA:", reserva);
-
-        // 2. Datos Unidad (Email)
-        const unidad = UNIDADES.find(u => String(u.ID) === String(reserva.UnidadID));
-        console.log(">>> 3. UNIDAD:", unidad);
-        
-        let emailDestino = unidad ? unidad.Email : null;
-        console.log(">>> 4. EMAIL DESTINO:", emailDestino);
-
-        if(!emailDestino) console.warn(">>> ALERTA: Unidad sin email registrado.");
-
-        // 3. Guardar BD
         if(typeof appSheetCRUD === 'function') {
           await appSheetCRUD("Reservas", "Edit", [{ "ID": id, "Estado": nuevoEstado }]);
+        }
+
+        // 3. ENVIAR CORREO PERSONALIZADO
+        if(emailDestino && typeof enviarEmailAPI === 'function') {
+            const asunto = `${nuevoEstado}: Solicitud de Reserva ${nombreEspacio}`;
+            
+            // Generar HTML con todos los datos recolectados
+            const cuerpoHTML = generarPlantillaEmail({
+                estado: nuevoEstado,
+                residente: nombreResidente,
+                unidad: numeroUnidad,
+                espacio: nombreEspacio,
+                comunidad: nombreComunidad,
+                fecha: reserva.Fecha,
+                bloque: textoBloque
+            });
+
+            // Enviar sin await para no bloquear
+            enviarEmailAPI(emailDestino, asunto, cuerpoHTML);
         } else {
-          reserva.Estado = nuevoEstado; // Mock
+          // Mock local
+          const idx = RESERVAS.findIndex(r => r.ID === id);
+          if(idx>=0) RESERVAS[idx].Estado = nuevoEstado;
           await new Promise(r => setTimeout(r, 500));
         }
-        console.log(">>> 5. BD ACTUALIZADA");
-
-        // 4. Enviar Email
-        if(emailDestino) {
-            console.log(">>> 6. GENERANDO EMAIL...");
-            const asunto = `Actualización Reserva: ${nuevoEstado}`;
-            const cuerpoHTML = generarPlantillaEmail(reserva, nuevoEstado);
-            
-            await enviarEmailAPI(emailDestino, asunto, cuerpoHTML);
-        } else {
-            console.error(">>> 7. NO SE ENVIO EMAIL (Sin destinatario)");
-            alert("Estado guardado, pero no se envió correo (No hay email registrado).");
-        }
-
-        await cargarDatos(); 
-
+        await cargarDatos(); // Recargar para ver cambios y actualizar conflictos
       } catch(e) {
-        console.error(">>> ERROR:", e);
         alert("Error: " + e.message);
       } finally {
         showSpinner(false);
@@ -379,13 +437,97 @@
       `;
     }
 
+    /* --- PLANTILLA DE CORREO MEJORADA --- */
+    function generarPlantillaEmail(datos) {
+      const esAprobado = datos.estado === 'Confirmada';
+      const color = esAprobado ? '#10b981' : '#ef4444'; // Verde o Rojo
+      const titulo = esAprobado ? '¡Solicitud Aprobada!' : 'Solicitud Rechazada';
+      const textoIntro = esAprobado 
+        ? 'Nos complace informarle que su solicitud de reserva ha sido aprobada exitosamente.' 
+        : 'Lamentamos informarle que su solicitud de reserva no ha podido ser cursada en esta ocasión debido a disponibilidad o normativas vigentes.';
+
+      // Formato Fecha Larga (ej: Lunes 10 de Enero, 2026)
+      const fechaObj = new Date(datos.fecha);
+      const fechaTexto = fechaObj.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+      return `
+        <div style="background-color: #f4f4f7; padding: 30px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #51545E;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+            
+            <div style="background-color: #1A2B48; padding: 25px; text-align: center;">
+               <h2 style="color: #ffffff; margin: 0; font-size: 20px; font-weight: 600;">Gestión de Reservas</h2>
+               <div style="color: #aeb4c1; font-size: 13px; margin-top: 5px;">${datos.comunidad}</div>
+            </div>
+
+            <div style="padding: 40px 30px;">
+               <h1 style="color: #333333; font-size: 24px; font-weight: bold; margin-top: 0; text-align:center;">${titulo}</h1>
+               
+               <p style="font-size: 16px; line-height: 1.5;">
+                 Estimado(a) <strong>${datos.residente}</strong>,<br>
+                 Residente de la Unidad <strong>${datos.unidad}</strong>.
+               </p>
+               
+               <p style="font-size: 15px; line-height: 1.5; color: #555;">${textoIntro}</p>
+
+               <div style="background-color: #f8fafc; border-left: 5px solid ${color}; padding: 20px; margin: 25px 0; border-radius: 4px;">
+                  <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                      <td style="padding: 5px 0; color: #1A2B48; font-weight: bold; width: 100px;">Espacio:</td>
+                      <td style="padding: 5px 0;">${datos.espacio}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 5px 0; color: #1A2B48; font-weight: bold;">Fecha:</td>
+                      <td style="padding: 5px 0;">${fechaTexto}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 5px 0; color: #1A2B48; font-weight: bold;">Horario:</td>
+                      <td style="padding: 5px 0;">${datos.bloque}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 5px 0; color: #1A2B48; font-weight: bold;">Estado:</td>
+                      <td style="padding: 5px 0; color: ${color}; font-weight: bold; text-transform: uppercase;">${datos.estado}</td>
+                    </tr>
+                  </table>
+               </div>
+
+               <p style="font-size: 13px; color: #888; text-align: center; margin-top: 30px;">
+                 Para ver más detalles o cancelar su reserva (si aplica), por favor ingrese al Portal de Residentes.
+               </p>
+            </div>
+
+            <div style="background-color: #f4f4f7; padding: 20px; text-align: center; font-size: 12px; color: #999;">
+               <p style="margin: 0;">&copy; ${new Date().getFullYear()} ${datos.comunidad}. Todos los derechos reservados.</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // --- EMAILJS ---
+    async function enviarEmailAPI(to, subject, htmlBody) {
+      console.log(">>> Enviando a:", to);
+      if (typeof emailjs === 'undefined') return console.error("EmailJS no cargado");
+
+      try {
+          await emailjs.send('service_p9hqkqn', 'template_80q9psi', {
+              to_email: to,
+              subject: subject,
+              html_body: htmlBody 
+          });
+          console.log(">>> Email enviado correctamente.");
+          // No hacemos alert aquí para no interrumpir el flujo visual del admin
+      } catch (error) {
+          console.error(">>> Error EmailJS:", error);
+          alert("La reserva se actualizó, pero falló el envío del correo.");
+      }
+    }
+
+    /* --- HELPERS GENÉRICOS --- */
     async function eliminarReserva(id) {
-      if(!confirm("¿Eliminar este registro permanentemente?")) return;
+      if(!confirm("¿Eliminar registro?")) return;
       showSpinner(true);
       try {
-        if(typeof appSheetCRUD === 'function') {
-          await appSheetCRUD("Reservas", "Delete", [{ "ID": id }]);
-        }
+        if(typeof appSheetCRUD === 'function') await appSheetCRUD("Reservas", "Delete", [{ "ID": id }]);
         await cargarDatos();
       } catch(e) {
         alert("Error: " + e.message);
@@ -395,21 +537,6 @@
     }
 
     // --- Helpers ---
-    function resolveBlockInfo(bloqueVal) {
-        if(!bloqueVal) return `<div style="color:#94a3b8; font-size:13px;">--</div>`;
-        const b = BLOQUES.find(x => x.ID === bloqueVal || x.Nombre === bloqueVal);
-        if (b) {
-            return `<div style="font-size:13px; color:#1A2B48; font-weight:600;">${b.Nombre}</div><div style="font-size:11px; color:#64748b;">${b.HoraInicio} - ${b.HoraFin}</div>`;
-        }
-        return `<div style="color:#64748b; font-size:13px;">${bloqueVal}</div>`;
-    }
-
-    function getBlockStart(bloqueVal) {
-        if(!bloqueVal) return "99:99";
-        const b = BLOQUES.find(x => x.ID === bloqueVal || x.Nombre === bloqueVal);
-        return b ? b.HoraInicio : "99:99";
-    }
-
     function resolverUnidad(id) {
       const u = UNIDADES.find(x => String(x.ID || x.id) === String(id));
       return u ? (u.Numero || u.Nombre) : id;
@@ -421,7 +548,6 @@
     }
     function clp(v) { return "$" + new Intl.NumberFormat("es-CL").format(v || 0); }
     function showSpinner(show) { document.getElementById("spinner").style.display = show ? "grid" : "none"; }
-
-  </script>
-</body>
+</script>
+  </body>
 </html>

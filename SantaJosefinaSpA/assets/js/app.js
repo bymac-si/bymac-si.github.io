@@ -142,12 +142,12 @@ function actualizarDOMconUTM() {
 
 // ==========================================
 // 5. CÁLCULO MATEMÁTICO CENTRALIZADO
-// (Fórmula del contrato: Base 2.6 UTM + Redondeo)
+// (Fórmula del contrato: Base 2.15 UTM + Redondeo)
 // ==========================================
 function calcularHonorarioGlobal(unidades, factor, utm) {
     if (!(factor > 0 && utm > 0)) return { neto: 0, iva: 0, total: 0 };
 
-    const baseF1 = utm * 2.6; // Variable base
+    const baseF1 = utm * 2; // Variable base
     let netoTeorico = 0;
 
     if (unidades < 20) {
