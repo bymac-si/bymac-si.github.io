@@ -1,5 +1,5 @@
 <style>
-  /* Base del Header */
+  /* --- Estilos Base del Header --- */
   .main-header {
     background-color: #ffffff;
     border-bottom: 1px solid #e2e8f0;
@@ -12,35 +12,38 @@
     position: sticky;
     top: 0;
     z-index: 1000;
+    width: 100%;
+    box-sizing: border-box;
   }
 
-  /* Logo */
   .logo-img {
-    height: 100px;
+    height: 50px;
     width: auto;
     transition: transform 0.2s;
   }
   .logo-img:hover { transform: scale(1.02); }
 
-  /* Navegación */
+  /* Navegación Desktop */
   .nav-container {
     display: flex;
-    gap: 5px;
+    gap: 15px; /* Aumenté el espacio ya que ahora tenemos menos botones */
     height: 100%;
     align-items: center;
   }
 
+  /* Links sueltos */
   .nav-link {
     text-decoration: none;
     color: #64748b;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 13px;
     padding: 8px 12px;
     border-radius: 6px;
     transition: all 0.2s;
     display: flex;
     align-items: center;
     gap: 8px;
+    white-space: nowrap;
   }
 
   .nav-link:hover {
@@ -49,13 +52,13 @@
   }
 
   .nav-link.active {
-    color: #3b82f6; /* Azul activo */
+    color: #3b82f6;
     background-color: #eff6ff;
   }
 
-  .nav-link i { font-size: 14px; }
+  .nav-link i { font-size: 16px; }
 
-  /* Dropdown */
+  /* Dropdowns */
   .nav-dropdown {
     position: relative;
     height: 100%;
@@ -64,12 +67,12 @@
   }
 
   .dropdown-menu {
-    display: none; /* Oculto por defecto */
+    display: none;
     position: absolute;
-    top: 60px; /* Debajo del header */
+    top: 60px;
     left: 0;
     background: white;
-    min-width: 200px;
+    min-width: 220px;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
@@ -79,119 +82,140 @@
     animation: fadeIn 0.2s ease;
   }
 
-  /* Mostrar dropdown al pasar el mouse por el contenedor */
-  .nav-dropdown:hover .dropdown-menu {
-    display: block;
-  }
+  .nav-dropdown:hover .dropdown-menu { display: block; }
+
+  .dropdown-menu li { margin: 0; }
 
   .dropdown-menu li a {
-    display: block;
-    padding: 10px 20px;
-    color: #475569;
-    text-decoration: none;
-    font-size: 14px;
-    transition: background 0.2s;
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 20px; color: #475569; text-decoration: none;
+    font-size: 13px; transition: background 0.2s;
   }
+  .dropdown-menu li a:hover { background-color: #f8fafc; color: #0f172a; padding-left: 25px; }
+  .dropdown-menu li a i { width: 16px; text-align: center; color: #94a3b8; }
+  .dropdown-menu li a:hover i { color: #3b82f6; }
 
-  .dropdown-menu li a:hover {
-    background-color: #f8fafc;
-    color: #0f172a;
-    padding-left: 25px; /* Pequeño desplazamiento */
-  }
-
-  /* Sección Usuario (Derecha) */
+  /* Usuario */
   .user-actions {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-left: 20px;
-    padding-left: 20px;
-    border-left: 1px solid #e2e8f0;
+    display: flex; align-items: center; gap: 15px;
+    margin-left: 20px; padding-left: 20px; border-left: 1px solid #e2e8f0;
   }
-
-  .user-info {
-    text-align: right;
-    line-height: 1.2;
-  }
+  .user-info { text-align: right; line-height: 1.2; }
   .user-name { font-weight: 700; font-size: 13px; color: #1e293b; display: block; }
   .user-role { font-size: 11px; color: #94a3b8; text-transform: uppercase; }
-
+  
   .btn-logout {
-    color: #ef4444;
-    border: 1px solid #fee2e2;
-    background: #fef2f2;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s;
+    color: #ef4444; border: 1px solid #fee2e2; background: #fef2f2;
+    padding: 8px; border-radius: 6px; font-size: 14px;
+    cursor: pointer; text-decoration: none; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
   }
-  .btn-logout:hover { background: #fee2e2; }
+  .btn-logout:hover { background: #fee2e2; transform: translateY(-1px); }
 
   @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
   
-  /* Mobile Toggle simple */
-  .mobile-toggle { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: #1e293b; }
+  /* Mobile Toggle */
+  .mobile-toggle { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: #1e293b; padding: 10px; }
 
+  /* Responsive Mobile */
   @media (max-width: 1024px) {
-    .nav-container { display: none; } /* Ocultar menú en móvil por ahora */
     .mobile-toggle { display: block; }
-    .main-header { justify-content: space-between; }
+    
+    .nav-container {
+      display: none; 
+      position: absolute; top: 70px; left: 0; width: 100%;
+      background: white; flex-direction: column; align-items: flex-start;
+      padding: 0; box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+      border-top: 1px solid #e2e8f0;
+      max-height: calc(100vh - 70px); overflow-y: auto;
+    }
+    .nav-container.active { display: flex; }
+
+    .nav-link, .nav-dropdown { width: 100%; box-sizing: border-box; }
+    .nav-link { padding: 15px 20px; border-bottom: 1px solid #f8fafc; font-size: 14px; }
+    
+    .nav-dropdown { flex-direction: column; align-items: flex-start; height: auto; }
+    .dropdown-menu {
+      position: static; box-shadow: none; border: none; 
+      width: 100%; padding: 0; display: none; background-color: #f8fafc;
+    }
+    .nav-dropdown:hover .dropdown-menu, .nav-dropdown:active .dropdown-menu { display: block; }
+    .dropdown-menu li a { padding-left: 40px; border-bottom: 1px solid #eee; }
+
+    .user-actions {
+      width: 100%; margin: 0; padding: 15px 20px; border-left: none;
+      border-top: 2px solid #f1f5f9; justify-content: space-between;
+      flex-direction: row-reverse; background: #fdfdfd;
+    }
+    .user-info { text-align: left; }
   }
 </style>
 
 <header class="main-header no-print">
   
-  <a href="index.html">
+  <a href="dashboard.html" style="display:flex; align-items:center;">
     <img src="assets/img/logo_santajosefina.png" alt="Santa Josefina" class="logo-img">
   </a>
 
-  <button class="mobile-toggle" onclick="alert('Menú móvil pendiente de implementar')">
+  <button class="mobile-toggle" onclick="toggleMenu()">
     <i class="fa-solid fa-bars"></i>
   </button>
 
-  <nav class="nav-container">
+  <nav class="nav-container" id="navMenu">
     
-    <a href="dashboard.html" class="nav-link">
-      <i class="fa-solid fa-chart-line"></i> KPIs
-    </a>
-    
-    <a href="clientes.html" class="nav-link">
-      <i class="fa-solid fa-users"></i> Clientes
-    </a>
-    
-    <a href="propiedades.html" class="nav-link">
-      <i class="fa-solid fa-house"></i> Propiedades
-    </a>
-
-    <a href="visitas.html" class="nav-link">
-      <i class="fa-regular fa-calendar-check"></i> Visitas
-    </a>
-    
-    <a href="marketing.html" class="nav-link">
-      <i class="fa-solid fa-bullhorn"></i> Marketing
-    </a>
-
     <div class="nav-dropdown">
       <a href="#" class="nav-link dropdown-toggle">
-        <i class="fa-solid fa-building"></i> Condominios <i class="fa-solid fa-chevron-down" style="font-size:10px; margin-left:4px;"></i>
+        <i class="fa-solid fa-handshake"></i> <span>Corretaje</span> <i class="fa-solid fa-chevron-down" style="font-size:10px; margin-left:4px;"></i>
       </a>
       <ul class="dropdown-menu">
-        <li><a href="dashboardcopropiedades.html"><i class="fa-solid fa-chart-line"></i> KPIs Condominios</a></li>
-        <li style="border-top:1px solid #f1f5f9; margin:4px 0;"></li>
-        <li><a href="prospectos.html">Prospectos</a></li>
-        <li><a href="copropiedades.html">Comunidades</a></li>
-        <li><a href="unidades.html">Unidades</a></li>
-        <li><a href="copropietarios.html">Copropietarios</a></li>
-        <li><a href="proveedores.html">Proveedores</a></li>
-        <li><a href="gastos.html">Gastos Comunes</a></li>
-        <li><a href="reportes.html">Reportes</a></li>
+        <li><a href="dashboard.html"><i class="fa-solid fa-chart-line"></i> KPIs Generales</a></li>
+        <li><a href="clientes.html"><i class="fa-solid fa-users"></i> Clientes</a></li>
+        <li><a href="propiedades.html"><i class="fa-solid fa-house"></i> Propiedades</a></li>
       </ul>
     </div>
 
+    <div class="nav-dropdown">
+      <a href="#" class="nav-link dropdown-toggle">
+        <i class="fa-solid fa-building"></i> <span>Condominios</span> <i class="fa-solid fa-chevron-down" style="font-size:10px; margin-left:4px;"></i>
+      </a>
+      <ul class="dropdown-menu">
+        <li><a href="dashboardcopropiedades.html"><i class="fa-solid fa-chart-pie"></i> KPIs Condominios</a></li>
+        <li style="border-top:1px solid #f1f5f9; margin:4px 0;"></li>
+        <li><a href="copropiedades.html"><i class="fa-solid fa-city"></i> Comunidades</a></li>
+        <li><a href="unidades.html"><i class="fa-solid fa-door-closed"></i> Unidades</a></li>
+        <li><a href="copropietarios.html"><i class="fa-solid fa-user-group"></i> Copropietarios</a></li>
+        <li><a href="prospectos.html"><i class="fa-solid fa-user-plus"></i> Prospectos</a></li>
+      </ul>
+    </div>
+
+    <div class="nav-dropdown">
+      <a href="#" class="nav-link dropdown-toggle">
+        <i class="fa-solid fa-coins"></i> <span>Finanzas</span> <i class="fa-solid fa-chevron-down" style="font-size:10px; margin-left:4px;"></i>
+      </a>
+      <ul class="dropdown-menu">
+        <li><a href="conciliacion.html"><i class="fa-solid fa-check-double"></i> Conciliación</a></li>
+        <li><a href="gastos.html"><i class="fa-solid fa-file-invoice-dollar"></i> Gastos Comunes</a></li>
+        <li><a href="proveedores.html"><i class="fa-solid fa-truck-field"></i> Proveedores</a></li>
+        <li><a href="reportes.html"><i class="fa-solid fa-file-pdf"></i> Reportes</a></li>
+      </ul>
+    </div>
+
+    <div class="nav-dropdown">
+      <a href="#" class="nav-link dropdown-toggle">
+        <i class="fa-solid fa-tree"></i> <span>Espacios</span> <i class="fa-solid fa-chevron-down" style="font-size:10px; margin-left:4px;"></i>
+      </a>
+      <ul class="dropdown-menu">
+        <li><a href="gestion_reservas.html"><i class="fa-regular fa-calendar-check"></i> Gestionar Reservas</a></li>
+        <li><a href="admin-espacios.html"><i class="fa-solid fa-pen-ruler"></i> Configurar Espacios</a></li>
+      </ul>
+    </div>
+
+    <a href="marketing.html" class="nav-link">
+      <i class="fa-solid fa-bullhorn"></i> <span>MKT</span>
+    </a>
+
     <a id="linkAgentes" href="agentes.html" class="nav-link">
-      <i class="fa-solid fa-user-tie"></i> Agentes
+      <i class="fa-solid fa-user-tie"></i> <span>Agentes</span>
     </a>
 
     <div class="user-actions">
@@ -208,54 +232,55 @@
 </header>
 
 <script>
+window.toggleMenu = function() {
+  document.getElementById('navMenu').classList.toggle('active');
+};
+
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Detectar Usuario
+  // 1. Usuario
   const au = typeof getAuthUser === 'function' ? getAuthUser() : null;
-  
   if (au) {
-    // Mostrar nombre y rol
     const nameEl = document.getElementById('headerUserName');
     const roleEl = document.getElementById('headerUserRole');
-    if(nameEl) nameEl.textContent = au.Nombre || au.email || "Usuario";
+    if(nameEl) nameEl.textContent = (au.Nombre || au.email || "Usuario").split(' ')[0];
     if(roleEl) roleEl.textContent = au.rol || "Agente";
-
-    // Mostrar link Admin solo si corresponde
-    const adminLink = document.getElementById('linkUsuarios');
-    if ((au.rol || '').toLowerCase() === 'admin') {
-      adminLink.style.display = 'flex';
-    } else {
-      adminLink.remove();
-    }
   }
 
-  // 2. Resaltar Link Activo
-  const path = window.location.pathname.split("/").pop(); // Ej: prospectos.html
-  const links = document.querySelectorAll('.nav-link');
+  // 2. Active Link Logic
+  const path = window.location.pathname.split("/").pop();
   
-  links.forEach(link => {
-    // Obtener el href limpio (sin query params)
-    const href = link.getAttribute('href')?.split('?')[0];
-    
-    // Si coincide exactamente
-    if (href === path) {
-      link.classList.add('active');
-      // Si está dentro de un dropdown, activar el padre también
-      const parentDropdown = link.closest('.nav-dropdown');
-      if(parentDropdown) {
-        parentDropdown.querySelector('.dropdown-toggle').classList.add('active');
-      }
-    }
-  });
-  
-  // Caso especial para items dentro del dropdown (que no tienen clase .nav-link directa)
-  const dropdownLinks = document.querySelectorAll('.dropdown-menu a');
-  dropdownLinks.forEach(link => {
+  // Buscar en todos los links (sueltos y dentro de dropdowns)
+  document.querySelectorAll('.nav-link, .dropdown-menu a').forEach(link => {
       const href = link.getAttribute('href');
-      if(href === path) {
-          link.style.fontWeight = "bold";
-          link.style.color = "#3b82f6";
-          link.closest('.nav-dropdown').querySelector('.dropdown-toggle').classList.add('active');
+      
+      // Si la URL coincide (ej: dashboard.html)
+      if(href && href.split('?')[0] === path) {
+          
+          // Si es un item de dropdown
+          if(link.closest('.dropdown-menu')) {
+              link.style.fontWeight = "bold";
+              link.style.color = "#3b82f6";
+              link.style.backgroundColor = "#f1f5f9";
+              
+              // Activar el padre
+              const parent = link.closest('.nav-dropdown');
+              if(parent) parent.querySelector('.dropdown-toggle').classList.add('active');
+          } 
+          // Si es un link directo
+          else {
+              link.classList.add('active');
+          }
       }
   });
 });
+
+if(typeof window.logout !== 'function') {
+    window.logout = function() {
+        if(confirm("¿Cerrar sesión?")) {
+            localStorage.removeItem("admin_token"); 
+            localStorage.removeItem("sesion_residente");
+            window.location.href = "login.html"; 
+        }
+    }
+}
 </script>

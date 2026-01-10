@@ -9,11 +9,10 @@
   <script>requireAuth();</script>
 
   <style>
-    /* Estilos Dashboard Unificados */
+    /* Estilos Dashboard */
     body { max-width: 1200px; margin: 0 auto; color: #1a2b48; background-color: #fff; }
     main { padding: 40px; }
     
-    /* Header */
     .dashboard-header { background: #fff; padding: 20px 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center;}
     .page-title { font-size: 28px; font-weight: 700; margin: 0; }
     .page-subtitle { color: #64748b; font-size: 14px; margin-top: 5px; }
@@ -23,31 +22,23 @@
     th, td { padding: 15px; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: middle; }
     th { background: #f8fafc; font-weight: 600; color: #475569; font-size: 13px; text-transform: uppercase; }
     
-    /* Icono en tabla */
     .table-icon { width: 40px; height: 40px; background: #f1f5f9; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #1A2B48; }
 
     /* Botones */
-    .btn-head { height: 44px; padding: 0 20px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; background-color: #1A2B48; color: white; transition: all 0.2s; }
-    .btn-head:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(26, 43, 72, 0.3); }
-
-    .btn-icon { width: 34px; height: 34px; border: none; border-radius: 6px; background: #f3f4f6; color: #555; cursor: pointer; margin-right: 5px; transition: all 0.2s; }
+    .btn-head { height: 44px; padding: 0 20px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; background-color: #1A2B48; color: white; }
+    .btn-icon { width: 34px; height: 34px; border: none; border-radius: 6px; background: #f3f4f6; color: #555; cursor: pointer; margin-right: 5px; }
     .btn-edit:hover { background-color: #f59e0b; color: white; }
     .btn-delete:hover { background-color: #ef4444; color: white; }
 
-    /* Modal Form */
+    /* Modal */
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center; }
     .modal.active { display: flex; }
-    .modal-content { background: white; padding: 30px; border-radius: 12px; width: 100%; max-width: 500px; position: relative; }
+    .modal-content { background: white; padding: 30px; border-radius: 12px; width: 100%; max-width: 500px; }
     
     .form-group { margin-bottom: 15px; }
     .label { display: block; font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 6px; }
     input, select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 14px; box-sizing: border-box; }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: #1A2B48; }
 
-    /* Icon Selector Preview */
-    .icon-option { display: flex; align-items: center; gap: 10px; }
-    
-    /* Spinner */
     .spinner-backdrop { position: fixed; inset: 0; background: rgba(255,255,255,0.8); display: none; place-items: center; z-index: 12000; }
     .spinner { width: 30px; height: 30px; border-radius: 50%; border: 3px solid #eee; border-top-color: #1A2B48; animation: spin .8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -60,25 +51,31 @@
     <div class="dashboard-header no-print">
       <div>
         <h1 class="page-title">Espacios Comunes</h1>
-        <div class="page-subtitle">Configura los quinchos, salas y áreas reservables.</div>
+        <div class="page-subtitle">Configura los quinchos, salas y áreas reservables por condominio.</div>
       </div>
       <button class="btn-head" onclick="abrirModal()">
         <i class="fa-solid fa-plus"></i> Nuevo Espacio
       </button>
     </div>
 
+    <div style="margin-bottom:15px;">
+        <select id="filtroCopro" style="max-width:300px;" onchange="renderTabla()">
+            <option value="">(Todos los condominios)</option>
+        </select>
+    </div>
+
     <table>
       <thead>
         <tr>
           <th style="width: 60px;">Icono</th>
-          <th>Nombre</th>
-          <th>Costo Reserva</th>
-          <th>Reglas / Descripción</th>
-          <th style="width: 100px; text-align: right;">Acciones</th>
+          <th>Copropiedad</th> <th>Nombre Espacio</th>
+          <th>Costo</th>
+          <th>Reglas</th>
+          <th style="width: 140px; text-align: right;">Acciones</th>
         </tr>
       </thead>
       <tbody id="tablaEspacios">
-        <tr><td colspan="5" style="text-align:center; padding:30px; color:#94a3b8;">Cargando espacios...</td></tr>
+        <tr><td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;">Cargando espacios...</td></tr>
       </tbody>
     </table>
   </main>
@@ -90,6 +87,13 @@
       <form id="formEspacio">
         <input type="hidden" id="espacioID">
         
+        <div class="form-group">
+          <label class="label">Condominio / Copropiedad</label>
+          <select id="espCopro" required>
+             <option value="">Cargando...</option>
+          </select>
+        </div>
+
         <div class="form-group">
           <label class="label">Nombre del Espacio</label>
           <input id="espNombre" placeholder="Ej: Quincho Norte" required>
@@ -103,22 +107,21 @@
           <div>
             <label class="label">Icono</label>
             <select id="espIcono">
-              <option value="fa-building">🏢 Edificio (Genérico)</option>
-              <option value="fa-fire-burner">🔥 Quincho / Asado</option>
-              <option value="fa-champagne-glasses">🥂 Sala Eventos</option>
+              <option value="fa-building">🏢 Edificio</option>
+              <option value="fa-fire-burner">🔥 Quincho</option>
+              <option value="fa-champagne-glasses">🥂 Eventos</option>
               <option value="fa-person-swimming">🏊 Piscina</option>
               <option value="fa-car">🚗 Estacionamiento</option>
               <option value="fa-shirt">👕 Lavandería</option>
               <option value="fa-dumbbell">💪 Gimnasio</option>
-              <option value="fa-tree">🌳 Jardín / Parque</option>
-              <option value="fa-gamepad">🎮 Sala Juegos</option>
+              <option value="fa-gamepad">🎮 Juegos</option>
             </select>
           </div>
         </div>
 
         <div class="form-group">
           <label class="label">Reglas y Condiciones</label>
-          <textarea id="espReglas" rows="4" placeholder="Ej: Aforo máx 10 personas. Horario hasta las 23:00 hrs. Limpieza incluida..."></textarea>
+          <textarea id="espReglas" rows="4" placeholder="Ej: Aforo máx 10 personas..."></textarea>
         </div>
 
         <div style="text-align:right; margin-top:20px; display:flex; justify-content:end; gap:10px;">
@@ -129,32 +132,41 @@
     </div>
   </div>
 
-  <div id="pageSpinner" class="spinner-backdrop">
-    <div class="spinner"></div>
-  </div>
-
+  <div id="pageSpinner" class="spinner-backdrop"><div class="spinner"></div></div>
   <div id="footer"></div>
 
   <script>
     let ESPACIOS = [];
-    let KEY_NAME = "ID"; // Default
+    let COPROPIEDADES = [];
+    const KEY_COL = "ID"; 
 
     document.addEventListener("DOMContentLoaded", async () => {
       try { document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); } catch(e){}
       try { document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); } catch(e){}
-      await cargarEspacios();
+      await cargarDatos();
     });
 
-    async function cargarEspacios() {
+    async function cargarDatos() {
       showSpinner(true);
       try {
-        ESPACIOS = await fetchData("Espacios");
-        if(!ESPACIOS) ESPACIOS = [];
-        if(ESPACIOS.length > 0) KEY_NAME = getKeyName(ESPACIOS[0]);
+        // Carga paralela de Espacios y Copropiedades
+        const [esp, cop] = await Promise.all([
+            fetchData("Espacios").catch(()=>[]),
+            fetchData("Copropiedades").catch(()=>[])
+        ]);
+        
+        ESPACIOS = esp || [];
+        COPROPIEDADES = cop || [];
+        
+        // Llenar selects de Copropiedades (Filtro y Modal)
+        const opts = COPROPIEDADES.map(c => `<option value="${getKeyVal(c)}">${c.Nombre}</option>`).join("");
+        document.getElementById("filtroCopro").innerHTML = '<option value="">(Todos los condominios)</option>' + opts;
+        document.getElementById("espCopro").innerHTML = '<option value="">Seleccione...</option>' + opts;
+
         renderTabla();
       } catch(e) {
         console.error(e);
-        document.getElementById("tablaEspacios").innerHTML = '<tr><td colspan="5" style="color:red; text-align:center;">Error cargando datos.</td></tr>';
+        alert("Error cargando datos");
       } finally {
         showSpinner(false);
       }
@@ -162,37 +174,39 @@
 
     function renderTabla() {
       const tb = document.getElementById("tablaEspacios");
-      if(ESPACIOS.length === 0) {
-        tb.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#64748b;">No hay espacios creados.</td></tr>';
+      const filtro = document.getElementById("filtroCopro").value;
+
+      // Filtrar
+      let displayData = ESPACIOS;
+      if(filtro) displayData = ESPACIOS.filter(e => String(e.CopropiedadID) === String(filtro));
+
+      if(displayData.length === 0) {
+        tb.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:#64748b;">No hay espacios registrados.</td></tr>';
         return;
       }
 
-      tb.innerHTML = ESPACIOS.map(e => {
-        const key = getKeyVal(e);
+      // Mapa para nombre de copropiedad
+      const coproMap = {};
+      COPROPIEDADES.forEach(c => coproMap[getKeyVal(c)] = c.Nombre);
+
+      tb.innerHTML = displayData.map(e => {
+        const key = e[KEY_COL];
         const icono = e.Icono || "fa-building";
         const costo = parseFloat(e.Costo) || 0;
-        const costoTxt = costo === 0 ? '<span style="color:#15803d; font-weight:700;">GRATIS</span>' : clp(costo);
+        const nombreCopro = coproMap[e.CopropiedadID] || "—";
 
         return `
-        <td style="text-align:right;">
-  <button class="btn-icon" style="background:#e0f2fe; color:#0284c7;" 
-          onclick="window.location.href='admin-bloques.html?id=${key}'" 
-          title="Configurar Horarios">
-    <i class="fa-solid fa-clock"></i>
-  </button>
-
-  <button class="btn-icon btn-edit" ... > ... </button>
-  <button class="btn-icon btn-delete" ... > ... </button>
-</td>
           <tr>
-            <td>
-              <div class="table-icon"><i class="fa-solid ${icono}"></i></div>
-            </td>
-            <td style="font-weight:600;">${e.Nombre || "(Sin Nombre)"}</td>
-            <td class="mono">${costoTxt}</td>
-            <td style="font-size:13px; color:#555;">${e.Reglas || "Sin reglas específicas."}</td>
+            <td><div class="table-icon"><i class="fa-solid ${icono}"></i></div></td>
+            <td style="color:#64748b; font-size:12px; font-weight:600;">${nombreCopro}</td>
+            <td style="font-weight:700; color:#1e293b;">${e.Nombre || "(Sin Nombre)"}</td>
+            <td class="mono">${costo === 0 ? '<span style="color:#15803d;">GRATIS</span>' : clp(costo)}</td>
+            <td style="font-size:12px; color:#555;">${e.Reglas || ""}</td>
             <td style="text-align:right;">
-              <button class="btn-icon btn-edit" onclick='abrirModal(${JSON.stringify(key)})' title="Editar">
+              <button class="btn-icon" style="background:#e0f2fe; color:#0284c7;" onclick="window.location.href='admin-bloques.html?id=${key}'" title="Horarios">
+                <i class="fa-solid fa-clock"></i>
+              </button>
+              <button class="btn-icon btn-edit" onclick='abrirModal("${key}")' title="Editar">
                 <i class="fa-solid fa-pen"></i>
               </button>
               <button class="btn-icon btn-delete" onclick="eliminarEspacio('${key}')" title="Eliminar">
@@ -210,10 +224,11 @@
       document.getElementById("modalTitle").textContent = "Nuevo Espacio";
 
       if(id) {
-        const e = ESPACIOS.find(x => String(getKeyVal(x)) === String(id));
+        const e = ESPACIOS.find(x => String(x[KEY_COL]) === String(id));
         if(e) {
           document.getElementById("modalTitle").textContent = "Editar Espacio";
           document.getElementById("espacioID").value = id;
+          document.getElementById("espCopro").value = e.CopropiedadID; // Setear Copropiedad
           document.getElementById("espNombre").value = e.Nombre || "";
           document.getElementById("espCosto").value = e.Costo || 0;
           document.getElementById("espIcono").value = e.Icono || "fa-building";
@@ -223,51 +238,31 @@
       document.getElementById("modalForm").classList.add("active");
     }
 
-    function cerrarModal() {
-      document.getElementById("modalForm").classList.remove("active");
-    }
+    function cerrarModal() { document.getElementById("modalForm").classList.remove("active"); }
 
     document.getElementById("formEspacio").onsubmit = async (e) => {
       e.preventDefault();
       
       const idVal = document.getElementById("espacioID").value;
-      const nombre = document.getElementById("espNombre").value.trim();
-      const costo = parseFloat(document.getElementById("espCosto").value) || 0;
-      const icono = document.getElementById("espIcono").value;
-      const reglas = document.getElementById("espReglas").value.trim();
-
-      if(!nombre) return alert("El nombre es obligatorio");
-
-      // Payload
       const payload = {
-        "Nombre": nombre,
-        "Costo": costo,
-        "Icono": icono,
-        "Reglas": reglas
+        "CopropiedadID": document.getElementById("espCopro").value, // NUEVO CAMPO
+        "Nombre": document.getElementById("espNombre").value.trim(),
+        "Costo": parseFloat(document.getElementById("espCosto").value) || 0,
+        "Icono": document.getElementById("espIcono").value,
+        "Reglas": document.getElementById("espReglas").value.trim()
       };
 
-      const keyField = idVal ? KEY_NAME : (ESPACIOS.length ? KEY_NAME : "ID");
-      
-      if(idVal) {
-        payload[keyField] = idVal;
-      } else {
-        // Generar ID si es nuevo (ej: ESP_QCHO)
-        payload[keyField] = "ESP_" + Date.now().toString(36).toUpperCase();
-      }
+      if(idVal) payload["ID"] = idVal;
+      else payload["ID"] = "ESP_" + Date.now().toString(36).toUpperCase();
 
       showSpinner(true);
       try {
         if(typeof appSheetCRUD === 'function') {
-          if(idVal) await appSheetCRUD("Espacios", "Edit", [payload]);
-          else await appSheetCRUD("Espacios", "Add", [payload]);
-        } else {
-          // Mock local
-          await new Promise(r => setTimeout(r, 1000));
+          const action = idVal ? "Edit" : "Add";
+          await appSheetCRUD("Espacios", action, [payload]);
         }
-        
         cerrarModal();
-        await cargarEspacios();
-        
+        await cargarDatos();
       } catch(err) {
         alert("Error al guardar: " + err.message);
       } finally {
@@ -276,28 +271,17 @@
     };
 
     async function eliminarEspacio(id) {
-      if(!confirm("¿Eliminar este espacio? Esto podría afectar reservas históricas.")) return;
-      
+      if(!confirm("¿Eliminar este espacio?")) return;
       showSpinner(true);
       try {
-        if(typeof appSheetCRUD === 'function') {
-          await appSheetCRUD("Espacios", "Delete", [{ [KEY_NAME]: id }]);
-        }
-        await cargarEspacios();
-      } catch(err) {
-        alert("Error al eliminar: " + err.message);
-      } finally {
-        showSpinner(false);
-      }
+        if(typeof appSheetCRUD === 'function') await appSheetCRUD("Espacios", "Delete", [{ "ID": id }]);
+        await cargarDatos();
+      } catch(err) { alert("Error: " + err.message); } finally { showSpinner(false); }
     }
 
-    // Helpers
     function showSpinner(v) { document.getElementById("pageSpinner").style.display = v ? "grid" : "none"; }
     function clp(v) { return "$" + new Intl.NumberFormat("es-CL").format(v); }
-    function getKeyVal(o) { return o.ID || o.id || o.Id || ""; }
-    function getKeyName(o) { return Object.keys(o)[0] || "ID"; }
-    function generateKey() { return "ESP_" + Math.random().toString(36).substr(2, 6).toUpperCase(); }
-
+    function getKeyVal(o) { return o.ID || o.id || ""; }
   </script>
 </body>
 </html>

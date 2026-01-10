@@ -8,6 +8,15 @@
   <script src="assets/js/app.js"></script>
   <script>requireAuth();</script>
 
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script type="text/javascript">
+     (function(){
+        // TU PUBLIC KEY
+        emailjs.init("7Il4AhmGHchP7qfxu"); 
+        console.log(">>> EmailJS Inicializado Correctamente");
+     })();
+  </script>
+
   <style>
     /* Estilos Base Admin */
     body { max-width: 1300px; margin: 0 auto; color: #1a2b48; background: #f8fafc; }
@@ -31,13 +40,13 @@
     th { background: #f8fafc; font-weight: 600; color: #475569; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
     tr:hover { background: #f8fafc; }
 
-    /* Estados (Badges) */
+    /* Estados */
     .badge { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; display: inline-block; }
-    .st-pendiente { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; } /* Naranja */
-    .st-confirmada { background: #ecfdf5; color: #15803d; border: 1px solid #dcfce7; } /* Verde */
-    .st-rechazada { background: #fef2f2; color: #b91c1c; border: 1px solid #fee2e2; } /* Rojo */
+    .st-pendiente { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
+    .st-confirmada { background: #ecfdf5; color: #15803d; border: 1px solid #dcfce7; }
+    .st-rechazada { background: #fef2f2; color: #b91c1c; border: 1px solid #fee2e2; }
 
-    /* Botones Acciones */
+    /* Botones */
     .btn-icon { width: 32px; height: 32px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s; margin-right: 4px; }
     .btn-approve { background: #dcfce7; color: #166534; }
     .btn-approve:hover { background: #166534; color: white; }
@@ -46,11 +55,10 @@
     .btn-delete { background: #f1f5f9; color: #64748b; }
     .btn-delete:hover { background: #64748b; color: white; }
 
-    /* Alerta Conflicto */
+    /* Conflicto */
     .conflict-row { background-color: #fff1f2 !important; }
     .conflict-msg { color: #e11d48; font-size: 11px; font-weight: 700; display: block; margin-top: 4px; }
 
-    /* Spinner */
     .spinner-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); display: none; place-items: center; z-index: 999; }
   </style>
 </head>
@@ -72,13 +80,13 @@
       <div class="header-filters">
         <div class="filter-group">
           <label class="label">Fecha Inicio</label>
-          <input type="date" id="filtroFecha" class="input-modern" onchange="aplicarFiltros()">
+          <input type="date" id="filtroFecha" class="input-modern" onchange="aplicarFiltros()" style="width: 90%;height:40px;">
         </div>
         <div class="filter-group">
           <label class="label">Espacio</label>
           <select id="filtroEspacio" class="input-modern" onchange="aplicarFiltros()">
             <option value="">(Todos)</option>
-            </select>
+          </select>
         </div>
         <div class="filter-group">
           <label class="label">Estado</label>
@@ -91,7 +99,7 @@
         </div>
         <div class="filter-group" style="flex-grow:1;">
           <label class="label">Buscar Unidad</label>
-          <input type="text" id="filtroBuscar" class="input-modern" placeholder="Ej: 304..." onkeyup="aplicarFiltros()">
+          <input type="text" id="filtroBuscar" class="input-modern" placeholder="Ej: 304..." onkeyup="aplicarFiltros()" style="width: 90%;height:40px;">
         </div>
       </div>
     </div>
@@ -100,7 +108,7 @@
       <table>
         <thead>
           <tr>
-            <th>Fecha / Hora</th>
+            <th>Fecha / Bloque</th>
             <th>Espacio</th>
             <th>Unidad</th>
             <th>Costo</th>
@@ -122,13 +130,13 @@
   <div id="footer"></div>
 
   <script>
-    let RESERVAS = [], ESPACIOS = [], UNIDADES = [], VIEW = [];
+    let RESERVAS = [], ESPACIOS = [], UNIDADES = [], BLOQUES = [], VIEW = [];
 
     document.addEventListener("DOMContentLoaded", async () => {
       try { document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); } catch(e){}
       try { document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); } catch(e){}
       
-      // Fecha por defecto: Hoy
+      // Fecha por defecto
       document.getElementById("filtroFecha").value = new Date().toISOString().split('T')[0];
       
       await cargarDatos();
@@ -137,17 +145,18 @@
     async function cargarDatos() {
       showSpinner(true);
       try {
-        const [reservas, espacios, unidades] = await Promise.all([
+        const [reservas, espacios, unidades, bloques] = await Promise.all([
           fetchData("Reservas").catch(()=>[]),
-          fetchData("Espacios").catch(()=>[]), // Si tienes tabla Espacios
-          fetchData("Unidades").catch(()=>[])
+          fetchData("Espacios").catch(()=>[]),
+          fetchData("Unidades").catch(()=>[]),
+          fetchData("Bloques").catch(()=>[])
         ]);
 
-        RESERVAS = reservas;
-        ESPACIOS = espacios; // Usar si existe tabla maestra de espacios
-        UNIDADES = unidades;
+        RESERVAS = reservas || [];
+        ESPACIOS = espacios || [];
+        UNIDADES = unidades || [];
+        BLOQUES = bloques || [];
 
-        // Llenar select espacios (si hay tabla, sino usar los únicos de reservas)
         const uniqueSpaces = [...new Set(RESERVAS.map(r => r.EspacioNombre || r.EspacioID))].filter(Boolean);
         const selEspacio = document.getElementById("filtroEspacio");
         selEspacio.innerHTML = '<option value="">(Todos)</option>' + 
@@ -157,7 +166,7 @@
 
       } catch(e) {
         console.error(e);
-        alert("Error cargando datos: " + e.message);
+        document.getElementById("tablaReservas").innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Error: ${e.message}</td></tr>`;
       } finally {
         showSpinner(false);
       }
@@ -170,28 +179,26 @@
       const busqueda = document.getElementById("filtroBuscar").value.toLowerCase();
 
       VIEW = RESERVAS.filter(r => {
-        // Filtro Fecha (Opcional: Si está vacío muestra todo, sino coincidencia exacta)
         if(fecha && (!r.Fecha || !r.Fecha.includes(fecha))) return false;
-        
-        // Filtro Estado
         if(estado && r.Estado !== estado) return false;
-
-        // Filtro Espacio
+        
         const spName = (r.EspacioNombre || r.EspacioID || "").toLowerCase();
         if(espacio && !spName.includes(espacio)) return false;
 
-        // Filtro Unidad
         const uLabel = resolverUnidad(r.UnidadID).toLowerCase();
         if(busqueda && !uLabel.includes(busqueda)) return false;
 
         return true;
       });
 
-      // Ordenar: Pendientes primero, luego por hora
+      // Ordenar por hora real del bloque
       VIEW.sort((a,b) => {
         if(a.Estado === 'Pendiente' && b.Estado !== 'Pendiente') return -1;
         if(a.Estado !== 'Pendiente' && b.Estado === 'Pendiente') return 1;
-        return (a.BloqueInicio || "").localeCompare(b.BloqueInicio || "");
+        
+        const horaA = getBlockStart(a.Bloque);
+        const horaB = getBlockStart(b.Bloque);
+        return horaA.localeCompare(horaB);
       });
 
       renderTabla();
@@ -204,30 +211,26 @@
         return;
       }
 
-      // Detectar Conflictos (Mismo Espacio, Misma Fecha, Mismo Bloque, Ambas NO rechazadas)
-      // Esto es un cálculo visual simple
       const conflictMap = {};
       VIEW.forEach(r => {
         if(r.Estado === 'Rechazada') return;
-        const key = `${r.Fecha}_${r.EspacioID}_${r.BloqueInicio}`;
+        const key = `${r.Fecha}_${r.EspacioID}_${r.Bloque}`;
         conflictMap[key] = (conflictMap[key] || 0) + 1;
       });
 
       tb.innerHTML = VIEW.map(r => {
         const uLabel = resolverUnidad(r.UnidadID);
-        
-        // Estilos Estado
+        const bloqueInfo = resolveBlockInfo(r.Bloque);
+
         let stClass = "st-pendiente";
         if(r.Estado === 'Confirmada') stClass = "st-confirmada";
         if(r.Estado === 'Rechazada') stClass = "st-rechazada";
 
-        // Conflicto?
-        const key = `${r.Fecha}_${r.EspacioID}_${r.BloqueInicio}`;
+        const key = `${r.Fecha}_${r.EspacioID}_${r.Bloque}`;
         const isConflict = (conflictMap[key] > 1 && r.Estado !== 'Rechazada');
         const rowClass = isConflict ? "conflict-row" : "";
         const conflictHtml = isConflict ? `<span class="conflict-msg"><i class="fa-solid fa-triangle-exclamation"></i> Tope de horario</span>` : "";
 
-        // Botones
         let acciones = "";
         if(r.Estado === 'Pendiente') {
           acciones = `
@@ -256,7 +259,7 @@
           <tr class="${rowClass}">
             <td>
               <div style="font-weight:700;">${formatearFecha(r.Fecha)}</div>
-              <div style="color:#64748b; font-size:13px;">${r.BloqueInicio || "Todo el día"}</div>
+              ${bloqueInfo}
               ${conflictHtml}
             </td>
             <td>${r.EspacioNombre || r.EspacioID}</td>
@@ -270,23 +273,110 @@
     }
 
     async function cambiarEstado(id, nuevoEstado) {
+      console.log(">>> 1. INICIANDO CAMBIO DE ESTADO", id, nuevoEstado);
       if(!confirm(`¿Marcar reserva como ${nuevoEstado}?`)) return;
       showSpinner(true);
+      
       try {
+        // 1. Datos Reserva
+        const reserva = RESERVAS.find(r => r.ID === id);
+        if (!reserva) throw new Error("Reserva no encontrada localmente");
+        console.log(">>> 2. RESERVA:", reserva);
+
+        // 2. Datos Unidad (Email)
+        const unidad = UNIDADES.find(u => String(u.ID) === String(reserva.UnidadID));
+        console.log(">>> 3. UNIDAD:", unidad);
+        
+        let emailDestino = unidad ? unidad.Email : null;
+        console.log(">>> 4. EMAIL DESTINO:", emailDestino);
+
+        if(!emailDestino) console.warn(">>> ALERTA: Unidad sin email registrado.");
+
+        // 3. Guardar BD
         if(typeof appSheetCRUD === 'function') {
           await appSheetCRUD("Reservas", "Edit", [{ "ID": id, "Estado": nuevoEstado }]);
         } else {
-          // Mock local
-          const idx = RESERVAS.findIndex(r => r.ID === id);
-          if(idx>=0) RESERVAS[idx].Estado = nuevoEstado;
+          reserva.Estado = nuevoEstado; // Mock
           await new Promise(r => setTimeout(r, 500));
         }
-        await cargarDatos(); // Recargar para ver cambios y actualizar conflictos
+        console.log(">>> 5. BD ACTUALIZADA");
+
+        // 4. Enviar Email
+        if(emailDestino) {
+            console.log(">>> 6. GENERANDO EMAIL...");
+            const asunto = `Actualización Reserva: ${nuevoEstado}`;
+            const cuerpoHTML = generarPlantillaEmail(reserva, nuevoEstado);
+            
+            await enviarEmailAPI(emailDestino, asunto, cuerpoHTML);
+        } else {
+            console.error(">>> 7. NO SE ENVIO EMAIL (Sin destinatario)");
+            alert("Estado guardado, pero no se envió correo (No hay email registrado).");
+        }
+
+        await cargarDatos(); 
+
       } catch(e) {
+        console.error(">>> ERROR:", e);
         alert("Error: " + e.message);
       } finally {
         showSpinner(false);
       }
+    }
+
+    // --- EMAILJS FUNCTION ---
+    async function enviarEmailAPI(to, subject, htmlBody) {
+      console.log(">>> 8. INTENTANDO ENVIAR A:", to);
+      
+      if (typeof emailjs === 'undefined') {
+          console.error(">>> ERROR CRÍTICO: EmailJS no cargó.");
+          return;
+      }
+
+      var templateParams = {
+          to_email: to,
+          subject: subject,
+          html_body: htmlBody 
+      };
+     
+      try {
+          // TUS CREDENCIALES
+          await emailjs.send('service_p9hqkqn', 'template_80q9psi', templateParams);
+          console.log(">>> 9. ✅ EMAILJS ÉXITO");
+          alert("Reserva actualizada y notificación enviada.");
+      } catch (error) {
+          console.error(">>> 9. ❌ EMAILJS ERROR:", error);
+          alert("Se guardó el estado pero falló el envío del correo.");
+      }
+    }
+
+    function generarPlantillaEmail(reserva, nuevoEstado) {
+      const esAprobado = nuevoEstado === 'Confirmada';
+      const colorEstado = esAprobado ? '#10b981' : '#ef4444';
+      const titulo = esAprobado ? 'Reserva Aprobada' : 'Reserva Rechazada';
+      const texto = esAprobado 
+        ? 'Su reserva ha sido confirmada con éxito.' 
+        : 'Lamentamos informar que su reserva no pudo ser cursada.';
+      const fechaFmt = formatearFecha(reserva.Fecha);
+
+      return `
+        <div style="font-family:Arial,sans-serif; background:#f4f4f7; padding:20px; color:#333;">
+          <div style="max-width:600px; margin:0 auto; background:#fff; border-radius:8px; overflow:hidden;">
+            <div style="background:#1A2B48; padding:20px; text-align:center; color:white;">
+               <h2 style="margin:0;">${titulo}</h2>
+            </div>
+            <div style="padding:30px;">
+               <p>Estimado residente,</p>
+               <p>${texto}</p>
+               <div style="background:#f8fafc; border-left:4px solid ${colorEstado}; padding:15px; margin:20px 0;">
+                  <div><strong>Fecha:</strong> ${fechaFmt}</div>
+                  <div><strong>Bloque:</strong> ${reserva.Bloque}</div>
+                  <div><strong>Estado:</strong> <span style="color:${colorEstado}; font-weight:bold;">${nuevoEstado}</span></div>
+               </div>
+               <p style="font-size:12px; color:#888;">Condominio Santa Josefina</p>
+            </div>
+          </div>
+        </div>
+      `;
     }
 
     async function eliminarReserva(id) {
@@ -305,13 +395,27 @@
     }
 
     // --- Helpers ---
+    function resolveBlockInfo(bloqueVal) {
+        if(!bloqueVal) return `<div style="color:#94a3b8; font-size:13px;">--</div>`;
+        const b = BLOQUES.find(x => x.ID === bloqueVal || x.Nombre === bloqueVal);
+        if (b) {
+            return `<div style="font-size:13px; color:#1A2B48; font-weight:600;">${b.Nombre}</div><div style="font-size:11px; color:#64748b;">${b.HoraInicio} - ${b.HoraFin}</div>`;
+        }
+        return `<div style="color:#64748b; font-size:13px;">${bloqueVal}</div>`;
+    }
+
+    function getBlockStart(bloqueVal) {
+        if(!bloqueVal) return "99:99";
+        const b = BLOQUES.find(x => x.ID === bloqueVal || x.Nombre === bloqueVal);
+        return b ? b.HoraInicio : "99:99";
+    }
+
     function resolverUnidad(id) {
       const u = UNIDADES.find(x => String(x.ID || x.id) === String(id));
       return u ? (u.Numero || u.Nombre) : id;
     }
     function formatearFecha(iso) { 
       if(!iso) return ""; 
-      // Manejo básico de fecha string YYYY-MM-DD
       const [y,m,d] = iso.split("-");
       return `${d}/${m}/${y}`;
     }

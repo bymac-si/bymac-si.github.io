@@ -109,12 +109,15 @@
     let ESPACIOS = [];
     let BLOQUES = [];
     let espacioActualID = null;
+    
+    // Nombres de columnas fijos
+    const COL_ID = "ID";
+    const COL_ESPACIO = "EspacioID";
 
     document.addEventListener("DOMContentLoaded", async () => {
       try { document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); } catch(e){}
       try { document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); } catch(e){}
       
-      // Leer parámetro URL si venimos de la otra página (admin-espacios.html?id=XYZ)
       const params = new URLSearchParams(window.location.search);
       espacioActualID = params.get('id');
 
@@ -126,20 +129,20 @@
       try {
         const [espacios, bloques] = await Promise.all([
           fetchData("Espacios"),
-          fetchData("Bloques").catch(()=>[]) // Si no existe tabla aun, retorna vacío
+          fetchData("Bloques").catch(()=>[]) 
         ]);
         ESPACIOS = espacios || [];
         BLOQUES = bloques || [];
 
         // Llenar Select
         const sel = document.getElementById("selEspacio");
-        sel.innerHTML = ESPACIOS.map(e => `<option value="${getKeyVal(e)}">${e.Nombre}</option>`).join("");
+        // Asumiendo que Espacios también tiene columna ID
+        sel.innerHTML = ESPACIOS.map(e => `<option value="${e.ID}">${e.Nombre}</option>`).join("");
         
-        // Seleccionar el de la URL o el primero
-        if(espacioActualID && ESPACIOS.some(e => String(getKeyVal(e)) === espacioActualID)) {
+        if(espacioActualID && ESPACIOS.some(e => String(e.ID) === espacioActualID)) {
             sel.value = espacioActualID;
         } else if(ESPACIOS.length > 0) {
-            espacioActualID = getKeyVal(ESPACIOS[0]);
+            espacioActualID = ESPACIOS[0].ID;
             sel.value = espacioActualID;
         }
 
@@ -157,15 +160,14 @@
       espacioActualID = document.getElementById("selEspacio").value;
       const contenedor = document.getElementById("gridBloques");
       
-      // Filtrar bloques del espacio seleccionado
-      const misBloques = BLOQUES.filter(b => String(b.EspacioID) === String(espacioActualID));
+      // Filtrar bloques usando los nombres de columna correctos
+      const misBloques = BLOQUES.filter(b => String(b[COL_ESPACIO]) === String(espacioActualID));
       
-      // Ordenar por hora de inicio
+      // Ordenar por hora inicio
       misBloques.sort((a,b) => (a.HoraInicio || "").localeCompare(b.HoraInicio || ""));
 
       let html = "";
 
-      // Renderizar Cards
       misBloques.forEach(b => {
         html += `
           <div class="block-card">
@@ -175,14 +177,13 @@
                 <i class="fa-regular fa-clock"></i> ${b.HoraInicio} - ${b.HoraFin}
               </span>
             </div>
-            <button class="btn-delete" onclick="eliminarBloque('${getKeyVal(b)}')" title="Eliminar Turno">
+            <button class="btn-delete" onclick="eliminarBloque('${b[COL_ID]}')" title="Eliminar Turno">
               <i class="fa-solid fa-trash"></i>
             </button>
           </div>
         `;
       });
 
-      // Card para agregar nuevo (Siempre al final)
       html += `
         <div class="add-card" onclick="abrirModal()">
           <i class="fa-solid fa-plus-circle" style="font-size:24px;"></i>
@@ -210,27 +211,27 @@
 
       if(inicio >= fin) return alert("La hora de inicio debe ser anterior a la de fin.");
 
+      // CONSTRUCCIÓN DEL PAYLOAD EXACTO
       const payload = {
-        ID: "BLK_" + Date.now().toString(36).toUpperCase(),
-        EspacioID: espacioActualID,
-        Nombre: nombre,
-        HoraInicio: inicio,
-        HoraFin: fin,
-        Activo: true
+        "ID": "BLK_" + Date.now().toString(36).toUpperCase(),
+        "EspacioID": espacioActualID, // ID del espacio seleccionado
+        "Nombre": nombre,
+        "HoraInicio": inicio,
+        "HoraFin": fin,
+        "Activo": true // AppSheet a veces prefiere "true" o "Y", prueba true primero
       };
 
       showSpinner(true);
       try {
         if(typeof appSheetCRUD === 'function') {
+          // Acción ADD
           await appSheetCRUD("Bloques", "Add", [payload]);
-        } else {
-          // Mock local para pruebas sin backend
-          BLOQUES.push(payload);
-          await new Promise(r => setTimeout(r, 500));
-        }
+        } 
+        
         cerrarModal();
-        await cargarTodo(); // Recargar para asegurar sync
+        await cargarTodo(); 
       } catch(err) {
+        console.error(err);
         alert("Error al guardar: " + err.message);
       } finally {
         showSpinner(false);
@@ -242,9 +243,8 @@
       showSpinner(true);
       try {
         if(typeof appSheetCRUD === 'function') {
+          // Acción DELETE con llave ID explicita
           await appSheetCRUD("Bloques", "Delete", [{ "ID": id }]);
-        } else {
-          BLOQUES = BLOQUES.filter(b => b.ID !== id);
         }
         await cargarTodo();
       } catch(err) {
@@ -254,9 +254,7 @@
       }
     }
 
-    // Helpers
     function showSpinner(show) { document.getElementById("pageSpinner").style.display = show ? "grid" : "none"; }
-    function getKeyVal(o) { return o.ID || o.id || ""; }
-  </script>
+</script>
 </body>
 </html>

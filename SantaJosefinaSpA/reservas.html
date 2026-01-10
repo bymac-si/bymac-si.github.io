@@ -150,13 +150,13 @@
   <script>
     let USUARIO = null;
     let ESPACIOS = [];
-    let RESERVAS = []; // Base de datos completa de reservas
+    let RESERVAS = []; 
+    let BLOQUES_DB = []; // Nueva variable para almacenar los horarios reales
     
     let espacioSeleccionado = null;
-    let bloqueSeleccionado = null; // Solo uno por vez para simplificar
+    let bloqueSeleccionado = null;
 
     document.addEventListener("DOMContentLoaded", async () => {
-        // 1. Validar Sesión
         try {
             const sesion = localStorage.getItem("sesion_residente");
             if(!sesion) throw new Error("No session");
@@ -166,33 +166,46 @@
             return;
         }
 
-        // 2. Configurar Fecha (Hoy)
+        // Fecha por defecto: Hoy
         const hoy = new Date().toISOString().split('T')[0];
         const inputFecha = document.getElementById("inputFecha");
         inputFecha.value = hoy;
         inputFecha.min = hoy;
         inputFecha.addEventListener("change", renderSlots);
 
-        // 3. Cargar Datos Reales
         await cargarDatos();
     });
 
     async function cargarDatos() {
         try {
-            // Carga paralela de Espacios y Reservas existentes
-            const [espacios, reservas] = await Promise.all([
+            // Carga de 3 tablas
+            const [espacios, reservas, bloques] = await Promise.all([
                 fetchData('Espacios'),
-                fetchData('Reservas').catch(()=>[]) // Si falla o está vacía, devuelve array vacío
+                fetchData('Reservas').catch(()=>[]),
+                fetchData('Bloques').catch(()=>[])
             ]);
 
-            ESPACIOS = espacios;
-            RESERVAS = reservas;
+            // --- FILTRO DE SEGURIDAD ---
+            // Solo mostramos los espacios de MI condominio
+            // Asumimos que USUARIO.CopropiedadID viene del login
+            const todosLosEspacios = espacios || [];
+            
+            if(USUARIO.CopropiedadID) {
+                ESPACIOS = todosLosEspacios.filter(e => String(e.CopropiedadID) === String(USUARIO.CopropiedadID));
+            } else {
+                // Fallback por si el usuario es Admin o hay error de datos, mostramos todo o nada
+                // console.warn("Usuario sin CopropiedadID");
+                ESPACIOS = todosLosEspacios; 
+            }
+
+            RESERVAS = reservas || [];
+            BLOQUES_DB = bloques || [];
 
             renderEspacios();
             renderMisReservas();
 
-            // Auto-seleccionar el primer espacio si existe
             if(ESPACIOS.length > 0) seleccionarEspacio(ESPACIOS[0]);
+            else document.getElementById("listaEspacios").innerHTML = '<div style="padding:20px; color:#64748b; width:100%;">No hay espacios habilitados para tu comunidad.</div>';
 
         } catch(e) {
             console.error(e);
@@ -220,12 +233,12 @@
         bloqueSeleccionado = null;
         actualizarPanelAccion();
 
-        // UI Activa
+        // UI
         document.querySelectorAll(".space-card").forEach(c => c.classList.remove("active"));
         const card = document.getElementById(`card_${getKeyVal(espacio)}`);
         if(card) card.classList.add("active");
 
-        // Mostrar Reglas
+        // Reglas
         const rulesDiv = document.getElementById("rulesContainer");
         if(espacio.Reglas) {
             rulesDiv.style.display = "flex";
@@ -244,51 +257,51 @@
         const container = document.getElementById("slotsContainer");
         const espacioID = String(getKeyVal(espacioSeleccionado));
 
-        // Lógica de bloques según tipo de espacio (Personalizable)
-        // Por defecto: Bloques de 2 horas para quinchos, 1 hora para otros
-        let bloques = [];
-        const nombreLower = (espacioSeleccionado.Nombre || "").toLowerCase();
+        // 1. Filtrar bloques configurados para ESTE espacio
+        // Nota: Asegúrate de que la columna en Bloques se llame EspacioID
+        let bloquesDelEspacio = BLOQUES_DB.filter(b => String(b.EspacioID) === espacioID && b.Activo !== false);
 
-        if(nombreLower.includes("lavanderia") || nombreLower.includes("lavandería")) {
-            bloques = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
-        } else if(nombreLower.includes("estacionamiento")) {
-            bloques = ["Mañana (08-14)", "Tarde (14-20)", "Noche (20-08)"];
-        } else {
-            // Quinchos o Salas
-            bloques = ["12:00 - 16:00", "16:00 - 20:00", "20:00 - 00:00"];
+        // Ordenar por hora de inicio
+        bloquesDelEspacio.sort((a,b) => (a.HoraInicio || "").localeCompare(b.HoraInicio || ""));
+
+        // Si no hay bloques configurados, mostrar mensaje
+        if(bloquesDelEspacio.length === 0) {
+            container.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:20px; color:#94a3b8;">No hay horarios disponibles para este espacio.</div>';
+            return;
         }
 
-        container.innerHTML = bloques.map(hora => {
-            // Verificar ocupación en la base de datos descargada
-            // Filtramos por Espacio, Fecha y Bloque. Estado != Rechazada
+        container.innerHTML = bloquesDelEspacio.map(bloque => {
+            // Nombre visual del bloque (ej: "12:00 - 16:00" o "Mañana")
+            const nombreBloque = bloque.Nombre || `${bloque.HoraInicio} - ${bloque.HoraFin}`;
+            
+            // Verificar si ya está reservado
             const ocupado = RESERVAS.some(r => 
                 String(r.EspacioID) === espacioID && 
                 r.Fecha === fecha && 
-                r.Bloque === hora &&
+                r.Bloque === nombreBloque && // Comparamos por nombre del bloque
                 r.Estado !== 'Rechazada'
             );
 
             const estadoClass = ocupado ? "occupied" : "available";
-            const estadoClick = ocupado ? "" : `onclick="seleccionarBloque('${hora}', this)"`;
+            // Pasamos el nombreBloque como identificador único del horario
+            const estadoClick = ocupado ? "" : `onclick="seleccionarBloque('${nombreBloque}', this)"`;
             
-            // Texto precio
             const costo = parseFloat(espacioSeleccionado.Costo) || 0;
             const precioTxt = costo > 0 ? clp(costo) : "GRATIS";
 
             return `
                 <div class="time-slot ${estadoClass}" ${estadoClick}>
-                    <div class="slot-time">${hora}</div>
+                    <div class="slot-time">${nombreBloque}</div>
                     <span class="slot-label">${ocupado ? "OCUPADO" : precioTxt}</span>
                 </div>
             `;
         }).join("");
     }
 
-    function seleccionarBloque(hora, el) {
-        // Deseleccionar previos
+    function seleccionarBloque(nombreBloque, el) {
         document.querySelectorAll(".time-slot.selected").forEach(d => d.classList.remove("selected"));
         
-        bloqueSeleccionado = hora;
+        bloqueSeleccionado = nombreBloque;
         el.classList.add("selected");
         
         actualizarPanelAccion();
@@ -310,32 +323,32 @@
 
     async function confirmarReserva() {
         const fecha = document.getElementById("inputFecha").value;
-        const costo = parseFloat(espacioSeleccionado.Costo) || 0;
-
-        if(!confirm(`¿Confirmar Reserva?\n\nEspacio: ${espacioSeleccionado.Nombre}\nFecha: ${fecha}\nBloque: ${bloqueSeleccionado}`)) return;
+        
+        if(!confirm(`¿Confirmar Reserva?\n\nEspacio: ${espacioSeleccionado.Nombre}\nFecha: ${fecha}\nHorario: ${bloqueSeleccionado}`)) return;
 
         document.getElementById("spinner").style.display = "flex";
 
-        // CONSTRUCCIÓN DEL PAYLOAD SEGÚN TABLA 'RESERVAS'
-        // Columnas: ID, UnidadID, EspacioID, Fecha, Bloque, Estado
         const payload = {
             "ID": "RES_" + Date.now(),
-            "UnidadID": String(USUARIO.UnidadID), // Importante: Texto
+            "UnidadID": String(USUARIO.UnidadID),
             "EspacioID": String(getKeyVal(espacioSeleccionado)),
+            "EspacioNombre": espacioSeleccionado.Nombre, // Opcional, útil para reportes
             "Fecha": fecha,
             "Bloque": bloqueSeleccionado,
-            "Estado": "Pendiente" // Pendiente de aprobación por admin
+            "Estado": "Pendiente",
+            "Costo": parseFloat(espacioSeleccionado.Costo) || 0,
+            "FechaCreacion": new Date().toISOString()
         };
 
         try {
             if(typeof appSheetCRUD === 'function') {
                 await appSheetCRUD("Reservas", "Add", [payload]);
             } else {
-                await new Promise(r => setTimeout(r, 1500)); // Simulación
+                await new Promise(r => setTimeout(r, 1000));
             }
             
-            alert("✅ Solicitud de reserva enviada.\nEspera la confirmación del administrador.");
-            location.reload(); // Recargar para ver actualización
+            alert("✅ Solicitud enviada con éxito.");
+            location.reload(); 
 
         } catch(e) {
             alert("Error al reservar: " + e.message);
@@ -346,29 +359,33 @@
 
     function renderMisReservas() {
         const container = document.getElementById("listaMisReservas");
-        
-        // Filtrar mis reservas (UnidadID) y ordenar por fecha
         const misReservas = RESERVAS.filter(r => String(r.UnidadID) === String(USUARIO.UnidadID));
         
+        // Ordenar por fecha desc
+        misReservas.sort((a,b) => new Date(b.Fecha) - new Date(a.Fecha));
+
         if(misReservas.length === 0) {
             container.innerHTML = '<div style="text-align:center; color:#94a3b8; font-size:13px;">No tienes reservas registradas.</div>';
             return;
         }
 
-        // Buscar nombre del espacio en el array ESPACIOS para mostrarlo bonito
         container.innerHTML = misReservas.map(r => {
             const espacio = ESPACIOS.find(e => String(getKeyVal(e)) === String(r.EspacioID));
-            const nombreEspacio = espacio ? espacio.Nombre : "Espacio";
+            const nombreEspacio = espacio ? espacio.Nombre : (r.EspacioNombre || "Espacio");
             
-            let colorBorde = "#c2410c"; // Pendiente Naranja
-            if(r.Estado === 'Confirmada') colorBorde = "#15803d"; // Verde
-            if(r.Estado === 'Rechazada') colorBorde = "#b91c1c"; // Rojo
+            let colorBorde = "#c2410c";
+            if(r.Estado === 'Confirmada') colorBorde = "#15803d";
+            if(r.Estado === 'Rechazada') colorBorde = "#b91c1c";
+
+            // Formato Fecha
+            const [y,m,d] = (r.Fecha||"").split("-");
+            const fechaFmt = d ? `${d}/${m}` : r.Fecha;
 
             return `
             <div class="booking-item" style="border-left-color: ${colorBorde};">
                 <div>
                     <div style="font-weight:700; color:#1e293b;">${nombreEspacio}</div>
-                    <div style="color:#64748b;">${r.Fecha} | ${r.Bloque}</div>
+                    <div style="color:#64748b;">${fechaFmt} <span style="margin:0 5px;">•</span> ${r.Bloque}</div>
                 </div>
                 <div style="text-align:right;">
                     <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:${colorBorde};">${r.Estado}</div>
@@ -377,9 +394,8 @@
         }).join("");
     }
 
-    /* Helpers */
     function clp(v) { return "$" + new Intl.NumberFormat("es-CL").format(v); }
     function getKeyVal(o) { return o.ID || o.id || ""; }
-  </script>
+</script>
 </body>
 </html>

@@ -1,165 +1,442 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>CRM Inmobiliario - Marketing</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="assets/css/styles.css">
-<script src="assets/js/app.js"></script>
-<script>
-  requireAuth();
-</script>
-  <script>
-  document.addEventListener("DOMContentLoaded", async ()=>{
-    // Cargar Header
-    const headerResp = await fetch("header.html");
-    document.getElementById("header").innerHTML = await headerResp.text();
+  <meta charset="UTF-8">
+  <title>CRM - Marketing Intelligence</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="assets/js/app.js"></script>
+  <script>requireAuth();</script>
 
-    // Cargar Footer
-    const footerResp = await fetch("footer.html");
-    document.getElementById("footer").innerHTML = await footerResp.text();
-  });
-</script>
+  <style>
+    /* Estilos Base Dashboard */
+    body{ max-width:1200px; margin:0 auto; color:#1A2B48; background-color:#f8fafc; }
+    main{ padding:40px; }
+    
+    /* KPI CARDS */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .kpi-card { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); display: flex; flex-direction: column; }
+    .kpi-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 24px; font-weight: 800; color: #1A2B48; margin-top: 5px; }
+    .kpi-sub { font-size: 12px; font-weight: 600; margin-top: 5px; color:#64748b; }
+    
+    .text-green { color: #10b981; }
+    .text-red { color: #ef4444; }
+
+    /* TABLA */
+    table { width:100%; border-collapse:collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+    th,td { padding:12px 10px; border-bottom:1px solid #f1f5f9; text-align:left; vertical-align: middle; font-size: 12px; }
+    th { background:#f8fafc; font-weight: 700; color: #475569; text-transform: uppercase; font-size: 11px; }
+    tr:hover { background-color: #fcfcfc; }
+    
+    /* Badges Metrics */
+    .metric-badge { padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 11px; display: inline-block; }
+    .bg-green { background: #dcfce7; color: #166534; }
+    .bg-red { background: #fee2e2; color: #991b1b; }
+    .bg-gray { background: #f3f4f6; color: #4b5563; }
+    .bg-blue { background: #dbeafe; color: #1e40af; }
+
+    /* Badges Estado */
+    .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .st-activa { background-color: #10b981; }
+    .st-pausada { background-color: #f59e0b; }
+    .st-finalizada { background-color: #94a3b8; }
+
+    /* Header */
+    .dashboard-header { background-color: #fff; padding: 20px 25px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 25px; display:flex; justify-content:space-between; align-items:center; }
+    .page-title { font-size: 24px; font-weight: 700; margin: 0; color: #1e293b; }
+
+    /* Botones */
+    .btn-nuevo { background-color: #0f172a; color: white; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; display:flex; align-items:center; gap:8px; }
+    .btn-nuevo:hover { background-color: #1e293b; }
+    
+    .btn-icon { width: 32px; height: 32px; border: none; border-radius: 6px; background-color: #f1f5f9; color: #64748b; cursor: pointer; }
+    .btn-icon:hover { background-color: #e2e8f0; color: #1e293b; }
+
+    /* Modal & Inputs */
+    .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:10000; align-items:center; justify-content:center; }
+    .modal.active { display:flex; }
+    .modal-content { width:100%; max-width:750px; background:#fff; border-radius:12px; padding:30px; max-height: 90vh; overflow-y: auto; }
+    
+    input, select, textarea { width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; margin-top:5px; box-sizing:border-box; }
+    .label { font-weight:600; font-size:13px; color:#374151; margin-top:15px; display:block; }
+
+    .spinner-backdrop { position:fixed; inset:0; background:rgba(255,255,255,0.9); display:none; place-items:center; z-index:12000; }
+    .spinner { width:30px; height:30px; border-radius:50%; border:3px solid #eee; border-top-color:#1A2B48; animation:spin 1s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .mono { font-family: monospace; letter-spacing: -0.5px; }
+  </style>
 </head>
-<body style="max-width:1200px; margin: 0 auto;">
-
-<!-- NAV -->
+<body>
 <div id="header"></div>
 
+<main>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <span class="kpi-label">Inversión Total</span>
+      <span class="kpi-value" id="kpiInversion">$0</span>
+      <span class="kpi-sub" id="kpiROI">0% ROI</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Tráfico (Clics)</span>
+      <span class="kpi-value" id="kpiClics">0</span>
+      <span class="kpi-sub" id="kpiCPC">$0 CPC Prom.</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Leads (Interesados)</span>
+      <span class="kpi-value" id="kpiLeads">0</span>
+      <span class="kpi-sub" id="kpiCPL">$0 CPL</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Ventas (Clientes)</span>
+      <span class="kpi-value" id="kpiClientes">0</span>
+      <span class="kpi-sub" id="kpiConv">0% Cierre</span>
+    </div>
+  </div>
 
-<!-- CONTENIDO -->
-<main style="padding:40px;">
-  <h1 style="font-size:28px; font-weight:600; color:#1A2B48; margin-bottom:20px;">
-    Estrategias de Marketing
-  </h1>
-
-  <button onclick="abrirFormMarketing()" class="btn-primary" style="margin-bottom:20px;">
-    + Nueva Campaña
-  </button>
+  <div class="dashboard-header no-print">
+    <div>
+      <h1 class="page-title">Campañas de Marketing</h1>
+      <p style="color:#64748b; font-size:14px; margin:5px 0 0;">Gestión de Canales, Clics y Retorno de Inversión.</p>
+    </div>
+    <button class="btn-nuevo" onclick="abrirForm()">
+      <i class="fa-solid fa-plus"></i> Nueva Campaña
+    </button>
+  </div>
 
   <table>
     <thead>
       <tr>
-        <th>Canal</th>
-        <th>Clientes Captados</th>
-        <th>Presupuesto</th>
-        <th>Acciones</th>
+        <th style="width:100px;">Estado</th>
+        <th>Campaña</th>
+        <th style="width:90px;">Vigencia</th>
+        <th style="text-align:right;">Inv.</th>
+        <th style="text-align:center;">Clics</th>
+        <th style="text-align:center;">CPC</th>
+        <th style="text-align:center;">Leads</th>
+        <th style="text-align:center;">CPL</th>
+        <th style="text-align:center;">Ventas</th>
+        <th style="text-align:center;">ROI</th>
+        <th style="text-align:right; width:60px;"></th>
       </tr>
     </thead>
-    <tbody id="tablaMarketing"></tbody>
+    <tbody id="tablaMarketing">
+      <tr><td colspan="11" style="text-align:center; padding:30px; color:#64748b;">Cargando datos...</td></tr>
+    </tbody>
   </table>
 </main>
 
-<!-- MODAL -->
-<div id="modalMarketing" class="modal">
+<div id="modalForm" class="modal">
   <div class="modal-content">
-    <h2 id="modalTitleMarketing">Nueva Campaña</h2>
+    <h2 id="modalTitle" style="margin-top:0;">Configurar Campaña</h2>
     <form id="formMarketing">
-      <input type="hidden" id="marketingID">
-      <label for="marketingCanal">Canal (Ej: Redes Sociales)</label>
-      <input type="text" id="marketingCanal" placeholder="Canal (Ej: Redes Sociales)" required>
-      <label for="marketingClientes">Clientes Captados</label>
-      <input type="number" id="marketingClientes" placeholder="Clientes Captados">
-      <label for="marketingPresupuesto">Presupuesto ($)</label>
-      <input type="number" id="marketingPresupuesto" placeholder="Presupuesto ($)">
-      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
-        <button type="button" onclick="cerrarModalMarketing()" class="btn-primary">Cancelar</button>
-        <button type="submit" class="btn-primary">Guardar</button>
+      <input type="hidden" id="mID">
+      
+      <div style="display:grid; grid-template-columns: 2fr 1fr; gap:15px;">
+        <div>
+          <label class="label">Nombre Campaña</label>
+          <input id="mCampana" placeholder="Ej: Cyberday 2026" required>
+        </div>
+        <div>
+          <label class="label">Estado</label>
+          <select id="mEstado" required>
+            <option value="Activa">Activa 🟢</option>
+            <option value="Pausada">Pausada 🟡</option>
+            <option value="Finalizada">Finalizada ⚫</option>
+            <option value="Planificada">Planificada ⚪</option>
+          </select>
+        </div>
+      </div>
+      
+      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px;">
+        <div>
+          <label class="label">Canal</label>
+          <select id="mCanal">
+            <option value="Facebook Ads">Facebook Ads</option>
+            <option value="Instagram">Instagram</option>
+            <option value="Google Ads">Google Ads</option>
+            <option value="Portales">Portales Inmob.</option>
+            <option value="Email">Email Marketing</option>
+            <option value="Offline">Offline</option>
+            <option value="Referidos">Referidos</option>
+          </select>
+        </div>
+        <div>
+          <label class="label">Fecha Inicio</label>
+          <input type="date" id="mInicio" required>
+        </div>
+        <div>
+          <label class="label">Fecha Fin</label>
+          <input type="date" id="mFin">
+        </div>
+      </div>
+
+      <hr style="border:0; border-top:1px solid #f1f5f9; margin:20px 0;">
+      <h4 style="margin:0; font-size:14px; color:#1e293b;">Embudo de Resultados (Funnel)</h4>
+
+      <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:10px; align-items:end;">
+        <div>
+          <label class="label" style="color:#ef4444;">Inversión $</label>
+          <input type="number" id="mInversion" placeholder="0" required>
+        </div>
+        <div style="text-align:center; color:#cbd5e1; padding-bottom:12px;"><i class="fa-solid fa-arrow-right"></i></div>
+        <div>
+          <label class="label">Clics</label>
+          <input type="number" id="mClics" placeholder="0">
+        </div>
+        <div style="text-align:center; color:#cbd5e1; padding-bottom:12px;"><i class="fa-solid fa-arrow-right"></i></div>
+        <div>
+          <label class="label">Leads</label>
+          <input type="number" id="mLeads" placeholder="0">
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:10px;">
+        <div>
+          <label class="label">Clientes Captados (Ventas)</label>
+          <input type="number" id="mClientes" placeholder="0">
+        </div>
+        <div>
+          <label class="label" style="color:#166534;">Ingresos Generados $</label>
+          <input type="number" id="mIngresos" placeholder="0" style="background:#f0fdf4; border-color:#bbf7d0;">
+        </div>
+      </div>
+
+      <div style="margin-top:15px;">
+          <label class="label">Observaciones</label>
+          <textarea id="mObs" rows="2" placeholder="Notas sobre la audiencia, creatividades, etc."></textarea>
+      </div>
+
+      <div style="margin-top:25px; text-align:right; display:flex; gap:10px; justify-content:flex-end;">
+        <button type="button" onclick="cerrarForm()" style="background:#fff; border:1px solid #ccc; padding:10px 20px; border-radius:6px; cursor:pointer;">Cancelar</button>
+        <button type="submit" style="background:#1A2B48; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Guardar</button>
       </div>
     </form>
   </div>
 </div>
 
+<div id="spinner" class="spinner-backdrop"><div class="spinner"></div></div>
+<div id="footer"></div>
+
 <script>
-requireAuth();
+let MARKETING_DATA = [];
+// COLUMNA LLAVE FIJA
+const KEY_COL = "ID"; 
 
-function formatoCLP(v){ return "$" + new Intl.NumberFormat("es-CL").format(Number(v||0)); }
+document.addEventListener("DOMContentLoaded", async () => {
+  try { document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); } catch(e){}
+  try { document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); } catch(e){}
+  await cargarDatos();
+});
 
-let marketingGlobal=[];
-let KEY_NAME="ID";
+async function cargarDatos() {
+  document.getElementById("spinner").style.display = "grid";
+  try {
+    const data = await fetchData("Marketing").catch(() => []);
+    MARKETING_DATA = data || [];
+    
+    calcularKPIsGlobales();
+    renderTabla();
+  } catch(e) {
+    console.error(e);
+  } finally {
+    document.getElementById("spinner").style.display = "none";
+  }
+}
 
-async function cargarMarketing(){
-  marketingGlobal = await fetchData("Marketing");
-  if (marketingGlobal.length) KEY_NAME = getKeyName(marketingGlobal[0]);
+function renderTabla() {
+  const tb = document.getElementById("tablaMarketing");
+  if (MARKETING_DATA.length === 0) {
+    tb.innerHTML = '<tr><td colspan="11" style="text-align:center; padding:30px;">Sin datos.</td></tr>';
+    return;
+  }
 
-  const tbody = document.getElementById("tablaMarketing");
-  tbody.innerHTML = marketingGlobal.map(m=>{
-    const key = getKeyVal(m);
-    const canal = m.Canal ?? "";
-    const clientes = m["Clientes Captados"] ?? m.Clientes ?? 0;
-    const presupuesto = formatoCLP(m.Presupuesto);
+  // Ordenar: Activas primero
+  MARKETING_DATA.sort((a,b) => {
+     if(a.Estado === 'Activa' && b.Estado !== 'Activa') return -1;
+     if(a.Estado !== 'Activa' && b.Estado === 'Activa') return 1;
+     return new Date(b['Fecha Inicio']) - new Date(a['Fecha Inicio']);
+  });
+
+  tb.innerHTML = MARKETING_DATA.map(m => {
+    const key = m[KEY_COL];
+    
+    // Parseo seguro de TODAS las columnas numéricas
+    const inv = parseFloat(m.Inversion) || 0;
+    const ing = parseFloat(m['Ingresos Generados']) || 0;
+    const clics = parseFloat(m.Clics) || 0; // NUEVO
+    const leads = parseFloat(m.Leads) || 0;
+    const clientes = parseFloat(m['Clientes Captados']) || 0;
+    
+    // CÁLCULOS
+    const profit = ing - inv;
+    const roi = inv > 0 ? (profit / inv) * 100 : 0;
+    const cpl = leads > 0 ? (inv / leads) : 0; // Costo por Lead
+    const cpc = clics > 0 ? (inv / clics) : 0; // Costo por Clic (NUEVO)
+    
+    // Colores ROI
+    const colorROI = roi > 0 ? 'bg-green' : (roi < 0 ? 'bg-red' : 'bg-gray');
+
+    // Estado Color
+    let stColor = '#94a3b8';
+    if(m.Estado === 'Activa') stColor = '#10b981';
+    if(m.Estado === 'Pausada') stColor = '#f59e0b';
+    if(m.Estado === 'Planificada') stColor = '#cbd5e1';
+
     return `
       <tr>
-        <td>${canal}</td>
-        <td>${clientes}</td>
-        <td>${presupuesto}</td>
         <td>
-          <button type="button" class="btn-primary btn-edit" data-id="${key}">Editar</button>
-          <button type="button" class="btn-primary" onclick="eliminarMarketing('${key}')">Eliminar</button>
+           <span class="status-dot" style="background:${stColor}" title="${m.Estado}"></span>
+           <span style="font-weight:600; font-size:11px;">${m.Estado || 'S/D'}</span>
+        </td>
+        <td>
+          <div style="font-weight:700; color:#1e293b;">${m.Campaña || "Sin Nombre"}</div>
+          <div style="font-size:11px; color:#64748b;">${m.Canal}</div>
+        </td>
+        <td style="font-size:11px;">
+           ${fmtFecha(m['Fecha Inicio'])}<br>
+           <span style="color:#94a3b8;">${m['Fecha Fin'] ? fmtFecha(m['Fecha Fin']) : '...'}</span>
+        </td>
+        <td class="mono" style="text-align:right;">${clp(inv)}</td>
+        
+        <td style="text-align:center;">${clics}</td>
+        <td style="text-align:center; font-size:11px; color:#64748b;">${clp(cpc)}</td>
+        
+        <td style="text-align:center; font-weight:600;">${leads}</td>
+        <td style="text-align:center; font-size:11px;">${clp(cpl)}</td>
+        
+        <td style="text-align:center; font-weight:700;">${clientes}</td>
+        
+        <td style="text-align:center;">
+            <span class="metric-badge ${colorROI}">${roi.toFixed(1)}%</span>
+        </td>
+
+        <td style="text-align:right;">
+           <button class="btn-icon" onclick="editar('${key}')"><i class="fa-solid fa-pen"></i></button>
         </td>
       </tr>
     `;
   }).join("");
-
-  // Delegación
-  tbody.onclick = (e)=>{
-    const btn = e.target.closest(".btn-edit");
-    if(!btn) return;
-    abrirFormMarketing(btn.dataset.id);
-  };
 }
 
-// Modal
-const modal = document.getElementById("modalMarketing");
-const form  = document.getElementById("formMarketing");
+function calcularKPIsGlobales() {
+    const sumInv = MARKETING_DATA.reduce((s, m) => s + (parseFloat(m.Inversion)||0), 0);
+    const sumIng = MARKETING_DATA.reduce((s, m) => s + (parseFloat(m['Ingresos Generados'])||0), 0);
+    const sumClics = MARKETING_DATA.reduce((s, m) => s + (parseFloat(m.Clics)||0), 0);
+    const sumLeads = MARKETING_DATA.reduce((s, m) => s + (parseFloat(m.Leads)||0), 0);
+    const sumCli = MARKETING_DATA.reduce((s, m) => s + (parseFloat(m['Clientes Captados'])||0), 0);
 
-function abrirFormMarketing(id){
-  document.getElementById("modalTitleMarketing").textContent = id ? "Editar Campaña" : "Nueva Campaña";
-  if(id){
-    const m = marketingGlobal.find(x => String(getKeyVal(x)) === String(id));
-    if(!m){ alert("No se encontró la campaña"); return; }
-    document.getElementById("marketingID").value = id;
-    document.getElementById("marketingCanal").value = m.Canal ?? "";
-    document.getElementById("marketingClientes").value = m["Clientes Captados"] ?? m.Clientes ?? 0;
-    document.getElementById("marketingPresupuesto").value = m.Presupuesto ?? 0;
-  } else {
-    form.reset();
-    document.getElementById("marketingID").value = "";
-  }
-  modal.classList.add("active");
+    // Global ROI
+    const profit = sumIng - sumInv;
+    const globalROI = sumInv > 0 ? (profit / sumInv) * 100 : 0;
+    
+    // Global CPC, CPL, Conv
+    const globalCPC = sumClics > 0 ? sumInv / sumClics : 0;
+    const globalCPL = sumLeads > 0 ? sumInv / sumLeads : 0;
+    const globalConv = sumLeads > 0 ? (sumCli / sumLeads) * 100 : 0;
+
+    // Render KPI Cards
+    document.getElementById("kpiInversion").textContent = clp(sumInv);
+    
+    const roiEl = document.getElementById("kpiROI");
+    roiEl.textContent = globalROI.toFixed(1) + "% ROI";
+    roiEl.className = globalROI >= 0 ? "kpi-sub text-green" : "kpi-sub text-red";
+
+    document.getElementById("kpiClics").textContent = sumClics;
+    document.getElementById("kpiCPC").textContent = clp(globalCPC) + " CPC";
+
+    document.getElementById("kpiLeads").textContent = sumLeads;
+    document.getElementById("kpiCPL").textContent = clp(globalCPL) + " CPL";
+    
+    document.getElementById("kpiClientes").textContent = sumCli;
+    document.getElementById("kpiConv").textContent = globalConv.toFixed(1) + "% Conv.";
 }
-function cerrarModalMarketing(){ modal.classList.remove("active"); }
 
-form.onsubmit = async (e)=>{
-  e.preventDefault();
-  const id = document.getElementById("marketingID").value || undefined;
+/* CRUD */
+function abrirForm() {
+    document.getElementById("formMarketing").reset();
+    document.getElementById("mID").value = "";
+    document.getElementById("modalTitle").textContent = "Nueva Campaña";
+    document.getElementById("mInicio").value = new Date().toISOString().split('T')[0];
+    document.getElementById("modalForm").classList.add("active");
+}
+function cerrarForm() { document.getElementById("modalForm").classList.remove("active"); }
 
-  // Enviamos ambas variantes para el campo de clientes por si el nombre difiere
-  const clientesVal = parseInt(document.getElementById("marketingClientes").value || 0, 10);
-  const payload = {
-    ...(id ? { [KEY_NAME]: id } : {}),
-    Canal: document.getElementById("marketingCanal").value.trim(),
-    "Clientes Captados": clientesVal,
-    Clientes: clientesVal,
-    Presupuesto: parseInt(document.getElementById("marketingPresupuesto").value || 0, 10)
-  };
+function editar(id) {
+    const m = MARKETING_DATA.find(x => String(x[KEY_COL]) === String(id));
+    if(!m) return;
+    
+    document.getElementById("mID").value = id;
+    document.getElementById("mCampana").value = m.Campaña || "";
+    document.getElementById("mEstado").value = m.Estado || "Activa";
+    document.getElementById("mCanal").value = m.Canal || "";
+    document.getElementById("mInversion").value = m.Inversion || 0;
+    document.getElementById("mInicio").value = m['Fecha Inicio'] || "";
+    document.getElementById("mFin").value = m['Fecha Fin'] || "";
+    
+    // Métricas Numéricas (Incluido Clics)
+    document.getElementById("mClics").value = m.Clics || 0;
+    document.getElementById("mLeads").value = m.Leads || 0;
+    document.getElementById("mClientes").value = m['Clientes Captados'] || 0;
+    document.getElementById("mIngresos").value = m['Ingresos Generados'] || 0;
+    
+    document.getElementById("mObs").value = m.Observaciones || "";
 
-  try{
-    if(id) await appSheetCRUD("Marketing","Edit",[payload]);
-    else   await appSheetCRUD("Marketing","Add",[payload]);
-    cerrarModalMarketing();
-    location.reload();
-  }catch(err){ alert("Error: " + (err.message || err)); }
+    document.getElementById("modalTitle").textContent = "Editar Campaña";
+    document.getElementById("modalForm").classList.add("active");
+}
+
+document.getElementById("formMarketing").onsubmit = async (e) => {
+    e.preventDefault();
+    document.getElementById("spinner").style.display = "grid";
+    const idVal = document.getElementById("mID").value;
+    
+    const payload = {
+        "Campaña": document.getElementById("mCampana").value,
+        "Estado": document.getElementById("mEstado").value,
+        "Canal": document.getElementById("mCanal").value,
+        "Inversion": parseFloat(document.getElementById("mInversion").value) || 0,
+        "Fecha Inicio": document.getElementById("mInicio").value,
+        "Fecha Fin": document.getElementById("mFin").value,
+        
+        // Métricas (Se envían como números)
+        "Clics": parseFloat(document.getElementById("mClics").value) || 0,
+        "Leads": parseFloat(document.getElementById("mLeads").value) || 0,
+        "Clientes Captados": parseFloat(document.getElementById("mClientes").value) || 0,
+        "Ingresos Generados": parseFloat(document.getElementById("mIngresos").value) || 0,
+        
+        "Observaciones": document.getElementById("mObs").value
+    };
+
+    if(idVal) {
+        payload[KEY_COL] = idVal; 
+    } else {
+        payload[KEY_COL] = "MKT_" + Date.now(); 
+    }
+
+    try {
+        if(typeof appSheetCRUD === 'function') {
+            const act = idVal ? "Edit" : "Add";
+            await appSheetCRUD("Marketing", act, [payload]);
+        } else {
+            await new Promise(r => setTimeout(r, 1000));
+        }
+        cerrarForm();
+        await cargarDatos();
+    } catch(err) {
+        alert("Error: " + err.message);
+    } finally {
+        document.getElementById("spinner").style.display = "none";
+    }
 };
 
-async function eliminarMarketing(id){
-  if(!confirm("¿Eliminar esta campaña?")) return;
-  await appSheetCRUD("Marketing","Delete",[{[KEY_NAME]:id}]);
-  location.reload();
+/* Helpers */
+function clp(v) { return "$" + new Intl.NumberFormat("es-CL",{maximumFractionDigits:0}).format(v); }
+function fmtFecha(iso){ 
+  if(!iso) return ""; 
+  const d = new Date(iso);
+  return d.toLocaleDateString("es-CL", { timeZone: 'UTC' }); 
 }
-
-cargarMarketing();
 </script>
-<div id="footer"></div>
 </body>
 </html>
