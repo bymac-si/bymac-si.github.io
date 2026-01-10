@@ -106,6 +106,7 @@
         <th>Dirección</th>
         <th>RUT</th>
         <th>Contacto</th>
+        <th>Teléfono</th>
         <th class="no-print">Acciones</th>
       </tr>
     </thead>
@@ -286,8 +287,8 @@ function renderTabla(){
     const unidades = p.Unidades || p.NUnidades || p.CantidadUnidades || 0;
     const direccion = p.Direccion || p.Dirección || "—";
     const rut = p.RUT || "—";
-    const contacto = p.Contacto || p.Email || p.Telefono || "—";
-    
+    const contacto = p.Contacto || p.Email || "—";
+    const telefono = p.Telefono || "—";
     // --- LÓGICA DE ESTADO (LEER) ---
     const estado = p.Estado || "Nuevo";
     let claseBadge = "st-nuevo";
@@ -309,7 +310,8 @@ function renderTabla(){
         <td>${direccion}</td>
         <td class="mono">${rut}</td>
         <td>${contacto}</td>
-        <td class="no-print" style="min-width: 200px;">
+        <td class="mono">${telefono}</td>
+         <td class="no-print" style="min-width: 200px;">
   <div class="acciones-group">
     
     <button class="btn-icon btn-ver" onclick='abrirDetalle(${JSON.stringify(key)})' title="Ver Detalle">
