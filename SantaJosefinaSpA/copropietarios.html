@@ -1,389 +1,942 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>CRM - Copropietarios</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="assets/js/app.js"></script>
-  <script>requireAuth();</script>
+  <head>
+    <meta charset="UTF-8" />
+    <title>CRM - Copropietarios y Residentes</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <script src="assets/js/app.js"></script>
+    <script>
+      requireAuth();
+    </script>
 
-  <style>
-    /* ===== ESTILOS DASHBOARD UNIFICADOS ===== */
-    body{ max-width:1200px; margin:0 auto; color:#1A2B48; }
-    main{ padding:40px; }
-    .page-title{ font-size:28px; font-weight:700; margin-bottom:16px; }
-    
-    /* Tablas */
-    table{ width:100%; border-collapse:collapse; }
-    th,td{ padding:10px 8px; border-bottom:1px solid #e5e7eb; text-align:left; vertical-align: middle; }
-    th{ background:#fafafa; font-weight: 600; color: #4b5563; }
-    
-    /* Inputs y Layout */
-    input,select,textarea{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:6px; font-family:inherit;}
-    .label{ display:block; font-weight:600; margin-bottom:4px; font-size: 13px; color: #374151; }
-    
-    /* MODAL */
-    .modal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:10000; align-items:center; justify-content:center; }
-    .modal.active{ display:flex; }
-    .modal-content{ width:100%; max-width:500px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:25px; box-shadow:0 12px 30px rgba(0,0,0,.18); }
-    
-    /* SPINNER */
-    .spinner-backdrop{ position:fixed; inset:0; background:rgba(255,255,255,0.85); display:none; place-items:center; z-index:12000; }
-    .spinner-card{ background:#fff; padding:18px 22px; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.08); text-align:center; min-width:260px; color:#1A2B48; font-weight:600; }
-    .spinner{ width:28px; height:28px; border-radius:50%; border:3px solid #eee; border-top-color:#B46A55; margin:0 auto 10px; animation:spin .9s linear infinite; }
-    @keyframes spin{ to{ transform:rotate(360deg); } }
-    
-    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace; }
-    .muted{ color:#666; font-size: 0.9em; }
+    <style>
+      /* Estilos Base (Idénticos a Unidades para coherencia) */
+      body {
+        max-width: 1200px;
+        margin: 0 auto;
+        color: #1a2b48;
+        background-color: #f8fafc;
+      }
+      main {
+        padding: 40px;
+      }
 
-    /* DASHBOARD HEADER */
-    .dashboard-header { background-color: #fff; padding: 20px 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #f0f0f0; }
-    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-    .header-actions { display: flex; gap: 10px; align-items: center; }
-    
-    .header-filters { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; padding-top: 20px; border-top: 1px solid #e2e8f0; }
-    .filter-item { display: flex; flex-direction: column; gap: 6px; }
-    .input-modern { height: 44px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #f8fafc; }
-    
-    /* BOTONES ICONOS */
-    .acciones-group { display: flex; gap: 6px; justify-content: flex-start; align-items: center; }
-    .btn-icon { width: 34px; height: 34px; border: none; border-radius: 6px; background-color: #f3f4f6; color: #555; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s ease; }
-    .btn-icon:hover { transform: translateY(-2px); color: white; }
-    .btn-editar:hover { background-color: #f59e0b; }
-    .btn-eliminar:hover { background-color: #ef4444; }
+      /* Header */
+      .dashboard-header {
+        background: #fff;
+        padding: 20px 25px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 25px;
+      }
+      .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0;
+        color: #1e293b;
+      }
 
-    /* BOTONES CABECERA */
-    .btn-head { height: 44px; padding: 0 20px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; transition: all 0.2s; }
-    .btn-head:hover { transform: translateY(-2px); }
-    .btn-nuevo { background-color: #0f172a; color: white; }
-    .btn-secundario { background-color: #fff; color: #475569; border: 1px solid #cbd5e1; }
-    .btn-secundario:hover { background-color: #f8fafc; border-color: #94a3b8; }
-  </style>
-</head>
-<body>
-<div id="header"></div>
+      .header-filters {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        align-items: end;
+      }
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        flex: 1;
+        min-width: 200px;
+      }
+      .label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+      }
+      .input-modern {
+        height: 42px;
+        padding: 0 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #fff;
+        width: 100%;
+        box-sizing: border-box;
+      }
 
-<main>
-  <div class="dashboard-header no-print">
-    <div class="header-top">
-      <h1 class="page-title">Copropietarios</h1>
-      
-      <div class="header-actions">
-        <button class="btn-head btn-secundario" id="btnReload" title="Recargar datos">
-          <i class="fa-solid fa-rotate-right"></i>
-          <span class="btn-text">Recargar</span>
-        </button>
+      /* Botones */
+      .btn-main {
+        background: #1a2b48;
+        color: white;
+        border: none;
+        padding: 0 20px;
+        height: 42px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-sec {
+        background: #fff;
+        color: #1a2b48;
+        border: 1px solid #cbd5e1;
+        padding: 0 15px;
+        height: 42px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-green {
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 0 20px;
+        height: 42px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        background: #f1f5f9;
+      }
+      .btn-icon:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+      }
 
-        <button class="btn-head btn-secundario" id="btnExport" title="Descargar CSV">
-          <i class="fa-solid fa-file-csv"></i>
-          <span class="btn-text">Exportar</span>
-        </button>
+      /* Tabla */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+      th,
+      td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 14px;
+      }
+      th {
+        background: #f8fafc;
+        font-weight: 600;
+        color: #475569;
+        text-transform: uppercase;
+        font-size: 11px;
+      }
 
-        <button class="btn-head btn-secundario" onclick="window.print()" title="Imprimir vista">
-          <i class="fa-solid fa-print"></i>
-          <span class="btn-text">Imprimir</span>
-        </button>
+      /* Modales */
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal.active {
+        display: flex;
+      }
+      .modal-content {
+        background: white;
+        width: 100%;
+        max-width: 600px;
+        padding: 30px;
+        border-radius: 12px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
 
-        <button class="btn-head btn-nuevo" id="btnNew">
-          <i class="fa-solid fa-plus"></i>
-          <span>Nuevo Copropietario</span>
-        </button>
+      /* Spinner */
+      .spinner-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: none;
+        place-items: center;
+        z-index: 2000;
+      }
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #e2e8f0;
+        border-top-color: #1a2b48;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Área Pegado */
+      .paste-area {
+        width: 100%;
+        height: 150px;
+        padding: 10px;
+        font-family: monospace;
+        font-size: 12px;
+        border: 2px dashed #cbd5e1;
+        border-radius: 8px;
+        background: #f8fafc;
+        margin-bottom: 15px;
+        resize: vertical;
+      }
+      .paste-area:focus {
+        border-color: #1a2b48;
+        outline: none;
+        background: #fff;
+      }
+      .preview-table {
+        width: 100%;
+        font-size: 12px;
+        border: 1px solid #e2e8f0;
+        margin-top: 10px;
+      }
+      .preview-table th {
+        background: #f1f5f9;
+        padding: 5px;
+      }
+      .preview-table td {
+        padding: 5px;
+        border-top: 1px solid #e2e8f0;
+      }
+
+      /* Badges */
+      .badge {
+        padding: 3px 8px;
+        border-radius: 10px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .bg-blue {
+        background: #e0f2fe;
+        color: #0369a1;
+      }
+      .bg-orange {
+        background: #ffedd5;
+        color: #c2410c;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="header"></div>
+
+    <main>
+      <div class="dashboard-header">
+        <div class="header-top">
+          <div>
+            <h1 class="page-title">Copropietarios y Residentes</h1>
+            <p style="margin: 5px 0 0; color: #64748b; font-size: 14px">
+              Gestiona a las personas, sus contactos y asignaciones.
+            </p>
+          </div>
+          <div style="display: flex; gap: 10px">
+            <button class="btn-sec" onclick="cargarDatos()" title="Recargar">
+              <i class="fa-solid fa-rotate-right"></i>
+            </button>
+            <button class="btn-green" onclick="abrirImportar()">
+              <i class="fa-solid fa-file-excel"></i> Importar Masivo
+            </button>
+            <button class="btn-main" onclick="abrirModal()">
+              <i class="fa-solid fa-plus"></i> Nuevo Persona
+            </button>
+          </div>
+        </div>
+
+        <div class="header-filters">
+          <div class="filter-group" style="flex: 2">
+            <label class="label">Comunidad / Condominio</label>
+            <select
+              id="filtroCopropiedad"
+              class="input-modern"
+              onchange="aplicarFiltros()"
+            >
+              <option value="">(Cargando...)</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label class="label">Buscar Persona</label>
+            <input
+              id="filtroBuscar"
+              class="input-modern"
+              placeholder="Nombre, email, unidad..."
+              onkeyup="aplicarFiltros()"
+            />
+          </div>
+
+          <div class="filter-group">
+            <label class="label">Tipo</label>
+            <select
+              id="filtroTipo"
+              class="input-modern"
+              onchange="aplicarFiltros()"
+            >
+              <option value="">(Todos)</option>
+              <option value="Propietario">Propietario</option>
+              <option value="Arrendatario">Arrendatario</option>
+              <option value="Corredor">Corredor</option>
+            </select>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <div class="header-filters">
-      <div class="filter-item" style="flex-grow: 2;"> 
-        <label class="label">Buscar</label>
-        <input id="inpBuscar" class="input-modern" placeholder="Nombre, RUT, Email, Teléfono..." type="text" style="width: 95%;height:42px;">
+      <div
+        style="
+          background: white;
+          border-radius: 12px;
+          border: 1px solid #e2e8f0;
+          overflow: hidden;
+        "
+      >
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Unidad (Depto/Casa)</th>
+              <th>Contacto (Email / Fono)</th>
+              <th>Tipo</th>
+              <th style="text-align: right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaUsuarios">
+            <tr>
+              <td
+                colspan="5"
+                style="text-align: center; padding: 30px; color: #94a3b8"
+              >
+                Selecciona una Comunidad para ver sus residentes.
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+    </main>
 
-      <div class="filter-item" style="flex-grow: 1;">
-        <label class="label">Filtrar por Copropiedad</label>
-        <select id="selCoproFilter" class="input-modern">
-          <option value="">(Todas)</option>
-        </select>
-      </div>
-    </div>
-  </div>
+    <div id="modalUsuario" class="modal">
+      <div class="modal-content">
+        <h2 id="modalTitle" style="margin-top: 0">Nueva Persona</h2>
+        <form id="formUsuario">
+          <input type="hidden" id="uID" />
+          <input type="hidden" id="uCopropiedadID" />
 
-  <table>
-    <thead>
-      <tr>
-        <th>Copropiedad</th>
-        <th>Nombre</th>
-        <th>RUT</th>
-        <th>Email</th>
-        <th>Teléfono</th>
-        <th class="no-print">Acciones</th>
-      </tr>
-    </thead>
-    <tbody id="tablaCo"><tr><td colspan="6" class="muted">Cargando datos...</td></tr></tbody>
-  </table>
-</main>
+          <label class="label" style="margin-top: 10px">Comunidad</label>
+          <input
+            id="uCopropiedadNombre"
+            class="input-modern"
+            style="background: #f1f5f9"
+            readonly
+          />
 
-<div id="modalCo" class="modal" aria-hidden="true">
-  <div class="modal-content">
-    <h2 id="modalTitle" style="margin-top:0;">Nuevo Copropietario</h2>
-    <form id="formCo" style="margin-top:20px;">
-      <input type="hidden" id="coID">
-      
-      <div style="display:flex; flex-direction:column; gap:12px;">
-         <div>
-            <label class="label">Copropiedad Asociada</label>
-            <select id="coCopro" required></select>
-         </div>
-         <div>
+          <div style="margin-top: 15px">
             <label class="label">Nombre Completo</label>
-            <input id="coNombre" required>
-         </div>
-         <div>
-            <label class="label">RUT</label>
-            <input id="coRUT" placeholder="12.345.678-9">
-         </div>
-         <div style="display:flex; gap:10px;">
-            <div style="flex:1;"><label class="label">Email</label><input id="coEmail" type="email"></div>
-            <div style="flex:1;"><label class="label">Teléfono</label><input id="coTelefono"></div>
-         </div>
-      </div>
+            <input
+              id="uNombre"
+              class="input-modern"
+              required
+              placeholder="Ej: Juan Pérez"
+            />
+          </div>
 
-      <div style="text-align:right; margin-top:20px;">
-        <button type="button" class="btn-primary" style="background:#6c757d; border:none;" onclick="cerrarForm()">Cancelar</button>
-        <button class="btn-primary" style="border:none;">Guardar</button>
-      </div>
-    </form>
-  </div>
-</div>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 15px;
+              margin-top: 15px;
+            "
+          >
+            <div>
+              <label class="label">Asignar Unidad</label>
+              <select id="uUnidadID" class="input-modern">
+                <option value="">(Sin Unidad)</option>
+              </select>
+            </div>
+            <div>
+              <label class="label">Tipo Relación</label>
+              <select id="uTipo" class="input-modern">
+                <option value="Propietario">Propietario</option>
+                <option value="Arrendatario">Arrendatario</option>
+                <option value="Corredor">Corredor</option>
+                <option value="Residente">Residente</option>
+              </select>
+            </div>
+          </div>
 
-<div id="pageSpinner" class="spinner-backdrop" aria-hidden="true">
-  <div class="spinner-card">
-    <div class="spinner"></div>
-    <div id="spinnerText">Cargando…</div>
-  </div>
-</div>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 15px;
+              margin-top: 15px;
+            "
+          >
+            <div>
+              <label class="label">Email</label>
+              <input
+                id="uEmail"
+                type="email"
+                class="input-modern"
+                placeholder="juan@correo.com"
+              />
+            </div>
+            <div>
+              <label class="label">Teléfono</label>
+              <input
+                id="uTelefono"
+                class="input-modern"
+                placeholder="+569..."
+              />
+            </div>
+          </div>
 
-<div id="footer"></div>
-
-<script>
-/* ===== Utilidades Standard ===== */
-function showSpinner(msg){ const sp=document.getElementById('pageSpinner'); const txt=document.getElementById('spinnerText'); if(msg) txt.textContent=msg; sp.style.display='grid'; }
-function hideSpinner(){ document.getElementById('pageSpinner').style.display='none'; }
-function norm(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim(); }
-function escapeCSV(v){ if(v==null) return ''; const s=String(v).replaceAll('"','""'); return /[",\n]/.test(s) ? '"'+s+'"' : s; }
-
-/* Helpers Claves */
-if(typeof window.getKeyVal !== 'function'){ window.getKeyVal = (o)=> o? (o._id ?? o.id ?? o.ID ?? o.Key ?? o.key ?? o.Id ?? o[Object.keys(o)[0]]):""; }
-if(typeof window.getKeyName !== 'function'){ window.getKeyName = (row)=>{ if(!row || typeof row!=='object') return 'ID'; const cands=['ID','_id','Id','id','Key','key']; for(const c of cands){ if(c in row) return c; } return Object.keys(row)[0] || 'ID'; }; }
-function generateKey(prefix='ID'){ return `${prefix}_${Date.now().toString(36)}${Math.random().toString(36).slice(2,8).toUpperCase()}`; }
-
-/* ===== Estado ===== */
-let COPROS=[], COPS=[], VIEW=[];
-let KEY_NAME="ID";
-
-/* ===== Inicialización ===== */
-document.addEventListener("DOMContentLoaded", async ()=>{
-  try{ document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); }catch(e){}
-  try{ document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); }catch(e){}
-  
-  bindUI();
-  await cargarTodo();
-});
-
-function bindUI(){
-  // Botones
-  document.getElementById('btnNew').addEventListener('click', ()=>abrirForm());
-  document.getElementById('btnReload').addEventListener('click', cargarTodo);
-  document.getElementById('btnExport').addEventListener('click', exportCSV);
-  
-  // Filtros
-  document.getElementById('inpBuscar').addEventListener('input', aplicarFiltros);
-  document.getElementById('selCoproFilter').addEventListener('change', aplicarFiltros);
-  
-  // Modal
-  modalCo.addEventListener('click', e=>{ if(e.target===modalCo) cerrarForm(); });
-  document.addEventListener('keydown', e=>{ if(e.key==='Escape') cerrarForm(); });
-}
-
-/* ===== Carga de Datos ===== */
-async function cargarTodo(){
-  try{
-    showSpinner("Cargando residentes...");
-    const [c, cp] = await Promise.all([ 
-       fetchData("Copropiedades").catch(()=>[]), 
-       fetchData("Copropietarios").catch(()=>[]) 
-    ]);
-
-    COPROS = c || [];
-    COPS = cp || [];
-    
-    if(COPS.length) KEY_NAME = getKeyName(COPS[0]);
-
-    // Llenar Selects de Copropiedades
-    const optionsHTML = COPROS.map(x=>`<option value="${getKeyVal(x)}">${x.Nombre}</option>`).join("");
-    document.getElementById('selCoproFilter').innerHTML = '<option value="">(Todas)</option>' + optionsHTML;
-    document.getElementById('coCopro').innerHTML = optionsHTML;
-
-    aplicarFiltros();
-
-  }catch(err){
-    console.error(err);
-    alert("Error cargando datos: " + err.message);
-  }finally{
-    hideSpinner();
-  }
-}
-
-/* ===== Filtros y Render ===== */
-function aplicarFiltros(){
-  const q = norm(document.getElementById('inpBuscar').value);
-  const coproID = document.getElementById('selCoproFilter').value;
-
-  VIEW = COPS.filter(r => {
-    // Filtro Copropiedad
-    if(coproID && String(r.CopropiedadID) !== String(coproID)) return false;
-    
-    // Filtro Texto
-    if(!q) return true;
-    const searchStr = [r.Nombre, r.RUT, r.Email, r.Telefono].map(v=>norm(v)).join(" ");
-    return searchStr.includes(q);
-  });
-
-  renderTabla();
-}
-
-function renderTabla(){
-  const tb = document.getElementById('tablaCo');
-  if(!VIEW.length){ tb.innerHTML = '<tr><td colspan="6" class="muted">No se encontraron residentes.</td></tr>'; return; }
-
-  const coproMap={}; COPROS.forEach(c => coproMap[getKeyVal(c)] = c.Nombre);
-
-  tb.innerHTML = VIEW.map(r => {
-    const key = getKeyVal(r);
-    const nombreCopro = coproMap[r.CopropiedadID] || "—";
-    
-    return `<tr>
-      <td><span style="font-weight:600; font-size:13px;">${nombreCopro}</span></td>
-      <td>${r.Nombre||""}</td>
-      <td class="mono">${r.RUT||""}</td>
-      <td>${r.Email||""}</td>
-      <td>${r.Telefono||""}</td>
-      <td class="no-print">
-         <div class="acciones-group">
-            <button class="btn-icon btn-editar" onclick="abrirForm('${key}')" title="Editar">
-               <i class="fa-solid fa-pen"></i>
+          <div style="text-align: right; margin-top: 25px">
+            <button type="button" class="btn-sec" onclick="cerrarModal()">
+              Cancelar
             </button>
-            <button class="btn-icon btn-eliminar" onclick="eliminar('${key}')" title="Eliminar">
-               <i class="fa-solid fa-trash"></i>
-            </button>
-         </div>
-      </td>
-    </tr>`;
-  }).join("");
-}
+            <button type="submit" class="btn-main">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
 
-/* ===== CRUD ===== */
-function abrirForm(id){
-  const title = document.getElementById('modalTitle');
-  document.getElementById('formCo').reset();
-  document.getElementById('coID').value = "";
+    <div id="modalImportar" class="modal">
+      <div class="modal-content" style="max-width: 800px">
+        <h2 style="margin-top: 0">
+          <i class="fa-solid fa-users" style="color: #10b981"></i> Carga Masiva
+          de Personas
+        </h2>
+        <p style="color: #64748b; font-size: 13px; margin-bottom: 15px">
+          Copia desde Excel y pega abajo. El orden de columnas debe ser: <br />
+          <b>1. Nombre | 2. Email | 3. N° Unidad</b> (Opcional)
+        </p>
 
-  if(id){
-    title.textContent = "Editar Copropietario";
-    const r = COPS.find(x => String(getKeyVal(x)) === String(id));
-    if(!r){ alert("No encontrado"); return; }
-    
-    document.getElementById('coID').value = id;
-    document.getElementById('coCopro').value = r.CopropiedadID;
-    document.getElementById('coNombre').value = r.Nombre||"";
-    document.getElementById('coRUT').value = r.RUT||"";
-    document.getElementById('coEmail').value = r.Email||"";
-    document.getElementById('coTelefono').value = r.Telefono||"";
-  } else {
-    title.textContent = "Nuevo Copropietario";
-  }
-  document.getElementById('modalCo').classList.add("active");
-}
+        <textarea
+          id="txtPaste"
+          class="paste-area"
+          placeholder="Ejemplo:
+Juan Pérez	juan@mail.com	101
+Maria Soto	maria@mail.com	102
+Pedro Pascal	pedro@mail.com	205"
+        ></textarea>
 
-function cerrarForm(){ document.getElementById('modalCo').classList.remove("active"); }
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <button type="button" class="btn-sec" onclick="procesarPegado()">
+            <i class="fa-solid fa-eye"></i> Previsualizar
+          </button>
+          <span
+            id="importStats"
+            style="font-size: 12px; font-weight: 700"
+          ></span>
+        </div>
 
-document.getElementById('formCo').onsubmit = async (e)=>{
-  e.preventDefault();
-  const idValue = document.getElementById('coID').value;
-  
-  const payload = {
-    CopropiedadID: document.getElementById('coCopro').value,
-    Nombre: document.getElementById('coNombre').value.trim(),
-    RUT: document.getElementById('coRUT').value.trim(),
-    Email: document.getElementById('coEmail').value.trim(),
-    Telefono: document.getElementById('coTelefono').value.trim()
-  };
+        <div
+          style="
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            margin-top: 10px;
+          "
+        >
+          <table class="preview-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Unidad Detectada</th>
+              </tr>
+            </thead>
+            <tbody id="tblPreview">
+              <tr>
+                <td colspan="4" style="text-align: center; color: #ccc">
+                  Nada para mostrar aún...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-  const keyField = (idValue ? KEY_NAME : KEY_NAME);
+        <div
+          style="
+            text-align: right;
+            margin-top: 20px;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 15px;
+          "
+        >
+          <button
+            type="button"
+            class="btn-sec"
+            onclick="document.getElementById('modalImportar').style.display='none'"
+          >
+            Cerrar
+          </button>
+          <button
+            type="button"
+            class="btn-green"
+            onclick="enviarCargaMasiva()"
+            id="btnConfirmarCarga"
+            disabled
+          >
+            Confirmar Carga
+          </button>
+        </div>
+      </div>
+    </div>
 
-  if(idValue){
-     payload[keyField] = idValue;
-  } else {
-     payload[keyField] = generateKey('COP');
-  }
+    <div id="pageSpinner" class="spinner-overlay">
+      <div style="text-align: center">
+        <div class="spinner"></div>
+        <div
+          id="spinnerText"
+          style="margin-top: 10px; font-weight: 600; color: #1a2b48"
+        >
+          Cargando...
+        </div>
+      </div>
+    </div>
 
-  try{
-    showSpinner(idValue ? 'Guardando...' : 'Creando...');
-    if(typeof upsertData === 'function'){
-       await upsertData("Copropietarios", payload);
-    } else {
-       if(idValue) await appSheetCRUD("Copropietarios","Edit",[payload]);
-       else        await appSheetCRUD("Copropietarios","Add",[payload]);
-    }
-    cerrarForm();
-    await cargarTodo();
-  }catch(err){
-    console.error(err);
-    alert("Error al guardar: " + err.message);
-  }finally{
-    hideSpinner();
-  }
-};
+    <div id="footer"></div>
 
-async function eliminar(id){
-  if(!confirm("¿Eliminar este registro?")) return;
-  try{
-    showSpinner("Eliminando...");
-    if(typeof deleteByKey === 'function'){
-       await deleteByKey("Copropietarios", id);
-    } else {
-       await appSheetCRUD("Copropietarios","Delete",[{[KEY_NAME]:id}]);
-    }
-    await cargarTodo();
-  }catch(err){
-    alert("Error: " + err.message);
-  }finally{
-    hideSpinner();
-  }
-}
+    <script>
+      let USUARIOS = [],
+        COPROPIEDADES = [],
+        UNIDADES = [],
+        VIEW = [];
+      let DATA_TO_IMPORT = []; // Buffer
 
-/* ===== Exportar ===== */
-function exportCSV(){
-  const headers = ['ID','CopropiedadID','Nombre','RUT','Email','Telefono'];
-  const lines = [headers.join(',')];
-  
-  VIEW.forEach(r => {
-    lines.push([
-      escapeCSV(getKeyVal(r)),
-      escapeCSV(r.CopropiedadID),
-      escapeCSV(r.Nombre),
-      escapeCSV(r.RUT),
-      escapeCSV(r.Email),
-      escapeCSV(r.Telefono)
-    ].join(','));
-  });
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          document.getElementById("header").innerHTML = await (
+            await fetch("header.html")
+          ).text();
+        } catch (e) {}
+        try {
+          document.getElementById("footer").innerHTML = await (
+            await fetch("footer.html")
+          ).text();
+        } catch (e) {}
 
-  const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); 
-  a.href = url; a.download = 'Copropietarios.csv'; 
-  a.click(); 
-  URL.revokeObjectURL(url);
-}
-</script>
-</body>
+        await cargarDatos();
+
+        // Auto-seleccionar si viene por URL
+        const params = new URLSearchParams(window.location.search);
+        const coproID = params.get("id");
+        if (coproID) {
+          document.getElementById("filtroCopropiedad").value = coproID;
+          aplicarFiltros();
+        }
+      });
+
+      async function cargarDatos() {
+        showSpinner("Descargando padrón...");
+        try {
+          const [u, c, uni] = await Promise.all([
+            fetchData("Copropietarios").catch(() => []),
+            fetchData("Copropiedades").catch(() => []),
+            fetchData("Unidades").catch(() => []),
+          ]);
+
+          USUARIOS = u || [];
+          COPROPIEDADES = c || [];
+          UNIDADES = uni || [];
+
+          // Llenar Select Condominios
+          const sel = document.getElementById("filtroCopropiedad");
+          sel.innerHTML =
+            '<option value="">-- Selecciona Comunidad --</option>' +
+            COPROPIEDADES.map(
+              (c) => `<option value="${c.ID}">${c.Nombre}</option>`
+            ).join("");
+        } catch (e) {
+          console.error(e);
+          alert("Error cargando datos: " + e.message);
+        } finally {
+          hideSpinner();
+        }
+      }
+
+      function aplicarFiltros() {
+        const idCopro = document.getElementById("filtroCopropiedad").value;
+        const q = document.getElementById("filtroBuscar").value.toLowerCase();
+        const tipo = document.getElementById("filtroTipo").value;
+
+        if (!idCopro) {
+          document.getElementById("tablaUsuarios").innerHTML =
+            '<tr><td colspan="5" style="text-align:center; padding:40px; color:#64748b;"><i class="fa-solid fa-arrow-up"></i><br>Por favor selecciona una Comunidad arriba.</td></tr>';
+          return;
+        }
+
+        // 1. Filtrar Unidades de ESTA comunidad (para saber nombres de unidad)
+        const unidadesLocal = UNIDADES.filter(
+          (uni) => String(uni.CopropiedadID) === String(idCopro)
+        );
+
+        // 2. Filtrar Usuarios que pertenezcan a unidades de esta comunidad
+        //    (OJO: En tu modelo, el usuario tiene CopropiedadID o UnidadID. Usaremos ambos para ser flexibles)
+        VIEW = USUARIOS.filter((user) => {
+          // Caso A: Tiene CopropiedadID directo
+          if (
+            user.CopropiedadID &&
+            String(user.CopropiedadID) === String(idCopro)
+          )
+            return true;
+          // Caso B: Tiene UnidadID, verificamos si esa unidad es de esta comunidad
+          if (user.UnidadID) {
+            const uniPadre = unidadesLocal.find(
+              (u) => String(u.ID) === String(user.UnidadID)
+            );
+            return !!uniPadre;
+          }
+          return false;
+        });
+
+        // 3. Filtros Texto y Tipo
+        if (tipo) VIEW = VIEW.filter((u) => u.Tipo === tipo);
+        if (q)
+          VIEW = VIEW.filter(
+            (u) =>
+              (u.Nombre || "").toLowerCase().includes(q) ||
+              (u.Email || "").toLowerCase().includes(q)
+          );
+
+        renderTabla(unidadesLocal);
+      }
+
+      function renderTabla(unidadesLocal) {
+        const tb = document.getElementById("tablaUsuarios");
+        if (VIEW.length === 0) {
+          tb.innerHTML =
+            '<tr><td colspan="5" style="text-align:center; padding:20px;">No hay personas registradas.</td></tr>';
+          return;
+        }
+
+        tb.innerHTML = VIEW.map((user) => {
+          // Resolver Nombre Unidad
+          let labelUnidad = '<span style="color:#cbd5e1;">--</span>';
+          if (user.UnidadID) {
+            const uni = unidadesLocal.find(
+              (u) => String(u.ID) === String(user.UnidadID)
+            );
+            if (uni)
+              labelUnidad = `<b>${uni.Numero}</b> <small>(${
+                uni.Torre || ""
+              })</small>`;
+          }
+
+          const tipoBadge =
+            user.Tipo === "Propietario" ? "bg-blue" : "bg-orange";
+
+          return `
+            <tr>
+                <td style="font-weight:600;">${user.Nombre}</td>
+                <td>${labelUnidad}</td>
+                <td style="font-size:13px;">
+                    <div><i class="fa-regular fa-envelope" style="width:15px;"></i> ${
+                      user.Email || "-"
+                    }</div>
+                    <div style="color:#64748b;"><i class="fa-solid fa-phone" style="width:15px;"></i> ${
+                      user.Telefono || "-"
+                    }</div>
+                </td>
+                <td><span class="badge ${tipoBadge}">${
+            user.Tipo || "Residente"
+          }</span></td>
+                <td style="text-align:right;">
+                    <button class="btn-icon" onclick="editar('${
+                      user.ID
+                    }')"><i class="fa-solid fa-pen"></i></button>
+                    <button class="btn-icon" onclick="eliminar('${
+                      user.ID
+                    }')"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            </tr>
+            `;
+        }).join("");
+      }
+
+      /* --- CRUD INDIVIDUAL --- */
+      function abrirModal() {
+        const idCopro = document.getElementById("filtroCopropiedad").value;
+        if (!idCopro)
+          return alert("Selecciona la Comunidad en el filtro primero.");
+
+        const copro = COPROPIEDADES.find(
+          (c) => String(c.ID) === String(idCopro)
+        );
+
+        document.getElementById("formUsuario").reset();
+        document.getElementById("uID").value = "";
+        document.getElementById("modalTitle").innerText = "Nueva Persona";
+
+        // Datos Contexto
+        document.getElementById("uCopropiedadID").value = idCopro;
+        document.getElementById("uCopropiedadNombre").value = copro
+          ? copro.Nombre
+          : "";
+
+        // Llenar Select de Unidades (Solo de esta comunidad)
+        llenarSelectUnidades(idCopro);
+
+        document.getElementById("modalUsuario").style.display = "flex";
+      }
+
+      function llenarSelectUnidades(idCopro, selectedID = "") {
+        const unidadesFiltradas = UNIDADES.filter(
+          (u) => String(u.CopropiedadID) === String(idCopro)
+        );
+        // Ordenar numéricamente si es posible
+        unidadesFiltradas.sort((a, b) =>
+          a.Numero.localeCompare(b.Numero, undefined, { numeric: true })
+        );
+
+        const sel = document.getElementById("uUnidadID");
+        sel.innerHTML =
+          '<option value="">(Sin asignar)</option>' +
+          unidadesFiltradas
+            .map(
+              (u) =>
+                `<option value="${u.ID}">${u.Numero} ${
+                  u.Torre ? "(" + u.Torre + ")" : ""
+                }</option>`
+            )
+            .join("");
+
+        if (selectedID) sel.value = selectedID;
+      }
+
+      function editar(id) {
+        const user = USUARIOS.find((x) => x.ID === id);
+        if (!user) return;
+
+        // Detectar comunidad (preferencia por CopropiedadID explicito, sino inferir de Unidad)
+        let idCopro = user.CopropiedadID;
+        if (!idCopro && user.UnidadID) {
+          const uni = UNIDADES.find((u) => u.ID === user.UnidadID);
+          if (uni) idCopro = uni.CopropiedadID;
+        }
+
+        const copro = COPROPIEDADES.find(
+          (c) => String(c.ID) === String(idCopro)
+        );
+
+        document.getElementById("uID").value = user.ID;
+        document.getElementById("uCopropiedadID").value = idCopro || "";
+        document.getElementById("uCopropiedadNombre").value = copro
+          ? copro.Nombre
+          : "";
+
+        document.getElementById("uNombre").value = user.Nombre;
+        document.getElementById("uEmail").value = user.Email || "";
+        document.getElementById("uTelefono").value = user.Telefono || "";
+        document.getElementById("uTipo").value = user.Tipo || "Propietario";
+
+        llenarSelectUnidades(idCopro, user.UnidadID);
+
+        document.getElementById("modalTitle").innerText = "Editar Persona";
+        document.getElementById("modalUsuario").style.display = "flex";
+      }
+
+      function cerrarModal() {
+        document.getElementById("modalUsuario").style.display = "none";
+      }
+
+      document.getElementById("formUsuario").onsubmit = async (e) => {
+        e.preventDefault();
+        showSpinner("Guardando...");
+
+        const id = document.getElementById("uID").value;
+        const payload = {
+          ID: id || "USR_" + Date.now(),
+          CopropiedadID: document.getElementById("uCopropiedadID").value,
+          UnidadID: document.getElementById("uUnidadID").value, // Relación Clave
+          Nombre: document.getElementById("uNombre").value,
+          Email: document.getElementById("uEmail").value,
+          Telefono: document.getElementById("uTelefono").value,
+          Tipo: document.getElementById("uTipo").value,
+          Password: "", // Se genera en otro flujo
+        };
+
+        try {
+          const action = id ? "Edit" : "Add";
+          if (typeof appSheetCRUD === "function")
+            await appSheetCRUD("Copropietarios", action, [payload]);
+          cerrarModal();
+          await cargarDatos();
+          aplicarFiltros();
+        } catch (err) {
+          alert("Error: " + err.message);
+        } finally {
+          hideSpinner();
+        }
+      };
+
+      async function eliminar(id) {
+        if (!confirm("¿Eliminar usuario?")) return;
+        showSpinner("Eliminando...");
+        try {
+          if (typeof appSheetCRUD === "function")
+            await appSheetCRUD("Copropietarios", "Delete", [{ ID: id }]);
+          await cargarDatos();
+          aplicarFiltros();
+        } catch (e) {
+          alert(e.message);
+        } finally {
+          hideSpinner();
+        }
+      }
+
+      /* --- LÓGICA IMPORTACIÓN MASIVA --- */
+      function abrirImportar() {
+        const idCopro = document.getElementById("filtroCopropiedad").value;
+        if (!idCopro)
+          return alert("Selecciona la Comunidad destino antes de importar.");
+
+        document.getElementById("txtPaste").value = "";
+        document.getElementById("tblPreview").innerHTML =
+          '<tr><td colspan="4" style="text-align:center;">Pega tus datos arriba y pulsa Previsualizar.</td></tr>';
+        document.getElementById("btnConfirmarCarga").disabled = true;
+        document.getElementById("importStats").innerText = "";
+        document.getElementById("modalImportar").style.display = "flex";
+      }
+
+      function procesarPegado() {
+        const texto = document.getElementById("txtPaste").value.trim();
+        if (!texto) return;
+
+        const lineas = texto.split("\n");
+        const idCopro = document.getElementById("filtroCopropiedad").value;
+
+        // Cargar unidades locales para hacer match por Nombre/Numero
+        const unidadesLocal = UNIDADES.filter(
+          (u) => String(u.CopropiedadID) === String(idCopro)
+        );
+
+        DATA_TO_IMPORT = [];
+        let html = "";
+
+        lineas.forEach((linea, index) => {
+          let cols = linea.split("\t");
+          const nombre = (cols[0] || "").trim();
+          const email = (cols[1] || "").trim();
+          const numUnidad = (cols[2] || "").trim();
+
+          if (nombre) {
+            // Intentar buscar ID de unidad por el número (Ej: "101" -> UNI_12345)
+            let idUnidadMatch = "";
+            let labelUnidad = '<span style="color:red;">No encontrada</span>';
+
+            if (numUnidad) {
+              const match = unidadesLocal.find((u) => u.Numero === numUnidad);
+              if (match) {
+                idUnidadMatch = match.ID;
+                labelUnidad = `<span style="color:green;">${match.Numero}</span>`;
+              }
+            }
+
+            const obj = {
+              ID: "USR_" + Date.now() + "_" + index,
+              CopropiedadID: idCopro,
+              UnidadID: idUnidadMatch,
+              Nombre: nombre,
+              Email: email,
+              Tipo: "Propietario",
+            };
+
+            DATA_TO_IMPORT.push(obj);
+            html += `<tr>
+                    <td>${index + 1}</td>
+                    <td><b>${obj.Nombre}</b></td>
+                    <td>${obj.Email}</td>
+                    <td>${labelUnidad} (${numUnidad})</td>
+                </tr>`;
+          }
+        });
+
+        document.getElementById("tblPreview").innerHTML =
+          html || '<tr><td colspan="4">Datos no válidos.</td></tr>';
+
+        if (DATA_TO_IMPORT.length > 0) {
+          document.getElementById("btnConfirmarCarga").disabled = false;
+          document.getElementById(
+            "importStats"
+          ).innerText = `${DATA_TO_IMPORT.length} personas detectadas.`;
+        }
+      }
+
+      async function enviarCargaMasiva() {
+        if (DATA_TO_IMPORT.length === 0) return;
+        if (!confirm(`Crear ${DATA_TO_IMPORT.length} personas. ¿Confirmar?`))
+          return;
+
+        showSpinner(`Creando ${DATA_TO_IMPORT.length} usuarios...`);
+        try {
+          if (typeof appSheetCRUD === "function") {
+            await appSheetCRUD("Copropietarios", "Add", DATA_TO_IMPORT);
+          }
+          document.getElementById("modalImportar").style.display = "none";
+          alert("✅ Carga masiva exitosa.");
+          await cargarDatos();
+          aplicarFiltros();
+        } catch (e) {
+          console.error(e);
+          alert("Error: " + e.message);
+        } finally {
+          hideSpinner();
+        }
+      }
+
+      /* Utils */
+      function showSpinner(msg) {
+        document.getElementById("spinnerText").innerText = msg;
+        document.getElementById("pageSpinner").style.display = "grid";
+      }
+      function hideSpinner() {
+        document.getElementById("pageSpinner").style.display = "none";
+      }
+    </script>
+  </body>
 </html>

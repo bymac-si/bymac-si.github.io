@@ -112,6 +112,49 @@
   }
   .btn-logout:hover { background: #fee2e2; transform: translateY(-1px); }
 
+  /* 1. IMPORTANTE: El elemento <li> padre debe ser el punto de referencia */
+.dropdown-submenu {
+  position: relative; /* Esto es vital */
+}
+
+/* 2. El submenú debe flotar a la derecha del padre */
+.dropdown-submenu .submenu {
+  display: none; /* Oculto por defecto */
+  position: absolute;
+  top: 0;
+  left: 100%; /* Lo empuja totalmente a la derecha */
+  margin-left: 2px; /* Un pequeño margen para que no toque el borde */
+  margin-top: -5px; /* Ajuste para alinear con el texto */
+  
+  /* Estilos visuales de la caja */
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* Sombra un poco más fuerte para destacar */
+  border: 1px solid #e2e8f0;
+  min-width: 180px;
+  padding: 5px 0;
+  list-style: none;
+  z-index: 1000; /* Asegura que quede por encima de todo */
+}
+
+/* 3. Mostrar el menú al pasar el mouse */
+.dropdown-submenu:hover > .submenu {
+  display: block;
+}
+
+/* Estilos de los enlaces dentro del submenú */
+.dropdown-submenu .submenu li a {
+  padding: 8px 15px;
+  display: block;
+  text-decoration: none;
+  color: #1a2b48;
+  font-size: 13px;
+}
+
+.dropdown-submenu .submenu li a:hover {
+  background-color: #f1f5f9;
+}
+
   @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
   
   /* Mobile Toggle */
@@ -175,18 +218,30 @@
     </div>
 
     <div class="nav-dropdown">
-      <a href="#" class="nav-link dropdown-toggle">
-        <i class="fa-solid fa-building"></i> <span>Condominios</span> <i class="fa-solid fa-chevron-down" style="font-size:10px; margin-left:4px;"></i>
-      </a>
-      <ul class="dropdown-menu">
-        <li><a href="dashboardcopropiedades.html"><i class="fa-solid fa-chart-pie"></i> KPIs Condominios</a></li>
-        <li style="border-top:1px solid #f1f5f9; margin:4px 0;"></li>
-        <li><a href="copropiedades.html"><i class="fa-solid fa-city"></i> Comunidades</a></li>
-        <li><a href="unidades.html"><i class="fa-solid fa-door-closed"></i> Unidades</a></li>
-        <li><a href="copropietarios.html"><i class="fa-solid fa-user-group"></i> Copropietarios</a></li>
-        <li><a href="prospectos.html"><i class="fa-solid fa-user-plus"></i> Prospectos</a></li>
-      </ul>
-    </div>
+  <a href="#" class="nav-link dropdown-toggle">
+    <i class="fa-solid fa-building"></i> <span>Condominios</span> 
+    <i class="fa-solid fa-chevron-down" style="font-size:10px; margin-left:4px;"></i>
+  </a>
+  
+  <ul class="dropdown-menu">
+    <li><a href="dashboardcopropiedades.html"><i class="fa-solid fa-chart-pie"></i> KPIs Condominios</a></li>
+    <li style="border-top:1px solid #f1f5f9; margin:4px 0;"></li>
+    <li><a href="copropiedades.html"><i class="fa-solid fa-city"></i> Comunidades</a></li>
+    <li><a href="unidades.html"><i class="fa-solid fa-door-closed"></i> Unidades</a></li>
+    <li><a href="copropietarios.html"><i class="fa-solid fa-user-group"></i> Copropietarios</a></li>
+    
+    <li class="dropdown-submenu">
+        <a href="#" style="display:flex; justify-content:space-between; align-items:center;">
+            <span><i class="fa-solid fa-user-plus"></i> Gestión Prospectos</span>
+            <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
+        </a>
+        <ul class="dropdown-menu submenu">
+            <li><a href="prospectos.html"><i class="fa-solid fa-list-ul"></i> Listado</a></li>
+            <li><a href="mapa.html"><i class="fa-solid fa-map-location-dot"></i> Mapa Geo</a></li>
+        </ul>
+    </li>
+    </ul>
+</div>
 
     <div class="nav-dropdown">
       <a href="#" class="nav-link dropdown-toggle">

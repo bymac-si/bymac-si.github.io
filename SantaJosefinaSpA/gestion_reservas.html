@@ -1,17 +1,31 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>CRM - Gestión de Reservas</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="assets/js/app.js"></script>
-  <script>requireAuth();</script>
+  <head>
+    <meta charset="UTF-8" />
+    <title>CRM - Gestión de Reservas</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script>
+      (function () {
+        // Inicializa EmailJS con tu Public Key si no se hace en app.js
+         emailjs.init("7Il4AhmGHchP7qfxu");
+      })();
+    </script>
+
+    <script src="assets/js/app.js"></script>
+    <script>
+      requireAuth();
+    </script>
 
     <style>
       /* Estilos Base Admin */
       body {
-        max-width: 1300px;
+        max-width: 1400px;
         margin: 0 auto;
         color: #1a2b48;
         background: #f8fafc;
@@ -20,7 +34,7 @@
         padding: 40px;
       }
 
-      /* Header Dashboard */
+      /* Header */
       .dashboard-header {
         background: #fff;
         padding: 20px 25px;
@@ -49,7 +63,6 @@
         flex-wrap: wrap;
       }
 
-      /* Inputs y Selects */
       .input-modern {
         height: 42px;
         padding: 0 12px;
@@ -57,6 +70,7 @@
         border-radius: 8px;
         font-size: 14px;
         background: #fff;
+        box-sizing: border-box;
       }
       .filter-group {
         display: flex;
@@ -94,352 +108,1009 @@
         font-weight: 600;
         color: #475569;
         text-transform: uppercase;
-        font-size: 12px;
+        font-size: 11px;
         letter-spacing: 0.5px;
       }
       tr:hover {
         background: #f8fafc;
       }
 
-    /* Estados (Badges) */
-    .badge { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; display: inline-block; }
-    .st-pendiente { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; } /* Naranja */
-    .st-confirmada { background: #ecfdf5; color: #15803d; border: 1px solid #dcfce7; } /* Verde */
-    .st-rechazada { background: #fef2f2; color: #b91c1c; border: 1px solid #fee2e2; } /* Rojo */
+      /* Badges */
+      .badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        display: inline-block;
+        white-space: nowrap;
+      }
+      .st-Pendiente {
+        background: #fff7ed;
+        color: #c2410c;
+        border: 1px solid #ffedd5;
+      }
+      .st-Confirmada {
+        background: #ecfdf5;
+        color: #15803d;
+        border: 1px solid #dcfce7;
+      }
+      .st-Rechazada {
+        background: #fef2f2;
+        color: #b91c1c;
+        border: 1px solid #fee2e2;
+      }
 
-    /* Botones Acciones */
-    .btn-icon { width: 32px; height: 32px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s; margin-right: 4px; }
-    .btn-approve { background: #dcfce7; color: #166534; }
-    .btn-approve:hover { background: #166534; color: white; }
-    .btn-reject { background: #fee2e2; color: #991b1b; }
-    .btn-reject:hover { background: #991b1b; color: white; }
-    .btn-delete { background: #f1f5f9; color: #64748b; }
-    .btn-delete:hover { background: #64748b; color: white; }
+      .pay-Pendiente {
+        color: #c2410c;
+        background: #fff7ed;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 700;
+      }
+      .pay-Pagado {
+        color: #15803d;
+        background: #ecfdf5;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 700;
+      }
 
-    /* Alerta Conflicto */
-    .conflict-row { background-color: #fff1f2 !important; }
-    .conflict-msg { color: #e11d48; font-size: 11px; font-weight: 700; display: block; margin-top: 4px; }
+      /* Botones */
+      .btn-main {
+        background: #1a2b48;
+        color: white;
+        border: none;
+        padding: 0 20px;
+        height: 42px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-sec {
+        background: #fff;
+        color: #1a2b48;
+        border: 1px solid #cbd5e1;
+        padding: 0 15px;
+        height: 42px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        margin-right: 4px;
+      }
+      .btn-approve {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .btn-approve:hover {
+        background: #166534;
+        color: white;
+      }
+      .btn-reject {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .btn-reject:hover {
+        background: #991b1b;
+        color: white;
+      }
+      .btn-delete {
+        background: #f1f5f9;
+        color: #64748b;
+      }
+      .btn-delete:hover {
+        background: #64748b;
+        color: white;
+      }
 
-    /* Spinner */
-    .spinner-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); display: none; place-items: center; z-index: 999; }
-  </style>
-</head>
-<body>
-  <div id="header"></div>
+      /* Modal */
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal.active {
+        display: flex;
+      }
+      .modal-content {
+        background: white;
+        width: 100%;
+        max-width: 600px;
+        padding: 30px;
+        border-radius: 12px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      .spinner-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.8);
+        display: none;
+        place-items: center;
+        z-index: 999;
+      }
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #e2e8f0;
+        border-top-color: #1a2b48;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .conflict-row {
+        background-color: #fff1f2 !important;
+      }
+      .conflict-msg {
+        color: #e11d48;
+        font-size: 11px;
+        font-weight: 700;
+        display: block;
+        margin-top: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="header"></div>
 
     <main>
       <div class="dashboard-header">
         <div class="header-top">
           <div>
-            <h1 class="page-title">Gestión de Espacios Comunes</h1>
+            <h1 class="page-title">Gestión de Reservas</h1>
             <p style="color: #64748b; font-size: 14px; margin: 5px 0 0">
-              Administra las reservas de quinchos, salas y estacionamientos.
+              Administra el uso de espacios, pagos y notificaciones.
             </p>
           </div>
-          <button
-            class="input-modern"
-            style="
-              background: #1a2b48;
-              color: white;
-              border: none;
-              font-weight: 600;
-              cursor: pointer;
-            "
-            onclick="cargarDatos()"
-          >
-            <i class="fa-solid fa-rotate"></i> Actualizar
-          </button>
+          <div style="display: flex; gap: 10px">
+            <button class="btn-sec" onclick="cargarDatos()">
+              <i class="fa-solid fa-rotate"></i> Actualizar
+            </button>
+            <button class="btn-main" onclick="abrirModalReserva()">
+              <i class="fa-solid fa-plus"></i> Nueva Reserva
+            </button>
+          </div>
         </div>
 
-      <div class="header-filters">
-        <div class="filter-group">
-          <label class="label">Fecha Inicio</label>
-          <input type="date" id="filtroFecha" class="input-modern" onchange="aplicarFiltros()" style="width: 90%;height:40px;">
-        </div>
-        <div class="filter-group">
-          <label class="label">Espacio</label>
-          <select id="filtroEspacio" class="input-modern" onchange="aplicarFiltros()">
-            <option value="">(Todos)</option>
+        <div class="header-filters">
+          <div class="filter-group" style="min-width: 250px">
+            <label class="label">Comunidad</label>
+            <select
+              id="filtroCopropiedad"
+              class="input-modern"
+              onchange="cargarDatos()"
+            >
+              <option value="">Cargando...</option>
             </select>
+          </div>
+
+          <div class="filter-group">
+            <label class="label">Fecha</label>
+            <input
+              type="date"
+              id="filtroFecha"
+              class="input-modern"
+              onchange="aplicarFiltros()"
+              style="width: 140px"
+            />
+          </div>
+          <div class="filter-group">
+            <label class="label">Espacio</label>
+            <select
+              id="filtroEspacio"
+              class="input-modern"
+              onchange="aplicarFiltros()"
+            >
+              <option value="">(Todos)</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="label">Estado</label>
+            <select
+              id="filtroEstado"
+              class="input-modern"
+              onchange="aplicarFiltros()"
+            >
+              <option value="">(Todos)</option>
+              <option value="Pendiente">Pendientes</option>
+              <option value="Confirmada">Confirmadas</option>
+            </select>
+          </div>
+          <div class="filter-group" style="flex-grow: 1">
+            <label class="label">Buscar</label>
+            <input
+              type="text"
+              id="filtroBuscar"
+              class="input-modern"
+              placeholder="Unidad o Residente..."
+              onkeyup="aplicarFiltros()"
+              style="width: 100%"
+            />
+          </div>
         </div>
-        <div class="filter-group">
-          <label class="label">Estado</label>
-          <select id="filtroEstado" class="input-modern" onchange="aplicarFiltros()">
-            <option value="Pendiente">Pendientes</option>
-            <option value="Confirmada">Confirmadas</option>
-            <option value="Rechazada">Rechazadas</option>
-            <option value="">(Todas)</option>
+      </div>
+
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha / Bloque</th>
+              <th>Espacio</th>
+              <th>Residente / Unidad</th>
+              <th>Pagos</th>
+              <th>Estado</th>
+              <th style="text-align: right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaReservas">
+            <tr>
+              <td
+                colspan="6"
+                style="text-align: center; padding: 30px; color: #94a3b8"
+              >
+                Cargando...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+
+    <div id="modalReserva" class="modal">
+      <div class="modal-content">
+        <h2 id="modalTitle" style="margin-top: 0">Registrar Reserva</h2>
+        <form id="formReserva">
+          <input type="hidden" id="rID" />
+          <input type="hidden" id="rCopropiedadID" />
+
+          <label class="label" style="margin-top: 10px">Comunidad</label>
+          <input
+            id="rCopropiedadNombre"
+            class="input-modern"
+            style="width: 100%; background: #f1f5f9"
+            readonly
+          />
+
+          <div
+            style="
+              background: #f8fafc;
+              padding: 15px;
+              border-radius: 8px;
+              border: 1px solid #e2e8f0;
+              margin: 15px 0;
+            "
+          >
+            <label class="label" style="margin-top: 0"
+              >Residente Solicitante</label
+            >
+            <select
+              id="rUsuarioID"
+              class="input-modern"
+              style="width: 100%; margin-bottom: 10px"
+              required
+              onchange="autoSeleccionarUnidad()"
+            >
+              <option value="">Cargando...</option>
+            </select>
+
+            <label class="label">Unidad (Depto/Casa)</label>
+            <select
+              id="rUnidadID"
+              class="input-modern"
+              style="width: 100%"
+              required
+            >
+              <option value="">Seleccione...</option>
+            </select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px">
+            <div>
+              <label class="label">Fecha</label>
+              <input
+                id="rFecha"
+                type="date"
+                class="input-modern"
+                style="width: 100%"
+                required
+                onchange="cargarBloquesDisponibles()"
+              />
+            </div>
+            <div>
+              <label class="label">Espacio</label>
+              <select
+                id="rEspacioID"
+                class="input-modern"
+                style="width: 100%"
+                required
+                onchange="alCambiarEspacio()"
+              >
+                <option value="">Seleccione...</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-top: 15px">
+            <label class="label">Bloque Horario</label>
+            <select
+              id="rBloque"
+              class="input-modern"
+              style="width: 100%"
+              required
+              disabled
+            >
+              <option value="">(Primero selecciona Fecha y Espacio)</option>
+            </select>
+            <small
+              id="msgBloques"
+              style="
+                color: #ef4444;
+                display: none;
+                margin-top: 5px;
+                font-weight: 700;
+              "
+              >Sin disponibilidad.</small
+            >
+          </div>
+
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr 1fr;
+              gap: 15px;
+              margin-top: 15px;
+            "
+          >
+            <div>
+              <label class="label">Costo ($)</label>
+              <input
+                id="rCosto"
+                type="number"
+                class="input-modern"
+                readonly
+                style="background: #f1f5f9"
+              />
+            </div>
+            <div>
+              <label class="label">Garantía ($)</label>
+              <input
+                id="rGarantia"
+                type="number"
+                class="input-modern"
+                readonly
+                style="background: #f1f5f9"
+              />
+            </div>
+            <div>
+              <label class="label">Pago</label>
+              <select id="rEstadoPago" class="input-modern">
+                <option value="Pendiente">Pendiente</option>
+                <option value="Pagado">Pagado</option>
+              </select>
+            </div>
+          </div>
+
+          <label class="label" style="margin-top: 15px"
+            >Notas / Observaciones</label
+          >
+          <input
+            id="rNotas"
+            class="input-modern"
+            style="width: 100%"
+            placeholder="Ej: Chequeo garantía ok..."
+          />
+
+          <label class="label" style="margin-top: 15px">Estado Reserva</label>
+          <select id="rEstado" class="input-modern" style="width: 100%">
+            <option value="Confirmada">Confirmada (Aprobada)</option>
+            <option value="Pendiente">Pendiente de Revisión</option>
           </select>
-        </div>
-        <div class="filter-group" style="flex-grow:1;">
-          <label class="label">Buscar Unidad</label>
-          <input type="text" id="filtroBuscar" class="input-modern" placeholder="Ej: 304..." onkeyup="aplicarFiltros()"  style="width: 95%;height:40px;">
-        </div>
+
+          <div
+            style="
+              text-align: right;
+              margin-top: 25px;
+              display: flex;
+              justify-content: end;
+              gap: 10px;
+            "
+          >
+            <button
+              type="button"
+              class="btn-sec"
+              onclick="document.getElementById('modalReserva').style.display='none'"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="btn-main">Guardar Reserva</button>
+          </div>
+        </form>
       </div>
     </div>
 
-    <div class="table-card">
-      <table>
-        <thead>
-          <tr>
-            <th>Fecha / Hora</th>
-            <th>Espacio</th>
-            <th>Unidad</th>
-            <th>Costo</th>
-            <th>Estado</th>
-            <th style="text-align:right;">Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="tablaReservas">
-          <tr><td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;">Cargando reservas...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </main>
-
     <div id="spinner" class="spinner-overlay">
-      <div
-        style="
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          border: 4px solid #e2e8f0;
-          border-top-color: #1a2b48;
-          animation: spin 1s linear infinite;
-        "
-      ></div>
+      <div class="spinner"></div>
     </div>
 
     <div id="footer"></div>
 
-  <script>
-    // Variables Globales
-    let RESERVAS = [], ESPACIOS = [], UNIDADES = [], BLOQUES = [], COPROPIEDADES = [], COPROPIETARIOS = [], VIEW = [];
+    <script>
+      // Variables Globales
+      let DB = {
+        Reservas: [],
+        Espacios: [],
+        Unidades: [],
+        Bloques: [],
+        Copropiedades: [],
+        Usuarios: [],
+      };
+      let VIEW = [];
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      try { document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); } catch(e){}
-      try { document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); } catch(e){}
-      
-      document.getElementById("filtroFecha").value = new Date().toISOString().split('T')[0];
-      
-      await cargarDatos();
-    });
-
-    async function cargarDatos() {
-      showSpinner(true);
-      try {
-        // CARGAMOS LAS 6 TABLAS NECESARIAS
-        const [reservas, espacios, unidades, bloques, copropiedades, copropietarios] = await Promise.all([
-          fetchData("Reservas").catch(()=>[]),
-          fetchData("Espacios").catch(()=>[]), 
-          fetchData("Unidades").catch(()=>[]),
-          fetchData("Bloques").catch(()=>[]),
-          fetchData("Copropiedades").catch(()=>[]),
-          fetchData("Copropietarios").catch(()=>[])
-        ]);
-
-        RESERVAS = reservas || [];
-        ESPACIOS = espacios || []; 
-        UNIDADES = unidades || [];
-        BLOQUES = bloques || [];
-        COPROPIEDADES = copropiedades || [];
-        COPROPIETARIOS = copropietarios || [];
-
-        // Llenar select espacios
-        const uniqueSpaces = [...new Set(RESERVAS.map(r => r.EspacioNombre || r.EspacioID))].filter(Boolean);
-        const selEspacio = document.getElementById("filtroEspacio");
-        selEspacio.innerHTML = '<option value="">(Todos)</option>' + 
-          uniqueSpaces.map(s => `<option value="${s}">${s}</option>`).join("");
-
-        aplicarFiltros();
-
-      } catch(e) {
-        console.error(e);
-        document.getElementById("tablaReservas").innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Error: ${e.message}</td></tr>`;
-      } finally {
-        showSpinner(false);
-      }
-    }
-
-    function aplicarFiltros() {
-      const fecha = document.getElementById("filtroFecha").value;
-      const espacio = document.getElementById("filtroEspacio").value.toLowerCase();
-      const estado = document.getElementById("filtroEstado").value;
-      const busqueda = document.getElementById("filtroBuscar").value.toLowerCase();
-
-      VIEW = RESERVAS.filter(r => {
-        if(fecha && (!r.Fecha || !r.Fecha.includes(fecha))) return false;
-        if(estado && r.Estado !== estado) return false;
-        
-        const spName = (r.EspacioNombre || r.EspacioID || "").toLowerCase();
-        if(espacio && !spName.includes(espacio)) return false;
-
-        const uLabel = resolverUnidad(r.UnidadID).toLowerCase();
-        if(busqueda && !uLabel.includes(busqueda)) return false;
-
-        return true;
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          document.getElementById("header").innerHTML = await (
+            await fetch("header.html")
+          ).text();
+        } catch (e) {}
+        try {
+          document.getElementById("footer").innerHTML = await (
+            await fetch("footer.html")
+          ).text();
+        } catch (e) {}
+        document.getElementById("filtroFecha").value = new Date()
+          .toISOString()
+          .split("T")[0];
+        await cargarFiltrosIniciales();
       });
 
-      VIEW.sort((a,b) => {
-        if(a.Estado === 'Pendiente' && b.Estado !== 'Pendiente') return -1;
-        if(a.Estado !== 'Pendiente' && b.Estado === 'Pendiente') return 1;
-        const horaA = getBlockStart(a.Bloque);
-        const horaB = getBlockStart(b.Bloque);
-        return horaA.localeCompare(horaB);
-      });
+      async function cargarFiltrosIniciales() {
+        showSpinner(true);
+        try {
+          DB.Copropiedades =
+            (await fetchData("Copropiedades").catch(() => [])) || [];
+          const sel = document.getElementById("filtroCopropiedad");
+          sel.innerHTML = DB.Copropiedades.length
+            ? ""
+            : "<option>No hay comunidades</option>";
 
-      renderTabla();
-    }
+          DB.Copropiedades.forEach((c) => {
+            const opt = document.createElement("option");
+            opt.value = c.ID;
+            opt.textContent = c.Nombre;
+            sel.appendChild(opt);
+          });
 
-    function renderTabla() {
-      const tb = document.getElementById("tablaReservas");
-      if(VIEW.length === 0) {
-        tb.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:#64748b;">No hay reservas con estos filtros.</td></tr>';
-        return;
+          if (DB.Copropiedades.length > 0) {
+            sel.value = DB.Copropiedades[0].ID;
+            await cargarDatos();
+          }
+        } catch (e) {
+          console.error(e);
+        } finally {
+          showSpinner(false);
+        }
       }
 
-      const conflictMap = {};
-      VIEW.forEach(r => {
-        if(r.Estado === 'Rechazada') return;
-        const key = `${r.Fecha}_${r.EspacioID}_${r.Bloque}`;
-        conflictMap[key] = (conflictMap[key] || 0) + 1;
-      });
+      async function cargarDatos() {
+        const idCopro = document.getElementById("filtroCopropiedad").value;
+        if (!idCopro) return;
 
-      tb.innerHTML = VIEW.map(r => {
-        const uLabel = resolverUnidad(r.UnidadID);
-        const bloqueInfo = resolveBlockInfo(r.Bloque);
-        
-        // --- MEJORA VISUAL: Resolver Nombre del Espacio ---
-        const espacioObj = ESPACIOS.find(e => String(e.ID) === String(r.EspacioID));
-        const nombreEspacioUI = espacioObj ? espacioObj.Nombre : (r.EspacioNombre || r.EspacioID);
+        showSpinner(true);
+        try {
+          const [res, esp, uni, blo, usu] = await Promise.all([
+            fetchData("Reservas").catch(() => []),
+            fetchData("Espacios").catch(() => []),
+            fetchData("Unidades").catch(() => []),
+            fetchData("Bloques").catch(() => []),
+            fetchData("Copropietarios").catch(() => []),
+          ]);
 
-        let stClass = "st-pendiente";
-        if(r.Estado === 'Confirmada') stClass = "st-confirmada";
-        if(r.Estado === 'Rechazada') stClass = "st-rechazada";
+          // FILTRADO DE DATOS (Solo de este condominio)
+          DB.Reservas = (res || []).filter(
+            (r) => String(r.CopropiedadID) === String(idCopro)
+          );
+          DB.Espacios = (esp || []).filter(
+            (e) => String(e.CopropiedadID) === String(idCopro)
+          );
+          DB.Unidades = (uni || []).filter(
+            (u) => String(u.CopropiedadID) === String(idCopro)
+          );
+          DB.Usuarios = (usu || []).filter(
+            (u) => String(u.CopropiedadID) === String(idCopro)
+          );
 
-        const key = `${r.Fecha}_${r.EspacioID}_${r.Bloque}`;
-        const isConflict = (conflictMap[key] > 1 && r.Estado !== 'Rechazada');
-        const rowClass = isConflict ? "conflict-row" : "";
-        const conflictHtml = isConflict ? `<span class="conflict-msg"><i class="fa-solid fa-triangle-exclamation"></i> Tope de horario</span>` : "";
+          // Bloques vinculados a espacios cargados
+          const idsEsp = DB.Espacios.map((e) => e.ID);
+          DB.Bloques = (blo || []).filter((b) => idsEsp.includes(b.EspacioID));
 
-        let acciones = "";
-        if(r.Estado === 'Pendiente') {
-          acciones = `
+          // Llenar filtro espacios header
+          const selEspacio = document.getElementById("filtroEspacio");
+          selEspacio.innerHTML =
+            '<option value="">(Todos)</option>' +
+            DB.Espacios.map(
+              (s) => `<option value="${s.ID}">${s.Nombre}</option>`
+            ).join("");
+
+          aplicarFiltros();
+        } catch (e) {
+          console.error(e);
+          alert("Error cargando datos: " + e.message);
+        } finally {
+          showSpinner(false);
+        }
+      }
+
+      function aplicarFiltros() {
+        const fecha = document.getElementById("filtroFecha").value;
+        const idEspacio = document.getElementById("filtroEspacio").value;
+        const estado = document.getElementById("filtroEstado").value;
+        const busqueda = document
+          .getElementById("filtroBuscar")
+          .value.toLowerCase();
+
+        VIEW = DB.Reservas.filter((r) => {
+          if (fecha && (!r.Fecha || !r.Fecha.includes(fecha))) return false;
+          if (estado && r.Estado !== estado) return false;
+          if (idEspacio && String(r.EspacioID) !== String(idEspacio))
+            return false;
+
+          const uLabel = resolverUnidad(r.UnidadID).toLowerCase();
+          const uNombre = resolverUsuario(r.UsuarioID).toLowerCase();
+          if (
+            busqueda &&
+            !uLabel.includes(busqueda) &&
+            !uNombre.includes(busqueda)
+          )
+            return false;
+
+          return true;
+        });
+
+        // Ordenar por fecha y bloque
+        VIEW.sort((a, b) =>
+          String(a.Bloque || "").localeCompare(String(b.Bloque || ""))
+        );
+
+        renderTabla();
+      }
+
+      function renderTabla() {
+        const tb = document.getElementById("tablaReservas");
+        if (VIEW.length === 0) {
+          tb.innerHTML =
+            '<tr><td colspan="6" style="text-align:center; padding:30px; color:#64748b;">No hay reservas.</td></tr>';
+          return;
+        }
+
+        // Detectar conflictos visuales (reservas confirmadas mismo bloque)
+        const conflictMap = {};
+        VIEW.forEach((r) => {
+          if (r.Estado === "Rechazada" || r.Estado === "Cancelada") return;
+          const key = `${r.Fecha}_${r.EspacioID}_${r.Bloque}`;
+          conflictMap[key] = (conflictMap[key] || 0) + 1;
+        });
+
+        tb.innerHTML = VIEW.map((r) => {
+          const uLabel = resolverUnidad(r.UnidadID);
+          const uNombre = resolverUsuario(r.UsuarioID);
+          const espacioObj = DB.Espacios.find(
+            (e) => String(e.ID) === String(r.EspacioID)
+          );
+          const nombreEspacio = espacioObj ? espacioObj.Nombre : "---";
+
+          // Resolver Bloque
+          const bloqueObj = DB.Bloques.find((b) => b.ID === r.Bloque);
+          const bloqueLabel = bloqueObj
+            ? `${bloqueObj.Nombre} (${bloqueObj.HoraInicio}-${bloqueObj.HoraFin})`
+            : r.Bloque;
+
+          const stPago = r.EstadoPago || "Pendiente";
+          const stPagoClass =
+            stPago === "Pagado" ? "pay-Pagado" : "pay-Pendiente";
+
+          // Conflicto visual
+          const key = `${r.Fecha}_${r.EspacioID}_${r.Bloque}`;
+          const isConflict = conflictMap[key] > 1 && r.Estado !== "Rechazada";
+          const rowClass = isConflict ? "conflict-row" : "";
+          const conflictHtml = isConflict
+            ? `<span class="conflict-msg"><i class="fa-solid fa-triangle-exclamation"></i> Tope</span>`
+            : "";
+
+          let acciones = "";
+          if (r.Estado === "Pendiente") {
+            acciones = `
             <button class="btn-icon btn-approve" onclick="cambiarEstado('${r.ID}', 'Confirmada')" title="Aprobar"><i class="fa-solid fa-check"></i></button>
             <button class="btn-icon btn-reject" onclick="cambiarEstado('${r.ID}', 'Rechazada')" title="Rechazar"><i class="fa-solid fa-xmark"></i></button>
           `;
-        } else if (r.Estado === 'Confirmada') {
-           acciones = `<button class="btn-icon btn-reject" onclick="cambiarEstado('${r.ID}', 'Rechazada')" title="Cancelar"><i class="fa-solid fa-ban"></i></button>`;
-        }
-        acciones += `<button class="btn-icon btn-delete" onclick="eliminarReserva('${r.ID}')"><i class="fa-solid fa-trash"></i></button>`;
+          } else if (r.Estado === "Confirmada") {
+            acciones = `<button class="btn-icon btn-reject" onclick="cambiarEstado('${r.ID}', 'Rechazada')" title="Cancelar/Rechazar"><i class="fa-solid fa-ban"></i></button>`;
+          }
+          acciones += `<button class="btn-icon btn-delete" onclick="eliminarReserva('${r.ID}')"><i class="fa-solid fa-trash"></i></button>`;
 
-        return `
+          return `
           <tr class="${rowClass}">
-            <td><div style="font-weight:700;">${formatearFecha(r.Fecha)}</div>${bloqueInfo}${conflictHtml}</td>
-            <td>${nombreEspacioUI}</td> <td style="font-weight:600; color:#1e293b;">${uLabel}</td>
-            <td class="mono">${clp(r.Costo)}</td>
-            <td><span class="badge ${stClass}">${r.Estado || "Pendiente"}</span></td>
+            <td>
+                <div style="font-weight:700;">${formatearFecha(r.Fecha)}</div>
+                <div style="color:#64748b; font-size:12px;">${bloqueLabel}</div>
+                ${conflictHtml}
+            </td>
+            <td>${nombreEspacio}</td> 
+            <td>
+                <div style="font-weight:600; color:#1e293b;">${uNombre}</div>
+                <div style="font-size:12px; color:#64748b;">${uLabel}</div>
+            </td>
+            <td>
+                <div style="font-weight:600;">${clp(r.Costo)}</div>
+                ${
+                  r.Garantia > 0
+                    ? `<div style="font-size:11px; color:#64748b;">+${clp(
+                        r.Garantia
+                      )} Gar.</div>`
+                    : ""
+                }
+                <span class="${stPagoClass}">${stPago}</span>
+            </td>
+            <td><span class="badge st-${r.Estado}">${r.Estado}</span></td>
             <td style="text-align:right;">${acciones}</td>
           </tr>
         `;
-      }).join("");
-    }
+        }).join("");
+      }
 
-    /* --- LÓGICA DE ESTADO Y DATOS CRUZADOS --- */
-    async function cambiarEstado(id, nuevoEstado) {
-      if(!confirm(`¿Marcar reserva como ${nuevoEstado}?`)) return;
-      showSpinner(true);
-      
-      try {
-        const reserva = RESERVAS.find(r => r.ID === id);
-        if (!reserva) throw new Error("Reserva no encontrada");
+      /* --- LÓGICA MODAL SEGURA (SafeSet) --- */
+      function safeSet(id, valor) {
+        const el = document.getElementById(id);
+        if (el) {
+          if (el.type === "date" && valor instanceof Date) {
+            el.valueAsDate = valor;
+          } else {
+            el.value = valor;
+          }
+        }
+      }
 
-        // 1. OBTENER DATOS DE LA UNIDAD
-        const unidad = UNIDADES.find(u => String(u.ID) === String(reserva.UnidadID));
-        
-        // 2. OBTENER DATOS DEL RESIDENTE/PROPIETARIO
-        let nombreResidente = "Residente";
-        let emailDestino = null;
+      function abrirModalReserva() {
+        try {
+          const idCopro = document.getElementById("filtroCopropiedad").value;
+          if (!idCopro || !DB.Copropiedades.length) {
+            return alert("Selecciona una comunidad válida primero.");
+          }
 
-        if (unidad) {
-            emailDestino = unidad.Email; 
-            if (unidad.PropietarioID) {
-                const propietario = COPROPIETARIOS.find(p => String(p.ID) === String(unidad.PropietarioID));
-                if (propietario) {
-                    nombreResidente = propietario.Nombre || "Residente";
-                    if (propietario.Email) emailDestino = propietario.Email;
-                }
+          const copro = DB.Copropiedades.find(
+            (c) => String(c.ID) === String(idCopro)
+          );
+
+          // Reset Formulario
+          document.getElementById("formReserva").reset();
+          safeSet("rID", "");
+          safeSet("rCopropiedadID", idCopro);
+          safeSet("rCopropiedadNombre", copro ? copro.Nombre : "---");
+          safeSet("rFecha", new Date());
+
+          // Limpiar campos monetarios
+          safeSet("rCosto", "");
+          safeSet("rGarantia", "");
+
+          // 1. Llenar Residentes
+          const usuariosLocales = DB.Usuarios.filter(
+            (u) => String(u.CopropiedadID) === String(idCopro)
+          );
+          usuariosLocales.sort((a, b) =>
+            String(a.Nombre || "").localeCompare(String(b.Nombre || ""))
+          );
+
+          const selUser = document.getElementById("rUsuarioID");
+          if (selUser) {
+            selUser.innerHTML =
+              '<option value="">Seleccione Residente...</option>' +
+              usuariosLocales
+                .map(
+                  (u) =>
+                    `<option value="${u.ID}" data-unidad="${
+                      u.UnidadID || ""
+                    }">${u.Nombre}</option>`
+                )
+                .join("");
+          }
+
+          // 2. Llenar Unidades
+          const unidadesLocales = DB.Unidades.filter(
+            (u) => String(u.CopropiedadID) === String(idCopro)
+          );
+          unidadesLocales.sort((a, b) =>
+            String(a.Numero || "").localeCompare(
+              String(b.Numero || ""),
+              undefined,
+              { numeric: true }
+            )
+          );
+
+          const selUni = document.getElementById("rUnidadID");
+          if (selUni) {
+            selUni.innerHTML =
+              '<option value="">Seleccione Unidad...</option>' +
+              unidadesLocales
+                .map(
+                  (u) =>
+                    `<option value="${u.ID}">${u.Numero} ${
+                      u.Torre ? "(" + u.Torre + ")" : ""
+                    }</option>`
+                )
+                .join("");
+          }
+
+          // 3. Llenar Espacios
+          const espaciosDisp = DB.Espacios.filter(
+            (e) =>
+              String(e.CopropiedadID) === String(idCopro) &&
+              e.Estado !== "Inactivo"
+          );
+
+          const selEsp = document.getElementById("rEspacioID");
+          if (selEsp) {
+            if (espaciosDisp.length > 0) {
+              selEsp.innerHTML =
+                '<option value="">Seleccione Espacio...</option>' +
+                espaciosDisp
+                  .map(
+                    (e) =>
+                      `<option value="${e.ID}" data-costo="${
+                        e.Costo || 0
+                      }" data-garantia="${e.Garantia || 0}">${
+                        e.Nombre
+                      }</option>`
+                  )
+                  .join("");
             } else {
-                nombreResidente = unidad.Nombre || "Residente";
+              selEsp.innerHTML =
+                '<option value="">(No hay espacios creados)</option>';
             }
+          }
+
+          // Reset UI Bloques
+          const selBloque = document.getElementById("rBloque");
+          if (selBloque) {
+            selBloque.innerHTML =
+              '<option value="">(Selecciona Espacio y Fecha)</option>';
+            selBloque.disabled = true;
+          }
+          const msgBloque = document.getElementById("msgBloques");
+          if (msgBloque) msgBloque.style.display = "none";
+
+          document.getElementById("modalReserva").style.display = "flex";
+        } catch (err) {
+          console.error("Error en abrirModalReserva:", err);
+          alert("Ocurrió un error al abrir el formulario. Revisa la consola.");
         }
-        
-        const numeroUnidad = unidad ? (unidad.Numero || reserva.UnidadID) : reserva.UnidadID;
+      }
 
-        // 3. OBTENER DATOS DE ESPACIO (CORRECTO: Se busca por ID en la tabla ESPACIOS)
-        const espacio = ESPACIOS.find(e => String(e.ID) === String(reserva.EspacioID));
-        // Aquí tomamos espacio.Nombre, si no existe el objeto, usamos el fallback
-        const nombreEspacio = espacio ? espacio.Nombre : (reserva.EspacioNombre || "Espacio Común");
-        
-        let nombreComunidad = "Condominio Santa Josefina";
-        if (espacio && espacio.CopropiedadID) {
-            const copro = COPROPIEDADES.find(c => String(c.ID) === String(espacio.CopropiedadID));
-            if (copro) nombreComunidad = copro.Nombre;
+      function autoSeleccionarUnidad() {
+        const selUser = document.getElementById("rUsuarioID");
+        const unidadID =
+          selUser.options[selUser.selectedIndex].getAttribute("data-unidad");
+        if (unidadID) safeSet("rUnidadID", unidadID);
+      }
+
+      function alCambiarEspacio() {
+        const selEsp = document.getElementById("rEspacioID");
+        if (selEsp.selectedIndex < 0) return;
+
+        const opt = selEsp.options[selEsp.selectedIndex];
+        const costo = opt.getAttribute("data-costo") || "0";
+        const garantia = opt.getAttribute("data-garantia") || "0";
+
+        safeSet("rCosto", costo);
+        safeSet("rGarantia", garantia);
+
+        cargarBloquesDisponibles();
+      }
+
+      function cargarBloquesDisponibles() {
+        const idEspacio = document.getElementById("rEspacioID").value;
+        const fecha = document.getElementById("rFecha").value;
+        const selBloques = document.getElementById("rBloque");
+        const msg = document.getElementById("msgBloques");
+
+        if (!idEspacio || !fecha) return;
+
+        const bloquesPosibles = DB.Bloques.filter(
+          (b) => String(b.EspacioID) === String(idEspacio)
+        );
+
+        const ocupados = DB.Reservas.filter(
+          (r) =>
+            String(r.EspacioID) === String(idEspacio) &&
+            r.Fecha === fecha &&
+            r.Estado !== "Rechazada" &&
+            r.Estado !== "Cancelada"
+        ).map((r) => String(r.Bloque));
+
+        const disponibles = bloquesPosibles.filter(
+          (b) => !ocupados.includes(String(b.ID))
+        );
+
+        if (disponibles.length > 0) {
+          disponibles.sort((a, b) =>
+            String(a.HoraInicio || "").localeCompare(String(b.HoraInicio || ""))
+          );
+          selBloques.innerHTML = disponibles
+            .map(
+              (b) =>
+                `<option value="${b.ID}">${b.Nombre} (${b.HoraInicio}-${b.HoraFin})</option>`
+            )
+            .join("");
+          selBloques.disabled = false;
+          msg.style.display = "none";
+        } else {
+          selBloques.innerHTML = '<option value="">-- Agotado --</option>';
+          selBloques.disabled = true;
+          msg.style.display = "block";
         }
+      }
 
-        let textoBloque = reserva.Bloque;
-        const bloqueObj = BLOQUES.find(b => b.ID === reserva.Bloque || b.Nombre === reserva.Bloque);
-        if (bloqueObj) textoBloque = `${bloqueObj.Nombre} (${bloqueObj.HoraInicio} - ${bloqueObj.HoraFin})`;
+      document.getElementById("formReserva").onsubmit = async (e) => {
+        e.preventDefault();
+        const bloqueVal = document.getElementById("rBloque").value;
+        if (!bloqueVal) return alert("Selecciona un horario disponible.");
 
-        // 4. GUARDAR CAMBIO
-        if(typeof appSheetCRUD === 'function') {
-          await appSheetCRUD("Reservas", "Edit", [{ "ID": id, "Estado": nuevoEstado }]);
+        showSpinner(true);
+
+        const payload = {
+          ID: "RES_" + Date.now(),
+          CopropiedadID: document.getElementById("rCopropiedadID").value,
+          UnidadID: document.getElementById("rUnidadID").value,
+          UsuarioID: document.getElementById("rUsuarioID").value,
+          EspacioID: document.getElementById("rEspacioID").value,
+          Fecha: document.getElementById("rFecha").value,
+          Bloque: bloqueVal,
+          Estado: document.getElementById("rEstado").value,
+          Costo: document.getElementById("rCosto").value,
+          Garantia: document.getElementById("rGarantia").value,
+          EstadoPago: document.getElementById("rEstadoPago").value,
+          Notas: document.getElementById("rNotas").value,
+          FechaCreacion: new Date().toISOString(),
+        };
+
+        try {
+          if (typeof appSheetCRUD === "function")
+            await appSheetCRUD("Reservas", "Add", [payload]);
+          document.getElementById("modalReserva").style.display = "none";
+          await cargarDatos();
+        } catch (err) {
+          alert(err.message);
+        } finally {
+          showSpinner(false);
         }
+      };
 
-        // 5. ENVIAR CORREO
-        if(emailDestino && typeof enviarEmailAPI === 'function') {
+      /* --- EMAIL Y ESTADOS --- */
+      async function cambiarEstado(id, nuevoEstado) {
+        if (!confirm(`¿Marcar reserva como ${nuevoEstado} y notificar?`))
+          return;
+        showSpinner(true);
+
+        try {
+          const reserva = DB.Reservas.find((r) => r.ID === id);
+          if (!reserva) throw new Error("Reserva no encontrada");
+
+          // 1. Obtener Datos Relacionados
+          const unidad = DB.Unidades.find(
+            (u) => String(u.ID) === String(reserva.UnidadID)
+          );
+          let emailDestino = null;
+          let nombreResidente = "Residente";
+
+          if (reserva.UsuarioID) {
+            const usuario = DB.Usuarios.find(
+              (u) => String(u.ID) === String(reserva.UsuarioID)
+            );
+            if (usuario) {
+              nombreResidente = usuario.Nombre;
+              emailDestino = usuario.Email;
+            }
+          } else if (unidad) {
+            // Fallback si no hay UsuarioID
+            nombreResidente = unidad.Nombre || "Residente";
+            emailDestino = unidad.Email;
+          }
+
+          const espacio = DB.Espacios.find(
+            (e) => String(e.ID) === String(reserva.EspacioID)
+          );
+          const nombreEspacio = espacio ? espacio.Nombre : "Espacio Común";
+
+          let nombreComunidad = "Condominio";
+          const copro = DB.Copropiedades.find(
+            (c) => String(c.ID) === String(reserva.CopropiedadID)
+          );
+          if (copro) nombreComunidad = copro.Nombre;
+
+          const bloqueObj = DB.Bloques.find((b) => b.ID === reserva.Bloque);
+          const textoBloque = bloqueObj
+            ? `${bloqueObj.Nombre} (${bloqueObj.HoraInicio} - ${bloqueObj.HoraFin})`
+            : "Horario definido";
+
+          // 2. Guardar en AppSheet
+          if (typeof appSheetCRUD === "function") {
+            await appSheetCRUD("Reservas", "Edit", [
+              { ID: id, Estado: nuevoEstado },
+            ]);
+          }
+
+          // 3. Enviar Correo
+          if (emailDestino && typeof enviarEmailAPI === "function") {
             const asunto = `${nuevoEstado}: Reserva ${nombreEspacio}`;
             const cuerpoHTML = generarPlantillaEmail({
-                estado: nuevoEstado,
-                residente: nombreResidente,
-                unidad: numeroUnidad,
-                espacio: nombreEspacio, // Se pasa el nombre correcto
-                comunidad: nombreComunidad,
-                fecha: reserva.Fecha,
-                bloque: textoBloque
+              estado: nuevoEstado,
+              residente: nombreResidente,
+              unidad: unidad ? unidad.Numero : "S/N",
+              espacio: nombreEspacio,
+              comunidad: nombreComunidad,
+              fecha: reserva.Fecha,
+              bloque: textoBloque,
             });
-            enviarEmailAPI(emailDestino, asunto, cuerpoHTML);
-        } else {
-            console.warn("No se envió correo: Falta email o librería.");
+            await enviarEmailAPI(emailDestino, asunto, cuerpoHTML);
+          }
+
+          await cargarDatos();
+        } catch (e) {
+          console.error(e);
+          alert("Error: " + e.message);
+        } finally {
+          showSpinner(false);
         }
-
-        await cargarDatos(); 
-
-      } catch(e) {
-        console.error(e);
-        alert("Error: " + e.message);
-      } finally {
-        showSpinner(false);
       }
-    }
 
-    function generarPlantillaEmail(datos) {
-      const esAprobado = datos.estado === 'Confirmada';
-      const color = esAprobado ? '#10b981' : '#ef4444';
-      const titulo = esAprobado ? '¡Solicitud Aprobada!' : 'Solicitud Rechazada';
-      const textoIntro = esAprobado 
-        ? 'Nos complace informarle que su solicitud de reserva ha sido aprobada.' 
-        : 'Lamentamos informarle que su solicitud de reserva no ha podido ser cursada en esta ocasión.';
+      function generarPlantillaEmail(datos) {
+        const esAprobado = datos.estado === "Confirmada";
+        const color = esAprobado ? "#10b981" : "#ef4444";
+        const titulo = esAprobado
+          ? "¡Solicitud Aprobada!"
+          : "Solicitud Rechazada";
+        const textoIntro = esAprobado
+          ? "Nos complace informarle que su solicitud de reserva ha sido aprobada."
+          : "Lamentamos informarle que su solicitud de reserva no ha podido ser cursada en esta ocasión.";
 
-      const fechaObj = new Date(datos.fecha);
-      const fechaTexto = fechaObj.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        // Formatear fecha
+        const fechaParts = datos.fecha.split("-"); // YYYY-MM-DD
+        const fechaTexto = `${fechaParts[2]}/${fechaParts[1]}/${fechaParts[0]}`;
 
-      return `
+        return `
         <div style="background-color: #f4f4f7; padding: 30px; font-family: sans-serif; color: #51545E;">
           <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
             <div style="background-color: #1A2B48; padding: 25px; text-align: center;">
                <h2 style="color: #ffffff; margin: 0; font-size: 20px;">Gestión de Reservas</h2>
-               <div style="color: #aeb4c1; font-size: 13px; margin-top: 5px;">${datos.comunidad}</div>
+               <div style="color: #aeb4c1; font-size: 13px; margin-top: 5px;">${
+                 datos.comunidad
+               }</div>
             </div>
             <div style="padding: 40px 30px;">
                <h1 style="color: #333; font-size: 24px; margin-top: 0; text-align:center;">${titulo}</h1>
@@ -450,70 +1121,82 @@
                <p style="font-size: 15px; line-height: 1.5; color: #555;">${textoIntro}</p>
                <div style="background-color: #f8fafc; border-left: 5px solid ${color}; padding: 20px; margin: 25px 0; border-radius: 4px;">
                   <table style="width: 100%;">
-                    <tr><td style="padding: 5px 0; font-weight: bold; width: 100px;">Espacio:</td><td>${datos.espacio}</td></tr>
+                    <tr><td style="padding: 5px 0; font-weight: bold; width: 100px;">Espacio:</td><td>${
+                      datos.espacio
+                    }</td></tr>
                     <tr><td style="padding: 5px 0; font-weight: bold;">Fecha:</td><td>${fechaTexto}</td></tr>
-                    <tr><td style="padding: 5px 0; font-weight: bold;">Horario:</td><td>${datos.bloque}</td></tr>
-                    <tr><td style="padding: 5px 0; font-weight: bold;">Estado:</td><td style="color: ${color}; font-weight: bold; text-transform: uppercase;">${datos.estado}</td></tr>
+                    <tr><td style="padding: 5px 0; font-weight: bold;">Horario:</td><td>${
+                      datos.bloque
+                    }</td></tr>
+                    <tr><td style="padding: 5px 0; font-weight: bold;">Estado:</td><td style="color: ${color}; font-weight: bold; text-transform: uppercase;">${
+          datos.estado
+        }</td></tr>
                   </table>
                </div>
                <p style="font-size: 13px; color: #888; text-align: center;">Para más detalles, ingrese al Portal de Residentes.</p>
             </div>
             <div style="background-color: #f4f4f7; padding: 20px; text-align: center; font-size: 12px; color: #999;">
-               <p style="margin: 0;">&copy; ${new Date().getFullYear()} ${datos.comunidad}.</p>
+               <p style="margin: 0;">&copy; ${new Date().getFullYear()} ${
+          datos.comunidad
+        }.</p>
             </div>
           </div>
         </div>
       `;
-    }
-
-    async function enviarEmailAPI(to, subject, htmlBody) {
-      console.log(">>> Enviando a:", to);
-      if (typeof emailjs === 'undefined') return console.error("EmailJS no cargado");
-      try {
-          await emailjs.send('service_p9hqkqn', 'template_80q9psi', {
-              to_email: to,
-              subject: subject,
-              html_body: htmlBody 
-          });
-          console.log(">>> Email enviado correctamente.");
-      } catch (error) {
-          console.error(">>> Error EmailJS:", error);
-          alert("La reserva se actualizó, pero falló el envío del correo.");
       }
-    }
 
-    async function eliminarReserva(id) {
-      if(!confirm("¿Eliminar registro?")) return;
-      showSpinner(true);
-      try {
-        if(typeof appSheetCRUD === 'function') await appSheetCRUD("Reservas", "Delete", [{ "ID": id }]);
-        await cargarDatos();
-      } catch(e) { alert("Error: " + e.message); } finally { showSpinner(false); }
-    }
+      async function enviarEmailAPI(to, subject, htmlBody) {
+        if (typeof emailjs === "undefined")
+          return console.error("EmailJS no cargado");
+        try {
+          await emailjs.send("service_p9hqkqn", "template_80q9psi", {
+            to_email: to,
+            subject: subject,
+            html_body: htmlBody,
+          });
+          console.log(">>> Email enviado.");
+        } catch (error) {
+          console.error(">>> Error EmailJS:", error);
+          alert("Reserva actualizada, pero falló el envío del correo.");
+        }
+      }
 
-    /* HELPERS */
-    function resolveBlockInfo(bloqueVal) {
-        if(!bloqueVal) return `<div style="color:#94a3b8; font-size:13px;">--</div>`;
-        const b = BLOQUES.find(x => x.ID === bloqueVal || x.Nombre === bloqueVal);
-        if (b) return `<div style="font-size:13px; color:#1A2B48; font-weight:600;">${b.Nombre}</div><div style="font-size:11px; color:#64748b;">${b.HoraInicio} - ${b.HoraFin}</div>`;
-        return `<div style="color:#64748b; font-size:13px;">${bloqueVal}</div>`;
-    }
-    function getBlockStart(bloqueVal) {
-        if(!bloqueVal) return "99:99";
-        const b = BLOQUES.find(x => x.ID === bloqueVal || x.Nombre === bloqueVal);
-        return b ? b.HoraInicio : "99:99";
-    }
-    function resolverUnidad(id) {
-      const u = UNIDADES.find(x => String(x.ID || x.id) === String(id));
-      return u ? (u.Numero || u.Nombre) : id;
-    }
-    function formatearFecha(iso) { 
-      if(!iso) return ""; 
-      const [y,m,d] = iso.split("-");
-      return `${d}/${m}/${y}`;
-    }
-    function clp(v) { return "$" + new Intl.NumberFormat("es-CL").format(v || 0); }
-    function showSpinner(show) { document.getElementById("spinner").style.display = show ? "grid" : "none"; }
-</script>
+      async function eliminarReserva(id) {
+        if (!confirm("¿Eliminar registro?")) return;
+        showSpinner(true);
+        try {
+          if (typeof appSheetCRUD === "function")
+            await appSheetCRUD("Reservas", "Delete", [{ ID: id }]);
+          await cargarDatos();
+        } catch (e) {
+          alert("Error: " + e.message);
+        } finally {
+          showSpinner(false);
+        }
+      }
+
+      /* HELPERS */
+      function resolverUnidad(id) {
+        const u = DB.Unidades.find((x) => String(x.ID) === String(id));
+        return u ? u.Numero + (u.Torre ? ` (${u.Torre})` : "") : id || "---";
+      }
+      function resolverUsuario(id) {
+        const u = DB.Usuarios.find((x) => String(x.ID) === String(id));
+        return u ? u.Nombre : "---";
+      }
+      function formatearFecha(iso) {
+        if (!iso) return "";
+        const [y, m, d] = iso.split("-");
+        return `${d}/${m}/${y}`;
+      }
+      function clp(v) {
+        return "$" + new Intl.NumberFormat("es-CL").format(Number(v) || 0);
+      }
+      function showSpinner(show) {
+        document.getElementById("spinner").style.display = show
+          ? "grid"
+          : "none";
+      }
+    </script>
   </body>
 </html>

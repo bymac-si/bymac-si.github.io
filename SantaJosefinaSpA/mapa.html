@@ -56,6 +56,52 @@
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
+<div id="modalProspecto" class="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:3000; align-items:center; justify-content:center;">
+  <div class="modal-content" style="background:white; padding:30px; border-radius:12px; width:100%; max-width:500px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+    <h2 style="margin-top:0; color:#1A2B48;">Editar Prospecto</h2>
+    
+    <form id="formEdicion">
+      <input type="hidden" id="pID">
+      
+      <div style="margin-bottom:15px;">
+        <label style="display:block; font-weight:600; font-size:12px; color:#64748b;">Nombre Completo</label>
+        <input id="pNombre" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px;" required>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
+        <div>
+            <label style="display:block; font-weight:600; font-size:12px; color:#64748b;">Estado</label>
+            <select id="pEstado" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px;">
+                <option value="Nuevo">Nuevo 🔵</option>
+                <option value="Interesado">Interesado 🟠</option>
+                <option value="Cliente">Cliente 🟢</option>
+                <option value="Cerrado">Cerrado ⚫</option>
+            </select>
+        </div>
+        <div>
+            <label style="display:block; font-weight:600; font-size:12px; color:#64748b;">Teléfono</label>
+            <input id="pTelefono" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px;">
+        </div>
+      </div>
+
+      <div style="margin-bottom:15px;">
+        <label style="display:block; font-weight:600; font-size:12px; color:#64748b;">Email</label>
+        <input id="pEmail" type="email" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px;">
+      </div>
+
+      <div style="margin-bottom:15px;">
+        <label style="display:block; font-weight:600; font-size:12px; color:#64748b;">Dirección / Ubicación</label>
+        <input id="pDireccion" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; background:#f1f5f9;" readonly>
+        <small style="color:#94a3b8;">La dirección se edita desde la ficha maestra.</small>
+      </div>
+
+      <div style="margin-top:25px; text-align:right; display:flex; justify-content:flex-end; gap:10px;">
+        <button type="button" onclick="cerrarModal()" style="padding:10px 20px; border:1px solid #cbd5e1; background:white; border-radius:6px; cursor:pointer;">Cancelar</button>
+        <button type="submit" style="padding:10px 20px; border:none; background:#1A2B48; color:white; border-radius:6px; cursor:pointer;">Guardar Cambios</button>
+      </div>
+    </form>
+  </div>
+</div>
 <body>
 
   <div class="map-header">
@@ -69,7 +115,7 @@
         <button class="btn-filter" onclick="filtrarMapa('Interesado', this)">Interesados</button>
         <button class="btn-filter" onclick="filtrarMapa('Cliente', this)">Clientes</button>
     </div>
-    <a href="portal.html" class="btn-filter" style="text-decoration:none; background:#f1f5f9;">Volver</a>
+    <a href="prospectos.html" class="btn-filter" style="text-decoration:none; background:#f1f5f9;">Volver</a>
   </div>
 
   <div id="map"></div>
@@ -233,13 +279,15 @@
         }
     }
 
-    // HTML del Popup (Tarjeta de información al hacer clic)
+    /* --- NUEVAS FUNCIONES DE EDICIÓN --- */
+
+    // 1. Función actualizada del Popup (El botón ahora llama a editarProspecto)
     function crearPopupHTML(p) {
         const nombre = p.Nombre || p.Cliente || "Prospecto";
         const estado = p.Estado || "Nuevo";
         const email = p.Email || "";
         const fono = p.Telefono || p.Celular || "";
-        const id = p.ID || ""; // Si tienes ID para ir a editar
+        const id = p.ID || ""; 
         
         return `
             <div class="popup-header">
@@ -251,10 +299,77 @@
                 ${fono ? `<div class="popup-row"><i class="fa-solid fa-phone" style="color:#64748b; width:15px;"></i> ${fono}</div>` : ''}
             </div>
             <div class="popup-footer">
-                <button class="btn-popup" onclick="alert('ID Prospecto: ${id}')">Ver Ficha</button>
+                <button class="btn-popup" onclick="editarProspecto('${id}')">
+                    <i class="fa-solid fa-pen-to-square"></i> Editar Ficha
+                </button>
             </div>
         `;
     }
+
+    // 2. Abrir el Modal y llenar datos
+    function editarProspecto(id) {
+        const p = PROSPECTOS.find(item => String(item.ID) === String(id));
+        if (!p) return alert("Error: No se encontró el prospecto en memoria.");
+
+        // Llenar el formulario
+        document.getElementById("pID").value = p.ID;
+        document.getElementById("pNombre").value = p.Nombre || p.Cliente || "";
+        document.getElementById("pEstado").value = p.Estado || "Nuevo";
+        document.getElementById("pTelefono").value = p.Telefono || p.Celular || "";
+        document.getElementById("pEmail").value = p.Email || "";
+        
+        // Mostrar dirección (solo lectura para referencia)
+        document.getElementById("pDireccion").value = p.Direccion || p.Ubicacion || "";
+
+        // Mostrar Modal
+        document.getElementById("modalProspecto").style.display = "flex";
+    }
+
+    // 3. Cerrar Modal
+    function cerrarModal() {
+        document.getElementById("modalProspecto").style.display = "none";
+    }
+
+    // 4. Guardar Cambios (Submit)
+    document.getElementById("formEdicion").onsubmit = async (e) => {
+        e.preventDefault();
+        
+        // Recoger datos
+        const id = document.getElementById("pID").value;
+        const payload = {
+            "ID": id,
+            "Nombre": document.getElementById("pNombre").value,
+            "Estado": document.getElementById("pEstado").value,
+            "Telefono": document.getElementById("pTelefono").value, // Asegúrate que tu columna se llame Telefono o Celular
+            "Email": document.getElementById("pEmail").value
+        };
+
+        // UI Loading
+        const btn = e.target.querySelector("button[type='submit']");
+        const textoOriginal = btn.innerText;
+        btn.innerText = "Guardando...";
+        btn.disabled = true;
+
+        try {
+            if(typeof appSheetCRUD === 'function') {
+                // IMPORTANTE: Usamos la tabla 'ProspectosCopro' que definimos antes
+                await appSheetCRUD("ProspectosCopro", "Edit", [payload]);
+                
+                // Cerrar y Recargar mapa para ver el cambio de color (si cambió estado)
+                cerrarModal();
+                await cargarProspectos(); 
+                alert("Prospecto actualizado correctamente.");
+            } else {
+                alert("Error: No se detectó la función de conexión.");
+            }
+        } catch(err) {
+            console.error(err);
+            alert("Error al guardar: " + err.message);
+        } finally {
+            btn.innerText = textoOriginal;
+            btn.disabled = false;
+        }
+    };
   </script>
 </body>
 </html>

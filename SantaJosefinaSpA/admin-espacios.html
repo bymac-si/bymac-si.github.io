@@ -1,287 +1,902 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>CRM - Gestión de Espacios</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="assets/js/app.js"></script>
-  <script>requireAuth();</script>
+  <head>
+    <meta charset="UTF-8" />
+    <title>CRM - Gestión de Espacios</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <script src="assets/js/app.js"></script>
+    <script>
+      requireAuth();
+    </script>
 
-  <style>
-    /* Estilos Dashboard */
-    body { max-width: 1200px; margin: 0 auto; color: #1a2b48; background-color: #fff; }
-    main { padding: 40px; }
-    
-    .dashboard-header { background: #fff; padding: 20px 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center;}
-    .page-title { font-size: 28px; font-weight: 700; margin: 0; }
-    .page-subtitle { color: #64748b; font-size: 14px; margin-top: 5px; }
+    <style>
+      /* Estilos Base */
+      body {
+        max-width: 1200px;
+        margin: 0 auto;
+        color: #1a2b48;
+        background-color: #f8fafc;
+      }
+      main {
+        padding: 40px;
+      }
 
-    /* Tabla */
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { padding: 15px; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: middle; }
-    th { background: #f8fafc; font-weight: 600; color: #475569; font-size: 13px; text-transform: uppercase; }
-    
-    .table-icon { width: 40px; height: 40px; background: #f1f5f9; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #1A2B48; }
+      /* Header */
+      .dashboard-header {
+        background: #fff;
+        padding: 20px 25px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 25px;
+      }
+      .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0;
+        color: #1e293b;
+      }
 
-    /* Botones */
-    .btn-head { height: 44px; padding: 0 20px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; background-color: #1A2B48; color: white; }
-    .btn-icon { width: 34px; height: 34px; border: none; border-radius: 6px; background: #f3f4f6; color: #555; cursor: pointer; margin-right: 5px; }
-    .btn-edit:hover { background-color: #f59e0b; color: white; }
-    .btn-delete:hover { background-color: #ef4444; color: white; }
+      .header-filters {
+        display: flex;
+        gap: 15px;
+        align-items: end;
+      }
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        flex: 1;
+      }
+      .label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+      }
+      .input-modern {
+        height: 42px;
+        padding: 0 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #fff;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      textarea.input-modern {
+        height: auto;
+        padding: 10px;
+        font-family: inherit;
+      }
 
-    /* Modal */
-    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center; }
-    .modal.active { display: flex; }
-    .modal-content { background: white; padding: 30px; border-radius: 12px; width: 100%; max-width: 500px; }
-    
-    .form-group { margin-bottom: 15px; }
-    .label { display: block; font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 6px; }
-    input, select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 14px; box-sizing: border-box; }
+      /* Cards de Espacios */
+      .grid-espacios {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+      }
+      .card-espacio {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.2s;
+        display: flex;
+        flex-direction: column;
+      }
+      .card-espacio:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      }
 
-    .spinner-backdrop { position: fixed; inset: 0; background: rgba(255,255,255,0.8); display: none; place-items: center; z-index: 12000; }
-    .spinner { width: 30px; height: 30px; border-radius: 50%; border: 3px solid #eee; border-top-color: #1A2B48; animation: spin .8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-  </style>
-</head>
-<body>
-  <div id="header"></div>
+      /* Área Visual (Foto o Icono) */
+      .card-visual {
+        height: 140px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        background-color: #cbd5e1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      /* Si no hay foto, usamos este gradiente */
+      .card-visual.no-photo {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      }
+      .card-visual.no-photo i {
+        font-size: 48px;
+        color: rgba(255, 255, 255, 0.2);
+      }
 
-  <main>
-    <div class="dashboard-header no-print">
-      <div>
-        <h1 class="page-title">Espacios Comunes</h1>
-        <div class="page-subtitle">Configura los quinchos, salas y áreas reservables por condominio.</div>
-      </div>
-      <button class="btn-head" onclick="abrirModal()">
-        <i class="fa-solid fa-plus"></i> Nuevo Espacio
-      </button>
-    </div>
+      .card-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        color: white;
+        text-transform: uppercase;
+      }
+      .st-Activo {
+        background: #10b981;
+      }
+      .st-Mantencion {
+        background: #f59e0b;
+      }
+      .st-Inactivo {
+        background: #ef4444;
+      }
 
-    <div style="margin-bottom:15px;">
-        <select id="filtroCopro" style="max-width:300px;" onchange="renderTabla()">
-            <option value="">(Todos los condominios)</option>
-        </select>
-    </div>
+      .card-body {
+        padding: 15px;
+        flex-grow: 1;
+      }
+      .card-title {
+        font-weight: 700;
+        font-size: 16px;
+        margin-bottom: 5px;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .card-meta {
+        display: flex;
+        gap: 15px;
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 10px;
+      }
+      .card-meta span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
 
-    <table>
-      <thead>
-        <tr>
-          <th style="width: 60px;">Icono</th>
-          <th>Copropiedad</th> <th>Nombre Espacio</th>
-          <th>Costo</th>
-          <th>Reglas</th>
-          <th style="width: 140px; text-align: right;">Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="tablaEspacios">
-        <tr><td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;">Cargando espacios...</td></tr>
-      </tbody>
-    </table>
-  </main>
+      .card-price {
+        font-weight: 700;
+        color: #10b981;
+        font-size: 15px;
+        margin-top: auto;
+      }
+      .card-garantia {
+        font-size: 11px;
+        color: #64748b;
+        font-weight: 400;
+      }
 
-  <div id="modalForm" class="modal">
-    <div class="modal-content">
-      <h2 id="modalTitle" style="margin-top:0;">Nuevo Espacio</h2>
-      
-      <form id="formEspacio">
-        <input type="hidden" id="espacioID">
-        
-        <div class="form-group">
-          <label class="label">Condominio / Copropiedad</label>
-          <select id="espCopro" required>
-             <option value="">Cargando...</option>
-          </select>
-        </div>
+      .card-footer {
+        padding: 10px 15px;
+        background: #f8fafc;
+        border-top: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
 
-        <div class="form-group">
-          <label class="label">Nombre del Espacio</label>
-          <input id="espNombre" placeholder="Ej: Quincho Norte" required>
-        </div>
+      /* Botones */
+      .btn-main {
+        background: #1a2b48;
+        color: white;
+        border: none;
+        padding: 0 20px;
+        height: 42px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-sm {
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid #cbd5e1;
+        background: white;
+        color: #475569;
+      }
+      .btn-sm:hover {
+        background: #f1f5f9;
+        color: #1e293b;
+      }
+      .btn-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        background: transparent;
+      }
+      .btn-icon:hover {
+        background: #e2e8f0;
+        color: #ef4444;
+      }
 
-        <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+      /* Modales */
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal.active {
+        display: flex;
+      }
+      .modal-content {
+        background: white;
+        width: 100%;
+        max-width: 600px;
+        padding: 30px;
+        border-radius: 12px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      /* Tabla Bloques (Horarios) */
+      .table-bloques {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        font-size: 13px;
+      }
+      .table-bloques th {
+        background: #f1f5f9;
+        text-align: left;
+        padding: 8px;
+        color: #64748b;
+      }
+      .table-bloques td {
+        border-bottom: 1px solid #e2e8f0;
+        padding: 8px;
+      }
+
+      .spinner-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: none;
+        place-items: center;
+        z-index: 2000;
+      }
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #e2e8f0;
+        border-top-color: #1a2b48;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="header"></div>
+
+    <main>
+      <div class="dashboard-header">
+        <div class="header-top">
           <div>
-            <label class="label">Costo ($)</label>
-            <input id="espCosto" type="number" placeholder="0 para gratis" required>
+            <h1 class="page-title">Espacios Comunes</h1>
+            <p style="margin: 5px 0 0; color: #64748b; font-size: 14px">
+              Gestiona Quinchos, Salas, Piscinas y sus horarios.
+            </p>
           </div>
-          <div>
-            <label class="label">Icono</label>
-            <select id="espIcono">
-              <option value="fa-building">🏢 Edificio</option>
-              <option value="fa-fire-burner">🔥 Quincho</option>
-              <option value="fa-champagne-glasses">🥂 Eventos</option>
-              <option value="fa-person-swimming">🏊 Piscina</option>
-              <option value="fa-car">🚗 Estacionamiento</option>
-              <option value="fa-shirt">👕 Lavandería</option>
-              <option value="fa-dumbbell">💪 Gimnasio</option>
-              <option value="fa-gamepad">🎮 Juegos</option>
+          <button class="btn-main" onclick="abrirModalEspacio()">
+            <i class="fa-solid fa-plus"></i> Nuevo Espacio
+          </button>
+        </div>
+
+        <div class="header-filters">
+          <div class="filter-group" style="max-width: 400px">
+            <label class="label">Comunidad</label>
+            <select
+              id="filtroCopropiedad"
+              class="input-modern"
+              onchange="cargarEspacios()"
+            >
+              <option value="">Cargando...</option>
             </select>
           </div>
         </div>
+      </div>
 
-        <div class="form-group">
-          <label class="label">Reglas y Condiciones</label>
-          <textarea id="espReglas" rows="4" placeholder="Ej: Aforo máx 10 personas..."></textarea>
+      <div id="gridEspacios" class="grid-espacios">
+        <div
+          style="
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+          "
+        >
+          <i class="fa-solid fa-spinner fa-spin"></i> Cargando espacios...
         </div>
+      </div>
+    </main>
 
-        <div style="text-align:right; margin-top:20px; display:flex; justify-content:end; gap:10px;">
-          <button type="button" onclick="cerrarModal()" style="padding:10px 20px; border:none; background:#f1f5f9; border-radius:6px; cursor:pointer;">Cancelar</button>
-          <button type="submit" style="padding:10px 20px; border:none; background:#1A2B48; color:white; border-radius:6px; cursor:pointer;">Guardar</button>
-        </div>
-      </form>
+    <div id="modalEspacio" class="modal">
+      <div class="modal-content">
+        <h2 id="modalTitleEspacio" style="margin-top: 0">Nuevo Espacio</h2>
+        <form id="formEspacio">
+          <input type="hidden" id="eID" />
+          <input type="hidden" id="eCopropiedadID" />
+
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px">
+            <div>
+              <label class="label">Nombre del Espacio</label>
+              <input
+                id="eNombre"
+                class="input-modern"
+                required
+                placeholder="Ej: Quincho Torre A"
+              />
+            </div>
+            <div>
+              <label class="label">Icono (Si no hay foto)</label>
+              <select id="eIcono" class="input-modern">
+                <option value="fa-building">🏢 Edificio</option>
+                <option value="fa-fire-burner">🔥 Quincho</option>
+                <option value="fa-champagne-glasses">🥂 Eventos</option>
+                <option value="fa-person-swimming">🏊 Piscina</option>
+                <option value="fa-car">🚗 Estac.</option>
+                <option value="fa-shirt">👕 Lavandería</option>
+                <option value="fa-dumbbell">💪 Gimnasio</option>
+              </select>
+            </div>
+          </div>
+
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 15px;
+              margin-top: 15px;
+            "
+          >
+            <div>
+              <label class="label">Capacidad (Personas)</label>
+              <input
+                id="eCapacidad"
+                type="number"
+                class="input-modern"
+                placeholder="Ej: 20"
+              />
+            </div>
+            <div>
+              <label class="label">Estado</label>
+              <select id="eEstado" class="input-modern">
+                <option value="Activo">Activo ✅</option>
+                <option value="Mantencion">En Mantención 🛠️</option>
+                <option value="Inactivo">Inactivo ❌</option>
+              </select>
+            </div>
+          </div>
+
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 15px;
+              margin-top: 15px;
+            "
+          >
+            <div>
+              <label class="label">Costo Reserva ($)</label>
+              <input id="eCosto" type="number" class="input-modern" value="0" />
+            </div>
+            <div>
+              <label class="label">Garantía ($)</label>
+              <input
+                id="eGarantia"
+                type="number"
+                class="input-modern"
+                value="0"
+              />
+            </div>
+          </div>
+
+          <label class="label" style="margin-top: 15px"
+            >URL Imagen (Opcional)</label
+          >
+          <input id="eImagen" class="input-modern" placeholder="https://..." />
+
+          <label class="label" style="margin-top: 15px">Reglas de Uso</label>
+          <textarea
+            id="eReglas"
+            class="input-modern"
+            rows="2"
+            placeholder="Ej: Se debe entregar limpio antes de las 10 AM."
+          ></textarea>
+
+          <div style="text-align: right; margin-top: 25px">
+            <button
+              type="button"
+              class="btn-sm"
+              onclick="document.getElementById('modalEspacio').style.display='none'"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="btn-main">Guardar Espacio</button>
+          </div>
+        </form>
+      </div>
     </div>
-  </div>
 
-  <div id="pageSpinner" class="spinner-backdrop"><div class="spinner"></div></div>
-  <div id="footer"></div>
+    <div id="modalBloques" class="modal">
+      <div class="modal-content" style="max-width: 600px">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+          "
+        >
+          <h2 style="margin: 0">Configurar Horarios</h2>
+          <button
+            class="btn-sm"
+            onclick="document.getElementById('modalBloques').style.display='none'"
+          >
+            Cerrar
+          </button>
+        </div>
 
-  <script>
-    let ESPACIOS = [];
-    let COPROPIEDADES = [];
-    const KEY_COL = "ID"; 
+        <p class="label" id="bloqueSubtitle" style="color: #1a2b48">
+          Espacio: ...
+        </p>
+        <input type="hidden" id="bEspacioID" />
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      try { document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); } catch(e){}
-      try { document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); } catch(e){}
-      await cargarDatos();
-    });
+        <div
+          style="
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 15px;
+          "
+        >
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 2fr 1fr 1fr auto;
+              gap: 10px;
+              align-items: end;
+            "
+          >
+            <div>
+              <label class="label">Nombre Bloque</label>
+              <input
+                id="bNombre"
+                class="input-modern"
+                style="height: 35px"
+                placeholder="Ej: Almuerzo"
+              />
+            </div>
+            <div>
+              <label class="label">Inicio</label>
+              <input
+                id="bInicio"
+                type="time"
+                class="input-modern"
+                style="height: 35px"
+              />
+            </div>
+            <div>
+              <label class="label">Fin</label>
+              <input
+                id="bFin"
+                type="time"
+                class="input-modern"
+                style="height: 35px"
+              />
+            </div>
+            <button
+              type="button"
+              class="btn-main"
+              onclick="agregarBloque()"
+              style="height: 35px; padding: 0 15px"
+            >
+              <i class="fa-solid fa-plus"></i>
+            </button>
+          </div>
+        </div>
 
-    async function cargarDatos() {
-      showSpinner(true);
-      try {
-        // Carga paralela de Espacios y Copropiedades
-        const [esp, cop] = await Promise.all([
-            fetchData("Espacios").catch(()=>[]),
-            fetchData("Copropiedades").catch(()=>[])
-        ]);
-        
-        ESPACIOS = esp || [];
-        COPROPIEDADES = cop || [];
-        
-        // Llenar selects de Copropiedades (Filtro y Modal)
-        const opts = COPROPIEDADES.map(c => `<option value="${getKeyVal(c)}">${c.Nombre}</option>`).join("");
-        document.getElementById("filtroCopro").innerHTML = '<option value="">(Todos los condominios)</option>' + opts;
-        document.getElementById("espCopro").innerHTML = '<option value="">Seleccione...</option>' + opts;
+        <table class="table-bloques">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Horario</th>
+              <th style="text-align: right">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="listaBloques">
+            <tr>
+              <td colspan="3" style="text-align: center; padding: 20px">
+                Cargando horarios...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-        renderTabla();
-      } catch(e) {
-        console.error(e);
-        alert("Error cargando datos");
-      } finally {
-        showSpinner(false);
-      }
-    }
+    <div id="pageSpinner" class="spinner-overlay">
+      <div style="text-align: center">
+        <div class="spinner"></div>
+        <div style="margin-top: 10px; font-weight: 600; color: #1a2b48">
+          Procesando...
+        </div>
+      </div>
+    </div>
 
-    function renderTabla() {
-      const tb = document.getElementById("tablaEspacios");
-      const filtro = document.getElementById("filtroCopro").value;
+    <div id="footer"></div>
 
-      // Filtrar
-      let displayData = ESPACIOS;
-      if(filtro) displayData = ESPACIOS.filter(e => String(e.CopropiedadID) === String(filtro));
+    <script>
+      let ESPACIOS = [],
+        COPROPIEDADES = [],
+        BLOQUES = [];
 
-      if(displayData.length === 0) {
-        tb.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:#64748b;">No hay espacios registrados.</td></tr>';
-        return;
-      }
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          document.getElementById("header").innerHTML = await (
+            await fetch("header.html")
+          ).text();
+        } catch (e) {}
+        try {
+          document.getElementById("footer").innerHTML = await (
+            await fetch("footer.html")
+          ).text();
+        } catch (e) {}
 
-      // Mapa para nombre de copropiedad
-      const coproMap = {};
-      COPROPIEDADES.forEach(c => coproMap[getKeyVal(c)] = c.Nombre);
+        await cargarFiltros();
+      });
 
-      tb.innerHTML = displayData.map(e => {
-        const key = e[KEY_COL];
-        const icono = e.Icono || "fa-building";
-        const costo = parseFloat(e.Costo) || 0;
-        const nombreCopro = coproMap[e.CopropiedadID] || "—";
+      async function cargarFiltros() {
+        showSpinner(true);
+        try {
+          const data = await fetchData("Copropiedades").catch(() => []);
+          COPROPIEDADES = data || [];
 
-        return `
-          <tr>
-            <td><div class="table-icon"><i class="fa-solid ${icono}"></i></div></td>
-            <td style="color:#64748b; font-size:12px; font-weight:600;">${nombreCopro}</td>
-            <td style="font-weight:700; color:#1e293b;">${e.Nombre || "(Sin Nombre)"}</td>
-            <td class="mono">${costo === 0 ? '<span style="color:#15803d;">GRATIS</span>' : clp(costo)}</td>
-            <td style="font-size:12px; color:#555;">${e.Reglas || ""}</td>
-            <td style="text-align:right;">
-              <button class="btn-icon" style="background:#e0f2fe; color:#0284c7;" onclick="window.location.href='admin-bloques.html?id=${key}'" title="Horarios">
-                <i class="fa-solid fa-clock"></i>
-              </button>
-              <button class="btn-icon btn-edit" onclick='abrirModal("${key}")' title="Editar">
-                <i class="fa-solid fa-pen"></i>
-              </button>
-              <button class="btn-icon btn-delete" onclick="eliminarEspacio('${key}')" title="Eliminar">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-      }).join("");
-    }
+          const sel = document.getElementById("filtroCopropiedad");
+          sel.innerHTML = COPROPIEDADES.length
+            ? ""
+            : "<option>No hay comunidades</option>";
 
-    function abrirModal(id) {
-      document.getElementById("formEspacio").reset();
-      document.getElementById("espacioID").value = "";
-      document.getElementById("modalTitle").textContent = "Nuevo Espacio";
+          COPROPIEDADES.forEach((c) => {
+            const opt = document.createElement("option");
+            opt.value = c.ID;
+            opt.textContent = c.Nombre;
+            sel.appendChild(opt);
+          });
 
-      if(id) {
-        const e = ESPACIOS.find(x => String(x[KEY_COL]) === String(id));
-        if(e) {
-          document.getElementById("modalTitle").textContent = "Editar Espacio";
-          document.getElementById("espacioID").value = id;
-          document.getElementById("espCopro").value = e.CopropiedadID; // Setear Copropiedad
-          document.getElementById("espNombre").value = e.Nombre || "";
-          document.getElementById("espCosto").value = e.Costo || 0;
-          document.getElementById("espIcono").value = e.Icono || "fa-building";
-          document.getElementById("espReglas").value = e.Reglas || "";
+          if (COPROPIEDADES.length > 0) {
+            sel.value = COPROPIEDADES[0].ID;
+            await cargarEspacios();
+          } else {
+            document.getElementById("gridEspacios").innerHTML =
+              '<div style="grid-column:1/-1; text-align:center;">Crea una Comunidad primero.</div>';
+          }
+        } catch (e) {
+          console.error(e);
+        } finally {
+          showSpinner(false);
         }
       }
-      document.getElementById("modalForm").classList.add("active");
-    }
 
-    function cerrarModal() { document.getElementById("modalForm").classList.remove("active"); }
+      async function cargarEspacios() {
+        const idCopro = document.getElementById("filtroCopropiedad").value;
+        if (!idCopro) return;
 
-    document.getElementById("formEspacio").onsubmit = async (e) => {
-      e.preventDefault();
-      
-      const idVal = document.getElementById("espacioID").value;
-      const payload = {
-        "CopropiedadID": document.getElementById("espCopro").value, // NUEVO CAMPO
-        "Nombre": document.getElementById("espNombre").value.trim(),
-        "Costo": parseFloat(document.getElementById("espCosto").value) || 0,
-        "Icono": document.getElementById("espIcono").value,
-        "Reglas": document.getElementById("espReglas").value.trim()
+        showSpinner(true);
+        try {
+          const [esp, blo] = await Promise.all([
+            fetchData("Espacios").catch(() => []),
+            fetchData("Bloques").catch(() => []),
+          ]);
+
+          // Filtrar espacios de esta comunidad
+          ESPACIOS = esp.filter(
+            (e) => String(e.CopropiedadID) === String(idCopro)
+          );
+          BLOQUES = blo || [];
+
+          renderEspacios();
+        } catch (e) {
+          console.error(e);
+          alert("Error cargando espacios.");
+        } finally {
+          showSpinner(false);
+        }
+      }
+
+      function renderEspacios() {
+        const container = document.getElementById("gridEspacios");
+        if (ESPACIOS.length === 0) {
+          container.innerHTML =
+            '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#64748b; background:white; border-radius:12px; border:1px dashed #cbd5e1;">No hay espacios creados en esta comunidad.</div>';
+          return;
+        }
+
+        container.innerHTML = ESPACIOS.map((e) => {
+          const numBloques = BLOQUES.filter(
+            (b) => String(b.EspacioID) === String(e.ID)
+          ).length;
+          const icono = e.Icono || "fa-building";
+          const estado = e.Estado || "Activo";
+          const tieneFoto = e.Imagen && e.Imagen.length > 10;
+
+          // Lógica visual: Si tiene foto usa foto, si no usa icono con gradiente
+          let visualHTML = "";
+          if (tieneFoto) {
+            visualHTML = `<div class="card-visual" style="background-image: url('${e.Imagen}');">
+                    <div class="card-badge st-${estado}">${estado}</div>
+                </div>`;
+          } else {
+            visualHTML = `<div class="card-visual no-photo">
+                    <i class="fa-solid ${icono}"></i>
+                    <div class="card-badge st-${estado}">${estado}</div>
+                </div>`;
+          }
+
+          return `
+            <div class="card-espacio">
+                ${visualHTML}
+                
+                <div class="card-body">
+                    <div class="card-title">${e.Nombre}</div>
+                    
+                    <div class="card-meta">
+                        <span><i class="fa-solid fa-users"></i> ${
+                          e.Capacidad || 0
+                        } Pers.</span>
+                        <span><i class="fa-regular fa-clock"></i> ${numBloques} Bloques</span>
+                    </div>
+
+                    <div class="card-price">
+                        ${
+                          parseInt(e.Costo) > 0
+                            ? "$" + parseInt(e.Costo).toLocaleString("es-CL")
+                            : "Gratis"
+                        }
+                        ${
+                          parseInt(e.Garantia) > 0
+                            ? '<span class="card-garantia">(+ $' +
+                              parseInt(e.Garantia).toLocaleString("es-CL") +
+                              " Gar.)</span>"
+                            : ""
+                        }
+                    </div>
+                </div>
+                
+                <div class="card-footer">
+                    <button class="btn-sm" onclick="abrirBloques('${e.ID}', '${
+            e.Nombre
+          }')"><i class="fa-solid fa-calendar-days"></i> Horarios</button>
+                    <div>
+                        <button class="btn-icon" onclick="editarEspacio('${
+                          e.ID
+                        }')" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn-icon" onclick="eliminarEspacio('${
+                          e.ID
+                        }')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+            </div>
+            `;
+        }).join("");
+      }
+
+      /* --- CRUD ESPACIOS --- */
+      function abrirModalEspacio() {
+        const idCopro = document.getElementById("filtroCopropiedad").value;
+        if (!idCopro) return alert("Selecciona una comunidad.");
+
+        document.getElementById("formEspacio").reset();
+        document.getElementById("eID").value = "";
+        document.getElementById("eCopropiedadID").value = idCopro;
+        document.getElementById("modalTitleEspacio").innerText =
+          "Nuevo Espacio";
+        document.getElementById("modalEspacio").style.display = "flex";
+      }
+
+      function editarEspacio(id) {
+        const e = ESPACIOS.find((x) => x.ID === id);
+        if (!e) return;
+
+        document.getElementById("eID").value = e.ID;
+        document.getElementById("eCopropiedadID").value = e.CopropiedadID;
+        document.getElementById("eNombre").value = e.Nombre;
+        document.getElementById("eIcono").value = e.Icono || "fa-building";
+        document.getElementById("eCapacidad").value = e.Capacidad || "";
+        document.getElementById("eEstado").value = e.Estado || "Activo";
+        document.getElementById("eCosto").value = e.Costo || 0;
+        document.getElementById("eGarantia").value = e.Garantia || 0;
+        document.getElementById("eImagen").value = e.Imagen || "";
+        document.getElementById("eReglas").value = e.Reglas || "";
+
+        document.getElementById("modalTitleEspacio").innerText =
+          "Editar Espacio";
+        document.getElementById("modalEspacio").style.display = "flex";
+      }
+
+      document.getElementById("formEspacio").onsubmit = async (e) => {
+        e.preventDefault();
+        showSpinner(true);
+
+        const id = document.getElementById("eID").value;
+        const payload = {
+          ID: id || "ESP_" + Date.now(),
+          CopropiedadID: document.getElementById("eCopropiedadID").value,
+          Nombre: document.getElementById("eNombre").value,
+          Costo: document.getElementById("eCosto").value,
+          Reglas: document.getElementById("eReglas").value,
+          Icono: document.getElementById("eIcono").value,
+          Capacidad: document.getElementById("eCapacidad").value,
+          Garantia: document.getElementById("eGarantia").value,
+          Imagen: document.getElementById("eImagen").value,
+          Estado: document.getElementById("eEstado").value,
+        };
+
+        try {
+          const act = id ? "Edit" : "Add";
+          if (typeof appSheetCRUD === "function")
+            await appSheetCRUD("Espacios", act, [payload]);
+
+          document.getElementById("modalEspacio").style.display = "none";
+          await cargarEspacios();
+        } catch (err) {
+          alert(err.message);
+        } finally {
+          showSpinner(false);
+        }
       };
 
-      if(idVal) payload["ID"] = idVal;
-      else payload["ID"] = "ESP_" + Date.now().toString(36).toUpperCase();
-
-      showSpinner(true);
-      try {
-        if(typeof appSheetCRUD === 'function') {
-          const action = idVal ? "Edit" : "Add";
-          await appSheetCRUD("Espacios", action, [payload]);
+      async function eliminarEspacio(id) {
+        if (!confirm("¿Eliminar espacio y sus horarios?")) return;
+        showSpinner(true);
+        try {
+          if (typeof appSheetCRUD === "function")
+            await appSheetCRUD("Espacios", "Delete", [{ ID: id }]);
+          await cargarEspacios();
+        } catch (e) {
+          alert(e.message);
+        } finally {
+          showSpinner(false);
         }
-        cerrarModal();
-        await cargarDatos();
-      } catch(err) {
-        alert("Error al guardar: " + err.message);
-      } finally {
-        showSpinner(false);
       }
-    };
 
-    async function eliminarEspacio(id) {
-      if(!confirm("¿Eliminar este espacio?")) return;
-      showSpinner(true);
-      try {
-        if(typeof appSheetCRUD === 'function') await appSheetCRUD("Espacios", "Delete", [{ "ID": id }]);
-        await cargarDatos();
-      } catch(err) { alert("Error: " + err.message); } finally { showSpinner(false); }
-    }
+      /* --- GESTIÓN BLOQUES (Horarios) --- */
+      function abrirBloques(idEspacio, nombreEspacio) {
+        document.getElementById("bEspacioID").value = idEspacio;
+        document.getElementById("bloqueSubtitle").innerText =
+          "Espacio: " + nombreEspacio;
 
-    function showSpinner(v) { document.getElementById("pageSpinner").style.display = v ? "grid" : "none"; }
-    function clp(v) { return "$" + new Intl.NumberFormat("es-CL").format(v); }
-    function getKeyVal(o) { return o.ID || o.id || ""; }
-  </script>
-</body>
+        const bloquesLocales = BLOQUES.filter(
+          (b) => String(b.EspacioID) === String(idEspacio)
+        );
+        renderBloques(bloquesLocales);
+
+        document.getElementById("modalBloques").style.display = "flex";
+      }
+
+      function renderBloques(lista) {
+        const tb = document.getElementById("listaBloques");
+        if (lista.length === 0) {
+          tb.innerHTML =
+            '<tr><td colspan="3" style="text-align:center; padding:15px; color:#cbd5e1;">Sin horarios.</td></tr>';
+          return;
+        }
+        lista.sort((a, b) =>
+          (a.HoraInicio || "").localeCompare(b.HoraInicio || "")
+        );
+        tb.innerHTML = lista
+          .map(
+            (b) => `
+            <tr>
+                <td style="font-weight:600;">${b.Nombre}</td>
+                <td>${b.HoraInicio} - ${b.HoraFin}</td>
+                <td style="text-align:right;">
+                    <button class="btn-icon" onclick="eliminarBloque('${b.ID}')" style="color:#ef4444;"><i class="fa-solid fa-xmark"></i></button>
+                </td>
+            </tr>
+        `
+          )
+          .join("");
+      }
+
+      async function agregarBloque() {
+        const idEspacio = document.getElementById("bEspacioID").value;
+        const nombre = document.getElementById("bNombre").value.trim();
+        const inicio = document.getElementById("bInicio").value;
+        const fin = document.getElementById("bFin").value;
+
+        if (!nombre || !inicio || !fin) return alert("Completa los campos.");
+
+        showSpinner(true);
+        const payload = {
+          ID: "BLK_" + Date.now(),
+          EspacioID: idEspacio,
+          Nombre: nombre,
+          HoraInicio: inicio,
+          HoraFin: fin,
+        };
+
+        try {
+          if (typeof appSheetCRUD === "function")
+            await appSheetCRUD("Bloques", "Add", [payload]);
+          const dataBloques = await fetchData("Bloques");
+          BLOQUES = dataBloques || [];
+
+          const bloquesLocales = BLOQUES.filter(
+            (b) => String(b.EspacioID) === String(idEspacio)
+          );
+          renderBloques(bloquesLocales);
+
+          document.getElementById("bNombre").value = "";
+          renderEspacios();
+        } catch (e) {
+          alert(e.message);
+        } finally {
+          showSpinner(false);
+        }
+      }
+
+      async function eliminarBloque(id) {
+        if (!confirm("¿Borrar horario?")) return;
+        const idEspacio = document.getElementById("bEspacioID").value;
+        showSpinner(true);
+        try {
+          if (typeof appSheetCRUD === "function")
+            await appSheetCRUD("Bloques", "Delete", [{ ID: id }]);
+          const dataBloques = await fetchData("Bloques");
+          BLOQUES = dataBloques || [];
+
+          const bloquesLocales = BLOQUES.filter(
+            (b) => String(b.EspacioID) === String(idEspacio)
+          );
+          renderBloques(bloquesLocales);
+          renderEspacios();
+        } catch (e) {
+          alert(e.message);
+        } finally {
+          showSpinner(false);
+        }
+      }
+
+      function showSpinner(show) {
+        document.getElementById("pageSpinner").style.display = show
+          ? "grid"
+          : "none";
+      }
+      function clp(v) {
+        return "$" + new Intl.NumberFormat("es-CL").format(v);
+      }
+    </script>
+  </body>
 </html>
