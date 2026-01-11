@@ -449,13 +449,14 @@
     </div>
 
     <div id="modalBloques" class="modal">
-      <div class="modal-content" style="max-width: 600px">
+      <div class="modal-content" style="max-width: 700px">
         <div
           style="
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
+  ;
           "
         >
           <h2 style="margin: 0">Configurar Horarios</h2>
@@ -487,6 +488,7 @@
               grid-template-columns: 2fr 1fr 1fr auto;
               gap: 10px;
               align-items: end;
+              max-width: 45px;
             "
           >
             <div>
@@ -494,8 +496,9 @@
               <input
                 id="bNombre"
                 class="input-modern"
-                style="height: 35px"
+                style="height: 35px;"
                 placeholder="Ej: Almuerzo"
+                
               />
             </div>
             <div>
@@ -504,7 +507,7 @@
                 id="bInicio"
                 type="time"
                 class="input-modern"
-                style="height: 35px"
+                style="height: 35px;"
               />
             </div>
             <div>
@@ -513,15 +516,14 @@
                 id="bFin"
                 type="time"
                 class="input-modern"
-                style="height: 35px"
+                style="height: 35px;"
               />
             </div>
             <button
               type="button"
               class="btn-main"
               onclick="agregarBloque()"
-              style="height: 35px; padding: 0 15px"
-            >
+              style="height: 35px; padding: 10px;position: relative; top:-12px; left:6px;">
               <i class="fa-solid fa-plus"></i>
             </button>
           </div>
