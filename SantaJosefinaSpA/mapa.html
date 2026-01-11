@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CRM - Mapa de Prospectos</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  
+  <script src="assets/js/app.js"></script>
+  <script>requireAuth();</script>
+
+  <style>
+    /* Ajustes de Layout */
+    body { max-width: 100%; margin: 0; background: #f8fafc; overflow-x: hidden; }
+    
+    /* Header Flotante */
+    .map-header {
+        position: absolute; top: 20px; left: 20px; right: 20px; z-index: 1000;
+        background: rgba(255, 255, 255, 0.95); padding: 15px 20px;
+        border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        display: flex; justify-content: space-between; align-items: center;
+        backdrop-filter: blur(5px);
+        flex-wrap: wrap; gap: 10px;
+    }
+    .map-title { font-size: 20px; font-weight: 700; color: #1A2B48; margin: 0; }
+    .map-stats { font-size: 13px; color: #64748b; margin-top: 4px; }
+
+    /* Contenedor del Mapa */
+    #map { height: 100vh; width: 100%; z-index: 1; }
+
+    /* Botones de Filtro en el mapa */
+    .filter-controls { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-filter {
+        padding: 8px 15px; border: 1px solid #cbd5e1; background: white;
+        border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer;
+        transition: all 0.2s; color: #475569;
+    }
+    .btn-filter:hover, .btn-filter.active { background: #1A2B48; color: white; border-color: #1A2B48; }
+
+    /* Personalización del Popup del Mapa */
+    .leaflet-popup-content-wrapper { border-radius: 10px; padding: 0; overflow: hidden; }
+    .leaflet-popup-content { margin: 0; width: 260px !important; }
+    
+    .popup-header { background: #1A2B48; color: white; padding: 12px 15px; font-weight: 700; font-size: 14px; }
+    .popup-body { padding: 15px; font-size: 13px; color: #334155; }
+    .popup-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .popup-footer { background: #f1f5f9; padding: 10px 15px; text-align: right; }
+    .btn-popup { background: #1A2B48; color: white; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+
+    /* Spinner */
+    .spinner-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); display: grid; place-items: center; z-index: 2000; }
+    .spinner { width: 40px; height: 40px; border-radius: 50%; border: 4px solid #e2e8f0; border-top-color: #1A2B48; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <div class="map-header">
+    <div>
+        <h1 class="map-title"><i class="fa-solid fa-map-location-dot"></i> Mapa de Prospectos</h1>
+        <div class="map-stats" id="mapStats">Cargando ubicaciones...</div>
+    </div>
+    <div class="filter-controls">
+        <button class="btn-filter active" onclick="filtrarMapa('Todos', this)">Todos</button>
+        <button class="btn-filter" onclick="filtrarMapa('Nuevo', this)">Nuevos</button>
+        <button class="btn-filter" onclick="filtrarMapa('Interesado', this)">Interesados</button>
+        <button class="btn-filter" onclick="filtrarMapa('Cliente', this)">Clientes</button>
+    </div>
+    <a href="portal.html" class="btn-filter" style="text-decoration:none; background:#f1f5f9;">Volver</a>
+  </div>
+
+  <div id="map"></div>
+
+  <div id="spinner" class="spinner-overlay">
+    <div style="text-align:center;">
+        <div class="spinner"></div>
+        <p style="margin-top:10px; font-weight:600; color:#1A2B48; font-size:14px;">Georreferenciando...</p>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <script>
+    let map;
+    let markersLayer; // Capa para agrupar marcadores
+    let PROSPECTOS = [];
+    
+    // Coordenadas por defecto (Santiago Centro)
+    const DEFAULT_LAT = -33.4489;
+    const DEFAULT_LNG = -70.6693;
+
+    // LÍMITES DE CHILE (Para evitar pines en Europa/África)
+    const CHILE_BOUNDS = {
+        minLat: -56.0, maxLat: -17.0, // Sur a Norte
+        minLng: -76.0, maxLng: -66.0  // Oeste a Este
+    };
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        await initMap();
+    });
+
+    async function initMap() {
+        // 1. Inicializar el mapa
+        map = L.map('map').setView([DEFAULT_LAT, DEFAULT_LNG], 10);
+
+        // 2. Cargar Tiles (Mapa base OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        // 3. Crear capa de marcadores
+        markersLayer = L.layerGroup().addTo(map);
+
+        // 4. Cargar Datos
+        await cargarProspectos();
+    }
+
+    async function cargarProspectos() {
+        try {
+            console.log(">>> Cargando datos de ProspectosCopro...");
+            // Asegúrate que el nombre de tabla sea EXACTO al de AppSheet
+            const data = await fetchData("ProspectosCopro").catch(() => []);
+            PROSPECTOS = data || [];
+
+            console.log(">>> Total registros:", PROSPECTOS.length);
+            renderMarkers(PROSPECTOS);
+            
+        } catch (e) {
+            console.error(e);
+            alert("Error cargando datos de prospectos.");
+        } finally {
+            document.getElementById("spinner").style.display = "none";
+        }
+    }
+
+    function renderMarkers(listaDatos) {
+        markersLayer.clearLayers(); // Limpiar mapa
+        let validCoords = 0;
+        let errors = 0;
+        const bounds = []; // Para auto-ajustar el zoom
+
+        listaDatos.forEach(p => {
+            // Buscar la columna de coordenadas (intenta varios nombres comunes)
+            const rawCoord = p.Coordenadas || p['Coordenadas'] || p.LatLong || p.Ubicacion || ""; 
+            
+            // Usamos la función con validación geográfica
+            const coords = parseCoordinates(rawCoord);
+
+            if (coords) {
+                validCoords++;
+                
+                // Lógica de colores según estado
+                let color = '#3b82f6'; // Azul (Nuevo/Default)
+                const estado = (p.Estado || "").toLowerCase();
+                
+                if(estado.includes('interesado')) color = '#f97316'; // Naranja
+                if(estado.includes('cliente') || estado.includes('cerrado')) color = '#22c55e'; // Verde
+
+                // Crear Icono Personalizado (Punto simple y elegante)
+                const customIcon = L.divIcon({
+                    className: 'custom-pin',
+                    html: `<div style="background-color:${color}; width:14px; height:14px; border-radius:50%; border:2px solid white; box-shadow:0 3px 6px rgba(0,0,0,0.4);"></div>`,
+                    iconSize: [18, 18],
+                    iconAnchor: [9, 9], // Centro del punto
+                    popupAnchor: [0, -10]
+                });
+
+                // Crear Marcador
+                const marker = L.marker([coords.lat, coords.lng], { icon: customIcon })
+                    .bindPopup(crearPopupHTML(p));
+                
+                markersLayer.addLayer(marker);
+                bounds.push([coords.lat, coords.lng]);
+            } else {
+                // Si tiene texto pero no coordenadas válidas, contamos error
+                if(rawCoord && rawCoord.length > 2) errors++;
+            }
+        });
+
+        // Actualizar estadísticas en el header
+        const msg = `${validCoords} ubicaciones válidas. ${errors > 0 ? `<span style='color:#ef4444'>(${errors} fuera de rango)</span>` : ''}`;
+        document.getElementById("mapStats").innerHTML = msg;
+
+        // Auto-ajustar vista del mapa
+        if (bounds.length > 0) {
+            map.fitBounds(bounds, { padding: [50, 50] });
+        } else {
+            // Si no hay puntos, centrar en Santiago
+            map.setView([DEFAULT_LAT, DEFAULT_LNG], 12);
+        }
+    }
+
+    // Convierte string "Lat, Long" a objeto {lat, lng} y VALIDA ZONA CHILE
+    function parseCoordinates(str) {
+        if (!str) return null;
+        
+        // Limpieza y split
+        const parts = String(str).split(',').map(s => s.trim());
+        
+        if (parts.length === 2) {
+            const lat = parseFloat(parts[0]);
+            const lng = parseFloat(parts[1]);
+
+            // 1. Validar que sean números
+            if (isNaN(lat) || isNaN(lng)) return null;
+
+            // 2. FILTRO GEOGRÁFICO: Solo mostrar si cae dentro de la caja de Chile
+            // Esto elimina los puntos que aparecen en Europa por error de geocodificación
+            if (lat < CHILE_BOUNDS.maxLat && lat > CHILE_BOUNDS.minLat && 
+                lng < CHILE_BOUNDS.maxLng && lng > CHILE_BOUNDS.minLng) {
+                return { lat, lng };
+            }
+        }
+        return null; // Fuera de rango o formato incorrecto
+    }
+
+    // Función para filtrar por estado
+    function filtrarMapa(estado, btn) {
+        // UI Botones
+        document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        if (estado === 'Todos') {
+            renderMarkers(PROSPECTOS);
+        } else {
+            // Filtro flexible (case insensitive)
+            const filtrados = PROSPECTOS.filter(p => (p.Estado || "").toLowerCase().includes(estado.toLowerCase()));
+            renderMarkers(filtrados);
+        }
+    }
+
+    // HTML del Popup (Tarjeta de información al hacer clic)
+    function crearPopupHTML(p) {
+        const nombre = p.Nombre || p.Cliente || "Prospecto";
+        const estado = p.Estado || "Nuevo";
+        const email = p.Email || "";
+        const fono = p.Telefono || p.Celular || "";
+        const id = p.ID || ""; // Si tienes ID para ir a editar
+        
+        return `
+            <div class="popup-header">
+                ${nombre}
+            </div>
+            <div class="popup-body">
+                <div class="popup-row"><i class="fa-solid fa-tag" style="color:#64748b; width:15px;"></i> <strong>${estado}</strong></div>
+                ${email ? `<div class="popup-row"><i class="fa-solid fa-envelope" style="color:#64748b; width:15px;"></i> ${email}</div>` : ''}
+                ${fono ? `<div class="popup-row"><i class="fa-solid fa-phone" style="color:#64748b; width:15px;"></i> ${fono}</div>` : ''}
+            </div>
+            <div class="popup-footer">
+                <button class="btn-popup" onclick="alert('ID Prospecto: ${id}')">Ver Ficha</button>
+            </div>
+        `;
+    }
+  </script>
+</body>
+</html>
