@@ -73,9 +73,9 @@
             <label style="display:block; font-weight:600; font-size:12px; color:#64748b;">Estado</label>
             <select id="pEstado" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px;">
                 <option value="Nuevo">Nuevo 🔵</option>
-                <option value="Interesado">Interesado 🟠</option>
-                <option value="Cliente">Cliente 🟢</option>
-                <option value="Cerrado">Cerrado ⚫</option>
+                <option value="Propuesta Enviada">Interesado 🟠</option>
+                <option value="En Negociación">En Negociación 🟢</option>
+                <option value="Cerrado Ganado">Cerrado ⚫</option>
             </select>
         </div>
         <div>
@@ -112,8 +112,9 @@
     <div class="filter-controls">
         <button class="btn-filter active" onclick="filtrarMapa('Todos', this)">Todos</button>
         <button class="btn-filter" onclick="filtrarMapa('Nuevo', this)">Nuevos</button>
-        <button class="btn-filter" onclick="filtrarMapa('Interesado', this)">Interesados</button>
-        <button class="btn-filter" onclick="filtrarMapa('Cliente', this)">Clientes</button>
+        <button class="btn-filter" onclick="filtrarMapa('Propuesta Enviada', this)">Interesados</button>
+        <button class="btn-filter" onclick="filtrarMapa('En Negociación', this)">En Negociación</button>
+        <button class="btn-filter" onclick="filtrarMapa('Cerrado Ganado', this)">Clientes</button>
     </div>
     <a href="prospectos.html" class="btn-filter" style="text-decoration:none; background:#f1f5f9;">Volver</a>
   </div>
@@ -203,8 +204,9 @@
                 let color = '#3b82f6'; // Azul (Nuevo/Default)
                 const estado = (p.Estado || "").toLowerCase();
                 
-                if(estado.includes('interesado')) color = '#f97316'; // Naranja
-                if(estado.includes('cliente') || estado.includes('cerrado')) color = '#22c55e'; // Verde
+                if(estado.includes('propuesta enviada')) color = '#f97316'; // Naranja
+                if(estado.includes('en negociación')) color = '#22ff77'; // Verde Fluor
+                if(estado.includes('cliente') || estado.includes('cerrado ganado')) color = '#22c55e'; // Verde
 
                 // Crear Icono Personalizado (Punto simple y elegante)
                 const customIcon = L.divIcon({
