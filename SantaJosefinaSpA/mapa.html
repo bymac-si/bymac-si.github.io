@@ -289,6 +289,7 @@
         const estado = p.Estado || "Nuevo";
         const email = p.Email || "";
         const fono = p.Telefono || p.Celular || "";
+        const direccion = p.Direccion || p.Ubicacion || "";
         const id = p.ID || ""; 
         
         return `
@@ -299,7 +300,8 @@
                 <div class="popup-row"><i class="fa-solid fa-tag" style="color:#64748b; width:15px;"></i> <strong>${estado}</strong></div>
                 ${email ? `<div class="popup-row"><i class="fa-solid fa-envelope" style="color:#64748b; width:15px;"></i> ${email}</div>` : ''}
                 ${fono ? `<div class="popup-row"><i class="fa-solid fa-phone" style="color:#64748b; width:15px;"></i> ${fono}</div>` : ''}
-            </div>
+                ${direccion ? `<div class="popup-row"><i class="fa-solid fa-location-dot"></i> ${direccion}</div>` : ''}
+                </div>
             <div class="popup-footer">
                 <button class="btn-popup" onclick="editarProspecto('${id}')">
                     <i class="fa-solid fa-pen-to-square"></i> Editar Ficha
