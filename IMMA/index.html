@@ -8,21 +8,14 @@
     />
 
     <meta name="theme-color" content="#ffffff" />
-
-    <link rel="manifest" href="manifest2.json" />
-
     <meta name="apple-mobile-web-app-capable" content="yes" />
-
     <meta
       name="apple-mobile-web-app-status-bar-style"
       content="black-translucent"
     />
-
     <meta name="apple-mobile-web-app-title" content="Ingreso Tags IMMA" />
 
-    <link rel="apple-touch-icon" href="icon-192.png" />
     <title>Panel MasterBI · Tag Spool</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
@@ -32,7 +25,10 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
     />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
       body {
         font-family: "Inter", sans-serif;
@@ -172,6 +168,11 @@
         color: #adb5bd;
         font-size: 0.9rem;
         padding-left: 10px;
+      }
+      
+      /* ESTILO HOVER PARA KPI CLICKABLE */
+      .kpi-clickable:hover {
+        background-color: #f8f9fa;
       }
     </style>
   </head>
@@ -413,7 +414,9 @@
                     </div>
                     <div class="col-6">
                       <small class="text-muted d-block">Status Fluor</small
-                      ><span id="lblFluorEdit" class="fw-bold small text-info"
+                      ><span
+                        id="lblFluorEdit"
+                        class="fw-bold small text-info"
                         >-</span
                       >
                     </div>
@@ -429,7 +432,10 @@
                 <div class="card shadow-sm p-3 mb-0 flex-shrink-0">
                   <h5 class="card-title">Registrar Movimiento</h5>
                   <label class="small text-muted">Etapa a actualizar:</label>
-                  <select id="cmbEtapa" class="form-select form-select-sm mb-2">
+                  <select
+                    id="cmbEtapa"
+                    class="form-select form-select-sm mb-2"
+                  >
                     <option value>Cargando columnas...</option>
                   </select>
                   <label class="small text-muted">Fecha del evento:</label>
@@ -439,7 +445,10 @@
                     class="form-control form-control-sm mb-2"
                   />
                   <div class="d-flex gap-2">
-                    <button class="btn btn-secondary btn-sm" onclick="setHoy()">
+                    <button
+                      class="btn btn-secondary btn-sm"
+                      onclick="setHoy()"
+                    >
                       Hoy
                     </button>
                     <button
@@ -513,7 +522,9 @@
           </div>
 
           <div class="tab-pane fade" id="tab-dashboard">
-            <div class="d-flex justify-content-between align-items-center mb-3">
+            <div
+              class="d-flex justify-content-between align-items-center mb-3"
+            >
               <h5 class="mb-0">
                 Indicadores de Gestión
                 <span
@@ -558,8 +569,16 @@
                   </div>
                 </div>
                 <div class="col-6 col-md-3">
-                  <div class="kpi-box">
-                    <div class="kpi-title">Activos</div>
+                  <div
+                    class="kpi-box shadow-sm border-primary kpi-clickable"
+                    style="cursor: pointer; transition: transform 0.2s"
+                    onclick="mostrarModalActivos()"
+                    onmouseover="this.style.transform='scale(1.05)'"
+                    onmouseout="this.style.transform='scale(1)'"
+                  >
+                    <div class="kpi-title text-primary">
+                      <i class="bi bi-hand-index-thumb"></i> Activos
+                    </div>
                     <div id="kpi-activos" class="kpi-value kpi-blue">-</div>
                   </div>
                 </div>
@@ -623,7 +642,7 @@
               <div class="row mb-3">
                 <div class="col-12">
                   <div class="card p-3">
-                    <h6>Evolución de Despachos 2025</h6>
+                    <h6>Evolución de Despachos (Histórico)</h6>
                     <div style="height: 250px">
                       <canvas id="chartEvolucion"></canvas>
                     </div>
@@ -635,7 +654,10 @@
                 <div class="col-12 col-lg-5">
                   <div class="card p-3 h-100">
                     <h6>Distribución Status Fluor</h6>
-                    <div class="table-responsive" style="max-height: 250px">
+                    <div
+                      class="table-responsive"
+                      style="max-height: 250px"
+                    >
                       <table class="table table-sm table-striped small">
                         <tbody id="tbodyFluor"></tbody>
                       </table>
@@ -667,7 +689,9 @@
                         <thead>
                           <tr>
                             <th>Etapa</th>
-                            <th class="text-center text-primary">Cantidad</th>
+                            <th class="text-center text-primary">
+                              Cantidad
+                            </th>
                           </tr>
                         </thead>
                         <tbody id="tbodyLogHoy"></tbody>
@@ -745,6 +769,7 @@
           </div>
         </div>
       </div>
+
       <footer
         class="card shadow-sm fixed-bottom d-flex flex-column flex-sm-row"
         style="
@@ -759,6 +784,63 @@
         </div>
       </footer>
     </main>
+
+    <div
+      class="modal fade"
+      id="modalActivos"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div
+        class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable"
+      >
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">
+              <i class="bi bi-list-check"></i> Detalle de Spools Activos
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body p-0">
+            <div class="table-responsive">
+              <table
+                class="table table-striped table-hover mb-0 small align-middle"
+              >
+                <thead class="table-light sticky-top">
+                  <tr>
+                    <th>TAG</th>
+                    <th class="text-center">Días</th>
+                    <th>Etapa Actual</th>
+                    <th>Status</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyActivos">
+                  </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <span
+              class="small text-muted me-auto"
+              id="lblTotalActivosModal"
+            ></span>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              data-bs-dismiss="modal"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -777,7 +859,6 @@
       // COLUMNAS
       const COL_MES_DESPACHO = "Mes Despacho";
       const COL_ESTATUS_ELIMINADO = "EstatusEliminado";
-      // const COL_DIAS_MOV = "Days_Since_Last_Move"; // IGNORADA POR PROBLEMAS DE API
 
       const COL_TAG = "TAG SPOOL";
       const COL_STATUS = "STATUS SPOOL";
@@ -839,6 +920,7 @@
 
       let dataCache = [];
       let logCache = [];
+      let listaActivosCache = []; // Nuevo caché para el listado del modal
 
       async function callAppSheet(tableName, action, bodyParams = {}) {
         const url = `https://api.appsheet.com/api/v2/apps/${APP_ID}/tables/${tableName}/Action`;
@@ -854,7 +936,6 @@
         if (bodyParams.Rows) body.Rows = bodyParams.Rows;
         if (bodyParams.Selector) body.Properties.Selector = bodyParams.Selector;
 
-        // SISTEMA DE REINTENTOS (3 intentos)
         let intentos = 0;
         const maxIntentos = 3;
 
@@ -887,7 +968,6 @@
         }
       }
 
-      // --- FUNCIÓN SCL PURA ROBUSTA ---
       function parseDateFlexible(val) {
         if (!val) return null;
         if (typeof val === "number") return new Date(1899, 11, 30 + val);
@@ -1058,7 +1138,9 @@
       function verFicha(i) {
         const r = resultadosFicha[i];
         document.getElementById("resFicha").style.display = "none";
-        document.getElementById("contenedorFicha").classList.remove("d-none");
+        document
+          .getElementById("contenedorFicha")
+          .classList.remove("d-none");
         document.getElementById("ficha-tag").textContent = r[COL_TAG];
         document.getElementById("ficha-status-badge").textContent =
           r[COL_STATUS];
@@ -1168,7 +1250,6 @@
         }
       }
 
-      // --- NUEVA FUNCIÓN PARA FECHA HORA SEGURA EN IPHONE ---
       function getFechaHoraSCL_String() {
         const now = new Date();
         const sclStr = now.toLocaleString("en-US", {
@@ -1183,7 +1264,7 @@
         const sec = String(d.getSeconds()).padStart(2, "0");
         return `${dia}/${mes}/${anio} ${hrs}:${min}:${sec}`;
       }
-      // Generador de ID único simple para AppSheet
+
       function generarUniqueID() {
         if (typeof crypto !== "undefined" && crypto.randomUUID) {
           return crypto.randomUUID();
@@ -1225,26 +1306,20 @@
         const fechaLog = getFechaHoraSCL_String();
         const idLog = generarUniqueID();
 
-        // --- CORRECCIÓN DE FORMATO VALOR ANTERIOR ---
-        // Convertimos cualquier formato extraño (ej: 06/27/2025) a dd/mm/yyyy
         let valAnt = "";
         if (valorExistente) {
-          // Intentamos interpretar la fecha existente
           let dAnt = parseDateFlexible(valorExistente);
           if (dAnt) {
-            // Si es fecha válida, forzamos formato dd/mm/yyyy
             const d = String(dAnt.getDate()).padStart(2, "0");
             const m = String(dAnt.getMonth() + 1).padStart(2, "0");
             const y = dAnt.getFullYear();
             valAnt = `${d}/${m}/${y}`;
           } else {
-            // Si no es fecha (texto), lo dejamos tal cual
             valAnt = String(valorExistente);
           }
         }
 
         try {
-          // Primero ChangeLog con valor saneado
           const respLog = await callAppSheet("ChangeLog", "Add", {
             Rows: [
               {
@@ -1255,7 +1330,7 @@
                 Celda: cellId,
                 CabeceraColumna: colNombre,
                 "TAG SPOOL": rowEdit[COL_TAG],
-                ValorAnterior: valAnt, // <--- AQUI ESTÁ EL CAMBIO
+                ValorAnterior: valAnt,
                 ValorNuevo: fec,
               },
             ],
@@ -1265,12 +1340,10 @@
             console.warn("ChangeLog no devolvió filas creadas.");
           }
 
-          // Luego MasterBI
           await callAppSheet(TABLE_MASTER, "Edit", {
             Rows: [{ "TAG SPOOL": rowEdit[COL_TAG], [colNombre]: fec }],
           });
 
-          // Éxito
           rowEdit[colNombre] = fec;
 
           const lastEvt = renderTimeline(rowEdit, "timeline-edit");
@@ -1298,6 +1371,7 @@
           msg.textContent = "Error. Ver consola.";
         }
       }
+
       async function cargarDashboardLocal(force = false) {
         const now = new Date();
         document.getElementById(
@@ -1311,7 +1385,9 @@
           return;
         }
 
-        document.getElementById("loading-dashboard").classList.remove("d-none");
+        document
+          .getElementById("loading-dashboard")
+          .classList.remove("d-none");
         document.getElementById("content-dashboard").classList.add("d-none");
 
         try {
@@ -1329,7 +1405,9 @@
         } catch (e) {
           console.error(e);
         } finally {
-          document.getElementById("loading-dashboard").classList.add("d-none");
+          document
+            .getElementById("loading-dashboard")
+            .classList.add("d-none");
           document
             .getElementById("content-dashboard")
             .classList.remove("d-none");
@@ -1353,6 +1431,7 @@
         today.setHours(0, 0, 0, 0);
 
         let listaCriticos = [];
+        let listaActivosTemp = [];
 
         rows.forEach((r) => {
           const st = (r[COL_STATUS] || "").toUpperCase();
@@ -1368,13 +1447,14 @@
             desp++;
             let valMes = r[COL_MES_DESPACHO];
             if (valMes)
-              distDespachoMes[valMes] = (distDespachoMes[valMes] || 0) + 1;
+              distDespachoMes[valMes] =
+                (distDespachoMes[valMes] || 0) + 1;
           } else if (st.includes("HOLD")) {
             elim++;
           } else {
+            // ES UN ACTIVO
             act++;
 
-            // --- CÁLCULO MANUAL DE DÍAS (FIX PARA APPSHEET) ---
             let maxDate = null;
             let ultimaEtapaNombre = "Sin Inicio";
 
@@ -1398,6 +1478,14 @@
             distFluor[fl] = (distFluor[fl] || 0) + 1;
             distUltima[ultimaEtapaNombre] =
               (distUltima[ultimaEtapaNombre] || 0) + 1;
+            
+            // Llenar lista para Modal
+            listaActivosTemp.push({
+                tag: r[COL_TAG],
+                dias: Math.floor(dias),
+                etapa: ultimaEtapaNombre,
+                status: r[COL_STATUS]
+            });
 
             if (dias > 60) {
               listaCriticos.push({
@@ -1410,6 +1498,9 @@
             }
           }
         });
+
+        // Actualizar caché global de activos
+        listaActivosCache = listaActivosTemp;
 
         document.getElementById("kpi-total").textContent = total;
         document.getElementById("kpi-activos").textContent = act;
@@ -1440,7 +1531,10 @@
               ],
             },
           ],
-          options: { indexAxis: "x", plugins: { legend: { display: true } } },
+          options: {
+            indexAxis: "x",
+            plugins: { legend: { display: true } },
+          },
         });
         renderChart("chartDiasProceso", "bar", {
           labels: ["0-30", "31-60", "61+"],
@@ -1453,12 +1547,24 @@
           options: { plugins: { legend: { display: false } } },
         });
 
+        // LÓGICA DE ORDENAMIENTO CRONOLÓGICO (INCLUYE 2026)
+        // 1. FORZAR que Enero y Febrero 2026 aparezcan en el gráfico (aunque sea con valor 0)
+        // Nota: Asegúrate que el formato de fecha en tu BBDD sea "MM/YYYY" (ej: 01/2026)
+        if (distDespachoMes["01/2026"] === undefined) distDespachoMes["01/2026"] = 0;
+        if (distDespachoMes["02/2026"] === undefined) distDespachoMes["02/2026"] = 0;
+
+        // 2. LÓGICA DE ORDENAMIENTO CRONOLÓGICO
         const sortedKeys = Object.keys(distDespachoMes).sort((a, b) => {
           let [m1, y1] = a.split("/").map(Number);
           let [m2, y2] = b.split("/").map(Number);
+          
+          // Si el formato falla (ej: es texto), intentar manejarlo o dejarlo al final
+          if (!y1 || !m1) return 0;
+
           if (y1 !== y2) return y1 - y2;
           return m1 - m2;
         });
+
         renderChart("chartEvolucion", "bar", {
           labels: sortedKeys,
           datasets: [
@@ -1590,7 +1696,9 @@
         });
 
         let generalAvg =
-          countPromedios > 0 ? (sumPromedios / countPromedios).toFixed(1) : "-";
+          countPromedios > 0
+            ? (sumPromedios / countPromedios).toFixed(1)
+            : "-";
         hTiempos += `<tr class="table-secondary"><th colspan="2" class="text-end">PROMEDIO GENERAL</th><th class="fw-bold text-primary">${generalAvg}</th><th>-</th></tr>`;
         document.getElementById("tbodyTiempos").innerHTML = hTiempos;
 
@@ -1608,7 +1716,7 @@
                     <td class="small text-muted">${item.etapa}</td>
                     <td class="small">${item.fecha}</td>
                     <td class="text-center"><button class="btn btn-sm btn-outline-primary" onclick="verDetalleTag('${item.tag}')"><i class="bi bi-search"></i></button></td>
-                 </tr>`;
+                   </tr>`;
           });
         }
         document.getElementById("tabla-criticos-body").innerHTML = hCrit;
@@ -1665,6 +1773,58 @@
           pdf.addImage(img, "JPEG", 0, 0, w, h);
           pdf.save("dashboard.pdf");
         }
+      }
+
+      // --- FUNCIONES MODAL ACTIVOS ---
+      function mostrarModalActivos() {
+        const modalEl = document.getElementById('modalActivos');
+        const modal = new bootstrap.Modal(modalEl);
+        
+        // Ordenar activos por días descendente
+        listaActivosCache.sort((a, b) => b.dias - a.dias);
+
+        const tbody = document.getElementById('tbodyActivos');
+        tbody.innerHTML = '';
+        
+        document.getElementById('lblTotalActivosModal').textContent = `Total: ${listaActivosCache.length} registros`;
+
+        if (listaActivosCache.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center">No hay datos activos</td></tr>';
+        } else {
+            let html = '';
+            listaActivosCache.forEach(item => {
+                let badgeClass = 'bg-success';
+                if(item.dias > 30) badgeClass = 'bg-warning text-dark';
+                if(item.dias > 60) badgeClass = 'bg-danger';
+
+                html += `
+                    <tr>
+                        <td class="fw-bold text-primary">${item.tag}</td>
+                        <td class="text-center"><span class="badge ${badgeClass} rounded-pill">${item.dias}</span></td>
+                        <td>${item.etapa}</td>
+                        <td class="small text-muted">${item.status}</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-light border" onclick="verDetalleDesdeModal('${item.tag}')">
+                                <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        modal.show();
+      }
+
+      function verDetalleDesdeModal(tag) {
+         // Cierra el modal primero
+         const modalEl = document.getElementById('modalActivos');
+         const modalInstance = bootstrap.Modal.getInstance(modalEl);
+         if(modalInstance) modalInstance.hide();
+         
+         // Llama a la función existente para ir a la ficha
+         verDetalleTag(tag);
       }
     </script>
   </body>

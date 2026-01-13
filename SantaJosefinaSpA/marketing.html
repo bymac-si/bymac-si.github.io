@@ -352,13 +352,6 @@
             <div>
               <label class="label">Canal</label>
               <select id="mCanal">
-                <option value="Facebook Ads">Facebook Ads</option>
-                <option value="Instagram">Instagram</option>
-                <option value="Google Ads">Google Ads</option>
-                <option value="Portales">Portales Inmob.</option>
-                <option value="Email">Email Marketing</option>
-                <option value="Offline">Offline</option>
-                <option value="Referidos">Referidos</option>
               </select>
             </div>
             <div>
@@ -513,6 +506,11 @@
           MARKETING_DATA = data || [];
 
           calcularKPIsGlobales();
+          
+          // --- NUEVO: Cargar opciones del select Canal ---
+          renderOpcionesCanal(); 
+          // -----------------------------------------------
+
           renderTabla();
         } catch (e) {
           console.error(e);
@@ -520,6 +518,33 @@
           document.getElementById("spinner").style.display = "none";
         }
       }
+
+      // --- NUEVA FUNCIÓN: Extrae canales únicos y llena el Select ---
+      function renderOpcionesCanal() {
+        const select = document.getElementById("mCanal");
+        
+        // 1. Extraer todos los canales existentes (filtrando vacíos)
+        let canales = MARKETING_DATA
+            .map(m => m.Canal)
+            .filter(c => c && c.trim() !== "");
+
+        // 2. (Opcional) Agregar canales base por si la tabla está vacía
+        const canalesBase = ["Google Ads", "Facebook Ads", "X.com", "LinkedIn", "Instagram", "Tik Tok","YouTube","Portales", "Email Marketing", "Offline / Volantes"];
+        canales = [...canales, ...canalesBase];
+
+        // 3. Eliminar duplicados y ordenar alfabéticamente
+        const canalesUnicos = [...new Set(canales)].sort();
+
+        // 4. Generar el HTML
+        let html = '<option value="">-- Seleccione --</option>';
+        canalesUnicos.forEach(c => {
+            html += `<option value="${c}">${c}</option>`;
+        });
+
+        // 5. Asignar al select
+        select.innerHTML = html;
+      }
+      // -------------------------------------------------------------
 
       function renderTabla() {
         const tb = document.getElementById("tablaMarketing");
@@ -676,7 +701,10 @@
         document.getElementById("mID").value = id;
         document.getElementById("mCampana").value = m.Campaña || "";
         document.getElementById("mEstado").value = m.Estado || "Activa";
+        
+        // Se asigna el valor al select (como ya cargamos las opciones, funcionará)
         document.getElementById("mCanal").value = m.Canal || "";
+        
         document.getElementById("mInversion").value = m.Inversion || 0;
 
         // CORRECCIÓN: Usar helper para asignar fechas correctamente

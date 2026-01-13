@@ -19,6 +19,7 @@
       body {
         background-color: #f8fafc;
         padding-bottom: 40px;
+        font-family: system-ui, -apple-system, sans-serif;
       }
 
       .app-header {
@@ -222,8 +223,10 @@
         "
       >
         <div>
-          <div class="user-welcome" style="font-size: 18px;">Hola, <b id="residenteNombre">...</b></div>
-          <div class="unit-badge" style="font-size: 24px;">
+          <div class="user-welcome" style="font-size: 18px">
+            Hola, <b id="residenteNombre">...</b>
+          </div>
+          <div class="unit-badge" style="font-size: 24px">
             <i class="fa-solid fa-building"></i>
             <span id="nombreEdificio">Cargando...</span>
             <span style="margin: 0 5px">| &nbsp;Casa/Depto. </span>
@@ -231,22 +234,22 @@
           </div>
         </div>
         <button
-  onclick="logoutResidente()"
-  style="
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: white;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  "
->
-  <i class="fa-solid fa-power-off" style="font-size: 14px;"></i>
-</button>
+          onclick="logoutResidente()"
+          style="
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          "
+        >
+          <i class="fa-solid fa-power-off" style="font-size: 14px"></i>
+        </button>
       </div>
     </div>
 
@@ -275,7 +278,23 @@
       <div class="debt-label">Total a Pagar</div>
       <div class="debt-amount" id="montoTotal">...</div>
       <div class="debt-period" id="textoEstadoDeuda">Calculando...</div>
+      <br><br>
 
+      <a
+        href="detalle_gastos.html"
+        style="
+          display: block;
+          margin-top: 12px;
+          font-size: 13px;
+          color: #3b82f6;
+          text-decoration: none;
+          font-weight: 600;
+        "
+      >
+        Ver detalle Gastos Comunes
+        <i class="fa-solid fa-chevron-right" style="font-size: 10px"></i>
+      </a>
+<br><br>
       <div id="btnPagarContainer" style="display: none">
         <a
           href="reportar_pago.html"
@@ -339,13 +358,10 @@
       let DATOS_UNIDAD = null;
 
       // --- FUNCIÓN SEGURA PARA ACTUALIZAR TEXTO ---
-      // Si el ID no existe en el HTML, no hace nada (y no da error)
       function safeUpdate(id, valor) {
         const el = document.getElementById(id);
         if (el) {
           el.textContent = valor;
-        } else {
-          console.warn(`Elemento HTML no encontrado: ${id}`);
         }
       }
 
@@ -385,6 +401,7 @@
           await cargarTodo();
         } catch (e) {
           console.error("Error inicio:", e);
+          window.location.href = "login_residente.html";
         } finally {
           const loader = document.getElementById("loader");
           if (loader) loader.style.display = "none";
@@ -446,27 +463,17 @@
         cobrosExistentes
       ) {
         try {
-          // A. Periodo
+          // A. Periodo Actual
           const fechaHoy = new Date();
           const mesStr = `${String(fechaHoy.getMonth() + 1).padStart(
             2,
             "0"
           )}-${fechaHoy.getFullYear()}`;
 
-          safeUpdate("periodoCobro", formatMes(mesStr));
-
-          const vencimientoDate = new Date(
-            fechaHoy.getFullYear(),
-            fechaHoy.getMonth() + 1,
-            5
-          );
-          safeUpdate(
-            "fechaVencimiento",
-            vencimientoDate.toLocaleDateString("es-CL")
-          );
-
-          // B. Calcular Gasto Total
+          // B. Calcular Gasto Total Comunidad (Mes Actual)
           let totalGastoComunidad = 0;
+
+          // 1. Buscar si ya hay resumen cerrado
           const resumenMes = gastosComunes.find(
             (g) =>
               String(g.CopropiedadID) === String(USUARIO.CopropiedadID) &&
@@ -476,11 +483,18 @@
           if (resumenMes) {
             totalGastoComunidad = parseMonto(resumenMes.TotalGastos);
           } else {
-            const gastosMes = gastos.filter(
-              (g) =>
-                String(g.CopropiedadID) === String(USUARIO.CopropiedadID) &&
-                g.Mes === mesStr
-            );
+            // 2. Si no, sumar gastos individuales del mes
+            const gastosMes = gastos.filter((g) => {
+              if (String(g.CopropiedadID) !== String(USUARIO.CopropiedadID))
+                return false;
+              // Asumimos que g.Fecha viene bien o usamos mes actual
+              // Para demo simple, usamos mes actual si g.Fecha existe
+              if (!g.Fecha) return false;
+              const d = new Date(g.Fecha);
+              const m = String(d.getMonth() + 1).padStart(2, "0");
+              const y = d.getFullYear();
+              return `${m}-${y}` === mesStr;
+            });
             totalGastoComunidad = gastosMes.reduce(
               (sum, g) => sum + parseMonto(g.Monto),
               0
@@ -492,52 +506,41 @@
           const fondoRaw = parsePorcentaje(DATOS_COMUNIDAD?.FondoReserva);
           const factorFondo = fondoRaw > 1 ? fondoRaw / 100 : fondoRaw;
 
-          // D. Cálculo
+          // D. Cálculo Teórico
           const montoGC = Math.round(totalGastoComunidad * (alicuota / 100));
           const montoFondo = Math.round(montoGC * factorFondo);
 
-          // E. Lógica de Cobros
-          const idCobroMes = `COB_${USUARIO.UnidadID}_${mesStr}`;
+          // E. Buscar Cobro en Base de Datos (Prevalece sobre cálculo)
+          // ID suele ser COB_UNIDAD_MES
+          // Pero buscamos por contenido mejor
           const cobroRegistrado = cobrosExistentes.find(
-            (c) => String(getKeyVal(c)) === idCobroMes
+            (c) =>
+              String(c.UnidadID) === String(USUARIO.UnidadID) &&
+              c.Mes === mesStr
           );
 
-          let moraVisual = 0;
           let totalVisual = 0;
 
           if (cobroRegistrado) {
-            // YA EXISTE EN BD
+            // YA EXISTE COBRO DEL MES
             if (cobroRegistrado.Estado === "Pagado") {
+              // Si este mes está pagado, mostrar solo deudas viejas si las hay
               const otrasMoras = cobrosExistentes.filter(
                 (c) =>
                   String(c.UnidadID) === String(USUARIO.UnidadID) &&
                   c.Estado === "Pendiente" &&
-                  c.ID !== idCobroMes
+                  c.Mes !== mesStr
               );
-              moraVisual = otrasMoras.reduce(
+              totalVisual = otrasMoras.reduce(
                 (sum, c) => sum + parseMonto(c.TotalAPagar),
                 0
               );
-              totalVisual = moraVisual;
-
-              safeUpdate("montoAlicuota", "$0 (Pagado)");
-              safeUpdate("montoFondo", "$0");
             } else {
-              moraVisual = parseMonto(cobroRegistrado.MontoMoraAnterior);
+              // Pendiente
               totalVisual = parseMonto(cobroRegistrado.TotalAPagar);
-
-              safeUpdate(
-                "montoAlicuota",
-                clp(parseMonto(cobroRegistrado.MontoGastoComun))
-              );
-
-              const multas = parseMonto(cobroRegistrado.MontoMultas);
-              const gcReg = parseMonto(cobroRegistrado.MontoGastoComun);
-              const fondoCalc = totalVisual - gcReg - moraVisual - multas;
-              safeUpdate("montoFondo", clp(fondoCalc > 0 ? fondoCalc : 0));
             }
           } else {
-            // NO EXISTE -> CALCULAR Y CREAR
+            // NO EXISTE -> PROYECCIÓN (Gasto del mes + Deudas Viejas)
             const morasPrevias = cobrosExistentes
               .filter(
                 (c) =>
@@ -546,43 +549,12 @@
               )
               .reduce((sum, c) => sum + parseMonto(c.TotalAPagar), 0);
 
-            moraVisual = morasPrevias;
             totalVisual = montoGC + montoFondo + morasPrevias;
-
-            if (montoGC > 0) {
-              console.log("Generando cobro auto:", idCobroMes);
-              const nuevoCobro = {
-                ID: idCobroMes,
-                UnidadID: String(USUARIO.UnidadID),
-                Mes: mesStr,
-                MontoGastoComun: montoGC,
-                MontoMultas: 0,
-                MontoMoraAnterior: morasPrevias,
-                TotalAPagar: totalVisual,
-                Estado: "Pendiente",
-                FechaVencimiento: vencimientoDate.toISOString().split("T")[0],
-              };
-              if (typeof appSheetCRUD === "function") {
-                appSheetCRUD("Cobros", "Add", [nuevoCobro]).catch(
-                  console.error
-                );
-              }
-            }
-
-            safeUpdate("montoAlicuota", clp(montoGC));
-            safeUpdate("montoFondo", clp(montoFondo));
           }
 
-          // Render Final (Usando safeUpdate para evitar crash)
-          safeUpdate("totalComunidad", clp(totalGastoComunidad));
-          safeUpdate("lblAlicuota", alicuota + "%");
-          safeUpdate("lblFondoPct", factorFondo * 100 + "%");
-          safeUpdate("montoMora", clp(moraVisual));
-
           safeUpdate("montoTotal", clp(totalVisual));
-          safeUpdate("montoTotalAbajo", clp(totalVisual));
 
-          // Estado Tarjeta
+          // Estado Tarjeta UI
           const card = document.getElementById("cardDeudaContainer");
           const txt = document.getElementById("textoEstadoDeuda");
           const btn = document.getElementById("btnPagarContainer");
@@ -590,7 +562,7 @@
           if (card && txt && btn) {
             if (totalVisual > 0) {
               card.style.borderLeft = "5px solid #ef4444";
-              txt.textContent = "Pagos Pendientes";
+              txt.textContent = "Por Pagar";
               txt.style.color = "#ef4444";
               btn.style.display = "block";
             } else {
@@ -684,15 +656,6 @@
       }
       function getKeyVal(o) {
         return o.ID || o.id || "";
-      }
-      function formatMes(str) {
-        if (!str) return "";
-        const [m, y] = str.split("-");
-        const d = new Date(y, m - 1, 1);
-        return d.toLocaleDateString("es-CL", {
-          month: "long",
-          year: "numeric",
-        });
       }
     </script>
   </body>

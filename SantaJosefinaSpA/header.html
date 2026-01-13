@@ -1,37 +1,41 @@
 <style>
-  /* --- Estilos Base del Header --- */
+  /* 1. Contenedor Principal */
   .main-header {
     background-color: #ffffff;
     border-bottom: 1px solid #e2e8f0;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     padding: 0 25px;
     height: 70px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
     position: sticky;
     top: 0;
     z-index: 1000;
     width: 100%;
     box-sizing: border-box;
+    flex-wrap: nowrap !important; /* Vital para que no se rompa la línea */
   }
 
+  /* 2. Logo */
   .logo-img {
-    height: 50px;
+    height: 100px;
     width: auto;
     transition: transform 0.2s;
+    display: block; /* Asegura que la imagen se comporte como bloque */
   }
-  .logo-img:hover { transform: scale(1.02); }
+  .logo-img:hover { transform: scale(1.05); }
 
-  /* Navegación Desktop */
+  /* 3. Navegación (Menú Central) */
   .nav-container {
     display: flex;
-    gap: 15px; /* Aumenté el espacio ya que ahora tenemos menos botones */
+    gap: 10px; /* Espacio optimizado */
     height: 100%;
     align-items: center;
+    margin-left: auto; /* Empuja el menú a la derecha si sobra espacio */
   }
 
-  /* Links sueltos */
+  /* Links */
   .nav-link {
     text-decoration: none;
     color: #64748b;
@@ -42,8 +46,8 @@
     transition: all 0.2s;
     display: flex;
     align-items: center;
-    gap: 8px;
-    white-space: nowrap;
+    gap: 6px;
+    white-space: nowrap; /* Evita que los textos largos bajen de línea */
   }
 
   .nav-link:hover {
@@ -55,8 +59,6 @@
     color: #3b82f6;
     background-color: #eff6ff;
   }
-
-  .nav-link i { font-size: 16px; }
 
   /* Dropdowns */
   .nav-dropdown {
@@ -95,65 +97,52 @@
   .dropdown-menu li a i { width: 16px; text-align: center; color: #94a3b8; }
   .dropdown-menu li a:hover i { color: #3b82f6; }
 
-  /* Usuario */
-  .user-actions {
-    display: flex; align-items: center; gap: 15px;
-    margin-left: 20px; padding-left: 20px; border-left: 1px solid #e2e8f0;
+  /* Submenús (Hover lateral) */
+  .dropdown-submenu { position: relative; }
+  .dropdown-submenu .submenu {
+    display: none;
+    position: absolute;
+    top: -5px;
+    left: 100%;
+    margin-left: 5px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border: 1px solid #e2e8f0;
+    min-width: 180px;
+    padding: 5px 0;
+    list-style: none;
+    z-index: 1002;
   }
+  .dropdown-submenu:hover > .submenu { display: block; }
+  .dropdown-submenu .submenu li a:hover { background-color: #f1f5f9; }
+
+  /* 4. Sección Usuario (PROTEGIDA) */
+  .user-actions {
+    display: flex; 
+    align-items: center; 
+    gap: 15px;
+    margin-left: 15px; 
+    padding-left: 15px; 
+    border-left: 1px solid #e2e8f0;
+    
+    /* ESTO ES LO IMPORTANTE PARA QUE NO SE OCULTE EL LOGOUT */
+    flex-shrink: 0 !important; 
+    min-width: max-content;
+  }
+  
   .user-info { text-align: right; line-height: 1.2; }
   .user-name { font-weight: 700; font-size: 13px; color: #1e293b; display: block; }
   .user-role { font-size: 11px; color: #94a3b8; text-transform: uppercase; }
   
   .btn-logout {
     color: #ef4444; border: 1px solid #fee2e2; background: #fef2f2;
-    padding: 8px; border-radius: 6px; font-size: 14px;
+    padding: 0; width: 36px; height: 36px; /* Botón cuadrado fijo */
+    border-radius: 6px; font-size: 14px;
     cursor: pointer; text-decoration: none; transition: all 0.2s;
     display: flex; align-items: center; justify-content: center;
   }
   .btn-logout:hover { background: #fee2e2; transform: translateY(-1px); }
-
-  /* 1. IMPORTANTE: El elemento <li> padre debe ser el punto de referencia */
-.dropdown-submenu {
-  position: relative; /* Esto es vital */
-}
-
-/* 2. El submenú debe flotar a la derecha del padre */
-.dropdown-submenu .submenu {
-  display: none; /* Oculto por defecto */
-  position: absolute;
-  top: 0;
-  left: 100%; /* Lo empuja totalmente a la derecha */
-  margin-left: 2px; /* Un pequeño margen para que no toque el borde */
-  margin-top: -5px; /* Ajuste para alinear con el texto */
-  
-  /* Estilos visuales de la caja */
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* Sombra un poco más fuerte para destacar */
-  border: 1px solid #e2e8f0;
-  min-width: 180px;
-  padding: 5px 0;
-  list-style: none;
-  z-index: 1000; /* Asegura que quede por encima de todo */
-}
-
-/* 3. Mostrar el menú al pasar el mouse */
-.dropdown-submenu:hover > .submenu {
-  display: block;
-}
-
-/* Estilos de los enlaces dentro del submenú */
-.dropdown-submenu .submenu li a {
-  padding: 8px 15px;
-  display: block;
-  text-decoration: none;
-  color: #1a2b48;
-  font-size: 13px;
-}
-
-.dropdown-submenu .submenu li a:hover {
-  background-color: #f1f5f9;
-}
 
   @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
   
@@ -161,7 +150,7 @@
   .mobile-toggle { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: #1e293b; padding: 10px; }
 
   /* Responsive Mobile */
-  @media (max-width: 1024px) {
+  @media (max-width: 1100px) { /* Aumenté el punto de quiebre para laptops pequeñas */
     .mobile-toggle { display: block; }
     
     .nav-container {
@@ -182,9 +171,10 @@
       position: static; box-shadow: none; border: none; 
       width: 100%; padding: 0; display: none; background-color: #f8fafc;
     }
-    .nav-dropdown:hover .dropdown-menu, .nav-dropdown:active .dropdown-menu { display: block; }
+    .nav-dropdown:hover .dropdown-menu { display: block; } /* En móvil hover a veces no es ideal, pero funcional */
     .dropdown-menu li a { padding-left: 40px; border-bottom: 1px solid #eee; }
 
+    /* En móvil, el usuario va arriba o abajo del menú desplegado */
     .user-actions {
       width: 100%; margin: 0; padding: 15px 20px; border-left: none;
       border-top: 2px solid #f1f5f9; justify-content: space-between;
@@ -196,8 +186,8 @@
 
 <header class="main-header no-print">
   
-  <a href="index.html" style="display:flex; align-items:center;">
-    <img src="assets/img/logo_santajosefina.png" alt="Santa Josefina" class="logo-img" style="height: 100px;">
+  <a href="index.html" style="display:flex; align-items:center; text-decoration:none;">
+    <img src="assets/img/logo_santajosefina.png" alt="Santa Josefina" class="logo-img">
   </a>
 
   <button class="mobile-toggle" onclick="toggleMenu()">
@@ -218,30 +208,29 @@
     </div>
 
     <div class="nav-dropdown">
-  <a href="#" class="nav-link dropdown-toggle">
-    <i class="fa-solid fa-building"></i> <span>Condominios</span> 
-    <i class="fa-solid fa-chevron-down" style="font-size:10px; margin-left:4px;"></i>
-  </a>
-  
-  <ul class="dropdown-menu">
-    <li><a href="dashboardcopropiedades.html"><i class="fa-solid fa-chart-pie"></i> KPIs Condominios</a></li>
-    <li style="border-top:1px solid #f1f5f9; margin:4px 0;"></li>
-    <li><a href="copropiedades.html"><i class="fa-solid fa-city"></i> Comunidades</a></li>
-    <li><a href="unidades.html"><i class="fa-solid fa-door-closed"></i> Unidades</a></li>
-    <li><a href="copropietarios.html"><i class="fa-solid fa-user-group"></i> Copropietarios</a></li>
-    
-    <li class="dropdown-submenu">
-        <a href="#" style="display:flex; justify-content:space-between; align-items:center;">
-            <span><i class="fa-solid fa-user-plus"></i> Gestión Prospectos</span>
-            <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
-        </a>
-        <ul class="dropdown-menu submenu">
-            <li><a href="prospectos.html"><i class="fa-solid fa-list-ul"></i> Listado</a></li>
-            <li><a href="mapa.html"><i class="fa-solid fa-map-location-dot"></i> Mapa Geo</a></li>
-        </ul>
-    </li>
-    </ul>
-</div>
+      <a href="#" class="nav-link dropdown-toggle">
+        <i class="fa-solid fa-building"></i> <span>Condominios</span> 
+        <i class="fa-solid fa-chevron-down" style="font-size:10px; margin-left:4px;"></i>
+      </a>
+      <ul class="dropdown-menu">
+        <li><a href="dashboardcopropiedades.html"><i class="fa-solid fa-chart-pie"></i> KPIs Condominios</a></li>
+        <li style="border-top:1px solid #f1f5f9; margin:4px 0;"></li>
+        <li><a href="copropiedades.html"><i class="fa-solid fa-city"></i> Comunidades</a></li>
+        <li><a href="unidades.html"><i class="fa-solid fa-door-closed"></i> Unidades</a></li>
+        <li><a href="copropietarios.html"><i class="fa-solid fa-user-group"></i> Copropietarios</a></li>
+        
+        <li class="dropdown-submenu">
+            <a href="#" style="display:flex; justify-content:space-between; align-items:center;">
+                <span><i class="fa-solid fa-user-plus"></i> Gestión Prospectos</span>
+                <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
+            </a>
+            <ul class="dropdown-menu submenu">
+                <li><a href="prospectos.html"><i class="fa-solid fa-list-ul"></i> Listado</a></li>
+                <li><a href="mapa.html"><i class="fa-solid fa-map-location-dot"></i> Mapa Geo</a></li>
+            </ul>
+        </li>
+      </ul>
+    </div>
 
     <div class="nav-dropdown">
       <a href="#" class="nav-link dropdown-toggle">
@@ -257,7 +246,7 @@
 
     <div class="nav-dropdown">
       <a href="#" class="nav-link dropdown-toggle">
-        <i class="fa-solid fa-tree"></i> <span>Espacios/reclamos</span> <i class="fa-solid fa-chevron-down" style="font-size:10px; margin-left:4px;"></i>
+        <i class="fa-solid fa-tree"></i> <span>Espacios/Reclamos</span> <i class="fa-solid fa-chevron-down" style="font-size:10px; margin-left:4px;"></i>
       </a>
       <ul class="dropdown-menu">
         <li><a href="gestion_reservas.html"><i class="fa-regular fa-calendar-check"></i> Gestionar Reservas</a></li>
@@ -293,7 +282,7 @@ window.toggleMenu = function() {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Usuario
+  // 1. Cargar Usuario
   const au = typeof getAuthUser === 'function' ? getAuthUser() : null;
   if (au) {
     const nameEl = document.getElementById('headerUserName');
@@ -302,14 +291,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if(roleEl) roleEl.textContent = au.rol || "Agente";
   }
 
-  // 2. Active Link Logic
+  // 2. Lógica Link Activo
   const path = window.location.pathname.split("/").pop();
   
-  // Buscar en todos los links (sueltos y dentro de dropdowns)
   document.querySelectorAll('.nav-link, .dropdown-menu a').forEach(link => {
       const href = link.getAttribute('href');
       
-      // Si la URL coincide (ej: dashboard.html)
+      // Si coincide la URL
       if(href && href.split('?')[0] === path) {
           
           // Si es un item de dropdown
@@ -330,6 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// Logout Global
 if(typeof window.logout !== 'function') {
     window.logout = function() {
         if(confirm("¿Cerrar sesión?")) {

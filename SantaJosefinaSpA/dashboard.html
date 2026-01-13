@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <title>CRM Inmobiliario - Dashboard - Corretaje</title>
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
     <link
@@ -12,76 +12,181 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <link rel="stylesheet" href="assets/css/styles.css" />
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-doughnutlabel-rebourne"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-funnel"></script>
     <script src="assets/js/app.js"></script>
+
     <script>
       requireAuth();
     </script>
+
     <script>
       document.addEventListener("DOMContentLoaded", async () => {
-        document.getElementById("header").innerHTML = await (
-          await fetch("header.html")
-        ).text();
-        document.getElementById("footer").innerHTML = await (
-          await fetch("footer.html")
-        ).text();
+        // Cargar Header y Footer
+        try {
+          document.getElementById("header").innerHTML = await (
+            await fetch("header.html")
+          ).text();
+        } catch (e) {}
+        try {
+          document.getElementById("footer").innerHTML = await (
+            await fetch("footer.html")
+          ).text();
+        } catch (e) {}
+
+        // Iniciar Lógica Dashboard
+        bindUI();
         cargarDashboard();
       });
+
+      function bindUI() {
+        document
+          .getElementById("btnReload")
+          .addEventListener("click", cargarDashboard);
+      }
     </script>
+
     <style>
-        body {
+      /* ===== ESTILOS BASE (Igualando a clientes.html) ===== */
+      body {
         max-width: 1300px;
         margin: 0 auto;
         color: #1a2b48;
+        background-color: #f8f9fa;
       }
-       main {
+      main {
         padding: 40px;
       }
-      /* 1. KPIs Grid */
+
+      /* ===== DASHBOARD HEADER (Copiado de clientes.html) ===== */
+      .dashboard-header {
+        background-color: #fff;
+        padding: 20px 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        margin-bottom: 30px;
+        border: 1px solid #f0f0f0;
+      }
+      .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+      .page-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0;
+        color: #1a2b48;
+      }
+      .header-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      /* BOTONES CABECERA (Estilo UI/UX Clientes) */
+      .btn-head {
+        height: 44px;
+        padding: 0 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.2s;
+        text-decoration: none;
+      }
+      .btn-head:hover {
+        transform: translateY(-2px);
+      }
+      .btn-secundario {
+        background-color: #fff;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+      }
+      .btn-secundario:hover {
+        background-color: #f8fafc;
+        border-color: #94a3b8;
+      }
+
+      /* ===== ESTILOS KPI (Tarjetas Limpias) ===== */
       .kpi-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 24px;
         margin-bottom: 30px;
       }
 
       .kpi-card {
-        background: white;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        border-left: 5px solid var(--brand);
+        background: #ffffff;
+        padding: 24px;
+        border-radius: 8px; /* Coincide con border-radius general */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border-left-width: 5px;
+        border-left-style: solid;
+        /* El color del borde se define inline en HTML */
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: center;
+        transition: transform 0.2s, box-shadow 0.2s;
+        height: 100%;
+        border-top: 1px solid #f0f0f0;
+        border-right: 1px solid #f0f0f0;
+        border-bottom: 1px solid #f0f0f0;
       }
+
+      .kpi-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      }
+
       .kpi-title {
-        font-size: 0.75rem;
-        color: #666;
+        font-size: 0.8rem;
+        color: #6c757d;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        margin-bottom: 8px;
       }
+
       .kpi-value {
-        font-size: 1.6rem;
+        font-size: 2.2rem;
         font-weight: 700;
-        color: #1a2b48;
-        margin-top: 8px;
+        color: #212529;
+        line-height: 1.1;
       }
+
       .kpi-sub {
-        font-size: 0.8rem;
-        color: #888;
+        font-size: 0.85rem;
+        color: #adb5bd;
         margin-top: 5px;
+      }
+
+      /* ===== CONTENEDORES DE GRÁFICOS (Estilo Unificado) ===== */
+      .card {
+        border: 1px solid #f0f0f0; /* Borde sutil igual que header */
+        border-radius: 12px; /* Más redondeado como el header */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        background-color: #fff;
       }
 
       .card h2 {
         font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 10px;
+        font-weight: 700;
+        margin-bottom: 15px;
         color: #1a2b48;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #f1f5f9;
       }
+
+      /* GAUGE & SPINNER */
       .gauge-container {
         display: inline-block;
         width: 250px;
@@ -94,7 +199,6 @@
         color: #555;
         margin-top: 4px;
       }
-      /* Spinner estilo card */
       .spinner-backdrop {
         position: fixed;
         inset: 0;
@@ -138,6 +242,25 @@
         border-radius: 12px;
         color: #fff;
         font-size: 12px;
+        font-weight: 600;
+      }
+
+      /* TABLAS DENTRO DE CARDS */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th {
+        font-weight: 600;
+        color: #4b5563;
+        background-color: #f8fafc;
+        border-bottom: 2px solid #e2e8f0;
+        font-size: 0.9rem;
+      }
+      td {
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.9rem;
+        color: #334155;
       }
     </style>
   </head>
@@ -145,94 +268,117 @@
     <div id="header"></div>
 
     <main>
-      
-      <h1
-        style="
-          font-size: 28px;
-          font-weight: 600;
-          color: #1a2b48;
-          margin-bottom: 20px;
-        "
-      >
-        Panel de Control Corretaje
-      </h1>
+      <div class="dashboard-header no-print">
+        <div class="header-top">
+          <h1 class="page-title">Panel de Control Corretaje</h1>
 
-      <!-- KPIs -->
-      <div class="kpi-grid">
-        <div class="kpi-card" style="border-left-color: #3b82f6">
-          <span class="kpi-title">Total Clientes</span>
-          <span class="kpi-value" id="kpiClientes">0</span>
-        </div>
-        <div class="kpi-card" style="border-left-color: #f59e0b">
-          <span class="kpi-title">Propiedades Disponibles</span>
-          <span class="kpi-value" id="kpiPropiedades">0</span>
-        </div>
-        <div class="kpi-card" style="border-left-color: #10b981">
-          <span class="kpi-title">Visitas Agendadas</span>
-          <span class="kpi-value" id="kpiVisitas">0</span>
-        </div>
-        <div class="kpi-card" style="border-left-color: #ef4444">
-          <span class="kpi-title">Tareas Pendientes</span>
-          <span class="kpi-value" id="kpiTareasPendientes">0</span>
+          <div class="header-actions">
+            <button
+              class="btn-head btn-secundario"
+              id="btnReload"
+              title="Recargar datos"
+            >
+              <i class="fa-solid fa-rotate-right"></i>
+              <span class="btn-text">Recargar</span>
+            </button>
+
+            <button
+              class="btn-head btn-secundario"
+              onclick="window.print()"
+              title="Imprimir vista"
+            >
+              <i class="fa-solid fa-print"></i>
+              <span class="btn-text">Imprimir</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- Tabla de Visitas Futuras -->
-      <div class="card p-3" style="margin-bottom: 40px">
+      <div class="kpi-grid">
+        <div class="kpi-card" style="border-left-color: #ffc107">
+          <span class="kpi-title">Total Clientes</span>
+          <span class="kpi-value" id="kpiClientes">0</span>
+          <span class="kpi-sub">Activos en cartera</span>
+        </div>
+        <div class="kpi-card" style="border-left-color: #fd7e14">
+          <span class="kpi-title">Propiedades Disponibles</span>
+          <span class="kpi-value" id="kpiPropiedades">0</span>
+          <span class="kpi-sub">En venta/arriendo</span>
+        </div>
+        <div class="kpi-card" style="border-left-color: #198754">
+          <span class="kpi-title">Visitas Agendadas</span>
+          <span class="kpi-value" id="kpiVisitas">0</span>
+          <span class="kpi-sub">Próximas fechas</span>
+        </div>
+        <div class="kpi-card" style="border-left-color: #0dcaf0">
+          <span class="kpi-title">Tareas Pendientes</span>
+          <span class="kpi-value" id="kpiTareasPendientes">0</span>
+          <span class="kpi-sub">Acciones requeridas</span>
+        </div>
+      </div>
+
+      <div class="card p-4 mb-4">
         <h2>Visitas Próximas</h2>
-        <table style="width: 100%; margin-top: 12px; border-collapse: collapse">
+        <table style="width: 100%; margin-top: 12px">
           <thead>
             <tr>
-              <th style="text-align: left; padding: 8px">Cliente</th>
-              <th style="text-align: left; padding: 8px">Propiedad</th>
-              <th style="text-align: left; padding: 8px">Fecha</th>
-              <th style="text-align: left; padding: 8px">Agente</th>
+              <th style="text-align: left; padding: 12px">Cliente</th>
+              <th style="text-align: left; padding: 12px">Propiedad</th>
+              <th style="text-align: left; padding: 12px">Fecha</th>
+              <th style="text-align: left; padding: 12px">Agente</th>
             </tr>
           </thead>
           <tbody id="tablaVisitasFuturas"></tbody>
         </table>
       </div>
 
-      <!-- Gráficos -->
-      <div class="row g-4">
-        <div class="col-6">
-          <div class="card p-3">
+      <div class="row g-4 mb-4">
+        <div class="col-12 col-lg-6">
+          <div class="card p-4 h-100">
             <h2>Embudo de Ventas</h2>
             <canvas id="graficoEmbudo"></canvas>
           </div>
         </div>
-        <div class="col-6">
-          <div class="card p-3">
+        <div class="col-12 col-lg-6">
+          <div class="card p-4 h-100">
             <h2>Clientes captados por campaña</h2>
             <canvas id="graficoMarketing"></canvas>
           </div>
         </div>
       </div>
-      <div class="row g-4" style="margin: 20px -10px">
-        <div class="col-6">
-          <div class="card p-3">
+
+      <div class="row g-4 mb-4">
+        <div class="col-12 col-lg-6">
+          <div class="card p-4 h-100">
             <h2>Tareas por Estado</h2>
-            <canvas id="graficoTareasEstado"></canvas>
+            <div
+              style="max-height: 300px; display: flex; justify-content: center"
+            >
+              <canvas id="graficoTareasEstado"></canvas>
+            </div>
           </div>
         </div>
-        <div class="col-6">
-          <div class="card p-3">
+        <div class="col-12 col-lg-6">
+          <div class="card p-4 h-100">
             <h2>Tareas Pendientes por Agente</h2>
-            <canvas id="graficoTareasAgente"></canvas>
+            <div
+              style="max-height: 300px; display: flex; justify-content: center"
+            >
+              <canvas id="graficoTareasAgente"></canvas>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Tabla de Tareas Pendientes -->
-      <div class="card p-3" style="margin: 40px 0">
+      <div class="card p-4 mb-4">
         <h2>Tareas Pendientes</h2>
-        <table style="width: 100%; margin-top: 12px; border-collapse: collapse">
+        <table style="width: 100%; margin-top: 12px">
           <thead>
             <tr>
-              <th style="text-align: left; padding: 8px">Título</th>
-              <th style="text-align: left; padding: 8px">Agente</th>
-              <th style="text-align: left; padding: 8px">Estado</th>
-              <th style="text-align: left; padding: 8px">Fecha Límite</th>
+              <th style="text-align: left; padding: 12px">Título</th>
+              <th style="text-align: left; padding: 12px">Agente</th>
+              <th style="text-align: left; padding: 12px">Estado</th>
+              <th style="text-align: left; padding: 12px">Fecha Límite</th>
             </tr>
           </thead>
           <tbody id="tablaTareasPendientes"></tbody>
@@ -240,7 +386,7 @@
       </div>
 
       <div class="col-md-12">
-        <div class="card p-3">
+        <div class="card p-4">
           <h2>Cumplimiento de Tareas por Agente</h2>
           <div style="text-align: center; margin-bottom: 30px">
             <div class="gauge-container">
@@ -255,14 +401,14 @@
               display: flex;
               flex-wrap: wrap;
               justify-content: center;
-              padding: 0 0 60px 0;
+              gap: 20px;
+              padding-bottom: 20px;
             "
           ></div>
         </div>
       </div>
     </main>
 
-    <!-- SPINNER -->
     <div id="pageSpinner" class="spinner-backdrop hidden" aria-hidden="true">
       <div class="spinner-card">
         <div class="spinner"></div>
@@ -273,6 +419,7 @@
     <div id="footer"></div>
 
     <script>
+      /* --- FUNCIONES AUXILIARES --- */
       function normalizarEstado(e) {
         if (!e) return "";
         return e
@@ -305,17 +452,18 @@
         document.getElementById("pageSpinner").classList.add("hidden");
       }
 
+      /* --- LÓGICA PRINCIPAL --- */
       async function cargarDashboard() {
         try {
           showSpinner("Cargando Dashboard...");
           const [clientes, propiedades, visitas, tareas, marketing, agentes] =
             await Promise.all([
-              fetchData("Clientes"),
-              fetchData("Propiedades"),
-              fetchData("Visitas"),
-              fetchData("Tareas"),
-              fetchData("Marketing"),
-              fetchData("Agentes"),
+              fetchData("Clientes").catch(() => []),
+              fetchData("Propiedades").catch(() => []),
+              fetchData("Visitas").catch(() => []),
+              fetchData("Tareas").catch(() => []),
+              fetchData("Marketing").catch(() => []),
+              fetchData("Agentes").catch(() => []),
             ]);
 
           const clienteMap = {};
@@ -325,30 +473,27 @@
           const agenteMap = {};
           agentes.forEach((a) => (agenteMap[a.ID] = a.Nombre));
 
-          // === Paleta de colores unificada ===
           const baseColors = [
             "#ffcc00",
             "#ff9933",
             "#66cc66",
             "#66ccff",
             "#B46A55",
+            "#B46A55",
           ];
 
-          // === KPIs dinámicos con la misma paleta ===
-          const kpiCards = document.querySelectorAll("#kpiContainer .kpi-card");
-          kpiCards.forEach((card, i) => {
-            card.style.backgroundColor = baseColors[i % baseColors.length];
-          });
-
-          // === Colores fijos por agente ===
+          // Colores agentes
           const colorAgente = {};
           agentes.forEach((a, i) => {
             colorAgente[a.ID] = baseColors[i % baseColors.length];
           });
 
-          // === KPIs valores ===
+          // === KPIs ===
           kpiClientes.textContent = clientes.length;
-          kpiPropiedades.textContent = propiedades.length;
+          const propsDisponibles = propiedades.filter(
+            (p) => normalizarEstado(p.Estado) === "disponible"
+          ).length;
+          kpiPropiedades.textContent = propsDisponibles;
 
           const hoy = new Date();
           hoy.setHours(0, 0, 0, 0);
@@ -367,36 +512,55 @@
             (t) => normalizarEstado(t["Estado"]) !== "completada"
           ).length;
 
-          // === Tabla Visitas Futuras ===
+          // === Tabla Visitas ===
           const tbody = document.getElementById("tablaVisitasFuturas");
           tbody.innerHTML = visitasFuturas.length
             ? visitasFuturas
                 .map((v) => {
                   const fecha = formatearFechaCL(v.Fecha || v["Fecha Visita"]);
                   return `<tr>
-            <td style="padding:6px;">${clienteMap[v.Cliente] || "—"}</td>
-            <td style="padding:6px;">${propMap[v.Propiedad] || "—"}</td>
-            <td style="padding:6px;">${fecha}</td>
-            <td style="padding:6px;">${
-              agenteMap[v.Agente] || v.Agente || "—"
-            }</td>
-          </tr>`;
+                  <td style="padding:12px;">${clienteMap[v.Cliente] || "—"}</td>
+                  <td style="padding:12px;">${propMap[v.Propiedad] || "—"}</td>
+                  <td style="padding:12px;">${fecha}</td>
+                  <td style="padding:12px;">${
+                    agenteMap[v.Agente] || v.Agente || "—"
+                  }</td>
+                </tr>`;
                 })
                 .join("")
-            : `<tr><td colspan="4" style="text-align:center; color:#888; padding:10px;">No hay visitas próximas</td></tr>`;
+            : `<tr><td colspan="4" style="text-align:center; color:#888; padding:15px;">No hay visitas próximas</td></tr>`;
 
-          // === Embudo ===
+          // === EMBUDO (Funnel) ===
           const etapas = [
             "Prospecto",
             "En Negociación",
             "Reservado",
-            "Vendido",
+            "Negocios Cerrados",
           ];
-          const conteo = etapas.map(
-            (et) => clientes.filter((c) => c["Estado"] === et).length
-          );
+          const conteo = [
+            clientes.filter(
+              (c) => normalizarEstado(c["Estado"]) === "prospecto"
+            ).length,
+            clientes.filter(
+              (c) => normalizarEstado(c["Estado"]) === "en negociacion"
+            ).length,
+            clientes.filter(
+              (c) => normalizarEstado(c["Estado"]) === "reservado"
+            ).length,
+            propiedades.filter((p) => {
+              const s = normalizarEstado(p["Estado"]);
+              return (
+                s === "vendido" ||
+                s === "vendida" ||
+                s === "arrendado" ||
+                s === "arrendada" ||
+                s === "cerrado"
+              );
+            }).length,
+          ];
+
           new Chart(graficoEmbudo, {
-            type: "funnel", // Cambio clave: usa 'funnel'
+            type: "funnel",
             data: {
               labels: etapas,
               datasets: [
@@ -408,9 +572,7 @@
             },
             options: {
               responsive: true,
-              plugins: {
-                legend: { display: false },
-              },
+              plugins: { legend: { display: false } },
             },
           });
 
@@ -418,11 +580,9 @@
           const labelsMarketing = marketing.map(
             (m) => `${m["Campaña"]} - ${m["Canal"]}`
           );
-
           const datosMarketing = marketing.map(
             (m) => m["Clientes Captados"] || m["Clientes"] || 0
           );
-
           new Chart(graficoMarketing, {
             type: "bar",
             data: {
@@ -437,33 +597,21 @@
             },
             options: {
               responsive: true,
-              indexAxis: "y", // Barras horizontales
+              indexAxis: "y",
               plugins: {
                 legend: { display: false },
                 tooltip: {
-                  callbacks: {
-                    label: (ctx) => `Clientes: ${ctx.raw}`,
-                  },
+                  callbacks: { label: (ctx) => `Clientes: ${ctx.raw}` },
                 },
               },
               scales: {
-                x: {
-                  title: {
-                    display: true,
-                    text: "Clientes captados",
-                  },
-                },
-                y: {
-                  title: {
-                    display: true,
-                    text: "Campaña - Canal",
-                  },
-                },
+                x: { title: { display: true, text: "Clientes captados" } },
+                y: { title: { display: true, text: "Campaña - Canal" } },
               },
             },
           });
 
-          // === Tareas por estado ===
+          // === Tareas Charts ===
           const estados = ["pendiente", "en progreso", "completada"];
           const etiquetasEstados = ["Pendiente", "En Progreso", "Completada"];
           const conteoTareas = estados.map(
@@ -480,7 +628,6 @@
             },
           });
 
-          // === Tareas PENDIENTES por agente ===
           const pendientes = tareas.filter(
             (t) => normalizarEstado(t["Estado"]) !== "completada"
           );
@@ -504,27 +651,27 @@
             },
           });
 
-          // === Tabla Tareas Pendientes ===
+          // === Tabla Tareas ===
           const tbodyTar = document.getElementById("tablaTareasPendientes");
           tbodyTar.innerHTML = pendientes.length
             ? pendientes
                 .map((t) => {
                   const color = colorAgente[t.AgenteID] || "#999";
                   return `<tr>
-            <td style="padding:6px;">${t["Título"] || "—"}</td>
-            <td style="padding:6px;"><span class="badge-agent" style="background:${color};">${
+                  <td style="padding:12px;">${t["Título"] || "—"}</td>
+                  <td style="padding:12px;"><span class="badge-agent" style="background:${color};">${
                     agenteMap[t.AgenteID] || "Sin asignar"
                   }</span></td>
-            <td style="padding:6px;">${t["Estado"] || "Pendiente"}</td>
-            <td style="padding:6px;">${formatearFechaCL(
-              t.FechaLimite || t["Fecha Límite"]
-            )}</td>
-          </tr>`;
+                  <td style="padding:12px;">${t["Estado"] || "Pendiente"}</td>
+                  <td style="padding:12px;">${formatearFechaCL(
+                    t.FechaLimite || t["Fecha Límite"]
+                  )}</td>
+                </tr>`;
                 })
                 .join("")
-            : `<tr><td colspan="4" style="text-align:center; color:#888; padding:10px;">No hay tareas pendientes</td></tr>`;
+            : `<tr><td colspan="4" style="text-align:center; color:#888; padding:15px;">No hay tareas pendientes</td></tr>`;
 
-          // === Cumplimiento Global ===
+          // === Gauges ===
           const totalGlobal = tareas.length;
           const doneGlobal = tareas.filter(
             (t) => normalizarEstado(t["Estado"]) === "completada"
@@ -557,7 +704,6 @@
           });
           detalleGlobal.textContent = `${doneGlobal}/${totalGlobal} tareas`;
 
-          // === Gauges por usuario ===
           const usuarios = [...new Set(tareas.map((t) => t.AgenteID))];
           gaugesUsuarios.innerHTML = "";
           usuarios.forEach((u) => {
@@ -568,18 +714,14 @@
                 normalizarEstado(t["Estado"]) === "completada"
             ).length;
             const pct = total ? Math.round((done / total) * 100) : 0;
-
             const div = document.createElement("div");
             div.className = "gauge-container";
-            div.innerHTML = `
-        <canvas id="gauge_${u}"></canvas>
-        <p style="font-weight:bold; color:${colorAgente[u] || "#333"};">${
+            div.innerHTML = `<canvas id="gauge_${u}"></canvas><p style="font-weight:bold; color:${
+              colorAgente[u] || "#333"
+            };">${
               agenteMap[u] || "Sin asignar"
-            }</p>
-        <p class="gauge-detail">${done}/${total} tareas</p>
-      `;
+            }</p><p class="gauge-detail">${done}/${total} tareas</p>`;
             gaugesUsuarios.appendChild(div);
-
             new Chart(document.getElementById(`gauge_${u}`), {
               type: "doughnut",
               data: {
@@ -611,7 +753,6 @@
         }
       }
     </script>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>
