@@ -6,6 +6,15 @@
   <title>Reclamos - Santa Josefina</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/css/styles.css">
+  
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+     (function(){
+        // IMPORTANTE: Pon tu Public Key aquí si no está en app.js
+       emailjs.init("7Il4AhmGHchP7qfxu"); 
+     })();
+  </script>
+
   <script src="assets/js/app.js"></script>
   
   <style>
@@ -13,15 +22,16 @@
     body { background-color: #f8fafc; padding-bottom: 90px; }
     
     .app-header-simple {
-      background: white; padding: 15px 20px;
+      background: #1A2B48; padding: 15px 20px;
       display: flex; align-items: center; gap: 15px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 15px rgba(26, 43, 72, 0.2);
       position: sticky; top: 0; z-index: 100;
+      color: white; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
     }
-    .page-title { font-size: 18px; font-weight: 700; color: #1e293b; margin: 0; }
-    .btn-back { color: #64748b; font-size: 18px; text-decoration: none; }
+    .page-title { font-size: 18px; font-weight: 700; color: white; margin: 0; }
+    .btn-back { color: white; font-size: 18px; text-decoration: none; opacity: 0.9; }
 
-    /* Tabs de Navegación (Nuevo vs Historial) */
+    /* Tabs */
     .tabs-container { display: flex; padding: 15px; gap: 10px; }
     .tab-btn {
       flex: 1; padding: 10px; border-radius: 8px; border: none;
@@ -31,11 +41,12 @@
     }
     .tab-btn.active { background: #1A2B48; color: white; border-color: #1A2B48; }
 
-    /* Contenedores de Vistas */
+    /* Vistas */
     .view-section { display: none; padding: 0 15px; }
-    .view-section.active { display: block; }
+    .view-section.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
 
-    /* Estilos Formulario (Reutilizados) */
+    /* Formulario */
     .form-group { margin-bottom: 20px; }
     .label-app { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 8px; }
     .input-app, .textarea-app, .select-app {
@@ -44,47 +55,77 @@
       box-sizing: border-box;
     }
     
-    /* Upload Área */
+    /* Upload */
     .upload-box {
       border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px;
       text-align: center; color: #64748b; position: relative; background: white;
+      transition: all 0.2s;
     }
     .upload-box.has-file { border-color: #10b981; background: #ecfdf5; color: #065f46; }
 
-    /* Tarjetas de Historial */
+    /* Cards Historial */
     .ticket-card {
       background: white; padding: 15px; border-radius: 12px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.03); margin-bottom: 10px;
-      border-left: 4px solid #cbd5e1; position: relative;
+      border-left: 4px solid #cbd5e1; position: relative; cursor: pointer;
     }
-    .ticket-card.status-pendiente { border-left-color: #f59e0b; }
-    .ticket-card.status-proceso { border-left-color: #3b82f6; }
-    .ticket-card.status-resuelto { border-left-color: #10b981; }
+    .status-Pendiente { border-left-color: #f59e0b; }
+    .status-Proceso { border-left-color: #3b82f6; }
+    .status-Resuelto { border-left-color: #10b981; }
 
     .t-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
     .t-cat { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; }
     .t-date { font-size: 11px; color: #94a3b8; }
-    .t-desc { font-weight: 600; color: #1e293b; font-size: 14px; margin-bottom: 5px; }
-    .t-status { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #f1f5f9; color: #475569; display: inline-block; }
+    .t-desc { font-weight: 600; color: #1e293b; font-size: 14px; margin-bottom: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .t-status { font-size: 10px; padding: 3px 8px; border-radius: 10px; background: #f1f5f9; color: #475569; display: inline-block; font-weight: 700; text-transform: uppercase; }
 
-    /* Modal Detalle */
+    /* --- MODAL CHAT --- */
     .modal-full {
       position: fixed; inset: 0; background: white; z-index: 2000;
       display: none; flex-direction: column;
     }
     .modal-full.active { display: flex; }
-    .modal-body { flex: 1; overflow-y: auto; padding: 20px; }
+    
+    .modal-body { flex: 1; overflow-y: auto; padding: 20px 20px 100px 20px; background:#f8fafc; }
+    
+    /* Chat Bubbles */
     .chat-bubble {
-      background: #f1f5f9; padding: 10px 15px; border-radius: 12px;
-      margin-bottom: 10px; font-size: 13px; max-width: 85%;
+      padding: 12px 15px; border-radius: 12px; margin-bottom: 15px; font-size: 14px; 
+      max-width: 85%; line-height: 1.4; position: relative; word-wrap: break-word;
     }
-    .chat-bubble.admin { background: #e0f2fe; color: #0369a1; margin-left: auto; border-bottom-right-radius: 2px; }
-    .chat-bubble.user { background: #f1f5f9; color: #334155; border-bottom-left-radius: 2px; }
+    .chat-bubble.admin { 
+      background: white; color: #1e293b; border: 1px solid #e2e8f0;
+      margin-right: auto; border-bottom-left-radius: 2px; 
+    }
+    .chat-bubble.user { 
+      background: #1A2B48; color: white; 
+      margin-left: auto; border-bottom-right-radius: 2px;
+    }
+    .bubble-meta { font-size: 10px; margin-bottom: 4px; opacity: 0.7; font-weight: 700; text-transform: uppercase;}
+
+    /* Input Footer */
+    .modal-footer {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: white; padding: 15px; border-top: 1px solid #e2e8f0;
+      display: flex; gap: 10px; align-items: center;
+    }
+    .chat-input {
+      flex: 1; border: 1px solid #cbd5e1; border-radius: 20px; padding: 10px 15px;
+      font-size: 14px; outline: none; background: #f8fafc; resize: none; height: 42px; line-height: 20px;
+    }
+    .btn-send {
+      width: 42px; height: 42px; border-radius: 50%; background: #1A2B48; color: white;
+      border: none; display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .btn-send:disabled { background: #cbd5e1; cursor: not-allowed; }
 
     .btn-submit {
       background: #1A2B48; color: white; width: 100%; padding: 15px;
       border: none; border-radius: 12px; font-weight: 700; cursor: pointer;
+      box-shadow: 0 4px 10px rgba(26, 43, 72, 0.2);
     }
+    
+    #spinner { position:fixed; inset:0; background:rgba(255,255,255,0.9); display:none; place-items:center; z-index:3000; flex-direction:column; justify-content:center; }
   </style>
 </head>
 <body>
@@ -110,20 +151,21 @@
           <option value="Seguridad">Seguridad / Acceso</option>
           <option value="Aseo">Aseo y Limpieza</option>
           <option value="Administración">Administración / Gastos Comunes</option>
+          <option value="Otros">Otros</option>
         </select>
       </div>
 
       <div class="form-group">
         <label class="label-app">Descripción del problema</label>
-        <textarea id="descTicket" class="textarea-app" rows="4" placeholder="Describe qué pasó, dónde y cuándo..." required></textarea>
+        <textarea id="descTicket" class="textarea-app" rows="5" placeholder="Describe qué pasó, dónde y cuándo. Entre más detalles, mejor." required></textarea>
       </div>
 
       <div class="form-group">
-        <label class="label-app">Evidencia (Foto)</label>
+        <label class="label-app">Evidencia (Opcional)</label>
         <div class="upload-box" id="uploadArea">
           <i class="fa-solid fa-camera" style="font-size:24px; margin-bottom:5px;"></i>
           <div style="font-size:12px;">Toca para subir foto</div>
-          <input type="file" id="fileInput" accept="image/*" style="position:absolute; inset:0; opacity:0;" onchange="previewFile()">
+          <input type="file" id="fileInput" accept="image/*" style="position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer;" onchange="previewFile()">
         </div>
       </div>
 
@@ -133,51 +175,76 @@
 
   <div id="viewHistory" class="view-section">
     <div id="listaTickets">
-      <div style="text-align:center; padding:40px; color:#94a3b8;">Cargando...</div>
+      <div style="text-align:center; padding:40px; color:#94a3b8;">
+        <i class="fa-solid fa-spinner fa-spin"></i> Cargando...
+      </div>
     </div>
   </div>
 
   <div id="modalTicket" class="modal-full">
-    <div class="app-header-simple" style="box-shadow:none; border-bottom:1px solid #eee;">
-      <button class="btn-back" onclick="cerrarModal()" style="background:none; border:none; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
-      <h1 class="page-title">Detalle Ticket #<span id="mdlID"></span></h1>
+    <div class="app-header-simple" style="background:white; color:#1e293b; box-shadow:none; border-bottom:1px solid #eee;">
+      <button class="btn-back" onclick="cerrarModal()" style="background:none; border:none; cursor:pointer; color:#1e293b;"><i class="fa-solid fa-xmark"></i></button>
+      <div>
+          <h1 class="page-title" style="color:#1e293b; font-size:16px;">Ticket #<span id="mdlID"></span></h1>
+          <div style="font-size:11px; color:#64748b;" id="mdlCat">Categoria</div>
+      </div>
+      <div id="mdlStatus" class="t-status" style="margin-left:auto;">...</div>
     </div>
     
-    <div class="modal-body">
-      <div style="margin-bottom:20px;">
-        <span class="t-cat" id="mdlCat">CATEGORÍA</span>
-        <h2 style="margin:5px 0 10px; font-size:18px;" id="mdlDesc">...</h2>
-        <div id="mdlStatus" class="badge">...</div>
-        
-        <div id="mdlFotoContainer" style="margin-top:15px; display:none;">
-          <img id="mdlFoto" src="" style="width:100%; border-radius:8px; border:1px solid #eee;">
-        </div>
+    <div class="modal-body" id="chatScroll">
+      
+      <div style="background:white; padding:15px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:20px;">
+          <div style="font-size:11px; color:#94a3b8; font-weight:700; margin-bottom:5px;">DESCRIPCIÓN INICIAL</div>
+          <div id="mdlDesc" style="color:#334155; font-size:14px; line-height:1.5;">...</div>
+          <div id="mdlFotoContainer" style="margin-top:10px; display:none;">
+            <img id="mdlFoto" src="" style="width:100%; border-radius:8px; border:1px solid #e2e8f0; max-height:200px; object-fit:cover;">
+          </div>
+          <div style="font-size:11px; color:#cbd5e1; text-align:right; margin-top:5px;" id="mdlDate">Fecha</div>
       </div>
 
-      <hr style="border:none; border-top:1px solid #eee; margin:20px 0;">
-      
-      <h3 style="font-size:14px; margin-bottom:15px;">Seguimiento</h3>
+      <div style="text-align:center; margin:20px 0; position:relative;">
+          <span style="background:#f8fafc; padding:0 10px; color:#94a3b8; font-size:11px; position:relative; z-index:1;">HISTORIAL DE RESPUESTAS</span>
+          <div style="border-top:1px solid #e2e8f0; position:absolute; top:50%; width:100%; z-index:0;"></div>
+      </div>
+
       <div id="chatContainer">
         </div>
     </div>
+
+    <div class="modal-footer" id="replyFooter" style="display:none;">
+        <textarea id="replyInput" class="chat-input" placeholder="Escribe una respuesta..."></textarea>
+        <button class="btn-send" onclick="enviarRespuestaChat()"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
   </div>
 
-  <div id="spinner" style="position:fixed; inset:0; background:rgba(255,255,255,0.8); display:none; place-items:center; z-index:3000;">
-    <div style="width:30px; height:30px; border-radius:50%; border:3px solid #ccc; border-top-color:#1A2B48; animation:spin .8s linear infinite;"></div>
+  <div id="spinner">
+    <div style="width:40px; height:40px; border-radius:50%; border:4px solid #eee; border-top-color:#1A2B48; animation:spin 1s linear infinite;"></div>
+    <div style="margin-top:15px; font-size:13px; font-weight:600; color:#1A2B48;">Procesando...</div>
   </div>
 
   <script>
-    const USUARIO = { UnidadID: "101" };
-    let FILE_BASE64 = null;
+    let USUARIO = null;
+    let TICKETS = [];
+    let FILE_BASE64 = "";
+    let TICKET_ACTUAL = null;
     
-    // MOCK DATA (Simulación Backend)
-    const TICKETS_MOCK = [
-      { ID: 'REQ_992', Categoria: 'Mantención', Descripcion: 'Foco quemado en pasillo piso 3', Estado: 'Pendiente', Fecha: '2026-01-08', Respuestas: [] },
-      { ID: 'REQ_881', Categoria: 'Ruidos', Descripcion: 'Fiesta ruidosa unidad 305 pasada las 2 AM', Estado: 'Resuelto', Fecha: '2025-12-20', FotoURL: 'assets/img/demo.jpg', Respuestas: [
-          { autor: 'Admin', texto: 'Se cursó multa según reglamento. Gracias por avisar.' }
-      ]}
-    ];
+    // EMAIL ADMIN (PARA NOTIFICACIONES)
+    const ADMIN_EMAIL = "marcos.castro@santajosefinaspa.cl"; 
 
+    // --- INICIALIZACIÓN ---
+    document.addEventListener("DOMContentLoaded", async () => {
+        try {
+            const sesion = localStorage.getItem("sesion_residente");
+            if(!sesion) throw new Error("No session");
+            USUARIO = JSON.parse(sesion);
+            
+            await cargarHistorial();
+        } catch(e) {
+            window.location.href = "login_residente.html";
+        }
+    });
+
+    // --- TABS ---
     function switchTab(tab) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
@@ -195,118 +262,308 @@
     function previewFile() {
         const file = document.getElementById("fileInput").files[0];
         const box = document.getElementById("uploadArea");
+        
         if (file) {
-            box.classList.add("has-file");
-            box.innerHTML = `<i class="fa-solid fa-check"></i> ${file.name}`;
+            if(file.size > 2 * 1024 * 1024) {
+                alert("La imagen es muy pesada. Máximo 2MB.");
+                document.getElementById("fileInput").value = "";
+                return;
+            }
             const reader = new FileReader();
-            reader.onload = (e) => FILE_BASE64 = e.target.result;
+            reader.onload = (e) => {
+                FILE_BASE64 = e.target.result; 
+                box.classList.add("has-file");
+                box.innerHTML = `<i class="fa-solid fa-check-circle" style="color:#10b981; font-size:24px; margin-bottom:5px;"></i><div style="font-size:12px; font-weight:600; color:#065f46;">Imagen lista</div>`;
+            };
             reader.readAsDataURL(file);
         }
     }
 
-    /* 1. CREAR TICKET */
+    // --- 1. ENVIAR RECLAMO (CREAR) ---
     document.getElementById("formTicket").onsubmit = async (e) => {
         e.preventDefault();
-        document.getElementById("spinner").style.display = "grid";
+        document.getElementById("spinner").style.display = "flex";
+
+        const categoria = document.getElementById("catTicket").value;
+        const descripcion = document.getElementById("descTicket").value;
+        const idTicket = "REQ_" + Date.now().toString().slice(-6);
+        const fechaHoy = new Date().toISOString().split('T')[0];
+
+        // Guardamos la descripción inicial como primer mensaje del historial
+        const historialInicial = [
+            { autor: "user", nombre: USUARIO.Nombre, texto: descripcion, fecha: fechaHoy }
+        ];
 
         const payload = {
-            ID: "REQ_" + Date.now().toString().slice(-4),
-            UnidadID: USUARIO.UnidadID,
-            Categoria: document.getElementById("catTicket").value,
-            Descripcion: document.getElementById("descTicket").value,
-            FotoURL: FILE_BASE64, // Base64
-            Estado: "Pendiente",
-            Fecha: new Date().toISOString().split('T')[0]
+            "ID": idTicket,
+            "CopropiedadID": String(USUARIO.CopropiedadID || ""),
+            "UnidadID": String(USUARIO.UnidadID),
+            "UsuarioID": String(USUARIO.ID),
+            "Categoria": categoria,
+            "Descripcion": descripcion,
+            "Foto": FILE_BASE64 || "", 
+            "Estado": "Pendiente",
+            "Fecha": fechaHoy,
+            "RespuestaAdmin": "", 
+            "Historial": JSON.stringify(historialInicial)
         };
 
         try {
             if(typeof appSheetCRUD === 'function') {
-                await appSheetCRUD("Tickets", "Add", [payload]);
-            } else {
-                // Simulación local
-                TICKETS_MOCK.unshift(payload); 
-                await new Promise(r => setTimeout(r, 1500));
+                await appSheetCRUD("Reclamos", "Add", [payload]);
             }
-            
-            alert("Solicitud enviada correctamente.");
+
+            if (typeof notificarNuevoReclamo === 'function') {
+                await notificarNuevoReclamo(payload);
+            }
+
+            alert("✅ Reclamo enviado correctamente.");
             document.getElementById("formTicket").reset();
-            FILE_BASE64 = null;
-            document.getElementById("uploadArea").classList.remove("has-file");
-            document.getElementById("uploadArea").innerHTML = `<i class="fa-solid fa-camera" style="font-size:24px; margin-bottom:5px;"></i><div style="font-size:12px;">Toca para subir foto</div><input type="file" id="fileInput" accept="image/*" style="position:absolute; inset:0; opacity:0;" onchange="previewFile()">`;
-            
-            switchTab('history'); // Ir al historial para verla
+            FILE_BASE64 = "";
+            switchTab('history');
 
         } catch(err) {
-            alert("Error: " + err.message);
+            const msgError = err.message || JSON.stringify(err);
+            alert("Error al enviar: " + msgError);
         } finally {
             document.getElementById("spinner").style.display = "none";
         }
     };
 
-    /* 2. VER HISTORIAL */
+    // --- 2. CARGAR HISTORIAL ---
     async function cargarHistorial() {
         const container = document.getElementById("listaTickets");
-        // Aquí deberías hacer fetchData('Tickets') filtrando por unidad
-        const tickets = TICKETS_MOCK; 
+        try {
+            const data = await fetchData("Reclamos").catch(() => []);
+            TICKETS = data.filter(t => String(t.UnidadID) === String(USUARIO.UnidadID));
+            TICKETS.sort((a,b) => (a.ID < b.ID) ? 1 : -1);
 
-        if(tickets.length === 0) {
-            container.innerHTML = '<div style="text-align:center; margin-top:30px; color:#94a3b8;">No tienes solicitudes registradas.</div>';
-            return;
-        }
+            if(TICKETS.length === 0) {
+                container.innerHTML = '<div style="text-align:center; margin-top:50px; color:#94a3b8;"><i class="fa-regular fa-folder-open" style="font-size:40px; margin-bottom:10px;"></i><br>No tienes tickets registrados.</div>';
+                return;
+            }
 
-        container.innerHTML = tickets.map(t => {
-            let statusClass = 'status-pendiente';
-            if(t.Estado === 'En Proceso') statusClass = 'status-proceso';
-            if(t.Estado === 'Resuelto') statusClass = 'status-resuelto';
+            container.innerHTML = TICKETS.map(t => {
+                let statusClass = 'status-' + (t.Estado || 'Pendiente');
+                const shortID = t.ID.replace("REQ_", "#");
+                
+                // Verificar si hay historial (JSON)
+                const hasReply = t.Historial && t.Historial.includes('"autor":"admin"');
 
-            return `
-            <div class="ticket-card ${statusClass}" onclick='abrirDetalle(${JSON.stringify(t)})'>
-                <div class="t-header">
-                    <span class="t-cat">${t.Categoria}</span>
-                    <span class="t-date">${t.Fecha}</span>
+                return `
+                <div class="ticket-card ${statusClass}" onclick='abrirDetalle("${t.ID}")'>
+                    <div class="t-header">
+                        <span class="t-cat">${t.Categoria}</span>
+                        <span class="t-date">${formatearFecha(t.Fecha)}</span>
+                    </div>
+                    <div class="t-desc">${t.Descripcion}</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+                        <span class="t-status">${t.Estado || 'Pendiente'}</span>
+                        <span style="font-size:10px; color:#cbd5e1;">${shortID}</span>
+                    </div>
+                    ${hasReply ? '<div style="margin-top:8px; font-size:11px; color:#3b82f6; font-weight:700;"><i class="fa-solid fa-comment-dots"></i> Respuesta disponible</div>' : ''}
                 </div>
-                <div class="t-desc">${t.Descripcion}</div>
-                <div class="t-status">${t.Estado}</div>
-                ${t.Respuestas && t.Respuestas.length > 0 ? '<i class="fa-solid fa-comment-dots" style="float:right; color:#3b82f6;"></i>' : ''}
-            </div>
-            `;
-        }).join("");
+                `;
+            }).join("");
+
+        } catch(e) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:red;">Error cargando historial.</div>';
+        }
     }
 
-    /* 3. VER DETALLE */
-    function abrirDetalle(t) {
-        document.getElementById("mdlID").textContent = t.ID;
-        document.getElementById("mdlCat").textContent = t.Categoria;
-        document.getElementById("mdlDesc").textContent = t.Descripcion;
+    // --- 3. DETALLE Y CHAT ---
+    function abrirDetalle(id) {
+        const t = TICKETS.find(x => x.ID === id);
+        if(!t) return;
+        TICKET_ACTUAL = t;
+
+        document.getElementById("mdlID").innerText = id.replace("REQ_", "");
+        document.getElementById("mdlCat").innerText = t.Categoria;
+        document.getElementById("mdlDesc").innerText = t.Descripcion;
+        document.getElementById("mdlDate").innerText = formatearFecha(t.Fecha);
         
+        const badge = document.getElementById("mdlStatus");
+        badge.innerText = t.Estado || "Pendiente";
+        badge.className = "t-status"; 
+        
+        // Foto
         const imgCont = document.getElementById("mdlFotoContainer");
-        if(t.FotoURL) {
+        if(t.Foto && t.Foto.length > 10) {
             imgCont.style.display = "block";
-            document.getElementById("mdlFoto").src = t.FotoURL;
+            document.getElementById("mdlFoto").src = t.Foto;
         } else {
             imgCont.style.display = "none";
         }
 
-        // Render Chat (Respuestas)
+        // --- RENDER CHAT ---
         const chat = document.getElementById("chatContainer");
         chat.innerHTML = "";
         
-        // Mensaje original del usuario
-        chat.innerHTML += `<div class="chat-bubble user"><b>Tú:</b> ${t.Descripcion}</div>`;
+        let historial = [];
+        try {
+            if(t.Historial) {
+                historial = typeof t.Historial === 'object' ? t.Historial : JSON.parse(t.Historial);
+            }
+            // Fallback Legacy
+            if(historial.length === 0 && t.RespuestaAdmin) {
+                historial.push({ autor: "admin", nombre: "Administración", texto: t.RespuestaAdmin });
+            }
+        } catch(e) {
+            console.warn("Historial error", e);
+            if(t.RespuestaAdmin) historial.push({ autor: "admin", nombre: "Admin", texto: t.RespuestaAdmin });
+        }
 
-        if(t.Respuestas && t.Respuestas.length > 0) {
-            t.Respuestas.forEach(r => {
-                chat.innerHTML += `<div class="chat-bubble admin"><b>${r.autor}:</b> ${r.texto}</div>`;
+        if(historial.length > 0) {
+            historial.forEach((msg, idx) => {
+                // Saltamos el primer mensaje si es igual a la descripción (para no duplicar visualmente)
+                if(idx === 0 && msg.texto === t.Descripcion) return;
+
+                const isMe = msg.autor === 'user';
+                chat.innerHTML += `
+                    <div class="chat-bubble ${isMe ? 'user' : 'admin'}">
+                        <div class="bubble-meta">${msg.nombre || (isMe ? 'Tú' : 'Admin')}</div>
+                        ${msg.texto}
+                    </div>
+                `;
             });
+        }
+
+        if(chat.innerHTML === "") {
+            chat.innerHTML = `<div style="text-align:center; color:#cbd5e1; font-size:12px; padding:20px;">Sin interacciones adicionales.</div>`;
+        }
+
+        // --- LÓGICA INPUT (PING-PONG) ---
+        // El usuario puede responder SOLO SI hay una respuesta del admin previa
+        // O si ya existe un historial de conversación avanzado
+        const hasAdminReply = historial.some(h => h.autor === 'admin') || t.RespuestaAdmin;
+        const footer = document.getElementById("replyFooter");
+        
+        if (hasAdminReply && t.Estado !== 'Resuelto') {
+            footer.style.display = "flex";
         } else {
-            chat.innerHTML += `<div style="font-size:12px; color:#94a3b8; text-align:center; margin-top:10px;">Esperando respuesta de administración...</div>`;
+            footer.style.display = "none";
         }
 
         document.getElementById("modalTicket").classList.add("active");
+        
+        const body = document.getElementById("chatScroll");
+        setTimeout(() => body.scrollTop = body.scrollHeight, 100);
     }
 
     function cerrarModal() {
         document.getElementById("modalTicket").classList.remove("active");
+        TICKET_ACTUAL = null;
+    }
+
+    // --- 4. RESPONDER EN CHAT (BLINDADA) ---
+    async function enviarRespuestaChat() {
+        const input = document.getElementById("replyInput");
+        const texto = input.value.trim();
+        
+        if(!texto) return alert("Escribe un mensaje.");
+        if(!TICKET_ACTUAL || !TICKET_ACTUAL.ID) return alert("Error de ticket.");
+
+        document.getElementById("spinner").style.display = "flex";
+
+        try {
+            // 1. Obtener historial actual
+            let historial = [];
+            
+            if (TICKET_ACTUAL.Historial) {
+                try {
+                    historial = typeof TICKET_ACTUAL.Historial === 'string' 
+                        ? JSON.parse(TICKET_ACTUAL.Historial) 
+                        : TICKET_ACTUAL.Historial;
+                } catch(e) {
+                    console.warn("Error parseo, iniciando nuevo historial");
+                    if(TICKET_ACTUAL.RespuestaAdmin) {
+                        historial.push({autor:"admin", nombre:"Admin", texto:TICKET_ACTUAL.RespuestaAdmin});
+                    }
+                }
+            } else if (TICKET_ACTUAL.RespuestaAdmin) {
+                historial.push({autor:"admin", nombre:"Admin", texto:TICKET_ACTUAL.RespuestaAdmin});
+            }
+
+            // 2. Agregar mensaje
+            const nuevoMsg = {
+                autor: "user",
+                nombre: USUARIO.Nombre || "Residente",
+                texto: texto,
+                fecha: new Date().toISOString()
+            };
+            historial.push(nuevoMsg);
+
+            // 3. Preparar Payload (Stringify obligatorio para AppSheet LongText)
+            const jsonHistorial = JSON.stringify(historial);
+            const payload = {
+                "ID": String(TICKET_ACTUAL.ID),
+                "Historial": jsonHistorial,
+                "Estado": "En Proceso"
+            };
+
+            // 4. Guardar
+            if(typeof appSheetCRUD === 'function') {
+                await appSheetCRUD("Reclamos", "Edit", [payload]);
+            } else {
+                throw new Error("No hay conexión con AppSheet.");
+            }
+
+            // 5. Notificar Admin
+            if (typeof emailjs !== 'undefined') {
+                const htmlBody = `
+                    <div style="font-family:sans-serif; padding:20px; border:1px solid #1A2B48;">
+                        <h3>💬 Nueva respuesta de residente</h3>
+                        <p><strong>${USUARIO.Nombre}</strong> ha respondido al ticket #${TICKET_ACTUAL.ID}:</p>
+                        <p style="background:#f1f5f9; padding:10px;"><em>"${texto}"</em></p>
+                        <a href="#">Ir al CRM</a>
+                    </div>
+                `;
+                emailjs.send("service_p9hqkqn", "template_80q9psi", {
+                    to_email: ADMIN_EMAIL,
+                    subject: `[RESPUESTA] Ticket #${TICKET_ACTUAL.ID}`,
+                    html_body: htmlBody
+                }).catch(e => console.warn("Email error", e));
+            }
+
+            // 6. UI Update
+            input.value = "";
+            TICKET_ACTUAL.Historial = jsonHistorial; // Update local
+            TICKET_ACTUAL.Estado = "En Proceso";
+            abrirDetalle(TICKET_ACTUAL.ID); // Re-render chat
+
+        } catch(e) {
+            const msg = e.message || JSON.stringify(e);
+            alert("Error al enviar respuesta: " + msg);
+        } finally {
+            document.getElementById("spinner").style.display = "none";
+        }
+    }
+
+    // Notificación inicial
+    async function notificarNuevoReclamo(data) {
+        if (typeof emailjs === 'undefined') return;
+        const htmlBody = `
+            <div style="font-family:sans-serif; padding:20px; border:2px solid #1A2B48;">
+                <h2>⚠️ Nuevo Reclamo</h2>
+                <ul>
+                    <li><strong>Categoría:</strong> ${data.Categoria}</li>
+                    <li><strong>Residente:</strong> ${USUARIO.Nombre}</li>
+                    <li><strong>Unidad:</strong> ${USUARIO.UnidadID}</li>
+                </ul>
+                <p>${data.Descripcion}</p>
+            </div>
+        `;
+        emailjs.send("service_p9hqkqn", "template_80q9psi", {
+            to_email: ADMIN_EMAIL,
+            subject: `[TICKET] ${data.Categoria}`,
+            html_body: htmlBody
+        }).catch(e => console.warn(e));
+    }
+
+    function formatearFecha(iso) { 
+      if(!iso) return ""; 
+      const [y,m,d] = iso.split("-");
+      return `${d}/${m}/${y}`;
     }
   </script>
 </body>
