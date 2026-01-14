@@ -312,7 +312,7 @@
             <input
               id="inpBuscar"
               class="input-modern"
-              placeholder="Nombre, email..."
+              placeholder="Nombre, comuna, email..."
               style="width: 95%; height: 40px"
             />
           </div>
@@ -395,6 +395,7 @@
               <select id="prosEstado">
                 <option value="Nuevo">Nuevo</option>
                 <option value="Contactado">Contactado</option>
+                <option value="Propuesta Enviada">Propuesta Enviada</option>
                 <option value="En Negociación">En Negociación</option>
                 <option value="Cerrado Ganado">Cerrado Ganado</option>
                 <option value="Cerrado Perdido">Cerrado Perdido</option>
@@ -819,7 +820,7 @@
 
           return `
                 <tr>
-                    <td style="width: 200px;">
+                    <td>
                         <div style="font-weight:600;">${
                           p.Nombre || "Sin Nombre"
                         }</div>
@@ -827,9 +828,9 @@
             p.Estado || "Nuevo"
           }</span>
                     </td>
-                    <td style="width:80px">${tipoBadge}</td>
+                    <td>${tipoBadge}</td>
                     <td style="font-size:13px;">${p.Direccion || "—"}</td>
-                    <td >${p.Comuna || "—"}</td>
+                    <td>${p.Comuna || "—"}</td>
                     <td style="font-size:13px;">${
                       p.Email || p.Telefono || "—"
                     }</td>
@@ -920,7 +921,7 @@
               p["Presupuesto"] || "";
           }
         } else {
-          setTipo("Administracion");
+          setTipo("Administracion"); // Default nuevo
         }
 
         document.getElementById("modalProspecto").classList.add("active");
