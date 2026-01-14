@@ -13,6 +13,7 @@
       requireAuth();
     </script>
     <style>
+      /* ... Tus estilos anteriores (tablas, modales, etc) ... */
       body {
         max-width: 1200px;
         margin: 0 auto;
@@ -60,14 +61,38 @@
         padding: 10px;
         border: 1px solid #d1d5db;
         border-radius: 6px;
-      }
-      .btns {
-        display: flex;
-        gap: 6px;
-        flex-wrap: wrap;
+        box-sizing: border-box;
       }
 
-      /* MODAL */
+      .tipo-selector {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+      .tipo-btn {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        text-align: center;
+        cursor: pointer;
+        font-weight: 600;
+        color: #64748b;
+        background: #f9fafb;
+        transition: all 0.2s;
+      }
+      .tipo-btn:hover {
+        background: #f3f4f6;
+      }
+      .tipo-btn.active {
+        background: #eff6ff;
+        color: #3b82f6;
+        border-color: #3b82f6;
+      }
+      .hidden {
+        display: none;
+      }
+
       .modal {
         display: none;
         position: fixed;
@@ -88,9 +113,10 @@
         border-radius: 10px;
         padding: 18px;
         box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+        max-height: 90vh;
+        overflow-y: auto;
       }
 
-      /* SPINNER */
       .spinner-backdrop {
         position: fixed;
         inset: 0;
@@ -125,15 +151,6 @@
         }
       }
 
-      .mono {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New",
-          monospace;
-      }
-      .muted {
-        color: #666;
-      }
-
-      /* ESTILOS DE ESTADO (BADGES) */
       .badge-status {
         padding: 4px 8px;
         border-radius: 12px;
@@ -146,82 +163,30 @@
         background: #e0f2fe;
         color: #0369a1;
       }
-      .st-contactado {
-        background: #fef3c7;
-        color: #b45309;
-      }
-      .st-propuesta {
-        background: #f3e8ff;
-        color: #7e22ce;
-      }
-      .st-negociacion {
-        background: #ffedd5;
-        color: #c2410c;
-      }
       .st-ganado {
         background: #dcfce7;
         color: #15803d;
       }
-      .st-perdido {
-        background: #fee2e2;
-        color: #b91c1c;
-      }
-
-      /* ESTILOS BITÁCORA (TIMELINE) */
-      .timeline {
-        position: relative;
-        border-left: 2px solid #e2e8f0;
-        margin-left: 10px;
-        padding-left: 20px;
-        margin-top: 15px;
-      }
-      .timeline-item {
-        margin-bottom: 20px;
-        position: relative;
-      }
-      .timeline-dot {
-        width: 12px;
-        height: 12px;
-        background: #fff;
-        border: 2px solid #3b82f6;
-        border-radius: 50%;
-        position: absolute;
-        left: -27px;
-        top: 5px;
-      }
-      .timeline-dot.Llamada {
-        border-color: #3b82f6;
-      } /* Azul */
-      .timeline-dot.Correo {
-        border-color: #f59e0b;
-      } /* Naranja */
-      .timeline-dot.Reunion {
-        border-color: #10b981;
-      } /* Verde */
-      .timeline-dot.Nota {
-        border-color: #64748b;
-      } /* Gris */
-
-      .timeline-date {
-        font-size: 11px;
-        color: #94a3b8;
-        font-weight: 600;
-        margin-bottom: 2px;
-      }
-      .timeline-content {
-        background: #f8fafc;
-        padding: 10px;
-        border-radius: 6px;
-        border: 1px solid #f1f5f9;
-        font-size: 13px;
-        color: #334155;
-      }
-      .timeline-type {
-        font-weight: 700;
-        font-size: 11px;
+      .badge-type {
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-right: 5px;
         text-transform: uppercase;
-        margin-bottom: 4px;
-        display: block;
+        font-weight: bold;
+      }
+      .type-admin {
+        background: #e0e7ff;
+        color: #3730a3;
+        border: 1px solid #c7d2fe;
+      }
+      .type-corretaje {
+        background: #ffedd5;
+        color: #9a3412;
+        border: 1px solid #fed7aa;
+      }
+      .muted {
+        color: #666;
       }
     </style>
   </head>
@@ -232,71 +197,36 @@
       <div class="dashboard-header no-print">
         <div class="header-top">
           <h1 class="page-title">Gestión de Prospectos</h1>
-
           <div class="header-actions">
             <button
               class="btn-head btn-secundario"
               id="btnReload"
-              title="Recargar datos"
+              title="Recargar"
             >
               <i class="fa-solid fa-rotate-right"></i>
-              <span class="btn-text">Recargar</span>
             </button>
-
-            <button
-              class="btn-head btn-secundario"
-              id="btnExport"
-              title="Descargar Excel/CSV"
-            >
-              <i class="fa-solid fa-file-csv"></i>
-              <span class="btn-text">Exportar</span>
-            </button>
-
-            <button
-              class="btn-head btn-secundario"
-              onclick="window.print()"
-              title="Imprimir vista"
-            >
-              <i class="fa-solid fa-print"></i>
-              <span class="btn-text">Imprimir</span>
-            </button>
-
             <button class="btn-head btn-nuevo" id="btnNew">
-              <i class="fa-solid fa-plus"></i>
-              <span>Nuevo Prospecto</span>
+              <i class="fa-solid fa-plus"></i> <span>Nuevo Prospecto</span>
             </button>
           </div>
         </div>
-
         <div class="header-filters">
           <div class="filter-item" style="flex-grow: 2">
             <label class="label">Buscar</label>
             <input
               id="inpBuscar"
               class="input-modern"
-              placeholder="Nombre, comuna, dirección, RUT..."
-              type="text"
+              placeholder="Nombre, comuna..."
               style="width: 95%; height: 40px"
             />
           </div>
-
           <div class="filter-item">
-            <label class="label">Comuna</label>
-            <select id="selComuna" class="input-modern" style="height: 42px">
-              <option value="">(Todas)</option>
+            <label class="label">Tipo</label>
+            <select id="selTipo" class="input-modern" style="height: 42px">
+              <option value="">(Todos)</option>
+              <option value="Administracion">Administración</option>
+              <option value="Corretaje">Corretaje</option>
             </select>
-          </div>
-
-          <div class="filter-item">
-            <label class="label">UTM (CLP)</label>
-            <input
-              id="inpUTMPros"
-              class="input-modern mono"
-              placeholder="Cargando..."
-              inputmode="decimal"
-              style="width: 110px; height: 40px"
-              readonly
-            />
           </div>
         </div>
       </div>
@@ -305,18 +235,15 @@
         <thead>
           <tr>
             <th>Nombre / Estado</th>
+            <th>Tipo</th>
             <th>Comuna</th>
-            <th style="text-align: right">Unidades</th>
-            <th>Dirección</th>
-            <th>RUT</th>
             <th>Contacto</th>
-            <th>Teléfono</th>
             <th class="no-print">Acciones</th>
           </tr>
         </thead>
         <tbody id="tablaProspectos">
           <tr>
-            <td colspan="8" class="muted">Cargando…</td>
+            <td colspan="5" class="muted">Cargando…</td>
           </tr>
         </tbody>
       </table>
@@ -325,221 +252,156 @@
     <div id="modalProspecto" class="modal" aria-hidden="true">
       <div class="modal-content">
         <h2 id="modalTitleProspecto">Nuevo Prospecto</h2>
+
         <form id="formProspecto">
           <input type="hidden" id="prospectoID" />
+          <input type="hidden" id="prosLatLong" />
 
-          <label class="label">Estado del Negocio</label>
-          <select id="prosEstado" style="margin-bottom: 15px">
-            <option value="Nuevo">Nuevo</option>
-            <option value="Contactado">Contactado</option>
-            <option value="Propuesta Enviada">Propuesta Enviada</option>
-            <option value="En Negociación">En Negociación</option>
-            <option value="Cerrado Ganado">Cerrado Ganado</option>
-            <option value="Cerrado Perdido">Cerrado Perdido</option>
-            <option value="Contrato Firmado">Contrato Firmado</option>
-          </select>
+          <label class="label">Tipo de Negocio</label>
+          <div class="tipo-selector">
+            <div
+              class="tipo-btn active"
+              onclick="setTipo('Administracion')"
+              id="btnTipoAdmin"
+            >
+              <i class="fa-solid fa-building"></i> Administración
+            </div>
+            <div
+              class="tipo-btn"
+              onclick="setTipo('Corretaje')"
+              id="btnTipoCorretaje"
+            >
+              <i class="fa-solid fa-house-user"></i> Corretaje
+            </div>
+          </div>
+          <input type="hidden" id="prosTipoNegocio" value="Administracion" />
 
-          <label>Nombre</label><input id="prosNombre" required />
-          <label>Comuna</label>
-          <input id="prosComuna" list="dlComunas" placeholder="Ej: Santiago" />
-          <datalist id="dlComunas"></datalist>
-          <div class="muted" style="font-size: 12px">
-            Sugerencias basadas en <b>TablaTarifas</b>.
+          <div class="row">
+            <div style="flex: 2">
+              <label class="label">Nombre</label>
+              <input
+                id="prosNombre"
+                required
+                placeholder="Ej: Edificio Los Andes"
+              />
+            </div>
+            <div>
+              <label class="label">Estado</label>
+              <select id="prosEstado">
+                <option value="Nuevo">Nuevo</option>
+                <option value="Contactado">Contactado</option>
+                <option value="En Negociación">En Negociación</option>
+                <option value="Cerrado Ganado">Cerrado Ganado</option>
+                <option value="Cerrado Perdido">Cerrado Perdido</option>
+              </select>
+            </div>
           </div>
 
-          <label>Unidades</label
-          ><input id="prosUnidades" type="number" min="0" />
-          <label>Dirección</label><input id="prosDireccion" /> <label>RUT</label
-          ><input id="prosRUT" placeholder="12.345.678-9" />
-          <label>Contacto</label
-          ><input id="prosContacto" placeholder="Nombre / email / teléfono" />
+          <div class="row" style="margin-top: 10px">
+            <div style="flex: 1">
+              <label class="label">Teléfono</label><input id="prosTelefono" />
+            </div>
+            <div style="flex: 1.5">
+              <label class="label">Email</label
+              ><input id="prosEmail" type="email" />
+            </div>
+          </div>
 
-          <div style="text-align: right; margin-top: 10px">
+          <div class="row" style="margin-top: 10px">
+            <div style="flex: 2">
+              <label class="label">Dirección</label>
+              <input id="prosDireccion" onchange="intentarGeocodificar()" />
+            </div>
+            <div style="flex: 1">
+              <label class="label">Comuna</label>
+              <input
+                id="prosComuna"
+                list="dlComunas"
+                onchange="intentarGeocodificar()"
+              />
+              <datalist id="dlComunas"></datalist>
+            </div>
+          </div>
+          <div
+            id="msgGeo"
+            style="
+              font-size: 11px;
+              color: #10b981;
+              margin-top: 2px;
+              display: none;
+            "
+          >
+            <i class="fa-solid fa-location-dot"></i> Ubicación detectada
+          </div>
+
+          <div id="camposAdmin" style="margin-top: 10px">
+            <div class="row">
+              <div>
+                <label class="label">Unidades</label
+                ><input id="prosUnidades" type="number" />
+              </div>
+              <div>
+                <label class="label">RUT Comunidad</label><input id="prosRUT" />
+              </div>
+            </div>
+          </div>
+
+          <div id="camposCorretaje" class="hidden" style="margin-top: 10px">
+            <div class="row">
+              <div>
+                <label class="label">Interés</label>
+                <select id="prosOperacion">
+                  <option value="Venta">Comprar</option>
+                  <option value="Arriendo">Arrendar</option>
+                  <option value="Vender">Vender</option>
+                </select>
+              </div>
+              <div>
+                <label class="label">Tipo Propiedad</label>
+                <select id="prosTipoProp">
+                  <option value="Departamento">Departamento</option>
+                  <option value="Casa">Casa</option>
+                  <option value="Terreno">Terreno</option>
+                </select>
+              </div>
+            </div>
+            <div class="row" style="margin-top: 10px">
+              <div>
+                <label class="label">Presupuesto</label
+                ><input id="prosPresupuesto" />
+              </div>
+            </div>
+          </div>
+
+          <label class="label" style="margin-top: 10px">Notas</label>
+          <textarea id="prosNotas" rows="2"></textarea>
+
+          <div style="text-align: right; margin-top: 20px">
             <button
               type="button"
-              class="btn-primary"
+              class="btn-head btn-secundario"
               onclick="cerrarModalProspecto()"
             >
               Cancelar
             </button>
-            <button class="btn-primary">Guardar</button>
+            <button type="submit" class="btn-head btn-nuevo">Guardar</button>
           </div>
         </form>
-      </div>
-    </div>
-
-    <div id="modalDetalle" class="modal" aria-hidden="true">
-      <div class="modal-content">
-        <h2>Detalle Prospecto</h2>
-        <div id="detalleContenido"></div>
-        <div style="text-align: right; margin-top: 10px">
-          <button
-            class="btn-primary"
-            type="button"
-            onclick="cerrarModalDetalle()"
-          >
-            Cerrar
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div id="modalBitacora" class="modal" aria-hidden="true">
-      <div
-        class="modal-content"
-        style="
-          max-width: 500px;
-          max-height: 85vh;
-          display: flex;
-          flex-direction: column;
-        "
-      >
-        <h2 style="margin-top: 0">Historial de Seguimiento</h2>
-        <p
-          class="muted"
-          id="bitacoraSubtitle"
-          style="margin-top: -10px; margin-bottom: 15px; font-size: 13px"
-        >
-          Prospecto: ...
-        </p>
-
-        <div
-          id="timelineContainer"
-          style="
-            flex-grow: 1;
-            overflow-y: auto;
-            min-height: 200px;
-            margin-bottom: 15px;
-            padding-right: 5px;
-          "
-        >
-          <div class="muted" style="text-align: center; padding: 20px">
-            Cargando historia...
-          </div>
-        </div>
-
-        <div
-          style="
-            background: #f1f5f9;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-          "
-        >
-          <label class="label" style="margin-top: 0">Nueva Interacción</label>
-          <div style="display: flex; gap: 10px; margin-bottom: 8px">
-            <select id="bitTipo" style="width: 120px">
-              <option value="Nota">Nota 📝</option>
-              <option value="Llamada">Llamada 📞</option>
-              <option value="Correo">Correo 📧</option>
-              <option value="Reunion">Reunión 🤝</option>
-            </select>
-            <input type="date" id="bitFecha" style="margin: 0" />
-          </div>
-          <textarea
-            id="bitNota"
-            rows="2"
-            placeholder="Detalles de la conversación..."
-            style="
-              width: 100%;
-              padding: 8px;
-              border: 1px solid #d1d5db;
-              border-radius: 6px;
-              resize: vertical;
-            "
-          ></textarea>
-          <div style="text-align: right; margin-top: 8px">
-            <button
-              class="btn-primary"
-              onclick="guardarBitacora()"
-              style="font-size: 12px"
-            >
-              Agregar Nota
-            </button>
-          </div>
-        </div>
-
-        <div style="text-align: right; margin-top: 10px">
-          <button
-            type="button"
-            class="btn-secundario"
-            onclick="document.getElementById('modalBitacora').classList.remove('active')"
-          >
-            Cerrar
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div id="modalContrato" class="modal" aria-hidden="true">
-      <div class="modal-content" style="max-width: 450px">
-        <h2><i class="fa-solid fa-file-contract"></i> Gestión de Contrato</h2>
-        <p class="muted">
-          Sube el contrato firmado a Google Drive/Dropbox y pega el enlace aquí
-          para finalizar el negocio.
-        </p>
-
-        <input type="hidden" id="contratoProsID" />
-
-        <label class="label">Enlace al Documento (URL)</label>
-        <input
-          id="inpContratoURL"
-          placeholder="https://drive.google.com/file/d/..."
-          style="width: 100%"
-        />
-
-        <div
-          style="
-            margin-top: 20px;
-            background: #fff7ed;
-            padding: 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            color: #c2410c;
-          "
-        >
-          <i class="fa-solid fa-triangle-exclamation"></i> Al guardar, el estado
-          cambiará a <b>"Contrato Firmado"</b>.
-        </div>
-
-        <div
-          style="
-            text-align: right;
-            margin-top: 20px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-          "
-        >
-          <button
-            type="button"
-            class="btn-secundario"
-            onclick="document.getElementById('modalContrato').classList.remove('active')"
-          >
-            Cancelar
-          </button>
-          <button type="button" class="btn-primary" onclick="guardarContrato()">
-            Guardar y Confirmar
-          </button>
-        </div>
       </div>
     </div>
 
     <div id="pageSpinner" class="spinner-backdrop" aria-hidden="true">
       <div class="spinner-card">
         <div class="spinner"></div>
-        <div id="spinnerText">Cargando…</div>
+        <div id="spinnerText">Cargando...</div>
       </div>
     </div>
-
-    <div id="footer" class="no-print"></div>
+    <div id="footer"></div>
 
     <script>
-      /* ===== Utilidades ===== */
       function showSpinner(msg) {
         const sp = document.getElementById("pageSpinner");
-        const txt = document.getElementById("spinnerText");
-        if (msg) txt.textContent = msg;
+        if (msg) document.getElementById("spinnerText").textContent = msg;
         sp.style.display = "grid";
       }
       function hideSpinner() {
@@ -553,736 +415,252 @@
           .replace(/[\u0300-\u036f]/g, "")
           .trim();
       }
-      function parseCLPInput(s) {
-        return (
-          parseFloat(
-            (s || "").toString().replaceAll(".", "").replace(",", ".")
-          ) || 0
-        );
-      }
-      function escapeCSV(v) {
-        if (v == null) return "";
-        const s = String(v).replaceAll('"', '""');
-        return /[",\n]/.test(s) ? '"' + s + '"' : s;
-      }
-      function clp(v) {
-        return (
-          "$" +
-          new Intl.NumberFormat("es-CL", { maximumFractionDigits: 0 }).format(
-            Number(v || 0)
-          )
-        );
+      function getKeyVal(o) {
+        return o.ID || o.id || "";
       }
 
-      /* Detectores de clave */
-      if (typeof window.getKeyVal !== "function") {
-        window.getKeyVal = (o) =>
-          o
-            ? o._id ??
-              o.id ??
-              o.ID ??
-              o.Key ??
-              o.key ??
-              o.Id ??
-              o[Object.keys(o)[0]]
-            : "";
-      }
-      if (typeof window.getKeyName !== "function") {
-        window.getKeyName = (row) => {
-          if (!row || typeof row !== "object") return "ID";
-          const cands = [
-            "ID",
-            "_id",
-            "Id",
-            "id",
-            "Key",
-            "key",
-            "RowKey",
-            "_RowNumber",
-          ];
-          for (const c of cands) {
-            if (c in row) return c;
-          }
-          return Object.keys(row)[0] || "ID";
-        };
-      }
-      function generateKey(prefix = "ID") {
-        return `${prefix}_${Date.now().toString(36)}${Math.random()
-          .toString(36)
-          .slice(2, 8)
-          .toUpperCase()}`;
-      }
-
-      /* ===== Estado ===== */
       let PROS = [],
-        VIEW = [],
-        TARIFAS = [];
-      let KEY_NAME = "ID";
-      let LAST_EDIT_ORIGINAL_KEY = null;
-      let CURRENT_PROS_ID = null; // Variable global para bitácora/contrato
+        VIEW = [];
 
-      /* ===== Boot ===== */
       document.addEventListener("DOMContentLoaded", async () => {
         try {
           document.getElementById("header").innerHTML = await (
             await fetch("header.html")
           ).text();
+          if (typeof initHeader === "function") initHeader();
         } catch (e) {}
         try {
           document.getElementById("footer").innerHTML = await (
             await fetch("footer.html")
           ).text();
         } catch (e) {}
-
         bindUI();
         await cargarTodo();
       });
 
-      /* ===== UI ===== */
       function bindUI() {
-        btnNew.addEventListener("click", () => abrirFormProspecto());
-        btnReload.addEventListener("click", cargarTodo);
-        btnExport.addEventListener("click", exportCSV);
-        inpBuscar.addEventListener("input", aplicarFiltros);
-        selComuna.addEventListener("change", aplicarFiltros);
-
-        const m1 = modalProspecto,
-          m2 = modalDetalle,
-          m3 = modalBitacora,
-          m4 = modalContrato;
-
-        m1.addEventListener("click", (e) => {
-          if (e.target === m1) cerrarModalProspecto();
-        });
-        m2.addEventListener("click", (e) => {
-          if (e.target === m2) cerrarModalDetalle();
-        });
-        m3.addEventListener("click", (e) => {
-          if (e.target === m3) m3.classList.remove("active");
-        });
-        m4.addEventListener("click", (e) => {
-          if (e.target === m4) m4.classList.remove("active");
-        });
-
-        document.addEventListener("keydown", (e) => {
-          if (e.key === "Escape") {
-            cerrarModalProspecto();
-            cerrarModalDetalle();
-            m3.classList.remove("active");
-            m4.classList.remove("active");
-          }
-        });
+        document
+          .getElementById("btnNew")
+          .addEventListener("click", () => abrirFormProspecto());
+        document
+          .getElementById("btnReload")
+          .addEventListener("click", cargarTodo);
+        document
+          .getElementById("inpBuscar")
+          .addEventListener("input", aplicarFiltros);
+        document
+          .getElementById("selTipo")
+          .addEventListener("change", aplicarFiltros);
       }
 
-      /* ===== Carga de Datos ===== */
       async function cargarTodo() {
+        showSpinner("Cargando datos...");
         try {
-          showSpinner("Cargando datos…");
-
-          const [pros, tarifas] = await Promise.all([
-            fetchData("ProspectosCopro"),
-            fetchData("TablaTarifas").catch(() => []),
+          const [adminData, corretajeData] = await Promise.all([
+            fetchData("ProspectosCopro").catch(() => []),
+            fetchData("ProspectosCorretaje").catch(() => []),
           ]);
 
-          PROS = pros || [];
-          if (PROS.length) KEY_NAME = getKeyName(PROS[0]);
-          TARIFAS = tarifas || [];
+          const listA = adminData.map((p) => ({
+            ...p,
+            _tipo: "Administracion",
+            _tabla: "ProspectosCopro",
+          }));
+          const listB = corretajeData.map((p) => ({
+            ...p,
+            _tipo: "Corretaje",
+            _tabla: "ProspectosCorretaje",
+          }));
 
-          const comunasPros = [
-            ...new Set(PROS.map((p) => p.Comuna).filter(Boolean)),
-          ].sort((a, b) => a.localeCompare(b));
-          selComuna.innerHTML =
-            '<option value="">(Todas)</option>' +
-            comunasPros
-              .map((c) => `<option value="${c}">${c}</option>`)
-              .join("");
-
-          const comunasTar = [
-            ...new Set(TARIFAS.map((t) => t.Comuna).filter(Boolean)),
-          ].sort((a, b) => a.localeCompare(b));
-          dlComunas.innerHTML = comunasTar
-            .map((c) => `<option value="${c}">`)
-            .join("");
-
-          if (typeof window.UTM_VALOR !== "undefined" && window.UTM_VALOR > 0) {
-            inpUTMPros.value = new Intl.NumberFormat("es-CL").format(
-              window.UTM_VALOR
-            );
-          }
-
+          PROS = [...listA, ...listB];
           aplicarFiltros();
-        } catch (err) {
-          console.error(err);
-          alert("Error al cargar datos: " + (err.message || err));
+        } catch (e) {
+          console.error(e);
         } finally {
           hideSpinner();
         }
       }
 
-      /* ===== Filtros/Render ===== */
       function aplicarFiltros() {
-        const q = norm(inpBuscar.value);
-        const comuna = selComuna.value;
-
+        const q = norm(document.getElementById("inpBuscar").value);
+        const tipoFilter = document.getElementById("selTipo").value;
         VIEW = PROS.filter((p) => {
-          if (comuna && p.Comuna !== comuna) return false;
+          if (tipoFilter && p._tipo !== tipoFilter) return false;
           if (!q) return true;
-          return [
-            getKeyVal(p),
-            p.Nombre,
-            p.Estado,
-            p.Comuna,
-            p.Unidades,
-            p.Direccion,
-            p.RUT,
-            p.Contacto,
-          ]
-            .map((v) => norm(v))
-            .some((s) => s.includes(q));
+          return [p.Nombre, p.Comuna, p.Estado, p.Direccion].some((v) =>
+            norm(v).includes(q)
+          );
         });
-
         renderTabla();
       }
 
       function renderTabla() {
-        if (!VIEW.length) {
-          tablaProspectos.innerHTML =
-            '<tr><td colspan="8" class="muted">Sin resultados.</td></tr>';
+        const tbody = document.getElementById("tablaProspectos");
+        if (VIEW.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="5" class="muted">Sin resultados.</td></tr>';
           return;
         }
-        tablaProspectos.innerHTML = VIEW.map((p) => {
-          const key = getKeyVal(p);
-          const nombre = p.Nombre || p.RazonSocial || "—";
-          const comuna = p.Comuna || "—";
-          const unidades = p.Unidades || p.NUnidades || p.CantidadUnidades || 0;
-          const direccion = p.Direccion || p.Dirección || "—";
-          const rut = p.RUT || "—";
-          const contacto = p.Contacto || p.Email || "—";
-          const telefono = p.Telefono || "—";
-          const estado = p.Estado || "Nuevo";
-
-          let claseBadge = "st-nuevo";
-          if (estado.includes("Contactado")) claseBadge = "st-contactado";
-          if (estado.includes("Propuesta")) claseBadge = "st-propuesta";
-          if (estado.includes("Negociación")) claseBadge = "st-negociacion";
-          if (estado.includes("Ganado")) claseBadge = "st-ganado";
-          if (estado.includes("Contrato")) claseBadge = "st-ganado";
-          if (estado.includes("Perdido")) claseBadge = "st-perdido";
-
-          return `
-      <tr>
-        <td>
-            <div style="font-weight:600; margin-bottom:4px;">${nombre}</div>
-            <span class="badge-status ${claseBadge}">${estado}</span>
-        </td>
-        <td style="min-width: 100px;">${comuna}</td>
-        <td class="mono" style="text-align:center;">${unidades || 0}</td>
-        <td>${direccion}</td>
-        <td class="mono">${rut}</td>
-        <td>${contacto}</td>
-        <td class="mono">${telefono}</td>
-        <td class="no-print" style="min-width: 280px;">
-          <div class="acciones-group" style="display:flex; gap:5px; flex-wrap:wrap;">
-            
-            <button class="btn-icon btn-ver" onclick='abrirDetalle(${JSON.stringify(
-              key
-            )})' title="Ver Detalle">
-              <i class="fa-solid fa-eye"></i>
-            </button>
-
-            <button class="btn-icon btn-editar" onclick='abrirFormProspecto(${JSON.stringify(
-              key
-            )})' title="Editar">
-              <i class="fa-solid fa-pen"></i>
-            </button>
-            
-            <button class="btn-icon btn-mapa" onclick='abrirMapa(${JSON.stringify(
-              key
-            )})' title="Ver en Mapa" style="background:#f1f5f9;">
-              <i class="fa-solid fa-map-location-dot"></i>
-            </button>
-            
-            <button class="btn-icon" onclick='abrirBitacora(${JSON.stringify(
-              key
-            )})' title="Historial / Bitácora" style="background:#e0f2fe; color:#0369a1;">
-              <i class="fa-solid fa-clock-rotate-left"></i>
-            </button>
-            
-            <button class="btn-icon" onclick='abrirModalContrato(${JSON.stringify(
-              key
-            )})' title="Adjuntar Contrato" style="background:#fef3c7; color:#b45309;">
-              <i class="fa-solid fa-file-signature"></i>
-            </button>
-
-            <button class="btn-icon btn-cotizar" onclick='abrirCotizacion(${JSON.stringify(
-              key
-            )})' title="Cotizar">
-              <i class="fa-solid fa-file-invoice-dollar"></i>
-            </button>
-            
-            <button class="btn-icon btn-eliminar" onclick='eliminarProspecto(${JSON.stringify(
-              key
-            )})' title="Eliminar">
-              <i class="fa-solid fa-trash"></i>
-            </button>
-
-            <button class="btn-icon btn-cliente" onclick='agregarAClientes(${JSON.stringify(
-              key
-            )})' title="Convertir a Cliente">
-              <i class="fa-solid fa-user-check"></i>
-            </button>
-
-          </div>
-        </td>
-      </tr>`;
+        tbody.innerHTML = VIEW.map((p) => {
+          let badgeClass = "st-nuevo";
+          if ((p.Estado || "").includes("Ganado")) badgeClass = "st-ganado";
+          const tipoBadge =
+            p._tipo === "Administracion"
+              ? '<span class="badge-type type-admin">Admin</span>'
+              : '<span class="badge-type type-corretaje">Corretaje</span>';
+          return `<tr>
+                    <td><div style="font-weight:600;">${
+                      p.Nombre || "Sin Nombre"
+                    }</div><span class="badge-status ${badgeClass}">${
+            p.Estado || "Nuevo"
+          }</span></td>
+                    <td>${tipoBadge}</td>
+                    <td>${p.Comuna || "—"}</td>
+                    <td>${p.Email || p.Telefono || "—"}</td>
+                    <td><button class="btn-icon btn-editar" onclick="abrirFormProspecto('${
+                      p.ID
+                    }', '${
+            p._tipo
+          }')"><i class="fa-solid fa-pen"></i></button></td>
+                </tr>`;
         }).join("");
       }
 
-      /* ===== Detalle y Formulario ===== */
-      function abrirDetalle(id) {
-        const p = PROS.find((x) => String(getKeyVal(x)) === String(id));
-        if (!p) {
-          alert("No encontrado");
-          return;
-        }
-        detalleContenido.innerHTML = `
-    <p><b>ID:</b> ${getKeyVal(p) || "—"}</p>
-    <p><b>Estado:</b> ${p.Estado || "Nuevo"}</p>
-    <p><b>Nombre:</b> ${p.Nombre || p.RazonSocial || "—"}</p>
-    <p><b>Comuna:</b> ${p.Comuna || "—"}</p>
-    <p><b>Unidades:</b> ${
-      p.Unidades || p.NUnidades || p.CantidadUnidades || 0
-    }</p>
-    <p><b>Dirección:</b> ${p.Direccion || p.Dirección || "—"}</p>
-    <p><b>RUT:</b> ${p.RUT || "—"}</p>
-    <p><b>Contacto:</b> ${p.Contacto || p.Email || p.Telefono || "—"}</p>
-    ${
-      p.ContratoURL
-        ? `<p><b>Contrato:</b> <a href="${p.ContratoURL}" target="_blank">Ver Documento</a></p>`
-        : ""
-    }`;
-        modalDetalle.classList.add("active");
-      }
-      function cerrarModalDetalle() {
-        modalDetalle.classList.remove("active");
+      function setTipo(tipo) {
+        document.getElementById("prosTipoNegocio").value = tipo;
+        document
+          .getElementById("btnTipoAdmin")
+          .classList.toggle("active", tipo === "Administracion");
+        document
+          .getElementById("btnTipoCorretaje")
+          .classList.toggle("active", tipo === "Corretaje");
+        document.getElementById("camposAdmin").className =
+          tipo === "Administracion" ? "" : "hidden";
+        document.getElementById("camposCorretaje").className =
+          tipo === "Corretaje" ? "" : "hidden";
       }
 
-      function abrirFormProspecto(id) {
-        const title = document.getElementById("modalTitleProspecto");
-        formProspecto.reset();
-        prospectoID.value = "";
-        LAST_EDIT_ORIGINAL_KEY = null;
-
+      function abrirFormProspecto(id, tipoExistente) {
+        document.getElementById("formProspecto").reset();
+        document.getElementById("prospectoID").value = "";
         if (id) {
-          title.textContent = "Editar Prospecto";
-          const p = PROS.find((x) => String(getKeyVal(x)) === String(id));
-          if (!p) {
-            alert("No encontrado");
-            return;
+          const p = PROS.find((item) => String(item.ID) === String(id));
+          if (!p) return;
+          document.getElementById("prospectoID").value = p.ID;
+          setTipo(tipoExistente || p._tipo);
+          document.getElementById("prosNombre").value = p.Nombre || "";
+          document.getElementById("prosEstado").value = p.Estado || "Nuevo";
+          document.getElementById("prosTelefono").value = p.Telefono || "";
+          document.getElementById("prosEmail").value = p.Email || "";
+          document.getElementById("prosDireccion").value = p.Direccion || "";
+          document.getElementById("prosComuna").value = p.Comuna || "";
+          document.getElementById("prosNotas").value = p.Observaciones || "";
+          if (p._tipo === "Administracion") {
+            document.getElementById("prosUnidades").value = p.Unidades || "";
+            document.getElementById("prosRUT").value = p.RUT || "";
+          } else {
+            document.getElementById("prosOperacion").value =
+              p["Tipo Operacion"] || "Venta";
+            document.getElementById("prosTipoProp").value =
+              p["Tipo Propiedad"] || "";
+            document.getElementById("prosPresupuesto").value =
+              p["Presupuesto"] || "";
           }
-          LAST_EDIT_ORIGINAL_KEY = getKeyName(p);
-          prospectoID.value = getKeyVal(p);
-
-          prosEstado.value = p.Estado || "Nuevo";
-          prosNombre.value = p.Nombre || p.RazonSocial || "";
-          prosComuna.value = p.Comuna || "";
-          prosUnidades.value =
-            p.Unidades || p.NUnidades || p.CantidadUnidades || 0;
-          prosDireccion.value = p.Direccion || p.Dirección || "";
-          prosRUT.value = p.RUT || "";
-          prosContacto.value = p.Contacto || p.Email || p.Telefono || "";
         } else {
-          title.textContent = "Nuevo Prospecto";
-          prosEstado.value = "Nuevo";
+          setTipo("Administracion");
         }
-        modalProspecto.classList.add("active");
+        document.getElementById("modalProspecto").classList.add("active");
       }
       function cerrarModalProspecto() {
-        modalProspecto.classList.remove("active");
+        document.getElementById("modalProspecto").classList.remove("active");
       }
 
-      formProspecto.onsubmit = async (e) => {
+      async function intentarGeocodificar() {
+        const dir = document.getElementById("prosDireccion").value;
+        const com = document.getElementById("prosComuna").value;
+        const msg = document.getElementById("msgGeo");
+        const latLongField = document.getElementById("prosLatLong");
+        if (dir.length < 5) return;
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+              dir + ", " + com + ", Chile"
+            )}`
+          );
+          const data = await res.json();
+          if (data && data.length > 0) {
+            latLongField.value = `${data[0].lat}, ${data[0].lon}`;
+            msg.style.display = "block";
+            msg.innerHTML = `<i class="fa-solid fa-check"></i> Ubicación OK`;
+          }
+        } catch (e) {}
+      }
+
+      /* SUBMIT FINAL CORREGIDO */
+      document.getElementById("formProspecto").onsubmit = async (e) => {
         e.preventDefault();
-        const idValue = prospectoID.value || null;
+        const id = document.getElementById("prospectoID").value;
+        const tipo = document.getElementById("prosTipoNegocio").value;
+        let tablaDestino = "",
+          payload = {};
 
-        const payload = {
-          Estado: prosEstado.value,
-          Nombre: (prosNombre.value || "").trim(),
-          Comuna: (prosComuna.value || "").trim(),
-          Unidades: Number(prosUnidades.value || 0),
-          Direccion: (prosDireccion.value || "").trim(),
-          RUT: (prosRUT.value || "").trim(),
-          Contacto: (prosContacto.value || "").trim(),
-        };
-
-        const keyField = idValue
-          ? LAST_EDIT_ORIGINAL_KEY || KEY_NAME
-          : KEY_NAME;
-
-        if (idValue) {
-          payload[keyField] = idValue;
+        if (tipo === "Administracion") {
+          tablaDestino = "ProspectosCopro";
+          const nuevoID = id || "PROS_" + Date.now();
+          payload = {
+            ID: nuevoID,
+            Nombre: document.getElementById("prosNombre").value,
+            Comuna: document.getElementById("prosComuna").value,
+            Unidades: document.getElementById("prosUnidades").value,
+            Direccion: document.getElementById("prosDireccion").value,
+            RUT: document.getElementById("prosRUT").value,
+            Contacto: document.getElementById("prosNombre").value, // Contacto = Nombre por defecto
+            Estado: document.getElementById("prosEstado").value,
+            Telefono: document.getElementById("prosTelefono").value,
+            Tipo: "Administracion",
+            Email: document.getElementById("prosEmail").value,
+            Observaciones: document.getElementById("prosNotas").value,
+            "Fecha Registro": new Date().toISOString().split("T")[0],
+            // Agente se puede agregar si tienes la variable global
+          };
+          const geo = document.getElementById("prosLatLong").value;
+          if (geo) payload["LatLong"] = geo; // Mapeo a nueva columna LatLong
         } else {
-          payload[keyField] = generateKey(keyField.toUpperCase());
+          tablaDestino = "ProspectosCorretaje";
+          const nuevoID = id || "PCOR_" + Date.now();
+          payload = {
+            ID: nuevoID,
+            Estado: document.getElementById("prosEstado").value,
+            Nombre: document.getElementById("prosNombre").value,
+            Telefono: document.getElementById("prosTelefono").value,
+            Email: document.getElementById("prosEmail").value,
+            "Tipo Operacion": document.getElementById("prosOperacion").value,
+            "Tipo Propiedad": document.getElementById("prosTipoProp").value,
+            Presupuesto: document.getElementById("prosPresupuesto").value,
+            Direccion: document.getElementById("prosDireccion").value,
+            Comuna: document.getElementById("prosComuna").value,
+            Observaciones: document.getElementById("prosNotas").value,
+            "Fecha Registro": new Date().toISOString().split("T")[0],
+            Canal: "CRM Web",
+          };
         }
 
+        console.log("Enviando a:", tablaDestino, payload);
         try {
-          showSpinner(idValue ? "Guardando…" : "Creando…");
-          if (typeof upsertData === "function")
-            await upsertData("ProspectosCopro", payload);
-          else
-            await appSheetCRUD("ProspectosCopro", idValue ? "Edit" : "Add", [
-              payload,
-            ]);
+          showSpinner("Guardando...");
+          if (typeof appSheetCRUD === "function") {
+            const action = id ? "Edit" : "Add";
+            await appSheetCRUD(tablaDestino, action, [payload]);
+          }
           cerrarModalProspecto();
           await cargarTodo();
+          alert("Guardado exitoso");
         } catch (err) {
-          console.error(err);
-          alert("Error al guardar: " + (err.message || JSON.stringify(err)));
+          alert("Error: " + err.message);
         } finally {
           hideSpinner();
         }
       };
-
-      async function eliminarProspecto(id) {
-        if (!confirm("¿Eliminar este prospecto?")) return;
-        try {
-          showSpinner("Eliminando…");
-          if (typeof deleteByKey === "function")
-            await deleteByKey("ProspectosCopro", id);
-          else
-            await appSheetCRUD("ProspectosCopro", "Delete", [
-              { [KEY_NAME]: id },
-            ]);
-          await cargarTodo();
-        } catch (err) {
-          console.error(err);
-          alert("Error al eliminar: " + (err.message || err));
-        } finally {
-          hideSpinner();
-        }
-      }
-
-      /* ===== Mapa y Cotización ===== */
-      function abrirMapa(id) {
-        const row = PROS.find((x) => String(getKeyVal(x)) === String(id));
-        if (!row) return;
-        const latLong = row.Coordenadas || row.LatLong || row.Ubicacion || "";
-        if (latLong && latLong.includes(",")) {
-          const coords = latLong.replace(/\s/g, "");
-          window.open(
-            `https://www.google.com/maps/search/?api=1&query=${coords}`,
-            "_blank"
-          );
-          return;
-        }
-        const direccion = row.Direccion || row.Dirección || "";
-        const comuna = row.Comuna || "";
-        if (direccion) {
-          let query = direccion;
-          if (comuna) query += `, ${comuna}`;
-          query += ", Chile";
-          window.open(
-            `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-              query
-            )}`,
-            "_blank"
-          );
-        } else {
-          alert("El prospecto no tiene dirección ni coordenadas guardadas.");
-        }
-      }
-
-      function getFactorByComuna(cname) {
-        const c = (cname || "")
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .trim();
-        const t = TARIFAS.find(
-          (tt) =>
-            (tt.Comuna || "")
-              .toLowerCase()
-              .normalize("NFD")
-              .replace(/[\u0300-\u036f]/g, "")
-              .trim() === c
-        );
-        return t ? Number(t.Factor || 0) : null;
-      }
-
-      function abrirCotizacion(id) {
-        const row = PROS.find((x) => String(getKeyVal(x)) === String(id));
-        if (!row) {
-          alert("No se encontró el prospecto.");
-          return;
-        }
-        const factor = getFactorByComuna(row.Comuna);
-        let utm = parseCLPInput(inpUTMPros.value);
-        if ((!utm || utm <= 0) && typeof window.UTM_VALOR !== "undefined") {
-          utm = window.UTM_VALOR;
-        }
-
-        const params = new URLSearchParams({
-          prospectoId: getKeyVal(row),
-          nombre: row.Nombre || row.RazonSocial || "",
-          comuna: row.Comuna || "",
-          unidades: String(
-            row.Unidades || row.NUnidades || row.CantidadUnidades || 0
-          ),
-          direccion: row.Direccion || row.Dirección || "",
-          rut: row.RUT || "",
-        });
-        if (factor != null) params.set("factor", String(factor));
-        if (utm > 0) params.set("utm", String(Math.round(utm)));
-
-        window.location.href = `cotizacion-admin-condominio.html?${params.toString()}`;
-      }
-
-      /* ===== BITÁCORA ===== */
-      async function abrirBitacora(id) {
-        CURRENT_PROS_ID = id;
-        const p = PROS.find((x) => String(getKeyVal(x)) === String(id));
-        if (!p) return;
-
-        document.getElementById("bitacoraSubtitle").innerText = `Prospecto: ${
-          p.Nombre || "Desconocido"
-        }`;
-        document.getElementById("modalBitacora").classList.add("active");
-        document.getElementById("bitFecha").valueAsDate = new Date();
-        document.getElementById("bitNota").value = "";
-
-        renderTimeline([]);
-
-        showSpinner("Cargando historial...");
-        try {
-          const data = await fetchData("Bitacora").catch(() => []);
-          const historial = data.filter(
-            (h) => String(h.ProspectoID) === String(id)
-          );
-          historial.sort((a, b) => new Date(b.Fecha) - new Date(a.Fecha));
-          renderTimeline(historial);
-        } catch (e) {
-          console.error(e);
-          document.getElementById("timelineContainer").innerHTML =
-            '<p class="muted">No se pudo cargar la bitácora (¿Existe la tabla?).</p>';
-        } finally {
-          hideSpinner();
-        }
-      }
-
-      function renderTimeline(lista) {
-        const container = document.getElementById("timelineContainer");
-        if (lista.length === 0) {
-          container.innerHTML =
-            '<div style="text-align:center; padding:20px; color:#94a3b8;"><i class="fa-regular fa-comment-dots" style="font-size:24px; margin-bottom:10px;"></i><br>Sin registros aún.<br>Agrega una nota abajo.</div>';
-          return;
-        }
-        container.innerHTML =
-          `<div class="timeline">` +
-          lista
-            .map(
-              (item) => `
-        <div class="timeline-item">
-            <div class="timeline-dot ${item.Tipo}"></div>
-            <div class="timeline-date">${item.Fecha || "---"}</div>
-            <div class="timeline-content">
-                <span class="timeline-type" style="color:${getColorTipo(
-                  item.Tipo
-                )}">${item.Tipo}</span>
-                ${item.Nota || ""}
-            </div>
-        </div>
-    `
-            )
-            .join("") +
-          `</div>`;
-      }
-
-      function getColorTipo(tipo) {
-        if (tipo === "Llamada") return "#2563eb";
-        if (tipo === "Correo") return "#d97706";
-        if (tipo === "Reunion") return "#059669";
-        return "#475569";
-      }
-
-      async function guardarBitacora() {
-        const nota = document.getElementById("bitNota").value.trim();
-        if (!nota) return alert("Escribe una nota primero.");
-
-        const payload = {
-          ID: generateKey("BIT"),
-          ProspectoID: CURRENT_PROS_ID,
-          Fecha: document.getElementById("bitFecha").value,
-          Tipo: document.getElementById("bitTipo").value,
-          Nota: nota,
-          Usuario: "Admin",
-        };
-
-        showSpinner("Guardando nota...");
-        try {
-          if (typeof upsertData === "function")
-            await upsertData("Bitacora", payload);
-          else await appSheetCRUD("Bitacora", "Add", [payload]);
-
-          const allData = await fetchData("Bitacora");
-          const historial = allData.filter(
-            (h) => String(h.ProspectoID) === String(CURRENT_PROS_ID)
-          );
-          historial.sort((a, b) => new Date(b.Fecha) - new Date(a.Fecha));
-          renderTimeline(historial);
-          document.getElementById("bitNota").value = "";
-        } catch (e) {
-          alert("Error: " + e.message);
-        } finally {
-          hideSpinner();
-        }
-      }
-
-      /* ===== CONTRATO ===== */
-      function abrirModalContrato(id) {
-        CURRENT_PROS_ID = id;
-        const p = PROS.find((x) => String(getKeyVal(x)) === String(id));
-
-        document.getElementById("contratoProsID").value = id;
-        document.getElementById("inpContratoURL").value = p.ContratoURL || "";
-        document.getElementById("modalContrato").classList.add("active");
-      }
-
-      async function guardarContrato() {
-        const url = document.getElementById("inpContratoURL").value.trim();
-        if (!url) return alert("Debes pegar un enlace al contrato.");
-
-        const payload = {
-          [KEY_NAME]: CURRENT_PROS_ID,
-          ContratoURL: url,
-          Estado: "Contrato Firmado",
-        };
-
-        showSpinner("Actualizando prospecto...");
-        try {
-          if (typeof upsertData === "function")
-            await upsertData("ProspectosCopro", payload);
-          else await appSheetCRUD("ProspectosCopro", "Edit", [payload]);
-
-          document.getElementById("modalContrato").classList.remove("active");
-          await cargarTodo();
-          alert("✅ Contrato registrado y estado actualizado.");
-        } catch (e) {
-          alert("Error: " + e.message);
-        } finally {
-          hideSpinner();
-        }
-      }
-
-      /* ===== Convertir Cliente ===== */
-      async function agregarAClientes(id) {
-        if (
-          !confirm(
-            '¿Deseas convertir este prospecto en una nueva Copropiedad?\n\nEsto también cambiará su estado a "Cerrado Ganado".'
-          )
-        )
-          return;
-
-        try {
-          const row = PROS.find((x) => String(getKeyVal(x)) === String(id));
-          if (!row) {
-            alert("No se encontró el prospecto.");
-            return;
-          }
-
-          showSpinner("Procesando conversión...");
-
-          const newID = generateKey("COPRO");
-          let numUnidades = parseInt(
-            row.Unidades || row.NUnidades || row.CantidadUnidades || 0
-          );
-          if (isNaN(numUnidades)) numUnidades = 0;
-
-          const payloadCliente = {
-            ID: newID,
-            Nombre: (row.Nombre || row.RazonSocial || "").trim(),
-            RUT: (row.RUT || "").trim(),
-            Direccion: (row.Direccion || row.Dirección || "").trim(),
-            Comuna: (row.Comuna || "").trim(),
-            Ciudad: (row.Comuna || "").trim(),
-            Banco: "",
-            Cuenta: "",
-            EmailAdmin: (row.Contacto || row.Email || "").trim(),
-            Telefono: (row.Telefono || "").trim(),
-            FondoReserva: 0,
-            ReglamentoURL: "",
-            LibroActasURL: "",
-            Unidades: numUnidades,
-          };
-
-          if (typeof upsertData === "function")
-            await upsertData("Copropiedades", payloadCliente);
-          else await appSheetCRUD("Copropiedades", "Add", [payloadCliente]);
-
-          const keyField = getKeyName(row);
-          const payloadProspecto = {
-            [keyField]: id,
-            Estado: "Cerrado Ganado",
-          };
-
-          if (typeof upsertData === "function")
-            await upsertData("ProspectosCopro", payloadProspecto);
-          else
-            await appSheetCRUD("ProspectosCopro", "Edit", [payloadProspecto]);
-
-          await cargarTodo();
-
-          if (
-            confirm(
-              '✅ ¡Felicidades! Nuevo cliente creado.\nEl prospecto ha pasado a "Cerrado Ganado".\n\n¿Ir al panel del nuevo condominio?'
-            )
-          ) {
-            window.location.href = `admin-condominios.html?id=${newID}`;
-          }
-        } catch (e) {
-          console.error(e);
-          alert("Error al procesar: " + (e.message || e));
-        } finally {
-          hideSpinner();
-        }
-      }
-
-      /* Export CSV */
-      function exportCSV() {
-        const headers = [
-          "ID",
-          "Estado",
-          "Nombre",
-          "Comuna",
-          "Unidades",
-          "Direccion",
-          "RUT",
-          "Contacto",
-        ];
-        const lines = [headers.join(",")];
-        VIEW.forEach((r) => {
-          lines.push(
-            [
-              escapeCSV(getKeyVal(r)),
-              escapeCSV(r.Estado || "Nuevo"),
-              escapeCSV(r.Nombre || r.RazonSocial || ""),
-              escapeCSV(r.Comuna || ""),
-              escapeCSV(r.Unidades || 0),
-              escapeCSV(r.Direccion || ""),
-              escapeCSV(r.RUT || ""),
-              escapeCSV(r.Contacto || ""),
-            ].join(",")
-          );
-        });
-        const blob = new Blob([lines.join("\n")], {
-          type: "text/csv;charset=utf-8;",
-        });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "ProspectosCopro.csv";
-        a.click();
-        URL.revokeObjectURL(url);
-      }
     </script>
   </body>
 </html>
