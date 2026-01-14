@@ -173,7 +173,12 @@
     let VIEW = [];
 
     document.addEventListener("DOMContentLoaded", async () => {
-        try { document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); } catch(e){}
+        try { 
+    document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); 
+    // AGREGAR ESTA LÍNEA CLAVE:
+    if (typeof initHeader === "function") initHeader(); 
+} catch(e){}
+
         try { document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); } catch(e){}
         await cargarFiltrosIniciales();
     });
