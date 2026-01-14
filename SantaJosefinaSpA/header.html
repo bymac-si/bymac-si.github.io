@@ -1,4 +1,8 @@
 <style>
+  /* =========================================
+     ESTILOS BASE (ESCRITORIO - Default)
+     ========================================= */
+
   /* 1. Contenedor Principal */
   .main-header {
     background-color: #ffffff;
@@ -19,12 +23,14 @@
 
   /* 2. Logo */
   .logo-img {
-    height: 50px; /* Ajustado para que no deforme el header */
+    height: 50px;
     width: auto;
     transition: transform 0.2s;
     display: block;
   }
-  .logo-img:hover { transform: scale(1.05); }
+  .logo-img:hover {
+    transform: scale(1.05);
+  }
 
   /* 3. Navegación (Menú Central) */
   .nav-container {
@@ -32,7 +38,7 @@
     gap: 10px;
     height: 100%;
     align-items: center;
-    margin-left: auto;
+    margin-left: auto; /* Empuja a la derecha en escritorio */
   }
 
   /* Links */
@@ -48,13 +54,25 @@
     align-items: center;
     gap: 6px;
     white-space: nowrap;
+    border-bottom: none; /* Asegura que no tenga borde en escritorio */
   }
 
-  .nav-link:hover { color: #0f172a; background-color: #f1f5f9; }
-  .nav-link.active { color: #3b82f6; background-color: #eff6ff; }
+  .nav-link:hover {
+    color: #0f172a;
+    background-color: #f1f5f9;
+  }
+  .nav-link.active {
+    color: #3b82f6;
+    background-color: #eff6ff;
+  }
 
-  /* Dropdowns */
-  .nav-dropdown { position: relative; height: 100%; display: flex; align-items: center; }
+  /* Dropdowns (Escritorio) */
+  .nav-dropdown {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
 
   .dropdown-menu {
     display: none;
@@ -72,173 +90,251 @@
     animation: fadeIn 0.2s ease;
   }
 
-  .nav-dropdown:hover .dropdown-menu { display: block; }
-  .dropdown-menu li { margin: 0; }
+  .nav-dropdown:hover .dropdown-menu {
+    display: block;
+  }
+  .dropdown-menu li {
+    margin: 0;
+  }
 
   .dropdown-menu li a {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 20px; color: #475569; text-decoration: none;
-    font-size: 13px; transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    color: #475569;
+    text-decoration: none;
+    font-size: 13px;
+    transition: background 0.2s;
+    border-bottom: none;
   }
-  .dropdown-menu li a:hover { background-color: #f8fafc; color: #0f172a; padding-left: 25px; }
-  .dropdown-menu li a i { width: 16px; text-align: center; color: #94a3b8; }
-  .dropdown-menu li a:hover i { color: #3b82f6; }
+  .dropdown-menu li a:hover {
+    background-color: #f8fafc;
+    color: #0f172a;
+    padding-left: 25px;
+  }
+  .dropdown-menu li a i {
+    width: 16px;
+    text-align: center;
+    color: #94a3b8;
+  }
+  .dropdown-menu li a:hover i {
+    color: #3b82f6;
+  }
 
-  /* Submenús */
-  .dropdown-submenu { position: relative; }
-  .dropdown-submenu .submenu {
-    display: none; position: absolute; top: -5px; left: 100%; margin-left: 5px;
-    background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    border: 1px solid #e2e8f0; min-width: 180px; padding: 5px 0; list-style: none; z-index: 1002;
+  /* Submenús (Escritorio) */
+  .dropdown-submenu {
+    position: relative;
   }
-  .dropdown-submenu:hover > .submenu { display: block; }
-  .dropdown-submenu .submenu li a:hover { background-color: #f1f5f9; }
+  .dropdown-submenu .submenu {
+    display: none;
+    position: absolute;
+    top: -5px;
+    left: 100%;
+    margin-left: 5px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e2e8f0;
+    min-width: 180px;
+    padding: 5px 0;
+    list-style: none;
+    z-index: 1002;
+  }
+  .dropdown-submenu:hover > .submenu {
+    display: block;
+  }
+  .dropdown-submenu .submenu li a:hover {
+    background-color: #f1f5f9;
+  }
 
   /* 4. Sección Usuario */
   .user-actions {
-    display: flex; align-items: center; gap: 15px; margin-left: 15px;
-    padding-left: 15px; border-left: 1px solid #e2e8f0;
-    flex-shrink: 0 !important; min-width: max-content;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-left: 15px;
+    padding-left: 15px;
+    border-left: 1px solid #e2e8f0;
+    flex-shrink: 0 !important;
+    min-width: max-content;
+    background: transparent;
+    border-top: none;
   }
-  .user-info { text-align: right; line-height: 1.2; }
-  .user-name { font-weight: 700; font-size: 13px; color: #1e293b; display: block; }
-  .user-role { font-size: 11px; color: #94a3b8; text-transform: uppercase; }
+  .user-info {
+    text-align: right;
+    line-height: 1.2;
+  }
+  .user-name {
+    font-weight: 700;
+    font-size: 13px;
+    color: #1e293b;
+    display: block;
+  }
+  .user-role {
+    font-size: 11px;
+    color: #94a3b8;
+    text-transform: uppercase;
+  }
 
   .btn-logout {
-    color: #ef4444; border: 1px solid #fee2e2; background: #fef2f2;
-    padding: 0; width: 36px; height: 36px; border-radius: 6px; font-size: 14px;
-    cursor: pointer; text-decoration: none; transition: all 0.2s;
-    display: flex; align-items: center; justify-content: center;
+    color: #ef4444;
+    border: 1px solid #fee2e2;
+    background: #fef2f2;
+    padding: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  .btn-logout:hover { background: #fee2e2; transform: translateY(-1px); }
+  .btn-logout:hover {
+    background: #fee2e2;
+    transform: translateY(-1px);
+  }
 
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
   /* Mobile Toggle */
-  .mobile-toggle { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: #1e293b; padding: 10px; }
+  .mobile-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #1e293b;
+    padding: 10px;
+  }
 
   /* =========================================
      RESPONSIVE MOBILE (Hasta 1100px)
      ========================================= */
   @media (max-width: 1100px) {
-    .mobile-toggle { display: block; }
-    
+    .mobile-toggle {
+      display: block;
+    }
+
     .nav-container {
-      display: none; 
-      position: fixed; /* Fixed asegura que ocupe toda la pantalla real */
+      display: none;
+      position: fixed;
       top: 70px;
       left: 0;
       width: 100%;
-      height: calc(100vh - 70px); /* Altura total menos el header */
+      height: calc(100vh - 70px);
       background: #ffffff;
       flex-direction: column;
       align-items: flex-start;
       padding: 0;
-      overflow-y: auto; /* Permite SCROLL si el menú es muy largo */
+      overflow-y: auto;
       z-index: 2000;
       border-top: 1px solid #e2e8f0;
-      padding-bottom: 40px; /* Espacio extra al final para scroll cómodo */
+      padding-bottom: 40px;
     }
-    
-    .nav-container.active { display: flex; }
 
-    /* Estilos generales de enlaces */
-    .nav-link, .nav-dropdown { width: 100%; box-sizing: border-box; }
-    .nav-link { 
-      padding: 15px 20px; 
-      border-bottom: 1px solid #f1f5f9; 
-      font-size: 15px; /* Texto un poco más grande para el dedo */
-      justify-content: space-between; /* Flechas a la derecha */
+    .nav-container.active {
+      display: flex;
     }
-    
-    .nav-dropdown { flex-direction: column; align-items: flex-start; height: auto; }
-    
-    /* MENÚ DESPLEGABLE (Nivel 1) */
+
+    /* Estilos enlaces MÓVIL */
+    .nav-link,
+    .nav-dropdown {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .nav-link {
+      padding: 15px 20px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 15px;
+      justify-content: space-between;
+    }
+
+    .nav-dropdown {
+      flex-direction: column;
+      align-items: flex-start;
+      height: auto;
+    }
+
+    /* MENÚ DESPLEGABLE MÓVIL (Nivel 1) */
     .dropdown-menu {
-      position: static; /* CLAVE: Ya no flota, ocupa espacio real */
-      box-shadow: none; 
-      border: none; 
-      width: 100%; 
-      padding: 0; 
-      display: none; /* Se oculta hasta hover/click */
-      background-color: #f8fafc; /* Fondo gris claro para diferenciar */
+      position: static;
+      box-shadow: none;
+      border: none;
+      width: 100%;
+      padding: 0;
+      display: none;
+      background-color: #f8fafc;
     }
-    
-    /* En móvil, mostrar siempre los menús desplegados para facilitar navegación 
-       o podrías usar JS para toggle. Por ahora hover/active funciona visualmente */
+
+    /* Mostrar menús al hover/active en móvil */
     .nav-dropdown:hover .dropdown-menu,
     .nav-dropdown:active .dropdown-menu,
-    .nav-dropdown:focus-within .dropdown-menu { 
-        display: block; 
+    .nav-dropdown:focus-within .dropdown-menu {
+      display: block;
     }
 
-    .dropdown-menu li a { 
-        padding: 12px 20px 12px 40px; /* Indentación Nivel 1 */
-        border-bottom: 1px solid #eee;
-        color: #334155;
+    .dropdown-menu li a {
+      padding: 12px 20px 12px 40px;
+      border-bottom: 1px solid #eee;
+      color: #334155;
     }
 
-    /* === SOLUCIÓN SUBMENÚ PROSPECTOS (Nivel 2) === */
-    .dropdown-submenu { 
-        display: block; 
-        width: 100%;
+    /* SUBMENÚ MÓVIL (Nivel 2) */
+    .dropdown-submenu {
+      display: block;
+      width: 100%;
     }
-    
+
     .dropdown-submenu .submenu {
-        position: static !important; /* CLAVE: Forzar a estático */
-        display: block !important;   /* Siempre visible dentro del padre en móvil */
-        width: 100% !important;
-        box-shadow: none !important;
-        border: none !important;
-        margin: 0 !important;
-        background-color: #eff6ff !important; /* Fondo azul muy claro para Nivel 2 */
-        padding: 0;
+      position: static !important;
+      display: block !important;
+      width: 100% !important;
+      box-shadow: none !important;
+      border: none !important;
+      margin: 0 !important;
+      background-color: #eff6ff !important;
+      padding: 0;
     }
 
-    /* Enlaces del Submenú (Indentación profunda) */
     .dropdown-submenu .submenu li a {
-        padding-left: 60px !important; /* Indentación Nivel 2 */
-        font-size: 13px;
-        color: #1e3a8a; /* Azul para diferenciar */
+      padding-left: 60px !important;
+      font-size: 13px;
+      color: #1e3a8a;
     }
 
-    /* Rotar la flechita del submenú para indicar que está "abajo" */
     .dropdown-submenu > a i.fa-chevron-right {
-        transform: rotate(90deg);
+      transform: rotate(90deg);
     }
 
-    /* Usuario al final */
+    /* Usuario al final en MÓVIL */
     .user-actions {
-      width: 100%; margin: 0; padding: 20px; 
-      border-top: 2px solid #e2e8f0; 
+      width: 100%;
+      margin: 0;
+      padding: 20px;
+      border-top: 2px solid #e2e8f0;
+      border-left: none; /* Quitar borde izquierdo de desktop */
       justify-content: space-between;
-      flex-direction: row-reverse; 
+      flex-direction: row-reverse;
       background: #ffffff;
-      margin-top: auto; /* Empuja al final si hay espacio */
+      margin-top: auto;
     }
-    .user-info { text-align: left; }
+    .user-info {
+      text-align: left;
+    }
   }
-    /* Esta clase se agrega con JS para mostrar el menú */
-    .nav-container.active { display: flex; }
-
-    .nav-link, .nav-dropdown { width: 100%; box-sizing: border-box; }
-    .nav-link { padding: 15px 20px; border-bottom: 1px solid #f8fafc; font-size: 14px; }
-
-    .nav-dropdown { flex-direction: column; align-items: flex-start; height: auto; }
-    .dropdown-menu {
-      position: static; box-shadow: none; border: none;
-      width: 100%; padding: 0; display: none; background-color: #f8fafc;
-    }
-    .nav-dropdown:hover .dropdown-menu { display: block; }
-    .dropdown-menu li a { padding-left: 40px; border-bottom: 1px solid #eee; }
-
-    .user-actions {
-      width: 100%; margin: 0; padding: 15px 20px; border-left: none;
-      border-top: 2px solid #f1f5f9; justify-content: space-between;
-      flex-direction: row-reverse; background: #fdfdfd;
-    }
-    .user-info { text-align: left; }
-  
 </style>
 
 <header class="main-header no-print">
@@ -260,7 +356,9 @@
   <nav class="nav-container" id="navMenu">
     <div class="nav-dropdown">
       <a href="#" class="nav-link dropdown-toggle">
-        <i class="fa-solid fa-handshake"></i> <span>Corretaje</span>
+        <div style="display: flex; align-items: center; gap: 6px">
+          <i class="fa-solid fa-handshake"></i> <span>Corretaje</span>
+        </div>
         <i
           class="fa-solid fa-chevron-down"
           style="font-size: 10px; margin-left: 4px"
@@ -285,7 +383,9 @@
 
     <div class="nav-dropdown">
       <a href="#" class="nav-link dropdown-toggle">
-        <i class="fa-solid fa-building"></i> <span>Condominios</span>
+        <div style="display: flex; align-items: center; gap: 6px">
+          <i class="fa-solid fa-building"></i> <span>Condominios</span>
+        </div>
         <i
           class="fa-solid fa-chevron-down"
           style="font-size: 10px; margin-left: 4px"
@@ -345,7 +445,9 @@
 
     <div class="nav-dropdown">
       <a href="#" class="nav-link dropdown-toggle">
-        <i class="fa-solid fa-coins"></i> <span>Finanzas</span>
+        <div style="display: flex; align-items: center; gap: 6px">
+          <i class="fa-solid fa-coins"></i> <span>Finanzas</span>
+        </div>
         <i
           class="fa-solid fa-chevron-down"
           style="font-size: 10px; margin-left: 4px"
@@ -377,7 +479,9 @@
 
     <div class="nav-dropdown">
       <a href="#" class="nav-link dropdown-toggle">
-        <i class="fa-solid fa-tree"></i> <span>Espacios/Reclamos</span>
+        <div style="display: flex; align-items: center; gap: 6px">
+          <i class="fa-solid fa-tree"></i> <span>Espacios/Reclamos</span>
+        </div>
         <i
           class="fa-solid fa-chevron-down"
           style="font-size: 10px; margin-left: 4px"
