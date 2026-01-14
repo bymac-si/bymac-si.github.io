@@ -23,23 +23,23 @@
     </script>
 
     <script>
-      document.addEventListener("DOMContentLoaded", async () => {
-        // Cargar Header y Footer
-        try {
-          document.getElementById("header").innerHTML = await (
-            await fetch("header.html")
-          ).text();
-        } catch (e) {}
-        try {
-          document.getElementById("footer").innerHTML = await (
-            await fetch("footer.html")
-          ).text();
-        } catch (e) {}
+document.addEventListener("DOMContentLoaded", async () => {
+  // 1. Cargar Header y activar menú
+  try {
+    document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
+    if (typeof initHeader === 'function') initHeader(); // Activa el menú sandwich
+  } catch (e) { console.error("Error header:", e); }
 
-        // Iniciar Lógica Dashboard
-        bindUI();
-        cargarDashboard();
-      });
+  // 2. Cargar Footer
+  try {
+    document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+  } catch (e) { console.error("Error footer:", e); }
+
+  // 3. Iniciar Lógica Específica de la Página (si existe)
+  if (typeof bindUI === 'function') bindUI();
+  if (typeof cargarDashboard === 'function') await cargarDashboard();
+  if (typeof cargarTodo === 'function') await cargarTodo(); // Para clientes.html / prospectos.html
+});
 
       function bindUI() {
         document

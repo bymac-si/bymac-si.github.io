@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Mapa en Terreno</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  
+  <script src="assets/js/app.js"></script>
+  <script>requireAuth();</script>
+
+  <style>
+    /* === LAYOUT MÓVIL === */
+    body { margin: 0; padding: 0; overflow: hidden; background: #e2e8f0; font-family: -apple-system, sans-serif; }
+    
+    #map { height: 100vh; width: 100vw; z-index: 1; }
+
+    /* Barra Superior Flotante */
+    .top-bar {
+        position: absolute; top: 15px; left: 15px; right: 15px; z-index: 1000;
+        display: flex; flex-direction: column; gap: 10px; pointer-events: none; /* Dejar pasar clicks al mapa en huecos */
+    }
+
+    .search-box {
+        background: white; border-radius: 12px; padding: 12px 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1); pointer-events: auto;
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .search-title { font-weight: 700; color: #1e293b; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .btn-close { color: #64748b; text-decoration: none; font-size: 18px; padding: 5px; }
+
+    /* Filtros Deslizables (Chips) */
+    .filter-scroll {
+        display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px;
+        pointer-events: auto; -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Ocultar scrollbar */
+    }
+    .filter-scroll::-webkit-scrollbar { display: none; }
+
+    .chip {
+        background: white; border: 1px solid #cbd5e1; color: #475569;
+        padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;
+        white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: all 0.2s; cursor: pointer; display: flex; align-items: center; gap: 6px;
+    }
+    .chip.active { background: #1a2b48; color: white; border-color: #1a2b48; }
+    
+    /* Colores específicos para chips activos */
+    .chip-admin.active { background: #1e3a8a; border-color: #1e3a8a; } /* Azul Admin */
+    .chip-corretaje.active { background: #ea580c; border-color: #ea580c; } /* Naranja Corretaje */
+
+    /* Botones Flotantes Inferiores */
+    .fab-container {
+        position: absolute; bottom: 30px; right: 20px; z-index: 1000;
+        display: flex; flex-direction: column; gap: 15px;
+    }
+    .fab {
+        width: 50px; height: 50px; border-radius: 50%; background: white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: flex;
+        align-items: center; justify-content: center; font-size: 20px;
+        color: #1e293b; cursor: pointer; border: none; text-decoration: none;
+    }
+    .fab:active { transform: scale(0.95); }
+    .fab-primary { background: #1a2b48; color: white; }
+
+    /* PINES PERSONALIZADOS (CSS PURO) */
+    .custom-pin {
+        display: flex; align-items: center; justify-content: center;
+        color: white; font-size: 14px; border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg); /* Forma de gota */
+        box-shadow: 3px 3px 6px rgba(0,0,0,0.3); border: 2px solid white;
+    }
+    .pin-icon { transform: rotate(45deg); } /* Enderezar icono */
+    
+    .pin-admin { background: #1e3a8a; } /* Azul Fuerte */
+    .pin-venta { background: #ea580c; } /* Naranja */
+    .pin-arriendo { background: #16a34a; } /* Verde */
+
+    /* BOTTOM SHEET (Modal de Edición Deslizable) */
+    .bottom-sheet {
+        position: fixed; bottom: -100%; left: 0; right: 0;
+        background: white; z-index: 2000;
+        border-top-left-radius: 20px; border-top-right-radius: 20px;
+        box-shadow: 0 -5px 25px rgba(0,0,0,0.2);
+        transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 20px; max-height: 85vh; overflow-y: auto;
+        display: flex; flex-direction: column;
+    }
+    .bottom-sheet.open { bottom: 0; }
+    
+    .sheet-header {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px;
+    }
+    .sheet-title { margin: 0; font-size: 18px; color: #1e293b; font-weight: 700; }
+    
+    /* Formulario en Sheet */
+    .sheet-form label { display: block; font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 5px; margin-top: 15px; }
+    .sheet-form input, .sheet-form select, .sheet-form textarea {
+        width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px;
+        background: #f8fafc; font-size: 16px; box-sizing: border-box;
+    }
+    .btn-save {
+        width: 100%; padding: 15px; background: #1a2b48; color: white;
+        border: none; border-radius: 12px; font-size: 16px; font-weight: 600;
+        margin-top: 25px; cursor: pointer;
+    }
+
+    /* Overlay Oscuro */
+    .overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1500;
+        display: none; opacity: 0; transition: opacity 0.3s;
+    }
+    .overlay.visible { display: block; opacity: 1; }
+
+    /* Leaflet Popup Clean */
+    .leaflet-popup-content-wrapper { border-radius: 12px; padding: 0; }
+    .leaflet-popup-content { margin: 15px; width: 220px !important; text-align: center; }
+    .popup-tag { 
+        display: inline-block; padding: 3px 8px; border-radius: 4px; 
+        font-size: 10px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px;
+    }
+    .btn-edit-popup {
+        margin-top: 10px; width: 100%; padding: 8px; background: #1a2b48; 
+        color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="map"></div>
+
+  <div class="top-bar">
+    <div class="search-box">
+        <div class="search-title">
+            <i class="fa-solid fa-map-location-dot" style="color: #1a2b48;"></i> Mapa de Oportunidades
+        </div>
+        <a href="dashboard.html" class="btn-close"><i class="fa-solid fa-xmark"></i></a>
+    </div>
+
+    <div class="filter-scroll">
+        <div class="chip active" onclick="filtrar('Todos', this)">Todos</div>
+        <div class="chip chip-admin" onclick="filtrar('Admin', this)"><i class="fa-solid fa-building"></i> Admin</div>
+        <div class="chip chip-corretaje" onclick="filtrar('Corretaje', this)"><i class="fa-solid fa-house"></i> Corretaje</div>
+        <div class="chip" onclick="filtrar('Nuevo', this)">Nuevos</div>
+        <div class="chip" onclick="filtrar('En Negociación', this)">En Negociación</div>
+    </div>
+  </div>
+
+  <div class="fab-container">
+    <button class="fab" onclick="centrarEnMi()" title="Mi Ubicación">
+        <i class="fa-solid fa-crosshairs"></i>
+    </button>
+    <a href="mobile_prospecto.html" class="fab fab-primary" title="Nuevo Prospecto">
+        <i class="fa-solid fa-plus"></i>
+    </a>
+  </div>
+
+  <div class="overlay" id="sheetOverlay" onclick="cerrarSheet()"></div>
+
+  <div class="bottom-sheet" id="editorSheet">
+    <div class="sheet-header">
+        <h3 class="sheet-title">Editar Prospecto</h3>
+        <button onclick="cerrarSheet()" style="background:none; border:none; font-size:20px; color:#64748b;"><i class="fa-solid fa-times"></i></button>
+    </div>
+    
+    <form id="formEdicion" class="sheet-form">
+        <input type="hidden" id="pID">
+        <input type="hidden" id="pTabla"> <label>Nombre Condominio / Cliente</label>
+        <input id="pNombre" required>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+                <label>Estado</label>
+                <select id="pEstado">
+                    <option value="Nuevo">Nuevo 🔵</option>
+                    <option value="Contactado">Contactado 🟡</option>
+                    <option value="En Negociación">En Negociación 🟠</option>
+                    <option value="Cerrado Ganado">Ganado 🟢</option>
+                    <option value="Cerrado Perdido">Perdido ⚫</option>
+                </select>
+            </div>
+            <div>
+                <label>Teléfono</label>
+                <input id="pTelefono" type="tel">
+            </div>
+        </div>
+
+        <label>Dirección / Ubicación</label>
+        <input id="pDireccion" placeholder="Calle, Número, Comuna">
+
+        <label>Notas</label>
+        <textarea id="pNotas" rows="3" placeholder="Comentarios..."></textarea>
+
+        <button type="submit" class="btn-save">Guardar Cambios</button>
+    </form>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <script>
+    let map;
+    let markersLayer;
+    let ALL_DATA = []; // Almacena Admin + Corretaje juntos
+
+    // Coordenadas iniciales (Centro aproximado Santiago/Chile)
+    const START_LAT = -34.5; 
+    const START_LNG = -71.0; 
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        initMap();
+        await cargarDatosUnificados();
+    });
+
+    function initMap() {
+        // Inicializar mapa sin controles de zoom (usamos pinch-to-zoom en móvil)
+        map = L.map('map', { zoomControl: false }).setView([START_LAT, START_LNG], 8);
+        
+        // Mapa limpio y claro (CartoDB Positron) para resaltar los pines
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap, &copy; CARTO',
+            maxZoom: 20
+        }).addTo(map);
+
+        markersLayer = L.layerGroup().addTo(map);
+    }
+
+    async function cargarDatosUnificados() {
+        try {
+            // 1. Cargar AMBAS tablas en paralelo
+            const [adminData, clientesData] = await Promise.all([
+                fetchData("ProspectosCopro").catch(() => []), // Tabla Admin
+                fetchData("Clientes").catch(() => [])         // Tabla Corretaje
+            ]);
+
+            // 2. Procesar Admin (Edificios)
+            const listA = adminData.map(p => ({
+                ...p,
+                _origen: 'Admin', // Etiqueta interna para filtrar
+                _tabla: 'ProspectosCopro', // Tabla destino para editar
+                _icono: 'fa-building',
+                _color: 'pin-admin'
+            }));
+
+            // 3. Procesar Clientes (Corretaje)
+            const listB = clientesData.map(p => {
+                // Inferir si es Venta o Arriendo
+                const op = (p["Tipo Operacion"] || "").toLowerCase();
+                let color = 'pin-venta'; // Naranja (Venta)
+                let icono = 'fa-sack-dollar';
+                
+                if(op.includes('arriendo')) {
+                    color = 'pin-arriendo'; // Verde (Arriendo)
+                    icono = 'fa-key';
+                }
+
+                return {
+                    ...p,
+                    _origen: 'Corretaje',
+                    _tabla: 'Clientes', // Tabla destino para editar
+                    _icono: icono,
+                    _color: color
+                };
+            });
+
+            // 4. Unir todo en una sola lista maestra
+            ALL_DATA = [...listA, ...listB];
+            
+            console.log(`Cargados: ${listA.length} Admin, ${listB.length} Corretaje`);
+            renderMap(ALL_DATA);
+
+        } catch (e) {
+            console.error("Error cargando datos:", e);
+            alert("Error de conexión al cargar datos.");
+        }
+    }
+
+    function renderMap(lista) {
+        markersLayer.clearLayers();
+        const bounds = [];
+
+        lista.forEach(p => {
+            // Obtener coordenadas de cualquier columna posible
+            const raw = p.LatLong || p.Coordenadas || p.Ubicacion;
+            const coords = parseCoords(raw);
+
+            if(coords) {
+                // Crear Pin HTML (Gota de color con icono dentro)
+                const iconHtml = `<div class="custom-pin ${p._color}">
+                                    <i class="fa-solid ${p._icono} pin-icon"></i>
+                                  </div>`;
+                
+                const icon = L.divIcon({
+                    className: 'dummy-class', 
+                    html: iconHtml,
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 30], // Punta del pin
+                    popupAnchor: [0, -30]
+                });
+
+                // Contenido del Popup
+                const popupContent = `
+                    <div style="text-align:center;">
+                        <span class="popup-tag" style="background:${p._color === 'pin-admin' ? '#e0f2fe; color:#0369a1' : '#ffedd5; color:#c2410c'}">
+                            ${p._origen}
+                        </span>
+                        <h4 style="margin:5px 0; color:#1e293b;">${p.Nombre || "Sin Nombre"}</h4>
+                        <p style="margin:0; font-size:12px; color:#64748b; margin-bottom:5px;">${p.Estado}</p>
+                        
+                        <button onclick="abrirEditor('${p.ID}', '${p._tabla}')" class="btn-edit-popup">
+                            <i class="fa-solid fa-pen"></i> Editar
+                        </button>
+                    </div>
+                `;
+
+                const marker = L.marker([coords.lat, coords.lng], { icon: icon })
+                    .bindPopup(popupContent);
+
+                markersLayer.addLayer(marker);
+                bounds.push([coords.lat, coords.lng]);
+            }
+        });
+
+        // Ajustar zoom para ver todos los puntos
+        if(bounds.length > 0) map.fitBounds(bounds, { padding: [50, 50] });
+    }
+
+    // --- FILTRADO (Chips) ---
+    window.filtrar = function(criterio, btn) {
+        // Activar chip visualmente
+        const parent = btn.parentNode;
+        parent.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+
+        if(criterio === 'Todos') {
+            renderMap(ALL_DATA);
+            return;
+        }
+
+        // Filtrar datos
+        const filtrados = ALL_DATA.filter(p => {
+            // Filtrar por Origen (Admin vs Corretaje)
+            if(criterio === 'Admin' || criterio === 'Corretaje') {
+                return p._origen === criterio;
+            }
+            // Filtrar por Estado (Nuevo, En Negociación, etc) - Búsqueda flexible
+            return (p.Estado || "").toLowerCase().includes(criterio.toLowerCase());
+        });
+
+        renderMap(filtrados);
+    };
+
+    // --- GPS ---
+    window.centrarEnMi = function() {
+        if(!navigator.geolocation) return alert("GPS no disponible");
+        navigator.geolocation.getCurrentPosition(pos => {
+            const { latitude, longitude } = pos.coords;
+            map.flyTo([latitude, longitude], 15);
+            // Dibujar círculo azul
+            L.circleMarker([latitude, longitude], {
+                radius: 8, fillColor: '#3b82f6', color: 'white', weight: 2, fillOpacity: 1
+            }).addTo(map).bindPopup("Estás aquí").openPopup();
+        }, err => alert("No se pudo obtener ubicación."));
+    };
+
+    // --- EDICIÓN (BOTTOM SHEET) ---
+    window.abrirEditor = function(id, tabla) {
+        const item = ALL_DATA.find(i => String(i.ID) === String(id) && i._tabla === tabla);
+        if(!item) return;
+
+        // Llenar formulario
+        document.getElementById('pID').value = item.ID;
+        document.getElementById('pTabla').value = tabla;
+        document.getElementById('pNombre').value = item.Nombre || "";
+        document.getElementById('pEstado').value = item.Estado || "Nuevo";
+        document.getElementById('pTelefono').value = item.Telefono || item.Celular || ""; // Soporta ambos nombres de columna
+        document.getElementById('pDireccion').value = item.Direccion || item.Ubicacion || "";
+        document.getElementById('pNotas').value = item.Observaciones || "";
+
+        // Abrir UI
+        map.closePopup(); // Cerrar popup del mapa para limpiar vista
+        document.getElementById('sheetOverlay').classList.add('visible');
+        document.getElementById('editorSheet').classList.add('open');
+    };
+
+    window.cerrarSheet = function() {
+        document.getElementById('sheetOverlay').classList.remove('visible');
+        document.getElementById('editorSheet').classList.remove('open');
+    };
+
+    // Guardar cambios
+    document.getElementById('formEdicion').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector('.btn-save');
+        const txt = btn.innerText;
+        btn.innerText = "Guardando..."; btn.disabled = true;
+
+        const tabla = document.getElementById('pTabla').value;
+        const payload = {
+            "ID": document.getElementById('pID').value,
+            "Nombre": document.getElementById('pNombre').value,
+            "Estado": document.getElementById('pEstado').value,
+            "Telefono": document.getElementById('pTelefono').value,
+            "Direccion": document.getElementById('pDireccion').value,
+            "Observaciones": document.getElementById('pNotas').value
+        };
+
+        try {
+            if(typeof appSheetCRUD === 'function') {
+                await appSheetCRUD(tabla, "Edit", [payload]);
+                alert("Guardado exitoso");
+                cerrarSheet();
+                cargarDatosUnificados(); // Recargar mapa para ver cambios
+            } else {
+                // Simulación local
+                alert("Modo Simulación: Guardado OK");
+                cerrarSheet();
+            }
+        } catch(err) {
+            alert("Error al guardar: " + err.message);
+        } finally {
+            btn.innerText = txt; btn.disabled = false;
+        }
+    };
+
+    // Helper Parseo Lat,Long
+    function parseCoords(str) {
+        if(!str) return null;
+        const parts = String(str).split(',').map(s => parseFloat(s.trim()));
+        if(parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+            // Filtro Geográfico Básico (Solo Chile aprox)
+            if(parts[0] < -17 && parts[0] > -56 && parts[1] < -66 && parts[1] > -76) {
+                return { lat: parts[0], lng: parts[1] };
+            }
+        }
+        return null;
+    }
+  </script>
+</body>
+</html>

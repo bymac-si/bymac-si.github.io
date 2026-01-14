@@ -336,3 +336,78 @@ document.addEventListener('DOMContentLoaded', () => {
         cargarDatosPropuesta();
     }
 });
+
+/* ==========================================
+   LÓGICA GLOBAL DEL HEADER
+   (Funciona aunque el header se cargue por fetch)
+   ========================================== */
+
+// 1. Función Toggle para el Menú Sandwich
+window.toggleMenu = function() {
+    const menu = document.getElementById('navMenu');
+    if (menu) {
+        menu.classList.toggle('active');
+    }
+};
+
+// 2. Función Logout Global
+window.logout = function() {
+    if(confirm("¿Cerrar sesión?")) {
+        localStorage.removeItem("admin_token"); 
+        localStorage.removeItem("sesion_residente");
+        window.location.href = "login.html"; 
+    }
+};
+
+// 3. Inicializar Header (Cargar usuario y marcar link activo)
+// Esta función debe llamarse DESPUÉS de que el header.html se haya insertado.
+window.initHeader = function() {
+    // 1. Cargar Usuario (Código existente...)
+    if(typeof getAuthUser === 'function') {
+        const au = getAuthUser();
+        if (au) {
+            const nameEl = document.getElementById('headerUserName');
+            const roleEl = document.getElementById('headerUserRole');
+            if(nameEl) nameEl.textContent = (au.Nombre || au.email || "Usuario").split(' ')[0];
+            if(roleEl) roleEl.textContent = au.rol || "Agente";
+        }
+    }
+
+    // 2. Marcar Link Activo (Código existente...)
+    const path = window.location.pathname.split("/").pop();
+    document.querySelectorAll('.nav-link, .dropdown-menu a').forEach(link => {
+        const href = link.getAttribute('href');
+        if(href && href.split('?')[0] === path) {
+            if(link.closest('.dropdown-menu')) {
+                link.style.fontWeight = "bold";
+                link.style.color = "#3b82f6";
+                link.style.backgroundColor = "#f1f5f9";
+                const parent = link.closest('.nav-dropdown');
+                if(parent) parent.querySelector('.dropdown-toggle').classList.add('active');
+            } else {
+                link.classList.add('active');
+            }
+        }
+    });
+
+    /* ======================================================
+       3. LÓGICA MOBILE REDIRECT (NUEVO)
+       Si la pantalla es menor a 1100px, cambiamos los links
+       ====================================================== */
+    if (window.innerWidth <= 1100) {
+        // Buscamos los enlaces específicos por su destino original
+        const btnListado = document.querySelector('a[href="prospectos.html"]');
+        const btnMapa = document.querySelector('a[href="mapa.html"]');
+
+        // Si existen en el menú, les cambiamos el destino
+        if (btnListado) {
+            btnListado.href = "mobile_prospecto.html"; // Redirige al formulario móvil
+            // Opcional: Cambiar icono o texto para indicar que es ingreso rápido
+            // btnListado.innerHTML = '<i class="fa-solid fa-plus"></i> Nuevo Prospecto'; 
+        }
+
+        if (btnMapa) {
+            btnMapa.href = "mobile_mapa.html"; // Redirige al mapa móvil (tipo App)
+        }
+    }
+};
