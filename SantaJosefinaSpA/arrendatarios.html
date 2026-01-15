@@ -1,292 +1,833 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Gestión de Arrendatarios</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/styles.css">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1a2b48">
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#1a2b48" />
+
     <script src="assets/js/app.js"></script>
-    <script>requireAuth();</script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script>
+      (function () {
+        emailjs.init("7Il4AhmGHchP7qfxu"); // Tu Public Key
+      })();
+      requireAuth();
+    </script>
+
     <style>
-        body { max-width: 1400px; margin: 0 auto; background: #f8fafc; }
-        main { padding: 40px; }
-        .badge-pago { font-size: 11px; padding: 4px 8px; border-radius: 12px; font-weight: bold; }
-        .bg-ok { background: #dcfce7; color: #166534; }
-        .bg-warn { background: #fef9c3; color: #854d0e; }
-        .bg-danger { background: #fee2e2; color: #991b1b; }
-        /* Reutilizamos estilos de chat/modal del dashboard anterior */
-        .chat-container { display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; padding: 10px; background: #f1f5f9; border-radius: 8px; }
-        .chat-bubble { background: white; padding: 10px; border-radius: 8px; font-size: 13px; border-left: 3px solid #3b82f6; }
+      /* Estilos Base */
+      body {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: #f8fafc;
+      }
+      main {
+        padding: 40px;
+      }
+
+      /* Badges */
+      .badge-pago {
+        font-size: 11px;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-weight: bold;
+      }
+      .bg-ok {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .bg-warn {
+        background: #fef9c3;
+        color: #854d0e;
+      }
+      .bg-danger {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      /* Bitácora / Chat */
+      .chat-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-height: 350px;
+        overflow-y: auto;
+        padding: 15px;
+        background: #f1f5f9;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        margin-top: 10px;
+      }
+      .chat-bubble {
+        background: white;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        border-left: 4px solid #3b82f6;
+        position: relative;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+      .chat-bubble.Cobranza {
+        border-left-color: #f59e0b;
+      }
+      .chat-bubble.Pago {
+        border-left-color: #10b981;
+      }
+
+      /* Spinner */
+      .spinner-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.85);
+        display: none;
+        place-items: center;
+        z-index: 9999;
+      }
+      .spinner {
+        width: 35px;
+        height: 35px;
+        border: 4px solid #e2e8f0;
+        border-top-color: #1a2b48;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div id="header"></div>
 
     <main>
-        <div class="dashboard-header no-print">
-            <div class="header-top">
-                <h1 class="page-title"><i class="fa-solid fa-key"></i> Contratos de Arriendo</h1>
-                <div class="header-actions">
-                    <button class="btn-head btn-secundario" onclick="cargarTodo()"><i class="fa-solid fa-rotate"></i></button>
-                    <button class="btn-head btn-nuevo" onclick="abrirModalContrato()"><i class="fa-solid fa-plus"></i> Nuevo Contrato</button>
-                </div>
-            </div>
-            <div class="header-filters">
-                <div class="filter-item" style="flex-grow: 1;">
-                    <label class="label">Buscar Arrendatario / Propiedad</label>
-                    <input id="inpBuscar" class="input-modern" placeholder="Nombre, RUT, Propiedad..." oninput="filtrar()">
-                </div>
-            </div>
+      <div class="dashboard-header no-print">
+        <div class="header-top">
+          <h1 class="page-title">
+            <i class="fa-solid fa-key"></i> Contratos de Arriendo
+          </h1>
+          <div class="header-actions">
+            <button
+              class="btn-head btn-secundario"
+              onclick="cargarTodo()"
+              title="Recargar"
+            >
+              <i class="fa-solid fa-rotate-right"></i>
+            </button>
+            <button class="btn-head btn-nuevo" onclick="abrirModalContrato()">
+              <i class="fa-solid fa-plus"></i> Nuevo Contrato
+            </button>
+          </div>
         </div>
+        <div class="header-filters">
+          <div class="filter-item" style="flex-grow: 1">
+            <label class="label">Buscar</label>
+            <input
+              id="inpBuscar"
+              class="input-modern"
+              placeholder="Nombre, RUT, Propiedad..."
+              oninput="filtrar()"
+            />
+          </div>
+        </div>
+      </div>
 
-        <div style="background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden;">
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; text-align: left;">
-                        <th style="padding: 15px;">Arrendatario</th>
-                        <th style="padding: 15px;">Propiedad</th>
-                        <th style="padding: 15px;">Canon</th>
-                        <th style="padding: 15px;">Día Pago</th>
-                        <th style="padding: 15px;">Vigencia</th>
-                        <th style="padding: 15px;">Estado</th>
-                        <th style="padding: 15px; text-align: right;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tablaContratos"></tbody>
-            </table>
-        </div>
+      <div
+        style="
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+          overflow: hidden;
+          border: 1px solid #e2e8f0;
+        "
+      >
+        <table style="width: 100%; border-collapse: collapse">
+          <thead>
+            <tr
+              style="
+                background: #f8fafc;
+                border-bottom: 2px solid #e2e8f0;
+                text-align: left;
+              "
+            >
+              <th
+                style="
+                  padding: 15px;
+                  font-size: 11px;
+                  text-transform: uppercase;
+                  color: #64748b;
+                "
+              >
+                Arrendatario
+              </th>
+              <th
+                style="
+                  padding: 15px;
+                  font-size: 11px;
+                  text-transform: uppercase;
+                  color: #64748b;
+                "
+              >
+                Propiedad
+              </th>
+              <th
+                style="
+                  padding: 15px;
+                  font-size: 11px;
+                  text-transform: uppercase;
+                  color: #64748b;
+                "
+              >
+                Canon
+              </th>
+              <th
+                style="
+                  padding: 15px;
+                  font-size: 11px;
+                  text-transform: uppercase;
+                  color: #64748b;
+                "
+              >
+                Día Pago
+              </th>
+              <th
+                style="
+                  padding: 15px;
+                  font-size: 11px;
+                  text-transform: uppercase;
+                  color: #64748b;
+                "
+              >
+                Vigencia
+              </th>
+              <th
+                style="
+                  padding: 15px;
+                  font-size: 11px;
+                  text-transform: uppercase;
+                  color: #64748b;
+                "
+              >
+                Estado
+              </th>
+              <th
+                style="
+                  padding: 15px;
+                  font-size: 11px;
+                  text-transform: uppercase;
+                  color: #64748b;
+                  text-align: right;
+                "
+              >
+                Acciones
+              </th>
+            </tr>
+          </thead>
+          <tbody id="tablaContratos"></tbody>
+        </table>
+      </div>
     </main>
 
     <div id="modalContrato" class="modal">
-        <div class="modal-content" style="max-width: 600px;">
-            <h2 id="ttlContrato">Nuevo Arriendo</h2>
-            <form id="formContrato" style="margin-top: 20px; display: grid; gap: 15px;">
-                <input type="hidden" id="contID">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div><label class="label">RUT Arrendatario</label><input id="cRut" class="input-modern" required></div>
-                    <div><label class="label">Nombre Completo</label><input id="cNombre" class="input-modern" required></div>
-                </div>
-                <div><label class="label">Propiedad (ID)</label><input id="cPropiedad" class="input-modern" placeholder="ID Propiedad"></div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div><label class="label">Monto ($)</label><input type="number" id="cMonto" class="input-modern" required></div>
-                    <div><label class="label">Día de Pago (1-31)</label><input type="number" id="cDia" class="input-modern" max="31" required></div>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div><label class="label">Email</label><input type="email" id="cEmail" class="input-modern"></div>
-                    <div><label class="label">Teléfono</label><input id="cTel" class="input-modern"></div>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div><label class="label">Inicio</label><input type="date" id="cInicio" class="input-modern"></div>
-                    <div><label class="label">Fin</label><input type="date" id="cFin" class="input-modern"></div>
-                </div>
-                <div style="text-align: right; margin-top: 10px;">
-                    <button type="button" class="btn-head btn-secundario" onclick="cerrarModal('modalContrato')">Cancelar</button>
-                    <button type="submit" class="btn-head btn-nuevo">Guardar</button>
-                </div>
-            </form>
-        </div>
+      <div class="modal-content" style="max-width: 600px">
+        <h2 id="ttlContrato" style="margin-top: 0">Nuevo Arriendo</h2>
+        <form
+          id="formContrato"
+          style="margin-top: 20px; display: grid; gap: 15px"
+        >
+          <input type="hidden" id="contID" />
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px">
+            <div>
+              <label class="label">RUT Arrendatario</label
+              ><input id="cRut" class="input-modern" required />
+            </div>
+            <div>
+              <label class="label">Nombre Completo</label
+              ><input id="cNombre" class="input-modern" required />
+            </div>
+          </div>
+          <div>
+            <label class="label">Propiedad (ID/Dirección)</label
+            ><input
+              id="cPropiedad"
+              class="input-modern"
+              placeholder="Ej: Depto 301 - Los Andes"
+              required
+            />
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px">
+            <div>
+              <label class="label">Monto ($)</label
+              ><input type="number" id="cMonto" class="input-modern" required />
+            </div>
+            <div>
+              <label class="label">Día de Pago (1-31)</label
+              ><input
+                type="number"
+                id="cDia"
+                class="input-modern"
+                max="31"
+                required
+              />
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px">
+            <div>
+              <label class="label">Email</label
+              ><input type="email" id="cEmail" class="input-modern" required />
+            </div>
+            <div>
+              <label class="label">Teléfono</label
+              ><input id="cTel" class="input-modern" />
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px">
+            <div>
+              <label class="label">Inicio</label
+              ><input type="date" id="cInicio" class="input-modern" />
+            </div>
+            <div>
+              <label class="label">Fin</label
+              ><input type="date" id="cFin" class="input-modern" />
+            </div>
+          </div>
+          <div style="text-align: right; margin-top: 15px">
+            <button
+              type="button"
+              class="btn-head btn-secundario"
+              onclick="cerrarModal('modalContrato')"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="btn-head btn-nuevo">Guardar</button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <div id="modalGestion" class="modal">
-        <div class="modal-content" style="max-width: 700px; height: 80vh; display: flex; flex-direction: column;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h2 style="margin: 0;">Gestión Arrendatario</h2>
-                <button onclick="cerrarModal('modalGestion')" class="btn-head btn-secundario">Cerrar</button>
-            </div>
-            
-            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <button class="btn-head btn-nuevo" onclick="enviarCobroMail()"><i class="fa-regular fa-envelope"></i> Enviar Cobro</button>
-                <button class="btn-head btn-secundario" onclick="registrarPagoManual()"><i class="fa-solid fa-money-bill-wave"></i> Registrar Pago</button>
-            </div>
-
-            <h4 style="margin: 0 0 10px; color: #64748b;">Bitácora de Interacciones</h4>
-            <div id="timelineContainer" class="chat-container" style="flex: 1;"></div>
-            
-            <div style="margin-top: 15px; display: flex; gap: 10px;">
-                <input id="txtNota" class="input-modern" placeholder="Nueva nota o compromiso..." style="flex: 1;">
-                <button class="btn-head btn-nuevo" onclick="guardarNota()">Agregar</button>
-            </div>
+      <div
+        class="modal-content"
+        style="
+          max-width: 700px;
+          height: 85vh;
+          display: flex;
+          flex-direction: column;
+        "
+      >
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+          "
+        >
+          <div>
+            <h2 style="margin: 0; font-size: 20px">Gestión de Pagos</h2>
+            <span id="lblClienteGestion" style="font-size: 13px; color: #64748b"
+              >Cliente: ...</span
+            >
+          </div>
+          <button
+            onclick="cerrarModal('modalGestion')"
+            class="btn-head btn-secundario"
+          >
+            Cerrar
+          </button>
         </div>
+
+        <div
+          style="
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+          "
+        >
+          <button
+            class="btn-head btn-nuevo"
+            style="background: #f59e0b; border: none"
+            onclick="enviarRecordatorioPago()"
+          >
+            <i class="fa-regular fa-bell"></i> Recordar Pago
+          </button>
+          <button
+            class="btn-head btn-nuevo"
+            style="background: #10b981; border: none"
+            onclick="enviarAcuseRecibo()"
+          >
+            <i class="fa-regular fa-circle-check"></i> Acuse Recibo
+          </button>
+          <button
+            class="btn-head btn-secundario"
+            onclick="registrarPagoManual()"
+          >
+            <i class="fa-solid fa-money-bill-wave"></i> Registro Manual
+          </button>
+        </div>
+
+        <h4
+          style="
+            margin: 0 0 5px;
+            color: #64748b;
+            font-size: 12px;
+            text-transform: uppercase;
+          "
+        >
+          Historial de Comunicaciones
+        </h4>
+        <div
+          id="timelineContainer"
+          class="chat-container"
+          style="flex: 1"
+        ></div>
+
+        <div style="margin-top: 15px; display: flex; gap: 10px">
+          <input
+            id="txtNota"
+            class="input-modern"
+            placeholder="Nota interna..."
+            style="flex: 1"
+          />
+          <button class="btn-head btn-nuevo" onclick="guardarNota()">
+            Agregar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="spinner" class="spinner-overlay">
+      <div style="text-align: center">
+        <div class="spinner"></div>
+        <div style="margin-top: 10px; font-weight: 600; color: #1a2b48">
+          Procesando...
+        </div>
+      </div>
     </div>
 
     <div id="footer"></div>
 
     <script>
-        let CONTRATOS = [], ACTUAL_ID = null;
+      /* ===== ESTADO ===== */
+      let CONTRATOS = [],
+        ACTUAL_ID = null;
 
-        document.addEventListener("DOMContentLoaded", async () => {
-            try { document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); if(typeof initHeader==='function') initHeader(); } catch(e){}
-            try { document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); } catch(e){}
-            await cargarTodo();
-        });
+      /* ===== INICIO ===== */
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          document.getElementById("header").innerHTML = await (
+            await fetch("header.html")
+          ).text();
+          if (typeof initHeader === "function") initHeader();
+        } catch (e) {}
+        try {
+          document.getElementById("footer").innerHTML = await (
+            await fetch("footer.html")
+          ).text();
+        } catch (e) {}
 
-        async function cargarTodo() {
-            // Asumimos tabla "ContratosArriendo"
-            CONTRATOS = await fetchData("ContratosArriendo").catch(() => []);
-            renderTabla(CONTRATOS);
+        await cargarTodo();
+      });
+
+      async function cargarTodo() {
+        showSpinner();
+        try {
+          CONTRATOS = await fetchData("ContratosArriendo").catch(() => []);
+          renderTabla(CONTRATOS);
+        } catch (e) {
+          console.error(e);
+        } finally {
+          hideSpinner();
+        }
+      }
+
+      /* ===== RENDER & FILTROS ===== */
+      function filtrar() {
+        const q = document.getElementById("inpBuscar").value.toLowerCase();
+        const filtrados = CONTRATOS.filter(
+          (c) =>
+            (c["Nombre Arrendatario"] || "").toLowerCase().includes(q) ||
+            (c["RUT Arrendatario"] || "").toLowerCase().includes(q) ||
+            (c.PropiedadID || "").toLowerCase().includes(q)
+        );
+        renderTabla(filtrados);
+      }
+
+      function renderTabla(lista) {
+        const tb = document.getElementById("tablaContratos");
+        tb.innerHTML = "";
+
+        if (lista.length === 0) {
+          tb.innerHTML =
+            '<tr><td colspan="7" style="text-align:center; padding:20px; color:#999;">No hay contratos encontrados.</td></tr>';
+          return;
         }
 
-        function filtrar() {
-            const q = document.getElementById("inpBuscar").value.toLowerCase();
-            const filtrados = CONTRATOS.filter(c => 
-                (c["Nombre Arrendatario"]||"").toLowerCase().includes(q) || 
-                (c["RUT Arrendatario"]||"").toLowerCase().includes(q)
-            );
-            renderTabla(filtrados);
-        }
+        lista.forEach((c) => {
+          // Lógica de Semáforo de Pago
+          const hoy = new Date().getDate();
+          const diaPago = parseInt(c["Dia Pago"]);
+          let badge = '<span class="badge-pago bg-ok">Al día</span>';
 
-        function renderTabla(lista) {
-            const tb = document.getElementById("tablaContratos");
-            tb.innerHTML = "";
-            lista.forEach(c => {
-                // Lógica de Semáforo de Pago
-                const hoy = new Date().getDate();
-                const diaPago = parseInt(c["Dia Pago"]);
-                let badge = '<span class="badge-pago bg-ok">Al día</span>';
-                if(hoy > diaPago) badge = '<span class="badge-pago bg-warn">Por Vencer</span>';
-                if(hoy > diaPago + 5) badge = '<span class="badge-pago bg-danger">Atrasado</span>';
+          // Simulación simple: Si hoy > día pago, alerta (en prod conectar con tabla Pagos)
+          if (hoy > diaPago)
+            badge = '<span class="badge-pago bg-warn">Por Vencer</span>';
+          if (hoy > diaPago + 5)
+            badge = '<span class="badge-pago bg-danger">Atrasado</span>';
 
-                tb.innerHTML += `
+          tb.innerHTML += `
                 <tr style="border-bottom: 1px solid #f1f5f9;">
                     <td style="padding: 15px;">
-                        <div style="font-weight: bold;">${c["Nombre Arrendatario"]}</div>
-                        <div style="font-size: 12px; color: #64748b;">${c["RUT Arrendatario"]}</div>
+                        <div style="font-weight: bold; color: #1e293b;">${
+                          c["Nombre Arrendatario"]
+                        }</div>
+                        <div style="font-size: 12px; color: #64748b;">${
+                          c["RUT Arrendatario"]
+                        }</div>
                     </td>
-                    <td style="padding: 15px;">ID: ${c.PropiedadID}</td>
-                    <td style="padding: 15px;">$${parseInt(c["Monto Arriendo"]).toLocaleString()}</td>
+                    <td style="padding: 15px; font-size:13px;">${
+                      c.PropiedadID
+                    }</td>
+                    <td style="padding: 15px; font-weight:700;">$${parseInt(
+                      c["Monto Arriendo"]
+                    ).toLocaleString()}</td>
                     <td style="padding: 15px;">Día ${c["Dia Pago"]}</td>
-                    <td style="padding: 15px; font-size: 13px;">${c["Fecha Inicio"]} <br>a ${c["Fecha Fin"]}</td>
+                    <td style="padding: 15px; font-size: 12px;">${
+                      c["Fecha Inicio"]
+                    }<br>al ${c["Fecha Fin"]}</td>
                     <td style="padding: 15px;">${badge}</td>
                     <td style="padding: 15px; text-align: right;">
-                        <button class="btn-icon" onclick="gestionar('${c.ID}')" title="Gestión"><i class="fa-solid fa-list-check"></i></button>
-                        <button class="btn-icon" onclick="editar('${c.ID}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn-icon" onclick="gestionar('${
+                          c.ID
+                        }')" title="Cobranza y Bitácora" style="background:#e0f2fe; color:#0369a1;"><i class="fa-solid fa-comments-dollar"></i></button>
+                        <button class="btn-icon" onclick="editar('${
+                          c.ID
+                        }')" title="Editar Contrato"><i class="fa-solid fa-pen"></i></button>
                     </td>
                 </tr>`;
-            });
-        }
+        });
+      }
 
-        /* --- CRUD CONTRATO --- */
-        function abrirModalContrato() {
-            document.getElementById("formContrato").reset();
-            document.getElementById("contID").value = "";
-            document.getElementById("modalContrato").style.display = "flex";
-        }
-        function cerrarModal(id) { document.getElementById(id).style.display = "none"; }
+      /* ===== EMAIL & GESTIÓN ===== */
+      async function gestionar(id) {
+        ACTUAL_ID = id;
+        const c = CONTRATOS.find((x) => x.ID === id);
+        if (c)
+          document.getElementById(
+            "lblClienteGestion"
+          ).innerText = `${c["Nombre Arrendatario"]} (${c.PropiedadID})`;
 
-        function editar(id) {
-            const c = CONTRATOS.find(x => x.ID === id);
-            if(!c) return;
-            document.getElementById("contID").value = c.ID;
-            document.getElementById("cRut").value = c["RUT Arrendatario"];
-            document.getElementById("cNombre").value = c["Nombre Arrendatario"];
-            document.getElementById("cPropiedad").value = c.PropiedadID;
-            document.getElementById("cMonto").value = c["Monto Arriendo"];
-            document.getElementById("cDia").value = c["Dia Pago"];
-            document.getElementById("cEmail").value = c.Email;
-            document.getElementById("cTel").value = c.telefono; // Ojo mayúsculas
-            document.getElementById("cInicio").value = c["Fecha Inicio"];
-            document.getElementById("cFin").value = c["Fecha Fin"];
-            document.getElementById("modalContrato").style.display = "flex";
-        }
+        document.getElementById("modalGestion").style.display = "flex";
+        cargarBitacora();
+      }
 
-        document.getElementById("formContrato").onsubmit = async (e) => {
-            e.preventDefault();
-            const id = document.getElementById("contID").value;
-            const payload = {
-                "RUT Arrendatario": document.getElementById("cRut").value,
-                "Nombre Arrendatario": document.getElementById("cNombre").value,
-                "PropiedadID": document.getElementById("cPropiedad").value,
-                "Monto Arriendo": document.getElementById("cMonto").value,
-                "Dia Pago": document.getElementById("cDia").value,
-                "Email": document.getElementById("cEmail").value,
-                "telefono": document.getElementById("cTel").value,
-                "Fecha Inicio": document.getElementById("cInicio").value,
-                "Fecha Fin": document.getElementById("cFin").value,
-                "Estado": "Activo"
-            };
-            
-            if(id) payload["ID"] = id; 
-            else payload["ID"] = "CTR_" + Date.now();
+      /* 1. ENVIAR RECORDATORIO DE PAGO */
+      async function enviarRecordatorioPago() {
+        const c = CONTRATOS.find((x) => x.ID === ACTUAL_ID);
+        if (!c || !c.Email)
+          return alert("Error: El cliente no tiene email registrado.");
 
-            const action = id ? "Edit" : "Add";
-            await appSheetCRUD("ContratosArriendo", action, [payload]);
-            cerrarModal("modalContrato");
-            cargarTodo();
-        }
+        if (
+          !confirm(
+            `¿Enviar recordatorio de pago a ${c["Nombre Arrendatario"]}?`
+          )
+        )
+          return;
 
-        /* --- GESTIÓN / BITÁCORA --- */
-        async function gestionar(id) {
-            ACTUAL_ID = id;
-            document.getElementById("modalGestion").style.display = "flex";
-            cargarBitacora();
-        }
+        showSpinner("Enviando correo...");
 
-        async function cargarBitacora() {
-            const div = document.getElementById("timelineContainer");
-            div.innerHTML = "Cargando...";
-            // Reusamos tabla Bitacora, ProspectoID = ContratoID
-            const logs = await fetchData("Bitacora").catch(()=>[]);
-            const misLogs = logs.filter(l => l.ProspectoID === ACTUAL_ID).sort((a,b)=> new Date(b.Fecha)-new Date(a.Fecha));
-            
-            div.innerHTML = misLogs.map(l => `
-                <div class="chat-bubble">
-                    <div style="display:flex; justify-content:space-between; color:#64748b; font-size:11px; margin-bottom:4px;">
-                        <span>${l.Fecha} (${l.Tipo})</span>
-                        <span>${l.Usuario}</span>
+        // Template HTML para el correo
+        const htmlBody = `
+                <div style="font-family:sans-serif; color:#333; border:1px solid #eee; padding:20px; border-radius:8px;">
+                    <h2 style="color:#f59e0b;">Recordatorio de Pago</h2>
+                    <p>Estimado(a) <strong>${
+                      c["Nombre Arrendatario"]
+                    }</strong>,</p>
+                    <p>Le recordamos amablemente que el pago de arriendo para la propiedad <strong>${
+                      c.PropiedadID
+                    }</strong> vence el día <strong>${
+          c["Dia Pago"]
+        }</strong> del presente mes.</p>
+                    <div style="background:#f9fafb; padding:15px; border-left:4px solid #f59e0b; margin:15px 0;">
+                        <p><strong>Monto a pagar:</strong> $${parseInt(
+                          c["Monto Arriendo"]
+                        ).toLocaleString()}</p>
                     </div>
-                    <div>${l.Nota}</div>
+                    <p>Favor enviar comprobante a este correo.</p>
+                    <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
+                    <small style="color:#666;">Santa Josefina SpA - Gestión Inmobiliaria</small>
                 </div>
-            `).join("");
-        }
+            `;
 
-        async function guardarNota() {
-            const nota = document.getElementById("txtNota").value;
-            if(!nota) return;
-            const payload = {
-                "ID": "BIT_" + Date.now(),
-                "ProspectoID": ACTUAL_ID,
-                "Fecha": new Date().toISOString().split("T")[0],
-                "Tipo": "Nota",
-                "Nota": nota,
-                "Usuario": "Agente" // Usar getAuthUser() si está disponible
-            };
-            await appSheetCRUD("Bitacora", "Add", [payload]);
-            document.getElementById("txtNota").value = "";
-            cargarBitacora();
-        }
+        try {
+          // Usamos el servicio y template de EmailJS (Asegúrate de que existan o usa tus IDs)
+          // Aquí uso IDs genéricos, cámbialos por los tuyos si tienes unos específicos
+          await emailjs.send("service_p9hqkqn", "template_80q9psi", {
+            to_email: c.Email,
+            subject: "Recordatorio de Pago Arriendo - " + c.PropiedadID,
+            html_body: htmlBody,
+          });
 
-        function enviarCobroMail() {
-            const c = CONTRATOS.find(x => x.ID === ACTUAL_ID);
-            if(!c || !c.Email) return alert("El contrato no tiene email.");
-            
-            const subject = `Recordatorio de Pago Arriendo - ${c["Nombre Arrendatario"]}`;
-            const body = `Estimado(a),\n\nLe recordamos que su arriendo de la propiedad ${c.PropiedadID} vence el día ${c["Dia Pago"]}.\n\nMonto a pagar: $${c["Monto Arriendo"]}\n\nAtte,\nSanta Josefina SpA`;
-            
-            window.open(`mailto:${c.Email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
-            
-            // Registrar en bitácora automático
-            appSheetCRUD("Bitacora", "Add", [{
-                "ID": "BIT_" + Date.now(), "ProspectoID": ACTUAL_ID, "Fecha": new Date().toISOString().split("T")[0],
-                "Tipo": "Cobranza", "Nota": "Se envió recordatorio de cobro por mail.", "Usuario": "Sistema"
-            }]);
-        }
+          // Registrar en Bitácora
+          await appSheetCRUD("Bitacora", "Add", [
+            {
+              ID: "BIT_" + Date.now(),
+              ProspectoID: ACTUAL_ID,
+              Fecha: new Date().toISOString().split("T")[0],
+              Tipo: "Cobranza",
+              Nota: "Se envió recordatorio de pago automático.",
+              Usuario: "Sistema",
+            },
+          ]);
 
-        function registrarPagoManual() {
-            // Aquí podrías abrir otro modal simple o guardar directo
-            const fecha = new Date().toISOString().split("T")[0];
-            const nota = `Pago recibido manualmente en oficina/transferencia. Fecha: ${fecha}`;
-            
-            if(confirm("¿Confirmar recepción de pago manual del mes en curso?")) {
-                appSheetCRUD("Bitacora", "Add", [{
-                    "ID": "BIT_" + Date.now(), "ProspectoID": ACTUAL_ID, "Fecha": fecha,
-                    "Tipo": "Pago", "Nota": nota, "Usuario": "Agente"
-                }]);
-                alert("Pago registrado en bitácora.");
-                cargarBitacora();
-            }
+          alert("Correo enviado exitosamente.");
+          cargarBitacora();
+        } catch (e) {
+          console.error(e);
+          alert("Error al enviar correo: " + JSON.stringify(e));
+        } finally {
+          hideSpinner();
         }
+      }
+
+      /* 2. ENVIAR ACUSE DE RECIBO (PAGO OK) */
+      async function enviarAcuseRecibo() {
+        const c = CONTRATOS.find((x) => x.ID === ACTUAL_ID);
+        if (!c || !c.Email) return alert("El cliente no tiene email.");
+
+        if (
+          !confirm(
+            `¿Confirmar recepción del pago y enviar comprobante a ${c["Nombre Arrendatario"]}?`
+          )
+        )
+          return;
+
+        showSpinner("Procesando...");
+
+        const htmlBody = `
+                <div style="font-family:sans-serif; color:#333; border:1px solid #eee; padding:20px; border-radius:8px;">
+                    <h2 style="color:#10b981;">Pago Recibido Exitosamente</h2>
+                    <p>Estimado(a) <strong>${
+                      c["Nombre Arrendatario"]
+                    }</strong>,</p>
+                    <p>Hemos recibido correctamente su pago de arriendo para la propiedad <strong>${
+                      c.PropiedadID
+                    }</strong>.</p>
+                    <div style="background:#f0fdf4; padding:15px; border-left:4px solid #10b981; margin:15px 0;">
+                        <p><strong>Monto Recibido:</strong> $${parseInt(
+                          c["Monto Arriendo"]
+                        ).toLocaleString()}</p>
+                        <p><strong>Fecha:</strong> ${new Date().toLocaleDateString()}</p>
+                        <p><strong>Estado:</strong> PAGADO</p>
+                    </div>
+                    <p>Muchas gracias por su puntualidad.</p>
+                    <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
+                    <small style="color:#666;">Santa Josefina SpA</small>
+                </div>
+            `;
+
+        try {
+          await emailjs.send("service_p9hqkqn", "template_80q9psi", {
+            to_email: c.Email,
+            subject: "Comprobante de Pago Arriendo - " + c.PropiedadID,
+            html_body: htmlBody,
+          });
+
+          await appSheetCRUD("Bitacora", "Add", [
+            {
+              ID: "BIT_" + Date.now(),
+              ProspectoID: ACTUAL_ID,
+              Fecha: new Date().toISOString().split("T")[0],
+              Tipo: "Pago",
+              Nota: "Pago recibido y notificado al cliente.",
+              Usuario: "Sistema",
+            },
+          ]);
+
+          alert("Comprobante enviado.");
+          cargarBitacora();
+        } catch (e) {
+          console.error(e);
+          alert("Error al enviar: " + JSON.stringify(e));
+        } finally {
+          hideSpinner();
+        }
+      }
+
+      /* 3. REGISTRO MANUAL (SIN EMAIL) */
+      async function registrarPagoManual() {
+        const nota = prompt(
+          "Ingrese detalle del pago (Ej: Transferencia Banco Estado):"
+        );
+        if (!nota) return;
+
+        showSpinner();
+        try {
+          await appSheetCRUD("Bitacora", "Add", [
+            {
+              ID: "BIT_" + Date.now(),
+              ProspectoID: ACTUAL_ID,
+              Fecha: new Date().toISOString().split("T")[0],
+              Tipo: "Pago",
+              Nota: "Registro Manual: " + nota,
+              Usuario:
+                typeof getAuthUser === "function"
+                  ? getAuthUser().nombre
+                  : "Admin",
+            },
+          ]);
+          cargarBitacora();
+        } catch (e) {
+          alert(e.message);
+        } finally {
+          hideSpinner();
+        }
+      }
+
+      /* 4. CARGAR BITÁCORA */
+      async function cargarBitacora() {
+        const div = document.getElementById("timelineContainer");
+        div.innerHTML =
+          '<div style="text-align:center; color:#999;">Cargando historial...</div>';
+
+        try {
+          const logs = await fetchData("Bitacora").catch(() => []);
+          const misLogs = logs
+            .filter((l) => l.ProspectoID === ACTUAL_ID)
+            .sort((a, b) => new Date(b.Fecha) - new Date(a.Fecha));
+
+          if (misLogs.length === 0) {
+            div.innerHTML =
+              '<div style="text-align:center; padding:20px; color:#cbd5e1;">Sin interacciones registradas.</div>';
+            return;
+          }
+
+          div.innerHTML = misLogs
+            .map(
+              (l) => `
+                    <div class="chat-bubble ${l.Tipo}">
+                        <div style="display:flex; justify-content:space-between; color:#64748b; font-size:11px; margin-bottom:4px;">
+                            <span>${l.Fecha} • <b>${l.Tipo}</b></span>
+                            <span>${l.Usuario || "Sistema"}</span>
+                        </div>
+                        <div>${l.Nota}</div>
+                    </div>
+                `
+            )
+            .join("");
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      async function guardarNota() {
+        const nota = document.getElementById("txtNota").value;
+        if (!nota) return;
+        showSpinner();
+        try {
+          await appSheetCRUD("Bitacora", "Add", [
+            {
+              ID: "BIT_" + Date.now(),
+              ProspectoID: ACTUAL_ID,
+              Fecha: new Date().toISOString().split("T")[0],
+              Tipo: "Nota",
+              Nota: nota,
+              Usuario:
+                typeof getAuthUser === "function"
+                  ? getAuthUser().nombre
+                  : "Agente",
+            },
+          ]);
+          document.getElementById("txtNota").value = "";
+          cargarBitacora();
+        } catch (e) {
+          alert(e.message);
+        } finally {
+          hideSpinner();
+        }
+      }
+
+      /* ===== CRUD BÁSICO ===== */
+      function abrirModalContrato() {
+        document.getElementById("formContrato").reset();
+        document.getElementById("contID").value = "";
+        document.getElementById("modalContrato").style.display = "flex";
+      }
+      function cerrarModal(id) {
+        document.getElementById(id).style.display = "none";
+      }
+
+      function editar(id) {
+        const c = CONTRATOS.find((x) => x.ID === id);
+        if (!c) return;
+        document.getElementById("contID").value = c.ID;
+        document.getElementById("cRut").value = c["RUT Arrendatario"];
+        document.getElementById("cNombre").value = c["Nombre Arrendatario"];
+        document.getElementById("cPropiedad").value = c.PropiedadID;
+        document.getElementById("cMonto").value = c["Monto Arriendo"];
+        document.getElementById("cDia").value = c["Dia Pago"];
+        document.getElementById("cEmail").value = c.Email;
+        document.getElementById("cTel").value = c.telefono;
+        document.getElementById("cInicio").value = c["Fecha Inicio"];
+        document.getElementById("cFin").value = c["Fecha Fin"];
+        document.getElementById("modalContrato").style.display = "flex";
+      }
+
+      document.getElementById("formContrato").onsubmit = async (e) => {
+        e.preventDefault();
+        showSpinner("Guardando...");
+        const id = document.getElementById("contID").value;
+        const payload = {
+          "RUT Arrendatario": document.getElementById("cRut").value,
+          "Nombre Arrendatario": document.getElementById("cNombre").value,
+          PropiedadID: document.getElementById("cPropiedad").value,
+          "Monto Arriendo": document.getElementById("cMonto").value,
+          "Dia Pago": document.getElementById("cDia").value,
+          Email: document.getElementById("cEmail").value,
+          telefono: document.getElementById("cTel").value,
+          "Fecha Inicio": document.getElementById("cInicio").value,
+          "Fecha Fin": document.getElementById("cFin").value,
+          Estado: "Activo",
+        };
+
+        if (id) payload["ID"] = id;
+        else payload["ID"] = "CTR_" + Date.now();
+
+        try {
+          const action = id ? "Edit" : "Add";
+          await appSheetCRUD("ContratosArriendo", action, [payload]);
+          cerrarModal("modalContrato");
+          cargarTodo();
+        } catch (e) {
+          alert(e.message);
+        } finally {
+          hideSpinner();
+        }
+      };
+
+      /* UTILS */
+      function showSpinner(msg) {
+        const sp = document.getElementById("spinner");
+        sp.style.display = "grid";
+      }
+      function hideSpinner() {
+        document.getElementById("spinner").style.display = "none";
+      }
     </script>
-</body>
+  </body>
 </html>
