@@ -1,379 +1,539 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>CRM - Mapa de Prospectos</title>
-  
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/styles.css">
-  
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-  
-  <script src="assets/js/app.js"></script>
-  <script>requireAuth();</script>
+  <head>
+    <meta charset="UTF-8" />
+    <title>CRM - Mapa de Prospectos</title>
 
-  <style>
-    /* Ajustes de Layout */
-    body { max-width: 100%; margin: 0; background: #f8fafc; overflow-x: hidden; }
-    
-    /* Header Flotante */
-    .map-header {
-        position: absolute; top: 20px; left: 20px; right: 20px; z-index: 1000;
-        background: rgba(255, 255, 255, 0.95); padding: 15px 20px;
-        border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-        display: flex; justify-content: space-between; align-items: center;
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <script src="assets/js/app.js"></script>
+    <script>
+      requireAuth();
+    </script>
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background: #f8fafc;
+        overflow: hidden;
+      }
+
+      /* Header Flotante (Desktop) */
+      .map-header {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 15px 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
         backdrop-filter: blur(5px);
-        flex-wrap: wrap; gap: 10px;
-    }
-    .map-title { font-size: 20px; font-weight: 700; color: #1A2B48; margin: 0; }
-    .map-stats { font-size: 13px; color: #64748b; margin-top: 4px; }
+        width: 300px;
+      }
+      .map-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .map-stats {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 5px;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 5px;
+      }
 
-    /* Contenedor del Mapa */
-    #map { height: 100vh; width: 100%; z-index: 1; }
+      /* Filtros Flotantes (Desktop - Derecha) */
+      .filter-container {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        display: flex;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 10px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+      .btn-filter {
+        padding: 8px 16px;
+        border: 1px solid #e2e8f0;
+        background: white;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: #475569;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .btn-filter:hover {
+        background: #f1f5f9;
+      }
+      .btn-filter.active {
+        background: #1e293b;
+        color: white;
+        border-color: #1e293b;
+      }
 
-    /* Botones de Filtro en el mapa */
-    .filter-controls { display: flex; gap: 10px; flex-wrap: wrap; }
-    .btn-filter {
-        padding: 8px 15px; border: 1px solid #cbd5e1; background: white;
-        border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer;
-        transition: all 0.2s; color: #475569;
-    }
-    .btn-filter:hover, .btn-filter.active { background: #1A2B48; color: white; border-color: #1A2B48; }
+      /* Puntos de color en filtros */
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+      }
 
-    /* Personalización del Popup del Mapa */
-    .leaflet-popup-content-wrapper { border-radius: 10px; padding: 0; overflow: hidden; }
-    .leaflet-popup-content { margin: 0; width: 260px !important; }
-    
-    .popup-header { background: #1A2B48; color: white; padding: 12px 15px; font-weight: 700; font-size: 14px; }
-    .popup-body { padding: 15px; font-size: 13px; color: #334155; }
-    .popup-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-    .popup-footer { background: #f1f5f9; padding: 10px 15px; text-align: right; }
-    .btn-popup { background: #1A2B48; color: white; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+      /* Mapa */
+      #map {
+        height: 100vh;
+        width: 100%;
+        z-index: 1;
+      }
 
-    /* Spinner */
-    .spinner-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); display: grid; place-items: center; z-index: 2000; }
-    .spinner { width: 40px; height: 40px; border-radius: 50%; border: 4px solid #e2e8f0; border-top-color: #1A2B48; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-  </style>
-</head>
-<div id="modalProspecto" class="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:3000; align-items:center; justify-content:center;">
-  <div class="modal-content" style="background:white; padding:30px; border-radius:12px; width:100%; max-width:500px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
-    <h2 style="margin-top:0; color:#1A2B48;">Editar Prospecto</h2>
-    
-    <form id="formEdicion">
-      <input type="hidden" id="pID">
-      
-      <div style="margin-bottom:15px;">
-        <label style="display:block; font-weight:600; font-size:12px; color:#64748b;">Nombre Completo</label>
-        <input id="pNombre" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px;" required>
-      </div>
+      /* Botón Volver Flotante */
+      .btn-back {
+        position: absolute;
+        bottom: 30px;
+        left: 30px;
+        z-index: 1000;
+        background: #1e293b;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s;
+      }
+      .btn-back:hover {
+        transform: translateY(-2px);
+      }
 
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
-        <div>
-            <label style="display:block; font-weight:600; font-size:12px; color:#64748b;">Estado</label>
-            <select id="pEstado" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px;">
-                <option value="Nuevo">Nuevo 🔵</option>
-                <option value="Propuesta Enviada">Interesado 🟠</option>
-                <option value="En Negociación">En Negociación 🟢</option>
-                <option value="Cerrado Ganado">Cerrado ⚫</option>
-            </select>
-        </div>
-        <div>
-            <label style="display:block; font-weight:600; font-size:12px; color:#64748b;">Teléfono</label>
-            <input id="pTelefono" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px;">
-        </div>
-      </div>
+      /* Popup Personalizado */
+      .leaflet-popup-content-wrapper {
+        border-radius: 12px;
+        padding: 0;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+      .leaflet-popup-content {
+        margin: 0;
+        width: 280px !important;
+      }
+      .popup-header {
+        background: #1e293b;
+        color: white;
+        padding: 15px;
+        font-weight: 700;
+        font-size: 14px;
+      }
+      .popup-body {
+        padding: 15px;
+        font-size: 13px;
+        color: #334155;
+      }
+      .popup-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+      .popup-footer {
+        background: #f8fafc;
+        padding: 12px 15px;
+        text-align: right;
+        border-top: 1px solid #e2e8f0;
+      }
+      .btn-popup {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .btn-popup:hover {
+        background: #2563eb;
+      }
 
-      <div style="margin-bottom:15px;">
-        <label style="display:block; font-weight:600; font-size:12px; color:#64748b;">Email</label>
-        <input id="pEmail" type="email" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px;">
-      </div>
-
-      <div style="margin-bottom:15px;">
-        <label style="display:block; font-weight:600; font-size:12px; color:#64748b;">Dirección / Ubicación</label>
-        <input id="pDireccion" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; background:#f1f5f9;" readonly>
-        <small style="color:#94a3b8;">La dirección se edita desde la ficha maestra.</small>
-      </div>
-
-      <div style="margin-top:25px; text-align:right; display:flex; justify-content:flex-end; gap:10px;">
-        <button type="button" onclick="cerrarModal()" style="padding:10px 20px; border:1px solid #cbd5e1; background:white; border-radius:6px; cursor:pointer;">Cancelar</button>
-        <button type="submit" style="padding:10px 20px; border:none; background:#1A2B48; color:white; border-radius:6px; cursor:pointer;">Guardar Cambios</button>
-      </div>
-    </form>
-  </div>
-</div>
-<body>
-
-  <div class="map-header">
-    <div>
-        <h1 class="map-title"><i class="fa-solid fa-map-location-dot"></i> Mapa de Prospectos</h1>
-        <div class="map-stats" id="mapStats">Cargando ubicaciones...</div>
-    </div>
-    <div class="filter-controls">
-        <button class="btn-filter active" onclick="filtrarMapa('Todos', this)">Todos</button>
-        <button class="btn-filter" onclick="filtrarMapa('Nuevo', this)">Nuevos</button>
-        <button class="btn-filter" onclick="filtrarMapa('Propuesta Enviada', this)">Interesados</button>
-        <button class="btn-filter" onclick="filtrarMapa('En Negociación', this)">En Negociación</button>
-        <button class="btn-filter" onclick="filtrarMapa('Cerrado Ganado', this)">Clientes</button>
-    </div>
-    <a href="prospectos.html" class="btn-filter" style="text-decoration:none; background:#f1f5f9;">Volver</a>
-  </div>
-
-  <div id="map"></div>
-
-  <div id="spinner" class="spinner-overlay">
-    <div style="text-align:center;">
-        <div class="spinner"></div>
-        <p style="margin-top:10px; font-weight:600; color:#1A2B48; font-size:14px;">Georreferenciando...</p>
-    </div>
-  </div>
-
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
-  <script>
-    let map;
-    let markersLayer; // Capa para agrupar marcadores
-    let PROSPECTOS = [];
-    
-    // Coordenadas por defecto (Santiago Centro)
-    const DEFAULT_LAT = -33.4489;
-    const DEFAULT_LNG = -70.6693;
-
-    // LÍMITES DE CHILE (Para evitar pines en Europa/África)
-    const CHILE_BOUNDS = {
-        minLat: -56.0, maxLat: -17.0, // Sur a Norte
-        minLng: -76.0, maxLng: -66.0  // Oeste a Este
-    };
-
-    document.addEventListener("DOMContentLoaded", async () => {
-        await initMap();
-    });
-
-    async function initMap() {
-        // 1. Inicializar el mapa
-        map = L.map('map').setView([DEFAULT_LAT, DEFAULT_LNG], 10);
-
-        // 2. Cargar Tiles (Mapa base OpenStreetMap)
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors',
-            maxZoom: 19
-        }).addTo(map);
-
-        // 3. Crear capa de marcadores
-        markersLayer = L.layerGroup().addTo(map);
-
-        // 4. Cargar Datos
-        await cargarProspectos();
-    }
-
-    async function cargarProspectos() {
-        try {
-            console.log(">>> Cargando datos de ProspectosCopro...");
-            // Asegúrate que el nombre de tabla sea EXACTO al de AppSheet
-            const data = await fetchData("ProspectosCopro").catch(() => []);
-            PROSPECTOS = data || [];
-
-            console.log(">>> Total registros:", PROSPECTOS.length);
-            renderMarkers(PROSPECTOS);
-            
-        } catch (e) {
-            console.error(e);
-            alert("Error cargando datos de prospectos.");
-        } finally {
-            document.getElementById("spinner").style.display = "none";
+      /* Spinner */
+      .spinner-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: grid;
+        place-items: center;
+        z-index: 2000;
+      }
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 4px solid #e2e8f0;
+        border-top-color: #1e293b;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
         }
-    }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="map-header">
+      <h1 class="map-title"><i class="fa-solid fa-map"></i> Mapa Prospectos</h1>
+      <div class="map-stats" id="mapStats">Cargando datos...</div>
+    </div>
 
-    function renderMarkers(listaDatos) {
-        markersLayer.clearLayers(); // Limpiar mapa
-        let validCoords = 0;
-        let errors = 0;
-        const bounds = []; // Para auto-ajustar el zoom
+    <div class="filter-container">
+      <button class="btn-filter active" onclick="filtrarMapa('Todos', this)">
+        Todos
+      </button>
+      <button class="btn-filter" onclick="filtrarMapa('Nuevo', this)">
+        <span class="dot" style="background: #0369a1"></span> Nuevos
+      </button>
+      <button class="btn-filter" onclick="filtrarMapa('En Negociación', this)">
+        <span class="dot" style="background: #c2410c"></span> Negociación
+      </button>
+      <button class="btn-filter" onclick="filtrarMapa('Cerrado Ganado', this)">
+        <span class="dot" style="background: #15803d"></span> Clientes
+      </button>
+    </div>
 
-        listaDatos.forEach(p => {
-            // Buscar la columna de coordenadas (intenta varios nombres comunes)
-            const rawCoord = p.Coordenadas || p['Coordenadas'] || p.LatLong || p.Ubicacion || ""; 
-            
-            // Usamos la función con validación geográfica
-            const coords = parseCoordinates(rawCoord);
+    <a href="prospectos.html" class="btn-back"
+      ><i class="fa-solid fa-arrow-left"></i> Volver a Lista</a
+    >
 
-            if (coords) {
-                validCoords++;
-                
-                // Lógica de colores según estado
-                let color = '#3b82f6'; // Azul (Nuevo/Default)
-                const estado = (p.Estado || "").toLowerCase();
-                
-                if(estado.includes('propuesta enviada')) color = '#7e22ce'; // Púrpura
-                if(estado.includes('en negociación')) color = '#c2410c'; // Café/Naranja
-                if(estado.includes('cliente') || estado.includes('cerrado ganado')) color = '#22c55e'; // Verde
+    <div id="map"></div>
 
-                // Crear Icono Personalizado (Punto simple y elegante)
-                const customIcon = L.divIcon({
-                    className: 'custom-pin',
-                    html: `<div style="background-color:${color}; width:14px; height:14px; border-radius:50%; border:2px solid white; box-shadow:0 3px 6px rgba(0,0,0,0.4);"></div>`,
-                    iconSize: [18, 18],
-                    iconAnchor: [9, 9], // Centro del punto
-                    popupAnchor: [0, -10]
-                });
+    <div
+      id="modalProspecto"
+      class="modal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 3000;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div
+        class="modal-content"
+        style="
+          background: white;
+          padding: 30px;
+          border-radius: 12px;
+          width: 400px;
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        "
+      >
+        <h2 style="margin-top: 0; color: #1e293b">Editar Estado</h2>
+        <form id="formEdicion">
+          <input type="hidden" id="pID" />
+          <div style="margin-bottom: 15px">
+            <label
+              style="
+                display: block;
+                font-size: 12px;
+                font-weight: bold;
+                color: #64748b;
+                margin-bottom: 5px;
+              "
+              >Nombre</label
+            >
+            <input
+              id="pNombre"
+              style="
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #cbd5e1;
+                border-radius: 6px;
+                box-sizing: border-box;
+              "
+              readonly
+            />
+          </div>
+          <div style="margin-bottom: 15px">
+            <label
+              style="
+                display: block;
+                font-size: 12px;
+                font-weight: bold;
+                color: #64748b;
+                margin-bottom: 5px;
+              "
+              >Nuevo Estado</label
+            >
+            <select
+              id="pEstado"
+              style="
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #cbd5e1;
+                border-radius: 6px;
+                box-sizing: border-box;
+              "
+            >
+              <option value="Nuevo">Nuevo</option>
+              <option value="Contactado">Contactado</option>
+              <option value="Propuesta Enviada">Propuesta Enviada</option>
+              <option value="En Negociación">En Negociación</option>
+              <option value="Cerrado Ganado">Cerrado Ganado</option>
+              <option value="Cerrado Perdido">Cerrado Perdido</option>
+            </select>
+          </div>
+          <div
+            style="
+              text-align: right;
+              gap: 10px;
+              display: flex;
+              justify-content: flex-end;
+            "
+          >
+            <button
+              type="button"
+              onclick="document.getElementById('modalProspecto').style.display='none'"
+              style="
+                padding: 10px 15px;
+                border: 1px solid #ccc;
+                background: white;
+                border-radius: 6px;
+                cursor: pointer;
+              "
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              style="
+                padding: 10px 15px;
+                border: none;
+                background: #1e293b;
+                color: white;
+                border-radius: 6px;
+                cursor: pointer;
+              "
+            >
+              Guardar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
 
-                // Crear Marcador
-                const marker = L.marker([coords.lat, coords.lng], { icon: customIcon })
-                    .bindPopup(crearPopupHTML(p));
-                
-                markersLayer.addLayer(marker);
-                bounds.push([coords.lat, coords.lng]);
-            } else {
-                // Si tiene texto pero no coordenadas válidas, contamos error
-                if(rawCoord && rawCoord.length > 2) errors++;
-            }
+    <div id="spinner" class="spinner-overlay">
+      <div style="text-align: center">
+        <div class="spinner"></div>
+        <p style="margin-top: 10px; font-weight: 600; color: #1e293b">
+          Cargando mapa...
+        </p>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+      let map,
+        markersLayer,
+        PROSPECTOS = [];
+      const CHILE_BOUNDS = {
+        minLat: -56.0,
+        maxLat: -17.0,
+        minLng: -76.0,
+        maxLng: -66.0,
+      };
+
+      /* --- COLORES COHERENTES CON PROSPECTOS.HTML --- */
+      function getColorByEstado(estRaw) {
+        const est = (estRaw || "").toLowerCase();
+        if (est.includes("ganado") || est.includes("cliente")) return "#15803d"; // Verde
+        if (est.includes("negociación")) return "#c2410c"; // Naranja Oscuro
+        if (est.includes("propuesta")) return "#7e22ce"; // Púrpura
+        if (est.includes("volante")) return "#0ea5e9"; // Celeste
+        if (est.includes("contactado")) return "#b45309"; // Ambar
+        if (est.includes("perdido")) return "#b91c1c"; // Rojo
+        return "#0369a1"; // Azul (Nuevo/Default)
+      }
+
+      document.addEventListener("DOMContentLoaded", initMap);
+
+      async function initMap() {
+        map = L.map("map").setView([-33.4489, -70.6693], 10);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "© OpenStreetMap",
+        }).addTo(map);
+        markersLayer = L.layerGroup().addTo(map);
+        await cargarProspectos();
+      }
+
+      async function cargarProspectos() {
+        try {
+          // Cargar ambas tablas para tener todo en el mapa
+          const [admin, corretaje] = await Promise.all([
+            fetchData("ProspectosCopro").catch(() => []),
+            fetchData("ProspectosCorretaje").catch(() => []),
+          ]);
+          // Unir y normalizar
+          PROSPECTOS = [
+            ...admin.map((p) => ({ ...p, _tabla: "ProspectosCopro" })),
+            ...corretaje.map((p) => ({ ...p, _tabla: "ProspectosCorretaje" })),
+          ];
+          renderMarkers(PROSPECTOS);
+        } catch (e) {
+          console.error(e);
+        } finally {
+          document.getElementById("spinner").style.display = "none";
+        }
+      }
+
+      function renderMarkers(lista) {
+        markersLayer.clearLayers();
+        let validos = 0;
+        const bounds = [];
+
+        lista.forEach((p) => {
+          // Intentar obtener coordenadas de varias columnas posibles
+          const raw = p.LatLong || p.Coordenadas || p.Ubicacion;
+          const coords = parseCoords(raw);
+
+          if (coords) {
+            validos++;
+            const color = getColorByEstado(p.Estado);
+
+            const icon = L.divIcon({
+              className: "custom-pin",
+              html: `<div style="background:${color}; width:16px; height:16px; border-radius:50%; border:2px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>`,
+              iconSize: [20, 20],
+              iconAnchor: [10, 10],
+              popupAnchor: [0, -10],
+            });
+
+            const marker = L.marker([coords.lat, coords.lng], {
+              icon: icon,
+            }).bindPopup(crearPopup(p));
+
+            markersLayer.addLayer(marker);
+            bounds.push([coords.lat, coords.lng]);
+          }
         });
 
-        // Actualizar estadísticas en el header
-        const msg = `${validCoords} ubicaciones válidas. ${errors > 0 ? `<span style='color:#ef4444'>(${errors} fuera de rango)</span>` : ''}`;
-        document.getElementById("mapStats").innerHTML = msg;
+        document.getElementById(
+          "mapStats"
+        ).innerText = `${validos} prospectos geolocalizados.`;
+        if (bounds.length) map.fitBounds(bounds, { padding: [50, 50] });
+      }
 
-        // Auto-ajustar vista del mapa
-        if (bounds.length > 0) {
-            map.fitBounds(bounds, { padding: [50, 50] });
-        } else {
-            // Si no hay puntos, centrar en Santiago
-            map.setView([DEFAULT_LAT, DEFAULT_LNG], 12);
-        }
-    }
-
-    // Convierte string "Lat, Long" a objeto {lat, lng} y VALIDA ZONA CHILE
-    function parseCoordinates(str) {
+      function parseCoords(str) {
         if (!str) return null;
-        
-        // Limpieza y split
-        const parts = String(str).split(',').map(s => s.trim());
-        
-        if (parts.length === 2) {
-            const lat = parseFloat(parts[0]);
-            const lng = parseFloat(parts[1]);
+        const [lat, lng] = str.split(",").map((s) => parseFloat(s.trim()));
+        if (isNaN(lat) || isNaN(lng)) return null;
+        // Filtro Chile básico
+        if (
+          lat < CHILE_BOUNDS.maxLat &&
+          lat > CHILE_BOUNDS.minLat &&
+          lng < CHILE_BOUNDS.maxLng &&
+          lng > CHILE_BOUNDS.minLng
+        )
+          return { lat, lng };
+        return null;
+      }
 
-            // 1. Validar que sean números
-            if (isNaN(lat) || isNaN(lng)) return null;
-
-            // 2. FILTRO GEOGRÁFICO: Solo mostrar si cae dentro de la caja de Chile
-            // Esto elimina los puntos que aparecen en Europa por error de geocodificación
-            if (lat < CHILE_BOUNDS.maxLat && lat > CHILE_BOUNDS.minLat && 
-                lng < CHILE_BOUNDS.maxLng && lng > CHILE_BOUNDS.minLng) {
-                return { lat, lng };
-            }
-        }
-        return null; // Fuera de rango o formato incorrecto
-    }
-
-    // Función para filtrar por estado
-    function filtrarMapa(estado, btn) {
-        // UI Botones
-        document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-
-        if (estado === 'Todos') {
-            renderMarkers(PROSPECTOS);
-        } else {
-            // Filtro flexible (case insensitive)
-            const filtrados = PROSPECTOS.filter(p => (p.Estado || "").toLowerCase().includes(estado.toLowerCase()));
-            renderMarkers(filtrados);
-        }
-    }
-
-    /* --- NUEVAS FUNCIONES DE EDICIÓN --- */
-
-    // 1. Función actualizada del Popup (El botón ahora llama a editarProspecto)
-    function crearPopupHTML(p) {
-        const nombre = p.Nombre || p.Cliente || "Prospecto";
-        const estado = p.Estado || "Nuevo";
-        const email = p.Email || "";
-        const fono = p.Telefono || p.Celular || "";
-        const direccion = p.Direccion || p.Ubicacion || "";
-        const id = p.ID || ""; 
-        
+      function crearPopup(p) {
+        const color = getColorByEstado(p.Estado);
         return `
-            <div class="popup-header">
-                ${nombre}
+            <div class="popup-header" style="background:${color}">
+                ${p.Nombre || "Sin Nombre"}
             </div>
             <div class="popup-body">
-                <div class="popup-row"><i class="fa-solid fa-tag" style="color:#64748b; width:15px;"></i> <strong>${estado}</strong></div>
-                ${email ? `<div class="popup-row"><i class="fa-solid fa-envelope" style="color:#64748b; width:15px;"></i> ${email}</div>` : ''}
-                ${fono ? `<div class="popup-row"><i class="fa-solid fa-phone" style="color:#64748b; width:15px;"></i> ${fono}</div>` : ''}
-                ${direccion ? `<div class="popup-row"><i class="fa-solid fa-location-dot"></i> ${direccion}</div>` : ''}
-                </div>
+                <div class="popup-row"><i class="fa-solid fa-tag"></i> <b>${
+                  p.Estado
+                }</b></div>
+                ${
+                  p.Telefono
+                    ? `<div class="popup-row"><i class="fa-solid fa-phone"></i> <a href="tel:${p.Telefono}">${p.Telefono}</a></div>`
+                    : ""
+                }
+                ${
+                  p.Email
+                    ? `<div class="popup-row"><i class="fa-solid fa-envelope"></i> ${p.Email}</div>`
+                    : ""
+                }
+                <div class="popup-row" style="color:#64748b; font-size:11px;">${
+                  p.Direccion || ""
+                }</div>
+            </div>
             <div class="popup-footer">
-                <button class="btn-popup" onclick="editarProspecto('${id}')">
-                    <i class="fa-solid fa-pen-to-square"></i> Editar Ficha
-                </button>
+                <button class="btn-popup" onclick="editar('${
+                  p.ID
+                }')" style="background:${color}">Gestionar</button>
             </div>
         `;
-    }
+      }
 
-    // 2. Abrir el Modal y llenar datos
-    function editarProspecto(id) {
-        const p = PROSPECTOS.find(item => String(item.ID) === String(id));
-        if (!p) return alert("Error: No se encontró el prospecto en memoria.");
+      function filtrarMapa(est, btn) {
+        document
+          .querySelectorAll(".btn-filter")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        if (est === "Todos") renderMarkers(PROSPECTOS);
+        else
+          renderMarkers(
+            PROSPECTOS.filter((p) => (p.Estado || "").includes(est))
+          );
+      }
 
-        // Llenar el formulario
+      /* EDICIÓN RÁPIDA */
+      window.editar = function (id) {
+        const p = PROSPECTOS.find((x) => String(x.ID) === String(id));
+        if (!p) return;
         document.getElementById("pID").value = p.ID;
-        document.getElementById("pNombre").value = p.Nombre || p.Cliente || "";
+        document.getElementById("pNombre").value = p.Nombre;
         document.getElementById("pEstado").value = p.Estado || "Nuevo";
-        document.getElementById("pTelefono").value = p.Telefono || p.Celular || "";
-        document.getElementById("pEmail").value = p.Email || "";
-        
-        // Mostrar dirección (solo lectura para referencia)
-        document.getElementById("pDireccion").value = p.Direccion || p.Ubicacion || "";
-
-        // Mostrar Modal
         document.getElementById("modalProspecto").style.display = "flex";
-    }
+      };
 
-    // 3. Cerrar Modal
-    function cerrarModal() {
-        document.getElementById("modalProspecto").style.display = "none";
-    }
-
-    // 4. Guardar Cambios (Submit)
-    document.getElementById("formEdicion").onsubmit = async (e) => {
+      document.getElementById("formEdicion").onsubmit = async (e) => {
         e.preventDefault();
-        
-        // Recoger datos
         const id = document.getElementById("pID").value;
-        const payload = {
-            "ID": id,
-            "Nombre": document.getElementById("pNombre").value,
-            "Estado": document.getElementById("pEstado").value,
-            "Telefono": document.getElementById("pTelefono").value, // Asegúrate que tu columna se llame Telefono o Celular
-            "Email": document.getElementById("pEmail").value
-        };
+        const est = document.getElementById("pEstado").value;
+        const p = PROSPECTOS.find((x) => String(x.ID) === String(id));
 
-        // UI Loading
         const btn = e.target.querySelector("button[type='submit']");
-        const textoOriginal = btn.innerText;
-        btn.innerText = "Guardando...";
-        btn.disabled = true;
+        btn.innerText = "...";
 
         try {
-            if(typeof appSheetCRUD === 'function') {
-                // IMPORTANTE: Usamos la tabla 'ProspectosCopro' que definimos antes
-                await appSheetCRUD("ProspectosCopro", "Edit", [payload]);
-                
-                // Cerrar y Recargar mapa para ver el cambio de color (si cambió estado)
-                cerrarModal();
-                await cargarProspectos(); 
-                alert("Prospecto actualizado correctamente.");
-            } else {
-                alert("Error: No se detectó la función de conexión.");
-            }
-        } catch(err) {
-            console.error(err);
-            alert("Error al guardar: " + err.message);
+          await appSheetCRUD(p._tabla, "Edit", [{ ID: id, Estado: est }]);
+          document.getElementById("modalProspecto").style.display = "none";
+          await cargarProspectos();
+        } catch (e) {
+          alert("Error: " + e.message);
         } finally {
-            btn.innerText = textoOriginal;
-            btn.disabled = false;
+          btn.innerText = "Guardar";
         }
-    };
-  </script>
-</body>
+      };
+    </script>
+  </body>
 </html>

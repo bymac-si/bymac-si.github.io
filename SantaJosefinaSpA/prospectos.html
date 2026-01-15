@@ -194,6 +194,10 @@
         background: #f3e8ff;
         color: #7e22ce;
       }
+      .st-volantes {
+        background: #f3e8ff;
+        color: #22A3CE;
+      }
       .st-negociacion {
         background: #ffedd5;
         color: #c2410c;
@@ -422,6 +426,7 @@
               <select id="prosEstado">
                 <option value="Nuevo">Nuevo</option>
                 <option value="Contactado">Contactado</option>
+                <option value="Volante Entregado">Volante Entregado</option>
                 <option value="Propuesta Enviada">Propuesta Enviada</option>
                 <option value="En Negociación">En Negociación</option>
                 <option value="Cerrado Ganado">Cerrado Ganado</option>
@@ -871,6 +876,7 @@
           if (est.includes("ganado") || est.includes("firmado"))
             badgeClass = "st-ganado";
           else if (est.includes("negociación")) badgeClass = "st-negociacion";
+          else if (est.includes("volante")) badgeClass = "st-volantes";
           else if (est.includes("propuesta")) badgeClass = "st-propuesta";
           else if (est.includes("perdido")) badgeClass = "st-perdido";
           else if (est.includes("contactado")) badgeClass = "st-contactado";
