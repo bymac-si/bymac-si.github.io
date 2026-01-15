@@ -308,6 +308,43 @@
         display: none;
         z-index: 3001;
       }
+      /* === ACTION SHEET (MENÚ DESLIZANTE) === */
+.sheet-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000;
+  opacity: 0; visibility: hidden; transition: all 0.3s;
+  backdrop-filter: blur(2px);
+}
+.sheet-overlay.active { opacity: 1; visibility: visible; }
+
+.action-sheet {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: white; border-radius: 20px 20px 0 0;
+  padding: 25px 20px; z-index: 2001;
+  transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 -5px 25px rgba(0,0,0,0.1);
+}
+.sheet-overlay.active .action-sheet { transform: translateY(0); }
+
+.sheet-header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; }
+.sheet-title { font-size: 18px; font-weight: 700; color: #1e293b; margin: 0; }
+.sheet-subtitle { font-size: 13px; color: #64748b; margin-top: 4px; }
+
+.sheet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+.sheet-btn {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
+  padding: 15px 5px; cursor: pointer; text-decoration: none; color: #334155;
+  transition: all 0.1s;
+}
+.sheet-btn:active { background: #e2e8f0; transform: scale(0.95); }
+.sheet-icon { font-size: 24px; margin-bottom: 8px; color: #1a2b48; }
+.sheet-label { font-size: 11px; font-weight: 600; }
+
+/* Colores específicos iconos */
+.icon-whatsapp { color: #16a34a; }
+.icon-edit { color: #f59e0b; }
+.icon-bitacora { color: #3b82f6; }
+.icon-quote { color: #7e22ce; }
     </style>
   </head>
   <body>
@@ -624,52 +661,33 @@
       }
 
       function renderLista(lista) {
-        const container = document.getElementById("listaContenido");
-        if (lista.length === 0) {
-          container.innerHTML =
-            '<div style="text-align:center; padding:30px; color:#94a3b8;">No hay prospectos recientes.</div>';
-          return;
-        }
+          const container = document.getElementById('listaContenido');
+          if(lista.length === 0) {
+              container.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8;">No hay prospectos recientes.</div>';
+              return;
+          }
 
-        container.innerHTML = lista
-          .map((p) => {
-            // Estilo Estado
-            let stClass = "st-Nuevo",
-              bgClass = "bg-Nuevo";
-            if ((p.Estado || "").includes("Negociación")) {
-              stClass = "st-Negociacion";
-              bgClass = "bg-Negociacion";
-            }
-            if ((p.Estado || "").includes("Ganado")) {
-              stClass = "st-Ganado";
-              bgClass = "bg-Ganado";
-            }
+          container.innerHTML = lista.map(p => {
+              // Estilo Estado
+              let stClass = "st-Nuevo", bgClass = "bg-Nuevo";
+              if((p.Estado||"").includes("Negociación")) { stClass="st-Negociacion"; bgClass="bg-Negociacion"; }
+              if((p.Estado||"").includes("Ganado")) { stClass="st-Ganado"; bgClass="bg-Ganado"; }
 
-            return `
-              <div class="prospect-card ${stClass}">
+              // Convertimos el objeto a string seguro para pasar al click
+              // Usamos el ID para buscar en cache luego, es más seguro
+              return `
+              <div class="prospect-card ${stClass}" onclick="abrirOpciones('${p.ID}')">
                   <div class="pc-header">
                       <div class="pc-name">${p.Nombre}</div>
-                      <div class="pc-badge ${bgClass}">${
-              p.Estado || "Nuevo"
-            }</div>
+                      <div class="pc-badge ${bgClass}">${p.Estado || 'Nuevo'}</div>
                   </div>
                   <div class="pc-meta" style="margin-bottom:5px;">
-                      <i class="fa-solid fa-building-user" style="color:#64748b"></i> ${
-                        p.Tipo || "Admin"
-                      } 
-                      <span style="color:#cbd5e1">|</span> 
-                      ${p["Fecha Registro"] || "-"}
-                  </div>
-                  <div class="pc-meta">
-                      ${
-                        p.Telefono
-                          ? `<a href="tel:${p.Telefono}" style="text-decoration:none; color:#475569;"><i class="fa-solid fa-phone"></i> Llamar</a>`
-                          : ""
-                      }
+                      <i class="fa-solid fa-building-user" style="color:#64748b"></i> ${p.Tipo || 'Admin'} 
+                      <span style="color:#cbd5e1; margin:0 5px;">|</span> 
+                      <span style="font-size:11px;">Toca para gestionar</span>
                   </div>
               </div>`;
-          })
-          .join("");
+          }).join("");
       }
 
       function filtrarLista() {
@@ -840,5 +858,46 @@
         setTimeout(() => (t.style.display = "none"), 3000);
       }
     </script>
+    <div id="actionSheetOverlay" class="sheet-overlay" onclick="cerrarActionSheet()">
+  <div class="action-sheet" onclick="event.stopPropagation()"> <div class="sheet-header">
+      <h3 class="sheet-title" id="sheetName">Nombre Prospecto</h3>
+      <div class="sheet-subtitle" id="sheetInfo">Detalles...</div>
+    </div>
+
+    <div class="sheet-grid">
+      <div class="sheet-btn" onclick="irABitacora()">
+        <i class="fa-solid fa-clock-rotate-left sheet-icon icon-bitacora"></i>
+        <span class="sheet-label">Bitácora</span>
+      </div>
+
+      <div class="sheet-btn" onclick="prepararEdicion()">
+        <i class="fa-solid fa-pen-to-square sheet-icon icon-edit"></i>
+        <span class="sheet-label">Editar</span>
+      </div>
+
+      <a href="#" id="btnSheetWhatsapp" class="sheet-btn" target="_blank">
+        <i class="fa-brands fa-whatsapp sheet-icon icon-whatsapp"></i>
+        <span class="sheet-label">WhatsApp</span>
+      </a>
+
+      <div class="sheet-btn" onclick="irACotizar()">
+        <i class="fa-solid fa-file-invoice-dollar sheet-icon icon-quote"></i>
+        <span class="sheet-label">Cotizar</span>
+      </div>
+
+      <div class="sheet-btn" onclick="verEnMapa()">
+        <i class="fa-solid fa-map-location-dot sheet-icon"></i>
+        <span class="sheet-label">Mapa</span>
+      </div>
+
+      <a href="#" id="btnSheetTel" class="sheet-btn">
+        <i class="fa-solid fa-phone sheet-icon"></i>
+        <span class="sheet-label">Llamar</span>
+      </a>
+    </div>
+
+    <button onclick="cerrarActionSheet()" style="width:100%; margin-top:20px; padding:12px; background:white; border:1px solid #cbd5e1; border-radius:10px; color:#64748b; font-weight:bold;">Cancelar</button>
+  </div>
+</div>
   </body>
 </html>
