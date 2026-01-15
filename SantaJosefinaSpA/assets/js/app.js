@@ -371,3 +371,33 @@ window.initHeader = function() {
         if (btnMapa) btnMapa.href = "mobile_mapa.html";
     }
 };
+
+/* ==========================================
+   LÓGICA DE ENRUTAMIENTO PWA (Router)
+   ========================================== */
+function iniciarEnrutamientoInteligente() {
+    // 1. Verificar si estamos en la Landing Page (index.html)
+    const path = window.location.pathname;
+    if (!path.includes("index.html") && path !== "/") return;
+
+    // 2. Verificar Agente (Prioridad 1)
+    const agente = localStorage.getItem("auth_user");
+    if (agente) {
+        console.log("Detectado Agente: Redirigiendo a Dashboard...");
+        window.location.href = "dashboard.html";
+        return;
+    }
+
+    // 3. Verificar Residente (Prioridad 2)
+    const residente = localStorage.getItem("sesion_residente");
+    if (residente) {
+        console.log("Detectado Residente: Redirigiendo a Portal...");
+        window.location.href = "portal.html"; // O como se llame tu home de residentes
+        return;
+    }
+    
+    // 4. Si no hay nadie, se queda en index.html para que elijan botón
+}
+
+// Ejecutar al cargar la página
+document.addEventListener("DOMContentLoaded", iniciarEnrutamientoInteligente);

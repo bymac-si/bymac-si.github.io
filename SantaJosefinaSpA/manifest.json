@@ -1,7 +1,7 @@
 {
   "name": "Santa Josefina CRM",
-  "short_name": "CRM Josefina",
-  "start_url": "/login.html",
+  "short_name": "CRM Santa Josefina",
+  "start_url": "/index.html?source=pwa",
   "display": "standalone",
   "background_color": "#1a2b48",
   "theme_color": "#1a2b48",
