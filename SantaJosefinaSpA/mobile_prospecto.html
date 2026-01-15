@@ -778,75 +778,104 @@
         ).format(base)}`;
       }
 
-      /* === SUBMIT === */
+      /* === SUBMIT CORREGIDO (CREAR Y EDITAR) === */
       document.getElementById("formProspecto").onsubmit = async (e) => {
         e.preventDefault();
+        
+        // 1. Validaciones
         const nombre = document.getElementById("nombre").value.trim();
         if (nombre.length < 3) return alert("Nombre requerido");
 
         document.getElementById("loader").style.display = "flex";
-        const operacion = document.querySelector(
-          'input[name="operacion"]:checked'
-        ).value;
+
+        // 2. Detectar Modo (Nuevo o Edición)
+        const editInput = document.getElementById('editId');
+        const isEdit = editInput && editInput.value !== "";
+        const actionType = isEdit ? "Edit" : "Add";
+
+        // 3. Preparar Variables
+        const operacion = document.querySelector('input[name="operacion"]:checked').value;
         const fechaHoy = new Date().toISOString().split("T")[0];
         let payload = {};
         let tablaDestino = "";
 
+        // Estado: Si editamos, mantenemos el actual. Si es nuevo, es "Nuevo".
+        // (SELECTED_PROSPECT viene de la lógica del Action Sheet)
+        const estadoFinal = (isEdit && typeof SELECTED_PROSPECT !== 'undefined') ? SELECTED_PROSPECT.Estado : "Nuevo";
+
         if (operacion === "Administracion") {
           tablaDestino = "ProspectosCopro";
+          
+          // ID: Usar el existente si editamos, o generar uno nuevo
+          const idFinal = isEdit ? editInput.value : "PROS_" + Date.now();
+          
           let coordenadas = document.getElementById("latlong").value || "0, 0";
+          
           payload = {
-            ID: "PROS_" + Date.now(),
-            Nombre: nombre,
-            Comuna: document.getElementById("comuna").value,
-            Unidades: document.getElementById("unidades").value,
-            Direccion: document.getElementById("direccion").value,
-            RUT: document.getElementById("rut").value,
-            Contacto: nombre,
-            Estado: "Nuevo",
-            Telefono: document.getElementById("telefono").value,
-            LatLong: coordenadas,
-            Tipo: "Administracion",
-            Email: document.getElementById("email").value,
-            Observaciones: document.getElementById("obs").value,
-            Agente: AGENTE_ACTUAL,
-            "Fecha Registro": fechaHoy,
+            "ID": idFinal,
+            "Nombre": nombre,
+            "Comuna": document.getElementById("comuna").value,
+            "Unidades": document.getElementById("unidades").value,
+            "Direccion": document.getElementById("direccion").value,
+            "RUT": document.getElementById("rut").value,
+            "Contacto": nombre,
+            "Estado": estadoFinal,
+            "Telefono": document.getElementById("telefono").value,
+            "LatLong": coordenadas,
+            "Tipo": "Administracion",
+            "Email": document.getElementById("email").value,
+            "Observaciones": document.getElementById("obs").value,
+            "Agente": AGENTE_ACTUAL,
+            // Solo enviar fecha si es nuevo para no perder la antigüedad
+            ...(!isEdit && { "Fecha Registro": fechaHoy })
           };
         } else {
           tablaDestino = "ProspectosCorretaje";
+          const idFinal = isEdit ? editInput.value : "PCOR_" + Date.now();
+
           payload = {
-            ID: "PCOR_" + Date.now(),
-            Estado: "Nuevo",
-            Nombre: nombre,
-            Telefono: document.getElementById("telefono").value,
-            Email: document.getElementById("email").value,
+            "ID": idFinal,
+            "Estado": estadoFinal,
+            "Nombre": nombre,
+            "Telefono": document.getElementById("telefono").value,
+            "Email": document.getElementById("email").value,
             "Tipo Operacion": operacion,
             "Tipo Propiedad": document.getElementById("tipoPropiedad").value,
-            Presupuesto: document.getElementById("presupuesto").value,
-            Observaciones: document.getElementById("obs").value,
-            Agente: AGENTE_ACTUAL,
-            "Fecha Registro": fechaHoy,
-            Canal: "En Terreno",
+            "Presupuesto": document.getElementById("presupuesto").value,
+            "Observaciones": document.getElementById("obs").value,
+            "Agente": AGENTE_ACTUAL,
+            "Canal": "En Terreno",
+            ...(!isEdit && { "Fecha Registro": fechaHoy })
           };
         }
 
         try {
           if (typeof appSheetCRUD === "function") {
-            await appSheetCRUD(tablaDestino, "Add", [payload]);
+            await appSheetCRUD(tablaDestino, actionType, [payload]);
+          } else {
+            console.warn("Modo offline/simulación");
+            await new Promise(r => setTimeout(r, 1000));
           }
+          
           showToast();
+          
+          // 4. Limpieza y Reseteo
           document.getElementById("formProspecto").reset();
+          if(editInput) editInput.value = ""; // Limpiar ID de edición
+          document.getElementById('pageTitle').innerText = "Gestión Prospectos"; // Restaurar título header
+
           const btnGps = document.getElementById("btnGps");
           if (btnGps) {
-            btnGps.innerHTML =
-              '<i class="fa-solid fa-location-crosshairs"></i> Guardar mi ubicación actual';
+            btnGps.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> Guardar mi ubicación actual';
             btnGps.classList.remove("active");
           }
 
-          // Volver al menú tras guardar
+          // 5. Actualizar lista en segundo plano y volver
+          if(typeof cargarListaMobile === 'function') await cargarListaMobile();
           switchView("menu");
+
         } catch (err) {
-          alert("Error: " + err.message);
+          alert("Error al guardar: " + err.message);
         } finally {
           document.getElementById("loader").style.display = "none";
         }
@@ -856,6 +885,119 @@
         const t = document.getElementById("toastSuccess");
         t.style.display = "flex";
         setTimeout(() => (t.style.display = "none"), 3000);
+      }
+      /* === LOGICA DE OPCIONES (ACTION SHEET) === */
+      let SELECTED_PROSPECT = null;
+
+      function abrirOpciones(id) {
+          // Buscar prospecto en la memoria (cache)
+          SELECTED_PROSPECT = PROSPECTOS_CACHE.find(p => String(p.ID) === String(id));
+          if(!SELECTED_PROSPECT) return;
+
+          // Llenar datos del menú
+          document.getElementById('sheetName').innerText = SELECTED_PROSPECT.Nombre;
+          document.getElementById('sheetInfo').innerText = `${SELECTED_PROSPECT.Tipo} • ${SELECTED_PROSPECT.Estado}`;
+
+          // Configurar botones dinámicos
+          const tel = SELECTED_PROSPECT.Telefono ? SELECTED_PROSPECT.Telefono.replace(/\D/g,'') : '';
+          
+          // WhatsApp
+          const btnWsp = document.getElementById('btnSheetWhatsapp');
+          if(tel) {
+              btnWsp.href = `https://wa.me/${tel}?text=Hola ${SELECTED_PROSPECT.Nombre}, te contacto de Santa Josefina...`;
+              btnWsp.style.opacity = "1";
+              btnWsp.style.pointerEvents = "auto";
+          } else {
+              btnWsp.style.opacity = "0.3";
+              btnWsp.style.pointerEvents = "none";
+          }
+
+          // Llamada
+          const btnTel = document.getElementById('btnSheetTel');
+          btnTel.href = tel ? `tel:${tel}` : "#";
+
+          // Mostrar
+          document.getElementById('actionSheetOverlay').classList.add('active');
+      }
+
+      function cerrarActionSheet() {
+          document.getElementById('actionSheetOverlay').classList.remove('active');
+      }
+
+      /* --- ACCIONES --- */
+
+      function irABitacora() {
+          if(!SELECTED_PROSPECT) return;
+          // Redirigir a mobile_bitacora.html pasando el ID
+          window.location.href = `mobile_bitacora.html?id=${SELECTED_PROSPECT.ID}&nombre=${encodeURIComponent(SELECTED_PROSPECT.Nombre)}`;
+      }
+
+      function irACotizar() {
+          if(!SELECTED_PROSPECT) return;
+          if(SELECTED_PROSPECT.Tipo === 'Administracion') {
+              // Redirigir a cotizador de admin
+              window.location.href = `cotizacion-admin-condominio.html?prospectoId=${SELECTED_PROSPECT.ID}&unidades=${SELECTED_PROSPECT.Unidades || 0}&comuna=${SELECTED_PROSPECT.Comuna || ''}`;
+          } else {
+              alert("La cotización automática es para Administración de Edificios.");
+          }
+      }
+
+      function verEnMapa() {
+          if(!SELECTED_PROSPECT) return;
+          const geo = SELECTED_PROSPECT.LatLong || SELECTED_PROSPECT.Coordenadas;
+          if(geo) {
+              window.open(`https://www.google.com/maps/search/?api=1&query=${geo}`, '_blank');
+          } else {
+              alert("Este prospecto no tiene coordenadas GPS guardadas.");
+          }
+      }
+
+      function prepararEdicion() {
+          if(!SELECTED_PROSPECT) return;
+          cerrarActionSheet();
+          
+          // Cambiar a vista Formulario
+          switchView('form');
+          
+          // Llenar formulario con datos existentes
+          document.getElementById('pageTitle').innerText = "Editar Prospecto";
+          
+          // Llenar campos comunes
+          document.getElementById('nombre').value = SELECTED_PROSPECT.Nombre;
+          document.getElementById('telefono').value = SELECTED_PROSPECT.Telefono || "";
+          document.getElementById('email').value = SELECTED_PROSPECT.Email || "";
+          document.getElementById('obs').value = SELECTED_PROSPECT.Observaciones || "";
+          document.getElementById('rut').value = SELECTED_PROSPECT.RUT || "";
+          document.getElementById('direccion').value = SELECTED_PROSPECT.Direccion || "";
+          document.getElementById('comuna').value = SELECTED_PROSPECT.Comuna || "";
+          document.getElementById('unidades').value = SELECTED_PROSPECT.Unidades || "";
+          document.getElementById('latlong').value = SELECTED_PROSPECT.LatLong || "";
+
+          // Seleccionar tipo de negocio correcto
+          const tipo = SELECTED_PROSPECT.Tipo === 'Administracion' ? 'Administracion' : (SELECTED_PROSPECT['Tipo Operacion'] || 'Venta');
+          
+          // Marcar el radio button correcto
+          const radios = document.getElementsByName('operacion');
+          for(let r of radios) {
+              if(r.value === tipo || (tipo === 'Administracion' && r.value === 'Administracion')) {
+                  r.checked = true;
+                  // Disparar evento para mostrar/ocultar campos
+                  toggleForm(r.value === 'Administracion' ? 'admin' : 'corretaje');
+              }
+          }
+
+          // Cambiar el comportamiento del botón guardar para que sea "Editar" en vez de "Crear"
+          // NOTA: Para hacer esto bien, deberíamos guardar el ID en una variable global o input hidden
+          // y modificar la función submit. 
+          // Para esta implementación rápida, agregaremos un input hidden ID al form
+          let hiddenId = document.getElementById('editId');
+          if(!hiddenId) {
+              hiddenId = document.createElement('input');
+              hiddenId.type = 'hidden';
+              hiddenId.id = 'editId';
+              document.getElementById('formProspecto').appendChild(hiddenId);
+          }
+          hiddenId.value = SELECTED_PROSPECT.ID;
       }
     </script>
     <div id="actionSheetOverlay" class="sheet-overlay" onclick="cerrarActionSheet()">
