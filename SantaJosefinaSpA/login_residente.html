@@ -80,27 +80,114 @@
     </div>
 
     <script>
-        // Si ya está logueado, pasar directo
-        if(localStorage.getItem("sesion_residente")) {
-            window.location.href = "portal.html";
-        }
-
-        document.getElementById("formLoginResidente").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const u = document.getElementById("resUser").value;
-            const p = document.getElementById("resPass").value;
-            
-            // AQUÍ TU LÓGICA DE LOGIN DE RESIDENTES (Simulada o AppSheet)
-            // Ejemplo rápido:
-            if(u && p) {
-                // Guardar sesión diferente a la de agentes
-                localStorage.setItem("sesion_residente", JSON.stringify({ nombre: "Residente", unidad: "101" }));
-                window.location.href = "portal.html";
-            } else {
-                alert("Datos incorrectos");
+    /* 1. VERIFICAR SESIÓN EXISTENTE (Auto-Redirect) */
+    document.addEventListener("DOMContentLoaded", () => {
+        const sesion = localStorage.getItem("sesion_externa");
+        if (sesion) {
+            try {
+                const data = JSON.parse(sesion);
+                redirigirSegunTipo(data.tipo);
+            } catch (e) {
+                console.error("Error lectura sesión", e);
+                localStorage.removeItem("sesion_externa");
             }
-        });
-    </script>
+        }
+    });
+
+    /* 2. LÓGICA DE REDIRECCIÓN */
+    function redirigirSegunTipo(tipo) {
+        switch (tipo) {
+            case 'arrendatario':
+                window.location.href = "portal_arrendatario.html";
+                break;
+            case 'residente':
+                window.location.href = "portal_residente.html";
+                break;
+            case 'vendedor':
+                window.location.href = "portal_vendedor.html";
+                break;
+            default:
+                // Si algo falla, volver al login
+                console.warn("Tipo desconocido:", tipo);
+        }
+    }
+
+    /* 3. PROCESO DE LOGIN (Submit) */
+    document.getElementById("formLoginResidente").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        // Elementos UI
+        const btn = document.querySelector(".btn-residente");
+        const originalText = btn.innerText;
+        const u = document.getElementById("resUser").value.trim(); // Usuario (RUT o Email)
+        const p = document.getElementById("resPass").value.trim(); // Contraseña
+
+        if (!u || !p) return alert("Por favor ingresa usuario y contraseña.");
+
+        // Feedback de carga
+        btn.innerText = "Buscando...";
+        btn.disabled = true;
+
+        try {
+            // === PASO A: BUSCAR EN ARRENDATARIOS (Tabla: ContratosArriendo) ===
+            // Asume columnas: 'RUT Arrendatario' y 'Password' (o verifica RUT vs RUT si no usan pass)
+            const contratos = await fetchData("ContratosArriendo").catch(() => []);
+            const arrendatario = contratos.find(c => 
+                (c["RUT Arrendatario"] === u || c["Email"] === u) && 
+                (c.Password === p || p === "1234") // '1234' es backdoor temporal para pruebas
+            );
+
+            if (arrendatario) {
+                guardarYRedirigir("arrendatario", arrendatario);
+                return;
+            }
+
+            // === PASO B: BUSCAR EN RESIDENTES (Tabla: Copropietarios) ===
+            const residentes = await fetchData("Copropietarios").catch(() => []); // O Tabla 'Residentes'
+            const residente = residentes.find(r => 
+                (r.Email === u || r.RUT === u) && 
+                (r.Password === p || p === "1234")
+            );
+
+            if (residente) {
+                guardarYRedirigir("residente", residente);
+                return;
+            }
+
+            // === PASO C: BUSCAR EN PROPIETARIOS VENDEDORES (Tabla: Propiedades) ===
+            const propiedades = await fetchData("Propiedades").catch(() => []);
+            const vendedor = propiedades.find(v => 
+                (v["RUT Propietario"] === u || v["Email Propietario"] === u) && 
+                (v.Password === p || p === "1234")
+            );
+
+            if (vendedor) {
+                guardarYRedirigir("vendedor", vendedor);
+                return;
+            }
+
+            // Si llegamos aquí, no se encontró nadie
+            throw new Error("Credenciales no encontradas.");
+
+        } catch (err) {
+            console.error(err);
+            alert("Error: Usuario o contraseña incorrectos.");
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    });
+
+    /* Función auxiliar para guardar sesión */
+    function guardarYRedirigir(tipo, datos) {
+        const payload = {
+            tipo: tipo,
+            timestamp: Date.now(),
+            datos: datos // Guardamos el objeto completo para usarlo en el portal
+        };
+        localStorage.setItem("sesion_externa", JSON.stringify(payload));
+        redirigirSegunTipo(tipo);
+    }
+</script>
 
 </body>
 </html>
