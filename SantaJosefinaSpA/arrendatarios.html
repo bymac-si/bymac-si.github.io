@@ -17,7 +17,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script>
       (function () {
-        emailjs.init("7Il4AhmGHchP7qfxu"); // Tu Public Key
+        // Asegúrate de que esta sea tu Public Key correcta
+        emailjs.init("7Il4AhmGHchP7qfxu");
       })();
       requireAuth();
     </script>
@@ -130,7 +131,7 @@
         </div>
         <div class="header-filters">
           <div class="filter-item" style="flex-grow: 1">
-            <label class="label">Buscar</label>
+            <label class="label">Buscar Arrendatario / Propiedad</label>
             <input
               id="inpBuscar"
               class="input-modern"
@@ -256,8 +257,8 @@
             </div>
           </div>
           <div>
-            <label class="label">Propiedad (ID/Dirección)</label
-            ><input
+            <label class="label">Propiedad (ID/Dirección)</label>
+            <input
               id="cPropiedad"
               class="input-modern"
               placeholder="Ej: Depto 301 - Los Andes"
@@ -425,6 +426,7 @@
     <script>
       /* ===== ESTADO ===== */
       let CONTRATOS = [],
+        PROPIEDADES = [],
         ACTUAL_ID = null;
 
       /* ===== INICIO ===== */
@@ -447,7 +449,14 @@
       async function cargarTodo() {
         showSpinner();
         try {
-          CONTRATOS = await fetchData("ContratosArriendo").catch(() => []);
+          // CARGAMOS CONTRATOS Y PROPIEDADES PARA HACER EL CRUCE (JOIN)
+          const [contratos, props] = await Promise.all([
+            fetchData("ContratosArriendo").catch(() => []),
+            fetchData("Propiedades").catch(() => []),
+          ]);
+          CONTRATOS = contratos || [];
+          PROPIEDADES = props || [];
+
           renderTabla(CONTRATOS);
         } catch (e) {
           console.error(e);
@@ -459,12 +468,20 @@
       /* ===== RENDER & FILTROS ===== */
       function filtrar() {
         const q = document.getElementById("inpBuscar").value.toLowerCase();
-        const filtrados = CONTRATOS.filter(
-          (c) =>
+        const filtrados = CONTRATOS.filter((c) => {
+          // Buscar nombre de propiedad
+          const prop = PROPIEDADES.find(
+            (p) => String(p.ID) === String(c.PropiedadID)
+          );
+          const nombreProp = prop ? prop.Titulo || prop.Direccion || "" : "";
+
+          return (
             (c["Nombre Arrendatario"] || "").toLowerCase().includes(q) ||
             (c["RUT Arrendatario"] || "").toLowerCase().includes(q) ||
+            nombreProp.toLowerCase().includes(q) ||
             (c.PropiedadID || "").toLowerCase().includes(q)
-        );
+          );
+        });
         renderTabla(filtrados);
       }
 
@@ -479,12 +496,23 @@
         }
 
         lista.forEach((c) => {
-          // Lógica de Semáforo de Pago
+          // 1. Buscar Datos Propiedad
+          const prop = PROPIEDADES.find(
+            (p) => String(p.ID) === String(c.PropiedadID)
+          );
+          const nombrePropiedad = prop
+            ? prop.Titulo || prop.Direccion
+            : c.PropiedadID || "Sin Propiedad";
+          const imagenPropiedad =
+            prop && prop.ImagenURL
+              ? `<img src="${prop.ImagenURL}" style="width:30px; height:30px; border-radius:4px; object-fit:cover; margin-right:5px; vertical-align:middle;">`
+              : "";
+
+          // 2. Lógica de Semáforo de Pago
           const hoy = new Date().getDate();
           const diaPago = parseInt(c["Dia Pago"]);
           let badge = '<span class="badge-pago bg-ok">Al día</span>';
 
-          // Simulación simple: Si hoy > día pago, alerta (en prod conectar con tabla Pagos)
           if (hoy > diaPago)
             badge = '<span class="badge-pago bg-warn">Por Vencer</span>';
           if (hoy > diaPago + 5)
@@ -500,9 +528,10 @@
                           c["RUT Arrendatario"]
                         }</div>
                     </td>
-                    <td style="padding: 15px; font-size:13px;">${
-                      c.PropiedadID
-                    }</td>
+                    <td style="padding: 15px; font-size:13px;">
+                        ${imagenPropiedad} 
+                        <b>${nombrePropiedad}</b>
+                    </td>
                     <td style="padding: 15px; font-weight:700;">$${parseInt(
                       c["Monto Arriendo"]
                     ).toLocaleString()}</td>
@@ -527,10 +556,18 @@
       async function gestionar(id) {
         ACTUAL_ID = id;
         const c = CONTRATOS.find((x) => x.ID === id);
+
+        // Buscar nombre propiedad para el título del modal
+        let nombreProp = c.PropiedadID;
+        const p = PROPIEDADES.find(
+          (item) => String(item.ID) === String(c.PropiedadID)
+        );
+        if (p) nombreProp = p.Titulo || p.Direccion;
+
         if (c)
           document.getElementById(
             "lblClienteGestion"
-          ).innerText = `${c["Nombre Arrendatario"]} (${c.PropiedadID})`;
+          ).innerText = `${c["Nombre Arrendatario"]} - ${nombreProp}`;
 
         document.getElementById("modalGestion").style.display = "flex";
         cargarBitacora();
@@ -542,6 +579,12 @@
         if (!c || !c.Email)
           return alert("Error: El cliente no tiene email registrado.");
 
+        // Buscar datos propiedad para el email
+        const p = PROPIEDADES.find(
+          (item) => String(item.ID) === String(c.PropiedadID)
+        );
+        const nombreProp = p ? p.Titulo || p.Direccion : c.PropiedadID;
+
         if (
           !confirm(
             `¿Enviar recordatorio de pago a ${c["Nombre Arrendatario"]}?`
@@ -551,16 +594,13 @@
 
         showSpinner("Enviando correo...");
 
-        // Template HTML para el correo
         const htmlBody = `
                 <div style="font-family:sans-serif; color:#333; border:1px solid #eee; padding:20px; border-radius:8px;">
                     <h2 style="color:#f59e0b;">Recordatorio de Pago</h2>
                     <p>Estimado(a) <strong>${
                       c["Nombre Arrendatario"]
                     }</strong>,</p>
-                    <p>Le recordamos amablemente que el pago de arriendo para la propiedad <strong>${
-                      c.PropiedadID
-                    }</strong> vence el día <strong>${
+                    <p>Le recordamos amablemente que el pago de arriendo para la propiedad <strong>${nombreProp}</strong> vence el día <strong>${
           c["Dia Pago"]
         }</strong> del presente mes.</p>
                     <div style="background:#f9fafb; padding:15px; border-left:4px solid #f59e0b; margin:15px 0;">
@@ -575,15 +615,12 @@
             `;
 
         try {
-          // Usamos el servicio y template de EmailJS (Asegúrate de que existan o usa tus IDs)
-          // Aquí uso IDs genéricos, cámbialos por los tuyos si tienes unos específicos
           await emailjs.send("service_p9hqkqn", "template_80q9psi", {
             to_email: c.Email,
-            subject: "Recordatorio de Pago Arriendo - " + c.PropiedadID,
+            subject: "Recordatorio de Pago Arriendo - " + nombreProp,
             html_body: htmlBody,
           });
 
-          // Registrar en Bitácora
           await appSheetCRUD("Bitacora", "Add", [
             {
               ID: "BIT_" + Date.now(),
@@ -610,6 +647,11 @@
         const c = CONTRATOS.find((x) => x.ID === ACTUAL_ID);
         if (!c || !c.Email) return alert("El cliente no tiene email.");
 
+        const p = PROPIEDADES.find(
+          (item) => String(item.ID) === String(c.PropiedadID)
+        );
+        const nombreProp = p ? p.Titulo || p.Direccion : c.PropiedadID;
+
         if (
           !confirm(
             `¿Confirmar recepción del pago y enviar comprobante a ${c["Nombre Arrendatario"]}?`
@@ -625,9 +667,7 @@
                     <p>Estimado(a) <strong>${
                       c["Nombre Arrendatario"]
                     }</strong>,</p>
-                    <p>Hemos recibido correctamente su pago de arriendo para la propiedad <strong>${
-                      c.PropiedadID
-                    }</strong>.</p>
+                    <p>Hemos recibido correctamente su pago de arriendo para la propiedad <strong>${nombreProp}</strong>.</p>
                     <div style="background:#f0fdf4; padding:15px; border-left:4px solid #10b981; margin:15px 0;">
                         <p><strong>Monto Recibido:</strong> $${parseInt(
                           c["Monto Arriendo"]
@@ -644,7 +684,7 @@
         try {
           await emailjs.send("service_p9hqkqn", "template_80q9psi", {
             to_email: c.Email,
-            subject: "Comprobante de Pago Arriendo - " + c.PropiedadID,
+            subject: "Comprobante de Pago Arriendo - " + nombreProp,
             html_body: htmlBody,
           });
 
@@ -669,7 +709,7 @@
         }
       }
 
-      /* 3. REGISTRO MANUAL (SIN EMAIL) */
+      /* 3. REGISTRO MANUAL */
       async function registrarPagoManual() {
         const nota = prompt(
           "Ingrese detalle del pago (Ej: Transferencia Banco Estado):"
