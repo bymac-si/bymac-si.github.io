@@ -1,4 +1,34 @@
 // ==========================================
+// 0. PWA REGISTRATION
+// ==========================================
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Service Worker registrado:', reg.scope))
+            .catch(err => console.error('Error SW:', err));
+    });
+}
+
+// Detección de Estado Offline (Para avisar al agente)
+window.addEventListener('offline', () => {
+    mostrarAvisoOffline(true);
+});
+window.addEventListener('online', () => {
+    mostrarAvisoOffline(false);
+});
+
+function mostrarAvisoOffline(estamosOffline) {
+    let aviso = document.getElementById('aviso-offline');
+    if (!aviso) {
+        aviso = document.createElement('div');
+        aviso.id = 'aviso-offline';
+        aviso.style.cssText = "position:fixed; bottom:0; left:0; right:0; background:#ef4444; color:white; text-align:center; padding:10px; z-index:9999; font-weight:bold; display:none;";
+        aviso.innerText = "⚠️ Sin conexión. No podrás guardar cambios.";
+        document.body.appendChild(aviso);
+    }
+    aviso.style.display = estamosOffline ? 'block' : 'none';
+}
+// ==========================================
 // 1. CONFIGURACIÓN APPSHEET
 // ==========================================
 const APP_ID = "247b67e5-5b42-49a5-92a1-16c4357f5c7e";
@@ -9,6 +39,11 @@ const API_KEY = "V2-bKT1n-onhYX-SHl8K-zPPx8-6QwfJ-pp9Pi-UIrcy-gcLGM"; // ⚠️ 
 // ==========================================
 
 async function appSheetCRUD(tabla, action, rows, properties = {}) {
+    // 1. Chequeo de seguridad PWA
+    if (!navigator.onLine) {
+        alert("⚠️ ESTÁS OFFLINE\n\nNo tienes conexión a internet. Los datos NO se guardarán.\nPor favor, conéctate y vuelve a intentar.");
+        throw new Error("Sin conexión a internet.");
+    }
     const url = `https://api.appsheet.com/api/v2/apps/${APP_ID}/tables/${tabla}/Action`;
     const body = { Action: action, Properties: properties, Rows: rows };
 

@@ -8,6 +8,10 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <link rel="stylesheet" href="assets/css/styles.css" />
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a2b48">
+<link rel="apple-touch-icon" href="assets/img/icon-192.png">
+
     <script src="assets/js/app.js"></script>
     <script>
       requireAuth();
@@ -708,26 +712,48 @@
         CURRENT_PROS_ID = null;
 
       /* ===== Boot ===== */
+     /* ===== Boot ===== */
       document.addEventListener("DOMContentLoaded", async () => {
-        try {
-          document.getElementById("header").innerHTML = await (
-            await fetch("header.html")
-          ).text();
-          if (typeof initHeader === "function") initHeader();
-        } catch (e) {
-          console.error("Error header:", e);
-        }
-
-        try {
-          document.getElementById("footer").innerHTML = await (
-            await fetch("footer.html")
-          ).text();
-        } catch (e) {
-          console.error("Error footer:", e);
-        }
-
+        // 1. Cargar Header y Footer
+        try { 
+            document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); 
+            if (typeof initHeader === 'function') initHeader();
+        } catch (e) {}
+        
+        try { 
+            document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); 
+        } catch (e) {}
+        
+        // 2. Iniciar Eventos y Datos
         bindUI();
         await cargarTodo();
+
+        // 3. LÓGICA DE FOCO (NUEVO)
+        // Verificar si venimos desde el Buzón Web con un ID específico
+        const params = new URLSearchParams(window.location.search);
+        const focusId = params.get('id');
+
+        if (focusId) {
+            // Buscar el prospecto en memoria
+            const target = PROS.find(p => String(p.ID) === String(focusId));
+            
+            if (target) {
+                // A. Forzar la vista solo a este registro
+                VIEW = [target];
+                renderTabla();
+                
+                // B. Limpiar filtros visuales para evitar confusión
+                document.getElementById("inpBuscar").value = ""; 
+                
+                // C. Abrir automáticamente el Modal de Edición para asignar agente
+                abrirFormProspecto(target.ID, target._tipo);
+                
+                // Opcional: Limpiar la URL para que al recargar no se abra de nuevo
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else {
+                console.warn("ID de URL no encontrado en la base de datos.");
+            }
+        }
       });
 
       function bindUI() {
