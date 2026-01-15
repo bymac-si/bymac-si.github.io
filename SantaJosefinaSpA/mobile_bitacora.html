@@ -193,7 +193,7 @@
         `).join("") + `</div>`;
     }
 
-    /* 4. GUARDAR NUEVA NOTA */
+    /* 4. GUARDAR NUEVA NOTA (Coincide con tabla Bitacora) */
     async function guardarLog() {
         const id = document.getElementById("prospectoID").value;
         const nota = document.getElementById("bitNota").value;
@@ -203,13 +203,20 @@
 
         document.getElementById("loader").style.display = "flex";
 
+        // Obtener nombre del usuario actual
+        let usuarioActual = "Movil";
+        try {
+            const auth = getAuthUser(); // Función de app.js
+            if(auth && auth.nombre) usuarioActual = auth.nombre;
+        } catch(e) {}
+
         const payload = {
             "ID": "BIT_" + Date.now(),
             "ProspectoID": id,
-            "Fecha": document.getElementById("bitFecha").value,
+            "Fecha": document.getElementById("bitFecha").value, // Formato YYYY-MM-DD
             "Tipo": document.getElementById("bitTipo").value,
             "Nota": nota,
-            "Usuario": "Movil" // Podrías usar getAuthUser().nombre aquí
+            "Usuario": usuarioActual
         };
 
         try {

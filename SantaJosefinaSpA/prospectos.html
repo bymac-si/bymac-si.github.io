@@ -1201,17 +1201,30 @@
       async function guardarBitacora() {
         const nota = document.getElementById("bitNota").value;
         if (!nota) return alert("Escribe una nota");
+
+        // Obtener nombre del usuario actual
+        let usuarioActual = "Admin";
+        try {
+            const auth = getAuthUser(); // Función global de app.js
+            if(auth && auth.nombre) usuarioActual = auth.nombre;
+        } catch(e) {}
+
         const payload = {
-          ID: "BIT_" + Date.now(),
-          ProspectoID: CURRENT_PROS_ID,
-          Fecha: document.getElementById("bitFecha").value,
-          Tipo: document.getElementById("bitTipo").value,
-          Nota: nota,
-          Usuario: "Admin",
+          "ID": "BIT_" + Date.now(),
+          "ProspectoID": CURRENT_PROS_ID,
+          "Fecha": document.getElementById("bitFecha").value,
+          "Tipo": document.getElementById("bitTipo").value,
+          "Nota": nota,
+          "Usuario": usuarioActual // <--- CAMBIO AQUÍ
         };
-        await appSheetCRUD("Bitacora", "Add", [payload]);
-        abrirBitacora(CURRENT_PROS_ID);
-        document.getElementById("bitNota").value = "";
+
+        try {
+            await appSheetCRUD("Bitacora", "Add", [payload]);
+            abrirBitacora(CURRENT_PROS_ID); // Recargar lista
+            document.getElementById("bitNota").value = "";
+        } catch (err) {
+            alert("Error al guardar nota: " + err.message);
+        }
       }
 
       /* MIGRAR CORRETAJE -> ADMIN */

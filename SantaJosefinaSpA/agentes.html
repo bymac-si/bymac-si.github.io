@@ -1095,37 +1095,78 @@
         } catch(err) { alert(err.message); } finally { hideSpinner(); }
     };
 
-    // 2. Guardar Transacción
+    // 2. Guardar Transacción (Coincide con tabla Transacciones)
     document.getElementById("formTransaccion").onsubmit = async (e) => {
         e.preventDefault();
         showSpinner();
 
+        const tipoNegocio = document.getElementById("tTipo").value;
         let propiedad = document.getElementById("tPropiedad").value;
-        // Si es captación y usó el select, asegurarse de tener nombre
-        if(!propiedad && document.getElementById("tTipo").value === 'Captacion') {
+        
+        // Si es captación y usó el select de edificios
+        if(!propiedad && tipoNegocio === 'Captacion') {
              const sel = document.getElementById("selEdificio");
              if(sel.selectedIndex > 0) propiedad = sel.options[sel.selectedIndex].text;
+        }
+
+        // --- CÁLCULO DE DATOS FINANCIEROS PARA LA TABLA ---
+        let montoOperacion = 0;
+        let comisionTotal = 0;
+        let pctAgente = 0;
+        let pagoAgente = parseInt(document.getElementById("tPagoFinal").value) || 0;
+
+        if (tipoNegocio === 'Captacion') {
+            // En Administración, el "Monto Operación" es el total comunidad mensual
+            const strTotal = document.getElementById("lblHonorarioTotal").innerText.replace(/\$|\./g, '').trim();
+            montoOperacion = parseInt(strTotal) || 0;
+            comisionTotal = montoOperacion; // En admin, la "comisión" base es el honorario completo
+            pctAgente = 50; // Regla de negocio: 50% en captación
+        } else {
+            // En Venta/Arriendo
+            montoOperacion = parseInt(document.getElementById("vMonto").value) || 0;
+            const pctEmpresa = parseFloat(document.getElementById("vPctEmpresa").value) || 0;
+            pctAgente = parseFloat(document.getElementById("vPctAgente").value) || 0;
+            
+            // Calculamos la comisión bruta de la empresa
+            // Fórmula inversa: Si pagoAgente es el X% de la ComisiónTotal neta...
+            // Pero más fácil: MontoOperacion * %Empresa = ComisionTotal Bruta
+            comisionTotal = Math.round(montoOperacion * (pctEmpresa / 100));
         }
 
         const payload = {
             "ID": "TRX_" + Date.now(),
             "AgenteID": AGENTE_ACTUAL.ID,
-            "Tipo": document.getElementById("tTipo").value,
+            "Tipo": tipoNegocio,
             "Propiedad": propiedad || "Sin nombre",
-            "PagoAgente": parseInt(document.getElementById("tPagoFinal").value),
+            "MontoOperacion": montoOperacion,     // Valor Propiedad / Honorario Comunidad
+            "ComisionTotal": comisionTotal,       // Ingreso Empresa
+            "PorcentajeAgente": pctAgente,        // % del Agente
+            "PagoAgente": pagoAgente,             // $ a Pagar al Agente
             "Fecha": new Date().toISOString().split('T')[0],
             "Estado": "Cerrado"
         };
 
         try {
             await appSheetCRUD("Transacciones", "Add", [payload]);
+            
+            // Actualizar UI
             TRANSACCIONES.push(payload);
             renderHistorial();
             renderTabla();
             calcularTotalMes();
+            
+            // Reset y cerrar
             document.getElementById("formTransaccion").reset();
             toggleCalculadora();
-        } catch(err) { alert("Error: " + err.message); } finally { hideSpinner(); }
+            alert("Negocio registrado correctamente.");
+            cerrarModalGestion();
+            
+        } catch(err) { 
+            console.error(err);
+            alert("Error al guardar: " + err.message); 
+        } finally { 
+            hideSpinner(); 
+        }
     };
 
     // 3. Actualizar Calificación
