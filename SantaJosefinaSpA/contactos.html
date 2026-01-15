@@ -1,111 +1,232 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>CRM - Contactos</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="assets/js/app.js"></script>
-  <script>requireAuth();</script>
-</head>
-<body style="max-width:1200px; margin: 0 auto;">
-<div id="header"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <title>CRM - Buzón Web</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <script src="assets/js/app.js"></script>
+    <script>
+      requireAuth();
+    </script>
+    <style>
+      /* Estilos específicos para lectura de mensajes */
+      body { max-width: 1200px; margin: 0 auto; color: #1a2b48; background-color: #f8fafc; }
+      main { padding: 40px; }
+      
+      .inbox-header {
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 20px;
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+      }
 
-<main style="padding:40px;">
-  <h1 class="page-title">Contactos</h1>
+      .message-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 15px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        transition: transform 0.2s, box-shadow 0.2s;
+        border-left: 4px solid #3b82f6; /* Azul por defecto */
+      }
+      .message-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+      }
+      
+      /* Estado Visual */
+      .card-nuevo { border-left-color: #10b981; background-color: #f0fdf4; } /* Verde para nuevos */
+      .card-procesado { border-left-color: #cbd5e1; opacity: 0.8; } /* Gris para ya vistos */
 
-  <table>
-    <thead>
-      <tr>
-        <th>Nombre</th><th>Email</th><th>Teléfono</th><th>Mensaje</th><th>Fecha</th><th>Estado</th><th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody id="tablaContactos"></tbody>
-  </table>
-</main>
+      .msg-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: 13px;
+        color: #64748b;
+      }
+      .msg-name {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1e293b;
+      }
+      .msg-body {
+        font-size: 14px;
+        color: #334155;
+        line-height: 1.5;
+        background: #f8fafc;
+        padding: 10px;
+        border-radius: 6px;
+        margin-top: 10px;
+      }
+      .msg-footer {
+        margin-top: 15px;
+        display: flex;
+        gap: 15px;
+        font-size: 13px;
+        align-items: center;
+      }
+      .contact-pill {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: #eff6ff;
+        color: #1e40af;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-weight: 600;
+      }
 
-<div id="modalContacto" class="modal">
-  <div class="modal-content">
-    <h2 id="modalTitle">Actualizar Contacto</h2>
-    <form id="formContactoAdm">
-      <input type="hidden" id="contactoID">
-      <label>Estado</label>
-      <select id="contactoEstado">
-        <option>Nuevo</option>
-        <option>Lead</option>
-        <option>Cliente</option>
-        <option>Descartado</option>
-      </select>
-      <label>Notas</label>
-      <textarea id="contactoNotas" rows="4"></textarea>
-      <div style="text-align:right;margin-top:10px;">
-        <button type="button" class="btn-outline" onclick="cerrarModal()">Cancelar</button>
-        <button class="btn-primary">Guardar</button>
+      /* SPINNER */
+      .spinner-backdrop { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.85); display: none; place-items: center; z-index: 12000; }
+      .spinner { width: 30px; height: 30px; border-radius: 50%; border: 3px solid #eee; border-top-color: #1a2b48; animation: spin 0.9s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+  </head>
+  <body>
+    <div id="header"></div>
+
+    <main>
+      <div class="inbox-header">
+        <div>
+            <h1 style="margin: 0; font-size: 24px;"><i class="fa-solid fa-inbox"></i> Buzón Web</h1>
+            <p style="margin: 5px 0 0; color: #64748b;">Leads capturados desde el formulario de contacto.</p>
+        </div>
+        <div>
+            <button class="btn-head btn-secundario" onclick="cargarBuzon()" title="Recargar">
+                <i class="fa-solid fa-rotate-right"></i> Actualizar
+            </button>
+        </div>
       </div>
-    </form>
-  </div>
-</div>
 
-<div id="footer"></div>
+      <div id="listaMensajes">
+          <div style="text-align: center; padding: 40px; color: #94a3b8;">
+              Cargando mensajes...
+          </div>
+      </div>
+    </main>
 
-<script>
-document.addEventListener("DOMContentLoaded", async ()=>{
-  document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
-  document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
-});
+    <div id="pageSpinner" class="spinner-backdrop" aria-hidden="true">
+        <div style="background:white; padding:20px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1); text-align:center;">
+            <div class="spinner" style="margin:0 auto 10px;"></div>
+            <div>Cargando...</div>
+        </div>
+    </div>
 
-let contactos=[], KEY_NAME="ID";
+    <div id="footer"></div>
 
-async function cargarContactos(){
-  contactos = await fetchData("Contactos");
-  if(contactos.length) KEY_NAME = getKeyName(contactos[0]);
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        try { 
+            document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); 
+            if (typeof initHeader === 'function') initHeader();
+        } catch (e) {}
+        try { 
+            document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); 
+        } catch (e) {}
+        
+        await cargarBuzon();
+      });
 
-  tablaContactos.innerHTML = contactos.map(r=>{
-    const key=getKeyVal(r);
-    return `<tr>
-      <td>${r.Nombre||""}</td>
-      <td>${r.Email||""}</td>
-      <td>${r.Telefono||""}</td>
-      <td>${r.Mensaje||""}</td>
-      <td>${r.Fecha||""}</td>
-      <td>${r.Estado||"Nuevo"}</td>
-      <td>
-        <button class="btn-outline" onclick="abrirModal('${key}')">Editar</button>
-        <button class="btn-primary" onclick="eliminar('${key}')">Eliminar</button>
-      </td>
-    </tr>`;
-  }).join("");
-}
+      async function cargarBuzon() {
+        const spinner = document.getElementById("pageSpinner");
+        spinner.style.display = "grid";
+        
+        try {
+            // 1. Cargar DATOS desde ProspectosCorretaje
+            const datos = await fetchData("ProspectosCorretaje").catch(() => []);
+            
+            // 2. FILTRAR: Solo Canal = 'Web Landing'
+            // Usamos .includes() para ser más flexibles si escribiste "Web Landing " con espacio
+            const leadsWeb = datos.filter(p => (p.Canal || "").includes("Web"));
 
-function abrirModal(id){
-  const c = contactos.find(x=>String(getKeyVal(x))===String(id));
-  if(!c){ alert("No encontrado"); return; }
-  contactoID.value = id;
-  contactoEstado.value = c.Estado||"Nuevo";
-  contactoNotas.value = c.Notas||"";
-  modalContacto.classList.add("active");
-}
-function cerrarModal(){ modalContacto.classList.remove("active"); }
+            // 3. ORDENAR: Más recientes primero
+            leadsWeb.sort((a, b) => new Date(b["Fecha Registro"]) - new Date(a["Fecha Registro"]));
 
-formContactoAdm.onsubmit = async (e)=>{
-  e.preventDefault();
-  const id = contactoID.value;
-  const payload = {
-    [KEY_NAME]: id,
-    Estado: contactoEstado.value,
-    Notas: contactoNotas.value.trim()
-  };
-  await appSheetCRUD("Contactos","Edit",[payload]);
-  cerrarModal(); location.reload();
-};
+            // 4. RENDERIZAR
+            renderMensajes(leadsWeb);
 
-async function eliminar(id){
-  if(!confirm("¿Eliminar?")) return;
-  await appSheetCRUD("Contactos","Delete",[{[KEY_NAME]:id}]);
-  location.reload();
-}
+        } catch (err) {
+            console.error(err);
+            alert("Error cargando el buzón.");
+        } finally {
+            spinner.style.display = "none";
+        }
+      }
 
-cargarContactos();
-</script>
-</body>
+      function renderMensajes(lista) {
+          const contenedor = document.getElementById("listaMensajes");
+          
+          if (lista.length === 0) {
+              contenedor.innerHTML = `
+                <div style="text-align: center; padding: 60px; color: #cbd5e1;">
+                    <i class="fa-regular fa-envelope-open" style="font-size: 48px; margin-bottom: 15px;"></i>
+                    <p>No hay mensajes nuevos desde la web.</p>
+                </div>`;
+              return;
+          }
+
+          contenedor.innerHTML = lista.map(lead => {
+              // Estilo según estado
+              const esNuevo = (lead.Estado === 'Nuevo');
+              const claseCard = esNuevo ? 'card-nuevo' : 'card-procesado';
+              const labelEstado = esNuevo 
+                ? '<span style="color:#166534; font-weight:bold; font-size:11px;">★ NUEVO</span>' 
+                : `<span style="color:#64748b; font-size:11px;">${lead.Estado}</span>`;
+
+              return `
+              <div class="message-card ${claseCard}">
+                  <div class="msg-header">
+                      <div>${labelEstado} • ID: ${lead.ID}</div>
+                      <div>${formatearFecha(lead["Fecha Registro"])}</div>
+                  </div>
+                  
+                  <div class="msg-name">${lead.Nombre || "Sin Nombre"}</div>
+                  
+                  <div class="msg-footer">
+                      ${lead.Email ? `<a href="mailto:${lead.Email}" class="contact-pill"><i class="fa-regular fa-envelope"></i> ${lead.Email}</a>` : ''}
+                      ${lead.Telefono ? `<a href="tel:${lead.Telefono}" class="contact-pill"><i class="fa-solid fa-phone"></i> ${lead.Telefono}</a>` : ''}
+                  </div>
+
+                  <div class="msg-body">
+                      ${lead.Observaciones || "<span style='font-style:italic; color:#94a3b8;'>Sin mensaje adjunto.</span>"}
+                  </div>
+
+                  <div style="margin-top: 15px; text-align: right;">
+                      <button onclick="irAGestion('${lead.ID}')" 
+                        style="background: white; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; cursor: pointer; color: #1a2b48; font-weight: 600; font-size: 13px;">
+                          <i class="fa-solid fa-arrow-up-right-from-square"></i> Gestionar en CRM
+                      </button>
+                  </div>
+              </div>
+              `;
+          }).join("");
+      }
+
+      /* Helpers */
+      function formatearFecha(fecha) {
+          if(!fecha) return "";
+          const d = new Date(fecha);
+          return d.toLocaleDateString("es-CL", { day: 'numeric', month: 'long', year: 'numeric' });
+      }
+
+      // Redirigir a prospectos.html pero abriendo el modal de ese ID (opcional)
+      // O simplemente ir a la tabla filtrada.
+      function irAGestion(id) {
+          // Guardamos el ID en localStorage para que prospectos.html sepa qué buscar (idea futura)
+          // Por ahora solo vamos a la página
+          window.location.href = "prospectos.html";
+      }
+    </script>
+  </body>
 </html>
