@@ -6,16 +6,16 @@
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
     />
-    <title>Nuevo Prospecto - En Terreno</title>
+    <title>Gestión Prospectos Móvil</title>
 
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <link rel="stylesheet" href="assets/css/styles.css" />
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1a2b48">
-<link rel="apple-touch-icon" href="assets/img/icon-192.png">
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#1a2b48" />
+    <link rel="apple-touch-icon" href="assets/img/icon-192.png" />
 
     <script src="assets/js/app.js"></script>
     <script>
@@ -23,13 +23,15 @@
     </script>
 
     <style>
-      /* === ESTILOS MOBILE === */
+      /* === ESTILOS BASE === */
       body {
         background-color: #f1f5f9;
         font-family: -apple-system, sans-serif;
         margin: 0;
         padding-bottom: 90px;
       }
+
+      /* HEADER */
       .mobile-header {
         background: #1a2b48;
         color: white;
@@ -46,11 +48,118 @@
         font-size: 18px;
         font-weight: 600;
       }
-      .btn-close {
-        color: rgba(255, 255, 255, 0.8);
+      .btn-nav {
+        color: white;
         font-size: 20px;
         text-decoration: none;
+        cursor: pointer;
       }
+
+      /* === MENÚ DE SELECCIÓN (NUEVO) === */
+      .menu-container {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        height: 80vh;
+        justify-content: center;
+      }
+      .menu-card {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        cursor: pointer;
+        transition: transform 0.2s;
+        border: 1px solid #e2e8f0;
+      }
+      .menu-card:active {
+        transform: scale(0.98);
+        background: #f8fafc;
+      }
+      .menu-icon {
+        font-size: 40px;
+        color: #1a2b48;
+        margin-bottom: 15px;
+      }
+      .menu-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1e293b;
+      }
+      .menu-desc {
+        font-size: 13px;
+        color: #64748b;
+        margin-top: 5px;
+      }
+
+      /* === LISTADO (NUEVO) === */
+      .list-container {
+        padding: 15px;
+      }
+      .prospect-card {
+        background: white;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-left: 5px solid #ccc;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+      }
+      .pc-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 8px;
+      }
+      .pc-name {
+        font-weight: 700;
+        font-size: 15px;
+        color: #1e293b;
+      }
+      .pc-date {
+        font-size: 11px;
+        color: #94a3b8;
+      }
+      .pc-meta {
+        font-size: 13px;
+        color: #475569;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .pc-badge {
+        font-size: 10px;
+        padding: 3px 8px;
+        border-radius: 10px;
+        text-transform: uppercase;
+        font-weight: bold;
+      }
+
+      /* Colores Estado */
+      .st-Nuevo {
+        border-left-color: #3b82f6;
+      }
+      .bg-Nuevo {
+        background: #eff6ff;
+        color: #1d4ed8;
+      }
+      .st-Negociacion {
+        border-left-color: #f59e0b;
+      }
+      .bg-Negociacion {
+        background: #fffbeb;
+        color: #b45309;
+      }
+      .st-Ganado {
+        border-left-color: #10b981;
+      }
+      .bg-Ganado {
+        background: #ecfdf5;
+        color: #047857;
+      }
+
+      /* === FORMULARIO (EXISTENTE) === */
       .form-container {
         padding: 20px;
         max-width: 600px;
@@ -70,7 +179,6 @@
         color: #64748b;
         text-transform: uppercase;
         margin-bottom: 8px;
-        letter-spacing: 0.5px;
       }
       input,
       select,
@@ -81,17 +189,7 @@
         padding: 12px;
         font-size: 16px;
         border-radius: 8px;
-        color: #1e293b;
         box-sizing: border-box;
-        border: 1px solid transparent;
-        transition: border 0.2s;
-      }
-      input:focus,
-      select:focus,
-      textarea:focus {
-        border-color: #3b82f6;
-        background: #fff;
-        outline: none;
       }
 
       /* Radio Buttons */
@@ -109,8 +207,6 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
-        text-align: center;
         padding: 8px 4px;
         background: #f1f5f9;
         border-radius: 8px;
@@ -119,25 +215,14 @@
         font-size: 12px;
         cursor: pointer;
         border: 2px solid transparent;
-        transition: all 0.2s;
-      }
-      .radio-option label i {
-        font-size: 18px;
-        margin-bottom: 4px;
-        display: block;
       }
       .radio-option input:checked + label {
         background: #eff6ff;
         color: #3b82f6;
         border-color: #3b82f6;
       }
-      .radio-option input[value="Administracion"]:checked + label {
-        background: #f0fdf4;
-        color: #166534;
-        border-color: #166534;
-      }
 
-      /* Botones */
+      /* Utils */
       .btn-gps {
         background: #e0f2fe;
         color: #0284c7;
@@ -159,6 +244,7 @@
         border-style: solid;
         border-color: #166534;
       }
+
       .fab-save {
         position: fixed;
         bottom: 20px;
@@ -179,12 +265,9 @@
         gap: 10px;
         z-index: 200;
       }
-      .fab-save:active {
-        transform: scale(0.98);
-      }
 
       .hidden {
-        display: none;
+        display: none !important;
       }
       .spinner-overlay {
         position: fixed;
@@ -209,6 +292,7 @@
           transform: rotate(360deg);
         }
       }
+
       .success-toast {
         position: fixed;
         top: 20px;
@@ -223,209 +307,234 @@
         box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
         display: none;
         z-index: 3001;
-        align-items: center;
-        gap: 8px;
-        width: max-content;
       }
     </style>
   </head>
   <body>
     <div class="mobile-header">
-    <div class="header-title"><i class="fa-solid fa-user-plus"></i> Prospecto</div>
-    <div style="display:flex; gap:15px;">
-        <a href="mobile_bitacora.html" style="color:white; font-size:18px;" title="Ir a Bitácora"><i class="fa-solid fa-clock-rotate-left"></i></a>
-        <a href="dashboard.html" class="btn-close"><i class="fa-solid fa-xmark"></i></a>
+      <div class="header-title" id="pageTitle">Gestión Prospectos</div>
+      <div style="display: flex; gap: 15px">
+        <a id="btnBack" onclick="goBack()" class="btn-nav"
+          ><i class="fa-solid fa-arrow-left"></i
+        ></a>
+      </div>
     </div>
-</div>
 
-    <form id="formProspecto" class="form-container" autocomplete="off">
-      <div class="input-group">
-        <label class="input-label">Tipo de Negocio</label>
-        <div class="radio-group">
-          <div class="radio-option">
-            <input
-              type="radio"
-              name="operacion"
-              id="opVenta"
-              value="Venta"
-              onchange="toggleForm('corretaje')"
-            />
-            <label for="opVenta"
-              ><i class="fa-solid fa-sack-dollar"></i> Venta</label
-            >
-          </div>
-          <div class="radio-option">
-            <input
-              type="radio"
-              name="operacion"
-              id="opArriendo"
-              value="Arriendo"
-              onchange="toggleForm('corretaje')"
-            />
-            <label for="opArriendo"
-              ><i class="fa-solid fa-key"></i> Arriendo</label
-            >
-          </div>
-          <div class="radio-option">
-            <input
-              type="radio"
-              name="operacion"
-              id="opAdmin"
-              value="Administracion"
-              checked
-              onchange="toggleForm('admin')"
-            />
-            <label for="opAdmin"
-              ><i class="fa-solid fa-building-user"></i> Admin</label
-            >
-          </div>
-        </div>
+    <div id="viewMenu" class="menu-container">
+      <div class="menu-card" onclick="switchView('form')">
+        <div class="menu-icon"><i class="fa-solid fa-user-plus"></i></div>
+        <div class="menu-title">Nuevo Prospecto</div>
+        <div class="menu-desc">Registrar visita en terreno o cliente.</div>
       </div>
 
-      <div class="input-group">
-        <label class="input-label" id="lblNombre"
-          >Nombre Condominio / Cliente</label
-        >
+      <div class="menu-card" onclick="switchView('list')">
+        <div class="menu-icon"><i class="fa-solid fa-list-ul"></i></div>
+        <div class="menu-title">Ver Listado</div>
+        <div class="menu-desc">Revisar mis prospectos recientes.</div>
+      </div>
+    </div>
+
+    <div id="viewList" class="list-container hidden">
+      <div style="margin-bottom: 10px">
         <input
           type="text"
-          id="nombre"
-          placeholder="Ej: Edificio Los Andes"
-          required
+          id="searchList"
+          placeholder="Buscar..."
+          oninput="filtrarLista()"
+          style="background: white; border: 1px solid #e2e8f0"
         />
-
-        <div
-          style="
-            display: grid;
-            grid-template-columns: 1fr 1.3fr;
-            gap: 10px;
-            margin-top: 10px;
-          "
-        >
-          <div>
-            <label class="input-label">Teléfono</label>
-            <input type="tel" id="telefono" placeholder="+569..." required />
-          </div>
-          <div>
-            <label class="input-label">Email</label>
-            <input type="email" id="email" placeholder="@mail.com" />
-          </div>
+      </div>
+      <div id="listaContenido">
+        <div style="text-align: center; padding: 40px; color: #94a3b8">
+          Cargando...
         </div>
       </div>
+    </div>
 
-      <div id="fieldsAdmin">
+    <div id="viewForm" class="hidden">
+      <form id="formProspecto" class="form-container" autocomplete="off">
         <div class="input-group">
-          <label class="input-label">Ubicación (Georreferencia)</label>
-
-          <div
-            style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px"
-          >
-            <input
-              type="text"
-              id="direccion"
-              placeholder="Calle y Número"
-              onchange="intentarGeocodificar()"
-            />
-            <input
-              type="text"
-              id="comuna"
-              placeholder="Comuna..."
-              onchange="intentarGeocodificar()"
-            />
-          </div>
-
-          <button
-            type="button"
-            class="btn-gps"
-            onclick="obtenerGPS()"
-            id="btnGps"
-          >
-            <i class="fa-solid fa-location-crosshairs"></i> Guardar mi ubicación
-            actual
-          </button>
-          <input type="hidden" id="latlong" name="latlong" />
-          <div
-            id="msgGeo"
-            style="
-              font-size: 11px;
-              color: #10b981;
-              margin-top: 5px;
-              display: none;
-              text-align: center;
-            "
-          >
-            <i class="fa-solid fa-check"></i> Coordenadas detectadas por
-            dirección
+          <label class="input-label">Tipo de Negocio</label>
+          <div class="radio-group">
+            <div class="radio-option">
+              <input
+                type="radio"
+                name="operacion"
+                id="opVenta"
+                value="Venta"
+                onchange="toggleForm('corretaje')"
+              />
+              <label for="opVenta"
+                ><i class="fa-solid fa-sack-dollar"></i> Venta</label
+              >
+            </div>
+            <div class="radio-option">
+              <input
+                type="radio"
+                name="operacion"
+                id="opArriendo"
+                value="Arriendo"
+                onchange="toggleForm('corretaje')"
+              />
+              <label for="opArriendo"
+                ><i class="fa-solid fa-key"></i> Arriendo</label
+              >
+            </div>
+            <div class="radio-option">
+              <input
+                type="radio"
+                name="operacion"
+                id="opAdmin"
+                value="Administracion"
+                checked
+                onchange="toggleForm('admin')"
+              />
+              <label for="opAdmin"
+                ><i class="fa-solid fa-building-user"></i> Admin</label
+              >
+            </div>
           </div>
         </div>
 
         <div class="input-group">
-          <label class="input-label">RUT Comunidad (Opcional)</label>
-          <input type="text" id="rut" placeholder="12.345.678-9" />
-        </div>
-
-        <div class="input-group">
+          <label class="input-label" id="lblNombre"
+            >Nombre Condominio / Cliente</label
+          >
+          <input
+            type="text"
+            id="nombre"
+            placeholder="Ej: Edificio Los Andes"
+            required
+          />
           <div
             style="
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
+              display: grid;
+              grid-template-columns: 1fr 1.3fr;
+              gap: 10px;
+              margin-top: 10px;
             "
           >
-            <label class="input-label" style="margin: 0"
-              >Cantidad Unidades</label
+            <div>
+              <label class="input-label">Teléfono</label
+              ><input type="tel" id="telefono" placeholder="+569..." required />
+            </div>
+            <div>
+              <label class="input-label">Email</label
+              ><input type="email" id="email" placeholder="@mail.com" />
+            </div>
+          </div>
+        </div>
+
+        <div id="fieldsAdmin">
+          <div class="input-group">
+            <label class="input-label">Ubicación</label>
+            <div
+              style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px"
             >
-            <span
-              id="badgeEstimacion"
+              <input
+                type="text"
+                id="direccion"
+                placeholder="Calle y Número"
+                onchange="intentarGeocodificar()"
+              />
+              <input
+                type="text"
+                id="comuna"
+                placeholder="Comuna..."
+                onchange="intentarGeocodificar()"
+              />
+            </div>
+            <button
+              type="button"
+              class="btn-gps"
+              onclick="obtenerGPS()"
+              id="btnGps"
+            >
+              <i class="fa-solid fa-location-crosshairs"></i> Guardar mi
+              ubicación
+            </button>
+            <input type="hidden" id="latlong" name="latlong" />
+            <div
+              id="msgGeo"
               style="
                 font-size: 11px;
-                background: #e0f2fe;
-                padding: 2px 6px;
-                border-radius: 4px;
-                color: #0369a1;
+                color: #10b981;
+                margin-top: 5px;
+                display: none;
+                text-align: center;
               "
-              >Est. Honorarios: $0</span
             >
+              <i class="fa-solid fa-check"></i> Coordenadas detectadas
+            </div>
           </div>
-          <input
-            type="number"
-            id="unidades"
-            placeholder="Ej: 80"
-            oninput="calcularEstimacion()"
-          />
+          <div class="input-group">
+            <label class="input-label">RUT Comunidad (Opcional)</label>
+            <input type="text" id="rut" placeholder="12.345.678-9" />
+          </div>
+          <div class="input-group">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+              "
+            >
+              <label class="input-label" style="margin: 0"
+                >Cantidad Unidades</label
+              >
+              <span
+                id="badgeEstimacion"
+                style="
+                  font-size: 11px;
+                  background: #e0f2fe;
+                  padding: 2px 6px;
+                  border-radius: 4px;
+                  color: #0369a1;
+                "
+                >Est. Honorarios: $0</span
+              >
+            </div>
+            <input
+              type="number"
+              id="unidades"
+              placeholder="Ej: 80"
+              oninput="calcularEstimacion()"
+            />
+          </div>
         </div>
-      </div>
 
-      <div id="fieldsCorretaje" class="hidden">
+        <div id="fieldsCorretaje" class="hidden">
+          <div class="input-group">
+            <label class="input-label">Tipo Propiedad</label>
+            <select id="tipoPropiedad">
+              <option value="Casa">Casa</option>
+              <option value="Departamento">Departamento</option>
+              <option value="Terreno">Terreno</option>
+              <option value="Parcela">Parcela</option>
+              <option value="Oficina">Oficina</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label class="input-label">Presupuesto</label>
+            <input type="number" id="presupuesto" placeholder="$" />
+          </div>
+        </div>
+
         <div class="input-group">
-          <label class="input-label">Tipo Propiedad</label>
-          <select id="tipoPropiedad">
-            <option value="Casa">Casa</option>
-            <option value="Departamento">Departamento</option>
-            <option value="Terreno">Terreno</option>
-            <option value="Parcela">Parcela</option>
-            <option value="Oficina">Oficina</option>
-          </select>
+          <label class="input-label">Notas / Observaciones</label>
+          <textarea id="obs" rows="3" placeholder="Comentarios..."></textarea>
         </div>
-        <div class="input-group">
-          <label class="input-label">Presupuesto</label>
-          <input type="number" id="presupuesto" placeholder="$" />
-        </div>
-      </div>
 
-      <div class="input-group">
-        <label class="input-label">Notas / Observaciones</label>
-        <textarea id="obs" rows="3" placeholder="Comentarios..."></textarea>
-      </div>
-
-      <button type="submit" class="fab-save">
-        <i class="fa-solid fa-paper-plane"></i> Enviar Prospecto
-      </button>
-    </form>
+        <button type="submit" class="fab-save">
+          <i class="fa-solid fa-paper-plane"></i> Enviar Prospecto
+        </button>
+      </form>
+    </div>
 
     <div id="loader" class="spinner-overlay">
       <div class="spinner"></div>
       <div style="margin-top: 15px; font-weight: 600; color: #1a2b48">
-        Guardando...
+        Cargando...
       </div>
     </div>
 
@@ -435,23 +544,143 @@
 
     <script>
       let AGENTE_ACTUAL = "Sin Asignar";
+      let PROSPECTOS_CACHE = [];
+      let CURRENT_VIEW = "menu"; // menu, list, form
 
       document.addEventListener("DOMContentLoaded", () => {
         try {
           if (typeof getAuthUser === "function") {
             const u = getAuthUser();
             if (u && u.Nombre) AGENTE_ACTUAL = u.Nombre;
-          } else {
-            const store = localStorage.getItem("admin_token");
-            if (store) {
-              const u = JSON.parse(store);
-              AGENTE_ACTUAL = u.Nombre || "Agente Móvil";
-            }
           }
         } catch (e) {}
+
         toggleForm("admin");
+        switchView("menu"); // Iniciar en menú
       });
 
+      /* === NAVEGACIÓN === */
+      function switchView(viewName) {
+        CURRENT_VIEW = viewName;
+
+        document.getElementById("viewMenu").classList.add("hidden");
+        document.getElementById("viewList").classList.add("hidden");
+        document.getElementById("viewForm").classList.add("hidden");
+        document.querySelector(".fab-save").classList.add("hidden"); // Ocultar boton flotante si no es form
+
+        const title = document.getElementById("pageTitle");
+        const btnBack = document.getElementById("btnBack");
+
+        if (viewName === "menu") {
+          document.getElementById("viewMenu").classList.remove("hidden");
+          title.innerText = "Gestión Prospectos";
+          btnBack.innerHTML = '<i class="fa-solid fa-house"></i>'; // Icono Home para volver al dashboard
+        } else if (viewName === "list") {
+          document.getElementById("viewList").classList.remove("hidden");
+          title.innerText = "Mis Prospectos";
+          btnBack.innerHTML = '<i class="fa-solid fa-arrow-left"></i>';
+          cargarListaMobile();
+        } else if (viewName === "form") {
+          document.getElementById("viewForm").classList.remove("hidden");
+          document.querySelector(".fab-save").classList.remove("hidden");
+          title.innerText = "Nuevo Ingreso";
+          btnBack.innerHTML = '<i class="fa-solid fa-arrow-left"></i>';
+        }
+      }
+
+      function goBack() {
+        if (CURRENT_VIEW === "menu") {
+          window.location.href = "dashboard.html";
+        } else {
+          switchView("menu");
+        }
+      }
+
+      /* === LÓGICA DE LISTADO === */
+      async function cargarListaMobile() {
+        document.getElementById("loader").style.display = "flex";
+        try {
+          const [admin, corr] = await Promise.all([
+            fetchData("ProspectosCopro").catch(() => []),
+            fetchData("ProspectosCorretaje").catch(() => []),
+          ]);
+
+          // Unir y ordenar por fecha más reciente
+          let lista = [...admin, ...corr];
+          lista.sort(
+            (a, b) =>
+              new Date(b["Fecha Registro"] || 0) -
+              new Date(a["Fecha Registro"] || 0)
+          );
+
+          PROSPECTOS_CACHE = lista;
+          renderLista(lista);
+        } catch (e) {
+          document.getElementById("listaContenido").innerHTML =
+            '<div style="text-align:center;">Error cargando datos</div>';
+        } finally {
+          document.getElementById("loader").style.display = "none";
+        }
+      }
+
+      function renderLista(lista) {
+        const container = document.getElementById("listaContenido");
+        if (lista.length === 0) {
+          container.innerHTML =
+            '<div style="text-align:center; padding:30px; color:#94a3b8;">No hay prospectos recientes.</div>';
+          return;
+        }
+
+        container.innerHTML = lista
+          .map((p) => {
+            // Estilo Estado
+            let stClass = "st-Nuevo",
+              bgClass = "bg-Nuevo";
+            if ((p.Estado || "").includes("Negociación")) {
+              stClass = "st-Negociacion";
+              bgClass = "bg-Negociacion";
+            }
+            if ((p.Estado || "").includes("Ganado")) {
+              stClass = "st-Ganado";
+              bgClass = "bg-Ganado";
+            }
+
+            return `
+              <div class="prospect-card ${stClass}">
+                  <div class="pc-header">
+                      <div class="pc-name">${p.Nombre}</div>
+                      <div class="pc-badge ${bgClass}">${
+              p.Estado || "Nuevo"
+            }</div>
+                  </div>
+                  <div class="pc-meta" style="margin-bottom:5px;">
+                      <i class="fa-solid fa-building-user" style="color:#64748b"></i> ${
+                        p.Tipo || "Admin"
+                      } 
+                      <span style="color:#cbd5e1">|</span> 
+                      ${p["Fecha Registro"] || "-"}
+                  </div>
+                  <div class="pc-meta">
+                      ${
+                        p.Telefono
+                          ? `<a href="tel:${p.Telefono}" style="text-decoration:none; color:#475569;"><i class="fa-solid fa-phone"></i> Llamar</a>`
+                          : ""
+                      }
+                  </div>
+              </div>`;
+          })
+          .join("");
+      }
+
+      function filtrarLista() {
+        const q = document.getElementById("searchList").value.toLowerCase();
+        const filtered = PROSPECTOS_CACHE.filter((p) =>
+          (p.Nombre || "").toLowerCase().includes(q)
+        );
+        renderLista(filtered);
+      }
+
+      /* === FUNCIONES DEL FORMULARIO (EXISTENTES) === */
       function toggleForm(mode) {
         const fAdmin = document.getElementById("fieldsAdmin");
         const fCorretaje = document.getElementById("fieldsCorretaje");
@@ -471,10 +700,7 @@
       function obtenerGPS() {
         const btn = document.getElementById("btnGps");
         const inputLatLong = document.getElementById("latlong");
-        if (!navigator.geolocation) {
-          alert("GPS no soportado");
-          return;
-        }
+        if (!navigator.geolocation) return alert("GPS no soportado");
 
         btn.innerHTML =
           '<i class="fa-solid fa-spinner fa-spin"></i> Obteniendo...';
@@ -487,99 +713,72 @@
               '<i class="fa-solid fa-check"></i> Ubicación Guardada';
             btn.classList.add("active");
           },
-          (error) => {
-            console.error(error);
+          () => {
             btn.innerHTML =
               '<i class="fa-solid fa-triangle-exclamation"></i> Error GPS';
-            alert("No se pudo obtener la ubicación.");
+            alert("Error GPS");
           },
           { enableHighAccuracy: true }
         );
       }
 
-      /* NUEVA FUNCIÓN: GEOCODIFICACIÓN AUTOMÁTICA POR DIRECCIÓN */
       async function intentarGeocodificar() {
         const dir = document.getElementById("direccion").value;
         const com = document.getElementById("comuna").value;
         const latLongField = document.getElementById("latlong");
         const msg = document.getElementById("msgGeo");
 
-        // Si ya hay dato de GPS real, no sobrescribimos con una estimación
         if (document.getElementById("btnGps").classList.contains("active"))
           return;
-
         if (dir.length < 5) return;
 
-        const query = `${dir}, ${com}, Chile`;
         try {
-          // Usamos Nominatim (OpenStreetMap) que es gratis
           const res = await fetch(
             `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-              query
+              dir + ", " + com + ", Chile"
             )}`
           );
           const data = await res.json();
-
           if (data && data.length > 0) {
             latLongField.value = `${data[0].lat}, ${data[0].lon}`;
             msg.style.display = "block";
           } else {
             msg.style.display = "none";
-            // No limpiamos el campo por si acaso el usuario quiere intentar enviar igual
           }
-        } catch (e) {
-          console.log("Error geo", e);
-        }
+        } catch (e) {}
       }
 
       function calcularEstimacion() {
         const u = parseInt(document.getElementById("unidades").value) || 0;
         if (u === 0) return;
         let base = 250000;
-        if (u > 20) {
-          base += (u - 20) * 2000;
-        }
-        const fmt = new Intl.NumberFormat("es-CL").format(base);
+        if (u > 20) base += (u - 20) * 2000;
         document.getElementById(
           "badgeEstimacion"
-        ).textContent = `Est. Honorarios: $${fmt}`;
+        ).textContent = `Est. Honorarios: $${new Intl.NumberFormat(
+          "es-CL"
+        ).format(base)}`;
       }
 
-      /* === SUBMIT CON CORRECCIÓN DE LATLONG === */
+      /* === SUBMIT === */
       document.getElementById("formProspecto").onsubmit = async (e) => {
         e.preventDefault();
-
         const nombre = document.getElementById("nombre").value.trim();
-        if (nombre.length < 3) {
-          alert("Nombre requerido");
-          return;
-        }
+        if (nombre.length < 3) return alert("Nombre requerido");
 
         document.getElementById("loader").style.display = "flex";
-
         const operacion = document.querySelector(
           'input[name="operacion"]:checked'
         ).value;
         const fechaHoy = new Date().toISOString().split("T")[0];
-
         let payload = {};
         let tablaDestino = "";
 
         if (operacion === "Administracion") {
-          // === TABLA: ProspectosCopro ===
           tablaDestino = "ProspectosCopro";
-          const nuevoID = "PROS_" + Date.now();
-
-          // Forzar obtener coordenadas si están vacías
-          let coordenadas = document.getElementById("latlong").value;
-          if (!coordenadas) {
-            // Si está vacío, ponemos 0,0 para evitar error de AppSheet
-            // O intentamos geocodificar una última vez (pero eso es async y aquí ya estamos en submit)
-            coordenadas = "0, 0";
-          }
-
+          let coordenadas = document.getElementById("latlong").value || "0, 0";
           payload = {
-            ID: nuevoID,
+            ID: "PROS_" + Date.now(),
             Nombre: nombre,
             Comuna: document.getElementById("comuna").value,
             Unidades: document.getElementById("unidades").value,
@@ -588,7 +787,7 @@
             Contacto: nombre,
             Estado: "Nuevo",
             Telefono: document.getElementById("telefono").value,
-            LatLong: coordenadas, // Aquí va el dato corregido o "0, 0"
+            LatLong: coordenadas,
             Tipo: "Administracion",
             Email: document.getElementById("email").value,
             Observaciones: document.getElementById("obs").value,
@@ -596,12 +795,9 @@
             "Fecha Registro": fechaHoy,
           };
         } else {
-          // === TABLA: ProspectosCorretaje ===
           tablaDestino = "ProspectosCorretaje";
-          const nuevoID = "PCOR_" + Date.now();
-
           payload = {
-            ID: nuevoID,
+            ID: "PCOR_" + Date.now(),
             Estado: "Nuevo",
             Nombre: nombre,
             Telefono: document.getElementById("telefono").value,
@@ -616,16 +812,10 @@
           };
         }
 
-        console.log("Enviando a:", tablaDestino, payload);
-
         try {
           if (typeof appSheetCRUD === "function") {
             await appSheetCRUD(tablaDestino, "Add", [payload]);
-          } else {
-            console.warn("Modo Simulación");
-            await new Promise((r) => setTimeout(r, 1000));
           }
-
           showToast();
           document.getElementById("formProspecto").reset();
           const btnGps = document.getElementById("btnGps");
@@ -634,7 +824,9 @@
               '<i class="fa-solid fa-location-crosshairs"></i> Guardar mi ubicación actual';
             btnGps.classList.remove("active");
           }
-          window.scrollTo({ top: 0, behavior: "smooth" });
+
+          // Volver al menú tras guardar
+          switchView("menu");
         } catch (err) {
           alert("Error: " + err.message);
         } finally {
