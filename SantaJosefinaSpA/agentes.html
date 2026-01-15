@@ -382,6 +382,7 @@
               <th style="width: 50px">Avatar</th>
               <th>Agente</th>
               <th>Rol / Contacto</th>
+              <th>Calificación</th>
               <th style="text-align: center">Negocios</th>
               <th style="text-align: center">Tareas</th>
               <th style="text-align: right">A Pagar</th>
@@ -390,7 +391,7 @@
           </thead>
           <tbody id="tablaAgentes">
             <tr>
-              <td colspan="7" style="text-align: center; padding: 30px">
+              <td colspan="8" style="text-align: center; padding: 30px">
                 Cargando...
               </td>
             </tr>
@@ -573,12 +574,32 @@
     </div>
 
     <div id="modalGestion" class="modal">
-      <div class="modal-content">
-        <div class="modal-sidebar">
+      <div
+        class="modal-content"
+        style="
+          width: 95% !important;
+          max-width: 1300px !important;
+          height: 90vh !important;
+        "
+      >
+        <div
+          class="modal-sidebar"
+          style="
+            width: 300px;
+            flex-shrink: 0;
+            background: #f8fafc;
+            border-right: 1px solid #e2e8f0;
+          "
+        >
           <div style="text-align: center; margin-bottom: 30px">
             <div class="big-avatar" id="mdlGestionAvatar"></div>
-            <h3 id="mdlNombre" style="margin: 0">Nombre</h3>
-            <p id="mdlEmail" style="color: #64748b; font-size: 13px">email</p>
+            <h3 id="mdlNombre" style="margin: 0; font-size: 18px">Nombre</h3>
+            <p
+              id="mdlEmail"
+              style="color: #64748b; font-size: 12px; word-break: break-all"
+            >
+              email
+            </p>
             <div
               class="stars"
               id="mdlStars"
@@ -600,45 +621,57 @@
                 max="5"
               />
             </div>
-            <button type="submit" class="btn-primary" style="width: 100%">
+            <button
+              type="submit"
+              class="btn-primary"
+              style="width: 100%; justify-content: center"
+            >
               Actualizar Calificación
             </button>
           </form>
         </div>
 
-        <div class="modal-main">
+        <div
+          class="modal-main"
+          style="flex: 1; padding: 30px; overflow-y: auto"
+        >
           <div
             style="
               display: flex;
               justify-content: space-between;
               margin-bottom: 20px;
+              align-items: center;
             "
           >
-            <h2 style="margin: 0">Registrar Negocio</h2>
+            <h2 style="margin: 0; font-size: 22px; color: #1e293b">
+              Registrar Negocio
+            </h2>
             <button
               class="btn-primary btn-outline"
               onclick="cerrarModal('modalGestion')"
             >
-              Cerrar
+              <i class="fa-solid fa-xmark"></i> Cerrar
             </button>
           </div>
 
           <div
             style="
               border: 1px solid #e2e8f0;
-              border-radius: 8px;
-              padding: 20px;
-              box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+              border-radius: 12px;
+              padding: 25px;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+              background: white;
             "
           >
             <form id="formTransaccion">
-              <div class="row-flex">
-                <div class="col-flex">
+              <div class="row-flex" style="gap: 20px">
+                <div class="col-flex" style="max-width: 250px">
                   <label class="label">Tipo de Negocio</label>
                   <select
                     id="tTipo"
                     class="input-std"
                     onchange="toggleCalculadora()"
+                    style="font-weight: bold; color: #0f172a"
                   >
                     <option value="Venta">Venta Propiedad</option>
                     <option value="Arriendo">Arriendo</option>
@@ -647,10 +680,11 @@
                     </option>
                   </select>
                 </div>
+
                 <div
                   id="divSelectEdificios"
                   class="col-flex"
-                  style="display: none"
+                  style="display: none; flex: 2"
                 >
                   <label class="label">Seleccionar Edificio</label>
                   <select
@@ -661,6 +695,7 @@
                     <option value="">-- Elige un edificio --</option>
                   </select>
                 </div>
+
                 <div id="divInputManual" class="col-flex" style="flex: 2">
                   <label class="label">Propiedad / Detalle</label>
                   <input
@@ -678,9 +713,9 @@
                 style="
                   background: #f0fdf4;
                   border: 1px solid #bbf7d0;
-                  padding: 15px;
+                  padding: 20px;
                   border-radius: 8px;
-                  margin-top: 15px;
+                  margin-top: 20px;
                   display: none;
                 "
               >
@@ -688,26 +723,27 @@
                   style="
                     display: flex;
                     justify-content: space-between;
-                    margin-bottom: 10px;
+                    margin-bottom: 15px;
                     border-bottom: 1px solid #bbf7d0;
-                    padding-bottom: 5px;
+                    padding-bottom: 10px;
                   "
                 >
-                  <strong style="color: #166534"
+                  <strong style="color: #166534; font-size: 15px"
                     ><i class="fa-solid fa-calculator"></i> Honorarios
-                    Admin</strong
+                    Administración</strong
                   >
                   <span
                     style="
-                      font-size: 11px;
+                      font-size: 12px;
                       background: #fff;
-                      padding: 2px 6px;
-                      border-radius: 4px;
+                      padding: 4px 10px;
+                      border-radius: 6px;
+                      border: 1px solid #bbf7d0;
                     "
-                    >UTM: <span id="lblUTM">--</span></span
+                    >UTM Hoy: <b><span id="lblUTM">--</span></b></span
                   >
                 </div>
-                <div class="row-flex">
+                <div class="row-flex" style="gap: 20px">
                   <div class="col-flex">
                     <label class="label">N° Unidades</label>
                     <input
@@ -730,20 +766,27 @@
                     />
                   </div>
                   <div class="col-flex" style="text-align: right">
-                    <label class="label">Total Comunidad</label>
+                    <label class="label">Total Comunidad Mensual</label>
                     <div
                       id="lblHonorarioTotal"
-                      style="font-weight: 700; font-size: 14px; color: #1e293b"
+                      style="font-weight: 800; font-size: 18px; color: #1e293b"
                     >
                       $0
                     </div>
                   </div>
                 </div>
-                <div style="text-align: right; font-size: 12px; color: #166534">
-                  Comisión Sugerida (50%):
+                <div
+                  style="
+                    text-align: right;
+                    font-size: 13px;
+                    color: #166534;
+                    margin-top: 10px;
+                  "
+                >
+                  Comisión Sugerida (50% del primer mes):
                   <span
                     id="lblPagoAgente"
-                    style="font-size: 16px; font-weight: 800"
+                    style="font-size: 18px; font-weight: 800; margin-left: 5px"
                     >$0</span
                   >
                 </div>
@@ -754,13 +797,13 @@
                 style="
                   background: #f0fdf4;
                   border: 1px solid #bbf7d0;
-                  padding: 15px;
+                  padding: 20px;
                   border-radius: 8px;
-                  margin-top: 15px;
+                  margin-top: 20px;
                   display: block;
                 "
               >
-                <div class="row-flex">
+                <div class="row-flex" style="gap: 20px">
                   <div class="col-flex">
                     <label class="label">Valor Propiedad</label>
                     <input
@@ -772,7 +815,7 @@
                     />
                   </div>
                   <div class="col-flex">
-                    <label class="label">% Empresa</label>
+                    <label class="label">% Comisión Empresa</label>
                     <input
                       type="number"
                       id="vPctEmpresa"
@@ -783,7 +826,7 @@
                     />
                   </div>
                   <div class="col-flex">
-                    <label class="label">% Agente</label>
+                    <label class="label">% Punta Agente</label>
                     <input
                       type="number"
                       id="vPctAgente"
@@ -794,10 +837,10 @@
                     />
                   </div>
                   <div class="col-flex" style="text-align: right">
-                    <label class="label">Pago Agente</label>
+                    <label class="label">A Pagar al Agente</label>
                     <div
                       id="lblPagoVenta"
-                      style="font-size: 16px; font-weight: 800; color: #166534"
+                      style="font-size: 20px; font-weight: 800; color: #166534"
                     >
                       $0
                     </div>
@@ -808,24 +851,27 @@
               <div
                 class="row-flex"
                 style="
-                  margin-top: 20px;
+                  margin-top: 25px;
                   border-top: 1px solid #e2e8f0;
-                  padding-top: 15px;
+                  padding-top: 20px;
+                  align-items: center;
                 "
               >
                 <div class="col-flex" style="flex: 2">
-                  <label class="label" style="color: #0f172a"
-                    >Monto Final a Pagar (Confirmar)</label
+                  <label class="label" style="color: #0f172a; font-size: 12px"
+                    >Monto Final a Registrar (Confirmar)</label
                   >
                   <input
                     type="number"
                     id="tPagoFinal"
                     class="input-std"
                     style="
-                      font-weight: 700;
-                      background: #f8fafc;
-                      font-size: 16px;
+                      font-weight: 800;
+                      background: #f1f5f9;
+                      font-size: 18px;
                       border-color: #94a3b8;
+                      height: 50px;
+                      color: #0f172a;
                     "
                     required
                   />
@@ -834,9 +880,9 @@
                   <button
                     type="submit"
                     class="btn-primary"
-                    style="height: 42px; padding: 0 30px"
+                    style="height: 50px; padding: 0 40px; font-size: 15px"
                   >
-                    Registrar
+                    <i class="fa-solid fa-check"></i> Registrar Negocio
                   </button>
                 </div>
               </div>
@@ -845,13 +891,15 @@
 
           <h4
             style="
-              margin: 20px 0 10px 0;
+              margin: 30px 0 15px 0;
               color: #64748b;
               font-size: 12px;
               text-transform: uppercase;
+              font-weight: 800;
+              letter-spacing: 0.5px;
             "
           >
-            Historial Reciente
+            Historial de Negocios
           </h4>
           <div id="listaTransacciones"></div>
         </div>
@@ -862,10 +910,7 @@
     <div id="footer"></div>
 
     <script>
-      /* ===== CONFIG ===== */
       const IMGBB_API_KEY = "d096ade1d65ede2aa12f00d94094a854";
-
-      /* ===== ESTADO ===== */
       let AGENTES = [],
         TRANSACCIONES = [],
         EDIFICIOS = [],
@@ -874,7 +919,6 @@
       let VALOR_UTM = 64000;
       let AVATAR_URL_NUEVO = "";
 
-      /* INICIO */
       document.addEventListener("DOMContentLoaded", async () => {
         try {
           document.getElementById("header").innerHTML = await (
@@ -887,12 +931,10 @@
             await fetch("footer.html")
           ).text();
         } catch (e) {}
-
         await cargarUTM();
         await cargarTodo();
       });
 
-      /* CARGAR UTM */
       async function cargarUTM() {
         try {
           const res = await fetch("https://mindicador.cl/api/utm");
@@ -907,7 +949,6 @@
         }
       }
 
-      /* CARGAR TODO */
       async function cargarTodo() {
         showSpinner();
         try {
@@ -921,7 +962,6 @@
           TRANSACCIONES = trans || [];
           EDIFICIOS = copros || [];
           TAREAS = tareas || [];
-
           poblarSelectEdificios();
           renderTabla();
           calcularTotalMes();
@@ -946,8 +986,6 @@
       function renderTabla() {
         const tb = document.getElementById("tablaAgentes");
         tb.innerHTML = "";
-
-        // Calcular Tareas Pendientes para KPI Global
         const tareasTotales = TAREAS.filter(
           (t) => t.Estado !== "Completada"
         ).length;
@@ -961,15 +999,21 @@
             (s, t) => s + (parseInt(t.PagoAgente) || 0),
             0
           );
-
-          // Tareas del agente
           const misTareas = TAREAS.filter(
             (t) =>
               String(t.AgenteID) === String(a.ID) && t.Estado !== "Completada"
           );
 
+          // Estrellas
           const r = parseInt(a.Calificacion) || 3;
-          // Avatar logic
+          let stars = "";
+          for (let i = 1; i <= 5; i++) {
+            stars +=
+              i <= r
+                ? '<i class="fa-solid fa-star" style="color:#f59e0b"></i>'
+                : '<i class="fa-regular fa-star" style="color:#cbd5e1"></i>';
+          }
+
           let avatarHTML = `<div class="avatar">${a.Nombre.charAt(
             0
           ).toUpperCase()}</div>`;
@@ -983,9 +1027,9 @@
                 <td><div style="font-size:12px; color:#64748b;">${
                   a.Rol || "Agente"
                 }<br>${a.Email}</div></td>
-                <td style="text-align:center; font-weight:700;">${
-                  negocios.length
-                }</td>
+                <td style="color:#f59e0b; letter-spacing:1px; font-size:12px;">${stars}</td> <td style="text-align:center; font-weight:700;">${
+            negocios.length
+          }</td>
                 <td style="text-align:center;"><span class="badge-priority p-Media">${
                   misTareas.length
                 } Pen.</span></td>
@@ -1007,7 +1051,7 @@
         });
 
         if (AGENTES.length === 0)
-          tb.innerHTML = `<tr><td colspan="7" style="text-align:center;">Sin datos.</td></tr>`;
+          tb.innerHTML = `<tr><td colspan="8" style="text-align:center;">Sin datos.</td></tr>`;
       }
 
       function calcularTotalMes() {
@@ -1018,14 +1062,12 @@
         document.getElementById("kpiTotalComision").innerText = clp(total);
       }
 
-      /* --- CRUD AGENTE (CREAR / EDITAR) --- */
       function abrirModalAgente(id) {
         document.getElementById("formAgente").reset();
         document.getElementById("agenteID").value = "";
         AVATAR_URL_NUEVO = "";
         document.getElementById("previewAvatar").style.display = "none";
         document.getElementById("avatarInitials").style.display = "flex";
-
         document.getElementById("modalTitleAgente").textContent =
           "Nuevo Agente";
 
@@ -1039,7 +1081,6 @@
             document.getElementById("agenteEmail").value = a.Email;
             document.getElementById("agenteTelefono").value = a.Telefono;
             document.getElementById("agenteRol").value = a.Rol || "Agente";
-
             if (a.Avatar && a.Avatar.startsWith("http")) {
               document.getElementById("previewAvatar").src = a.Avatar;
               document.getElementById("previewAvatar").style.display = "block";
@@ -1053,7 +1094,6 @@
       document.getElementById("formAgente").onsubmit = async (e) => {
         e.preventDefault();
         showSpinner();
-
         const id = document.getElementById("agenteID").value;
         const payload = {
           Nombre: document.getElementById("agenteNombre").value,
@@ -1062,7 +1102,6 @@
           Rol: document.getElementById("agenteRol").value,
           Activo: true,
         };
-
         if (AVATAR_URL_NUEVO) payload["Avatar"] = AVATAR_URL_NUEVO;
         if (id) payload["ID"] = id;
         else payload["ID"] = "AGE_" + Date.now();
@@ -1079,7 +1118,6 @@
         }
       };
 
-      /* --- GESTIÓN DE TAREAS --- */
       function abrirModalTareas(id) {
         const a = AGENTES.find((x) => String(x.ID) === String(id));
         if (!a) return;
@@ -1095,7 +1133,6 @@
         const misTareas = TAREAS.filter(
           (t) => String(t.AgenteID) === String(id)
         );
-        // Ordenar: Pendientes primero, luego por fecha
         misTareas.sort(
           (a, b) => (a.Estado === "Completada") - (b.Estado === "Completada")
         );
@@ -1154,14 +1191,12 @@
           Estado: "Pendiente",
           FechaCreación: new Date().toISOString().split("T")[0],
         };
-
         try {
           await appSheetCRUD("Tareas", "Add", [payload]);
           document.getElementById("formTarea").reset();
-          // Actualizar local y UI
           TAREAS.push(payload);
           renderTareasAgente(agenteID);
-          renderTabla(); // Actualizar contador en tabla
+          renderTabla();
         } catch (e) {
           alert(e.message);
         } finally {
@@ -1177,7 +1212,6 @@
           ]);
           const t = TAREAS.find((x) => x.ID === id);
           if (t) t.Estado = nuevoEstado;
-
           const agenteID = document.getElementById("tareaAgenteID").value;
           renderTareasAgente(agenteID);
           renderTabla();
@@ -1188,13 +1222,10 @@
         }
       }
 
-      /* --- GESTIÓN DE NEGOCIOS (Transacciones) --- */
       function abrirModalGestion(id) {
         const a = AGENTES.find((x) => String(x.ID) === String(id));
         if (!a) return;
         AGENTE_ACTUAL = a;
-
-        // Populate Sidebar
         document.getElementById("mdlNombre").textContent = a.Nombre;
         document.getElementById("mdlEmail").textContent = a.Email;
         document.getElementById("gestionAgenteID").value = a.ID;
@@ -1211,6 +1242,45 @@
         renderHistorial();
         document.getElementById("modalGestion").style.display = "flex";
       }
+
+      /* --- CORRECCIÓN: ACTUALIZAR CALIFICACIÓN --- */
+      document.getElementById("formPerfil").onsubmit = async (e) => {
+        e.preventDefault();
+        showSpinner();
+
+        const id = document.getElementById("gestionAgenteID").value;
+        const cal = document.getElementById("inpRating").value;
+
+        if (!id) {
+          hideSpinner();
+          return alert("Error: Agente no identificado.");
+        }
+
+        try {
+          await appSheetCRUD("Agentes", "Edit", [
+            { ID: id, Calificacion: cal },
+          ]);
+
+          const index = AGENTES.findIndex((a) => String(a.ID) === String(id));
+          if (index !== -1) {
+            AGENTES[index].Calificacion = cal;
+            AGENTE_ACTUAL = AGENTES[index];
+          }
+
+          let stars = "";
+          for (let i = 1; i <= 5; i++) {
+            stars += i <= parseInt(cal) ? "★" : "☆";
+          }
+          document.getElementById("mdlStars").innerHTML = stars;
+          renderTabla();
+          alert("Calificación actualizada.");
+        } catch (err) {
+          console.error(err);
+          alert("Error al actualizar: " + err.message);
+        } finally {
+          hideSpinner();
+        }
+      };
 
       /* UTILS & HELPERS */
       function toggleCalculadora() {

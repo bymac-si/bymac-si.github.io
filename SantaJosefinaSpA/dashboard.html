@@ -339,11 +339,40 @@
       <div class="row g-4 mb-4">
         <div class="col-12 col-lg-6">
           <div class="card p-4 h-100">
-            <h2>Captación por Campaña (Marketing)</h2>
+            <h2>Conversión: Leads vs Clientes</h2>
+            <p
+              style="
+                font-size: 12px;
+                color: #666;
+                margin-top: -10px;
+                margin-bottom: 15px;
+              "
+            >
+              Comparativa de captación por campaña
+            </p>
             <canvas id="graficoMarketing"></canvas>
           </div>
         </div>
 
+        <div class="col-12 col-lg-6">
+          <div class="card p-4 h-100">
+            <h2>Alcance de Campañas (Clicks)</h2>
+            <p
+              style="
+                font-size: 12px;
+                color: #666;
+                margin-top: -10px;
+                margin-bottom: 15px;
+              "
+            >
+              Tráfico generado por fuente
+            </p>
+            <canvas id="graficoAlcance"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4 mb-4">
         <div class="col-12 col-lg-6">
           <div class="card p-4 h-100">
             <h2>Próximas Visitas</h2>
@@ -361,9 +390,7 @@
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="row g-4 mb-4">
         <div class="col-12 col-lg-6">
           <div class="card p-4 h-100">
             <h2>Tareas por Estado</h2>
@@ -374,6 +401,9 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <div class="row g-4 mb-4">
         <div class="col-12 col-lg-6">
           <div class="card p-4 h-100">
             <h2>Pendientes por Agente</h2>
@@ -384,22 +414,22 @@
             </div>
           </div>
         </div>
-      </div>
-
-      <div class="card p-4 mb-4">
-        <h2>Detalle Tareas Pendientes</h2>
-        <div style="overflow-x: auto">
-          <table style="width: 100%; margin-top: 12px">
-            <thead>
-              <tr>
-                <th style="text-align: left; padding: 12px">Título</th>
-                <th style="text-align: left; padding: 12px">Agente</th>
-                <th style="text-align: left; padding: 12px">Estado</th>
-                <th style="text-align: left; padding: 12px">Fecha Límite</th>
-              </tr>
-            </thead>
-            <tbody id="tablaTareasPendientes"></tbody>
-          </table>
+        <div class="col-12 col-lg-6">
+          <div class="card p-4 h-100">
+            <h2>Detalle Tareas Pendientes</h2>
+            <div style="overflow-x: auto; max-height: 300px">
+              <table style="width: 100%; margin-top: 12px">
+                <thead>
+                  <tr>
+                    <th style="text-align: left; padding: 12px">Título</th>
+                    <th style="text-align: left; padding: 12px">Agente</th>
+                    <th style="text-align: left; padding: 12px">Límite</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaTareasPendientes"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -523,7 +553,7 @@
             (t) => normalizarEstado(t["Estado"]) !== "completada"
           ).length;
 
-          // === 1. NUEVO GRÁFICO: ESTATUS CLIENTES ===
+          // === 1. GRÁFICO: ESTATUS CLIENTES ===
           const estadosClientes = {};
           clientes.forEach((c) => {
             const est = c.Estado || "Sin Estado";
@@ -542,7 +572,7 @@
                     "#eab308",
                     "#2563eb",
                     "#9333ea",
-                  ], // Colores fijos
+                  ],
                 },
               ],
             },
@@ -561,10 +591,10 @@
           ];
           const conteoEmbudo = [
             clientes.filter((c) => normalizarEstado(c["Estado"]) === "activo")
-              .length, // Usando activo como prospecto general
+              .length,
             clientes.filter(
               (c) => normalizarEstado(c["Estado"]) === "en negociacion"
-            ).length, // Si tienes ese estado específico
+            ).length,
             propiedades.filter(
               (p) => normalizarEstado(p["Estado"]) === "reservado"
             ).length,
@@ -573,8 +603,6 @@
             ).length,
           ];
 
-          // Si no tienes estados detallados en clientes, usa lógica simplificada:
-          // Esto es solo un ejemplo, ajusta según tus valores reales en la tabla Clientes
           new Chart(document.getElementById("graficoEmbudo"), {
             type: "funnel",
             data: {
@@ -586,16 +614,70 @@
             options: { indexAxis: "y" },
           });
 
-          // === 3. MARKETING ===
+          // === 3. MARKETING (ACTUALIZADO: LEADS VS CLIENTES) ===
           const labelsMkt = marketing.map((m) => `${m["Campaña"]}`);
-          const dataMkt = marketing.map((m) => m["Clientes Captados"] || 0);
+
+          // Datos Leads (Potenciales)
+          const dataLeads = marketing.map(
+            (m) => m["Leads"] || m["Clientes Captados"] || 0
+          );
+
+          // Datos Clientes (Cerrados/Reales) - Asegúrate de tener esta columna en tu tabla Marketing o usa lógica
+          const dataClientes = marketing.map(
+            (m) => m["Clientes"] || m["Cierres"] || 0
+          );
+
           new Chart(document.getElementById("graficoMarketing"), {
             type: "bar",
             data: {
               labels: labelsMkt,
               datasets: [
-                { label: "Leads", data: dataMkt, backgroundColor: "#3b82f6" },
+                {
+                  label: "Leads (Potenciales)",
+                  data: dataLeads,
+                  backgroundColor: "#3b82f6", // Azul
+                },
+                {
+                  label: "Clientes Captados",
+                  data: dataClientes,
+                  backgroundColor: "#10b981", // Verde
+                },
               ],
+            },
+            options: {
+              responsive: true,
+              interaction: {
+                mode: "index",
+                intersect: false,
+              },
+            },
+          });
+
+          // === 3.1 NUEVO GRÁFICO ALCANCE (CLICKS) ===
+          // Asumimos columna "Clicks" o "Alcance" en tabla Marketing
+          const dataClicks = marketing.map(
+            (m) => m["Clics"] || m["Alcance"] || 0
+          );
+
+          new Chart(document.getElementById("graficoAlcance"), {
+            type: "bar",
+            data: {
+              labels: labelsMkt,
+              datasets: [
+                {
+                  label: "Clicks / Alcance",
+                  data: dataClicks,
+                  backgroundColor: "#8b5cf6", // Violeta
+                  borderRadius: 4,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              plugins: { legend: { display: false } }, // Ocultar leyenda si es solo 1 serie
+              scales: {
+                y: { beginAtZero: true },
+              },
             },
           });
 
@@ -676,7 +758,6 @@
                 <td style="padding:10px;"><span class="badge-agent" style="background:${
                   colorAgente[t.AgenteID] || "#999"
                 }">${agenteMap[t.AgenteID] || "-"}</span></td>
-                <td style="padding:10px;">${t.Estado}</td>
                 <td style="padding:10px;">${formatearFechaCL(
                   t.FechaLimite
                 )}</td>
