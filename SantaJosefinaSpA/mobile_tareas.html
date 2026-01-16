@@ -60,7 +60,6 @@
             background: #10b981; border-color: #10b981; color: white;
         }
 
-        /* Avatar pequeño */
         .mini-avatar {
             width: 20px; height: 20px; border-radius: 50%; background: #e2e8f0;
             display: flex; align-items: center; justify-content: center;
@@ -82,24 +81,28 @@
             display: flex; justify-content: space-between; align-items: center;
         }
         .sheet-body { flex: 1; overflow-y: auto; padding: 20px; }
-          .m-logo {
-        width: 80px;
-        margin-bottom: 20px;
-        filter: brightness(0) invert(1);
-      }
+        
+        .btn-save-task {
+            width: 100%; padding: 16px; background: #1a2b48; color: white; border: none;
+            border-radius: 12px; font-size: 16px; font-weight: 700;
+            box-shadow: 0 4px 12px rgba(26, 43, 72, 0.2); cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-save-task:active { transform: scale(0.98); }
+
+        .m-logo {
+            width: 80px; margin-bottom: 20px; filter: brightness(0) invert(1);
+        }
     </style>
 </head>
 <body>
 
-    <div class="mobile-header"><img
-        src="assets/img/logo_santajosefina.png"
-        class="m-logo"
-        alt="Santa Josefina"
-      />
-      <div class="header-title">Tareas del Equipo</div>
-      <div onclick="window.location.href='mobile_dashboard.html'" style="cursor: pointer; opacity: 0.8">
-        <i class="fa-solid fa-home"></i>
-      </div>
+    <div class="mobile-header">
+        <img src="assets/img/logo_santajosefina.png" class="m-logo" alt="Santa Josefina" />
+        <div class="header-title">Tareas del Equipo</div>
+        <div onclick="window.location.href='mobile_dashboard.html'" style="cursor: pointer; opacity: 0.8">
+            <i class="fa-solid fa-home"></i>
+        </div>
     </div>
 
     <div class="filter-scroll">
@@ -182,8 +185,8 @@
                 <textarea id="tDesc" rows="4" class="input-std" placeholder="Detalles adicionales..." 
                           style="width:100%; padding:15px; border:1px solid #cbd5e1; border-radius:12px; margin-bottom:20px;"></textarea>
 
-                <button type="submit" class="fab-save" style="position:static; width:100%; box-shadow:none;">
-                    Guardar Tarea
+                <button type="submit" class="btn-save-task">
+                    <i class="fa-solid fa-check"></i> Guardar Tarea
                 </button>
                 
                 <button type="button" id="btnEliminar" onclick="eliminarTarea()" style="width:100%; margin-top:15px; padding:15px; background:#fee2e2; color:#b91c1c; border:none; border-radius:12px; font-weight:600; display:none;">
@@ -273,7 +276,6 @@
 
             container.innerHTML = lista.map(t => {
                 const isDone = t.Estado === 'Completada';
-                // Formateo estricto a dd/mm/yyyy
                 const fechaFmt = formatearFecha(t.FechaLimite);
                 
                 const agente = AGENTES.find(a => String(a.ID) === String(t.AgenteID));
@@ -319,7 +321,6 @@
             if(!task) return;
 
             const nuevoEstado = task.Estado === 'Completada' ? 'Pendiente' : 'Completada';
-            
             task.Estado = nuevoEstado;
             aplicarFiltro(FILTRO_ACTUAL);
             mostrarToast(nuevoEstado === 'Completada' ? "Tarea completada ✅" : "Tarea reactivada 🔄");
@@ -339,6 +340,8 @@
             const hoy = new Date().toISOString().split("T")[0];
             document.getElementById("tFecha").value = hoy;
             document.getElementById("tCreacion").value = hoy;
+            // Resetear prioridad a Media por defecto
+            document.getElementById("tPrioridad").value = "Media";
 
             document.getElementById("btnEliminar").style.display = "none";
             
@@ -354,10 +357,14 @@
 
             document.getElementById("tID").value = t.ID;
             document.getElementById("tTitulo").value = t["Título"] || "";
-            document.getElementById("tFecha").value = t.FechaLimite || "";
-            document.getElementById("tCreacion").value = t["FechaCreación"] || new Date().toISOString().split("T")[0];
+            document.getElementById("tFecha").value = toInputDate(t.FechaLimite);
+            document.getElementById("tCreacion").value = toInputDate(t["FechaCreación"]); 
             document.getElementById("tDesc").value = t["Descripción"] || "";
+            
+            // CORRECCIÓN CRÍTICA: Cargar la prioridad existente
+            // Si no tiene, por defecto "Media"
             document.getElementById("tPrioridad").value = t.Prioridad || "Media";
+            
             document.getElementById("tAgente").value = t.AgenteID || ""; 
             
             document.getElementById("modalTitle").innerText = "Editar Tarea";
@@ -376,11 +383,12 @@
             const isNew = !id;
             const finalID = id || "TSK_" + Date.now();
             
+            // CORRECCIÓN CRÍTICA: Asegurar que capturamos "Prioridad"
             const payload = {
                 "ID": finalID,
                 "Título": document.getElementById("tTitulo").value,
                 "Descripción": document.getElementById("tDesc").value,
-                "Prioridad": document.getElementById("tPrioridad").value,
+                "Prioridad": document.getElementById("tPrioridad").value, // <--- AQUÍ
                 "FechaLimite": document.getElementById("tFecha").value,
                 "FechaCreación": document.getElementById("tCreacion").value, 
                 "AgenteID": document.getElementById("tAgente").value, 
@@ -422,27 +430,37 @@
             setTimeout(() => t.style.opacity = 0, 3000);
         }
 
-        /* FUNCIÓN FORMATO DD/MM/YYYY */
+        // 1. Mostrar en tarjetas (DD/MM/YYYY)
         function formatearFecha(iso) {
             if(!iso) return "S/F";
-            
-            // Intenta convertir YYYY-MM-DD a DD/MM/YYYY
-            if(iso.indexOf('-') > -1) {
+            if(iso.match(/^\d{4}-\d{2}-\d{2}$/)) {
                 const [y, m, d] = iso.split('-');
-                if(d && m && y) return `${d}/${m}/${y}`;
+                return `${d}/${m}/${y}`;
             }
-            
-            // Si ya viene como MM/DD/YYYY (formato gringo), intenta invertirlo
-            // O usa Date para normalizar
-            const d = new Date(iso);
-            if(!isNaN(d.getTime())) {
-                 const dia = String(d.getDate()).padStart(2, '0');
-                 const mes = String(d.getMonth() + 1).padStart(2, '0');
-                 const anio = d.getFullYear();
-                 return `${dia}/${mes}/${anio}`;
+            if(iso.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
+                const parts = iso.split('/');
+                const m = parts[0].padStart(2, '0');
+                const d = parts[1].padStart(2, '0');
+                const y = parts[2];
+                return `${d}/${m}/${y}`;
             }
-
             return iso;
+        }
+
+        // 2. Cargar en input date (YYYY-MM-DD)
+        function toInputDate(iso) {
+            if(!iso) return "";
+            if(iso.match(/^\d{4}-\d{2}-\d{2}$/)) return iso;
+            if(iso.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
+                const parts = iso.split('/');
+                const m = parts[0].padStart(2, '0');
+                const d = parts[1].padStart(2, '0');
+                const y = parts[2];
+                return `${y}-${m}-${d}`;
+            }
+            const d = new Date(iso);
+            if(!isNaN(d.getTime())) return d.toISOString().split('T')[0];
+            return "";
         }
     </script>
 </body>
