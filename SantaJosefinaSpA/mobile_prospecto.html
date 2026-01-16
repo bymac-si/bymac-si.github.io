@@ -12,7 +12,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="stylesheet" href="assets/css/mobile.css" />
     <link rel="manifest" href="manifest.json" />
     <meta name="theme-color" content="#1a2b48" />
     <link rel="apple-touch-icon" href="assets/img/icon-192.png" />
@@ -55,7 +55,7 @@
         cursor: pointer;
       }
 
-      /* === MENÚ DE SELECCIÓN (NUEVO) === */
+      /* === MENÚ DE SELECCIÓN === */
       .menu-container {
         padding: 20px;
         display: flex;
@@ -94,7 +94,7 @@
         margin-top: 5px;
       }
 
-      /* === LISTADO (NUEVO) === */
+      /* === LISTADO === */
       .list-container {
         padding: 15px;
       }
@@ -159,7 +159,7 @@
         color: #047857;
       }
 
-      /* === FORMULARIO (EXISTENTE) === */
+      /* === FORMULARIO === */
       .form-container {
         padding: 20px;
         max-width: 600px;
@@ -309,43 +309,43 @@
         z-index: 3001;
       }
       /* === ACTION SHEET (MENÚ DESLIZANTE) === */
-.sheet-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000;
-  opacity: 0; visibility: hidden; transition: all 0.3s;
-  backdrop-filter: blur(2px);
-}
-.sheet-overlay.active { opacity: 1; visibility: visible; }
+      .sheet-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000;
+        opacity: 0; visibility: hidden; transition: all 0.3s;
+        backdrop-filter: blur(2px);
+      }
+      .sheet-overlay.active { opacity: 1; visibility: visible; }
 
-.action-sheet {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  background: white; border-radius: 20px 20px 0 0;
-  padding: 25px 20px; z-index: 2001;
-  transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-  box-shadow: 0 -5px 25px rgba(0,0,0,0.1);
-}
-.sheet-overlay.active .action-sheet { transform: translateY(0); }
+      .action-sheet {
+        position: fixed; bottom: 0; left: 0; right: 0;
+        background: white; border-radius: 20px 20px 0 0;
+        padding: 25px 20px; z-index: 2001;
+        transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        box-shadow: 0 -5px 25px rgba(0,0,0,0.1);
+      }
+      .sheet-overlay.active .action-sheet { transform: translateY(0); }
 
-.sheet-header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; }
-.sheet-title { font-size: 18px; font-weight: 700; color: #1e293b; margin: 0; }
-.sheet-subtitle { font-size: 13px; color: #64748b; margin-top: 4px; }
+      .sheet-header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; }
+      .sheet-title { font-size: 18px; font-weight: 700; color: #1e293b; margin: 0; }
+      .sheet-subtitle { font-size: 13px; color: #64748b; margin-top: 4px; }
 
-.sheet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-.sheet-btn {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
-  padding: 15px 5px; cursor: pointer; text-decoration: none; color: #334155;
-  transition: all 0.1s;
-}
-.sheet-btn:active { background: #e2e8f0; transform: scale(0.95); }
-.sheet-icon { font-size: 24px; margin-bottom: 8px; color: #1a2b48; }
-.sheet-label { font-size: 11px; font-weight: 600; }
+      .sheet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+      .sheet-btn {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
+        padding: 15px 5px; cursor: pointer; text-decoration: none; color: #334155;
+        transition: all 0.1s;
+      }
+      .sheet-btn:active { background: #e2e8f0; transform: scale(0.95); }
+      .sheet-icon { font-size: 24px; margin-bottom: 8px; color: #1a2b48; }
+      .sheet-label { font-size: 11px; font-weight: 600; }
 
-/* Colores específicos iconos */
-.icon-whatsapp { color: #16a34a; }
-.icon-edit { color: #f59e0b; }
-.icon-bitacora { color: #3b82f6; }
-.icon-quote { color: #7e22ce; }
-  .m-logo {
+      /* Colores específicos iconos */
+      .icon-whatsapp { color: #16a34a; }
+      .icon-edit { color: #f59e0b; }
+      .icon-bitacora { color: #3b82f6; }
+      .icon-quote { color: #7e22ce; }
+      .m-logo {
         width: 80px;
         margin-bottom: 20px;
         filter: brightness(0) invert(1);
@@ -353,13 +353,13 @@
     </style>
   </head>
   <body>
-     <div class="mobile-header"><img
+    <div class="mobile-header"><img
         src="assets/img/logo_santajosefina.png"
         class="m-logo"
         alt="Santa Josefina"
       />
-      <div class="header-title">Gestión Prospectos</div>
-      <div onclick="window.location.href='mobile_dashboard.html'" style="cursor: pointer; opacity: 0.8">
+      <div class="header-title" id="pageTitle">Gestión Prospectos</div>
+      <div onclick="goBack()" style="cursor: pointer; opacity: 0.8" id="btnBack">
         <i class="fa-solid fa-home"></i>
       </div>
     </div>
@@ -397,7 +397,7 @@
 
     <div id="viewForm" class="hidden">
       <form id="formProspecto" class="form-container" autocomplete="off">
-        <div class="input-group">
+        <input type="hidden" id="editId"> <div class="input-group">
           <label class="input-label">Tipo de Negocio</label>
           <div class="radio-group">
             <div class="radio-option">
@@ -618,7 +618,7 @@
         if (viewName === "menu") {
           document.getElementById("viewMenu").classList.remove("hidden");
           title.innerText = "Gestión Prospectos";
-          btnBack.innerHTML = '<i class="fa-solid fa-house"></i>'; // Icono Home para volver al dashboard
+          btnBack.innerHTML = '<i class="fa-solid fa-home"></i>'; // Icono Home para volver al dashboard
         } else if (viewName === "list") {
           document.getElementById("viewList").classList.remove("hidden");
           title.innerText = "Mis Prospectos";
@@ -634,7 +634,7 @@
 
       function goBack() {
         if (CURRENT_VIEW === "menu") {
-          window.location.href = "dashboard.html";
+          window.location.href = "mobile_dashboard.html";
         } else {
           switchView("menu");
         }
@@ -649,19 +649,20 @@
             fetchData("ProspectosCorretaje").catch(() => []),
           ]);
 
-          // Unir y ordenar por fecha más reciente
+          // Unir y ordenar por fecha más reciente (manejo seguro de fechas)
           let lista = [...admin, ...corr];
-          lista.sort(
-            (a, b) =>
-              new Date(b["Fecha Registro"] || 0) -
-              new Date(a["Fecha Registro"] || 0)
-          );
+          lista.sort((a, b) => {
+              const dateA = a["Fecha Registro"] ? new Date(a["Fecha Registro"]) : new Date(0);
+              const dateB = b["Fecha Registro"] ? new Date(b["Fecha Registro"]) : new Date(0);
+              return dateB - dateA;
+          });
 
           PROSPECTOS_CACHE = lista;
           renderLista(lista);
         } catch (e) {
+          console.error("Error cargando lista:", e);
           document.getElementById("listaContenido").innerHTML =
-            '<div style="text-align:center;">Error cargando datos</div>';
+            '<div style="text-align:center; color: red;">Error cargando datos. Verifique conexión.</div>';
         } finally {
           document.getElementById("loader").style.display = "none";
         }
@@ -807,15 +808,12 @@
         let tablaDestino = "";
 
         // Estado: Si editamos, mantenemos el actual. Si es nuevo, es "Nuevo".
-        // (SELECTED_PROSPECT viene de la lógica del Action Sheet)
         const estadoFinal = (isEdit && typeof SELECTED_PROSPECT !== 'undefined') ? SELECTED_PROSPECT.Estado : "Nuevo";
 
         if (operacion === "Administracion") {
           tablaDestino = "ProspectosCopro";
           
-          // ID: Usar el existente si editamos, o generar uno nuevo
           const idFinal = isEdit ? editInput.value : "PROS_" + Date.now();
-          
           let coordenadas = document.getElementById("latlong").value || "0, 0";
           
           payload = {
@@ -833,7 +831,6 @@
             "Email": document.getElementById("email").value,
             "Observaciones": document.getElementById("obs").value,
             "Agente": AGENTE_ACTUAL,
-            // Solo enviar fecha si es nuevo para no perder la antigüedad
             ...(!isEdit && { "Fecha Registro": fechaHoy })
           };
         } else {
@@ -903,7 +900,7 @@
 
           // Llenar datos del menú
           document.getElementById('sheetName').innerText = SELECTED_PROSPECT.Nombre;
-          document.getElementById('sheetInfo').innerText = `${SELECTED_PROSPECT.Tipo} • ${SELECTED_PROSPECT.Estado}`;
+          document.getElementById('sheetInfo').innerText = `${SELECTED_PROSPECT.Tipo || 'N/A'} • ${SELECTED_PROSPECT.Estado || 'Nuevo'}`;
 
           // Configurar botones dinámicos
           const tel = SELECTED_PROSPECT.Telefono ? SELECTED_PROSPECT.Telefono.replace(/\D/g,'') : '';
@@ -994,9 +991,6 @@
           }
 
           // Cambiar el comportamiento del botón guardar para que sea "Editar" en vez de "Crear"
-          // NOTA: Para hacer esto bien, deberíamos guardar el ID en una variable global o input hidden
-          // y modificar la función submit. 
-          // Para esta implementación rápida, agregaremos un input hidden ID al form
           let hiddenId = document.getElementById('editId');
           if(!hiddenId) {
               hiddenId = document.createElement('input');

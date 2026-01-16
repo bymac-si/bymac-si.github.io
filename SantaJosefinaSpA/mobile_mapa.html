@@ -158,31 +158,69 @@
         margin-bottom: 20px;
         filter: brightness(0) invert(1);
       }
+      .mobile-header {
+        position: absolute;
+        top: 50px;
+        left: 10px;
+        right: 10px;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 15px;
+        background: rgba(26, 43, 72, 0.8);
+        border-radius: 8px;
+      }
+      .header-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: white;
+      }
+      @media (max-width: 768px) {
+    .header-filters {
+        flex-direction: column; /* Cambia la dirección a columna vertical */
+        align-items: stretch;   /* Estira los elementos al 100% del ancho */
+        gap: 15px;              /* Reduce un poco el espacio vertical */
+    }
+    
+    /* Opcional: Asegura que los hijos ocupen todo el ancho */
+    .header-filters > * {
+        width: 100%;
+    }
+}
     </style>
   </head>
-  <body>
+  <body> 
+    <div class="mobile-header"><img
+        src="assets/img/logo_santajosefina.png"
+        class="m-logo"
+        alt="Santa Josefina"
+      />
+      <div class="header-title">Mapa de Prospectos</div>
+      </div>
+    </div>
     <div class="mobile-filters">
       <div class="pill-filter active" onclick="filtrar('Todos', this)">
         Todos
       </div>
       <div class="pill-filter" onclick="filtrar('Nuevo', this)">
-        <span class="dot" style="background: #0369a1"></span>Nuevos
+        <span class="dot" style="background: #0369a1"></span>Nv.
       </div>
       <div class="pill-filter" onclick="filtrar('Propuesta', this)">
-        <span class="dot" style="background: #7e22ce"></span>Propuesta
+        <span class="dot" style="background: #7e22ce"></span>Pr.
       </div>
       <div class="pill-filter" onclick="filtrar('Negociación', this)">
-        <span class="dot" style="background: #c2410c"></span>Negociando
+        <span class="dot" style="background: #c2410c"></span>Ne.
       </div>
       <div class="pill-filter" onclick="filtrar('Ganado', this)">
-        <span class="dot" style="background: #15803d"></span>Clientes
+        <span class="dot" style="background: #15803d"></span>Ce.
       </div>
     </div>
 
     <div id="map"></div>
 
     <div class="stats-bubble" id="lblStats">Cargando...</div>
-    <a href="index.html" class="fab-back"
+    <a href="mobile_dashboard.html" class="fab-back"
       ><i class="fa-solid fa-arrow-left"></i
     ></a>
 
