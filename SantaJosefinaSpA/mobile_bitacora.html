@@ -12,10 +12,9 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-    <link rel="stylesheet" href="assets/css/styles.css" />
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1a2b48">
-<link rel="apple-touch-icon" href="assets/img/icon-192.png">
+    <link rel="stylesheet" href="assets/css/mobile.css" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#1a2b48" />
 
     <script src="assets/js/app.js"></script>
     <script>
@@ -23,41 +22,7 @@
     </script>
 
     <style>
-      /* ESTILOS MOBILE (Reutilizados) */
-      body {
-        background-color: #f1f5f9;
-        font-family: -apple-system, sans-serif;
-        margin: 0;
-        padding-bottom: 90px;
-      }
-      .mobile-header {
-        background: #1a2b48;
-        color: white;
-        padding: 15px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      }
-      .header-title {
-        font-size: 18px;
-        font-weight: 600;
-      }
-      .btn-close {
-        color: rgba(255, 255, 255, 0.8);
-        font-size: 20px;
-        text-decoration: none;
-      }
-
-      .container {
-        padding: 20px;
-        max-width: 600px;
-        margin: 0 auto;
-      }
-
+      /* ESTILOS MOBILE ESPECIFICOS */
       .input-group {
         background: white;
         border-radius: 12px;
@@ -73,30 +38,19 @@
         text-transform: uppercase;
         margin-bottom: 8px;
       }
-
       input,
       select,
       textarea {
         width: 100%;
-        border: none;
-        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        background: #fff;
         padding: 12px;
         font-size: 16px;
         border-radius: 8px;
-        color: #1e293b;
         box-sizing: border-box;
-        border: 1px solid transparent;
-        transition: border 0.2s;
-      }
-      input:focus,
-      select:focus,
-      textarea:focus {
-        border-color: #3b82f6;
-        background: #fff;
-        outline: none;
       }
 
-      /* Timeline Simplificado para Móvil */
+      /* Timeline */
       .timeline {
         position: relative;
         border-left: 2px solid #e2e8f0;
@@ -129,55 +83,37 @@
       }
       .timeline-content {
         background: #f8fafc;
-        padding: 10px;
+        padding: 12px;
         border-radius: 8px;
         font-size: 13px;
         color: #334155;
+        border: 1px solid #e2e8f0;
       }
       .timeline-date {
         font-size: 11px;
         color: #94a3b8;
-        margin-bottom: 2px;
+        margin-bottom: 4px;
         font-weight: 600;
+        display: block;
       }
 
-      .fab-save {
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        right: 20px;
-        background: #1a2b48;
-        color: white;
-        border: none;
-        padding: 16px;
-        border-radius: 12px;
-        font-size: 16px;
-        font-weight: 700;
-        box-shadow: 0 10px 25px rgba(26, 43, 72, 0.3);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        z-index: 200;
-      }
-
+      /* Spinner & Toast */
       .spinner-overlay {
         position: fixed;
         inset: 0;
         background: rgba(255, 255, 255, 0.9);
         display: none;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
         z-index: 3000;
+        flex-direction: column;
       }
       .spinner {
         width: 40px;
         height: 40px;
-        border-radius: 50%;
         border: 4px solid #e2e8f0;
         border-top-color: #1a2b48;
+        border-radius: 50%;
         animation: spin 1s linear infinite;
       }
       @keyframes spin {
@@ -185,7 +121,6 @@
           transform: rotate(360deg);
         }
       }
-
       .success-toast {
         position: fixed;
         top: 20px;
@@ -193,14 +128,14 @@
         transform: translateX(-50%);
         background: #10b981;
         color: white;
-        padding: 12px 20px;
-        border-radius: 30px;
-        font-weight: 600;
-        font-size: 14px;
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-size: 13px;
         display: none;
         z-index: 3001;
+        font-weight: 600;
       }
-      .m-logo {
+         .m-logo {
         width: 80px;
         margin-bottom: 20px;
         filter: brightness(0) invert(1);
@@ -208,37 +143,49 @@
     </style>
   </head>
   <body>
-    <div class="mobile-header">
-      <div class="header-title">
-        <i class="fa-solid fa-clock-rotate-left"></i> Bitácora
+    <div class="mobile-header"><img
+        src="assets/img/logo_santajosefina.png"
+        class="m-logo"
+        alt="Santa Josefina"
+      />
+      <div class="header-title">Propiedades</div>
+      <div onclick="window.location.href='mobile_dashboard.html'" style="cursor: pointer; opacity: 0.8">
+        <i class="fa-solid fa-house"></i>
       </div>
-      <a href="mobile_dashboard.html" class="btn-close"
-        ><i class="fa-solid fa-house"></i
-      ></a>
     </div>
 
-    <div class="container">
+    <div class="app-container" style="padding-top: 20px">
       <div class="input-group">
-        <label class="input-label">Buscar Prospecto</label>
+        <label class="input-label">Buscar Cliente / Prospecto</label>
         <input
           list="dlProspectos"
           id="inpBuscar"
-          placeholder="Escribe nombre..."
-          onchange="seleccionarProspecto()"
+          placeholder="Escribe para buscar..."
+          oninput="verificarSeleccion()"
+          autocomplete="off"
         />
         <datalist id="dlProspectos"></datalist>
+
         <input type="hidden" id="prospectoID" />
         <div
           id="infoSeleccion"
-          style="font-size: 12px; color: #64748b; margin-top: 5px"
-        ></div>
+          style="
+            font-size: 12px;
+            color: #166534;
+            margin-top: 8px;
+            font-weight: 600;
+            display: none;
+          "
+        >
+          <i class="fa-solid fa-check-circle"></i> Cliente seleccionado
+        </div>
       </div>
 
       <div id="formBitacora" style="display: none">
         <div class="input-group">
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
             <div>
-              <label class="input-label">Tipo</label>
+              <label class="input-label">Acción</label>
               <select id="bitTipo">
                 <option value="Nota">Nota 📝</option>
                 <option value="Llamada">Llamada 📞</option>
@@ -251,75 +198,119 @@
               <input type="date" id="bitFecha" />
             </div>
           </div>
-          <div style="margin-top: 10px">
-            <label class="input-label">Detalle / Resumen</label>
+          <div style="margin-top: 15px">
+            <label class="input-label">Detalle</label>
             <textarea
               id="bitNota"
               rows="3"
-              placeholder="¿Qué conversaron?"
+              placeholder="Escribe los detalles aquí..."
             ></textarea>
           </div>
         </div>
 
-        <button onclick="guardarLog()" class="fab-save">
-          <i class="fa-solid fa-paper-plane"></i> Guardar Registro
+        <button
+          onclick="guardarLog()"
+          class="fab"
+          style="
+            position: relative;
+            bottom: auto;
+            right: auto;
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 20px;
+          "
+        >
+          <i class="fa-solid fa-paper-plane"></i> Guardar en Bitácora
         </button>
 
-        <h4 style="margin: 20px 0 10px 0; color: #1a2b48">
+        <h4
+          style="
+            margin: 10px 0 15px 0;
+            color: #1a2b48;
+            font-size: 14px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 5px;
+          "
+        >
           Historial Reciente
         </h4>
-        <div id="timelineContainer">
-          <p style="color: #94a3b8; font-size: 13px; text-align: center">
-            Cargando historia...
-          </p>
-        </div>
+        <div id="timelineContainer"></div>
       </div>
 
       <div
         id="msgInicial"
-        style="text-align: center; color: #94a3b8; margin-top: 50px"
+        style="text-align: center; color: #94a3b8; margin-top: 60px"
       >
         <i
           class="fa-solid fa-magnifying-glass"
-          style="font-size: 40px; margin-bottom: 10px; opacity: 0.3"
+          style="font-size: 40px; margin-bottom: 15px; opacity: 0.3"
         ></i>
-        <p>Busca un cliente arriba para ver su historial o agregar notas.</p>
+        <p style="font-size: 14px">
+          Busca un prospecto arriba<br />para ver su historial.
+        </p>
       </div>
     </div>
 
     <div id="loader" class="spinner-overlay">
       <div class="spinner"></div>
       <div style="margin-top: 15px; font-weight: 600; color: #1a2b48">
-        Procesando...
+        Cargando...
       </div>
     </div>
 
     <div id="toastSuccess" class="success-toast">
-      <i class="fa-solid fa-check"></i> Guardado
+      <i class="fa-solid fa-check"></i> Guardado correctamente
     </div>
+
+    <nav class="bottom-nav">
+      <a href="mobile_dashboard.html" class="nav-btn">
+        <i class="fa-solid fa-house"></i> <span>Inicio</span>
+      </a>
+      <a href="mobile_prospecto.html" class="nav-btn">
+        <i class="fa-solid fa-users"></i> <span>Prospectos</span>
+      </a>
+      <a href="mobile_propiedades.html" class="nav-btn">
+        <i class="fa-solid fa-building"></i> <span>Props</span>
+      </a>
+      <a href="mobile_tareas.html" class="nav-btn">
+        <i class="fa-solid fa-list-check"></i> <span>Tareas</span>
+      </a>
+    </nav>
 
     <script>
       let TODOS_PROSPECTOS = [];
       let BITACORA_CACHE = [];
 
       document.addEventListener("DOMContentLoaded", async () => {
+        // Fecha hoy por defecto
         document.getElementById("bitFecha").valueAsDate = new Date();
-        await cargarListas();
+
+        // Si viene ID en la URL (redirección desde otro lado)
+        const params = new URLSearchParams(window.location.search);
+        const preID = params.get("id");
+        const preNombre = params.get("nombre");
+
+        await cargarDatosIniciales();
+
+        if (preID && preNombre) {
+          document.getElementById("inpBuscar").value = preNombre;
+          seleccionarProspectoPorID(preID);
+        }
       });
 
-      /* 1. CARGAR LISTA UNIFICADA (ADMIN + CORRETAJE) */
-      async function cargarListas() {
-        document.getElementById("loader").style.display = "flex";
+      async function cargarDatosIniciales() {
+        mostrarLoader(true);
         try {
-          const [admin, corretaje, bits] = await Promise.all([
+          // Carga paralela de tablas necesarias
+          const [admin, corretaje, bitacora] = await Promise.all([
             fetchData("ProspectosCopro").catch(() => []),
             fetchData("ProspectosCorretaje").catch(() => []),
             fetchData("Bitacora").catch(() => []),
           ]);
 
-          BITACORA_CACHE = bits || [];
+          BITACORA_CACHE = bitacora || [];
 
-          // Unificamos para el buscador
+          // Unificar prospectos en una sola lista para el buscador
           const listaA = admin.map((p) => ({
             ID: p.ID,
             Nombre: p.Nombre,
@@ -336,53 +327,74 @@
           // Llenar Datalist
           const dl = document.getElementById("dlProspectos");
           dl.innerHTML = TODOS_PROSPECTOS.map(
-            (p) =>
-              `<option value="${p.Nombre}" data-id="${p.ID}">[${p.Tipo}]</option>`
+            (p) => `<option value="${p.Nombre}"></option>`
           ).join("");
         } catch (e) {
           console.error(e);
-          alert("Error cargando datos");
+          alert("Error de conexión al cargar datos.");
         } finally {
-          document.getElementById("loader").style.display = "none";
+          mostrarLoader(false);
         }
       }
 
-      /* 2. SELECCIONAR CLIENTE */
-      function seleccionarProspecto() {
+      /* --- LÓGICA DE BÚSQUEDA --- */
+      function verificarSeleccion() {
         const val = document.getElementById("inpBuscar").value;
-        if (!val) return;
+        if (!val) {
+          resetView();
+          return;
+        }
 
-        // Buscar ID en la lista en memoria (datalist no entrega el ID directamente en input)
-        const encontrado = TODOS_PROSPECTOS.find((p) => p.Nombre === val);
+        // Buscar coincidencia exacta en el nombre
+        const encontrado = TODOS_PROSPECTOS.find(
+          (p) => p.Nombre.toLowerCase() === val.toLowerCase()
+        );
 
         if (encontrado) {
-          document.getElementById("prospectoID").value = encontrado.ID;
-          document.getElementById(
-            "infoSeleccion"
-          ).innerText = `ID: ${encontrado.ID} • Tipo: ${encontrado.Tipo}`;
-          document.getElementById("formBitacora").style.display = "block";
-          document.getElementById("msgInicial").style.display = "none";
-          renderTimeline(encontrado.ID);
-        } else {
-          // Si escribió algo que no está en la lista exacta
-          document.getElementById("formBitacora").style.display = "none";
-          document.getElementById("msgInicial").style.display = "block";
+          seleccionarProspectoPorID(encontrado.ID);
         }
       }
 
-      /* 3. RENDERIZAR HISTORIAL */
+      function seleccionarProspectoPorID(id) {
+        const p = TODOS_PROSPECTOS.find((x) => String(x.ID) === String(id));
+        if (!p) return;
+
+        // UI Feedback
+        document.getElementById("prospectoID").value = p.ID;
+        document.getElementById("infoSeleccion").style.display = "block";
+        document.getElementById(
+          "infoSeleccion"
+        ).innerHTML = `<i class="fa-solid fa-user-check"></i> ${p.Nombre} <small style="color:#64748b">(${p.Tipo})</small>`;
+
+        // Mostrar Formulario
+        document.getElementById("formBitacora").style.display = "block";
+        document.getElementById("msgInicial").style.display = "none";
+
+        renderTimeline(p.ID);
+      }
+
+      function resetView() {
+        document.getElementById("formBitacora").style.display = "none";
+        document.getElementById("msgInicial").style.display = "block";
+        document.getElementById("infoSeleccion").style.display = "none";
+        document.getElementById("prospectoID").value = "";
+      }
+
+      /* --- HISTORIAL --- */
       function renderTimeline(id) {
         const container = document.getElementById("timelineContainer");
+
+        // Filtrar bitácora por ID de prospecto
         const historia = BITACORA_CACHE.filter(
           (b) => String(b.ProspectoID) === String(id)
         );
 
-        // Ordenar: más reciente primero
+        // Ordenar: Más reciente primero
         historia.sort((a, b) => new Date(b.Fecha) - new Date(a.Fecha));
 
         if (historia.length === 0) {
           container.innerHTML =
-            '<p style="color:#cbd5e1; font-size:13px; text-align:center; padding:20px;">Sin registros previos.</p>';
+            '<div style="text-align:center; padding:20px; color:#cbd5e1; font-size:13px;">No hay registros previos.</div>';
           return;
         }
 
@@ -391,71 +403,87 @@
           historia
             .map(
               (h) => `
-            <div class="timeline-item">
-                <div class="timeline-dot ${h.Tipo}"></div>
-                <div class="timeline-date">${h.Fecha}</div>
-                <div class="timeline-content">
-                    <strong style="display:block; margin-bottom:4px;">${h.Tipo}</strong>
-                    ${h.Nota}
+                <div class="timeline-item">
+                    <div class="timeline-dot ${h.Tipo}"></div>
+                    <span class="timeline-date">${formatearFecha(
+                      h.Fecha
+                    )}</span>
+                    <div class="timeline-content">
+                        <strong style="display:block; margin-bottom:4px; font-size:12px;">${
+                          h.Tipo
+                        }</strong>
+                        ${h.Nota}
+                        <div style="text-align:right; font-size:10px; color:#94a3b8; margin-top:5px;">Por: ${
+                          h.Usuario || "Agente"
+                        }</div>
+                    </div>
                 </div>
-            </div>
-        `
+            `
             )
             .join("") +
           `</div>`;
       }
 
-<<<<<<< HEAD
-    /* 4. GUARDAR NUEVA NOTA (Coincide con tabla Bitacora) */
-=======
-      /* 4. GUARDAR NUEVA NOTA (Coincide con tabla Bitacora) */
->>>>>>> 2e953ec78e6fe355ad181e17683fdc19e01d176f
-    async function guardarLog() {
+      /* --- GUARDAR --- */
+      async function guardarLog() {
         const id = document.getElementById("prospectoID").value;
         const nota = document.getElementById("bitNota").value;
-        
-        if(!id) return alert("Selecciona un prospecto válido.");
-        if(!nota.trim()) return alert("Escribe una nota.");
 
-        document.getElementById("loader").style.display = "flex";
+        if (!id) return alert("Debes buscar y seleccionar un cliente primero.");
+        if (!nota.trim()) return alert("La nota no puede estar vacía.");
 
-        // Obtener nombre del usuario actual
-        let usuarioActual = "Movil";
+        mostrarLoader(true);
+
+        // Obtener usuario actual
+        let usuario = "Móvil";
         try {
-            const auth = getAuthUser(); // Función de app.js
-            if(auth && auth.nombre) usuarioActual = auth.nombre;
-        } catch(e) {}
+          const u = getAuthUser();
+          if (u && u.Nombre) usuario = u.Nombre.split(" ")[0];
+        } catch (e) {}
 
         const payload = {
-            "ID": "BIT_" + Date.now(),
-            "ProspectoID": id,
-            "Fecha": document.getElementById("bitFecha").value, // Formato YYYY-MM-DD
-            "Tipo": document.getElementById("bitTipo").value,
-            "Nota": nota,
-            "Usuario": usuarioActual
+          ID: "BIT_" + Date.now(),
+          ProspectoID: id,
+          Fecha: document.getElementById("bitFecha").value,
+          Tipo: document.getElementById("bitTipo").value,
+          Nota: nota,
+          Usuario: usuario,
         };
 
         try {
-            await appSheetCRUD("Bitacora", "Add", [payload]);
-            
-            // Actualizar caché local y UI
-            BITACORA_CACHE.push(payload);
-            renderTimeline(id);
-            
-            // Limpiar campo nota
-            document.getElementById("bitNota").value = "";
-            
-            // Feedback visual
-            const t = document.getElementById("toastSuccess");
-            t.style.display = "block";
-            setTimeout(()=>t.style.display="none", 3000);
+          await appSheetCRUD("Bitacora", "Add", [payload]);
 
-        } catch(e) {
-            alert("Error al guardar: " + e.message);
+          // Actualizar Cache Local y UI
+          BITACORA_CACHE.push(payload);
+          renderTimeline(id);
+
+          // Limpiar
+          document.getElementById("bitNota").value = "";
+
+          const t = document.getElementById("toastSuccess");
+          t.style.display = "block";
+          setTimeout(() => (t.style.display = "none"), 2500);
+        } catch (e) {
+          alert("Error al guardar: " + e.message);
         } finally {
-            document.getElementById("loader").style.display = "none";
+          mostrarLoader(false);
         }
-    }
+      }
+
+      /* UTILS */
+      function mostrarLoader(show) {
+        document.getElementById("loader").style.display = show
+          ? "flex"
+          : "none";
+      }
+
+      function formatearFecha(iso) {
+        if (!iso) return "";
+        const partes = iso.split("-");
+        if (partes.length === 3)
+          return `${partes[2]}/${partes[1]}/${partes[0]}`;
+        return iso;
+      }
     </script>
   </body>
 </html>
