@@ -1,0 +1,262 @@
+/* ===== Extracted from admin-condominios.html ===== */
+
+/* ===== ESTILOS DASHBOARD UNIFICADOS ===== */
+      body {
+        max-width: 1200px;
+        margin: 0 auto;
+        color: #1a2b48;
+        background-color: #f8fafc;
+      }
+      main {
+        padding: 40px;
+      }
+      .page-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: #0f172a;
+      }
+
+      /* Inputs y Layout */
+      .input-modern {
+        width: 90%;
+        height: 42px;
+        padding: 0 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 14px;
+        background-color: #fff;
+      }
+      .label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 6px;
+        font-size: 13px;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      /* SPINNER */
+      .spinner-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.85);
+        display: none;
+        place-items: center;
+        z-index: 12000;
+      }
+      .spinner-card {
+        background: #fff;
+        padding: 18px 22px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        text-align: center;
+        min-width: 260px;
+        color: #1a2b48;
+        font-weight: 600;
+      }
+      .spinner {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 3px solid #eee;
+        border-top-color: #b46a55;
+        margin: 0 auto 10px;
+        animation: spin 0.9s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New",
+          monospace;
+      }
+      .muted {
+        color: #64748b;
+        font-size: 0.9em;
+      }
+
+      /* DASHBOARD HEADER */
+      .dashboard-header {
+        background-color: #fff;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        margin-bottom: 30px;
+        border: 1px solid #e2e8f0;
+      }
+
+      /* FILA DE CONTROLES (Inputs en fila) */
+      .controls-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        align-items: end;
+      }
+
+      /* BOTONES */
+      .btn-head {
+        height: 42px;
+        padding: 0 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.2s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+      .btn-head:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .btn-primary {
+        background-color: #0f172a;
+        color: white;
+      }
+      .btn-secondary {
+        background-color: #fff;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+      }
+      .btn-secondary:hover {
+        background-color: #f1f5f9;
+        color: #0f172a;
+        border-color: #94a3b8;
+      }
+
+      /* TARJETAS DE RESUMEN */
+      .grid-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+        margin-bottom: 40px;
+      }
+      .card-info {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
+      }
+      .card-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 10px;
+      }
+
+      .info-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+      .info-label {
+        font-weight: 600;
+        color: #64748b;
+      }
+      .info-value {
+        color: #1e293b;
+        font-weight: 500;
+      }
+
+      /* TABLA SIMPLE EN TARJETA */
+      .simple-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      .simple-table th {
+        text-align: left;
+        color: #64748b;
+        font-size: 13px;
+        padding: 6px 0;
+        border-bottom: 1px solid #f1f5f9;
+      }
+      .simple-table td {
+        text-align: right;
+        color: #0f172a;
+        font-weight: 600;
+        padding: 8px 0;
+        font-family: ui-monospace, monospace;
+        font-size: 15px;
+      }
+      .total-row td {
+        color: #059669;
+        font-size: 18px;
+        font-weight: 700;
+        border-top: 2px solid #f1f5f9;
+        padding-top: 12px;
+      }
+
+      /* ===== ESTILOS PARA IMPRESIÓN (CONTRATO) ===== */
+      @media print {
+        body {
+          background: white;
+          max-width: none;
+          margin: 0;
+          padding: 0;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .print-only {
+          display: block !important;
+        }
+        .container {
+          width: 100%;
+          max-width: none;
+          padding: 0;
+          margin: 0;
+        }
+
+        .contrato {
+          font-family: "Times New Roman", Times, serif;
+          font-size: 12pt;
+          line-height: 1.5;
+          color: black;
+          padding: 2cm;
+        }
+        .contrato h3 {
+          font-size: 14pt;
+          margin-top: 20px;
+          margin-bottom: 10px;
+          text-decoration: underline;
+        }
+        .contrato p {
+          text-align: justify;
+          margin-bottom: 12px;
+        }
+
+        .firma-grid {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 80px;
+          page-break-inside: avoid;
+        }
+        .firma-box {
+          width: 40%;
+          text-align: center;
+        }
+        .firma-line {
+          border-top: 1px solid black;
+          margin-bottom: 5px;
+        }
+      }
+
+      .print-only {
+        display: none;
+      } /* Oculto en pantalla normal */

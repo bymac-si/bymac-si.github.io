@@ -1,0 +1,29 @@
+/* ===== Extracted from cotizacion-admin-condominio.html ===== */
+
+/* =========================================
+       AJUSTES TÉCNICOS PARA PDF
+       ========================================= */
+    body.generating-pdf .no-print { display: none !important; }
+    body.generating-pdf .print-only { display: block !important; }
+    body.generating-pdf { background: white !important; }
+    
+    body.generating-pdf .container { 
+        width: 98% !important; 
+        max-width: none !important; 
+        margin: 0 !important; 
+        padding: 0 !important; 
+    }
+
+    body.generating-pdf .brand-logo { width: 60mm !important; height: auto !important; }
+    
+    body.generating-pdf .print-cover {
+        position: relative;
+        min-height: 260mm; 
+        width: 100%;
+        page-break-after: always; 
+    }
+
+    body.generating-pdf .print-section {
+        padding-left: 15mm !important;
+        padding-right: 15mm !important;
+    }

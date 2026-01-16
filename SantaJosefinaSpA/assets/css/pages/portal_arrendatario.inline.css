@@ -1,0 +1,72 @@
+/* ===== Extracted from portal_arrendatario.html ===== */
+
+/* Estilo específico para Arrendatarios (Teal / Verde Profesional) */
+        body { background: #f0fdfa; padding-bottom: 90px; color: #134e4a; }
+        
+        .header-rent { 
+            background: linear-gradient(135deg, #0f766e 0%, #115e59 100%); 
+            color: white; 
+            padding: 25px 20px 40px; 
+            border-radius: 0 0 20px 20px; 
+            box-shadow: 0 4px 15px rgba(15, 118, 110, 0.2);
+        }
+
+        .payment-card {
+            background: white;
+            width: 90%;
+            margin: -30px auto 20px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            text-align: center;
+            position: relative;
+            border: 1px solid #ccfbf1;
+        }
+
+        .amount-display { font-size: 32px; font-weight: 800; color: #0f766e; margin: 10px 0; }
+        .due-date { font-size: 13px; color: #e11d48; font-weight: 600; background: #ffe4e6; padding: 4px 10px; border-radius: 20px; display: inline-block; }
+        .due-date.ok { color: #166534; background: #dcfce7; }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 0 20px;
+        }
+        .q-btn {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+            transition: transform 0.1s;
+        }
+        .q-btn:active { transform: scale(0.98); }
+        .q-icon { font-size: 24px; margin-bottom: 8px; color: #0f766e; }
+        .q-text { font-size: 13px; font-weight: 700; color: #334155; }
+
+        .history-section { padding: 20px; }
+        .h-title { font-size: 15px; font-weight: 700; color: #64748b; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .trx-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #cbd5e1;
+        }
+        .trx-ok { border-left-color: #10b981; }
+        .trx-pending { border-left-color: #f59e0b; }
+
+        /* Modals */
+        .sheet-modal { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-radius: 20px 20px 0 0; padding: 25px; box-shadow: 0 -5px 40px rgba(0,0,0,0.2); transform: translateY(100%); transition: transform 0.3s; z-index: 2000; }
+        .sheet-modal.open { transform: translateY(0); }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1999; display: none; }
+        .overlay.open { display: block; }
+        
+        .btn-action { width: 100%; padding: 14px; background: #0f766e; color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; margin-top: 15px; }

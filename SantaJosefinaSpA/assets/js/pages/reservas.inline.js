@@ -1,0 +1,342 @@
+// ===== Extracted from reservas.html =====
+
+(function () {
+        // IMPORTANTE: Inicializa aquí con tu PUBLIC KEY si no está en app.js
+        if(typeof emailjs !== 'undefined') emailjs.init("7Il4AhmGHchP7qfxu");
+      })();
+
+let USUARIO = null;
+    let ESPACIOS = [];
+    let RESERVAS = []; 
+    let BLOQUES_DB = [];
+    let UNIDADES = [];      // Nueva variable global
+    let COPROPIEDADES = []; // Nueva variable global
+    
+    // EMAIL DEL ADMINISTRADOR FIJO
+    const ADMIN_EMAIL = "marcos.castro@santajosefinaspa.cl"; 
+    
+    let espacioSeleccionado = null;
+    let bloqueSeleccionadoID = null; 
+    let bloqueSeleccionadoNombre = null; 
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        try {
+            // CORRECCIÓN: Usar la llave correcta de sesión
+            const sesion = localStorage.getItem("sesion_externa");
+            if(!sesion) throw new Error("No session");
+            
+            const objSesion = JSON.parse(sesion);
+            USUARIO = objSesion.datos; // Extraer datos reales
+        } catch(e) {
+            window.location.href = "login_residente.html";
+            return;
+        }
+
+        const hoy = new Date().toISOString().split('T')[0];
+        const inputFecha = document.getElementById("inputFecha");
+        inputFecha.value = hoy;
+        inputFecha.min = hoy;
+        inputFecha.addEventListener("change", renderSlots);
+
+        await cargarDatos();
+    });
+
+    async function cargarDatos() {
+        try {
+            // CARGAMOS TODO PARA PODER TRADUCIR LOS IDS
+            const [espacios, reservas, bloques, unidades, copropiedades] = await Promise.all([
+                fetchData('Espacios').catch(()=>[]),
+                fetchData('Reservas').catch(()=>[]),
+                fetchData('Bloques').catch(()=>[]),
+                fetchData('Unidades').catch(()=>[]),      // <--- NUEVO
+                fetchData('Copropiedades').catch(()=>[]) // <--- NUEVO
+            ]);
+
+            // Guardamos globales
+            UNIDADES = unidades || [];
+            COPROPIEDADES = copropiedades || [];
+
+            // Filtrar espacios de la comunidad del usuario
+            ESPACIOS = (espacios || []).filter(e => 
+                String(e.CopropiedadID) === String(USUARIO.CopropiedadID) &&
+                e.Estado !== 'Inactivo'
+            );
+
+            RESERVAS = reservas || [];
+            BLOQUES_DB = bloques || [];
+
+            renderEspacios();
+            renderMisReservas();
+
+            if(ESPACIOS.length > 0) seleccionarEspacio(ESPACIOS[0]);
+            else document.getElementById("listaEspacios").innerHTML = '<div style="padding:20px; color:#64748b; width:100%;">No hay espacios habilitados.</div>';
+
+        } catch(e) {
+            console.error(e);
+            alert("Error cargando datos: " + e.message);
+        }
+    }
+
+    function renderEspacios() {
+        const container = document.getElementById("listaEspacios");
+        if(ESPACIOS.length === 0) return;
+
+        container.innerHTML = ESPACIOS.map(e => `
+            <div class="space-card" id="card_${e.ID}" onclick='seleccionarEspacio(${JSON.stringify(e)})'>
+                <i class="fa-solid ${e.Icono || 'fa-building'} space-icon"></i>
+                <div class="space-name">${e.Nombre}</div>
+            </div>
+        `).join("");
+    }
+
+    function seleccionarEspacio(espacio) {
+        espacioSeleccionado = espacio;
+        bloqueSeleccionadoID = null;
+        actualizarPanelAccion();
+
+        document.querySelectorAll(".space-card").forEach(c => c.classList.remove("active"));
+        const card = document.getElementById(`card_${espacio.ID}`);
+        if(card) card.classList.add("active");
+
+        const rulesDiv = document.getElementById("rulesContainer");
+        if(espacio.Reglas) {
+            rulesDiv.style.display = "flex";
+            document.getElementById("rulesText").textContent = espacio.Reglas;
+        } else {
+            rulesDiv.style.display = "none";
+        }
+
+        renderSlots();
+    }
+
+    function renderSlots() {
+        if(!espacioSeleccionado) return;
+        
+        const fecha = document.getElementById("inputFecha").value;
+        const container = document.getElementById("slotsContainer");
+        const espacioID = String(espacioSeleccionado.ID);
+
+        let bloquesDelEspacio = BLOQUES_DB.filter(b => String(b.EspacioID) === espacioID);
+        bloquesDelEspacio.sort((a,b) => (a.HoraInicio || "").localeCompare(b.HoraInicio || ""));
+
+        if(bloquesDelEspacio.length === 0) {
+            container.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:20px; color:#94a3b8;">No hay horarios disponibles.</div>';
+            return;
+        }
+
+        container.innerHTML = bloquesDelEspacio.map(bloque => {
+            const ocupado = RESERVAS.some(r => 
+                String(r.EspacioID) === espacioID && 
+                r.Fecha === fecha && 
+                String(r.Bloque) === String(bloque.ID) && 
+                r.Estado !== 'Rechazada' && r.Estado !== 'Cancelada'
+            );
+
+            const estadoClass = ocupado ? "occupied" : "available";
+            const nombreVisual = bloque.Nombre || `${bloque.HoraInicio} - ${bloque.HoraFin}`;
+            const estadoClick = ocupado ? "" : `onclick="seleccionarBloque('${bloque.ID}', '${nombreVisual}', this)"`;
+            const costo = parseFloat(espacioSeleccionado.Costo) || 0;
+            const precioTxt = costo > 0 ? "$" + costo.toLocaleString("es-CL") : "GRATIS";
+
+            return `
+                <div class="time-slot ${estadoClass}" ${estadoClick}>
+                    <div class="slot-time">${nombreVisual}</div>
+                    <span class="slot-label">${ocupado ? "OCUPADO" : precioTxt}</span>
+                </div>
+            `;
+        }).join("");
+    }
+
+    function seleccionarBloque(id, nombre, el) {
+        document.querySelectorAll(".time-slot.selected").forEach(d => d.classList.remove("selected"));
+        bloqueSeleccionadoID = id;
+        bloqueSeleccionadoNombre = nombre;
+        el.classList.add("selected");
+        actualizarPanelAccion();
+    }
+
+    function actualizarPanelAccion() {
+        const btn = document.getElementById("btnConfirmar");
+        const priceEl = document.getElementById("totalPrice");
+        
+        if(bloqueSeleccionadoID && espacioSeleccionado) {
+            const costo = parseFloat(espacioSeleccionado.Costo) || 0;
+            priceEl.textContent = "$" + costo.toLocaleString("es-CL");
+            btn.disabled = false;
+        } else {
+            priceEl.textContent = "$0";
+            btn.disabled = true;
+        }
+    }
+
+    async function confirmarReserva() {
+        const fecha = document.getElementById("inputFecha").value;
+        
+        if(!confirm(`¿Confirmar Reserva?\n\nEspacio: ${espacioSeleccionado.Nombre}\nFecha: ${fecha}\nHorario: ${bloqueSeleccionadoNombre}`)) return;
+
+        document.getElementById("spinner").style.display = "flex";
+
+        const payload = {
+            "ID": "RES_" + Date.now(),
+            "CopropiedadID": String(USUARIO.CopropiedadID),
+            "UnidadID": String(USUARIO.UnidadID),
+            "UsuarioID": String(USUARIO.ID),
+            "EspacioID": String(espacioSeleccionado.ID),
+            "Fecha": fecha,
+            "Bloque": bloqueSeleccionadoID,
+            "Estado": "Pendiente",
+            "Costo": parseFloat(espacioSeleccionado.Costo) || 0,
+            "Garantia": parseFloat(espacioSeleccionado.Garantia) || 0,
+            "EstadoPago": "Pendiente",
+            "EspacioNombre": espacioSeleccionado.Nombre,
+            "FechaCreacion": new Date().toISOString()
+        };
+
+        try {
+            // Guardar en DB
+            if(typeof appSheetCRUD === 'function') {
+                await appSheetCRUD("Reservas", "Add", [payload]);
+            }
+            
+            // --- PREPARAR DATOS PARA EMAIL (TRADUCCIÓN DE IDS) ---
+            
+            // 1. Buscar Nombre Unidad (Ej: "304")
+            const unidadObj = UNIDADES.find(u => String(u.ID) === String(USUARIO.UnidadID));
+            const nombreUnidad = unidadObj ? (unidadObj.Numero + (unidadObj.Torre ? " - Torre " + unidadObj.Torre : "")) : "Unidad S/N";
+
+            // 2. Buscar Nombre Condominio
+            const coproObj = COPROPIEDADES.find(c => String(c.ID) === String(USUARIO.CopropiedadID));
+            const nombreCondominio = coproObj ? coproObj.Nombre : "Santa Josefina SpA";
+
+            const datosEmail = {
+                residente_nombre: USUARIO.Nombre,
+                residente_email: USUARIO.Email,
+                admin_email: ADMIN_EMAIL,
+                espacio: espacioSeleccionado.Nombre,
+                fecha: formatearFecha(fecha),
+                horario: bloqueSeleccionadoNombre,
+                unidad: nombreUnidad,       // AHORA VA EL NOMBRE REAL
+                comunidad: nombreCondominio // AHORA VA EL NOMBRE REAL
+            };
+
+            await enviarCorreosSolicitud(datosEmail);
+
+            alert("✅ Solicitud enviada.\nSe ha notificado a la administración.");
+            location.reload(); 
+
+        } catch(e) {
+            console.error(e);
+            alert("Error al reservar: " + e.message);
+        } finally {
+            document.getElementById("spinner").style.display = "none";
+        }
+    }
+
+    async function enviarCorreosSolicitud(datos) {
+        if (typeof emailjs === 'undefined') return console.warn("EmailJS no cargado");
+
+        // 1. Correo para el RESIDENTE
+        if(datos.residente_email) {
+            const htmlResidente = generarHTMLResidente(datos);
+            emailjs.send("service_p9hqkqn", "template_80q9psi", {
+                to_email: datos.residente_email,
+                subject: "Solicitud Recibida: " + datos.espacio,
+                html_body: htmlResidente
+            }).catch(err => console.error("Fallo mail residente", err));
+        }
+
+        // 2. Correo para el ADMIN
+        if(datos.admin_email) {
+            const htmlAdmin = generarHTMLAdmin(datos);
+            try {
+                await emailjs.send("service_p9hqkqn", "template_80q9psi", {
+                    to_email: datos.admin_email,
+                    subject: "NUEVA RESERVA: " + datos.espacio,
+                    html_body: htmlAdmin
+                });
+                console.log(">>> Aviso admin enviado.");
+            } catch(err) {
+                console.error("Fallo mail admin", err);
+            }
+        }
+    }
+
+    // Plantilla Residente
+    function generarHTMLResidente(d) {
+        return `
+        <div style="font-family:sans-serif; color:#333; padding:20px; border:1px solid #eee; border-radius:8px;">
+            <h2 style="color:#1A2B48; text-align:center;">Solicitud en Proceso</h2>
+            <p>Estimado(a) <strong>${d.residente_nombre}</strong>,</p>
+            <p>Hemos recibido tu solicitud para <strong>${d.comunidad}</strong>.</p>
+            <div style="background:#f8fafc; padding:15px; margin:20px 0; border-left:4px solid #f59e0b;">
+                <p><strong>Espacio:</strong> ${d.espacio}</p>
+                <p><strong>Fecha:</strong> ${d.fecha}</p>
+                <p><strong>Horario:</strong> ${d.horario}</p>
+            </div>
+            <p style="font-size:12px; color:#666; text-align:center;">Santa Josefina SpA</p>
+        </div>`;
+    }
+
+    // Plantilla Admin (Ahora con Nombres Reales)
+    function generarHTMLAdmin(d) {
+        return `
+        <div style="font-family:sans-serif; color:#333; padding:20px; border:2px solid #1A2B48; border-radius:8px;">
+            <h2 style="color:#1A2B48; text-align:center;">🔔 Nueva Solicitud</h2>
+            <p><strong>${d.comunidad}</strong></p>
+            <ul style="background:#f9f9f9; padding:15px; list-style:none;">
+                <li>👤 <strong>Residente:</strong> ${d.residente_nombre}</li>
+                <li>🏠 <strong>Unidad:</strong> ${d.unidad}</li> <li>📍 <strong>Espacio:</strong> ${d.espacio}</li>
+                <li>📅 <strong>Fecha:</strong> ${d.fecha}</li>
+                <li>⏰ <strong>Horario:</strong> ${d.horario}</li>
+            </ul>
+            <p style="text-align:center; color:#666; font-size:12px;">Ingresa al CRM para aprobar.</p>
+        </div>`;
+    }
+
+    function renderMisReservas() {
+        const container = document.getElementById("listaMisReservas");
+        const misReservas = RESERVAS.filter(r => String(r.UnidadID) === String(USUARIO.UnidadID));
+        
+        misReservas.sort((a,b) => new Date(b.Fecha) - new Date(a.Fecha));
+
+        if(misReservas.length === 0) {
+            container.innerHTML = '<div style="text-align:center; color:#94a3b8; font-size:13px;">No tienes reservas.</div>';
+            return;
+        }
+
+        container.innerHTML = misReservas.map(r => {
+            const espacio = ESPACIOS.find(e => String(e.ID) === String(r.EspacioID));
+            const nombreEspacio = espacio ? espacio.Nombre : (r.EspacioNombre || "Espacio");
+            
+            // Traducción Visual del Bloque
+            let nombreBloqueVisual = r.Bloque; 
+            const bloqueObj = BLOQUES_DB.find(b => String(b.ID) === String(r.Bloque));
+            if (bloqueObj) nombreBloqueVisual = bloqueObj.Nombre || `${bloqueObj.HoraInicio} - ${bloqueObj.HoraFin}`;
+
+            let color = "#c2410c";
+            if(r.Estado === 'Confirmada') color = "#15803d";
+            if(r.Estado === 'Rechazada') color = "#b91c1c";
+
+            const [y,m,d] = (r.Fecha||"").split("-");
+            const fechaFmt = d ? `${d}/${m}` : r.Fecha;
+
+            return `
+            <div class="booking-item" style="border-left-color: ${color};">
+                <div>
+                    <div style="font-weight:700; color:#1e293b;">${nombreEspacio}</div>
+                    <div style="color:#64748b;">${fechaFmt} <span style="margin:0 5px;">•</span> ${nombreBloqueVisual}</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:${color};">${r.Estado}</div>
+                </div>
+            </div>`;
+        }).join("");
+    }
+
+    function formatearFecha(iso) {
+        if(!iso) return "";
+        const [y, m, d] = iso.split("-");
+        return `${d}/${m}/${y}`;
+    }
+    function clp(v) { return "$" + new Intl.NumberFormat("es-CL").format(v); }
+    function getKeyVal(o) { return o.ID || o.id || ""; }

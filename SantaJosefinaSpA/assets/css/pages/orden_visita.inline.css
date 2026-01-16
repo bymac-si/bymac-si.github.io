@@ -1,0 +1,98 @@
+/* ===== Extracted from orden_visita.html ===== */
+
+body{
+		max-width:900px;
+		margin:10px auto;
+		padding:20px;
+		line-height:1.6;
+		font-family:Arial, sans-serif;color:#333;
+		background-color: #fff;
+	  }
+    h1{
+		font-size:22px;
+		text-align:center;
+		margin-bottom:20px;
+	  }
+    .campo{
+		margin:8px 0;
+	  }
+    .campo b{
+		display:inline-block;
+		width:140px;
+	  }
+    table{
+		width:100%;
+		border-collapse:collapse;
+		margin-top:20px;
+	  }
+    th,td{
+		border:1px solid #ccc;
+		padding:8px;
+		text-align:center;
+	  }
+    .firma{
+		margin-top:60px;
+	  }
+    .firma div{
+		display:inline-block;
+		width:45%;
+		text-align:center;
+	  }
+    .legal{
+		margin-top:40px;
+		font-size:13px;
+		color:#444;
+	  }
+    .logo{
+		text-align:center;
+		margin-bottom:10px;
+	  }
+    .logo img{
+		width:130px;
+	  }
+    .acciones{
+		margin-top:20px;
+		text-align:right;
+	  }
+    .btn-print{
+		background:#B46A55;
+		color:#fff;
+		padding:10px 18px;
+		border:none;
+		border-radius:6px;
+		cursor:pointer;
+	  }
+    .btn-print:hover{
+		background:#963f2f;
+	  }
+
+    /* Configuración de impresión */
+    @media print {
+      .acciones{display:none;}
+    }
+    @page {
+      size: Letter;
+      margin: 0.1in; /* márgenes de 0.1 pulgadas */
+    }
+
+    /* Spinner */
+    .spinner-backdrop{
+		position:fixed; 
+		inset:0; 
+		background:rgba(255,255,255,0.85);
+		display:flex; 
+		align-items:center; 
+		justify-content:center; 
+		z-index:9999;
+	  }
+    .spinner-card{
+		background:#fff; 
+		padding:18px 22px; 
+		border:1px solid #e5e7eb; 
+		border-radius:8px;
+		box-shadow:0 6px 18px rgba(0,0,0,.08); text-align:center; min-width:260px; color:#1A2B48; font-weight:600;}
+    .spinner{width:28px; height:28px; border-radius:50%; border:3px solid #eee; border-top-color:#B46A55;
+      margin:0 auto 10px auto; animation:spin 0.9s linear infinite;}
+    @keyframes spin{ to{ transform:rotate(360deg);} }
+    .hidden{display:none !important;}
+    #printArea { display:block; position:absolute; top:0; left:0; width:100%; padding:20px; color:black; }

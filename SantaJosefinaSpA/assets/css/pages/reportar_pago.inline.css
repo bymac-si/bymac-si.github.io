@@ -1,0 +1,132 @@
+/* ===== Extracted from reportar_pago.html ===== */
+
+/* Estilos Base */
+      body {
+        background-color: #f8fafc;
+        padding-bottom: 40px;
+      }
+
+      .app-header {
+        background: #1a2b48;
+        color: white;
+        padding: 20px 20px 30px;
+        border-bottom-left-radius: 25px;
+        border-bottom-right-radius: 25px;
+        box-shadow: 0 4px 15px rgba(26, 43, 72, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      .btn-back {
+        color: white;
+        font-size: 20px;
+        text-decoration: none;
+        opacity: 0.9;
+      }
+      .page-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0;
+        color: white;
+      }
+
+      .form-card {
+        background: white;
+        margin: -20px 15px 20px;
+        padding: 25px 20px;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e2e8f0;
+        position: relative;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+      .form-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 8px;
+      }
+
+      .input-app,
+      .select-app,
+      .textarea-app {
+        width: 100%;
+        padding: 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        font-size: 15px;
+        background: #f8fafc;
+        color: #1e293b;
+        transition: all 0.2s;
+        box-sizing: border-box;
+      }
+      .input-app:focus {
+        border-color: #3b82f6;
+        background: white;
+        outline: none;
+      }
+
+      .file-upload-area {
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        padding: 30px 20px;
+        text-align: center;
+        background: #f8fafc;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s;
+      }
+      .file-upload-area:active {
+        background: #e2e8f0;
+      }
+      .file-upload-area.has-file {
+        border-color: #10b981;
+        background: #ecfdf5;
+      }
+      .upload-icon {
+        font-size: 30px;
+        color: #94a3b8;
+        margin-bottom: 10px;
+      }
+      .upload-text {
+        font-size: 13px;
+        color: #64748b;
+      }
+      #fileInput {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      .btn-submit {
+        background: #2563eb;
+        color: white;
+        width: 100%;
+        padding: 16px;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 16px;
+        margin-top: 10px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+      }
+      .btn-submit:active {
+        transform: scale(0.98);
+      }
+
+      .spinner-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+      }
