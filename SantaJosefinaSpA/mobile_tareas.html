@@ -82,13 +82,24 @@
             display: flex; justify-content: space-between; align-items: center;
         }
         .sheet-body { flex: 1; overflow-y: auto; padding: 20px; }
+          .m-logo {
+        width: 80px;
+        margin-bottom: 20px;
+        filter: brightness(0) invert(1);
+      }
     </style>
 </head>
 <body>
 
-    <div class="mobile-header">
-        <div class="header-title">Tareas de Equipo</div>
-        <div onclick="window.location.href='mobile_dashboard.html'"><i class="fa-solid fa-house"></i></div>
+    <div class="mobile-header"><img
+        src="assets/img/logo_santajosefina.png"
+        class="m-logo"
+        alt="Santa Josefina"
+      />
+      <div class="header-title">Tareas del Equipo</div>
+      <div onclick="window.location.href='mobile_dashboard.html'" style="cursor: pointer; opacity: 0.8">
+        <i class="fa-solid fa-home"></i>
+      </div>
     </div>
 
     <div class="filter-scroll">

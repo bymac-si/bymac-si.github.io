@@ -345,15 +345,22 @@
 .icon-edit { color: #f59e0b; }
 .icon-bitacora { color: #3b82f6; }
 .icon-quote { color: #7e22ce; }
+  .m-logo {
+        width: 80px;
+        margin-bottom: 20px;
+        filter: brightness(0) invert(1);
+      }
     </style>
   </head>
   <body>
-    <div class="mobile-header">
-      <div class="header-title" id="pageTitle">Gestión Prospectos</div>
-      <div style="display: flex; gap: 15px">
-        <a id="btnBack" onclick="goBack()" class="btn-nav"
-          ><i class="fa-solid fa-arrow-left"></i
-        ></a>
+     <div class="mobile-header"><img
+        src="assets/img/logo_santajosefina.png"
+        class="m-logo"
+        alt="Santa Josefina"
+      />
+      <div class="header-title">Gestión Prospectos</div>
+      <div onclick="window.location.href='mobile_dashboard.html'" style="cursor: pointer; opacity: 0.8">
+        <i class="fa-solid fa-home"></i>
       </div>
     </div>
 

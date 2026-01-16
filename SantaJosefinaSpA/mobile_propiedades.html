@@ -82,13 +82,24 @@
             padding: 15px 5px; cursor: pointer; text-decoration: none; color: #334155;
         }
         .sheet-icon { font-size: 24px; margin-bottom: 8px; color: #1a2b48; }
+          .m-logo {
+        width: 80px;
+        margin-bottom: 20px;
+        filter: brightness(0) invert(1);
+      }
     </style>
 </head>
 <body>
 
-    <div class="mobile-header">
-        <div class="header-title">Propiedades</div>
-        <div onclick="window.location.href='mobile_dashboard.html'"><i class="fa-solid fa-house"></i></div>
+    <div class="mobile-header"><img
+        src="assets/img/logo_santajosefina.png"
+        class="m-logo"
+        alt="Santa Josefina"
+      />
+      <div class="header-title">Propiedades</div>
+      <div onclick="window.location.href='mobile_dashboard.html'" style="cursor: pointer; opacity: 0.8">
+        <i class="fa-solid fa-house"></i>
+      </div>
     </div>
 
     <div class="filter-scroll">
