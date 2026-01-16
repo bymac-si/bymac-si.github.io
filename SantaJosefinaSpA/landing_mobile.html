@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Santa Josefina - Móvil</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/styles.css"> <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a2b48">
+
+    <style>
+        /* ESTILOS ESPECÍFICOS LANDING MÓVIL */
+        body { background: #f8fafc; padding-bottom: 40px; }
+        
+        /* Hero Section Móvil */
+        .m-hero {
+            background: #1a2b48; color: white;
+            padding: 40px 20px 60px;
+            text-align: center;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            box-shadow: 0 4px 20px rgba(26, 43, 72, 0.3);
+        }
+        .m-logo { width: 140px; margin-bottom: 20px; filter: brightness(0) invert(1); }
+        .m-title { font-size: 24px; font-weight: 800; line-height: 1.2; margin-bottom: 10px; }
+        .m-subtitle { font-size: 14px; opacity: 0.8; margin-bottom: 25px; }
+
+        /* Tarjetas de Acceso Rápido (Login) */
+        .access-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+            padding: 0 20px; margin-top: -40px; /* Efecto flotante sobre el header */
+        }
+        .access-card {
+            background: white; border-radius: 16px; padding: 20px 15px;
+            text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            text-decoration: none; color: #1a2b48; transition: transform 0.1s;
+        }
+        .access-card:active { transform: scale(0.95); }
+        .access-icon { font-size: 28px; margin-bottom: 10px; display: block; }
+        .access-text { font-weight: 700; font-size: 14px; display: block; }
+
+        /* Botones de Acción */
+        .action-list { padding: 30px 20px; display: flex; flex-direction: column; gap: 15px; }
+        .btn-action {
+            background: white; border: 1px solid #e2e8f0; padding: 15px;
+            border-radius: 12px; display: flex; align-items: center; justify-content: space-between;
+            text-decoration: none; color: #334155; font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+        .btn-action i { font-size: 18px; width: 30px; text-align: center; }
+        .btn-action.highlight { background: #e0f2fe; color: #0284c7; border: none; }
+
+        /* Footer Flotante (WhatsApp) */
+        .fab-whatsapp {
+            position: fixed; bottom: 20px; right: 20px;
+            background: #25D366; color: white; width: 60px; height: 60px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 30px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+            z-index: 1000; text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="m-hero">
+        <img src="assets/img/logo_santajosefina.png" class="m-logo" alt="Santa Josefina">
+        <div class="m-title">Gestión Inmobiliaria Integral</div>
+        <div class="m-subtitle">Administración de Edificios, Corretaje y Asesoría Legal.</div>
+    </div>
+
+    <div class="access-grid">
+        <a href="login_residente.html" class="access-card">
+            <i class="fa-solid fa-house-user access-icon" style="color: #0f766e;"></i>
+            <span class="access-text">Soy Residente</span>
+        </a>
+        <a href="dashboard.html" class="access-card">
+            <i class="fa-solid fa-briefcase access-icon" style="color: #1a2b48;"></i>
+            <span class="access-text">Soy Comité</span>
+        </a>
+    </div>
+
+    <div class="action-list">
+        <div style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">¿Qué necesitas hoy?</div>
+        
+        <a href="https://santajosefinaspa.cl/landing_desktop.html#propiedades" class="btn-action highlight">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <span>Buscar Propiedad</span>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="font-size:12px; opacity:0.5;"></i>
+        </a>
+
+        <a href="landing_desktop.html#contacto" class="btn-action">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <i class="fa-solid fa-headset" style="color:#e74e35;"></i>
+                <span>Contactar Administración</span>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="font-size:12px; opacity:0.5;"></i>
+        </a>
+
+        <a href="tel:+56998647190" class="btn-action">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <i class="fa-solid fa-phone" style="color:#64748b;"></i>
+                <span>Llamar a Soporte</span>
+            </div>
+        </a>
+    </div>
+
+    <div style="text-align:center; padding: 20px; opacity: 0.6; font-size: 12px;">
+        © 2026 Santa Josefina SpA<br>
+        <a href="landing_desktop.html" style="color: #1a2b48; font-weight: bold; margin-top: 5px; display: inline-block;">Ver versión completa (Web)</a>
+    </div>
+
+    <a href="https://wa.me/56998647190?text=Hola,%20necesito%20información." class="fab-whatsapp" target="_blank">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+</body>
+</html>

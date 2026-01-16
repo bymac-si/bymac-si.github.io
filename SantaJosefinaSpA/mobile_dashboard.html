@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Dashboard Móvil</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/mobile.css">
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a2b48">
+
+    <script src="assets/js/app.js"></script>
+    <script>requireAuth();</script>
+</head>
+<body>
+
+    <div class="mobile-header">
+        <div class="header-title">Santa Josefina</div>
+        <div onclick="logout()" style="cursor:pointer; opacity:0.8;">
+            <i class="fa-solid fa-power-off"></i>
+        </div>
+    </div>
+
+    <div class="app-container">
+        
+        <div style="margin-bottom: 15px;">
+            <div style="font-size:12px; color:#64748b;">Bienvenido,</div>
+            <div style="font-size:20px; font-weight:700; color:#1e293b;" id="lblUsuario">Cargando...</div>
+        </div>
+
+        <div style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 5px;">
+            
+            <div class="m-card" style="min-width: 130px; margin:0; padding: 15px; border-left: 4px solid #f59e0b;">
+                <div class="m-kpi-label">Cartera</div>
+                <div class="m-kpi-val" id="kpiClientes">--</div>
+                <div style="font-size:10px; color:#94a3b8;">Clientes Activos</div>
+            </div>
+
+            <div class="m-card" style="min-width: 130px; margin:0; padding: 15px; border-left: 4px solid #3b82f6;">
+                <div class="m-kpi-label">Propiedades</div>
+                <div class="m-kpi-val" id="kpiProps">--</div>
+                <div style="font-size:10px; color:#94a3b8;">Disponibles</div>
+            </div>
+
+            <div class="m-card" style="min-width: 130px; margin:0; padding: 15px; border-left: 4px solid #ef4444;">
+                <div class="m-kpi-label">Pendientes</div>
+                <div class="m-kpi-val" id="kpiTareas" style="color:#ef4444">--</div>
+                <div style="font-size:10px; color:#94a3b8;">Acciones</div>
+            </div>
+
+        </div>
+
+        <h3 style="font-size:14px; margin: 15px 0 10px; color:#334155;">Gestión Rápida</h3>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            
+            <div class="m-card" onclick="window.location.href='mobile_prospecto.html'" style="margin:0; text-align:center; padding:15px; cursor:pointer;">
+                <div class="m-kpi-icon" style="margin:0 auto 8px; background:#dcfce7; color:#166534;"><i class="fa-solid fa-user-plus"></i></div>
+                <div style="font-size:12px; font-weight:600;">Nuevo Lead</div>
+            </div>
+
+            <div class="m-card" onclick="window.location.href='mobile_bitacora.html'" style="margin:0; text-align:center; padding:15px; cursor:pointer;">
+                <div class="m-kpi-icon" style="margin:0 auto 8px;"><i class="fa-solid fa-clipboard-list"></i></div>
+                <div style="font-size:12px; font-weight:600;">Bitácora</div>
+            </div>
+
+            <div class="m-card" onclick="window.location.href='mobile_mapa.html'" style="margin:0; text-align:center; padding:15px; cursor:pointer;">
+                <div class="m-kpi-icon" style="margin:0 auto 8px; background:#e0f2fe; color:#0369a1;"><i class="fa-solid fa-map-location-dot"></i></div>
+                <div style="font-size:12px; font-weight:600;">Mapa</div>
+            </div>
+
+            <div class="m-card" onclick="window.location.href='mobile_tareas.html'" style="margin:0; text-align:center; padding:15px; cursor:pointer;">
+                <div class="m-kpi-icon" style="margin:0 auto 8px; background:#fef3c7; color:#b45309;"><i class="fa-solid fa-list-check"></i></div>
+                <div style="font-size:12px; font-weight:600;">Mis Tareas</div>
+            </div>
+
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:end; margin-top:25px; margin-bottom:10px;">
+            <h3 style="font-size:14px; margin:0; color:#334155;">Agenda Prioritaria</h3>
+            <a href="mobile_tareas.html" style="font-size:11px; color:#3b82f6; text-decoration:none;">Ver todo</a>
+        </div>
+
+        <div class="m-card" style="padding: 0 15px; margin-bottom: 20px;">
+            <div id="listaTareasMobile">
+                <div style="padding:20px; text-align:center; color:#94a3b8; font-size:12px;">Cargando agenda...</div>
+            </div>
+        </div>
+
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="mobile_dashboard.html" class="nav-btn active">
+            <i class="fa-solid fa-house"></i>
+            <span>Inicio</span>
+        </a>
+        <a href="mobile_prospecto.html" class="nav-btn">
+            <i class="fa-solid fa-users"></i>
+            <span>Prospectos</span>
+        </a>
+        <a href="mobile_propiedades.html" class="nav-btn">
+            <i class="fa-solid fa-building"></i>
+            <span>Props</span>
+        </a>
+        <a href="mobile_tareas.html" class="nav-btn">
+            <i class="fa-solid fa-list-check"></i>
+            <span>Tareas</span>
+        </a>
+    </nav>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            // 1. Obtener usuario
+            try {
+                const u = getAuthUser();
+                document.getElementById("lblUsuario").innerText = u.Nombre || "Agente";
+            } catch(e){}
+
+            // 2. Cargar Datos
+            try {
+                const [clientes, props, tareas] = await Promise.all([
+                    fetchData("Clientes").catch(()=>[]),
+                    fetchData("Propiedades").catch(()=>[]),
+                    fetchData("Tareas").catch(()=>[])
+                ]);
+
+                // KPIs
+                document.getElementById("kpiClientes").innerText = clientes.length;
+                document.getElementById("kpiProps").innerText = props.filter(p => (p.Estado||"") === 'Disponible').length;
+                
+                const pendientes = tareas.filter(t => (t.Estado||"") !== 'Completada');
+                document.getElementById("kpiTareas").innerText = pendientes.length;
+
+                // Renderizar Tareas (Solo las 3 primeras urgentes)
+                renderTareasResumen(pendientes);
+
+            } catch(e) { 
+                console.error(e);
+            }
+        });
+
+        function renderTareasResumen(lista) {
+            const container = document.getElementById("listaTareasMobile");
+            if(lista.length === 0) {
+                container.innerHTML = "<div style='padding:15px; text-align:center; font-size:12px; color:#cbd5e1;'>¡Todo al día! 🎉</div>";
+                return;
+            }
+
+            // Ordenar por fecha límite (las vacías al final)
+            lista.sort((a,b) => {
+                if(!a.FechaLimite) return 1;
+                if(!b.FechaLimite) return -1;
+                return new Date(a.FechaLimite) - new Date(b.FechaLimite);
+            });
+
+            const top3 = lista.slice(0, 3);
+
+            container.innerHTML = top3.map(t => {
+                let colorPrio = "#94a3b8"; // Baja
+                if(t.Prioridad === 'Media') colorPrio = "#f59e0b";
+                if(t.Prioridad === 'Alta') colorPrio = "#ef4444";
+
+                return `
+                <div class="m-list-item" onclick="window.location.href='mobile_tareas.html'">
+                    <div style="width:10px; height:10px; border-radius:50%; background:${colorPrio}; margin-right:10px;"></div>
+                    <div class="m-info">
+                        <div class="m-title" style="font-size:13px;">${t["Título"]}</div>
+                        <div class="m-sub" style="font-size:11px;">${t.FechaLimite || "Sin fecha"}</div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right" style="color:#e2e8f0; font-size:12px;"></i>
+                </div>
+                `;
+            }).join("");
+        }
+    </script>
+</body>
+</html>
