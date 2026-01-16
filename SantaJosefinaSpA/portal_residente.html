@@ -7,14 +7,21 @@
       content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
     />
     <title>App Santa Josefina</title>
+
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <link rel="stylesheet" href="assets/css/styles.css" />
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1a2b48">
-<link rel="apple-touch-icon" href="assets/img/icon-192.png">
+    <link rel="manifest" href="manifest.json" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Ovo&display=swap"
+      rel="stylesheet"
+    />
+    <meta name="theme-color" content="#1a2b48" />
+    <link rel="apple-touch-icon" href="assets/img/icon-192.png" />
 
     <script src="assets/js/app.js"></script>
 
@@ -70,6 +77,7 @@
         font-size: 11px;
         font-weight: 600;
         text-align: center;
+        cursor: pointer;
       }
       .qa-icon {
         width: 45px;
@@ -101,13 +109,14 @@
         text-align: center;
         position: relative;
         overflow: hidden;
+        border-left: 5px solid #cbd5e1; /* Default */
       }
       .debt-card.clean {
-        border-left: 5px solid #10b981;
-      } /* Borde verde si al día */
+        border-left-color: #10b981;
+      }
       .debt-card.pending {
-        border-left: 5px solid #ef4444;
-      } /* Borde rojo si debe */
+        border-left-color: #ef4444;
+      }
 
       .debt-label {
         color: #64748b;
@@ -149,7 +158,7 @@
         text-decoration: none;
       }
 
-      /* Tablero de Notificaciones */
+      /* Notificaciones */
       .notifications-board {
         margin: 0 15px;
       }
@@ -215,6 +224,18 @@
         justify-content: center;
         z-index: 2000;
       }
+
+      .ovo-regular {
+        font-family: "Ovo", serif;
+        font-weight: 400;
+        font-style: normal;
+      }
+
+      .biz-udpmincho-regular {
+        font-family: "BIZ UDPMincho", serif;
+        font-weight: 400;
+        font-style: normal;
+      }
     </style>
   </head>
   <body>
@@ -230,11 +251,19 @@
           <div class="user-welcome" style="font-size: 18px">
             Hola, <b id="residenteNombre">...</b>
           </div>
-          <div class="unit-badge" style="font-size: 24px">
+          <div class="unit-badge" style="font-size: 14px">
             <i class="fa-solid fa-building"></i>
-            <span id="nombreEdificio">Cargando...</span>
-            <span style="margin: 0 5px">| &nbsp;Casa/Depto. </span>
-            <span id="residenteUnidad">...</span>
+            <span id="nombreEdificio" style="text-align: center"
+              >Cargando...</span
+            >
+            <span style="margin: 0 5px">|</span>
+            <span style="font-size: 12px">Unid.:</span>
+            <span
+              id="residenteUnidad"
+              class="ovo-regular"
+              style="font-size: 40px; font-weight: 550; line-height: 1"
+              >...</span
+            >
           </div>
         </div>
         <button
@@ -272,18 +301,29 @@
         <div class="qa-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
         Historial
       </a>
-      <a href="#" class="qa-item" onclick="alert('Documentos de la comunidad')">
-        <div class="qa-icon"><i class="fa-solid fa-book-open"></i></div>
-        Docs
-      </a>
+      <div class="qa-item" onclick="logoutResidente()">
+        <div
+          class="qa-icon"
+          style="background: #fee2e2; color: #991b1b; border-color: #fecaca"
+        >
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </div>
+        Salir
+      </div>
     </div>
 
     <div class="debt-card" id="cardDeudaContainer">
       <div class="debt-label">Total a Pagar</div>
-      <div class="debt-amount" id="montoTotal">...</div>
-      <div class="debt-period" id="textoEstadoDeuda">Calculando...</div>
-      <br><br>
+      <div
+        class="debt-amount biz-udpmincho-regular"
+        id="montoTotal"
+        style="font-size: 60px; font-weight: 500; line-height: 1"
+      >
+        ...
+      </div>
+      <div class="debt-period" id="textoEstadoDeuda">Consultando...</div>
 
+      <br /><br />
       <a
         href="detalle_gastos.html"
         style="
@@ -298,8 +338,9 @@
         Ver detalle Gastos Comunes
         <i class="fa-solid fa-chevron-right" style="font-size: 10px"></i>
       </a>
-<br><br>
+
       <div id="btnPagarContainer" style="display: none">
+        <br />
         <a
           href="reportar_pago.html"
           class="btn-pay"
@@ -352,7 +393,7 @@
           color: #1a2b48;
         "
       >
-        Sincronizando datos...
+        Sincronizando...
       </div>
     </div>
 
@@ -361,60 +402,33 @@
       let DATOS_COMUNIDAD = null;
       let DATOS_UNIDAD = null;
 
-      // --- FUNCIÓN SEGURA PARA ACTUALIZAR TEXTO ---
-      function safeUpdate(id, valor) {
-        const el = document.getElementById(id);
-        if (el) {
-          el.textContent = valor;
-        }
-      }
-
-      // --- FUNCIÓN DE LIMPIEZA DE NÚMEROS ---
-      function parseMonto(valor) {
-        if (valor === undefined || valor === null || valor === "") return 0;
-        const limpio = String(valor)
-          .replace(/\$/g, "")
-          .replace(/\s/g, "")
-          .replace(/\./g, "")
-          .replace(",", ".")
-          .trim();
-        const numero = parseFloat(limpio);
-        return isNaN(numero) ? 0 : numero;
-      }
-
-      function parsePorcentaje(valor) {
-        if (!valor) return 0;
-        const limpio = String(valor).replace(",", ".");
-        return parseFloat(limpio) || 0;
-      }
-
+      // --- INICIO SEGURO ---
       document.addEventListener("DOMContentLoaded", async () => {
         try {
-          const sesion = localStorage.getItem("sesion_residente");
-          if (!sesion) throw new Error("No session");
-          USUARIO = JSON.parse(sesion);
+          // 1. Obtener Sesión
+          const sesionStr = localStorage.getItem("sesion_externa");
+          if (!sesionStr) throw new Error("No session");
 
-          // Render Header
-          const nombre = (USUARIO.Nombre || "Residente").split(" ")[0];
+          const sesionObj = JSON.parse(sesionStr);
+          USUARIO = sesionObj.datos; // Datos crudos del login
+
+          // Render Básico
+          const nombre = (USUARIO.Nombre || "Usuario").split(" ")[0];
           safeUpdate("residenteNombre", nombre);
-          safeUpdate(
-            "residenteUnidad",
-            USUARIO.UnidadLabel || USUARIO.UnidadID
-          );
+          safeUpdate("residenteUnidad", "...");
 
+          // 2. Cargar Datos
           await cargarTodo();
         } catch (e) {
-          console.error("Error inicio:", e);
+          console.error("Error crítico de sesión:", e);
           window.location.href = "login_residente.html";
         } finally {
-          const loader = document.getElementById("loader");
-          if (loader) loader.style.display = "none";
+          document.getElementById("loader").style.display = "none";
         }
       });
 
       async function cargarTodo() {
         try {
-          console.log("Cargando tablas...");
           const [
             copropiedades,
             unidades,
@@ -433,31 +447,46 @@
             fetchData("Reservas").catch(() => []),
           ]);
 
-          const myCoproID = String(USUARIO.CopropiedadID).trim();
+          // 3. Vincular Unidad y Comunidad
+          // Usamos comparaciones flexibles (String y trim)
           const myUnidadID = String(USUARIO.UnidadID).trim();
 
-          DATOS_COMUNIDAD = copropiedades.find(
-            (c) => String(getKeyVal(c)) === myCoproID
-          );
           DATOS_UNIDAD = unidades.find(
             (u) => String(getKeyVal(u)) === myUnidadID
           );
 
+          // Si encontramos la unidad, obtenemos el ID de la comunidad desde ahí (más seguro)
+          // Si no, tratamos de usar el que viene en el usuario
+          let coproID = DATOS_UNIDAD
+            ? String(DATOS_UNIDAD.CopropiedadID)
+            : String(USUARIO.CopropiedadID);
+
+          DATOS_COMUNIDAD = copropiedades.find(
+            (c) => String(getKeyVal(c)) === coproID
+          );
+
+          // Render Header
           if (DATOS_COMUNIDAD)
             safeUpdate("nombreEdificio", DATOS_COMUNIDAD.Nombre);
-
-          if (!DATOS_UNIDAD) {
-            console.error("Unidad no encontrada. ID:", myUnidadID);
-            document.getElementById("montoTotal").innerHTML =
-              "<span style='font-size:16px; color:red'>Error Unidad</span>";
-            return;
+          if (DATOS_UNIDAD) {
+            const nombreReal =
+              DATOS_UNIDAD.Unidad ||
+              DATOS_UNIDAD.Numero ||
+              DATOS_UNIDAD.Nombre ||
+              myUnidadID;
+            safeUpdate("residenteUnidad", nombreReal);
+          } else {
+            safeUpdate("residenteUnidad", "Unidad no encontrada");
           }
 
+          // 4. Procesar Datos
           await procesarDeudaDelMes(gastosComunes, gastos, cobros);
           renderNotificaciones(pagos, reservas);
         } catch (err) {
-          console.error("Error general:", err);
-          safeUpdate("montoTotal", "Error Carga");
+          console.error("Error cargando datos:", err);
+          // No redirigimos al login aquí para evitar loop, solo mostramos error visual
+          safeUpdate("montoTotal", "--");
+          safeUpdate("textoEstadoDeuda", "Error de conexión");
         }
       }
 
@@ -467,56 +496,16 @@
         cobrosExistentes
       ) {
         try {
-          // A. Periodo Actual
+          if (!DATOS_UNIDAD) return; // No podemos calcular sin unidad
+
           const fechaHoy = new Date();
+          // Formato MM-YYYY (Ej: 01-2026)
           const mesStr = `${String(fechaHoy.getMonth() + 1).padStart(
             2,
             "0"
           )}-${fechaHoy.getFullYear()}`;
 
-          // B. Calcular Gasto Total Comunidad (Mes Actual)
-          let totalGastoComunidad = 0;
-
-          // 1. Buscar si ya hay resumen cerrado
-          const resumenMes = gastosComunes.find(
-            (g) =>
-              String(g.CopropiedadID) === String(USUARIO.CopropiedadID) &&
-              g.Mes === mesStr
-          );
-
-          if (resumenMes) {
-            totalGastoComunidad = parseMonto(resumenMes.TotalGastos);
-          } else {
-            // 2. Si no, sumar gastos individuales del mes
-            const gastosMes = gastos.filter((g) => {
-              if (String(g.CopropiedadID) !== String(USUARIO.CopropiedadID))
-                return false;
-              // Asumimos que g.Fecha viene bien o usamos mes actual
-              // Para demo simple, usamos mes actual si g.Fecha existe
-              if (!g.Fecha) return false;
-              const d = new Date(g.Fecha);
-              const m = String(d.getMonth() + 1).padStart(2, "0");
-              const y = d.getFullYear();
-              return `${m}-${y}` === mesStr;
-            });
-            totalGastoComunidad = gastosMes.reduce(
-              (sum, g) => sum + parseMonto(g.Monto),
-              0
-            );
-          }
-
-          // C. Datos Unitarios
-          const alicuota = parsePorcentaje(DATOS_UNIDAD.Alicuota);
-          const fondoRaw = parsePorcentaje(DATOS_COMUNIDAD?.FondoReserva);
-          const factorFondo = fondoRaw > 1 ? fondoRaw / 100 : fondoRaw;
-
-          // D. Cálculo Teórico
-          const montoGC = Math.round(totalGastoComunidad * (alicuota / 100));
-          const montoFondo = Math.round(montoGC * factorFondo);
-
-          // E. Buscar Cobro en Base de Datos (Prevalece sobre cálculo)
-          // ID suele ser COB_UNIDAD_MES
-          // Pero buscamos por contenido mejor
+          // Buscar cobro YA generado para este mes
           const cobroRegistrado = cobrosExistentes.find(
             (c) =>
               String(c.UnidadID) === String(USUARIO.UnidadID) &&
@@ -524,61 +513,75 @@
           );
 
           let totalVisual = 0;
+          let estadoTexto = "Calculando...";
+          let estadoClase = "";
 
           if (cobroRegistrado) {
-            // YA EXISTE COBRO DEL MES
+            // Ya existe cobro oficial
             if (cobroRegistrado.Estado === "Pagado") {
-              // Si este mes está pagado, mostrar solo deudas viejas si las hay
-              const otrasMoras = cobrosExistentes.filter(
-                (c) =>
-                  String(c.UnidadID) === String(USUARIO.UnidadID) &&
-                  c.Estado === "Pendiente" &&
-                  c.Mes !== mesStr
-              );
-              totalVisual = otrasMoras.reduce(
-                (sum, c) => sum + parseMonto(c.TotalAPagar),
-                0
-              );
-            } else {
-              // Pendiente
-              totalVisual = parseMonto(cobroRegistrado.TotalAPagar);
-            }
-          } else {
-            // NO EXISTE -> PROYECCIÓN (Gasto del mes + Deudas Viejas)
-            const morasPrevias = cobrosExistentes
-              .filter(
+              // Buscar deudas anteriores
+              const deudasViejas = cobrosExistentes.filter(
                 (c) =>
                   String(c.UnidadID) === String(USUARIO.UnidadID) &&
                   c.Estado === "Pendiente"
-              )
-              .reduce((sum, c) => sum + parseMonto(c.TotalAPagar), 0);
+              );
+              totalVisual = deudasViejas.reduce(
+                (sum, c) => sum + parseMonto(c.TotalAPagar),
+                0
+              );
 
-            totalVisual = montoGC + montoFondo + morasPrevias;
-          }
-
-          safeUpdate("montoTotal", clp(totalVisual));
-
-          // Estado Tarjeta UI
-          const card = document.getElementById("cardDeudaContainer");
-          const txt = document.getElementById("textoEstadoDeuda");
-          const btn = document.getElementById("btnPagarContainer");
-
-          if (card && txt && btn) {
-            if (totalVisual > 0) {
-              card.style.borderLeft = "5px solid #ef4444";
-              txt.textContent = "Por Pagar";
-              txt.style.color = "#ef4444";
-              btn.style.display = "block";
+              if (totalVisual > 0) {
+                estadoTexto = "Deuda Anterior";
+                estadoClase = "pending";
+              } else {
+                estadoTexto = "¡Estás al día!";
+                estadoClase = "clean";
+              }
             } else {
-              card.style.borderLeft = "5px solid #10b981";
-              txt.textContent = "¡Estás al día!";
-              txt.style.color = "#10b981";
-              btn.style.display = "none";
+              // Mes actual pendiente
+              totalVisual = parseMonto(cobroRegistrado.TotalAPagar);
+              estadoTexto = "Por Pagar";
+              estadoClase = "pending";
+            }
+          } else {
+            // No hay cobro oficial aun -> Mostrar proyección o $0
+            // Para evitar confusiones, mostraremos deudas previas si hay
+            const deudasViejas = cobrosExistentes.filter(
+              (c) =>
+                String(c.UnidadID) === String(USUARIO.UnidadID) &&
+                c.Estado === "Pendiente"
+            );
+            totalVisual = deudasViejas.reduce(
+              (sum, c) => sum + parseMonto(c.TotalAPagar),
+              0
+            );
+
+            if (totalVisual > 0) {
+              estadoTexto = "Deuda Acumulada";
+              estadoClase = "pending";
+            } else {
+              estadoTexto = "Sin cobros pendientes";
+              estadoClase = "clean";
             }
           }
+
+          // Render UI
+          safeUpdate("montoTotal", clp(totalVisual));
+          safeUpdate("textoEstadoDeuda", estadoTexto);
+
+          const card = document.getElementById("cardDeudaContainer");
+          const btn = document.getElementById("btnPagarContainer");
+
+          // Aplicar estilos
+          card.className = "debt-card " + estadoClase; // clean o pending
+          document.getElementById("textoEstadoDeuda").style.color =
+            estadoClase === "pending" ? "#ef4444" : "#10b981";
+
+          // Botón Pagar: Mostrar siempre que haya deuda, o permitir reportar aunque sea 0 (opcional)
+          // Aquí lo mostramos siempre para facilitar el reporte
+          btn.style.display = "block";
         } catch (e) {
-          console.error("Error en procesarDeuda:", e);
-          safeUpdate("montoTotal", "Error");
+          console.error("Error cálculo deuda:", e);
         }
       }
 
@@ -587,38 +590,38 @@
         if (!board) return;
 
         const items = [];
-        const misPagos = pagos.filter(
-          (p) => String(p.UnidadID) === String(USUARIO.UnidadID)
-        );
+        // Filtramos por UnidadID
+        const myID = String(USUARIO.UnidadID);
 
-        misPagos.forEach((p) => {
-          if (p.Estado === "Aprobado")
-            items.push({
-              type: "success",
-              title: "Pago Aprobado",
-              desc: `Monto: ${clp(parseMonto(p.Monto))}`,
-              date: p.FechaRegistro,
-            });
-          if (p.Estado === "Rechazado")
-            items.push({
-              type: "error",
-              title: "Pago Rechazado",
-              desc: p.Observaciones || "Datos incorrectos",
-              date: p.FechaRegistro,
-            });
+        pagos.forEach((p) => {
+          if (String(p.UnidadID) === myID) {
+            if (p.Estado === "Aprobado")
+              items.push({
+                type: "success",
+                title: "Pago Aprobado",
+                desc: `Monto: ${clp(parseMonto(p.Monto))}`,
+                date: p.FechaRegistro,
+              });
+            if (p.Estado === "Rechazado")
+              items.push({
+                type: "error",
+                title: "Pago Rechazado",
+                desc: p.Observaciones || "Revisa el comprobante",
+                date: p.FechaRegistro,
+              });
+          }
         });
 
-        const misReservas = reservas.filter(
-          (r) => String(r.UnidadID) === String(USUARIO.UnidadID)
-        );
-        misReservas.forEach((r) => {
-          if (r.Estado === "Confirmada")
-            items.push({
-              type: "info",
-              title: "Reserva Confirmada",
-              desc: `${r.EspacioNombre || "Espacio"} - ${r.Fecha}`,
-              date: r.FechaCreacion,
-            });
+        reservas.forEach((r) => {
+          if (String(r.UnidadID) === myID) {
+            if (r.Estado === "Confirmada")
+              items.push({
+                type: "info",
+                title: "Reserva Confirmada",
+                desc: `${r.EspacioNombre || "Espacio"} - ${r.Fecha}`,
+                date: r.FechaCreacion,
+              });
+          }
         });
 
         items.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
@@ -642,19 +645,37 @@
               icon = "fa-calendar-check";
               color = "icon-info";
             }
-            const fechaStr = it.date
-              ? new Date(it.date).toLocaleDateString("es-CL")
-              : "";
+
+            const fechaObj = it.date ? new Date(it.date) : new Date();
+            const fechaStr = fechaObj.toLocaleDateString("es-CL");
+
             return `<div class="notif-card"><div class="notif-icon ${color}"><i class="fa-solid ${icon}"></i></div><div class="notif-content"><h4>${it.title}</h4><p>${it.desc}</p><span class="notif-time">${fechaStr}</span></div></div>`;
           })
           .join("");
       }
 
       function logoutResidente() {
-        localStorage.removeItem("sesion_residente");
+        localStorage.removeItem("sesion_externa");
         window.location.href = "login_residente.html";
       }
 
+      /* UTILS */
+      function safeUpdate(id, valor) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = valor;
+      }
+      function parseMonto(valor) {
+        if (!valor) return 0;
+        const limpio = String(valor)
+          .replace(/[^0-9,-]/g, "")
+          .replace(",", "."); // Limpieza robusta
+        return parseFloat(limpio) || 0;
+      }
+      function parsePorcentaje(valor) {
+        if (!valor) return 0;
+        const limpio = String(valor).replace(",", ".");
+        return parseFloat(limpio) || 0;
+      }
       function clp(v) {
         return "$" + new Intl.NumberFormat("es-CL").format(v);
       }

@@ -20,7 +20,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script>
       (function () {
-        // Inicializar si tienes EmailJS configurado
         if (typeof emailjs !== "undefined") emailjs.init("7Il4AhmGHchP7qfxu");
       })();
     </script>
@@ -98,6 +97,14 @@
         font-weight: 700;
         font-size: 13px;
         display: block;
+        line-height: 1.3;
+      }
+      .access-sub {
+        font-size: 10px;
+        color: #64748b;
+        font-weight: 400;
+        display: block;
+        margin-top: 4px;
       }
 
       /* Lista de Acciones */
@@ -145,7 +152,7 @@
         border-color: #bae6fd;
       }
 
-      /* Footer Links */
+      /* Footer */
       .footer-links {
         text-align: center;
         padding: 20px;
@@ -181,161 +188,64 @@
         transform: scale(0.9);
       }
 
-      /* === MODALES (HOJAS DESLIZANTES) === */
+      /* === MODALES === */
       .modal-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 2000;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s;
-        backdrop-filter: blur(2px);
+        position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 2000;
+        opacity: 0; visibility: hidden; transition: all 0.3s; backdrop-filter: blur(2px);
       }
-      .modal-overlay.active {
-        opacity: 1;
-        visibility: visible;
-      }
+      .modal-overlay.active { opacity: 1; visibility: visible; }
 
       .modal-sheet {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        top: 20px;
-        background: #f8fafc;
-        border-radius: 20px 20px 0 0;
-        z-index: 2001;
-        transform: translateY(100%);
-        transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
+        position: fixed; bottom: 0; left: 0; right: 0; top: 20px;
+        background: #f8fafc; border-radius: 20px 20px 0 0; z-index: 2001;
+        transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        display: flex; flex-direction: column; overflow: hidden;
       }
-      .modal-overlay.active .modal-sheet {
-        transform: translateY(0);
-      }
+      .modal-overlay.active .modal-sheet { transform: translateY(0); }
 
       .sheet-header {
-        background: white;
-        padding: 15px 20px;
-        border-bottom: 1px solid #e2e8f0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        background: white; padding: 15px 20px; border-bottom: 1px solid #e2e8f0;
+        display: flex; justify-content: space-between; align-items: center;
       }
-      .sheet-title {
-        font-size: 16px;
-        font-weight: 700;
-        color: #1e293b;
-        margin: 0;
-      }
+      .sheet-title { font-size: 16px; font-weight: 700; color: #1e293b; margin: 0; }
       .btn-close {
-        border: none;
-        background: #f1f5f9;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        color: #64748b;
-        font-size: 16px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        border: none; background: #f1f5f9; width: 32px; height: 32px;
+        border-radius: 50%; color: #64748b; font-size: 16px; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
       }
+      .sheet-content { flex: 1; overflow-y: auto; padding: 20px; }
 
-      .sheet-content {
-        flex: 1;
-        overflow-y: auto;
-        padding: 20px;
-      }
-
-      /* Estilos Propiedades en Modal */
+      /* Estilos Propiedades */
       .prop-card-mini {
-        background: white;
-        border-radius: 12px;
-        overflow: hidden;
-        margin-bottom: 15px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        border: 1px solid #e2e8f0;
-        display: flex;
-        flex-direction: column;
+        background: white; border-radius: 12px; overflow: hidden; margin-bottom: 15px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0;
+        display: flex; flex-direction: column;
       }
-      .prop-img {
-        width: 100%;
-        height: 150px;
-        object-fit: cover;
-        background: #eee;
-      }
-      .prop-info {
-        padding: 12px;
-      }
+      .prop-img { width: 100%; height: 150px; object-fit: cover; background: #eee; }
+      .prop-info { padding: 12px; }
       .prop-tag {
-        display: inline-block;
-        font-size: 10px;
-        font-weight: 700;
-        text-transform: uppercase;
-        padding: 2px 6px;
-        border-radius: 4px;
-        margin-bottom: 5px;
+        display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase;
+        padding: 2px 6px; border-radius: 4px; margin-bottom: 5px;
       }
-      .tag-venta {
-        background: #dcfce7;
-        color: #166534;
-      }
-      .tag-arriendo {
-        background: #dbeafe;
-        color: #1e40af;
-      }
-      .prop-price {
-        font-size: 16px;
-        font-weight: 800;
-        color: #1a2b48;
-      }
-      .prop-addr {
-        font-size: 12px;
-        color: #64748b;
-        margin: 2px 0 10px;
-      }
-
+      .tag-venta { background: #dcfce7; color: #166534; }
+      .tag-arriendo { background: #dbeafe; color: #1e40af; }
+      .prop-price { font-size: 16px; font-weight: 800; color: #1a2b48; }
+      .prop-addr { font-size: 12px; color: #64748b; margin: 2px 0 10px; }
       .btn-wsp-outline {
-        display: block;
-        width: 100%;
-        text-align: center;
-        padding: 8px;
-        border-radius: 8px;
-        border: 1px solid #25d366;
-        color: #25d366;
-        font-weight: 600;
-        text-decoration: none;
-        font-size: 13px;
+        display: block; width: 100%; text-align: center; padding: 8px; border-radius: 8px;
+        border: 1px solid #25d366; color: #25d366; font-weight: 600; text-decoration: none; font-size: 13px;
       }
 
-      /* Estilos Inputs Form */
+      /* Inputs Form */
       .input-mobile {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        font-size: 16px;
-        margin-bottom: 12px;
-        box-sizing: border-box;
+        width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px;
+        font-size: 16px; margin-bottom: 12px; box-sizing: border-box;
       }
       .btn-submit-mobile {
-        width: 100%;
-        padding: 14px;
-        background: #1a2b48;
-        color: white;
-        border: none;
-        border-radius: 10px;
-        font-size: 16px;
-        font-weight: 700;
-        margin-top: 10px;
-        cursor: pointer;
+        width: 100%; padding: 14px; background: #1a2b48; color: white; border: none;
+        border-radius: 10px; font-size: 16px; font-weight: 700; margin-top: 10px; cursor: pointer;
       }
-      .btn-submit-mobile:disabled {
-        background: #94a3b8;
-      }
+      .btn-submit-mobile:disabled { background: #94a3b8; }
     </style>
   </head>
   <body>
@@ -352,15 +262,17 @@
     <div class="access-grid">
       <a href="login_residente.html" class="access-card">
         <i
-          class="fa-solid fa-house-user access-icon"
-          style="color: #0f766e"
+          class="fa-solid fa-users access-icon"
+          style="color: #e74e35"
         ></i>
-        <span class="access-text">Soy Residente</span>
+        <span class="access-text">Portal Comunidad</span>
+        <span class="access-sub">Residentes y Dueños</span>
       </a>
 
       <a href="login.html" class="access-card">
-        <i class="fa-solid fa-briefcase access-icon" style="color: #1a2b48"></i>
-        <span class="access-text">Soy Comité</span>
+        <i class="fa-solid fa-id-badge access-icon" style="color: #1a2b48"></i>
+        <span class="access-text">Acceso Agentes</span>
+        <span class="access-sub">CRM Interno</span>
       </a>
     </div>
 
@@ -475,16 +387,12 @@
     </div>
 
     <script>
-      // Verificar sesión activa
+      // Verificar sesión activa (Solo redirige si es AGENTE, no Residente)
       document.addEventListener("DOMContentLoaded", () => {
         if (typeof getAuthUser === "function") {
           const user = getAuthUser();
-          // Si ya está logueado, redirigir automáticamente al dashboard móvil
-          if (
-            user &&
-            user.Nombre &&
-            !window.location.href.includes("dashboard")
-          ) {
+          // Si es un Agente (tiene sesión interna), va al dashboard
+          if (user && user.Nombre && !window.location.href.includes("dashboard")) {
             window.location.href = "mobile_dashboard.html";
           }
         }
@@ -502,9 +410,7 @@
 
       function cerrarModal(tipo) {
         if (tipo === "propiedades") {
-          document
-            .getElementById("modalPropiedades")
-            .classList.remove("active");
+          document.getElementById("modalPropiedades").classList.remove("active");
         } else if (tipo === "contacto") {
           document.getElementById("modalContacto").classList.remove("active");
         }
@@ -515,30 +421,20 @@
 
       async function cargarPropiedades() {
         if (propiedadesCargadas) return;
-
         const contenedor = document.getElementById("contenedorPropiedades");
 
         try {
-          const props =
-            typeof fetchData === "function"
-              ? await fetchData("Propiedades")
-              : [];
-          const disponibles = props.filter(
-            (p) => (p.Estado || "") === "Disponible"
-          );
+          const props = typeof fetchData === "function" ? await fetchData("Propiedades") : [];
+          const disponibles = props.filter((p) => (p.Estado || "") === "Disponible");
 
           if (disponibles.length === 0) {
-            contenedor.innerHTML =
-              '<p style="text-align:center; color:#999; margin-top:20px;">No hay propiedades destacadas.</p>';
+            contenedor.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">No hay propiedades destacadas.</p>';
             return;
           }
 
-          contenedor.innerHTML = disponibles
-            .map((p) => {
-              const precioFmt =
-                "$" + new Intl.NumberFormat("es-CL").format(p.Precio || 0);
-              const tagClass =
-                p.Operacion === "Arriendo" ? "tag-arriendo" : "tag-venta";
+          contenedor.innerHTML = disponibles.map((p) => {
+              const precioFmt = "$" + new Intl.NumberFormat("es-CL").format(p.Precio || 0);
+              const tagClass = p.Operacion === "Arriendo" ? "tag-arriendo" : "tag-venta";
               const imgUrl = p.ImagenURL || "assets/img/default_prop.jpg";
               const wspText = `Hola, me interesa: ${p.Titulo} (${precioFmt})`;
 
@@ -546,31 +442,21 @@
                     <div class="prop-card-mini">
                         <img src="${imgUrl}" class="prop-img" loading="lazy" onerror="this.src='assets/img/default_prop.jpg'">
                         <div class="prop-info">
-                            <span class="prop-tag ${tagClass}">${
-                p.Operacion || "Venta"
-              }</span>
+                            <span class="prop-tag ${tagClass}">${p.Operacion || "Venta"}</span>
                             <div class="prop-price">${precioFmt}</div>
-                            <div style="font-weight:600; font-size:14px; margin-top:2px;">${
-                              p.Titulo
-                            }</div>
-                            <div class="prop-addr"><i class="fa-solid fa-location-dot"></i> ${
-                              p.Comuna || "Santiago"
-                            }</div>
-                            <a href="https://wa.me/56998647190?text=${encodeURIComponent(
-                              wspText
-                            )}" target="_blank" class="btn-wsp-outline">
+                            <div style="font-weight:600; font-size:14px; margin-top:2px;">${p.Titulo}</div>
+                            <div class="prop-addr"><i class="fa-solid fa-location-dot"></i> ${p.Comuna || "Santiago"}</div>
+                            <a href="https://wa.me/56998647190?text=${encodeURIComponent(wspText)}" target="_blank" class="btn-wsp-outline">
                                 <i class="fa-brands fa-whatsapp"></i> Consultar
                             </a>
                         </div>
                     </div>`;
-            })
-            .join("");
+            }).join("");
 
           propiedadesCargadas = true;
         } catch (e) {
           console.error(e);
-          contenedor.innerHTML =
-            '<p style="text-align:center; color:red;">Error cargando datos.</p>';
+          contenedor.innerHTML = '<p style="text-align:center; color:red;">Error cargando datos.</p>';
         }
       }
 

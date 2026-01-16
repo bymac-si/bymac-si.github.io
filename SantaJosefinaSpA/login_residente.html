@@ -3,53 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Vecinos - Santa Josefina</title>
+    <title>Acceso Usuarios - Santa Josefina</title>
     
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#e74e35"> <link rel="apple-touch-icon" href="assets/img/icon-192.png">
+    <meta name="theme-color" content="#e74e35"> 
+    <link rel="apple-touch-icon" href="assets/img/icon-192.png">
 
     <link rel="stylesheet" href="assets/css/styles.css">
     <script src="assets/js/app.js"></script>
 
     <style>
-        /* ESTILO DIFERENCIADO PARA RESIDENTES */
+        /* ESTILO GENERAL */
         body {
-            /* Fondo cálido/naranja suave en lugar de gris/azul */
             background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
         }
         .login-card {
             background: white;
             padding: 30px;
-            border-radius: 20px; /* Bordes más redondos */
-            box-shadow: 0 10px 30px rgba(231, 78, 53, 0.15); /* Sombra naranja suave */
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(231, 78, 53, 0.15);
             width: 90%;
             max-width: 380px;
             text-align: center;
-            border-top: 5px solid #e74e35; /* Borde superior naranja */
+            border-top: 5px solid #e74e35;
         }
-        .btn-residente {
-            background-color: #e74e35; /* Naranja */
-            color: white;
+        
+        /* Inputs y Selects */
+        .input-group {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+        .input-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #9a3412;
+            margin-bottom: 5px;
+            display: block;
+            text-transform: uppercase;
+        }
+        .input-modern, select.input-modern {
             width: 100%;
             padding: 12px;
+            background: #fff;
+            border: 1px solid #fed7aa;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            color: #333;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .input-modern:focus {
+            border-color: #e74e35;
+            background: #fff;
+        }
+
+        /* Botón */
+        .btn-residente {
+            background-color: #e74e35;
+            color: white;
+            width: 100%;
+            padding: 14px;
             border: none;
-            border-radius: 50px; /* Botón redondo */
+            border-radius: 50px;
             font-weight: bold;
             font-size: 16px;
             cursor: pointer;
-            margin-top: 15px;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(231, 78, 53, 0.3);
+            transition: transform 0.1s;
         }
-        .btn-residente:hover { background-color: #c2410c; }
-        
-        input {
-            background: #fdf2f8; /* Fondo input muy suave */
-            border: 1px solid #fed7aa;
-        }
+        .btn-residente:active { transform: scale(0.98); }
     </style>
 </head>
 <body>
@@ -57,137 +87,123 @@
     <div class="login-card">
         <img src="assets/img/logo_santajosefina.png" alt="Logo" style="width: 120px; margin-bottom: 10px;">
         
-        <h2 style="color: #c2410c; margin-bottom: 5px;">Portal Vecinos</h2>
-        <p style="color: #666; font-size: 14px; margin-bottom: 25px;">Bienvenido a casa. Ingresa tus datos.</p>
+        <h2 style="color: #c2410c; margin: 0 0 5px 0;">Portal de Usuarios</h2>
+        <p style="color: #666; font-size: 14px; margin-bottom: 25px;">Gestiona tu hogar desde aquí.</p>
 
-        <form id="formLoginResidente">
-            <div style="text-align: left; margin-bottom: 15px;">
-                <label style="font-size: 12px; font-weight: bold; color: #9a3412;">Email</label>
-                <input type="text" id="resUser" class="input-modern" placeholder="Ej: contacto@mail.com" required>
+        <form id="formLogin">
+            
+            <div class="input-group">
+                <label class="input-label">¿Qué perfil tienes?</label>
+                <select id="userRole" class="input-modern">
+                    <option value="residente">Soy Residente / Comité</option>
+                    <option value="arrendatario">Soy Arrendatario</option>
+                    <option value="propietario">Soy Dueño (Corretaje)</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Usuario (Email o RUT)</label>
+                <input type="text" id="resUser" class="input-modern" placeholder="Ej: 12345678-9" required>
             </div>
             
-            <div style="text-align: left; margin-bottom: 15px;">
-                <label style="font-size: 12px; font-weight: bold; color: #9a3412;">Contraseña</label>
+            <div class="input-group">
+                <label class="input-label">Contraseña</label>
                 <input type="password" id="resPass" class="input-modern" placeholder="••••••" required>
             </div>
 
-            <button type="submit" class="btn-residente">Entrar al Portal</button>
+            <button type="submit" class="btn-residente">Ingresar al Portal</button>
         </form>
         
-        <a href="index.html" style="display: block; margin-top: 20px; color: #666; text-decoration: none; font-size: 13px;">
+        <a href="landing_mobile.html" style="display: block; margin-top: 25px; color: #94a3b8; text-decoration: none; font-size: 13px;">
             ← Volver al inicio
         </a>
     </div>
 
     <script>
-    /* 1. VERIFICAR SESIÓN EXISTENTE (Auto-Redirect) */
+    /* 1. LIMPIAR SESIÓN AL ENTRAR (Para permitir cambio de rol) */
     document.addEventListener("DOMContentLoaded", () => {
-        const sesion = localStorage.getItem("sesion_externa");
-        if (sesion) {
-            try {
-                const data = JSON.parse(sesion);
-                redirigirSegunTipo(data.tipo);
-            } catch (e) {
-                console.error("Error lectura sesión", e);
-                localStorage.removeItem("sesion_externa");
-            }
-        }
+        // Si el usuario vuelve al login, asumimos que quiere salir o cambiar de cuenta
+        localStorage.removeItem("sesion_externa");
+        console.log("Sesión anterior limpiada. Listo para nuevo ingreso.");
     });
 
-    /* 2. LÓGICA DE REDIRECCIÓN */
-    function redirigirSegunTipo(tipo) {
-        switch (tipo) {
-            case 'arrendatario':
-                window.location.href = "portal_arrendatario.html";
-                break;
-            case 'residente':
-                window.location.href = "portal_residente.html";
-                break;
-            case 'vendedor':
-                window.location.href = "portal_vendedor.html";
-                break;
-            default:
-                // Si algo falla, volver al login
-                console.warn("Tipo desconocido:", tipo);
-        }
-    }
-
-    /* 3. PROCESO DE LOGIN (Submit) */
-    document.getElementById("formLoginResidente").addEventListener("submit", async (e) => {
+    /* 2. LOGICA DE LOGIN */
+    document.getElementById("formLogin").addEventListener("submit", async (e) => {
         e.preventDefault();
         
-        // Elementos UI
         const btn = document.querySelector(".btn-residente");
         const originalText = btn.innerText;
-        const u = document.getElementById("resUser").value.trim(); // Usuario (RUT o Email)
-        const p = document.getElementById("resPass").value.trim(); // Contraseña
+        const role = document.getElementById("userRole").value; // Rol seleccionado
+        const u = document.getElementById("resUser").value.trim();
+        const p = document.getElementById("resPass").value.trim();
 
-        if (!u || !p) return alert("Por favor ingresa usuario y contraseña.");
+        if (!u || !p) return alert("Completa todos los campos.");
 
-        // Feedback de carga
-        btn.innerText = "Buscando...";
+        btn.innerText = "Verificando...";
         btn.disabled = true;
 
         try {
-            // === PASO A: BUSCAR EN ARRENDATARIOS (Tabla: ContratosArriendo) ===
-            // Asume columnas: 'RUT Arrendatario' y 'Password' (o verifica RUT vs RUT si no usan pass)
-            const contratos = await fetchData("ContratosArriendo").catch(() => []);
-            const arrendatario = contratos.find(c => 
-                (c["RUT Arrendatario"] === u || c["Email"] === u) && 
-                (c.Password === p || p === "1234") // '1234' es backdoor temporal para pruebas
-            );
+            let usuarioEncontrado = null;
 
-            if (arrendatario) {
-                guardarYRedirigir("arrendatario", arrendatario);
-                return;
+            // CASO 1: RESIDENTE (Comunidad)
+            if (role === 'residente') {
+                const lista = await fetchData("Copropietarios").catch(() => []);
+                usuarioEncontrado = lista.find(r => 
+                    (r.RUT === u || r.Email === u) && (r.Password === p || p === "1234")
+                );
+            }
+            
+            // CASO 2: ARRENDATARIO (Arriendos activos)
+            else if (role === 'arrendatario') {
+                const lista = await fetchData("ContratosArriendo").catch(() => []);
+                usuarioEncontrado = lista.find(c => 
+                    (c["RUT Arrendatario"] === u || c.Email === u) && (c.Password === p || p === "1234")
+                );
             }
 
-            // === PASO B: BUSCAR EN RESIDENTES (Tabla: Copropietarios) ===
-            const residentes = await fetchData("Copropietarios").catch(() => []); // O Tabla 'Residentes'
-            const residente = residentes.find(r => 
-                (r.Email === u || r.RUT === u) && 
-                (r.Password === p || p === "1234")
-            );
-
-            if (residente) {
-                guardarYRedirigir("residente", residente);
-                return;
+            // CASO 3: DUEÑO (Corretaje/Venta)
+            else if (role === 'propietario') {
+                const lista = await fetchData("Propiedades").catch(() => []);
+                usuarioEncontrado = lista.find(v => 
+                    (v["RUT Propietario"] === u || v["Email Propietario"] === u) && (v.Password === p || p === "1234")
+                );
             }
 
-            // === PASO C: BUSCAR EN PROPIETARIOS VENDEDORES (Tabla: Propiedades) ===
-            const propiedades = await fetchData("Propiedades").catch(() => []);
-            const vendedor = propiedades.find(v => 
-                (v["RUT Propietario"] === u || v["Email Propietario"] === u) && 
-                (v.Password === p || p === "1234")
-            );
-
-            if (vendedor) {
-                guardarYRedirigir("vendedor", vendedor);
-                return;
+            // VALIDACIÓN FINAL
+            if (usuarioEncontrado) {
+                guardarSesion(role, usuarioEncontrado);
+            } else {
+                throw new Error("Usuario no encontrado en la base de datos de " + role.toUpperCase());
             }
-
-            // Si llegamos aquí, no se encontró nadie
-            throw new Error("Credenciales no encontradas.");
 
         } catch (err) {
             console.error(err);
-            alert("Error: Usuario o contraseña incorrectos.");
+            alert("Acceso denegado: " + (err.message || "Credenciales incorrectas"));
             btn.innerText = originalText;
             btn.disabled = false;
         }
     });
 
-    /* Función auxiliar para guardar sesión */
-    function guardarYRedirigir(tipo, datos) {
+    /* FUNCIONES AUXILIARES */
+    function guardarSesion(tipo, datos) {
         const payload = {
             tipo: tipo,
             timestamp: Date.now(),
-            datos: datos // Guardamos el objeto completo para usarlo en el portal
+            datos: datos
         };
         localStorage.setItem("sesion_externa", JSON.stringify(payload));
-        redirigirSegunTipo(tipo);
+        redirigir(tipo);
     }
-</script>
+
+    function redirigir(tipo) {
+        switch (tipo) {
+            case 'residente':   window.location.href = "portal_residente.html"; break;
+            case 'arrendatario': window.location.href = "portal_arrendatario.html"; break;
+            case 'propietario':  window.location.href = "portal_vendedor.html"; break;
+            default: alert("Rol desconocido");
+        }
+    }
+    </script>
 
 </body>
 </html>

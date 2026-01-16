@@ -12,16 +12,16 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <link rel="stylesheet" href="assets/css/styles.css" />
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1a2b48">
-<link rel="apple-touch-icon" href="assets/img/icon-192.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a2b48">
+    <link rel="apple-touch-icon" href="assets/img/icon-192.png">
 
 
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script>
       (function () {
         // IMPORTANTE: Inicializa aquí con tu PUBLIC KEY si no está en app.js
-        emailjs.init("7Il4AhmGHchP7qfxu");
+        if(typeof emailjs !== 'undefined') emailjs.init("7Il4AhmGHchP7qfxu");
       })();
     </script>
 
@@ -268,7 +268,7 @@
   </head>
   <body>
     <div class="app-header-simple">
-      <a href="portal.html" class="btn-back"
+      <a href="portal_residente.html" class="btn-back"
         ><i class="fa-solid fa-arrow-left"></i
       ></a>
       <h1 class="page-title">Reservar Espacio</h1>
@@ -393,9 +393,12 @@
 
     document.addEventListener("DOMContentLoaded", async () => {
         try {
-            const sesion = localStorage.getItem("sesion_residente");
+            // CORRECCIÓN: Usar la llave correcta de sesión
+            const sesion = localStorage.getItem("sesion_externa");
             if(!sesion) throw new Error("No session");
-            USUARIO = JSON.parse(sesion);
+            
+            const objSesion = JSON.parse(sesion);
+            USUARIO = objSesion.datos; // Extraer datos reales
         } catch(e) {
             window.location.href = "login_residente.html";
             return;

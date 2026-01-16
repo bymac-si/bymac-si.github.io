@@ -9,17 +9,17 @@
   
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
-     (function(){
+      (function(){
         // IMPORTANTE: Pon tu Public Key aquí si no está en app.js
-       emailjs.init("7Il4AhmGHchP7qfxu"); 
-     })();
+       if(typeof emailjs !== 'undefined') emailjs.init("7Il4AhmGHchP7qfxu"); 
+      })();
   </script>
 
   <script src="assets/js/app.js"></script>
   
   <style>
     /* Estilos App Mobile */
-    body { background-color: #f8fafc; padding-bottom: 90px; }
+    body { background-color: #f8fafc; padding-bottom: 90px; margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     
     .app-header-simple {
       background: #1A2B48; padding: 15px 20px;
@@ -131,7 +131,7 @@
 <body>
 
   <div class="app-header-simple">
-    <a href="portal.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i></a>
+    <a href="portal_residente.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i></a>
     <h1 class="page-title">Centro de Ayuda</h1>
   </div>
 
@@ -228,18 +228,22 @@
     let FILE_BASE64 = "";
     let TICKET_ACTUAL = null;
     
-    // EMAIL ADMIN (PARA NOTIFICACIONES)
     const ADMIN_EMAIL = "marcos.castro@santajosefinaspa.cl"; 
 
-    // --- INICIALIZACIÓN ---
+    // --- INICIALIZACIÓN CORREGIDA ---
     document.addEventListener("DOMContentLoaded", async () => {
         try {
-            const sesion = localStorage.getItem("sesion_residente");
-            if(!sesion) throw new Error("No session");
-            USUARIO = JSON.parse(sesion);
+            // CORRECCIÓN: Leer la sesión correcta "sesion_externa"
+            const sesionStr = localStorage.getItem("sesion_externa");
+            if(!sesionStr) throw new Error("No session");
+            
+            const sesionObj = JSON.parse(sesionStr);
+            // CORRECCIÓN: Extraer los datos reales del usuario
+            USUARIO = sesionObj.datos; 
             
             await cargarHistorial();
         } catch(e) {
+            console.error("Error sesión:", e);
             window.location.href = "login_residente.html";
         }
     });
@@ -289,7 +293,6 @@
         const idTicket = "REQ_" + Date.now().toString().slice(-6);
         const fechaHoy = new Date().toISOString().split('T')[0];
 
-        // Guardamos la descripción inicial como primer mensaje del historial
         const historialInicial = [
             { autor: "user", nombre: USUARIO.Nombre, texto: descripcion, fecha: fechaHoy }
         ];
@@ -298,7 +301,7 @@
             "ID": idTicket,
             "CopropiedadID": String(USUARIO.CopropiedadID || ""),
             "UnidadID": String(USUARIO.UnidadID),
-            "UsuarioID": String(USUARIO.ID),
+            "UsuarioID": String(USUARIO.ID), // Aseguramos ID correcto
             "Categoria": categoria,
             "Descripcion": descripcion,
             "Foto": FILE_BASE64 || "", 
@@ -335,6 +338,7 @@
         const container = document.getElementById("listaTickets");
         try {
             const data = await fetchData("Reclamos").catch(() => []);
+            // Filtro robusto por ID de Unidad
             TICKETS = data.filter(t => String(t.UnidadID) === String(USUARIO.UnidadID));
             TICKETS.sort((a,b) => (a.ID < b.ID) ? 1 : -1);
 
@@ -346,8 +350,6 @@
             container.innerHTML = TICKETS.map(t => {
                 let statusClass = 'status-' + (t.Estado || 'Pendiente');
                 const shortID = t.ID.replace("REQ_", "#");
-                
-                // Verificar si hay historial (JSON)
                 const hasReply = t.Historial && t.Historial.includes('"autor":"admin"');
 
                 return `
@@ -386,7 +388,6 @@
         badge.innerText = t.Estado || "Pendiente";
         badge.className = "t-status"; 
         
-        // Foto
         const imgCont = document.getElementById("mdlFotoContainer");
         if(t.Foto && t.Foto.length > 10) {
             imgCont.style.display = "block";
@@ -404,18 +405,15 @@
             if(t.Historial) {
                 historial = typeof t.Historial === 'object' ? t.Historial : JSON.parse(t.Historial);
             }
-            // Fallback Legacy
             if(historial.length === 0 && t.RespuestaAdmin) {
                 historial.push({ autor: "admin", nombre: "Administración", texto: t.RespuestaAdmin });
             }
         } catch(e) {
-            console.warn("Historial error", e);
             if(t.RespuestaAdmin) historial.push({ autor: "admin", nombre: "Admin", texto: t.RespuestaAdmin });
         }
 
         if(historial.length > 0) {
             historial.forEach((msg, idx) => {
-                // Saltamos el primer mensaje si es igual a la descripción (para no duplicar visualmente)
                 if(idx === 0 && msg.texto === t.Descripcion) return;
 
                 const isMe = msg.autor === 'user';
@@ -432,9 +430,6 @@
             chat.innerHTML = `<div style="text-align:center; color:#cbd5e1; font-size:12px; padding:20px;">Sin interacciones adicionales.</div>`;
         }
 
-        // --- LÓGICA INPUT (PING-PONG) ---
-        // El usuario puede responder SOLO SI hay una respuesta del admin previa
-        // O si ya existe un historial de conversación avanzado
         const hasAdminReply = historial.some(h => h.autor === 'admin') || t.RespuestaAdmin;
         const footer = document.getElementById("replyFooter");
         
@@ -445,7 +440,6 @@
         }
 
         document.getElementById("modalTicket").classList.add("active");
-        
         const body = document.getElementById("chatScroll");
         setTimeout(() => body.scrollTop = body.scrollHeight, 100);
     }
@@ -455,7 +449,7 @@
         TICKET_ACTUAL = null;
     }
 
-    // --- 4. RESPONDER EN CHAT (BLINDADA) ---
+    // --- 4. RESPONDER EN CHAT ---
     async function enviarRespuestaChat() {
         const input = document.getElementById("replyInput");
         const texto = input.value.trim();
@@ -466,16 +460,13 @@
         document.getElementById("spinner").style.display = "flex";
 
         try {
-            // 1. Obtener historial actual
             let historial = [];
-            
             if (TICKET_ACTUAL.Historial) {
                 try {
                     historial = typeof TICKET_ACTUAL.Historial === 'string' 
                         ? JSON.parse(TICKET_ACTUAL.Historial) 
                         : TICKET_ACTUAL.Historial;
                 } catch(e) {
-                    console.warn("Error parseo, iniciando nuevo historial");
                     if(TICKET_ACTUAL.RespuestaAdmin) {
                         historial.push({autor:"admin", nombre:"Admin", texto:TICKET_ACTUAL.RespuestaAdmin});
                     }
@@ -484,7 +475,6 @@
                 historial.push({autor:"admin", nombre:"Admin", texto:TICKET_ACTUAL.RespuestaAdmin});
             }
 
-            // 2. Agregar mensaje
             const nuevoMsg = {
                 autor: "user",
                 nombre: USUARIO.Nombre || "Residente",
@@ -493,7 +483,6 @@
             };
             historial.push(nuevoMsg);
 
-            // 3. Preparar Payload (Stringify obligatorio para AppSheet LongText)
             const jsonHistorial = JSON.stringify(historial);
             const payload = {
                 "ID": String(TICKET_ACTUAL.ID),
@@ -501,14 +490,12 @@
                 "Estado": "En Proceso"
             };
 
-            // 4. Guardar
             if(typeof appSheetCRUD === 'function') {
                 await appSheetCRUD("Reclamos", "Edit", [payload]);
             } else {
                 throw new Error("No hay conexión con AppSheet.");
             }
 
-            // 5. Notificar Admin
             if (typeof emailjs !== 'undefined') {
                 const htmlBody = `
                     <div style="font-family:sans-serif; padding:20px; border:1px solid #1A2B48;">
@@ -525,11 +512,10 @@
                 }).catch(e => console.warn("Email error", e));
             }
 
-            // 6. UI Update
             input.value = "";
-            TICKET_ACTUAL.Historial = jsonHistorial; // Update local
+            TICKET_ACTUAL.Historial = jsonHistorial;
             TICKET_ACTUAL.Estado = "En Proceso";
-            abrirDetalle(TICKET_ACTUAL.ID); // Re-render chat
+            abrirDetalle(TICKET_ACTUAL.ID);
 
         } catch(e) {
             const msg = e.message || JSON.stringify(e);
@@ -539,7 +525,6 @@
         }
     }
 
-    // Notificación inicial
     async function notificarNuevoReclamo(data) {
         if (typeof emailjs === 'undefined') return;
         const htmlBody = `

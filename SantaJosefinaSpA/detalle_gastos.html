@@ -12,9 +12,9 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <link rel="stylesheet" href="assets/css/styles.css" />
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1a2b48">
-<link rel="apple-touch-icon" href="assets/img/icon-192.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a2b48">
+    <link rel="apple-touch-icon" href="assets/img/icon-192.png">
 
     <script src="assets/js/app.js"></script>
 
@@ -192,11 +192,17 @@
         justify-content: center;
         z-index: 2000;
       }
+      .biz-udpmincho-regular {
+        font-family: "BIZ UDPMincho", serif;
+        font-weight: 400;
+        font-style: normal;
+      }
+
     </style>
   </head>
-  <body>
+  <body class="biz-udpmincho-regular">
     <div class="app-header">
-      <a href="portal.html" class="btn-back">
+      <a href="portal_residente.html" class="btn-back">
         <i class="fa-solid fa-arrow-left"></i>
       </a>
       <div>
@@ -323,24 +329,33 @@
 
       document.addEventListener("DOMContentLoaded", async () => {
         try {
-          const sesion = localStorage.getItem("sesion_residente");
-          if (!sesion) window.location.href = "login_residente.html";
-          USUARIO = JSON.parse(sesion);
+          // 1. CORRECCIÓN SESIÓN: Leer sesion_externa
+          const sesionStr = localStorage.getItem("sesion_externa");
+          
+          if (!sesionStr) {
+             console.warn("No session found, redirecting");
+             window.location.href = "login_residente.html";
+             return;
+          }
+          
+          const sesionObj = JSON.parse(sesionStr);
+          USUARIO = sesionObj.datos; // Extraer datos reales del envoltorio
 
+          // Mostrar Unidad en Header (si existe etiqueta, si no el ID)
           document.getElementById("lblUnidad").textContent =
-            USUARIO.UnidadLabel || USUARIO.UnidadID;
+            USUARIO.UnidadLabel || USUARIO.UnidadID || "...";
 
           await cargarDetalle();
         } catch (e) {
           console.error(e);
-          alert("Error cargando detalles");
+          alert("Error cargando detalles. Revisa tu conexión.");
         } finally {
           document.getElementById("loader").style.display = "none";
         }
       });
 
       async function cargarDetalle() {
-        // 1. CARGA DE DATOS (Incluyendo Proveedores ahora)
+        // 2. CARGA DE DATOS (Incluyendo Proveedores ahora)
         const [
           copropiedades,
           unidades,
@@ -357,7 +372,7 @@
           fetchData("Proveedores").catch(() => []), // <--- NUEVO
         ]);
 
-        // 2. Crear Mapa de Proveedores para búsqueda rápida
+        // 3. Crear Mapa de Proveedores para búsqueda rápida
         proveedores.forEach((p) => {
           PROV_MAP[getKeyVal(p)] = p.Nombre || p.RazonSocial || "Proveedor";
         });
@@ -372,7 +387,7 @@
           (u) => String(getKeyVal(u)) === myUnidadID
         );
 
-        if (!comunidad || !unidad) throw new Error("Datos no encontrados");
+        if (!comunidad || !unidad) throw new Error("Datos de comunidad/unidad no encontrados");
 
         // --- Periodo ---
         const hoy = new Date();
@@ -392,6 +407,8 @@
 
         // --- Gastos Mes ---
         let totalGastoComunidad = 0;
+        
+        // Filtrar gastos de la comunidad y del mes actual
         const gastosMes = gastos.filter((g) => {
           if (String(g.CopropiedadID) !== myCoproID) return false;
           // Filtro simple por mes actual (mejora esto en producción con g.Fecha)
