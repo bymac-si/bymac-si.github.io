@@ -17,9 +17,288 @@
       requireAuth();
     </script>
 
-    
-      <link rel="stylesheet" href="assets/css/pages/admin-espacios.inline.css">
-</head>
+    <style>
+      /* Estilos Base */
+      body {
+        max-width: 1200px;
+        margin: 0 auto;
+        color: #1a2b48;
+        background-color: #f8fafc;
+      }
+      main {
+        padding: 40px;
+      }
+
+      /* Header */
+      .dashboard-header {
+        background: #fff;
+        padding: 20px 25px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 25px;
+      }
+      .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0;
+        color: #1e293b;
+      }
+
+      .header-filters {
+        display: flex;
+        gap: 15px;
+        align-items: end;
+      }
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        flex: 1;
+      }
+      .label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+      }
+      .input-modern {
+        height: 42px;
+        padding: 0 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #fff;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      textarea.input-modern {
+        height: auto;
+        padding: 10px;
+        font-family: inherit;
+      }
+
+      /* Cards de Espacios */
+      .grid-espacios {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+      }
+      .card-espacio {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.2s;
+        display: flex;
+        flex-direction: column;
+      }
+      .card-espacio:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Área Visual (Foto o Icono) */
+      .card-visual {
+        height: 140px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        background-color: #cbd5e1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      /* Si no hay foto, usamos este gradiente */
+      .card-visual.no-photo {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      }
+      .card-visual.no-photo i {
+        font-size: 48px;
+        color: rgba(255, 255, 255, 0.2);
+      }
+
+      .card-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        color: white;
+        text-transform: uppercase;
+      }
+      .st-Activo {
+        background: #10b981;
+      }
+      .st-Mantencion {
+        background: #f59e0b;
+      }
+      .st-Inactivo {
+        background: #ef4444;
+      }
+
+      .card-body {
+        padding: 15px;
+        flex-grow: 1;
+      }
+      .card-title {
+        font-weight: 700;
+        font-size: 16px;
+        margin-bottom: 5px;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .card-meta {
+        display: flex;
+        gap: 15px;
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 10px;
+      }
+      .card-meta span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .card-price {
+        font-weight: 700;
+        color: #10b981;
+        font-size: 15px;
+        margin-top: auto;
+      }
+      .card-garantia {
+        font-size: 11px;
+        color: #64748b;
+        font-weight: 400;
+      }
+
+      .card-footer {
+        padding: 10px 15px;
+        background: #f8fafc;
+        border-top: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      /* Botones */
+      .btn-main {
+        background: #1a2b48;
+        color: white;
+        border: none;
+        padding: 0 20px;
+        height: 42px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-sm {
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid #cbd5e1;
+        background: white;
+        color: #475569;
+      }
+      .btn-sm:hover {
+        background: #f1f5f9;
+        color: #1e293b;
+      }
+      .btn-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        background: transparent;
+      }
+      .btn-icon:hover {
+        background: #e2e8f0;
+        color: #ef4444;
+      }
+
+      /* Modales */
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal.active {
+        display: flex;
+      }
+      .modal-content {
+        background: white;
+        width: 100%;
+        max-width: 600px;
+        padding: 30px;
+        border-radius: 12px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      /* Tabla Bloques (Horarios) */
+      .table-bloques {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        font-size: 13px;
+      }
+      .table-bloques th {
+        background: #f1f5f9;
+        text-align: left;
+        padding: 8px;
+        color: #64748b;
+      }
+      .table-bloques td {
+        border-bottom: 1px solid #e2e8f0;
+        padding: 8px;
+      }
+
+      .spinner-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: none;
+        place-items: center;
+        z-index: 2000;
+      }
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #e2e8f0;
+        border-top-color: #1a2b48;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
   <body>
     <div id="header"></div>
 
@@ -284,6 +563,346 @@
 
     <div id="footer"></div>
 
-    <script src="assets/js/pages/admin-espacios.inline.js"></script>
+    <script>
+      let ESPACIOS = [],
+        COPROPIEDADES = [],
+        BLOQUES = [];
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          document.getElementById("header").innerHTML = await (
+            await fetch("header.html")
+          ).text();
+        } catch (e) {}
+        try {
+          document.getElementById("footer").innerHTML = await (
+            await fetch("footer.html")
+          ).text();
+        } catch (e) {}
+
+        await cargarFiltros();
+      });
+
+      async function cargarFiltros() {
+        showSpinner(true);
+        try {
+          const data = await fetchData("Copropiedades").catch(() => []);
+          COPROPIEDADES = data || [];
+
+          const sel = document.getElementById("filtroCopropiedad");
+          sel.innerHTML = COPROPIEDADES.length
+            ? ""
+            : "<option>No hay comunidades</option>";
+
+          COPROPIEDADES.forEach((c) => {
+            const opt = document.createElement("option");
+            opt.value = c.ID;
+            opt.textContent = c.Nombre;
+            sel.appendChild(opt);
+          });
+
+          if (COPROPIEDADES.length > 0) {
+            sel.value = COPROPIEDADES[0].ID;
+            await cargarEspacios();
+          } else {
+            document.getElementById("gridEspacios").innerHTML =
+              '<div style="grid-column:1/-1; text-align:center;">Crea una Comunidad primero.</div>';
+          }
+        } catch (e) {
+          console.error(e);
+        } finally {
+          showSpinner(false);
+        }
+      }
+
+      async function cargarEspacios() {
+        const idCopro = document.getElementById("filtroCopropiedad").value;
+        if (!idCopro) return;
+
+        showSpinner(true);
+        try {
+          const [esp, blo] = await Promise.all([
+            fetchData("Espacios").catch(() => []),
+            fetchData("Bloques").catch(() => []),
+          ]);
+
+          // Filtrar espacios de esta comunidad
+          ESPACIOS = esp.filter(
+            (e) => String(e.CopropiedadID) === String(idCopro)
+          );
+          BLOQUES = blo || [];
+
+          renderEspacios();
+        } catch (e) {
+          console.error(e);
+          alert("Error cargando espacios.");
+        } finally {
+          showSpinner(false);
+        }
+      }
+
+      function renderEspacios() {
+        const container = document.getElementById("gridEspacios");
+        if (ESPACIOS.length === 0) {
+          container.innerHTML =
+            '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#64748b; background:white; border-radius:12px; border:1px dashed #cbd5e1;">No hay espacios creados en esta comunidad.</div>';
+          return;
+        }
+
+        container.innerHTML = ESPACIOS.map((e) => {
+          const numBloques = BLOQUES.filter(
+            (b) => String(b.EspacioID) === String(e.ID)
+          ).length;
+          const icono = e.Icono || "fa-building";
+          const estado = e.Estado || "Activo";
+          const tieneFoto = e.Imagen && e.Imagen.length > 10;
+
+          // Lógica visual: Si tiene foto usa foto, si no usa icono con gradiente
+          let visualHTML = "";
+          if (tieneFoto) {
+            visualHTML = `<div class="card-visual" style="background-image: url('${e.Imagen}');">
+                    <div class="card-badge st-${estado}">${estado}</div>
+                </div>`;
+          } else {
+            visualHTML = `<div class="card-visual no-photo">
+                    <i class="fa-solid ${icono}"></i>
+                    <div class="card-badge st-${estado}">${estado}</div>
+                </div>`;
+          }
+
+          return `
+            <div class="card-espacio">
+                ${visualHTML}
+                
+                <div class="card-body">
+                    <div class="card-title">${e.Nombre}</div>
+                    
+                    <div class="card-meta">
+                        <span><i class="fa-solid fa-users"></i> ${
+                          e.Capacidad || 0
+                        } Pers.</span>
+                        <span><i class="fa-regular fa-clock"></i> ${numBloques} Bloques</span>
+                    </div>
+
+                    <div class="card-price">
+                        ${
+                          parseInt(e.Costo) > 0
+                            ? "$" + parseInt(e.Costo).toLocaleString("es-CL")
+                            : "Gratis"
+                        }
+                        ${
+                          parseInt(e.Garantia) > 0
+                            ? '<span class="card-garantia">(+ $' +
+                              parseInt(e.Garantia).toLocaleString("es-CL") +
+                              " Gar.)</span>"
+                            : ""
+                        }
+                    </div>
+                </div>
+                
+                <div class="card-footer">
+                    <button class="btn-sm" onclick="abrirBloques('${e.ID}', '${
+            e.Nombre
+          }')"><i class="fa-solid fa-calendar-days"></i> Horarios</button>
+                    <div>
+                        <button class="btn-icon" onclick="editarEspacio('${
+                          e.ID
+                        }')" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn-icon" onclick="eliminarEspacio('${
+                          e.ID
+                        }')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+            </div>
+            `;
+        }).join("");
+      }
+
+      /* --- CRUD ESPACIOS --- */
+      function abrirModalEspacio() {
+        const idCopro = document.getElementById("filtroCopropiedad").value;
+        if (!idCopro) return alert("Selecciona una comunidad.");
+
+        document.getElementById("formEspacio").reset();
+        document.getElementById("eID").value = "";
+        document.getElementById("eCopropiedadID").value = idCopro;
+        document.getElementById("modalTitleEspacio").innerText =
+          "Nuevo Espacio";
+        document.getElementById("modalEspacio").style.display = "flex";
+      }
+
+      function editarEspacio(id) {
+        const e = ESPACIOS.find((x) => x.ID === id);
+        if (!e) return;
+
+        document.getElementById("eID").value = e.ID;
+        document.getElementById("eCopropiedadID").value = e.CopropiedadID;
+        document.getElementById("eNombre").value = e.Nombre;
+        document.getElementById("eIcono").value = e.Icono || "fa-building";
+        document.getElementById("eCapacidad").value = e.Capacidad || "";
+        document.getElementById("eEstado").value = e.Estado || "Activo";
+        document.getElementById("eCosto").value = e.Costo || 0;
+        document.getElementById("eGarantia").value = e.Garantia || 0;
+        document.getElementById("eImagen").value = e.Imagen || "";
+        document.getElementById("eReglas").value = e.Reglas || "";
+
+        document.getElementById("modalTitleEspacio").innerText =
+          "Editar Espacio";
+        document.getElementById("modalEspacio").style.display = "flex";
+      }
+
+      document.getElementById("formEspacio").onsubmit = async (e) => {
+        e.preventDefault();
+        showSpinner(true);
+
+        const id = document.getElementById("eID").value;
+        const payload = {
+          ID: id || "ESP_" + Date.now(),
+          CopropiedadID: document.getElementById("eCopropiedadID").value,
+          Nombre: document.getElementById("eNombre").value,
+          Costo: document.getElementById("eCosto").value,
+          Reglas: document.getElementById("eReglas").value,
+          Icono: document.getElementById("eIcono").value,
+          Capacidad: document.getElementById("eCapacidad").value,
+          Garantia: document.getElementById("eGarantia").value,
+          Imagen: document.getElementById("eImagen").value,
+          Estado: document.getElementById("eEstado").value,
+        };
+
+        try {
+          const act = id ? "Edit" : "Add";
+          if (typeof appSheetCRUD === "function")
+            await appSheetCRUD("Espacios", act, [payload]);
+
+          document.getElementById("modalEspacio").style.display = "none";
+          await cargarEspacios();
+        } catch (err) {
+          alert(err.message);
+        } finally {
+          showSpinner(false);
+        }
+      };
+
+      async function eliminarEspacio(id) {
+        if (!confirm("¿Eliminar espacio y sus horarios?")) return;
+        showSpinner(true);
+        try {
+          if (typeof appSheetCRUD === "function")
+            await appSheetCRUD("Espacios", "Delete", [{ ID: id }]);
+          await cargarEspacios();
+        } catch (e) {
+          alert(e.message);
+        } finally {
+          showSpinner(false);
+        }
+      }
+
+      /* --- GESTIÓN BLOQUES (Horarios) --- */
+      function abrirBloques(idEspacio, nombreEspacio) {
+        document.getElementById("bEspacioID").value = idEspacio;
+        document.getElementById("bloqueSubtitle").innerText =
+          "Espacio: " + nombreEspacio;
+
+        const bloquesLocales = BLOQUES.filter(
+          (b) => String(b.EspacioID) === String(idEspacio)
+        );
+        renderBloques(bloquesLocales);
+
+        document.getElementById("modalBloques").style.display = "flex";
+      }
+
+      function renderBloques(lista) {
+        const tb = document.getElementById("listaBloques");
+        if (lista.length === 0) {
+          tb.innerHTML =
+            '<tr><td colspan="3" style="text-align:center; padding:15px; color:#cbd5e1;">Sin horarios.</td></tr>';
+          return;
+        }
+        lista.sort((a, b) =>
+          (a.HoraInicio || "").localeCompare(b.HoraInicio || "")
+        );
+        tb.innerHTML = lista
+          .map(
+            (b) => `
+            <tr>
+                <td style="font-weight:600;">${b.Nombre}</td>
+                <td>${b.HoraInicio} - ${b.HoraFin}</td>
+                <td style="text-align:right;">
+                    <button class="btn-icon" onclick="eliminarBloque('${b.ID}')" style="color:#ef4444;"><i class="fa-solid fa-xmark"></i></button>
+                </td>
+            </tr>
+        `
+          )
+          .join("");
+      }
+
+      async function agregarBloque() {
+        const idEspacio = document.getElementById("bEspacioID").value;
+        const nombre = document.getElementById("bNombre").value.trim();
+        const inicio = document.getElementById("bInicio").value;
+        const fin = document.getElementById("bFin").value;
+
+        if (!nombre || !inicio || !fin) return alert("Completa los campos.");
+
+        showSpinner(true);
+        const payload = {
+          ID: "BLK_" + Date.now(),
+          EspacioID: idEspacio,
+          Nombre: nombre,
+          HoraInicio: inicio,
+          HoraFin: fin,
+        };
+
+        try {
+          if (typeof appSheetCRUD === "function")
+            await appSheetCRUD("Bloques", "Add", [payload]);
+          const dataBloques = await fetchData("Bloques");
+          BLOQUES = dataBloques || [];
+
+          const bloquesLocales = BLOQUES.filter(
+            (b) => String(b.EspacioID) === String(idEspacio)
+          );
+          renderBloques(bloquesLocales);
+
+          document.getElementById("bNombre").value = "";
+          renderEspacios();
+        } catch (e) {
+          alert(e.message);
+        } finally {
+          showSpinner(false);
+        }
+      }
+
+      async function eliminarBloque(id) {
+        if (!confirm("¿Borrar horario?")) return;
+        const idEspacio = document.getElementById("bEspacioID").value;
+        showSpinner(true);
+        try {
+          if (typeof appSheetCRUD === "function")
+            await appSheetCRUD("Bloques", "Delete", [{ ID: id }]);
+          const dataBloques = await fetchData("Bloques");
+          BLOQUES = dataBloques || [];
+
+          const bloquesLocales = BLOQUES.filter(
+            (b) => String(b.EspacioID) === String(idEspacio)
+          );
+          renderBloques(bloquesLocales);
+          renderEspacios();
+        } catch (e) {
+          alert(e.message);
+        } finally {
+          showSpinner(false);
+        }
+      }
+
+      function showSpinner(show) {
+        document.getElementById("pageSpinner").style.display = show
+          ? "grid"
+          : "none";
+      }
+      function clp(v) {
+        return "$" + new Intl.NumberFormat("es-CL").format(v);
+      }
+    </script>
   </body>
 </html>

@@ -25,9 +25,171 @@
       requireAuth();
     </script>
 
+    <style>
+      /* RESET MÓVIL */
+      body {
+        margin: 0;
+        padding: 0;
+        background: #eee;
+        overflow: hidden;
+        height: 100vh;
+        width: 100vw;
+      }
+
+      /* MAPA FULLSCREEN */
+      #map {
+        height: 100%;
+        width: 100%;
+        z-index: 1;
+      }
+
+      /* BARRA DE FILTROS SUPERIOR (SCROLL HORIZONTAL) */
+      .mobile-filters {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        z-index: 1000;
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 5px;
+        -webkit-overflow-scrolling: touch; /* Suavidad en iOS */
+        scrollbar-width: none; /* Ocultar scrollbar Firefox */
+      }
+      .mobile-filters::-webkit-scrollbar {
+        display: none;
+      } /* Ocultar scrollbar Chrome */
+
+      .pill-filter {
+        background: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        white-space: nowrap;
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+        border: 1px solid white;
+        flex-shrink: 0;
+        transition: all 0.2s;
+      }
+      .pill-filter.active {
+        background: #1e293b;
+        color: white;
+        border-color: #1e293b;
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 4px;
+      }
+
+      /* BOTÓN VOLVER (FAB Inferior Izquierdo) */
+      .fab-back {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        z-index: 1000;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: white;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        text-decoration: none;
+        font-size: 18px;
+      }
+
+      /* ESTADÍSTICAS FLOTANTES (Inferior Centro) */
+      .stats-bubble {
+        position: absolute;
+        bottom: 25px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        background: rgba(30, 41, 59, 0.9);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(4px);
+        pointer-events: none;
+      }
+
+      /* POPUP MÓVIL (Más ancho y botones grandes) */
+      .leaflet-popup-content {
+        margin: 10px;
+        width: 260px !important;
+      }
+      .popup-action {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        text-align: center;
+        background: #3b82f6;
+        color: white;
+        border-radius: 8px;
+        border: none;
+        margin-top: 10px;
+        font-size: 14px;
+        font-weight: bold;
+      }
+
+      /* Spinner */
+      .loader-overlay {
+        position: fixed;
+        inset: 0;
+        background: white;
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+        .m-logo {
+        width: 80px;
+        margin-bottom: 20px;
+        filter: brightness(0) invert(1);
+      }
+      .mobile-header {
+        position: absolute;
+        top: 50px;
+        left: 10px;
+        right: 10px;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 15px;
+        background: rgba(26, 43, 72, 0.8);
+        border-radius: 8px;
+      }
+      .header-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: white;
+      }
+      @media (max-width: 768px) {
+    .header-filters {
+        flex-direction: column; /* Cambia la dirección a columna vertical */
+        align-items: stretch;   /* Estira los elementos al 100% del ancho */
+        gap: 15px;              /* Reduce un poco el espacio vertical */
+    }
     
-      <link rel="stylesheet" href="assets/css/pages/mobile_mapa.inline.css">
-</head>
+    /* Opcional: Asegura que los hijos ocupen todo el ancho */
+    .header-filters > * {
+        width: 100%;
+    }
+}
+    </style>
+  </head>
   <body> 
     <div class="mobile-header"><img
         src="assets/img/logo_santajosefina.png"
@@ -74,6 +236,127 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="assets/js/pages/mobile_mapa.inline.js"></script>
+    <script>
+      let map,
+        markersLayer,
+        PROSPECTOS = [];
+      // Limites Chile para evitar errores de coordenadas 0,0 en África
+      const CHILE = { minLat: -56, maxLat: -17, minLng: -76, maxLng: -66 };
+
+      /* --- LÓGICA DE COLOR COMPARTIDA --- */
+      function getColor(estRaw) {
+        const e = (estRaw || "").toLowerCase();
+        if (e.includes("ganado") || e.includes("cliente")) return "#15803d";
+        if (e.includes("negociación")) return "#c2410c";
+        if (e.includes("propuesta")) return "#7e22ce";
+        if (e.includes("volante")) return "#0ea5e9";
+        if (e.includes("contactado")) return "#b45309";
+        if (e.includes("perdido")) return "#b91c1c";
+        return "#0369a1";
+      }
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        // Mapa Limpio (Sin controles de zoom por defecto para ahorrar espacio, usamos gestos)
+        map = L.map("map", { zoomControl: false }).setView(
+          [-33.4489, -70.6693],
+          10
+        );
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(
+          map
+        );
+        // Zoom abajo a la derecha
+        L.control.zoom({ position: "bottomright" }).addTo(map);
+
+        markersLayer = L.layerGroup().addTo(map);
+        await cargarDatos();
+      });
+
+      async function cargarDatos() {
+        try {
+          const [admin, corretaje] = await Promise.all([
+            fetchData("ProspectosCopro").catch(() => []),
+            fetchData("ProspectosCorretaje").catch(() => []),
+          ]);
+          PROSPECTOS = [...admin, ...corretaje];
+          render(PROSPECTOS);
+        } catch (e) {
+          alert("Error de conexión");
+        } finally {
+          document.getElementById("loader").style.display = "none";
+        }
+      }
+
+      function render(lista) {
+        markersLayer.clearLayers();
+        const bounds = [];
+        let count = 0;
+
+        lista.forEach((p) => {
+          const raw = p.LatLong || p.Coordenadas;
+          if (!raw) return;
+          const [lat, lng] = raw.split(",").map(Number);
+
+          // Validación Geográfica Simple
+          if (
+            lat < CHILE.maxLat &&
+            lat > CHILE.minLat &&
+            lng < CHILE.maxLng &&
+            lng > CHILE.minLng
+          ) {
+            count++;
+            const color = getColor(p.Estado);
+
+            // Marcador Minimalista para Móvil
+            const icon = L.divIcon({
+              className: "mobile-pin",
+              html: `<div style="background:${color}; width:18px; height:18px; border-radius:50%; border:3px solid white; box-shadow:0 2px 4px rgba(0,0,0,0.3);"></div>`,
+              iconSize: [24, 24],
+              iconAnchor: [12, 12],
+            });
+
+            const m = L.marker([lat, lng], { icon }).bindPopup(`
+                    <div style="font-family:sans-serif;">
+                        <strong style="color:#1e293b; font-size:15px;">${
+                          p.Nombre
+                        }</strong><br>
+                        <span style="color:${color}; font-weight:bold; font-size:12px;">${
+              p.Estado
+            }</span><br>
+                        <div style="margin-top:5px; color:#64748b; font-size:13px;">${
+                          p.Direccion || "Sin dirección"
+                        }</div>
+                        <div style="display:flex; gap:10px; margin-top:10px;">
+                            ${
+                              p.Telefono
+                                ? `<a href="tel:${p.Telefono}" style="flex:1; text-align:center; padding:8px; background:#f1f5f9; border-radius:6px; color:#334155; text-decoration:none;"><i class="fa-solid fa-phone"></i> Llamar</a>`
+                                : ""
+                            }
+                            ${
+                              p.LatLong
+                                ? `<a href="https://maps.google.com/?q=${p.LatLong}" target="_blank" style="flex:1; text-align:center; padding:8px; background:#f1f5f9; border-radius:6px; color:#334155; text-decoration:none;"><i class="fa-solid fa-diamond-turn-right"></i> Ir</a>`
+                                : ""
+                            }
+                        </div>
+                    </div>
+                `);
+            markersLayer.addLayer(m);
+            bounds.push([lat, lng]);
+          }
+        });
+
+        document.getElementById("lblStats").innerText = `${count} prospectos`;
+        if (bounds.length) map.fitBounds(bounds, { padding: [20, 20] });
+      }
+
+      function filtrar(est, btn) {
+        document
+          .querySelectorAll(".pill-filter")
+          .forEach((el) => el.classList.remove("active"));
+        btn.classList.add("active");
+
+        if (est === "Todos") render(PROSPECTOS);
+        else render(PROSPECTOS.filter((p) => (p.Estado || "").includes(est)));
+      }
+    </script>
   </body>
 </html>

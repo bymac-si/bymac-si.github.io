@@ -19,9 +19,188 @@
       requireAuth();
     </script>
 
-    
-      <link rel="stylesheet" href="assets/css/pages/mapa.inline.css">
-</head>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background: #f8fafc;
+        overflow: hidden;
+      }
+
+      /* Header Flotante (Desktop) */
+      .map-header {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 15px 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(5px);
+        width: 300px;
+      }
+      .map-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .map-stats {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 5px;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 5px;
+      }
+
+      /* Filtros Flotantes (Desktop - Derecha) */
+      .filter-container {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        display: flex;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 10px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+      .btn-filter {
+        padding: 8px 16px;
+        border: 1px solid #e2e8f0;
+        background: white;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: #475569;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .btn-filter:hover {
+        background: #f1f5f9;
+      }
+      .btn-filter.active {
+        background: #1e293b;
+        color: white;
+        border-color: #1e293b;
+      }
+
+      /* Puntos de color en filtros */
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      /* Mapa */
+      #map {
+        height: 100vh;
+        width: 100%;
+        z-index: 1;
+      }
+
+      /* Botón Volver Flotante */
+      .btn-back {
+        position: absolute;
+        bottom: 30px;
+        left: 30px;
+        z-index: 1000;
+        background: #1e293b;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s;
+      }
+      .btn-back:hover {
+        transform: translateY(-2px);
+      }
+
+      /* Popup Personalizado */
+      .leaflet-popup-content-wrapper {
+        border-radius: 12px;
+        padding: 0;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+      .leaflet-popup-content {
+        margin: 0;
+        width: 280px !important;
+      }
+      .popup-header {
+        background: #1e293b;
+        color: white;
+        padding: 15px;
+        font-weight: 700;
+        font-size: 14px;
+      }
+      .popup-body {
+        padding: 15px;
+        font-size: 13px;
+        color: #334155;
+      }
+      .popup-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+      .popup-footer {
+        background: #f8fafc;
+        padding: 12px 15px;
+        text-align: right;
+        border-top: 1px solid #e2e8f0;
+      }
+      .btn-popup {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .btn-popup:hover {
+        background: #2563eb;
+      }
+
+      /* Spinner */
+      .spinner-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: grid;
+        place-items: center;
+        z-index: 2000;
+      }
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 4px solid #e2e8f0;
+        border-top-color: #1e293b;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
   <body>
     <div class="map-header">
       <h1 class="map-title"><i class="fa-solid fa-map"></i> Mapa Prospectos</h1>
@@ -176,6 +355,185 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="assets/js/pages/mapa.inline.js"></script>
+    <script>
+      let map,
+        markersLayer,
+        PROSPECTOS = [];
+      const CHILE_BOUNDS = {
+        minLat: -56.0,
+        maxLat: -17.0,
+        minLng: -76.0,
+        maxLng: -66.0,
+      };
+
+      /* --- COLORES COHERENTES CON PROSPECTOS.HTML --- */
+      function getColorByEstado(estRaw) {
+        const est = (estRaw || "").toLowerCase();
+        if (est.includes("ganado") || est.includes("cliente")) return "#15803d"; // Verde
+        if (est.includes("negociación")) return "#c2410c"; // Naranja Oscuro
+        if (est.includes("propuesta")) return "#7e22ce"; // Púrpura
+        if (est.includes("volante")) return "#0ea5e9"; // Celeste
+        if (est.includes("contactado")) return "#b45309"; // Ambar
+        if (est.includes("perdido")) return "#b91c1c"; // Rojo
+        return "#0369a1"; // Azul (Nuevo/Default)
+      }
+
+      document.addEventListener("DOMContentLoaded", initMap);
+
+      async function initMap() {
+        map = L.map("map").setView([-33.4489, -70.6693], 10);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "© OpenStreetMap",
+        }).addTo(map);
+        markersLayer = L.layerGroup().addTo(map);
+        await cargarProspectos();
+      }
+
+      async function cargarProspectos() {
+        try {
+          // Cargar ambas tablas para tener todo en el mapa
+          const [admin, corretaje] = await Promise.all([
+            fetchData("ProspectosCopro").catch(() => []),
+            fetchData("ProspectosCorretaje").catch(() => []),
+          ]);
+          // Unir y normalizar
+          PROSPECTOS = [
+            ...admin.map((p) => ({ ...p, _tabla: "ProspectosCopro" })),
+            ...corretaje.map((p) => ({ ...p, _tabla: "ProspectosCorretaje" })),
+          ];
+          renderMarkers(PROSPECTOS);
+        } catch (e) {
+          console.error(e);
+        } finally {
+          document.getElementById("spinner").style.display = "none";
+        }
+      }
+
+      function renderMarkers(lista) {
+        markersLayer.clearLayers();
+        let validos = 0;
+        const bounds = [];
+
+        lista.forEach((p) => {
+          // Intentar obtener coordenadas de varias columnas posibles
+          const raw = p.LatLong || p.Coordenadas || p.Ubicacion;
+          const coords = parseCoords(raw);
+
+          if (coords) {
+            validos++;
+            const color = getColorByEstado(p.Estado);
+
+            const icon = L.divIcon({
+              className: "custom-pin",
+              html: `<div style="background:${color}; width:16px; height:16px; border-radius:50%; border:2px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>`,
+              iconSize: [20, 20],
+              iconAnchor: [10, 10],
+              popupAnchor: [0, -10],
+            });
+
+            const marker = L.marker([coords.lat, coords.lng], {
+              icon: icon,
+            }).bindPopup(crearPopup(p));
+
+            markersLayer.addLayer(marker);
+            bounds.push([coords.lat, coords.lng]);
+          }
+        });
+
+        document.getElementById(
+          "mapStats"
+        ).innerText = `${validos} prospectos geolocalizados.`;
+        if (bounds.length) map.fitBounds(bounds, { padding: [50, 50] });
+      }
+
+      function parseCoords(str) {
+        if (!str) return null;
+        const [lat, lng] = str.split(",").map((s) => parseFloat(s.trim()));
+        if (isNaN(lat) || isNaN(lng)) return null;
+        // Filtro Chile básico
+        if (
+          lat < CHILE_BOUNDS.maxLat &&
+          lat > CHILE_BOUNDS.minLat &&
+          lng < CHILE_BOUNDS.maxLng &&
+          lng > CHILE_BOUNDS.minLng
+        )
+          return { lat, lng };
+        return null;
+      }
+
+      function crearPopup(p) {
+        const color = getColorByEstado(p.Estado);
+        return `
+            <div class="popup-header" style="background:${color}">
+                ${p.Nombre || "Sin Nombre"}
+            </div>
+            <div class="popup-body">
+                <div class="popup-row"><i class="fa-solid fa-tag"></i> <b>${
+                  p.Estado
+                }</b></div>
+                ${
+                  p.Telefono
+                    ? `<div class="popup-row"><i class="fa-solid fa-phone"></i> <a href="tel:${p.Telefono}">${p.Telefono}</a></div>`
+                    : ""
+                }
+                ${
+                  p.Email
+                    ? `<div class="popup-row"><i class="fa-solid fa-envelope"></i> ${p.Email}</div>`
+                    : ""
+                }
+                <div class="popup-row" style="color:#64748b; font-size:11px;">${
+                  p.Direccion || ""
+                }</div>
+            </div>
+            <div class="popup-footer">
+                <button class="btn-popup" onclick="editar('${
+                  p.ID
+                }')" style="background:${color}">Gestionar</button>
+            </div>
+        `;
+      }
+
+      function filtrarMapa(est, btn) {
+        document
+          .querySelectorAll(".btn-filter")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        if (est === "Todos") renderMarkers(PROSPECTOS);
+        else
+          renderMarkers(
+            PROSPECTOS.filter((p) => (p.Estado || "").includes(est))
+          );
+      }
+
+      /* EDICIÓN RÁPIDA */
+      window.editar = function (id) {
+        const p = PROSPECTOS.find((x) => String(x.ID) === String(id));
+        if (!p) return;
+        document.getElementById("pID").value = p.ID;
+        document.getElementById("pNombre").value = p.Nombre;
+        document.getElementById("pEstado").value = p.Estado || "Nuevo";
+        document.getElementById("modalProspecto").style.display = "flex";
+      };
+
+      document.getElementById("formEdicion").onsubmit = async (e) => {
+        e.preventDefault();
+        const id = document.getElementById("pID").value;
+        const est = document.getElementById("pEstado").value;
+        const p = PROSPECTOS.find((x) => String(x.ID) === String(id));
+
+        const btn = e.target.querySelector("button[type='submit']");
+        btn.innerText = "...";
+
+        try {
+          await appSheetCRUD(p._tabla, "Edit", [{ ID: id, Estado: est }]);
+          document.getElementById("modalProspecto").style.display = "none";
+          await cargarProspectos();
+        } catch (e) {
+          alert("Error: " + e.message);
+        } finally {
+          btn.innerText = "Guardar";
+        }
+      };
+    </script>
   </body>
 </html>

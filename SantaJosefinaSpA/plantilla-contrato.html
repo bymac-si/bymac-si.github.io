@@ -1,4 +1,3 @@
-<link rel="stylesheet" href="assets/css/pages/plantilla-contrato.inline.css">
 <?php
 /* 
 Template Name: Contrato – Corretaje
@@ -6,7 +5,43 @@ Template Name: Contrato – Corretaje
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 get_header();
 ?>
+<style>
+  body { color:#1A2B48; }
+  .container { max-width:1200px; margin:0 auto; padding: 40px; }
+  h1.page-title{ font-size:28px; font-weight:700; margin-bottom:16px; }
+  h2.section-title{ font-size:18px; font-weight:700; margin:18px 0 8px; }
+  .muted{ color:#555; }
+  .grid { display:grid; gap:10px; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); }
+  .card { background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:18px; }
+  .row { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; }
+  .row > * { flex: 1 1 220px; }
+  .label { font-weight:600; display:block; margin-bottom:4px; }
+  input, select { font-weight:400; width:90%; padding:10px; border:1px solid #d1d5db; border-radius:6px; }
+  .btns { display:flex; gap:8px; justify-content:flex-end; margin-top:12px; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:999px; background:#f4f4f5; font-size:12px; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace; }
 
+  table { width:100%; border-collapse:collapse; }
+  th, td { padding:8px; border-bottom:1px solid #e5e7eb; text-align:left; }
+  th { background:#fafafa; }
+
+  .contrato { background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:8px; }
+  .contrato p { line-height:1.6; margin: 10px 0; text-align:justify; }
+  .firma-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:36px; }
+  .firma-box { text-align:center; padding-top:36px; }
+  .firma-line { border-top:1px solid #111; margin-top:40px; padding-top:6px; }
+  .small { font-size:12px; }
+
+  .spinner-backdrop{ position:fixed; inset:0; background:rgba(255,255,255,0.85); display:flex; align-items:center; justify-content:center; z-index:9999; }
+  .spinner-card{ background:#fff; padding:18px 22px; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.08); text-align:center; min-width:260px; color:#1A2B48; font-weight:600; }
+  .spinner{ width:28px; height:28px; border-radius:50%; border:3px solid #eee; border-top-color:#B46A55; margin:0 auto 10px auto; animation:spin 0.9s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .hidden{ display:none !important; }
+
+  @page { size: Letter; margin: 20mm; }
+  @media print { header, footer, .no-print, #wpadminbar { display:none !important; } body { max-width: 100%; } .contrato { border:none; } .logo-print {visibility: visible;} }
+  .logo-print { visibility: hidden; }
+</style>
 
 <main class="container">
   <h2 class="page-title no-print">Contrato de Corretaje</h2>
@@ -115,7 +150,73 @@ get_header();
 </div>
 
 <script src="/assets/js/app.js"></script>
+<script>
+requireAuth();
 
+let COPROS=[], TARIFAS=[]; // TARIFAS no se usa aquí, se deja por homogeneidad
+let coproSel=null;
+
+function showSpinner(msg){ const sp=document.getElementById('pageSpinner'); const txt=document.getElementById('spinnerText'); if(msg) txt.textContent=msg; sp.classList.remove('hidden'); }
+function hideSpinner(){ document.getElementById('pageSpinner').classList.add('hidden'); }
+function formatoCLP(v){ return "$" + new Intl.NumberFormat("es-CL",{maximumFractionDigits:0}).format(Number(v||0)); }
+
+async function cargarDatos(){
+  try{
+    showSpinner("Cargando tablas...");
+    [COPROS] = await Promise.all([
+      fetchData("Copropiedades")
+    ]);
+    const sel = document.getElementById("selCopro");
+    sel.innerHTML = COPROS.map(c=>`<option value="${getKeyVal(c)}">${c.Nombre}</option>`).join("");
+    sel.onchange = onSelectCopro;
+    if(COPROS.length){ sel.value = getKeyVal(COPROS[0]); await onSelectCopro(); }
+    document.getElementById("inpPrecio").addEventListener("input", calcular);
+    document.getElementById("selPct").addEventListener("change", calcular);
+  }catch(err){ alert("Error al cargar datos: "+(err.message||err)); console.error(err); }
+  finally{ hideSpinner(); }
+}
+
+document.addEventListener("DOMContentLoaded", cargarDatos);
+
+async function onSelectCopro(){
+  const id = document.getElementById("selCopro").value;
+  coproSel = COPROS.find(c=> String(getKeyVal(c))===String(id));
+  if(!coproSel) return;
+  document.getElementById("cxCopro").textContent = coproSel.Nombre||"—";
+  document.getElementById("cxDir").textContent   = (coproSel.Direccion||"—");
+  document.getElementById("cxComuna").textContent= (coproSel.Comuna||"—");
+  document.getElementById("inpDir").value = (coproSel.Direccion||"");
+  document.getElementById("inpComuna").value = (coproSel.Comuna||"");
+  document.getElementById("c_dir").textContent = (coproSel.Direccion||"[Dirección]");
+  document.getElementById("c_comuna").textContent = (coproSel.Comuna||"[Comuna]");
+  calcular();
+}
+
+function parseCLP(raw){ return parseFloat((raw||"").toString().replaceAll(".","").replace(",","."))||0; }
+
+function calcular(){
+  const precio = parseCLP(document.getElementById("inpPrecio").value);
+  const pct = parseFloat(document.getElementById("selPct").value||"0");
+
+  document.getElementById("cxPrecio").textContent = precio? formatoCLP(precio): "—";
+  document.getElementById("cxPct").textContent = pct? (pct.toString().replace(".",",")+"%") : "—";
+  document.getElementById("c_pct").textContent = pct? (pct.toString().replace(".",","")) : "[Pct]";
+
+  let neto = Math.round(precio * (pct/100));
+  let iva  = Math.round(neto * 0.19);
+  let total= Math.round(neto + iva);
+
+  document.getElementById("outMontoNeto").textContent = formatoCLP(neto);
+  document.getElementById("outIVA").textContent       = formatoCLP(iva);
+  document.getElementById("outTotal").textContent     = formatoCLP(total);
+
+  document.getElementById("c_monto_neto").textContent = formatoCLP(neto);
+  document.getElementById("c_monto_iva").textContent  = formatoCLP(iva);
+  document.getElementById("c_monto_tot").textContent  = formatoCLP(total);
+}
+
+function imprimir(){ window.print(); }
+</script>
 <?php get_footer(); ?>
 
 
@@ -126,7 +227,43 @@ Template Name: Contrato – Administración de Arriendo
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 get_header();
 ?>
+<style>
+  body { color:#1A2B48; }
+  .container { max-width:1200px; margin:0 auto; padding: 40px; }
+  h1.page-title{ font-size:28px; font-weight:700; margin-bottom:16px; }
+  h2.section-title{ font-size:18px; font-weight:700; margin:18px 0 8px; }
+  .muted{ color:#555; }
+  .grid { display:grid; gap:10px; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); }
+  .card { background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:18px; }
+  .row { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; }
+  .row > * { flex: 1 1 220px; }
+  .label { font-weight:600; display:block; margin-bottom:4px; }
+  input, select { font-weight:400; width:90%; padding:10px; border:1px solid #d1d5db; border-radius:6px; }
+  .btns { display:flex; gap:8px; justify-content:flex-end; margin-top:12px; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:999px; background:#f4f4f5; font-size:12px; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace; }
 
+  table { width:100%; border-collapse:collapse; }
+  th, td { padding:8px; border-bottom:1px solid #e5e7eb; text-align:left; }
+  th { background:#fafafa; }
+
+  .contrato { background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:8px; }
+  .contrato p { line-height:1.6; margin: 10px 0; text-align:justify; }
+  .firma-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:36px; }
+  .firma-box { text-align:center; padding-top:36px; }
+  .firma-line { border-top:1px solid #111; margin-top:40px; padding-top:6px; }
+  .small { font-size:12px; }
+
+  .spinner-backdrop{ position:fixed; inset:0; background:rgba(255,255,255,0.85); display:flex; align-items:center; justify-content:center; z-index:9999; }
+  .spinner-card{ background:#fff; padding:18px 22px; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.08); text-align:center; min-width:260px; color:#1A2B48; font-weight:600; }
+  .spinner{ width:28px; height:28px; border-radius:50%; border:3px solid #eee; border-top-color:#B46A55; margin:0 auto 10px auto; animation:spin 0.9s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .hidden{ display:none !important; }
+
+  @page { size: Letter; margin: 20mm; }
+  @media print { header, footer, .no-print, #wpadminbar { display:none !important; } body { max-width: 100%; } .contrato { border:none; } .logo-print {visibility: visible;} }
+  .logo-print { visibility: hidden; }
+</style>
 
 <main class="container">
   <h2 class="page-title no-print">Contrato de Administración de Arriendo</h2>
@@ -233,7 +370,71 @@ get_header();
 </div>
 
 <script src="/assets/js/app.js"></script>
+<script>
+requireAuth();
 
+let COPROS2=[];
+let coproSel2=null;
+
+function showSpinner(msg){ const sp=document.getElementById('pageSpinner'); const txt=document.getElementById('spinnerText'); if(msg) txt.textContent=msg; sp.classList.remove('hidden'); }
+function hideSpinner(){ document.getElementById('pageSpinner').classList.add('hidden'); }
+function formatoCLP(v){ return "$" + new Intl.NumberFormat("es-CL",{maximumFractionDigits:0}).format(Number(v||0)); }
+
+async function cargarDatos2(){
+  try{
+    showSpinner("Cargando tablas...");
+    [COPROS2] = await Promise.all([
+      fetchData("Copropiedades")
+    ]);
+    const sel = document.getElementById("selCopro2");
+    sel.innerHTML = COPROS2.map(c=>`<option value="${getKeyVal(c)}">${c.Nombre}</option>`).join("");
+    sel.onchange = onSelectCopro2;
+    if(COPROS2.length){ sel.value = getKeyVal(COPROS2[0]); await onSelectCopro2(); }
+    document.getElementById("inpCanon").addEventListener("input", calcular2);
+    document.getElementById("selPct2").addEventListener("change", calcular2);
+  }catch(err){ alert("Error al cargar datos: "+(err.message||err)); console.error(err); }
+  finally{ hideSpinner(); }
+}
+
+document.addEventListener("DOMContentLoaded", cargarDatos2);
+
+async function onSelectCopro2(){
+  const id = document.getElementById("selCopro2").value;
+  coproSel2 = COPROS2.find(c=> String(getKeyVal(c))===String(id));
+  if(!coproSel2) return;
+  document.getElementById("cxCopro2").textContent = coproSel2.Nombre||"—";
+  document.getElementById("cxDir2").textContent   = (coproSel2.Direccion||"—");
+  document.getElementById("cxComuna2").textContent= (coproSel2.Comuna||"—");
+  document.getElementById("inpDir2").value = (coproSel2.Direccion||"");
+  document.getElementById("inpComuna2").value = (coproSel2.Comuna||"");
+  document.getElementById("c2_dir").textContent = (coproSel2.Direccion||"[Dirección]");
+  document.getElementById("c2_comuna").textContent = (coproSel2.Comuna||"[Comuna]");
+  calcular2();
+}
+
+function parseCLP(raw){ return parseFloat((raw||"").toString().replaceAll(".","").replace(",","."))||0; }
+
+function calcular2(){
+  const canon = parseCLP(document.getElementById("inpCanon").value);
+  const pct = parseFloat(document.getElementById("selPct2").value||"0");
+
+  document.getElementById("cxCanon").textContent = canon? formatoCLP(canon): "—";
+  document.getElementById("cxPct2").textContent = pct? (pct.toString().replace(".",",")+"%") : "—";
+  document.getElementById("c2_pct").textContent = pct? (pct.toString().replace(".",","")) : "[Pct]";
+
+  let neto = Math.round(canon * (pct/100));
+  let iva  = Math.round(neto * 0.19);
+  let total= Math.round(neto + iva);
+
+  document.getElementById("outMontoNeto2").textContent = formatoCLP(neto);
+  document.getElementById("outIVA2").textContent       = formatoCLP(iva);
+  document.getElementById("outTotal2").textContent     = formatoCLP(total);
+
+  document.getElementById("c2_monto_neto").textContent = formatoCLP(neto);
+  document.getElementById("c2_monto_iva").textContent  = formatoCLP(iva);
+  document.getElementById("c2_monto_tot").textContent  = formatoCLP(total);
+}
+
+function imprimir(){ window.print(); }
+</script>
 <?php get_footer(); ?>
-
-<script src="assets/js/pages/plantilla-contrato.inline.js"></script>

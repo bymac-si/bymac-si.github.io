@@ -7,8 +7,193 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    
-    <link rel="stylesheet" href="assets/css/pages/folleto.inline.css">
+    <style>
+        /* RESET & BASICS */
+        * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        body {
+            margin: 0; padding: 40px; background: #333;
+            font-family: 'Montserrat', sans-serif;
+            display: flex; justify-content: center;
+        }
+
+        /* LIENZO A5 (148mm x 210mm) */
+        .flyer-a5 {
+            width: 148mm;
+            height: 210mm;
+            background: white;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* HEADER */
+        header {
+            text-align: center;
+            padding-top: 25px;
+            padding-bottom: 15px;
+        }
+        .logo {
+            max-width: 180px;
+            /* Si el logo es negro y quieres que resalte, ajusta aquí. 
+               Asumimos que el logo se ve bien sobre blanco */
+        }
+
+        /* HERO SECTION */
+        .hero {
+            padding: 0 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #1A2B48; /* Azul corporativo */
+            font-size: 19pt;
+            font-weight: 800;
+            line-height: 1.1;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+        }
+        h1 span { color: #D32F2F; /* Rojo marca */ }
+        
+        .subhead {
+            font-family: 'Open Sans', sans-serif;
+            font-size: 9pt;
+            color: #555;
+            margin-bottom: 15px;
+            padding: 0 10px;
+        }
+
+        /* PLACEHOLDER IMAGEN PRINCIPAL */
+        .img-placeholder {
+            width: 100%;
+            height: 150px;
+            background-color: #e0e0e0;
+            border: 2px dashed #bbb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #777;
+            font-weight: bold;
+            font-size: 10pt;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            position: relative;
+        }
+        .img-label {
+            position: absolute;
+            bottom: 0; right: 0;
+            background: #D32F2F; color: white;
+            padding: 4px 10px;
+            font-size: 7pt; font-weight: 700;
+            border-top-left-radius: 8px;
+        }
+
+        /* 3 PILARES */
+        .pillars {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 15px;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .pillar {
+            flex: 1;
+            text-align: center;
+        }
+        .icon-circle {
+            width: 35px; height: 35px;
+            background: #f4f4f4;
+            border-radius: 50%;
+            margin: 0 auto 5px;
+            display: flex; align-items: center; justify-content: center;
+            color: #D32F2F;
+            font-size: 14pt;
+        }
+        .pillar h3 {
+            font-size: 8pt;
+            font-weight: 700;
+            color: #1A2B48;
+            margin: 0 0 2px 0;
+        }
+        .pillar p {
+            font-size: 6.5pt;
+            color: #666;
+            line-height: 1.3;
+            margin: 0;
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        /* CTA BOX (Oferta) */
+        .cta-container {
+            margin-top: auto;
+            background: #F9F9F9;
+            border-top: 4px solid #D32F2F;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .cta-left { flex: 2; padding-right: 10px; }
+        .cta-right { flex: 1; text-align: center; }
+
+        .cta-title {
+            font-size: 9pt; font-weight: 700; color: #333;
+            margin-bottom: 5px;
+        }
+        .offer-box {
+            border: 1px dashed #D32F2F;
+            background: white;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        .offer-text {
+            color: #D32F2F; font-weight: 800; font-size: 10pt;
+            display: block; margin-bottom: 2px;
+        }
+        .offer-sub { font-size: 7pt; color: #555; }
+
+        /* CONTACTO */
+        .contact-info { margin-top: 8px; }
+        .contact-item {
+            font-size: 8pt; font-weight: 600; color: #333;
+            display: flex; align-items: center; gap: 6px;
+            margin-bottom: 2px;
+        }
+        .contact-item i { color: #D32F2F; width: 12px; text-align: center;}
+
+        /* PLACEHOLDERS PEQUEÑOS */
+        .photo-placeholder {
+            width: 50px; height: 50px;
+            background: #ccc; border-radius: 50%;
+            margin: 0 auto 5px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 6pt; color: #555; text-align: center;
+            border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .qr-placeholder {
+            width: 65px; height: 65px;
+            background: white; border: 1px solid #ddd;
+            margin: 5px auto 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 7pt; font-weight: bold; color: #aaa;
+        }
+
+        /* FOOTER */
+        .footer-strip {
+            background: #1A2B48;
+            color: white;
+            text-align: center;
+            font-size: 6pt;
+            padding: 4px;
+            letter-spacing: 1px;
+        }
+
+        @media print {
+            body { background: none; padding: 0; }
+            .flyer-a5 { box-shadow: none; margin: 0; page-break-after: always;}
+        }
+    </style>
 </head>
 <body>
 

@@ -1,4 +1,3 @@
-<link rel="stylesheet" href="assets/css/pages/functions.inline.css">
 <?php
 /**
  * Funciones personalizadas del theme Santa Josefina
@@ -83,7 +82,14 @@ add_action('init', 'sj_block_sensitive_files');
 
 // Logo personalizado en pantalla de login
 function sj_login_logo() { ?>
-    
+    <style type="text/css">
+        body.login div#login h1 a {
+            background-image: url('/assets/img/logo_santajosefina.png');
+            background-size: contain;
+            width: 250px;
+            height: 100px;
+        }
+    </style>
 <?php }
 add_action('login_enqueue_scripts', 'sj_login_logo');
 
