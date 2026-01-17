@@ -289,8 +289,17 @@ function readIncoming(){
     unidades: (data?.unidades)||Number(qs.get('unidades')||0),
     direccion: (data?.direccion)||qs.get('direccion')||'',
     rut: (data?.rut)||qs.get('rut')||'',
-    factor: (data?.factor??(qs.get('factor')?Number(qs.get('factor')):null)),
-    utm: (data?.utm??(qs.get('utm')?Number(qs.get('utm')):null)),
+    factor: (
+  data?.factor ??
+  data?.factorComuna ??
+  (qs.get('factor') ? Number(qs.get('factor')) :
+   qs.get('factorComuna') ? Number(qs.get('factorComuna')) : null)
+),
+utm: (
+  data?.utm ??
+  (qs.get('utm') ? Number(qs.get('utm')) : null)
+),
+
   };
 }
 
@@ -341,52 +350,83 @@ function renderEntidadOptions(){
 }
 
 function onEntidadChange(prefill){
-  const sel=document.getElementById('selEntidad');
-  const list=(origen==='prospecto'&&PROSPECTOS.length)?PROSPECTOS:COPROS;
-  entidadSel=list.find(x=>String(getKeyVal(x))===String(sel.value))||null;
+  const sel = document.getElementById('selEntidad');
+  const list = (origen === 'prospecto' && PROSPECTOS.length) ? PROSPECTOS : COPROS;
+  entidadSel = list.find(x => String(getKeyVal(x)) === String(sel.value)) || null;
 
-  const nombre = prefill?.nombre ?? entidadSel?.Nombre ?? entidadSel?.RazonSocial ?? '—';
-  const comuna = prefill?.comuna ?? entidadSel?.Comuna ?? '—';
-  const dir    = prefill?.direccion ?? entidadSel?.Direccion ?? entidadSel?.Dirección ?? '—';
-  const rutRaw = prefill?.rut ?? entidadSel?.RUT ?? '—';
-  const rutFmt = (rutRaw && rutRaw!=='—') ? formatRut(rutRaw) : '—';
-  
-  const rawUnidades = prefill?.unidades ?? entidadSel?.Unidades ?? entidadSel?.NUnidades ?? entidadSel?.CantidadUnidades;
-  nUnidades = Number(rawUnidades || 0);
+  // --- Datos base ---
+  const nombre  = prefill?.nombre ?? entidadSel?.Nombre ?? entidadSel?.RazonSocial ?? '—';
+  const comuna  = prefill?.comuna ?? entidadSel?.Comuna ?? '—';
+  const dir     = prefill?.direccion ?? entidadSel?.Direccion ?? entidadSel?.Dirección ?? '—';
+  const rutRaw  = prefill?.rut ?? entidadSel?.RUT ?? '—';
+  const rutFmt  = (rutRaw && rutRaw !== '—') ? formatRut(rutRaw) : '—';
 
-  let f=null;
-  if(prefill?.factor!=null) f = Number(prefill.factor);
-  if(f==null){
-    const t = TARIFAS.find(tt => norm(tt.Comuna)===norm(comuna));
-    f = t ? Number(t.Factor||0) : 0;
+  // --- Unidades ---
+  const rawUnidades = prefill?.unidades 
+                   ?? entidadSel?.Unidades 
+                   ?? entidadSel?.NUnidades 
+                   ?? entidadSel?.CantidadUnidades;
+  nUnidades = Number(rawUnidades) || 0;
+
+  // --- Factor comuna (factor | factorComuna) ---
+  let f = null;
+  if (prefill?.factor != null)        f = Number(prefill.factor);
+  if (prefill?.factorComuna != null)  f = Number(prefill.factorComuna);
+
+  if (f == null || !(f > 0)) {
+    const t = TARIFAS.find(tt => norm(tt.Comuna) === norm(comuna));
+    f = t ? Number(t.Factor || t.FactorComuna || 0) : 0;
   }
   factor = f;
-  if(prefill?.utm!=null){ utmCLP = Number(prefill.utm)||0; if(utmCLP>0) document.getElementById('inpUTM').value=utmCLP; }
 
+  // --- UTM ---
+  if (prefill?.utm != null) {
+    utmCLP = Number(prefill.utm) || 0;
+  }
+  if (utmCLP > 0) {
+    document.getElementById('inpUTM').value = utmCLP;
+    document.getElementById('cxUTM').textContent = clp(utmCLP);
+  } else {
+    document.getElementById('cxUTM').textContent = '—';
+  }
+
+  // --- Inputs ---
   document.getElementById('inpComuna').value = comuna;
   document.getElementById('inpDireccion').value = dir;
   document.getElementById('inpRUT').value = rutFmt;
-  document.getElementById('inpFactor').value = factor || '';
-  
+  document.getElementById('inpFactor').value = factor > 0 ? factor : '';
+
   const inpU = document.getElementById('inpUnidades');
-  inpU.value = nUnidades || ''; 
-  if(nUnidades > 0) {
-      inpU.readOnly = true; inpU.style.backgroundColor = ''; inpU.style.border = ''; 
+  inpU.value = nUnidades > 0 ? nUnidades : '';
+  if (nUnidades > 0) {
+    inpU.readOnly = true;
+    inpU.style.backgroundColor = '';
+    inpU.style.border = '';
   } else {
-      inpU.readOnly = false; inpU.style.backgroundColor = '#fffbeb'; inpU.style.border = '1px solid #aaa';
+    inpU.readOnly = false;
+    inpU.style.backgroundColor = '#fffbeb';
+    inpU.style.border = '1px solid #aaa';
   }
 
-  document.getElementById('cxNombre').textContent = nombre;
-  document.getElementById('cxDir').textContent    = dir;
-  document.getElementById('cxComuna').textContent = comuna;
-  document.getElementById('cxFactor').textContent = factor || '—';
-  document.getElementById('cxUnidades').textContent = nUnidades || '—';
+  // --- Resumen ---
+  document.getElementById('cxNombre').textContent   = nombre;
+  document.getElementById('cxDir').textContent      = dir;
+  document.getElementById('cxComuna').textContent   = comuna;
+  document.getElementById('cxFactor').textContent   = factor > 0 ? factor : '—';
+  document.getElementById('cxUnidades').textContent = nUnidades > 0 ? nUnidades : '—';
 
-  const printNameEl = document.getElementById('printNombre'); if(printNameEl) printNameEl.textContent = nombre;
-  const coverSub = document.getElementById('coverSub'); if(coverSub) coverSub.textContent = nombre ? ('Condominio ' + nombre) : 'Condominio';
-  
-  renderHonorarios();
+  const printNameEl = document.getElementById('printNombre');
+  if (printNameEl) printNameEl.textContent = nombre;
+
+  const coverSub = document.getElementById('coverSub');
+  if (coverSub) coverSub.textContent = nombre ? ('Condominio ' + nombre) : 'Condominio';
+
+  // --- Cálculo solo si hay datos válidos ---
+  if (factor > 0 && utmCLP > 0) {
+    renderHonorarios();
+  }
 }
+
 
 function renderHonorarios(){
   const tb = document.getElementById('tbodyHonorarios');

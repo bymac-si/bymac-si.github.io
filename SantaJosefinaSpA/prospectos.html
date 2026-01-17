@@ -12,10 +12,15 @@
 <meta name="theme-color" content="#1a2b48">
 <link rel="apple-touch-icon" href="assets/img/icon-192.png">
 
-    <script src="assets/js/app.js"></script>
-    <script>
+    <script src="assets/js/app.js" defer></script>
+<script defer>
+  document.addEventListener("DOMContentLoaded", () => {
+    if (typeof requireAuth === "function") {
       requireAuth();
-    </script>
+    }
+  });
+</script>
+
     <style>
       /* ESTILOS BASE */
       body {
@@ -286,9 +291,14 @@
   </head>
   <body>
     <div id="header"></div>
-
     <main>
-      <div class="dashboard-header no-print">
+      <div style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 30px;
+        ">
+      <div class="dashboard-header no-print"  >
         <div class="header-top">
           <h1 class="page-title">Gestión de Prospectos</h1>
 
@@ -312,7 +322,7 @@
               <span>Nuevo Prospecto</span>
             </button>
           </div>
-        </div>
+        
 
         <div class="header-filters">
           <div class="filter-item" style="flex-grow: 2">
@@ -340,9 +350,9 @@
               <option value="Corretaje">Corretaje</option>
             </select>
           </div>
-        </div>
-      </div>
-
+        </div></div>
+      
+</div></div>
       <table>
         <thead>
           <tr>
@@ -1316,12 +1326,41 @@
         await cargarTodo();
       }
 
-      /* COTIZAR (Admin) */
-      function abrirCotizacion(id) {
-        const p = PROS.find((i) => String(i.ID) === String(id));
-        if (p)
-          window.location.href = `cotizacion-admin-condominio.html?prospectoId=${p.ID}&unidades=${p.Unidades}&comuna=${p.Comuna}`;
-      }
+     /* ===== COTIZAR (Admin) – FUNCIONAL ===== */
+window.abrirCotizacion = async function(id) {
+  console.log('abrirCotizacion ejecutado con ID:', id);
+
+  const p = PROS.find(i => String(i.ID) === String(id));
+  if (!p) {
+    alert("Prospecto no encontrado");
+    return;
+  }
+
+  let factorComuna = 0;
+  const tarifa = TARIFAS.find(t => norm(t.Comuna) === norm(p.Comuna));
+  if (tarifa) factorComuna = Number(tarifa.Factor || tarifa.FactorComuna || 0);
+
+  let utmValor = 0;
+  try {
+    const res = await fetch("https://mindicador.cl/api/utm");
+    const data = await res.json();
+    utmValor = Number(data?.serie?.[0]?.valor || 0);
+  } catch(e){}
+
+  const params = new URLSearchParams({
+    prospectoId: p.ID,
+    nombre: p.Nombre || '',
+    direccion: p.Direccion || '',
+    comuna: p.Comuna || '',
+    unidades: p.Unidades || 0,
+    factorComuna,
+    utm: utmValor
+  });
+
+  window.location.href = `cotizacion-admin-condominio.html?${params}`;
+}
+
+
 
       /* CONVERTIR CLIENTE */
       async function agregarAClientes(id) {
