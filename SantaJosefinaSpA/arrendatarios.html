@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -17,10 +17,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script>
       (function () {
-        // Asegúrate de que esta sea tu Public Key correcta
         emailjs.init("7Il4AhmGHchP7qfxu");
       })();
-      requireAuth();
+      if (typeof requireAuth === "function") requireAuth();
     </script>
 
     <style>
@@ -29,30 +28,46 @@
         max-width: 1400px;
         margin: 0 auto;
         background: #f8fafc;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       }
       main {
         padding: 40px;
       }
 
-      /* Badges */
+      /* Badges de Estado */
       .badge-pago {
         font-size: 11px;
         padding: 4px 8px;
         border-radius: 12px;
         font-weight: bold;
+        white-space: nowrap;
       }
+
+      /* Estados Originales */
       .bg-ok {
         background: #dcfce7;
         color: #166534;
-      }
+      } /* Al día */
       .bg-warn {
         background: #fef9c3;
         color: #854d0e;
-      }
+      } /* Por vencer */
       .bg-danger {
         background: #fee2e2;
         color: #991b1b;
-      }
+      } /* Atrasado */
+
+      /* NUEVOS ESTADOS */
+      .bg-pagado {
+        background: #1a2b48;
+        color: #fff;
+      } /* Pagado Total */
+      .bg-parcial {
+        background: #e0e7ff;
+        color: #4338ca;
+        border: 1px solid #6366f1;
+      } /* Abono Parcial */
 
       /* Bitácora / Chat */
       .chat-container {
@@ -82,6 +97,9 @@
       .chat-bubble.Pago {
         border-left-color: #10b981;
       }
+      .chat-bubble.Parcial {
+        border-left-color: #6366f1;
+      }
 
       /* Spinner */
       .spinner-overlay {
@@ -105,18 +123,84 @@
           transform: rotate(360deg);
         }
       }
+
+      /* UI General */
+      .input-modern {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        box-sizing: border-box;
+      }
+      .btn-head {
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        border: none;
+        font-weight: 600;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-nuevo {
+        background: #1a2b48;
+        color: white;
+      }
+      .btn-secundario {
+        background: white;
+        border: 1px solid #cbd5e1;
+        color: #334155;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 100;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+      }
+      .modal-content {
+        background-color: #fefefe;
+        padding: 20px;
+        border-radius: 12px;
+        width: 90%;
+        position: relative;
+      }
+      .label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        margin-bottom: 4px;
+        display: block;
+      }
     </style>
   </head>
   <body>
     <div id="header"></div>
 
     <main>
-      <div class="dashboard-header no-print">
-        <div class="header-top">
-          <h1 class="page-title">
+      <div class="dashboard-header no-print" style="margin-bottom: 20px">
+        <div
+          class="header-top"
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+          "
+        >
+          <h1
+            class="page-title"
+            style="margin: 0; font-size: 24px; color: #1e293b"
+          >
             <i class="fa-solid fa-key"></i> Contratos de Arriendo
           </h1>
-          <div class="header-actions">
+          <div class="header-actions" style="display: flex; gap: 10px">
             <button
               class="btn-head btn-secundario"
               onclick="cargarTodo()"
@@ -208,17 +292,7 @@
                   color: #64748b;
                 "
               >
-                Vigencia
-              </th>
-              <th
-                style="
-                  padding: 15px;
-                  font-size: 11px;
-                  text-transform: uppercase;
-                  color: #64748b;
-                "
-              >
-                Estado
+                Estado Mes Actual
               </th>
               <th
                 style="
@@ -358,6 +432,7 @@
             padding: 15px;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
+            flex-wrap: wrap;
           "
         >
           <button
@@ -365,21 +440,65 @@
             style="background: #f59e0b; border: none"
             onclick="enviarRecordatorioPago()"
           >
-            <i class="fa-regular fa-bell"></i> Recordar Pago
+            <i class="fa-regular fa-bell"></i> Recordar
           </button>
           <button
             class="btn-head btn-nuevo"
             style="background: #10b981; border: none"
             onclick="enviarAcuseRecibo()"
           >
-            <i class="fa-regular fa-circle-check"></i> Acuse Recibo
+            <i class="fa-regular fa-circle-check"></i> Total
+          </button>
+          <button
+            class="btn-head btn-nuevo"
+            style="background: #6366f1; border: none"
+            onclick="togglePagoParcial()"
+          >
+            <i class="fa-solid fa-chart-pie"></i> Parcial
           </button>
           <button
             class="btn-head btn-secundario"
             onclick="registrarPagoManual()"
           >
-            <i class="fa-solid fa-money-bill-wave"></i> Registro Manual
+            <i class="fa-solid fa-money-bill-wave"></i> Manual
           </button>
+        </div>
+
+        <div
+          id="divPagoParcial"
+          style="
+            display: none;
+            background: #eff6ff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px dashed #6366f1;
+          "
+        >
+          <label
+            class="label"
+            style="color: #1e1b4b; margin-bottom: 5px; display: block"
+            >Ingrese Monto del Abono ($)</label
+          >
+          <div style="display: flex; gap: 10px">
+            <input
+              type="number"
+              id="txtMontoParcial"
+              class="input-modern"
+              placeholder="Ej: 150000"
+              style="flex: 1"
+            />
+            <button
+              class="btn-head btn-nuevo"
+              style="background: #6366f1"
+              onclick="ejecutarPagoParcial()"
+            >
+              Confirmar Abono
+            </button>
+          </div>
+          <small style="color: #64748b; margin-top: 5px; display: block"
+            >El sistema calculará automáticamente el saldo pendiente.</small
+          >
         </div>
 
         <h4
@@ -424,450 +543,467 @@
     <div id="footer"></div>
 
     <script>
-      /* ===== ESTADO ===== */
-      let CONTRATOS = [],
-        PROPIEDADES = [],
-        ACTUAL_ID = null;
+            /* ===== VARIABLES GLOBALES ===== */
+            let CONTRATOS = [], PROPIEDADES = [], BITACORA = [], ACTUAL_ID = null;
 
-      /* ===== INICIO ===== */
-      document.addEventListener("DOMContentLoaded", async () => {
-        try {
-          document.getElementById("header").innerHTML = await (
-            await fetch("header.html")
-          ).text();
-          if (typeof initHeader === "function") initHeader();
-        } catch (e) {}
-        try {
-          document.getElementById("footer").innerHTML = await (
-            await fetch("footer.html")
-          ).text();
-        } catch (e) {}
+            /* ===== INICIO ===== */
+            document.addEventListener("DOMContentLoaded", async () => {
+              try {
+                  const headerRes = await fetch("header.html");
+                  if(headerRes.ok) document.getElementById("header").innerHTML = await headerRes.text();
+                  if (typeof initHeader === "function") initHeader();
 
-        await cargarTodo();
-      });
+                  const footerRes = await fetch("footer.html");
+                  if(footerRes.ok) document.getElementById("footer").innerHTML = await footerRes.text();
+              } catch (e) { }
 
-      async function cargarTodo() {
-        showSpinner();
-        try {
-          // CARGAMOS CONTRATOS Y PROPIEDADES PARA HACER EL CRUCE (JOIN)
-          const [contratos, props] = await Promise.all([
-            fetchData("ContratosArriendo").catch(() => []),
-            fetchData("Propiedades").catch(() => []),
-          ]);
-          CONTRATOS = contratos || [];
-          PROPIEDADES = props || [];
+              await cargarTodo();
+            });
 
-          renderTabla(CONTRATOS);
-        } catch (e) {
-          console.error(e);
-        } finally {
-          hideSpinner();
-        }
-      }
+            async function cargarTodo() {
+              showSpinner();
+              try {
+                // AHORA CARGAMOS TAMBIÉN LA BITÁCORA AL INICIO PARA LOS CÁLCULOS
+                const [contratos, props, bitacora] = await Promise.all([
+                  fetchData("ContratosArriendo").catch(() => []),
+                  fetchData("Propiedades").catch(() => []),
+                  fetchData("Bitacora").catch(() => []) // Nueva carga
+                ]);
+                CONTRATOS = contratos || [];
+                PROPIEDADES = props || [];
+                BITACORA = bitacora || []; // Guardamos en global
 
-      /* ===== RENDER & FILTROS ===== */
-      function filtrar() {
-        const q = document.getElementById("inpBuscar").value.toLowerCase();
-        const filtrados = CONTRATOS.filter((c) => {
-          // Buscar nombre de propiedad
-          const prop = PROPIEDADES.find(
-            (p) => String(p.ID) === String(c.PropiedadID)
-          );
-          const nombreProp = prop ? prop.Titulo || prop.Direccion || "" : "";
+                renderTabla(CONTRATOS);
+              } catch (e) {
+                console.error(e);
+              } finally {
+                hideSpinner();
+              }
+            }
 
-          return (
-            (c["Nombre Arrendatario"] || "").toLowerCase().includes(q) ||
-            (c["RUT Arrendatario"] || "").toLowerCase().includes(q) ||
-            nombreProp.toLowerCase().includes(q) ||
-            (c.PropiedadID || "").toLowerCase().includes(q)
-          );
+            /* ===== CÁLCULO DE ESTADO (CORREGIDO) ===== */
+      function calcularEstado(contrato) {
+        const montoArriendo = parseInt(contrato["Monto Arriendo"]);
+        const diaPago = parseInt(contrato["Dia Pago"]);
+        const hoy = new Date();
+        const diaActual = hoy.getDate();
+
+        const pagosMes = BITACORA.filter(b => {
+            if (b.ProspectoID !== contrato.ID) return false;
+            const parts = b.Fecha.split('-');
+            const mesB = parseInt(parts[1]) - 1;
+            const anioB = parseInt(parts[0]);
+            return mesB === hoy.getMonth() && anioB === hoy.getFullYear();
         });
-        renderTabla(filtrados);
-      }
 
-      function renderTabla(lista) {
-        const tb = document.getElementById("tablaContratos");
-        tb.innerHTML = "";
-
-        if (lista.length === 0) {
-          tb.innerHTML =
-            '<tr><td colspan="7" style="text-align:center; padding:20px; color:#999;">No hay contratos encontrados.</td></tr>';
-          return;
+        // 1. Verificar si hay un "Pago Total"
+        const pagoTotal = pagosMes.find(p => p.Tipo === 'Pago' && p.Nota.includes("Pago Total"));
+        if (pagoTotal) {
+            return { html: '<span class="badge-pago bg-pagado"><i class="fa-solid fa-check"></i> Pagado</span>', saldo: 0 };
         }
 
-        lista.forEach((c) => {
-          // 1. Buscar Datos Propiedad
-          const prop = PROPIEDADES.find(
-            (p) => String(p.ID) === String(c.PropiedadID)
-          );
-          const nombrePropiedad = prop
-            ? prop.Titulo || prop.Direccion
-            : c.PropiedadID || "Sin Propiedad";
-          const imagenPropiedad =
-            prop && prop.ImagenURL
-              ? `<img src="${prop.ImagenURL}" style="width:30px; height:30px; border-radius:4px; object-fit:cover; margin-right:5px; vertical-align:middle;">`
-              : "";
-
-          // 2. Lógica de Semáforo de Pago
-          const hoy = new Date().getDate();
-          const diaPago = parseInt(c["Dia Pago"]);
-          let badge = '<span class="badge-pago bg-ok">Al día</span>';
-
-          if (hoy > diaPago)
-            badge = '<span class="badge-pago bg-warn">Por Vencer</span>';
-          if (hoy > diaPago + 5)
-            badge = '<span class="badge-pago bg-danger">Atrasado</span>';
-
-          tb.innerHTML += `
-                <tr style="border-bottom: 1px solid #f1f5f9;">
-                    <td style="padding: 15px;">
-                        <div style="font-weight: bold; color: #1e293b;">${
-                          c["Nombre Arrendatario"]
-                        }</div>
-                        <div style="font-size: 12px; color: #64748b;">${
-                          c["RUT Arrendatario"]
-                        }</div>
-                    </td>
-                    <td style="padding: 15px; font-size:13px;">
-                        ${imagenPropiedad} 
-                        <b>${nombrePropiedad}</b>
-                    </td>
-                    <td style="padding: 15px; font-weight:700;">$${parseInt(
-                      c["Monto Arriendo"]
-                    ).toLocaleString()}</td>
-                    <td style="padding: 15px;">Día ${c["Dia Pago"]}</td>
-                    <td style="padding: 15px; font-size: 12px;">${
-                      c["Fecha Inicio"]
-                    }<br>al ${c["Fecha Fin"]}</td>
-                    <td style="padding: 15px;">${badge}</td>
-                    <td style="padding: 15px; text-align: right;">
-                        <button class="btn-icon" onclick="gestionar('${
-                          c.ID
-                        }')" title="Cobranza y Bitácora" style="background:#e0f2fe; color:#0369a1;"><i class="fa-solid fa-comments-dollar"></i></button>
-                        <button class="btn-icon" onclick="editar('${
-                          c.ID
-                        }')" title="Editar Contrato"><i class="fa-solid fa-pen"></i></button>
-                    </td>
-                </tr>`;
+        // 2. Sumar Abonos Parciales (CORRECCIÓN AQUÍ)
+        let totalAbonado = 0;
+        pagosMes.forEach(p => {
+            if (p.Tipo === 'Parcial') {
+                // El Regex ahora acepta dígitos, puntos, comas y espacios
+                const match = p.Nota.match(/Abono: \$([\d\.,\s]+)/);
+                if (match && match[1]) {
+                    // Limpiamos TODO lo que no sea número antes de sumar
+                    const soloNumeros = match[1].replace(/[^\d]/g, '');
+                    totalAbonado += parseInt(soloNumeros);
+                }
+            }
         });
-      }
 
-      /* ===== EMAIL & GESTIÓN ===== */
-      async function gestionar(id) {
-        ACTUAL_ID = id;
-        const c = CONTRATOS.find((x) => x.ID === id);
-
-        // Buscar nombre propiedad para el título del modal
-        let nombreProp = c.PropiedadID;
-        const p = PROPIEDADES.find(
-          (item) => String(item.ID) === String(c.PropiedadID)
-        );
-        if (p) nombreProp = p.Titulo || p.Direccion;
-
-        if (c)
-          document.getElementById(
-            "lblClienteGestion"
-          ).innerText = `${c["Nombre Arrendatario"]} - ${nombreProp}`;
-
-        document.getElementById("modalGestion").style.display = "flex";
-        cargarBitacora();
-      }
-
-      /* 1. ENVIAR RECORDATORIO DE PAGO */
-      async function enviarRecordatorioPago() {
-        const c = CONTRATOS.find((x) => x.ID === ACTUAL_ID);
-        if (!c || !c.Email)
-          return alert("Error: El cliente no tiene email registrado.");
-
-        // Buscar datos propiedad para el email
-        const p = PROPIEDADES.find(
-          (item) => String(item.ID) === String(c.PropiedadID)
-        );
-        const nombreProp = p ? p.Titulo || p.Direccion : c.PropiedadID;
-
-        if (
-          !confirm(
-            `¿Enviar recordatorio de pago a ${c["Nombre Arrendatario"]}?`
-          )
-        )
-          return;
-
-        showSpinner("Enviando correo...");
-
-        const htmlBody = `
-                <div style="font-family:sans-serif; color:#333; border:1px solid #eee; padding:20px; border-radius:8px;">
-                    <h2 style="color:#f59e0b;">Recordatorio de Pago</h2>
-                    <p>Estimado(a) <strong>${
-                      c["Nombre Arrendatario"]
-                    }</strong>,</p>
-                    <p>Le recordamos amablemente que el pago de arriendo para la propiedad <strong>${nombreProp}</strong> vence el día <strong>${
-          c["Dia Pago"]
-        }</strong> del presente mes.</p>
-                    <div style="background:#f9fafb; padding:15px; border-left:4px solid #f59e0b; margin:15px 0;">
-                        <p><strong>Monto a pagar:</strong> $${parseInt(
-                          c["Monto Arriendo"]
-                        ).toLocaleString()}</p>
-                    </div>
-                    <p>Favor enviar comprobante a este correo.</p>
-                    <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
-                    <small style="color:#666;">Santa Josefina SpA - Gestión Inmobiliaria</small>
-                </div>
-            `;
-
-        try {
-          await emailjs.send("service_p9hqkqn", "template_80q9psi", {
-            to_email: c.Email,
-            subject: "Recordatorio de Pago Arriendo - " + nombreProp,
-            html_body: htmlBody,
-          });
-
-          await appSheetCRUD("Bitacora", "Add", [
-            {
-              ID: "BIT_" + Date.now(),
-              ProspectoID: ACTUAL_ID,
-              Fecha: new Date().toISOString().split("T")[0],
-              Tipo: "Cobranza",
-              Nota: "Se envió recordatorio de pago automático.",
-              Usuario: "Sistema",
-            },
-          ]);
-
-          alert("Correo enviado exitosamente.");
-          cargarBitacora();
-        } catch (e) {
-          console.error(e);
-          alert("Error al enviar correo: " + JSON.stringify(e));
-        } finally {
-          hideSpinner();
+        // 3. Determinar Estado
+        if (totalAbonado >= montoArriendo) {
+             return { html: '<span class="badge-pago bg-pagado"><i class="fa-solid fa-check"></i> Pagado</span>', saldo: 0 };
+        } else if (totalAbonado > 0) {
+            const deuda = montoArriendo - totalAbonado;
+            return { html: `<span class="badge-pago bg-parcial">Debe: $${deuda.toLocaleString()}</span>`, saldo: deuda };
+        } else {
+            if (diaActual > diaPago + 5) return { html: '<span class="badge-pago bg-danger">Atrasado</span>', saldo: montoArriendo };
+            if (diaActual > diaPago) return { html: '<span class="badge-pago bg-warn">Por Vencer</span>', saldo: montoArriendo };
+            return { html: '<span class="badge-pago bg-ok">Al día</span>', saldo: montoArriendo };
         }
       }
 
-      /* 2. ENVIAR ACUSE DE RECIBO (PAGO OK) */
-      async function enviarAcuseRecibo() {
-        const c = CONTRATOS.find((x) => x.ID === ACTUAL_ID);
-        if (!c || !c.Email) return alert("El cliente no tiene email.");
+              
+            /* ===== RENDER & FILTROS ===== */
+            function filtrar() {
+              const q = document.getElementById("inpBuscar").value.toLowerCase();
+              const filtrados = CONTRATOS.filter((c) => {
+                const prop = PROPIEDADES.find((p) => String(p.ID) === String(c.PropiedadID));
+                const nombreProp = prop ? prop.Titulo || prop.Direccion || "" : "";
+                return (
+                  (c["Nombre Arrendatario"] || "").toLowerCase().includes(q) ||
+                  (c["RUT Arrendatario"] || "").toLowerCase().includes(q) ||
+                  nombreProp.toLowerCase().includes(q)
+                );
+              });
+              renderTabla(filtrados);
+            }
 
-        const p = PROPIEDADES.find(
-          (item) => String(item.ID) === String(c.PropiedadID)
-        );
-        const nombreProp = p ? p.Titulo || p.Direccion : c.PropiedadID;
+            function renderTabla(lista) {
+              const tb = document.getElementById("tablaContratos");
+              tb.innerHTML = "";
 
-        if (
-          !confirm(
-            `¿Confirmar recepción del pago y enviar comprobante a ${c["Nombre Arrendatario"]}?`
-          )
-        )
-          return;
+              if (lista.length === 0) {
+                tb.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:#999;">No hay contratos encontrados.</td></tr>';
+                return;
+              }
 
-        showSpinner("Procesando...");
+              lista.forEach((c) => {
+                const prop = PROPIEDADES.find((p) => String(p.ID) === String(c.PropiedadID));
+                const nombrePropiedad = prop ? prop.Titulo || prop.Direccion : c.PropiedadID || "Sin Propiedad";
+                const imagenPropiedad = prop && prop.ImagenURL
+                    ? `<img src="${prop.ImagenURL}" style="width:30px; height:30px; border-radius:4px; object-fit:cover; margin-right:5px; vertical-align:middle;">`
+                    : "";
 
-        const htmlBody = `
-                <div style="font-family:sans-serif; color:#333; border:1px solid #eee; padding:20px; border-radius:8px;">
-                    <h2 style="color:#10b981;">Pago Recibido Exitosamente</h2>
-                    <p>Estimado(a) <strong>${
-                      c["Nombre Arrendatario"]
-                    }</strong>,</p>
-                    <p>Hemos recibido correctamente su pago de arriendo para la propiedad <strong>${nombreProp}</strong>.</p>
-                    <div style="background:#f0fdf4; padding:15px; border-left:4px solid #10b981; margin:15px 0;">
-                        <p><strong>Monto Recibido:</strong> $${parseInt(
-                          c["Monto Arriendo"]
-                        ).toLocaleString()}</p>
-                        <p><strong>Fecha:</strong> ${new Date().toLocaleDateString()}</p>
-                        <p><strong>Estado:</strong> PAGADO</p>
-                    </div>
-                    <p>Muchas gracias por su puntualidad.</p>
-                    <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
-                    <small style="color:#666;">Santa Josefina SpA</small>
-                </div>
-            `;
+                // CALCULAR ESTADO CON LA NUEVA LÓGICA
+                const estadoObj = calcularEstado(c);
 
-        try {
-          await emailjs.send("service_p9hqkqn", "template_80q9psi", {
-            to_email: c.Email,
-            subject: "Comprobante de Pago Arriendo - " + nombreProp,
-            html_body: htmlBody,
-          });
+                tb.innerHTML += `
+                  <tr style="border-bottom: 1px solid #f1f5f9;">
+                      <td style="padding: 15px;">
+                          <div style="font-weight: bold; color: #1e293b;">${c["Nombre Arrendatario"]}</div>
+                          <div style="font-size: 12px; color: #64748b;">${c["RUT Arrendatario"]}</div>
+                      </td>
+                      <td style="padding: 15px; font-size:13px;">${imagenPropiedad} <b>${nombrePropiedad}</b></td>
+                      <td style="padding: 15px; font-weight:700;">$${parseInt(c["Monto Arriendo"]).toLocaleString()}</td>
+                      <td style="padding: 15px;">Día ${c["Dia Pago"]}</td>
 
-          await appSheetCRUD("Bitacora", "Add", [
-            {
-              ID: "BIT_" + Date.now(),
-              ProspectoID: ACTUAL_ID,
-              Fecha: new Date().toISOString().split("T")[0],
-              Tipo: "Pago",
-              Nota: "Pago recibido y notificado al cliente.",
-              Usuario: "Sistema",
-            },
-          ]);
+                      <td style="padding: 15px;">${estadoObj.html}</td>
 
-          alert("Comprobante enviado.");
-          cargarBitacora();
-        } catch (e) {
-          console.error(e);
-          alert("Error al enviar: " + JSON.stringify(e));
-        } finally {
-          hideSpinner();
-        }
-      }
+                      <td style="padding: 15px; text-align: right;">
+                          <button class="btn-head" style="background:#e0f2fe; color:#0369a1; padding: 6px 10px;" onclick="gestionar('${c.ID}')" title="Cobranza">
+                              <i class="fa-solid fa-comments-dollar"></i>
+                          </button>
+                          <button class="btn-head" style="background:#f1f5f9; color:#333; padding: 6px 10px;" onclick="editar('${c.ID}')" title="Editar">
+                              <i class="fa-solid fa-pen"></i>
+                          </button>
+                      </td>
+                  </tr>`;
+              });
+            }
 
-      /* 3. REGISTRO MANUAL */
-      async function registrarPagoManual() {
-        const nota = prompt(
-          "Ingrese detalle del pago (Ej: Transferencia Banco Estado):"
-        );
-        if (!nota) return;
+            /* ===== GESTIÓN DE MODAL ===== */
+            async function gestionar(id) {
+              ACTUAL_ID = id;
+              const c = CONTRATOS.find((x) => x.ID === id);
+              let nombreProp = c.PropiedadID;
+              const p = PROPIEDADES.find((item) => String(item.ID) === String(c.PropiedadID));
+              if (p) nombreProp = p.Titulo || p.Direccion;
 
-        showSpinner();
-        try {
-          await appSheetCRUD("Bitacora", "Add", [
-            {
-              ID: "BIT_" + Date.now(),
-              ProspectoID: ACTUAL_ID,
-              Fecha: new Date().toISOString().split("T")[0],
-              Tipo: "Pago",
-              Nota: "Registro Manual: " + nota,
-              Usuario:
-                typeof getAuthUser === "function"
-                  ? getAuthUser().nombre
-                  : "Admin",
-            },
-          ]);
-          cargarBitacora();
-        } catch (e) {
-          alert(e.message);
-        } finally {
-          hideSpinner();
-        }
-      }
+              document.getElementById("lblClienteGestion").innerText = `${c["Nombre Arrendatario"]} - ${nombreProp}`;
 
-      /* 4. CARGAR BITÁCORA */
-      async function cargarBitacora() {
-        const div = document.getElementById("timelineContainer");
-        div.innerHTML =
-          '<div style="text-align:center; color:#999;">Cargando historial...</div>';
+              document.getElementById("divPagoParcial").style.display = "none";
+              document.getElementById("txtMontoParcial").value = "";
 
-        try {
-          const logs = await fetchData("Bitacora").catch(() => []);
-          const misLogs = logs
-            .filter((l) => l.ProspectoID === ACTUAL_ID)
-            .sort((a, b) => new Date(b.Fecha) - new Date(a.Fecha));
+              document.getElementById("modalGestion").style.display = "flex";
+              cargarBitacora(); // Recarga localmente por si hubo cambios
+            }
 
-          if (misLogs.length === 0) {
-            div.innerHTML =
-              '<div style="text-align:center; padding:20px; color:#cbd5e1;">Sin interacciones registradas.</div>';
-            return;
-          }
+            /* 1. ENVIAR RECORDATORIO */
+            async function enviarRecordatorioPago() {
+              const c = CONTRATOS.find((x) => x.ID === ACTUAL_ID);
+              if (!c || !c.Email) return alert("Error: El cliente no tiene email registrado.");
 
-          div.innerHTML = misLogs
-            .map(
-              (l) => `
-                    <div class="chat-bubble ${l.Tipo}">
-                        <div style="display:flex; justify-content:space-between; color:#64748b; font-size:11px; margin-bottom:4px;">
-                            <span>${l.Fecha} • <b>${l.Tipo}</b></span>
-                            <span>${l.Usuario || "Sistema"}</span>
-                        </div>
-                        <div>${l.Nota}</div>
-                    </div>
-                `
-            )
-            .join("");
-        } catch (e) {
-          console.error(e);
-        }
-      }
+              const p = PROPIEDADES.find((item) => String(item.ID) === String(c.PropiedadID));
+              const nombreProp = p ? p.Titulo || p.Direccion : c.PropiedadID;
 
-      async function guardarNota() {
-        const nota = document.getElementById("txtNota").value;
-        if (!nota) return;
-        showSpinner();
-        try {
-          await appSheetCRUD("Bitacora", "Add", [
-            {
-              ID: "BIT_" + Date.now(),
-              ProspectoID: ACTUAL_ID,
-              Fecha: new Date().toISOString().split("T")[0],
-              Tipo: "Nota",
-              Nota: nota,
-              Usuario:
-                typeof getAuthUser === "function"
-                  ? getAuthUser().nombre
-                  : "Agente",
-            },
-          ]);
-          document.getElementById("txtNota").value = "";
-          cargarBitacora();
-        } catch (e) {
-          alert(e.message);
-        } finally {
-          hideSpinner();
-        }
-      }
+              if (!confirm(`¿Enviar recordatorio a ${c["Nombre Arrendatario"]}?`)) return;
 
-      /* ===== CRUD BÁSICO ===== */
-      function abrirModalContrato() {
-        document.getElementById("formContrato").reset();
-        document.getElementById("contID").value = "";
-        document.getElementById("modalContrato").style.display = "flex";
-      }
-      function cerrarModal(id) {
-        document.getElementById(id).style.display = "none";
-      }
+              showSpinner("Enviando correo...");
+              const htmlBody = `
+                  <div style="font-family:sans-serif; color:#333; border:1px solid #eee; padding:20px; border-radius:8px;">
+                      <h2 style="color:#f59e0b;">Recordatorio de Pago</h2>
+                      <p>Estimado(a) <strong>${c["Nombre Arrendatario"]}</strong>,</p>
+                      <p>Le recordamos que el arriendo de <strong>${nombreProp}</strong> vence el día <strong>${c["Dia Pago"]}</strong>.</p>
+                      <div style="background:#f9fafb; padding:15px; border-left:4px solid #f59e0b; margin:15px 0;">
+                          <p><strong>Monto:</strong> $${parseInt(c["Monto Arriendo"]).toLocaleString()}</p>
+                      </div>
+                      <small>Santa Josefina SpA</small>
+                  </div>`;
 
-      function editar(id) {
-        const c = CONTRATOS.find((x) => x.ID === id);
-        if (!c) return;
-        document.getElementById("contID").value = c.ID;
-        document.getElementById("cRut").value = c["RUT Arrendatario"];
-        document.getElementById("cNombre").value = c["Nombre Arrendatario"];
-        document.getElementById("cPropiedad").value = c.PropiedadID;
-        document.getElementById("cMonto").value = c["Monto Arriendo"];
-        document.getElementById("cDia").value = c["Dia Pago"];
-        document.getElementById("cEmail").value = c.Email;
-        document.getElementById("cTel").value = c.telefono;
-        document.getElementById("cInicio").value = c["Fecha Inicio"];
-        document.getElementById("cFin").value = c["Fecha Fin"];
-        document.getElementById("modalContrato").style.display = "flex";
-      }
+              try {
+                await emailjs.send("service_p9hqkqn", "template_80q9psi", {
+                  to_email: c.Email,
+                  subject: "Recordatorio de Pago - " + nombreProp,
+                  html_body: htmlBody,
+                });
+                await appSheetCRUD("Bitacora", "Add", [{
+                    ID: "BIT_" + Date.now(),
+                    ProspectoID: ACTUAL_ID,
+                    Fecha: new Date().toISOString().split("T")[0],
+                    Tipo: "Cobranza",
+                    Nota: "Recordatorio enviado.",
+                    Usuario: "Sistema",
+                }]);
+                alert("Enviado exitosamente.");
+                // Actualizar datos globales y tabla al cerrar
+                await cargarTodo();
+              } catch (e) { console.error(e); alert("Error al enviar."); }
+              finally { hideSpinner(); }
+            }
 
-      document.getElementById("formContrato").onsubmit = async (e) => {
-        e.preventDefault();
-        showSpinner("Guardando...");
-        const id = document.getElementById("contID").value;
-        const payload = {
-          "RUT Arrendatario": document.getElementById("cRut").value,
-          "Nombre Arrendatario": document.getElementById("cNombre").value,
-          PropiedadID: document.getElementById("cPropiedad").value,
-          "Monto Arriendo": document.getElementById("cMonto").value,
-          "Dia Pago": document.getElementById("cDia").value,
-          Email: document.getElementById("cEmail").value,
-          telefono: document.getElementById("cTel").value,
-          "Fecha Inicio": document.getElementById("cInicio").value,
-          "Fecha Fin": document.getElementById("cFin").value,
-          Estado: "Activo",
-        };
+            /* 2. PAGO TOTAL */
+            async function enviarAcuseRecibo() {
+              const c = CONTRATOS.find((x) => x.ID === ACTUAL_ID);
+              if (!c || !c.Email) return alert("El cliente no tiene email.");
+              const p = PROPIEDADES.find((item) => String(item.ID) === String(c.PropiedadID));
+              const nombreProp = p ? p.Titulo || p.Direccion : c.PropiedadID;
 
-        if (id) payload["ID"] = id;
-        else payload["ID"] = "CTR_" + Date.now();
+              if (!confirm(`¿Confirmar PAGO TOTAL para ${c["Nombre Arrendatario"]}?`)) return;
 
-        try {
-          const action = id ? "Edit" : "Add";
-          await appSheetCRUD("ContratosArriendo", action, [payload]);
-          cerrarModal("modalContrato");
-          cargarTodo();
-        } catch (e) {
-          alert(e.message);
-        } finally {
-          hideSpinner();
-        }
-      };
+              showSpinner("Procesando...");
+              const htmlBody = `
+                  <div style="font-family:sans-serif; color:#333; border:1px solid #eee; padding:20px; border-radius:8px;">
+                      <h2 style="color:#10b981;">Pago Recibido</h2>
+                      <p>Estimado(a) <strong>${c["Nombre Arrendatario"]}</strong>,</p>
+                      <p>Hemos recibido el pago total de <strong>${nombreProp}</strong>.</p>
+                      <div style="background:#f0fdf4; padding:15px; border-left:4px solid #10b981; margin:15px 0;">
+                          <p><strong>Monto:</strong> $${parseInt(c["Monto Arriendo"]).toLocaleString()}</p>
+                          <p><strong>Estado:</strong> PAGADO</p>
+                      </div>
+                      <small>Santa Josefina SpA</small>
+                  </div>`;
 
-      /* UTILS */
-      function showSpinner(msg) {
-        const sp = document.getElementById("spinner");
-        sp.style.display = "grid";
-      }
-      function hideSpinner() {
-        document.getElementById("spinner").style.display = "none";
-      }
+              try {
+                await emailjs.send("service_p9hqkqn", "template_80q9psi", {
+                  to_email: c.Email,
+                  subject: "Comprobante de Pago - " + nombreProp,
+                  html_body: htmlBody,
+                });
+                await appSheetCRUD("Bitacora", "Add", [{
+                    ID: "BIT_" + Date.now(),
+                    ProspectoID: ACTUAL_ID,
+                    Fecha: new Date().toISOString().split("T")[0],
+                    Tipo: "Pago",
+                    Nota: "Pago Total recibido.",
+                    Usuario: "Sistema",
+                }]);
+                alert("Registrado.");
+                // Actualizamos todo para que la tabla principal refleje el pago
+                await cargarTodo();
+                cargarBitacora(); // Actualizar el chat
+              } catch (e) { console.error(e); alert("Error."); }
+              finally { hideSpinner(); }
+            }
+
+            /* 3. PAGO PARCIAL */
+            function togglePagoParcial() {
+              const div = document.getElementById("divPagoParcial");
+              const isHidden = div.style.display === "none";
+              div.style.display = isHidden ? "block" : "none";
+              if(isHidden) document.getElementById("txtMontoParcial").focus();
+            }
+
+            async function ejecutarPagoParcial() {
+              const montoAbonado = parseInt(document.getElementById("txtMontoParcial").value);
+              if (!montoAbonado || montoAbonado <= 0) return alert("Ingrese un monto válido.");
+
+              const c = CONTRATOS.find(x => x.ID === ACTUAL_ID);
+              if (!c) return;
+
+              // Necesitamos recalcular saldo considerando pagos previos de ESTE mes
+              // Reutilizamos la lógica de calcularEstado pero solo para sumar abonos previos
+              const pagosMes = BITACORA.filter(b => {
+                   if (b.ProspectoID !== c.ID) return false;
+                   const parts = b.Fecha.split('-');
+                   const hoy = new Date();
+                   return (parseInt(parts[1])-1) === hoy.getMonth() && parseInt(parts[0]) === hoy.getFullYear();
+              });
+
+              let abonosPrevios = 0;
+pagosMes.forEach(p => {
+     if (p.Tipo === 'Parcial') {
+         // MISMA CORRECCIÓN DE LECTURA ROBUSTA
+         const match = p.Nota.match(/Abono: \$([\d\.,\s]+)/);
+         if (match && match[1]) {
+             const soloNumeros = match[1].replace(/[^\d]/g, '');
+             abonosPrevios += parseInt(soloNumeros);
+         }
+     }
+});
+
+              const montoTotal = parseInt(c["Monto Arriendo"]);
+              // El nuevo saldo es: Total - (lo que ya pagó antes + lo que paga ahora)
+              const saldoPendiente = montoTotal - (abonosPrevios + montoAbonado);
+
+              const p = PROPIEDADES.find(item => String(item.ID) === String(c.PropiedadID));
+              const nombreProp = p ? (p.Titulo || p.Direccion) : c.PropiedadID;
+
+              if (!confirm(`¿Confirmar abono de $${montoAbonado.toLocaleString()}?\nQuedará un saldo de $${saldoPendiente < 0 ? 0 : saldoPendiente.toLocaleString()}.`)) return;
+
+              showSpinner("Registrando abono...");
+
+              const htmlBody = `
+                  <div style="font-family:sans-serif; color:#333; border:1px solid #eee; padding:20px; border-radius:8px;">
+                      <h2 style="color:#6366f1;">Abono Recibido</h2>
+                      <p>Estimado(a) <strong>${c["Nombre Arrendatario"]}</strong>,</p>
+                      <p>Abono recibido para <strong>${nombreProp}</strong>.</p>
+                      <div style="background:#eff6ff; padding:15px; border-left:4px solid #6366f1; margin:15px 0;">
+                          <p><strong>Monto Total:</strong> $${montoTotal.toLocaleString()}</p>
+                          <p><strong>Nuevo Abono:</strong> $${montoAbonado.toLocaleString()}</p>
+                          <p><strong>Total Abonado Mes:</strong> $${(abonosPrevios + montoAbonado).toLocaleString()}</p>
+                          <hr style="border:0; border-top:1px dashed #cbd5e1; margin:10px 0;">
+                          <p style="font-size:16px; color:#b91c1c;"><strong>Saldo Pendiente: $${saldoPendiente < 0 ? 0 : saldoPendiente.toLocaleString()}</strong></p>
+                      </div>
+                      <small>Santa Josefina SpA</small>
+                  </div>`;
+
+              try {
+                  if (c.Email) {
+                      await emailjs.send("service_p9hqkqn", "template_80q9psi", {
+                          to_email: c.Email,
+                          subject: "Comprobante de Abono - " + nombreProp,
+                          html_body: htmlBody
+                      });
+                  }
+                  // NOTA: Es crucial mantener este formato de texto en la Nota para que el Regex funcione
+                  await appSheetCRUD("Bitacora", "Add", [{
+                      "ID": "BIT_" + Date.now(),
+                      "ProspectoID": ACTUAL_ID,
+                      "Fecha": new Date().toISOString().split('T')[0],
+                      "Tipo": "Parcial",
+                      "Nota": `Abono: $${montoAbonado.toLocaleString()}. Saldo: $${saldoPendiente.toLocaleString()}.`,
+                      "Usuario": (typeof getAuthUser === 'function') ? getAuthUser().nombre : 'Sistema'
+                  }]);
+
+                  document.getElementById("txtMontoParcial").value = "";
+                  document.getElementById("divPagoParcial").style.display = "none";
+                  alert("Abono registrado.");
+
+                  // Recargar todo para actualizar Tabla Principal y Bitácora local
+                  await cargarTodo();
+                  cargarBitacora();
+
+              } catch (e) { console.error(e); alert("Error al procesar abono."); }
+              finally { hideSpinner(); }
+            }
+
+            /* 4. REGISTRO MANUAL */
+            async function registrarPagoManual() {
+              const nota = prompt("Ingrese detalle del pago (Ej: Transferencia Banco Estado):");
+              if (!nota) return;
+              showSpinner();
+              try {
+                await appSheetCRUD("Bitacora", "Add", [{
+                    ID: "BIT_" + Date.now(),
+                    ProspectoID: ACTUAL_ID,
+                    Fecha: new Date().toISOString().split("T")[0],
+                    Tipo: "Pago",
+                    Nota: "Manual: " + nota,
+                    Usuario: typeof getAuthUser === "function" ? getAuthUser().nombre : "Admin",
+                }]);
+                cargarBitacora();
+              } catch (e) { alert(e.message); }
+              finally { hideSpinner(); }
+            }
+
+            /* 5. BITÁCORA */
+            async function cargarBitacora() {
+              const div = document.getElementById("timelineContainer");
+              div.innerHTML = '<div style="text-align:center; color:#999;">Cargando historial...</div>';
+
+              // Usamos la variable global BITACORA para no hacer fetch de nuevo innecesariamente,
+              // pero filtramos por el usuario actual
+              const misLogs = BITACORA
+                  .filter((l) => l.ProspectoID === ACTUAL_ID)
+                  .sort((a, b) => new Date(b.Fecha) - new Date(a.Fecha));
+
+              if (misLogs.length === 0) {
+                  div.innerHTML = '<div style="text-align:center; padding:20px; color:#cbd5e1;">Sin interacciones.</div>';
+                  return;
+              }
+
+              div.innerHTML = misLogs.map((l) => `
+                  <div class="chat-bubble ${l.Tipo}">
+                      <div style="display:flex; justify-content:space-between; color:#64748b; font-size:11px; margin-bottom:4px;">
+                          <span>${l.Fecha} • <b>${l.Tipo}</b></span>
+                          <span>${l.Usuario || "Sistema"}</span>
+                      </div>
+                      <div>${l.Nota}</div>
+                  </div>`).join("");
+            }
+
+            async function guardarNota() {
+              const nota = document.getElementById("txtNota").value;
+              if (!nota) return;
+              showSpinner();
+              try {
+                await appSheetCRUD("Bitacora", "Add", [{
+                    ID: "BIT_" + Date.now(),
+                    ProspectoID: ACTUAL_ID,
+                    Fecha: new Date().toISOString().split("T")[0],
+                    Tipo: "Nota",
+                    Nota: nota,
+                    Usuario: typeof getAuthUser === "function" ? getAuthUser().nombre : "Agente",
+                }]);
+                document.getElementById("txtNota").value = "";
+                // Recargar todo para actualizar bitácora global
+                await cargarTodo();
+                cargarBitacora();
+              } catch (e) { alert(e.message); }
+              finally { hideSpinner(); }
+            }
+
+            /* ===== CRUD CONTRATOS ===== */
+            function abrirModalContrato() {
+              document.getElementById("formContrato").reset();
+              document.getElementById("contID").value = "";
+              document.getElementById("modalContrato").style.display = "flex";
+            }
+            function cerrarModal(id) { document.getElementById(id).style.display = "none"; }
+
+            function editar(id) {
+              const c = CONTRATOS.find((x) => x.ID === id);
+              if (!c) return;
+              document.getElementById("contID").value = c.ID;
+              document.getElementById("cRut").value = c["RUT Arrendatario"];
+              document.getElementById("cNombre").value = c["Nombre Arrendatario"];
+              document.getElementById("cPropiedad").value = c.PropiedadID;
+              document.getElementById("cMonto").value = c["Monto Arriendo"];
+              document.getElementById("cDia").value = c["Dia Pago"];
+              document.getElementById("cEmail").value = c.Email;
+              document.getElementById("cTel").value = c.telefono;
+              document.getElementById("cInicio").value = c["Fecha Inicio"];
+              document.getElementById("cFin").value = c["Fecha Fin"];
+              document.getElementById("modalContrato").style.display = "flex";
+            }
+
+            document.getElementById("formContrato").onsubmit = async (e) => {
+              e.preventDefault();
+              showSpinner("Guardando...");
+              const id = document.getElementById("contID").value;
+              const payload = {
+                "RUT Arrendatario": document.getElementById("cRut").value,
+                "Nombre Arrendatario": document.getElementById("cNombre").value,
+                PropiedadID: document.getElementById("cPropiedad").value,
+                "Monto Arriendo": document.getElementById("cMonto").value,
+                "Dia Pago": document.getElementById("cDia").value,
+                Email: document.getElementById("cEmail").value,
+                telefono: document.getElementById("cTel").value,
+                "Fecha Inicio": document.getElementById("cInicio").value,
+                "Fecha Fin": document.getElementById("cFin").value,
+                Estado: "Activo",
+              };
+              if (id) payload["ID"] = id;
+              else payload["ID"] = "CTR_" + Date.now();
+
+              try {
+                const action = id ? "Edit" : "Add";
+                await appSheetCRUD("ContratosArriendo", action, [payload]);
+                cerrarModal("modalContrato");
+                cargarTodo();
+              } catch (e) { alert(e.message); }
+              finally { hideSpinner(); }
+            };
+
+            function showSpinner(msg) { document.getElementById("spinner").style.display = "grid"; }
+            function hideSpinner() { document.getElementById("spinner").style.display = "none"; }
     </script>
   </body>
 </html>
