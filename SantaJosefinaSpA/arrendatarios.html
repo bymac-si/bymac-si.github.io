@@ -540,7 +540,7 @@
       </div>
     </div>
 
-    <div id="footer"></div>
+  <div id="footer"></div>
 
     <script>
             /* ===== VARIABLES GLOBALES ===== */
@@ -553,9 +553,12 @@
                   if(headerRes.ok) document.getElementById("header").innerHTML = await headerRes.text();
                   if (typeof initHeader === "function") initHeader();
 
-                  const footerRes = await fetch("footer.html");
-                  if(footerRes.ok) document.getElementById("footer").innerHTML = await footerRes.text();
-              } catch (e) { }
+              } catch (e) {}
+        try {
+          document.getElementById("footer").innerHTML = await (
+            await fetch("footer.html")
+          ).text();
+        } catch (e) {}
 
               await cargarTodo();
             });
