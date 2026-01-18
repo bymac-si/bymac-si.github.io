@@ -14,7 +14,7 @@
 
     <script src="assets/js/app.js"></script>
     <script>
-      requireAuth();
+      if(typeof requireAuth === 'function') requireAuth();
     </script>
 
     <style>
@@ -518,9 +518,10 @@
       >
         <div class="modal-sidebar" style="width: 250px">
           <h3 style="margin-top: 0">Nueva Tarea</h3>
+          
           <form id="formTarea">
             <input type="hidden" id="tareaAgenteID" />
-            <div style="margin-bottom: 10px">
+            <input type="hidden" id="tareaEditID" /> <div style="margin-bottom: 10px">
               <label class="label">Título</label>
               <input
                 id="tareaTitulo"
@@ -545,11 +546,29 @@
               <label class="label">Detalle</label>
               <textarea id="tareaDesc" class="input-std" rows="3"></textarea>
             </div>
-            <button type="submit" class="btn-primary" style="width: 100%">
-              Asignar Tarea
-            </button>
+            
+            <div style="display: flex; gap: 5px">
+                <button
+                  type="button"
+                  id="btnCancelEdit"
+                  class="btn-primary btn-outline"
+                  style="display: none; flex: 1"
+                  onclick="resetFormTarea()"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  id="btnSubmitTarea"
+                  class="btn-primary"
+                  style="flex: 2; justify-content: center"
+                >
+                  Asignar Tarea
+                </button>
+              </div>
           </form>
         </div>
+
         <div class="modal-main">
           <div
             style="
@@ -981,7 +1000,7 @@
         });
       }
 
-      /* RENDER TABLA */
+      /* RENDER TABLA PRINCIPAL */
       function renderTabla() {
         const tb = document.getElementById("tablaAgentes");
         tb.innerHTML = "";
@@ -1061,6 +1080,7 @@
         document.getElementById("kpiTotalComision").innerText = clp(total);
       }
 
+      /* LOGICA AGENTES */
       function abrirModalAgente(id) {
         document.getElementById("formAgente").reset();
         document.getElementById("agenteID").value = "";
@@ -1117,14 +1137,42 @@
         }
       };
 
+      /* LOGICA TAREAS (MODIFICADA) */
       function abrirModalTareas(id) {
         const a = AGENTES.find((x) => String(x.ID) === String(id));
         if (!a) return;
         document.getElementById("tareaAgenteID").value = a.ID;
-        document.getElementById("formTarea").reset();
-        document.getElementById("tareaFecha").valueAsDate = new Date();
+        
+        // Siempre limpiar al abrir
+        resetFormTarea();
+        
         renderTareasAgente(a.ID);
         document.getElementById("modalTareas").style.display = "flex";
+      }
+
+      function resetFormTarea() {
+        document.getElementById("tareaEditID").value = ""; 
+        document.getElementById("tareaTitulo").value = "";
+        document.getElementById("tareaDesc").value = "";
+        document.getElementById("tareaPrioridad").value = "Media";
+        document.getElementById("tareaFecha").valueAsDate = new Date();
+        
+        document.getElementById("btnSubmitTarea").innerText = "Asignar Tarea";
+        document.getElementById("btnCancelEdit").style.display = "none";
+      }
+
+      function cargarDatosTarea(idTarea) {
+        const t = TAREAS.find(x => String(x.ID) === String(idTarea));
+        if(!t) return;
+
+        document.getElementById("tareaEditID").value = t.ID;
+        document.getElementById("tareaTitulo").value = t["Título"];
+        document.getElementById("tareaDesc").value = t["Descripción"] || "";
+        document.getElementById("tareaPrioridad").value = t.Prioridad;
+        document.getElementById("tareaFecha").value = t.FechaLimite;
+
+        document.getElementById("btnSubmitTarea").innerText = "Guardar Cambios";
+        document.getElementById("btnCancelEdit").style.display = "block";
       }
 
       function renderTareasAgente(id) {
@@ -1148,13 +1196,18 @@
             const style = done
               ? "opacity:0.6; text-decoration:line-through;"
               : "";
-            const btnAction = done
-              ? `<button class="btn-primary btn-sm btn-outline" onclick="cambiarEstadoTarea('${t.ID}', 'Pendiente')"><i class="fa-solid fa-rotate-left"></i></button>`
-              : `<button class="btn-primary btn-sm" style="background:#166534;" onclick="cambiarEstadoTarea('${t.ID}', 'Completada')"><i class="fa-solid fa-check"></i></button>`;
+              
+            const btnState = done
+              ? `<button class="btn-primary btn-sm btn-outline" onclick="cambiarEstadoTarea('${t.ID}', 'Pendiente')" title="Reabrir"><i class="fa-solid fa-rotate-left"></i></button>`
+              : `<button class="btn-primary btn-sm" style="background:#166534;" onclick="cambiarEstadoTarea('${t.ID}', 'Completada')" title="Completar"><i class="fa-solid fa-check"></i></button>`;
+
+            const btnEdit = !done 
+                ? `<button class="btn-primary btn-sm btn-outline" onclick="cargarDatosTarea('${t.ID}')" title="Editar"><i class="fa-solid fa-pen"></i></button>`
+                : '';
 
             return `
             <div class="task-item">
-                <div style="${style}">
+                <div style="${style}; flex:1;">
                     <div style="font-weight:bold; color:#334155;">${
                       t["Título"]
                     }</div>
@@ -1170,7 +1223,10 @@
                         }</span>
                     </div>
                 </div>
-                <div>${btnAction}</div>
+                <div style="display:flex; gap:5px; margin-left:10px;">
+                    ${btnEdit}
+                    ${btnState}
+                </div>
             </div>`;
           })
           .join("");
@@ -1180,20 +1236,36 @@
         e.preventDefault();
         showSpinner();
         const agenteID = document.getElementById("tareaAgenteID").value;
+        const editID = document.getElementById("tareaEditID").value;
+        
         const payload = {
-          ID: "TSK_" + Date.now(),
           AgenteID: agenteID,
           Título: document.getElementById("tareaTitulo").value,
           Descripción: document.getElementById("tareaDesc").value,
           Prioridad: document.getElementById("tareaPrioridad").value,
           FechaLimite: document.getElementById("tareaFecha").value,
-          Estado: "Pendiente",
-          FechaCreación: new Date().toISOString().split("T")[0],
         };
+
         try {
-          await appSheetCRUD("Tareas", "Add", [payload]);
-          document.getElementById("formTarea").reset();
-          TAREAS.push(payload);
+          if (editID) {
+            // EDITAR
+            payload.ID = editID;
+            await appSheetCRUD("Tareas", "Edit", [payload]);
+            // Actualizar local
+            const idx = TAREAS.findIndex(t => t.ID === editID);
+            if(idx !== -1) {
+                TAREAS[idx] = { ...TAREAS[idx], ...payload };
+            }
+          } else {
+            // CREAR
+            payload.ID = "TSK_" + Date.now();
+            payload.Estado = "Pendiente";
+            payload.FechaCreación = new Date().toISOString().split("T")[0];
+            await appSheetCRUD("Tareas", "Add", [payload]);
+            TAREAS.push(payload);
+          }
+          
+          resetFormTarea();
           renderTareasAgente(agenteID);
           renderTabla();
         } catch (e) {
@@ -1221,6 +1293,7 @@
         }
       }
 
+      /* LOGICA NEGOCIOS (CALIFICACION & TRANSACCIONES) */
       function abrirModalGestion(id) {
         const a = AGENTES.find((x) => String(x.ID) === String(id));
         if (!a) return;
@@ -1242,7 +1315,6 @@
         document.getElementById("modalGestion").style.display = "flex";
       }
 
-      /* --- CORRECCIÓN: ACTUALIZAR CALIFICACIÓN --- */
       document.getElementById("formPerfil").onsubmit = async (e) => {
         e.preventDefault();
         showSpinner();
