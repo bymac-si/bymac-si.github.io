@@ -731,7 +731,7 @@
             (t.Comuna || "").toLowerCase().trim() ===
             (coproSel.Comuna || "").toLowerCase().trim()
         );
-        factor = tarifa ? Number(tarifa.Factor || 0) : 0;
+        factor = tarifa ? Number(tarifa.FactorComuna || 0) : 0;
 
         document.getElementById("inpFactor").value = factor || "";
         document.getElementById("cxFactor").textContent = factor || "—";
