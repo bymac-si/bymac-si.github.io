@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Comunidad - Escritorio | Santa Josefina</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="assets/js/app.js"></script>
+
+    <style>
+        :root { 
+            --primary: #1a2b48;
+            --secondary: #3b82f6;
+            --bg-light: #f1f5f9;
+            --white: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            flex-shrink: 0;
+        }
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-item {
+            padding: 12px 15px;
+            color: #94a3b8;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        .user-profile {
+            margin-top: auto;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .avatar-circle {
+            width: 40px;
+            height: 40px;
+            background: var(--secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px 40px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .page-title h1 { margin: 0; font-size: 24px; }
+        .page-title p { margin: 5px 0 0; color: var(--text-muted); font-size: 14px; }
+
+        /* DASHBOARD GRID */
+        .grid-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr; /* 2 columnas principales */
+            gap: 25px;
+            grid-template-rows: auto auto;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        /* WIDGET FINANCIERO DESKTOP */
+        .finance-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .big-number {
+            font-size: 42px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -1px;
+        }
+        .status-pill {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .pill-success { background: #dcfce7; color: #166534; }
+        .pill-danger { background: #fee2e2; color: #991b1b; }
+
+        /* TABLA */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { text-align: left; color: var(--text-muted); font-size: 12px; text-transform: uppercase; padding-bottom: 10px; border-bottom: 2px solid #f1f5f9; }
+        td { padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+
+        /* RESERVAS */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .time-slot {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .time-slot:hover { border-color: var(--secondary); background: #eff6ff; }
+        .slot-busy { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; text-decoration: line-through; }
+        
+        /* SPINNER */
+        #spinner {
+            position: fixed; inset: 0; background: rgba(255,255,255,0.95);
+            z-index: 2000; display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; color: var(--primary);
+        }
+
+        @media print {
+            .sidebar, .no-print { display: none; }
+            .grid-container { display: block; }
+            .card { border: 1px solid #000; box-shadow: none; margin-bottom: 20px; page-break-inside: avoid; }
+        }
+        .m-logo {
+        width: 80px;
+        margin-bottom: 20px;
+        filter: brightness(0) invert(1);}
+    </style>
+</head>
+<body>
+
+    <div id="spinner">
+        <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 40px; margin-bottom: 15px;"></i>
+        <div style="font-weight: 600;">Cargando Escritorio...</div>
+    </div>
+
+    <div class="sidebar">
+        <div class="logo">
+            <img
+        src="assets/img/logo_santajosefina.png"
+        class="m-logo"
+        alt="Santa Josefina"
+      /> Santa Josefina
+        </div>
+        <nav>
+            <div class="nav-item active" onclick="scrollToSection('dashboard')">
+                <i class="fa-solid fa-chart-pie"></i> Resumen
+            </div>
+            <div class="nav-item" onclick="scrollToSection('finance')">
+                <i class="fa-solid fa-wallet"></i> Finanzas
+            </div>
+            <div class="nav-item" onclick="scrollToSection('spaces')">
+                <i class="fa-regular fa-calendar-check"></i> Espacios
+            </div>
+            <div class="nav-item" onclick="scrollToSection('tickets')">
+                <i class="fa-solid fa-bullhorn"></i> Reclamos
+            </div>
+        </nav>
+        <div class="user-profile">
+            <div class="avatar-circle" id="userInitial">U</div>
+            <div style="overflow: hidden;">
+                <div style="font-weight: 600; white-space: nowrap;" id="sidebarName">...</div>
+                <div style="font-size: 18px; color: #94a3b8;" id="sidebarUnit">...</div>
+            </div>
+            <i class="fa-solid fa-right-from-bracket" style="margin-left: auto; cursor: pointer;" onclick="logout()" title="Salir"></i>
+        </div>
+    </div>
+
+    <div class="main-content">
+        
+        <div class="header-top">
+            <div class="page-title">
+                <h1 id="welcomeTitle">Bienvenido</h1>
+                <p id="buildingName" style="font-size: 1.5rem;;">Cargando comunidad...</p>
+            </div>
+            <button onclick="window.print()" class="no-print" style="padding: 10px 20px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--text);">
+                <i class="fa-solid fa-print"></i> Imprimir Informe
+            </button>
+        </div>
+
+        <div class="grid-container" id="dashboard">
+            
+            <div class="card" id="finance" style="grid-row: span 2;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                    <h3 style="margin:0;">Estado de Cuenta</h3>
+                    <div id="statusPill" class="status-pill pill-success">Al día</div>
+                </div>
+
+                <div class="finance-row">
+                    <div>
+                        <div style="font-size: 13px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Total a Pagar</div>
+                        <div class="big-number" id="debtAmount">$0</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <button onclick="window.location.href='reportar_pago.html'" style="padding: 12px 24px; background: var(--secondary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                            Pagar Ahora
+                        </button>
+                    </div>
+                </div>
+
+                <div style="margin-top: 40px;">
+                    <h4 style="font-size: 14px; margin-bottom: 15px;">Historial de Movimientos</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Concepto</th>
+                                <th>Estado</th>
+                                <th style="text-align: right;">Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTable">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-top:0; font-size: 16px;">Distribución de Gastos Comunes</h3>
+                <div style="display: flex; align-items: center;">
+                    <div style="height: 180px; width: 180px;">
+                        <canvas id="chartExpenses"></canvas>
+                    </div>
+                    <div style="flex: 1; padding-left: 20px; font-size: 13px; color: var(--text-muted);" id="expenseLegend">
+                        Cargando gráfico...
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="spaces">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="margin:0; font-size: 16px;">Reservar Espacio</h3>
+                    <select id="spaceSelector" onchange="renderSlots()" style="padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                        <option>Cargando...</option>
+                    </select>
+                </div>
+                
+                <div id="spaceInfo" style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">
+                    </div>
+
+                <div class="calendar-grid" id="slotsContainer">
+                    </div>
+            </div>
+
+            <div class="card" id="tickets" style="grid-column: 1 / -1;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin:0;">Mis Reclamos y Solicitudes</h3>
+                    <button onclick="window.location.href='reclamos.html'" style="padding: 8px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; font-size: 13px;">
+                        + Nuevo Ticket
+                    </button>
+                </div>
+                <div id="ticketsContainer" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                    </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        /* CONFIGURACIÓN Y ESTADO */
+        let USER = null;
+        let DB = { 
+            Cobros: [], Pagos: [], Gastos: [], 
+            Espacios: [], Bloques: [], Reservas: [], 
+            Reclamos: [], Copropiedades: [], Unidades: [] 
+        };
+        let chartInstance = null;
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            // 1. Detección de Dispositivo
+            if(window.innerWidth < 1024) {
+                if(confirm("Estás en una pantalla pequeña. ¿Ir a la versión móvil optimizada?")) {
+                    window.location.href = "Portal_residente.html";
+                    return;
+                }
+            }
+
+            // 2. Verificar Sesión
+            const sesionStr = localStorage.getItem('sesion_externa');
+            if(!sesionStr) {
+                window.location.href = 'login_residente.html';
+                return;
+            }
+            USER = JSON.parse(sesionStr);
+            
+            // Render Inicial (Muestra ID mientras carga lo demás)
+            renderUserProfile(null);
+
+            // 3. Cargar Datos
+            await loadData();
+
+            // 4. Renderizar Todo
+            renderFinance();
+            renderExpensesChart();
+            initSpaces();
+            renderTickets();
+
+            document.getElementById('spinner').style.display = 'none';
+        });
+
+        /* --- LÓGICA DE PERFIL INTELIGENTE --- */
+        function renderUserProfile(unidadReal) {
+            const nombre = USER.datos.Nombre || "Residente";
+            let labelUnidad = USER.UnidadID || "..."; // Default: ID
+
+            if (unidadReal) {
+                // Si encontramos la unidad real en la BD, mostramos el Nombre/Numero
+                labelUnidad = unidadReal.Unidad || unidadReal.Numero || unidadReal.Nombre || USER.UnidadID;
+            }
+
+            document.getElementById('sidebarName').innerText = nombre;
+            document.getElementById('sidebarUnit').innerText = `Unidad ${labelUnidad}`;
+            document.getElementById('userInitial').innerText = nombre.charAt(0).toUpperCase();
+            document.getElementById('welcomeTitle').innerText = `Hola, ${nombre.split(' ')[0]}`;
+        }
+
+        async function loadData() {
+            try {
+                // Carga paralela de todas las tablas necesarias
+                const [cob, pag, gas, esp, blo, res, rec, cop, uni] = await Promise.all([
+                    fetchData('Cobros'),
+                    fetchData('Pagos'),
+                    fetchData('Gastos'),
+                    fetchData('Espacios'),
+                    fetchData('Bloques'),
+                    fetchData('Reservas'),
+                    fetchData('Reclamos'),
+                    fetchData('Copropiedades'),
+                    fetchData('Unidades')
+                ]);
+                
+                DB = { 
+                    Cobros: cob||[], Pagos: pag||[], Gastos: gas||[], 
+                    Espacios: esp||[], Bloques: blo||[], Reservas: res||[], 
+                    Reclamos: rec||[], Copropiedades: cop||[], Unidades: uni||[] 
+                };
+
+                // --- VINCULACIÓN DE UNIDAD Y COMUNIDAD ---
+                
+                // 1. Buscar la Unidad Real usando el ID guardado en sesión
+                // Usamos trim() y String() para evitar errores de tipo
+                const myUnidadID = String(USER.UnidadID).trim();
+                const unidadEncontrada = DB.Unidades.find(u => String(u.ID || u.id) === myUnidadID);
+
+                // 2. Actualizar la UI del perfil con datos reales
+                renderUserProfile(unidadEncontrada);
+
+                // 3. Buscar el nombre de la comunidad
+                // Si encontramos la unidad, usamos su CopropiedadID. Si no, el que traía el usuario.
+                const coproID = unidadEncontrada ? (unidadEncontrada.CopropiedadID) : (USER.CopropiedadID);
+                const edificio = DB.Copropiedades.find(c => String(c.ID || c.id) === String(coproID));
+                
+                if(edificio) document.getElementById('buildingName').innerText = edificio.Nombre;
+
+            } catch(e) { console.error(e); }
+        }
+
+        /* 1. FINANZAS */
+        function renderFinance() {
+            const myID = String(USER.UnidadID);
+            
+            // Deuda
+            const pendientes = DB.Cobros.filter(c => String(c.UnidadID) === myID && c.Estado === 'Pendiente');
+            const totalDeuda = pendientes.reduce((acc, c) => acc + (parseInt(c.TotalAPagar)||0), 0);
+            
+            document.getElementById('debtAmount').innerText = clp(totalDeuda);
+            const pill = document.getElementById('statusPill');
+            
+            if(totalDeuda > 0) {
+                pill.className = "status-pill pill-danger";
+                pill.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Pendiente';
+            } else {
+                pill.className = "status-pill pill-success";
+                pill.innerHTML = '<i class="fa-solid fa-check"></i> Al día';
+            }
+
+            // Historial (Merge Cobros & Pagos)
+            let history = [];
+            DB.Cobros.filter(c => String(c.UnidadID) === myID).forEach(c => {
+                history.push({ 
+                    date: c.FechaVencimiento || c.Mes, 
+                    desc: `Gasto Común ${c.Mes}`, 
+                    amount: -parseInt(c.TotalAPagar), 
+                    status: c.Estado 
+                });
+            });
+            DB.Pagos.filter(p => String(p.UnidadID) === myID).forEach(p => {
+                history.push({ 
+                    date: p.FechaPago || p.FechaReporte, 
+                    desc: "Pago Realizado", 
+                    amount: parseInt(p.Monto), 
+                    status: "Aprobado" 
+                });
+            });
+
+            history.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+            const tbody = document.getElementById('historyTable');
+            tbody.innerHTML = history.slice(0, 5).map(h => `
+                <tr>
+                    <td>${h.date}</td>
+                    <td>${h.desc}</td>
+                    <td><span style="font-size:11px; background:#f1f5f9; padding:2px 6px; border-radius:4px;">${h.status}</span></td>
+                    <td style="text-align:right; font-weight:600; color:${h.amount > 0 ? 'var(--success)' : 'var(--text)'}">
+                        ${h.amount > 0 ? '+' : ''}${clp(h.amount)}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        /* 2. GRAFICO */
+        function renderExpensesChart() {
+            const dataMap = {};
+            let total = 0;
+            DB.Gastos.forEach(g => {
+                const cat = g.TipoGasto || 'Otros';
+                const val = parseInt(g.Monto)||0;
+                dataMap[cat] = (dataMap[cat]||0) + val;
+                total += val;
+            });
+
+            document.getElementById('expenseLegend').innerHTML = `
+                <div style="font-size:20px; font-weight:800; color:var(--primary); margin-bottom:5px;">${clp(total)}</div>
+                <div>Gasto Total Edificio (Mes)</div>
+            `;
+
+            const ctx = document.getElementById('chartExpenses').getContext('2d');
+            
+            if (total === 0) return;
+
+            if(chartInstance) chartInstance.destroy();
+
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(dataMap),
+                    datasets: [{
+                        data: Object.values(dataMap),
+                        backgroundColor: ['#1a2b48', '#3b82f6', '#f59e0b', '#10b981', '#64748b'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        }
+
+        /* 3. ESPACIOS */
+        function initSpaces() {
+            const sel = document.getElementById('spaceSelector');
+            const espaciosActivos = DB.Espacios.filter(e => e.Estado === 'Activo');
+            
+            sel.innerHTML = '';
+            if(espaciosActivos.length === 0) {
+                sel.innerHTML = '<option>Sin espacios</option>';
+                return;
+            }
+
+            espaciosActivos.forEach(e => {
+                const opt = document.createElement('option');
+                opt.value = e.ID;
+                opt.text = e.Nombre;
+                sel.appendChild(opt);
+            });
+            renderSlots(); // Renderizar el primero
+        }
+
+        function renderSlots() {
+            const spaceID = document.getElementById('spaceSelector').value;
+            const espacio = DB.Espacios.find(e => String(e.ID) === spaceID);
+            const container = document.getElementById('slotsContainer');
+            
+            if(espacio) {
+                document.getElementById('spaceInfo').innerHTML = `<i class="fa-solid fa-users"></i> Capacidad: ${espacio.Capacidad} | <i class="fa-solid fa-tag"></i> Costo: ${clp(espacio.Costo)}`;
+            }
+
+            const hoy = new Date().toISOString().split('T')[0];
+            const bloques = DB.Bloques.filter(b => String(b.EspacioID) === spaceID && b.Activo);
+            const reservas = DB.Reservas.filter(r => String(r.EspacioID) === spaceID && r.Fecha === hoy);
+
+            if(bloques.length === 0) {
+                container.innerHTML = '<div style="grid-column:1/-1; text-align:center;">No hay bloques configurados.</div>';
+                return;
+            }
+
+            container.innerHTML = bloques.map(b => {
+                const ocupado = reservas.find(r => String(r.Bloque) === String(b.Nombre) || String(r.Bloque) === String(b.ID));
+                const cssClass = ocupado ? 'slot-busy' : 'time-slot';
+                const action = ocupado ? '' : `onclick="alert('Reservar ${b.Nombre}')"`;
+                
+                return `<div class="${cssClass}" ${action}>
+                    <b>${b.Nombre}</b><br>
+                    ${b.HoraInicio}
+                </div>`;
+            }).join('');
+        }
+
+        /* 4. RECLAMOS */
+        function renderTickets() {
+            const myID = String(USER.UnidadID);
+            const tickets = DB.Reclamos.filter(r => String(r.UnidadID) === myID);
+            const container = document.getElementById('ticketsContainer');
+
+            if(tickets.length === 0) {
+                container.innerHTML = '<div style="grid-column:1/-1; padding:20px; text-align:center; color:#94a3b8; border:1px dashed #e2e8f0; border-radius:8px;">No tienes reclamos activos.</div>';
+                return;
+            }
+
+            container.innerHTML = tickets.map(t => {
+                const bgBadge = t.Estado === 'Resuelto' ? '#dcfce7' : '#fef3c7';
+                const colorBadge = t.Estado === 'Resuelto' ? '#166534' : '#b45309';
+                
+                return `
+                <div style="border:1px solid #e2e8f0; padding:15px; border-radius:8px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <strong style="color:var(--primary); font-size:13px;">${t.Categoria}</strong>
+                        <span style="background:${bgBadge}; color:${colorBadge}; font-size:10px; padding:2px 8px; border-radius:10px; font-weight:700;">${t.Estado}</span>
+                    </div>
+                    <p style="font-size:13px; color:#334155; margin:0;">${t.Descripcion}</p>
+                    <div style="font-size:11px; color:#94a3b8; margin-top:8px; text-align:right;">${t.Fecha || ''}</div>
+                </div>`;
+            }).join('');
+        }
+
+        function logout() {
+            localStorage.removeItem('sesion_externa');
+            window.location.href = 'login_residente.html';
+        }
+
+        function clp(v) { return "$" + new Intl.NumberFormat("es-CL").format(v||0); }
+        function scrollToSection(id) { document.getElementById(id).scrollIntoView({ behavior: 'smooth' }); }
+
+    </script>
+</body>
