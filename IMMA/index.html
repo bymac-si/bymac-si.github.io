@@ -1550,8 +1550,8 @@
         // LÓGICA DE ORDENAMIENTO CRONOLÓGICO (INCLUYE 2026)
         // 1. FORZAR que Enero y Febrero 2026 aparezcan en el gráfico (aunque sea con valor 0)
         // Nota: Asegúrate que el formato de fecha en tu BBDD sea "MM/YYYY" (ej: 01/2026)
-        if (distDespachoMes["01/2026"] === undefined) distDespachoMes["01/2026"] = 0;
-        if (distDespachoMes["02/2026"] === undefined) distDespachoMes["02/2026"] = 0;
+       // if (distDespachoMes["01/2026"] === undefined) distDespachoMes["01/2026"] = 0;
+       // if (distDespachoMes["02/2026"] === undefined) distDespachoMes["02/2026"] = 0;
 
         // 2. LÓGICA DE ORDENAMIENTO CRONOLÓGICO
         const sortedKeys = Object.keys(distDespachoMes).sort((a, b) => {
