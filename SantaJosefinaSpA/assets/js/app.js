@@ -1,3 +1,4 @@
+
 // ==========================================
 // 0. PWA REGISTRATION
 // ==========================================
@@ -401,3 +402,129 @@ function iniciarEnrutamientoInteligente() {
 
 // Ejecutar al cargar la página
 document.addEventListener("DOMContentLoaded", iniciarEnrutamientoInteligente);
+
+/* ================= CARGA DE HEADER Y NAVEGACIÓN ================= */
+
+async function loadHeader() {
+    try {
+        const response = await fetch("header.html");
+        if (!response.ok) throw new Error("No se pudo cargar header.html");
+        
+        const text = await response.text();
+        const headerDiv = document.getElementById("header");
+        
+        if (headerDiv) {
+            headerDiv.innerHTML = text;
+
+            // 1. RE-EJECUTAR SCRIPTS INCRUSTADOS (Tu código original)
+            const scripts = headerDiv.querySelectorAll("script");
+            scripts.forEach(oldScript => {
+                const newScript = document.createElement("script");
+                Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
+
+            // 2. CONFIGURAR NAVEGACIÓN (Lógica Agente vs Residente)
+            setupNavigation();
+        }
+    } catch (e) { 
+        console.error("Error cargando header:", e); 
+    }
+}
+
+function setupNavigation() {
+    // Referencias al DOM (elementos que vienen en header.html)
+    const menuAgente = document.getElementById('menuAgente');
+    const menuResidente = document.getElementById('menuResidente');
+    const lblUser = document.getElementById('navUserName'); // Desktop
+    const btnLogout = document.getElementById('btnLogoutNav'); // Desktop
+
+    // Chequear Sesiones
+    const sesionAgente = localStorage.getItem('sesion_activa');
+    const sesionResidente = localStorage.getItem('sesion_externa');
+
+    // Resetear visualización
+    if(menuAgente) menuAgente.style.display = 'none';
+    if(menuResidente) menuResidente.style.display = 'none';
+
+    // CASO 1: ES AGENTE
+    if (sesionAgente) {
+        if(menuAgente) {
+            menuAgente.style.display = 'flex';
+            highlightActiveLink(menuAgente);
+        }
+        
+        try {
+            const user = JSON.parse(sesionAgente);
+            if(lblUser) lblUser.innerText = user.nombre || 'Agente';
+            
+            // Configurar Logout Agente
+            if(btnLogout) {
+                btnLogout.onclick = () => {
+                    if(confirm("¿Cerrar sesión de administración?")) {
+                        localStorage.removeItem('sesion_activa');
+                        window.location.href = 'login.html';
+                    }
+                };
+            }
+        } catch(e) {}
+    } 
+    // CASO 2: ES RESIDENTE
+    else if (sesionResidente) {
+        if(menuResidente) {
+            menuResidente.style.display = 'flex';
+            highlightActiveLink(menuResidente);
+        }
+
+        try {
+            const user = JSON.parse(sesionResidente);
+            // El objeto residente suele tener estructura { datos: { Nombre: ... } }
+            const nombre = user.datos ? user.datos.Nombre.split(' ')[0] : 'Vecino';
+            
+            if(lblUser) lblUser.innerText = nombre;
+            
+            // Configurar Logout Residente
+            if(btnLogout) {
+                btnLogout.onclick = () => {
+                    if(confirm("¿Salir del portal de residentes?")) {
+                        localStorage.removeItem('sesion_externa');
+                        window.location.href = 'login_residente.html';
+                    }
+                };
+            }
+        } catch(e) {}
+    }
+}
+
+// Función auxiliar para resaltar la página actual en el menú
+function highlightActiveLink(menuContainer) {
+    if(!menuContainer) return;
+    const currentPath = window.location.pathname.split('/').pop(); // Ej: 'reservas.html'
+    const links = menuContainer.getElementsByTagName('a');
+    
+    for(let link of links) {
+        const href = link.getAttribute('href');
+        if(href && (href === currentPath || (currentPath === '' && href === 'index.html'))) {
+            link.classList.add('active');
+            link.style.color = 'white';
+            link.style.fontWeight = '700';
+            link.style.borderBottom = '2px solid white'; // Opcional para dar más énfasis
+        }
+    }
+}
+
+// Función global para el menú hamburguesa (móvil)
+window.toggleMenu = function() {
+    const m1 = document.getElementById('menuAgente');
+    const m2 = document.getElementById('menuResidente');
+    
+    // Toggle solo al que esté visible (display: flex)
+    if(m1 && m1.style.display !== 'none') {
+        m1.classList.toggle('active');
+    } else if(m2 && m2.style.display !== 'none') {
+        m2.classList.toggle('active');
+    }
+};
+
+/* ================= FIN HEADER ================= */

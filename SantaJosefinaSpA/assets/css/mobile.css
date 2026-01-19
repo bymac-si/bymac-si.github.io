@@ -1,5 +1,6 @@
-:root {
-    --primary: #1a2b48;
+ :root {
+    --brand: #1a2b48;
+    --primary: var(--brand);
     --accent: #e74e35;
     --bg: #f3f4f6;
     --white: #ffffff;
