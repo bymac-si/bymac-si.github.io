@@ -3,18 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <title>CRM - Gestión de Espacios</title>
-    <link
+  <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <link rel="stylesheet" href="assets/css/styles.css" />
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1a2b48">
-<link rel="apple-touch-icon" href="assets/img/icon-192.png">
-
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#1a2b48" />
     <script src="assets/js/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script>
-      requireAuth();
+      (function () {
+        emailjs.init("7Il4AhmGHchP7qfxu");
+      })();
+      if (typeof requireAuth === "function") requireAuth();
     </script>
 
     <style>
@@ -460,7 +462,6 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
-  ;
           "
         >
           <h2 style="margin: 0">Configurar Horarios</h2>
@@ -500,9 +501,8 @@
               <input
                 id="bNombre"
                 class="input-modern"
-                style="height: 35px;"
+                style="height: 35px"
                 placeholder="Ej: Almuerzo"
-                
               />
             </div>
             <div>
@@ -511,7 +511,7 @@
                 id="bInicio"
                 type="time"
                 class="input-modern"
-                style="height: 35px;"
+                style="height: 35px"
               />
             </div>
             <div>
@@ -520,14 +520,21 @@
                 id="bFin"
                 type="time"
                 class="input-modern"
-                style="height: 35px;"
+                style="height: 35px"
               />
             </div>
             <button
               type="button"
               class="btn-main"
               onclick="agregarBloque()"
-              style="height: 35px; padding: 10px;position: relative; top:-12px; left:6px;">
+              style="
+                height: 35px;
+                padding: 10px;
+                position: relative;
+                top: -12px;
+                left: 6px;
+              "
+            >
               <i class="fa-solid fa-plus"></i>
             </button>
           </div>
