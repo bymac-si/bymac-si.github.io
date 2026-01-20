@@ -5,9 +5,21 @@
   <title>Propuesta Comercial — Administración de Condominios</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  
-  <link rel="stylesheet" href="assets/css/styles.css">
+  <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#1a2b48" />
+    <script src="assets/js/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script>
+      (function () {
+        emailjs.init("7Il4AhmGHchP7qfxu");
+      })();
+      if (typeof requireAuth === "function") requireAuth();
+    </script>
   
   <script>
     // Configuración de la fórmula
