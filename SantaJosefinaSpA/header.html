@@ -355,6 +355,21 @@
         <i class="fa-solid fa-power-off"></i>
       </a>
     </div>
+    <div class="nav-dropdown">
+  <a href="#" class="nav-link" onclick="toggleDropdown(event, this)">
+    <div style="display:flex; align-items:center; gap:6px;">
+      <i class="fa-solid fa-coins"></i> Finanzas
+    </div>
+    <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i>
+  </a>
+  <ul class="dropdown-menu">
+    <li><a href="mis_comisiones.html"><i class="fa-solid fa-money-bill-wave"></i> Mis Comisiones</a></li>
+    
+    <li class="admin-only"><a href="conciliacion.html"><i class="fa-solid fa-check-double"></i> Conciliación</a></li>
+    <li class="admin-only"><a href="gastos.html"><i class="fa-solid fa-file-invoice-dollar"></i> Gastos Operacionales</a></li>
+    <li class="admin-only"><a href="reportes.html"><i class="fa-solid fa-file-pdf"></i> Reportes Globales</a></li>
+  </ul>
+</div>
   </nav>
 </header>
 
@@ -438,4 +453,5 @@
       window.location.href = 'login.html';
     }
   };
+  
 </script>
