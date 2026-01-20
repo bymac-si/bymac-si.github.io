@@ -1,276 +1,266 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Header Responsive</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+<style>
+  /* =========================================
+     HEADER - ESTILO UNIFICADO
+     ========================================= */
+  
+  .main-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    padding: 0 25px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+    box-sizing: border-box; /* Asegura que el padding no rompa el ancho */
+  }
 
-    /* =========================================
-       HEADER - ESTILO UNIFICADO
-       ========================================= */
+  .logo-img { 
+    height: 50px; /* Ajustado para que no rompa el header de 70px */
+    width: auto; 
+    transition: transform 0.2s; 
+    display: block; 
+  }
+  .logo-img:hover { transform: scale(1.05); }
+
+  /* --- MENU DESKTOP --- */
+  .nav-container {
+    display: flex; 
+    gap: 5px; 
+    height: 100%; 
+    align-items: center; 
+    margin-left: auto;
+  }
+
+  .nav-link {
+    text-decoration: none; 
+    color: #64748b; 
+    font-weight: 600; 
+    font-size: 13px;
+    padding: 8px 12px; 
+    border-radius: 6px; 
+    transition: all 0.2s;
+    display: flex; 
+    align-items: center; 
+    gap: 6px; 
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .nav-link:hover { color: #0f172a; background-color: #f1f5f9; }
+  .nav-link i { font-size: 14px; }
+
+  /* Dropdowns */
+  .nav-dropdown { 
+    position: relative; 
+    height: 100%; 
+    display: flex; 
+    align-items: center; 
+  }
+  
+  .dropdown-menu {
+    display: none; 
+    position: absolute; 
+    top: 60px; 
+    left: 0;
+    background: white; 
+    min-width: 220px;
+    border: 1px solid #e2e8f0; 
+    border-radius: 8px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    padding: 5px 0; 
+    margin: 0;
+    list-style: none; 
+    z-index: 1001;
+    animation: fadeIn 0.15s ease;
+  }
+  
+  /* DESKTOP: hover funciona */
+  @media (min-width: 1101px) {
+    .nav-dropdown:hover .dropdown-menu { display: block; }
+  }
+  
+  /* MOBILE/TABLET: usar clase .active */
+  .dropdown-menu.active { display: block; }
+  
+  .dropdown-menu li a {
+    display: flex; 
+    align-items: center; 
+    gap: 10px;
+    padding: 10px 15px; 
+    color: #475569; 
+    text-decoration: none;
+    font-size: 13px; 
+    transition: background 0.2s;
+  }
+  .dropdown-menu li a:hover { 
+    background-color: #f8fafc; 
+    color: #0f172a; 
+    padding-left: 20px; 
+  }
+  .dropdown-menu li a i { 
+    width: 18px; 
+    text-align: center; 
+    color: #94a3b8; 
+  }
+  
+  /* Submenús */
+  .dropdown-submenu { position: relative; }
+  .dropdown-submenu .submenu {
+    display: none; 
+    position: absolute; 
+    top: -5px; 
+    left: 100%; 
+    margin-left: 5px;
+    background: white; 
+    border-radius: 8px; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border: 1px solid #e2e8f0; 
+    min-width: 180px; 
+    padding: 5px 0; 
+    list-style: none;
+  }
+  
+  @media (min-width: 1101px) {
+    .dropdown-submenu:hover > .submenu { display: block; }
+  }
+  .dropdown-submenu .submenu.active { display: block; }
+
+  /* User Area */
+  .user-actions {
+    display: flex; 
+    align-items: center; 
+    gap: 15px; 
+    margin-left: 20px;
+    padding-left: 20px; 
+    border-left: 1px solid #e2e8f0; 
+    height: 40px;
+  }
+  .user-info { text-align: right; line-height: 1.2; }
+  .user-name { 
+    font-weight: 700; 
+    font-size: 13px; 
+    color: #1e293b; 
+    display: block; 
+  }
+  .user-role { 
+    font-size: 11px; 
+    color: #94a3b8; 
+    text-transform: uppercase; 
+  }
+  .btn-logout {
+    color: #ef4444; 
+    border: 1px solid #fee2e2; 
+    background: #fef2f2;
+    width: 32px; 
+    height: 32px; 
+    border-radius: 6px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    transition: 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .btn-logout:hover { 
+    background: #fee2e2; 
+    transform: scale(1.05); 
+  }
+
+  /* Mobile Toggle */
+  .mobile-toggle { 
+    display: none; 
+    background: none; 
+    border: none; 
+    font-size: 24px; 
+    color: #1e293b; 
+    cursor: pointer;
+    padding: 5px;
+  }
+
+  @keyframes fadeIn { 
+    from { opacity: 0; transform: translateY(-5px); } 
+    to { opacity: 1; transform: translateY(0); } 
+  }
+
+  /* =========================================
+     RESPONSIVE (TABLET / MOBILE)
+     ========================================= */
+  @media (max-width: 1100px) {
+    .mobile-toggle { display: block; }
     
-    .main-header {
-      background-color: #ffffff;
-      border-bottom: 1px solid #e2e8f0;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-      padding: 0 25px;
-      height: 70px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      width: 100%;
-    }
-
-    .logo-img { 
-      height: 100px; 
-      width: auto; 
-      transition: transform 0.2s; 
-      display: block; 
-      margin-top: 10px;
-    }
-    .logo-img:hover { transform: scale(1.05); }
-
-    /* --- MENU DESKTOP --- */
     .nav-container {
-      display: flex; 
-      gap: 5px; 
-      height: 100%; 
-      align-items: center; 
-      margin-left: auto;
+      display: none; 
+      position: fixed; 
+      top: 70px; 
+      left: 0; 
+      width: 100%; 
+      height: calc(100vh - 70px);
+      background: white; 
+      flex-direction: column; 
+      align-items: flex-start;
+      padding: 0; 
+      overflow-y: auto; 
+      border-top: 1px solid #e2e8f0;
+      z-index: 999; /* Z-INDEX IMPORTANTE PARA QUE SE VEA */
     }
+    .nav-container.active { display: flex; }
 
-    .nav-link {
-      text-decoration: none; 
-      color: #64748b; 
-      font-weight: 600; 
-      font-size: 13px;
-      padding: 8px 12px; 
-      border-radius: 6px; 
-      transition: all 0.2s;
-      display: flex; 
-      align-items: center; 
-      gap: 6px; 
-      white-space: nowrap;
-      cursor: pointer;
-    }
-    .nav-link:hover { color: #0f172a; background-color: #f1f5f9; }
-    .nav-link i { font-size: 14px; }
-
-    /* Dropdowns */
-    .nav-dropdown { 
-      position: relative; 
-      height: 100%; 
-      display: flex; 
-      align-items: center; 
+    .nav-link, .nav-dropdown { width: 100%; }
+    .nav-link { 
+      padding: 15px 20px; 
+      border-bottom: 1px solid #f1f5f9; 
+      font-size: 15px; 
+      justify-content: space-between;
+      border-radius: 0;
     }
     
     .dropdown-menu {
-      display: none; 
-      position: absolute; 
-      top: 60px; 
-      left: 0;
-      background: white; 
-      min-width: 220px;
-      border: 1px solid #e2e8f0; 
-      border-radius: 8px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-      padding: 5px 0; 
-      margin: 0;
-      list-style: none; 
-      z-index: 1001;
-      animation: fadeIn 0.15s ease;
-    }
-    
-    /* DESKTOP: hover funciona */
-    @media (min-width: 1101px) {
-      .nav-dropdown:hover .dropdown-menu { display: block; }
-    }
-    
-    /* MOBILE/TABLET: usar clase .active */
-    .dropdown-menu.active { display: block; }
-    
-    .dropdown-menu li a {
-      display: flex; 
-      align-items: center; 
-      gap: 10px;
-      padding: 10px 15px; 
-      color: #475569; 
-      text-decoration: none;
-      font-size: 13px; 
-      transition: background 0.2s;
-    }
-    .dropdown-menu li a:hover { 
-      background-color: #f8fafc; 
-      color: #0f172a; 
-      padding-left: 20px; 
-    }
-    .dropdown-menu li a i { 
-      width: 18px; 
-      text-align: center; 
-      color: #94a3b8; 
-    }
-    
-    /* Submenús */
-    .dropdown-submenu { position: relative; }
-    .dropdown-submenu .submenu {
-      display: none; 
-      position: absolute; 
-      top: -5px; 
-      left: 100%; 
-      margin-left: 5px;
-      background: white; 
-      border-radius: 8px; 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      border: 1px solid #e2e8f0; 
-      min-width: 180px; 
-      padding: 5px 0; 
-      list-style: none;
-    }
-    
-    @media (min-width: 1101px) {
-      .dropdown-submenu:hover > .submenu { display: block; }
-    }
-    .dropdown-submenu .submenu.active { display: block; }
-
-    /* User Area */
-    .user-actions {
-      display: flex; 
-      align-items: center; 
-      gap: 15px; 
-      margin-left: 20px;
-      padding-left: 20px; 
-      border-left: 1px solid #e2e8f0; 
-      height: 40px;
-    }
-    .user-info { text-align: right; line-height: 1.2; }
-    .user-name { 
-      font-weight: 700; 
-      font-size: 13px; 
-      color: #1e293b; 
-      display: block; 
-    }
-    .user-role { 
-      font-size: 11px; 
-      color: #94a3b8; 
-      text-transform: uppercase; 
-    }
-    .btn-logout {
-      color: #ef4444; 
-      border: 1px solid #fee2e2; 
-      background: #fef2f2;
-      width: 32px; 
-      height: 32px; 
-      border-radius: 6px; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      transition: 0.2s;
-      cursor: pointer;
-      text-decoration: none;
-    }
-    .btn-logout:hover { 
-      background: #fee2e2; 
-      transform: scale(1.05); 
-    }
-
-    /* Mobile Toggle */
-    .mobile-toggle { 
-      display: none; 
-      background: none; 
+      position: static; 
+      box-shadow: none; 
       border: none; 
-      font-size: 22px; 
-      color: #1e293b; 
-      cursor: pointer;
-      padding: 5px;
+      border-radius: 0;
+      width: 100%; 
+      padding: 0; 
+      background: #f8fafc;
+      animation: none;
     }
 
-    @keyframes fadeIn { 
-      from { opacity: 0; transform: translateY(-5px); } 
-      to { opacity: 1; transform: translateY(0); } 
+    .dropdown-menu li a { 
+      padding-left: 40px; 
+      border-bottom: 1px solid #eee; 
     }
 
-    /* =========================================
-       RESPONSIVE (TABLET / MOBILE)
-       ========================================= */
-    @media (max-width: 1100px) {
-      .mobile-toggle { display: block; }
-      
-      .nav-container {
-        display: none; 
-        position: fixed; 
-        top: 70px; 
-        left: 0; 
-        width: 100%; 
-        height: calc(100vh - 70px);
-        background: white; 
-        flex-direction: column; 
-        align-items: flex-start;
-        padding: 0; 
-        overflow-y: auto; 
-        border-top: 1px solid #e2e8f0;
-      }
-      .nav-container.active { display: flex; }
-
-      .nav-link, .nav-dropdown { width: 100%; }
-      .nav-link { 
-        padding: 15px 20px; 
-        border-bottom: 1px solid #f1f5f9; 
-        font-size: 15px; 
-        justify-content: space-between;
-        border-radius: 0;
-      }
-      
-      .dropdown-menu {
-        position: static; 
-        box-shadow: none; 
-        border: none; 
-        border-radius: 0;
-        width: 100%; 
-        padding: 0; 
-        background: #f8fafc;
-        animation: none;
-      }
-
-      .dropdown-menu li a { 
-        padding-left: 40px; 
-        border-bottom: 1px solid #eee; 
-      }
-
-      .dropdown-submenu .submenu {
-        position: static;
-        margin-left: 0;
-        box-shadow: none;
-        border-radius: 0;
-        background: #f1f5f9;
-      }
-
-      .dropdown-submenu .submenu li a {
-        padding-left: 60px;
-      }
-      
-      .user-actions {
-        width: 100%; 
-        margin: 0; 
-        padding: 20px; 
-        border-top: 1px solid #e2e8f0; 
-        border-left: none;
-        justify-content: space-between; 
-        flex-direction: row-reverse; 
-        background: #fff; 
-        margin-top: auto;
-      }
-      .user-info { text-align: left; }
+    .dropdown-submenu .submenu {
+      position: static;
+      margin-left: 0;
+      box-shadow: none;
+      border-radius: 0;
+      background: #f1f5f9;
     }
-  </style>
-</head>
-<body>
+
+    .dropdown-submenu .submenu li a {
+      padding-left: 60px;
+    }
+    
+    .user-actions {
+      width: 100%; 
+      margin: 0; 
+      padding: 20px; 
+      border-top: 1px solid #e2e8f0; 
+      border-left: none;
+      justify-content: space-between; 
+      flex-direction: row-reverse; 
+      background: #fff; 
+      margin-top: auto;
+      box-sizing: border-box;
+    }
+    .user-info { text-align: left; }
+  }
+</style>
 
 <header class="main-header">
   <a href="index.html" style="text-decoration: none">
@@ -369,92 +359,83 @@
 </header>
 
 <script>
-  // Toggle menú móvil principal
-  function toggleMenu() {
+  // ATENCIÓN: Usamos window.funcion para que sean globales y accesibles por el HTML inyectado
+
+  // 1. Toggle menú principal
+  window.toggleMenu = function() {
     const nav = document.getElementById('navMenu');
-    nav.classList.toggle('active');
-  }
+    // Toggle simple de clase
+    if (nav.classList.contains('active')) {
+        nav.classList.remove('active');
+    } else {
+        nav.classList.add('active');
+    }
+  };
   
-  // Toggle dropdowns en móvil/tablet
-  function toggleDropdown(event, element) {
-    // Solo aplicar en móvil
+  // 2. Toggle dropdowns (Solo Móvil)
+  window.toggleDropdown = function(event, element) {
     if (window.innerWidth <= 1100) {
       event.preventDefault();
       
       const dropdown = element.nextElementSibling;
-      const parent = element.closest('.nav-dropdown');
       
-      // Cerrar otros dropdowns al mismo nivel
+      // Cerrar otros abiertos
       document.querySelectorAll('.nav-dropdown > .dropdown-menu').forEach(menu => {
-        if (menu !== dropdown) {
-          menu.classList.remove('active');
-        }
+        if (menu !== dropdown) menu.classList.remove('active');
       });
       
-      // Toggle el dropdown actual
       dropdown.classList.toggle('active');
     }
-  }
+  };
 
-  // Toggle submenús en móvil
-  function toggleSubmenu(event, element) {
+  // 3. Toggle submenús (Solo Móvil)
+  window.toggleSubmenu = function(event, element) {
     if (window.innerWidth <= 1100) {
       event.preventDefault();
       event.stopPropagation();
-      
       const submenu = element.nextElementSibling;
       submenu.classList.toggle('active');
     }
-  }
+  };
   
-  // Cerrar menú al hacer clic en un enlace (excepto dropdowns)
-  document.addEventListener('click', function(e) {
-    if (window.innerWidth <= 1100) {
-      // Si se hace clic en un enlace real (no dropdown toggle)
-      if (e.target.tagName === 'A' && 
-          !e.target.classList.contains('nav-link') && 
-          !e.target.closest('.dropdown-submenu')) {
-        const nav = document.getElementById('navMenu');
-        nav.classList.remove('active');
-      }
-    }
-  });
-
-  // Limpiar clases active al cambiar de móvil a desktop
+  // 4. Reset al cambiar tamaño de pantalla
   window.addEventListener('resize', function() {
     if (window.innerWidth > 1100) {
-      document.querySelectorAll('.dropdown-menu.active').forEach(menu => {
+      document.querySelectorAll('.dropdown-menu.active, .submenu.active').forEach(menu => {
         menu.classList.remove('active');
       });
-      document.getElementById('navMenu').classList.remove('active');
+      const nav = document.getElementById('navMenu');
+      if(nav) nav.classList.remove('active');
     }
   });
   
-  // Cargar nombre usuario si existe
-  document.addEventListener("DOMContentLoaded", () => {
+  // 5. Cargar datos del usuario
+  (function initUserHeader() {
     try {
+      // Intentamos leer de app.js si existe, si no, leemos localStorage directo
+      let u = null;
       if(typeof getAuthUser === 'function') {
-        const u = getAuthUser();
-        if(u && u.Nombre) {
-          document.getElementById('headerUserName').innerText = u.Nombre.split(' ')[0];
-          document.getElementById('headerUserRole').innerText = u.Rol || "Admin";
-        }
+          u = getAuthUser();
+      } else {
+          const s = localStorage.getItem('sesion_activa');
+          if(s) u = JSON.parse(s);
       }
-    } catch(e) {
-      console.log('Auth function not available');
-    }
-  });
 
-  // Función logout de ejemplo
-  function logout(event) {
+      if(u && u.Nombre) {
+        const elName = document.getElementById('headerUserName');
+        const elRole = document.getElementById('headerUserRole');
+        if(elName) elName.innerText = u.Nombre.split(' ')[0];
+        if(elRole) elRole.innerText = u.Rol || "Agente";
+      }
+    } catch(e) { console.log('Header user info error', e); }
+  })();
+
+  // 6. Logout
+  window.logout = function(event) {
     event.preventDefault();
     if (confirm('¿Deseas cerrar sesión?')) {
-      // Aquí tu lógica de logout
-      console.log('Cerrando sesión...');
-      // window.location.href = 'login.html';
+      localStorage.removeItem('sesion_activa');
+      window.location.href = 'login.html';
     }
-  }
+  };
 </script>
-
-</body>
-</html>
