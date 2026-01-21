@@ -2,36 +2,46 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <title>CRM - Buzón Web</title>
-   <link
+    <title>CRM - Buzón Web Unificado</title>
+    
+    <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <link rel="stylesheet" href="assets/css/styles.css" />
     <link rel="manifest" href="manifest.json" />
     <meta name="theme-color" content="#1a2b48" />
+    
     <script src="assets/js/app.js"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script>
       (function () {
-        emailjs.init("7Il4AhmGHchP7qfxu");
+        if (typeof emailjs !== "undefined") emailjs.init("7Il4AhmGHchP7qfxu");
       })();
+      // Protección de ruta (solo agentes/admin)
       if (typeof requireAuth === "function") requireAuth();
     </script>
+
     <style>
-      /* Estilos específicos para lectura de mensajes */
-      body { max-width: 1200px; margin: 0 auto; color: #1a2b48; background-color: #f8fafc; }
-      main { padding: 40px; }
+      /* ESTILOS DE LA BANDEJA DE ENTRADA */
+      body { 
+        max-width: 1200px; 
+        margin: 0 auto; 
+        color: #1a2b48; 
+        background-color: #f8fafc; 
+      }
+      main { padding: 30px; }
       
       .inbox-header {
         display: flex; 
         justify-content: space-between; 
         align-items: center; 
-        margin-bottom: 20px;
+        margin-bottom: 25px;
         background: white;
-        padding: 20px;
+        padding: 25px;
         border-radius: 12px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
         border: 1px solid #e2e8f0;
       }
 
@@ -43,7 +53,8 @@
         border: 1px solid #e2e8f0;
         box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         transition: transform 0.2s, box-shadow 0.2s;
-        border-left: 4px solid #3b82f6; /* Azul por defecto */
+        border-left: 5px solid #cbd5e1; /* Gris por defecto */
+        position: relative;
       }
       .message-card:hover {
         transform: translateY(-2px);
@@ -51,120 +62,195 @@
       }
       
       /* Estado Visual */
-      .card-nuevo { border-left-color: #10b981; background-color: #f0fdf4; } /* Verde para nuevos */
-      .card-procesado { border-left-color: #cbd5e1; opacity: 0.8; } /* Gris para ya vistos */
+      .card-nuevo { border-left-color: #10b981; background-color: #ffffff; } 
+      .card-procesado { border-left-color: #cbd5e1; opacity: 0.85; background: #f8fafc; }
 
       .msg-header {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 10px;
-        font-size: 13px;
+        margin-bottom: 12px;
+        font-size: 12px;
         color: #64748b;
+        text-transform: uppercase;
+        font-weight: 600;
+        border-bottom: 1px solid #f1f5f9;
+        padding-bottom: 8px;
       }
+      
       .msg-name {
-        font-size: 16px;
-        font-weight: 700;
+        font-size: 18px;
+        font-weight: 800;
         color: #1e293b;
+        margin-bottom: 5px;
       }
+      
       .msg-body {
         font-size: 14px;
         color: #334155;
-        line-height: 1.5;
+        line-height: 1.6;
         background: #f8fafc;
-        padding: 10px;
-        border-radius: 6px;
-        margin-top: 10px;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 15px;
+        border: 1px solid #e2e8f0;
       }
+
       .msg-footer {
         margin-top: 15px;
         display: flex;
-        gap: 15px;
+        gap: 10px;
         font-size: 13px;
         align-items: center;
+        flex-wrap: wrap;
       }
+      
       .contact-pill {
         display: flex;
         align-items: center;
         gap: 6px;
         background: #eff6ff;
         color: #1e40af;
-        padding: 4px 10px;
+        padding: 6px 12px;
         border-radius: 20px;
         font-weight: 600;
+        text-decoration: none;
+        transition: background 0.2s;
       }
+      .contact-pill:hover { background: #dbeafe; }
+
+      /* Badges de Origen */
+      .badge-origin { padding: 2px 8px; border-radius: 4px; font-size: 10px; margin-right: 5px; }
+      .bg-web { background: #e0f2fe; color: #0369a1; }
+      .bg-app { background: #f3e8ff; color: #7e22ce; }
+      .bg-check { background: #ffedd5; color: #c2410c; }
 
       /* SPINNER */
-      .spinner-backdrop { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.85); display: none; place-items: center; z-index: 12000; }
-      .spinner { width: 30px; height: 30px; border-radius: 50%; border: 3px solid #eee; border-top-color: #1a2b48; animation: spin 0.9s linear infinite; }
+      .spinner-backdrop { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.9); display: none; place-items: center; z-index: 12000; }
+      .spinner { width: 40px; height: 40px; border-radius: 50%; border: 4px solid #eee; border-top-color: #1a2b48; animation: spin 0.8s linear infinite; }
       @keyframes spin { to { transform: rotate(360deg); } }
     </style>
   </head>
   <body>
+    
     <div id="header"></div>
 
     <main>
       <div class="inbox-header">
         <div>
-            <h1 style="margin: 0; font-size: 24px;"><i class="fa-solid fa-inbox"></i> Buzón Web</h1>
-            <p style="margin: 5px 0 0; color: #64748b;">Leads capturados desde el formulario de contacto.</p>
+            <h1 style="margin: 0; font-size: 24px; color: #1a2b48;"><i class="fa-solid fa-inbox"></i> Buzón Web Unificado</h1>
+            <p style="margin: 5px 0 0; color: #64748b; font-size: 14px;">
+                Centralización de leads desde Sitio Web, App Móvil y Checklist de Seguridad.
+            </p>
         </div>
         <div>
-            <button class="btn-head btn-secundario" onclick="cargarBuzon()" title="Recargar">
+            <button class="btn-head" onclick="cargarBuzon()" title="Recargar" 
+                style="padding: 10px 20px; cursor: pointer; border-radius: 8px; border: 1px solid #cbd5e1; background: white; font-weight: 600; color: #1a2b48;">
                 <i class="fa-solid fa-rotate-right"></i> Actualizar
             </button>
         </div>
       </div>
 
       <div id="listaMensajes">
-          <div style="text-align: center; padding: 40px; color: #94a3b8;">
-              Cargando mensajes...
           </div>
-      </div>
     </main>
 
     <div id="pageSpinner" class="spinner-backdrop" aria-hidden="true">
-        <div style="background:white; padding:20px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1); text-align:center;">
-            <div class="spinner" style="margin:0 auto 10px;"></div>
-            <div>Cargando...</div>
+        <div style="text-align:center;">
+            <div class="spinner" style="margin:0 auto 15px;"></div>
+            <div style="font-weight:600; color:#1a2b48;">Sincronizando fuentes de datos...</div>
         </div>
     </div>
 
     <div id="footer"></div>
 
     <script>
+      /* --- INICIALIZACIÓN --- */
       document.addEventListener("DOMContentLoaded", async () => {
+        // Cargar Header y Footer
         try { 
-            document.getElementById("header").innerHTML = await (await fetch("header.html")).text(); 
+            const h = await fetch("header.html"); if(h.ok) document.getElementById("header").innerHTML = await h.text();
+            const f = await fetch("footer.html"); if(f.ok) document.getElementById("footer").innerHTML = await f.text();
+            
+            // Si el header tiene scripts (ej: menú móvil), ejecutarlos
             if (typeof initHeader === 'function') initHeader();
-        } catch (e) {}
-        try { 
-            document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text(); 
+            // Ejecutar scripts incrustados en header.html (parche común)
+            const scripts = document.getElementById("header").querySelectorAll("script");
+            scripts.forEach(s => eval(s.innerHTML));
         } catch (e) {}
         
+        // Cargar Datos
         await cargarBuzon();
       });
 
+      /* --- LÓGICA PRINCIPAL --- */
       async function cargarBuzon() {
         const spinner = document.getElementById("pageSpinner");
         spinner.style.display = "grid";
         
         try {
-            // 1. Cargar DATOS desde ProspectosCorretaje
-            const datos = await fetchData("ProspectosCorretaje").catch(() => []);
+            // 1. CARGA PARALELA DE TABLAS (Prospectos CRM + Contactos Web)
+            const [tablaCRM, tablaWeb] = await Promise.all([
+                fetchData("ProspectosCorretaje").catch(() => []),
+                fetchData("contactos").catch(() => [])
+            ]);
+
+            // 2. NORMALIZACIÓN DE DATOS (Crear estructura común)
             
-            // 2. FILTRAR: Solo Canal = 'Web Landing'
-            // Usamos .includes() para ser más flexibles si escribiste "Web Landing " con espacio
-            const leadsWeb = datos.filter(p => (p.Canal || "").includes("Web"));
+            // A. Datos del CRM (Filtramos solo lo que parece digital)
+            const leadsCRM = tablaCRM.map(p => ({
+                ID: p.ID,
+                Nombre: p.Nombre,
+                Email: p.Email,
+                Telefono: p.Telefono,
+                Mensaje: p.Observaciones || p.Mensaje,
+                Fecha: p["Fecha Registro"] || p.Fecha,
+                Estado: p.Estado || "Nuevo",
+                CanalOriginal: p.Canal || "CRM",
+                Notas: p.Notas, // Diagnósticos si los hubiera
+                Fuente: "CRM"
+            }));
 
-            // 3. ORDENAR: Más recientes primero
-            leadsWeb.sort((a, b) => new Date(b["Fecha Registro"]) - new Date(a["Fecha Registro"]));
+            // B. Datos de la Web/Checklist (Tabla contactos)
+            const leadsWeb = tablaWeb.map(c => ({
+                ID: c.ID,
+                Nombre: c.Nombre,
+                Email: c.Email,
+                Telefono: c.Telefono,
+                Mensaje: c.Mensaje,
+                Fecha: c.Fecha,
+                Estado: c.Estado || "Nuevo",
+                CanalOriginal: "Formulario Web", 
+                Notas: c.Notas, // Aquí viene el resultado del checklist
+                Fuente: "WEB"
+            }));
 
-            // 4. RENDERIZAR
-            renderMensajes(leadsWeb);
+            // 3. UNIFICACIÓN
+            const todos = [...leadsCRM, ...leadsWeb];
+
+            // 4. FILTRADO (Solo mostrar origen digital)
+            // Palabras clave para identificar leads digitales en Canal o Mensaje
+            const keywords = ["web", "checklist", "app", "portal", "digital", "landing"];
+            
+            const filtrados = todos.filter(item => {
+                const texto = (item.CanalOriginal + " " + item.Mensaje).toLowerCase();
+                // Si viene de la tabla WEB, entra directo. Si viene del CRM, verificamos palabras clave.
+                return item.Fuente === "WEB" || keywords.some(k => texto.includes(k));
+            });
+
+            // 5. ORDENAMIENTO (Más reciente arriba)
+            filtrados.sort((a, b) => {
+                const dateA = new Date(a.Fecha || 0);
+                const dateB = new Date(b.Fecha || 0);
+                return dateB - dateA;
+            });
+
+            // 6. RENDER
+            renderMensajes(filtrados);
 
         } catch (err) {
-            console.error(err);
-            alert("Error cargando el buzón.");
+            console.error("Error cargando buzón:", err);
+            document.getElementById("listaMensajes").innerHTML = 
+                `<div style="text-align:center; color:red; padding:20px;">Error al cargar datos. Verifique conexión.</div>`;
         } finally {
             spinner.style.display = "none";
         }
@@ -175,42 +261,76 @@
           
           if (lista.length === 0) {
               contenedor.innerHTML = `
-                <div style="text-align: center; padding: 60px; color: #cbd5e1;">
-                    <i class="fa-regular fa-envelope-open" style="font-size: 48px; margin-bottom: 15px;"></i>
-                    <p>No hay mensajes nuevos desde la web.</p>
+                <div style="text-align: center; padding: 80px; color: #cbd5e1;">
+                    <i class="fa-regular fa-envelope-open" style="font-size: 60px; margin-bottom: 20px;"></i>
+                    <p style="font-size:18px;">Buzón al día. No hay mensajes nuevos.</p>
                 </div>`;
               return;
           }
 
           contenedor.innerHTML = lista.map(lead => {
-              // Estilo según estado
+              // Lógica Visual
               const esNuevo = (lead.Estado === 'Nuevo');
               const claseCard = esNuevo ? 'card-nuevo' : 'card-procesado';
+              
+              // Etiqueta de Estado
               const labelEstado = esNuevo 
-                ? '<span style="color:#166534; font-weight:bold; font-size:11px;">★ NUEVO</span>' 
-                : `<span style="color:#64748b; font-size:11px;">${lead.Estado}</span>`;
+                ? '<span style="color:#166534; background:#dcfce7; padding:2px 8px; border-radius:4px;"><i class="fa-solid fa-star"></i> NUEVO</span>' 
+                : `<span style="color:#64748b; background:#f1f5f9; padding:2px 8px; border-radius:4px;"><i class="fa-solid fa-check"></i> ${lead.Estado}</span>`;
+
+              // Detectar Origen para Badge
+              let badge = "";
+              const contexto = (lead.Mensaje || "") + (lead.CanalOriginal || "");
+              
+              if (contexto.toLowerCase().includes("checklist")) {
+                  badge = `<span class="badge-origin bg-check"><i class="fa-solid fa-shield-halved"></i> Checklist Seguridad</span>`;
+              } else if (contexto.toLowerCase().includes("app")) {
+                  badge = `<span class="badge-origin bg-app"><i class="fa-solid fa-mobile-screen"></i> App Móvil</span>`;
+              } else {
+                  badge = `<span class="badge-origin bg-web"><i class="fa-solid fa-globe"></i> Web / Landing</span>`;
+              }
+
+              // Formato Diagnóstico (Si existe en Notas)
+              let bloqueDiagnostico = "";
+              if (lead.Notas && lead.Notas.length > 5) {
+                  bloqueDiagnostico = `
+                    <div style="background:#fff7ed; border-left:4px solid #f97316; padding:10px; margin-bottom:10px; font-size:13px; color:#9a3412;">
+                        <i class="fa-solid fa-triangle-exclamation"></i> <strong>Diagnóstico Automático:</strong><br>
+                        ${lead.Notas}
+                    </div>
+                  `;
+              }
 
               return `
               <div class="message-card ${claseCard}">
                   <div class="msg-header">
-                      <div>${labelEstado} • ID: ${lead.ID}</div>
-                      <div>${formatearFecha(lead["Fecha Registro"])}</div>
+                      <div style="display:flex; align-items:center; gap:10px;">
+                          ${badge}
+                          <span style="color:#cbd5e1;">|</span>
+                          ID: ${lead.ID}
+                      </div>
+                      <div style="display:flex; align-items:center; gap:10px;">
+                          ${formatearFecha(lead.Fecha)}
+                          ${labelEstado}
+                      </div>
                   </div>
                   
-                  <div class="msg-name">${lead.Nombre || "Sin Nombre"}</div>
+                  <div class="msg-name">${lead.Nombre || "Usuario Web"}</div>
                   
                   <div class="msg-footer">
                       ${lead.Email ? `<a href="mailto:${lead.Email}" class="contact-pill"><i class="fa-regular fa-envelope"></i> ${lead.Email}</a>` : ''}
-                      ${lead.Telefono ? `<a href="tel:${lead.Telefono}" class="contact-pill"><i class="fa-solid fa-phone"></i> ${lead.Telefono}</a>` : ''}
+                      ${lead.Telefono ? `<a href="https://wa.me/${lead.Telefono.replace('+','')}" target="_blank" class="contact-pill"><i class="fa-brands fa-whatsapp"></i> ${lead.Telefono}</a>` : ''}
                   </div>
 
                   <div class="msg-body">
-                      ${lead.Observaciones || "<span style='font-style:italic; color:#94a3b8;'>Sin mensaje adjunto.</span>"}
+                      ${bloqueDiagnostico}
+                      <div style="font-weight:600; font-size:12px; color:#64748b; margin-bottom:5px;">MENSAJE DEL USUARIO:</div>
+                      ${lead.Mensaje || "<span style='font-style:italic; color:#94a3b8;'>Sin mensaje adjunto.</span>"}
                   </div>
 
-                  <div style="margin-top: 15px; text-align: right;">
-                      <button onclick="irAGestion('${lead.ID}')" 
-                        style="background: white; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; cursor: pointer; color: #1a2b48; font-weight: 600; font-size: 13px;">
+                  <div style="margin-top: 15px; text-align: right; border-top:1px solid #f1f5f9; padding-top:15px;">
+                      <button onclick="gestionarLead('${lead.ID}', '${lead.Fuente}')" 
+                        style="background: #c2410c; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: 600; font-size: 13px; box-shadow: 0 2px 5px rgba(26,43,72,0.2);">
                           <i class="fa-solid fa-arrow-up-right-from-square"></i> Gestionar en CRM
                       </button>
                   </div>
@@ -222,13 +342,86 @@
       /* Helpers */
       function formatearFecha(fecha) {
           if(!fecha) return "";
-          const d = new Date(fecha);
-          return d.toLocaleDateString("es-CL", { day: 'numeric', month: 'long', year: 'numeric' });
+          // Intentar parsear fecha YYYY-MM-DD
+          const [y, m, d] = fecha.split('T')[0].split('-');
+          if(y && m && d) return `${d}/${m}/${y}`;
+          return fecha; 
       }
 
-      // Redirigir a prospectos.html pasando el ID por URL
-      function irAGestion(id) {
-          window.location.href = `prospectos.html?id=${id}`;
+      // Redirigir según origen
+      async function gestionarLead(id, fuente) {
+          // CASO 1: Si ya es del CRM, solo abrimos la ficha
+          if (fuente === "CRM") {
+              window.location.href = `prospectos.html?id=${id}`;
+              return;
+          }
+
+          // CASO 2: Si viene de la WEB, PROMOVER
+          if (fuente === "WEB") {
+              if(!confirm("¿Ingresar este contacto al CRM como Prospecto activo?")) return;
+
+              // Referencia al botón para efecto visual
+              const btn = event.currentTarget || event.target; 
+              const textoOriginal = btn.innerHTML;
+              btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+              btn.disabled = true;
+
+              try {
+                  // 1. Buscar el dato original
+                  // Forzamos String() y trim() para evitar errores de espacios
+                  const listaContactos = await fetchData("contactos");
+                  const contacto = listaContactos.find(c => String(c.ID).trim() === String(id).trim());
+
+                  if (!contacto) throw new Error("No se encontró el contacto original en la tabla.");
+
+                  // 2. Generar NUEVO ID para el CRM (Más seguro que reutilizar)
+                  const nuevoIDCRM = "PROS_" + Date.now();
+
+                  // 3. Crear objeto para 'ProspectosCorretaje'
+                  const nuevoProspecto = {
+                      ID: nuevoIDCRM, 
+                      Nombre: contacto.Nombre,
+                      Email: contacto.Email,
+                      Telefono: contacto.Telefono,
+                      // Unimos mensaje y diagnóstico en observaciones
+                      Observaciones: (contacto.Mensaje || "") + (contacto.Notas ? "\n\nDiagnóstico: " + contacto.Notas : ""),
+                      "Fecha Registro": new Date().toISOString().split('T')[0], // Fecha de HOY, día de ingreso al CRM
+                      Estado: "Nuevo",
+                      Canal: "Web/Checklist",
+                      "Tipo Operacion": "Captación", 
+                      Agente: "Por Asignar"
+                  };
+
+                  console.log("Enviando a CRM:", nuevoProspecto);
+
+                  // 4. PASO CRÍTICO: Guardar en CRM
+                  await appSheetCRUD("ProspectosCorretaje", "Add", [nuevoProspecto]);
+
+                  // 5. PASO OPCIONAL: Actualizar estado en 'contactos'
+                  // Lo ponemos en un try/catch interno para que si falla esto, 
+                  // NO impida que el usuario vaya a la ficha del CRM (que es lo importante)
+                  try {
+                      const updateContacto = {
+                          ID: contacto.ID, // Usamos el ID original para editar
+                          Estado: "Procesado"
+                      };
+                      await appSheetCRUD("contactos", "Edit", [updateContacto]);
+                  } catch (errUpdate) {
+                      console.warn("No se pudo actualizar el estado en tabla contactos (Probablemente ID no es Key), pero el CRM se guardó.", errUpdate);
+                  }
+
+                  // 6. Éxito y Redirección
+                  alert("✅ ¡Prospecto creado correctamente!");
+                  // Redirigimos al NUEVO ID del CRM
+                  window.location.href = `prospectos.html?id=${nuevoIDCRM}`;
+
+              } catch (e) {
+                  console.error(e);
+                  alert("Error crítico al guardar: " + (e.message || e));
+                  btn.innerHTML = textoOriginal;
+                  btn.disabled = false;
+              }
+          }
       }
     </script>
   </body>

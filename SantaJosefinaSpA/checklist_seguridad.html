@@ -295,105 +295,150 @@
     </div>
 
     <script>
-        document.getElementById('securityForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            // 1. Validar preguntas
-            const totalQuestions = 13;
-            let answeredCount = 0;
-            let countNo = 0;
+    document.getElementById('securityForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // 1. VALIDACIÓN Y CAPTURA DE RESPUESTAS DETALLADAS
+        const totalQuestions = 13;
+        let answeredCount = 0;
+        let countNo = 0;
+        let resumenRespuestas = []; // Aquí guardaremos el detalle P1:SI, P2:NO...
+        let puntosCriticos = [];    // Aquí guardaremos solo los "NO" para resaltar
 
-            for (let i = 1; i <= totalQuestions; i++) {
-                const radios = document.getElementsByName('q' + i);
-                let answered = false;
-                for (let r of radios) {
-                    if (r.checked) {
-                        answered = true;
-                        if (r.value === 'NO') countNo++;
-                        break;
-                    }
+        // Mapeo rápido de temas por pregunta (opcional, para dar contexto)
+        const temas = {
+            1: "Manuales", 2: "Capacitación", 3: "Antecedentes", 4: "Turnos", 5: "Comunicación",
+            6: "Visitas", 7: "Tags/Llaves", 8: "Mudanzas", 9: "Áreas Sensibles",
+            10: "Mantención Portones", 11: "Cámaras", 12: "Certificación", 13: "Iluminación"
+        };
+
+        for (let i = 1; i <= totalQuestions; i++) {
+            const radios = document.getElementsByName('q' + i);
+            let val = null;
+            for (let r of radios) {
+                if (r.checked) {
+                    val = r.value;
+                    break;
                 }
-                if (answered) answeredCount++;
             }
 
-            if (answeredCount < totalQuestions) {
-                alert(`Por favor responda todas las preguntas (${answeredCount}/${totalQuestions}) para obtener un diagnóstico preciso.`);
-                return;
-            }
-
-            // 2. Spinner ON
-            document.getElementById('spinner').style.display = 'flex';
-            const btn = document.querySelector('.btn-cta');
-            btn.disabled = true;
-            btn.innerText = "Calculando...";
-
-            // 3. Preparar Datos para la Tabla 'contactos'
-            const comunidad = document.getElementById('leadComunidad').value;
-            const cargo = document.getElementById('leadCargo').value;
-
-            // Objeto exacto para tu tabla contactos (ID, Nombre, Email, Telefono, Mensaje, Fecha, Estado, Notas)
-            const contactData = {
-                ID: "LEAD_" + Date.now(),
-                Nombre: document.getElementById('leadNombre').value,
-                Email: document.getElementById('leadEmail').value,
-                Telefono: document.getElementById('leadTelefono').value,
-                Mensaje: `Lead Checklist Seguridad. Comunidad: ${comunidad} (Cargo: ${cargo})`,
-                Fecha: new Date().toISOString().split('T')[0],
-                Estado: "Nuevo",
-                Notas: `Diagnóstico: ${countNo} de 13 puntos vulnerables ("NO").`
-            };
-
-            try {
-                // Guardar en AppSheet - Tabla 'contactos'
-                if (typeof appSheetCRUD === 'function') {
-                    await appSheetCRUD("contactos", "Add", [contactData]);
-                } else {
-                    console.log("Modo Demo: Guardando localmente", contactData);
-                    await new Promise(r => setTimeout(r, 1000));
+            if (val) {
+                answeredCount++;
+                resumenRespuestas.push(`P${i}(${val})`); // Ej: P1(SI)
+                if (val === 'NO') {
+                    countNo++;
+                    puntosCriticos.push(`P${i} ${temas[i]}`);
                 }
-
-            } catch (err) {
-                console.error("Error guardando contacto", err);
-                // No bloqueamos al usuario si falla el guardado, igual le mostramos el resultado
-            } finally {
-                document.getElementById('spinner').style.display = 'none';
-                mostrarResultado(countNo);
             }
-        });
-
-        function mostrarResultado(countNo) {
-            document.getElementById('securityForm').style.display = 'none';
-            const resultArea = document.getElementById('resultArea');
-            const scoreBox = document.getElementById('scoreBox');
-            
-            document.getElementById('lblPuntosNo').innerText = countNo;
-            
-            let nivel = "";
-            let clase = "";
-            let texto = "";
-
-            if (countNo <= 3) {
-                nivel = "RIESGO BAJO";
-                clase = "risk-low";
-                texto = "Su comunidad tiene una buena base de gestión. Mantengan la vigilancia y sigan mejorando los procesos preventivos.";
-            } else if (countNo <= 7) {
-                nivel = "RIESGO MEDIO";
-                clase = "risk-med";
-                texto = "Existen vulnerabilidades claras que pueden ser explotadas. Es necesario revisar los protocolos administrativos a la brevedad.";
-            } else {
-                nivel = "RIESGO ALTO (CRÍTICO)";
-                clase = "risk-high";
-                texto = "Su edificio es altamente vulnerable. La gestión actual no garantiza estándares mínimos. Se requiere una intervención urgente.";
-            }
-
-            document.getElementById('lblNivelRiesgo').innerText = nivel;
-            document.getElementById('lblDiagnostico').innerText = texto;
-            scoreBox.className = "result-box " + clase;
-
-            resultArea.style.display = 'block';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-    </script>
+
+        if (answeredCount < totalQuestions) {
+            alert(`Por favor responda todas las preguntas (${answeredCount}/${totalQuestions}) para obtener un diagnóstico preciso.`);
+            return;
+        }
+
+        // Determinar Nivel de Riesgo Texto
+        let nivelRiesgoTexto = "BAJO";
+        if (countNo > 3) nivelRiesgoTexto = "MEDIO";
+        if (countNo > 7) nivelRiesgoTexto = "ALTO";
+
+        // 2. SPINNER
+        document.getElementById('spinner').style.display = 'flex';
+        const btn = document.querySelector('.btn-cta');
+        btn.disabled = true;
+        btn.innerText = "Procesando...";
+
+        // 3. GENERAR IDs Y FECHAS
+        const nuevoLeadID = "LEAD_" + Date.now();
+        const fechaHoy = new Date().toISOString().split('T')[0];
+        
+        // Datos del Formulario
+        const nombre = document.getElementById('leadNombre').value;
+        const comunidad = document.getElementById('leadComunidad').value;
+        const email = document.getElementById('leadEmail').value;
+        const telefono = document.getElementById('leadTelefono').value;
+        const cargo = document.getElementById('leadCargo').value;
+
+        // Construir la Nota detallada para el Agente
+        // Formato: "Riesgo ALTO (8 fallas). Puntos Críticos: P1 Manuales, P4 Turnos..."
+        const notaDetallada = `Diagnóstico: RIESGO ${nivelRiesgoTexto}. Vulnerabilidades (${countNo}): ${puntosCriticos.join(', ')}. Detalle total: ${resumenRespuestas.join(', ')}`;
+
+        // A. OBJETO PARA TABLA 'CONTACTOS'
+        const contactData = {
+            ID: nuevoLeadID,
+            Nombre: nombre,
+            Email: email,
+            Telefono: telefono,
+            Mensaje: `Lead Checklist Seguridad. Comunidad: ${comunidad} (Cargo: ${cargo})`,
+            Fecha: fechaHoy,
+            Estado: "Nuevo",
+            Notas: notaDetallada // Aquí va todo el detalle
+        };
+
+        // B. OBJETO PARA TABLA 'BITACORA'
+        const bitacoraData = {
+            ID: "BIT_" + Date.now(),
+            ProspectoID: nuevoLeadID, // Enlace con el contacto creado
+            Fecha: fechaHoy,
+            Tipo: "Diagnostico Web",
+            Nota: `Realizó Test de Seguridad. Resultado: ${countNo} respuestas negativas. Nivel de Riesgo: ${nivelRiesgoTexto}.`,
+            Usuario: "Web Landing" // Identificador de que vino automático
+        };
+
+        try {
+            // ENVIAR A APPSHEET (EN PARALELO PARA RAPIDEZ)
+            if (typeof appSheetCRUD === 'function') {
+                await Promise.all([
+                    appSheetCRUD("contactos", "Add", [contactData]),
+                    appSheetCRUD("Bitacora", "Add", [bitacoraData])
+                ]);
+            } else {
+                console.log("Modo Demo: Guardando Contacto", contactData);
+                console.log("Modo Demo: Guardando Bitácora", bitacoraData);
+                await new Promise(r => setTimeout(r, 1500));
+            }
+
+        } catch (err) {
+            console.error("Error guardando datos", err);
+        } finally {
+            document.getElementById('spinner').style.display = 'none';
+            mostrarResultado(countNo);
+        }
+    });
+
+    function mostrarResultado(countNo) {
+        document.getElementById('securityForm').style.display = 'none';
+        const resultArea = document.getElementById('resultArea');
+        const scoreBox = document.getElementById('scoreBox');
+        
+        document.getElementById('lblPuntosNo').innerText = countNo;
+        
+        let nivel = "";
+        let clase = "";
+        let texto = "";
+
+        if (countNo <= 3) {
+            nivel = "RIESGO BAJO";
+            clase = "risk-low";
+            texto = "Su comunidad tiene una buena base de gestión. Mantengan la vigilancia y sigan mejorando los procesos preventivos.";
+        } else if (countNo <= 7) {
+            nivel = "RIESGO MEDIO";
+            clase = "risk-med";
+            texto = "Existen vulnerabilidades claras que pueden ser explotadas. Es necesario revisar los protocolos administrativos a la brevedad.";
+        } else {
+            nivel = "RIESGO ALTO (CRÍTICO)";
+            clase = "risk-high";
+            texto = "Su edificio es altamente vulnerable. La gestión actual no garantiza estándares mínimos. Se requiere una intervención urgente.";
+        }
+
+        document.getElementById('lblNivelRiesgo').innerText = nivel;
+        document.getElementById('lblDiagnostico').innerText = texto;
+        scoreBox.className = "result-box " + clase;
+
+        resultArea.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
 
 </body>
 </html>
