@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -20,9 +20,9 @@
     />
 
     <link rel="stylesheet" href="assets/css/styles.css" />
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1a2b48">
-<link rel="apple-touch-icon" href="assets/img/icon-192.png">
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#1a2b48" />
+    <link rel="apple-touch-icon" href="assets/img/icon-192.png" />
 
     <script src="assets/js/app.js"></script>
 
@@ -49,8 +49,14 @@
         padding: 0;
       }
       body {
-        font-family: system-ui, -apple-system, "Segoe UI", Roboto,
-          "Helvetica Neue", Arial, sans-serif;
+        font-family:
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          "Helvetica Neue",
+          Arial,
+          sans-serif;
         color: var(--brand);
         background: #f7f7f7;
         max-width: 1200px;
@@ -83,7 +89,9 @@
         top: 0;
         z-index: 30;
         background: rgba(255, 255, 255, 0.95);
-        transition: background 0.25s, box-shadow 0.25s;
+        transition:
+          background 0.25s,
+          box-shadow 0.25s;
         height: 100px;
         border-bottom: 1px solid rgba(0, 0, 0, 0.05);
       }
@@ -413,6 +421,7 @@
           class="btn-group-custom d-none d-md-flex gap-2"
           style="position: relative; top: -30px"
         >
+        
           <a href="login_residente.html" class="btn btn-primary btn-sm px-3">
             <i class="fa-solid fa-house-user"></i> Residentes
           </a>
@@ -495,6 +504,19 @@
           <a href="#propiedades" class="btn btn-primary btn-lg"
             >Ver Propiedades</a
           >
+          <a
+            href="checklist_seguridad.html"
+            class="btn btn-lg"
+            style="
+              background: #e74e35;
+              color: white;
+              font-weight: 700;
+              border: 2px solid #e74e35;
+              box-shadow: 0 4px 15px rgba(231, 78, 53, 0.4);
+            "
+          >
+            <i class="fa-solid fa-shield-halved"></i> Diagnóstico de Seguridad
+          </a>
         </div>
       </div>
     </section>
@@ -504,18 +526,34 @@
         <div class="circles" aria-hidden="true">
           <figure
             class="circle"
-            style="position: relative; top: -580px; left: 610px; width: 550px; height: 550px"
+            style="
+              position: relative;
+              top: -580px;
+              left: 610px;
+              width: 550px;
+              height: 550px;
+            "
           >
             <img src="assets/img/circ-3.jpg" alt="Transparencia" />
           </figure>
           <figure
             class="circle"
-            style="position: relative; top: -600px; left: 10px; width: 550px; height: 550px; margin-bottom: -500px; "
+            style="
+              position: relative;
+              top: -600px;
+              left: 10px;
+              width: 550px;
+              height: 550px;
+              margin-bottom: -500px;
+            "
           >
             <img src="assets/img/circ-1.jpg" alt="Gestión" />
           </figure>
         </div>
-        <div class="features-copy" style="position: relative; top:-200px; margin-top: 300px">
+        <div
+          class="features-copy"
+          style="position: relative; top: -200px; margin-top: 300px"
+        >
           <span class="kicker">lo que nos define</span>
           <h2 class="h2" style="margin-bottom: 30px; color: var(--brand)">
             Gastos comunes claros.<br />Administración Ley 21.442.<br />Trato
@@ -880,7 +918,7 @@
               </div>
             </div>
           </div>
-        `
+        `,
           )
           .join("");
       }

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico de Seguridad | Santa Josefina SpA</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Ovo&display=swap" rel="stylesheet">
+    
+    <script src="assets/js/app.js"></script>
+
+    <style>
+        :root { --primary: #1a2b48; --accent: #e74e35; --bg: #f8fafc; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; color: #334155; }
+        
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, #0f172a 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .hero h1 { font-family: 'Ovo', serif; font-size: 28px; margin-bottom: 10px; }
+        .hero p { opacity: 0.9; max-width: 600px; margin: 0 auto; line-height: 1.6; }
+        
+        .container { max-width: 800px; margin: -30px auto 40px; padding: 0 20px; position: relative; z-index: 10; }
+        
+        .card { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); margin-bottom: 25px; }
+        
+        h2.section-title { 
+            color: var(--primary); font-size: 18px; border-bottom: 2px solid #e2e8f0; 
+            padding-bottom: 10px; margin-top: 0; display: flex; align-items: center; gap: 10px;
+        }
+        
+        .question-item { margin-bottom: 25px; }
+        .q-text { font-weight: 600; font-size: 15px; margin-bottom: 10px; display: block; }
+        
+        /* Toggle Buttons Yes/No */
+        .toggle-group { display: flex; gap: 10px; }
+        .toggle-radio { display: none; }
+        .toggle-label {
+            flex: 1; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px;
+            text-align: center; cursor: pointer; font-weight: 700; font-size: 14px;
+            transition: all 0.2s; color: #64748b;
+        }
+        
+        /* Logic for selection */
+        input[value="SI"]:checked + label { background: #dcfce7; color: #166534; border-color: #166534; }
+        input[value="NO"]:checked + label { background: #fee2e2; color: #991b1b; border-color: #991b1b; }
+        
+        /* Lead Form */
+        .lead-form { background: #eff6ff; border: 1px solid #bfdbfe; padding: 25px; border-radius: 12px; margin-top: 30px; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 12px; font-weight: 700; color: var(--primary); margin-bottom: 5px; text-transform: uppercase; }
+        .input-std { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; }
+        
+        .btn-cta {
+            background: var(--accent); color: white; width: 100%; padding: 16px; border: none;
+            border-radius: 50px; font-size: 18px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(231, 78, 53, 0.4); transition: transform 0.2s;
+        }
+        .btn-cta:hover { transform: translateY(-2px); }
+
+        /* Results Area (Hidden by default) */
+        #resultArea { display: none; animation: slideUp 0.5s ease; }
+        .result-box { text-align: center; padding: 40px 20px; border-radius: 16px; color: white; margin-bottom: 20px; }
+        .risk-low { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .risk-med { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+        .risk-high { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); }
+        
+        .score-number { font-size: 48px; font-weight: 800; line-height: 1; }
+        .score-label { font-size: 20px; font-weight: 600; opacity: 0.9; margin-bottom: 15px; display: block; }
+        
+        .contact-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 15px; }
+        .contact-avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; }
+
+        @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+        
+        /* Spinner */
+        #spinner { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 999; display: none; justify-content: center; align-items: center; }
+    </style>
+</head>
+<body style="margin: auto;">
+
+    <div id="spinner"><i class="fa-solid fa-circle-notch fa-spin" style="font-size: 40px; color: var(--primary);"></i></div>
+
+    <div class="hero">
+        <a href="index.html" style="color:white; text-decoration:none; display:inline-block; margin-bottom:15px;">
+            <i class="fa-solid fa-arrow-left"></i> Volver al inicio
+        </a>
+        <img src="assets/img/logo_santajosefina.png" alt="Santa Josefina" style="height:60px; display:block; margin:0 auto 15px; filter: brightness(0) invert(1);">
+        <h1>Checklist de Vulnerabilidad</h1>
+        <p>¿Sabía que el 60% de las brechas de seguridad ocurren por fallas en la gestión? Evalúe su comunidad en 2 minutos.</p>
+    </div>
+
+    <div class="container">
+        
+        <form id="securityForm">
+            <div class="card">
+                <h2 class="section-title"><i class="fa-solid fa-user-shield"></i> 1. Personal y Conserjería</h2>
+                
+                <div class="question-item">
+                    <span class="q-text">¿Existe un manual de procedimientos escrito y firmado por los conserjes?</span>
+                    <div class="toggle-group">
+                        <input type="radio" name="q1" value="SI" id="q1y" class="toggle-radio"><label for="q1y" class="toggle-label">SÍ</label>
+                        <input type="radio" name="q1" value="NO" id="q1n" class="toggle-radio"><label for="q1n" class="toggle-label">NO</label>
+                    </div>
+                </div>
+
+                <div class="question-item">
+                    <span class="q-text">¿Se realizan capacitaciones semestrales sobre protocolos de emergencia?</span>
+                    <div class="toggle-group">
+                        <input type="radio" name="q2" value="SI" id="q2y" class="toggle-radio"><label for="q2y" class="toggle-label">SÍ</label>
+                        <input type="radio" name="q2" value="NO" id="q2n" class="toggle-radio"><label for="q2n" class="toggle-label">NO</label>
+                    </div>
+                </div>
+
+                <div class="question-item">
+                    <span class="q-text">¿Se realizan chequeos de antecedentes rigurosos antes de contratar?</span>
+                    <div class="toggle-group">
+                        <input type="radio" name="q3" value="SI" id="q3y" class="toggle-radio"><label for="q3y" class="toggle-label">SÍ</label>
+                        <input type="radio" name="q3" value="NO" id="q3n" class="toggle-radio"><label for="q3n" class="toggle-label">NO</label>
+                    </div>
+                </div>
+
+                <div class="question-item">
+                    <span class="q-text">¿Existen turnos supervisados para evitar fatiga o abandono?</span>
+                    <div class="toggle-group">
+                        <input type="radio" name="q4" value="SI" id="q4y" class="toggle-radio"><label for="q4y" class="toggle-label">SÍ</label>
+                        <input type="radio" name="q4" value="NO" id="q4n" class="toggle-radio"><label for="q4n" class="toggle-label">NO</label>
+                    </div>
+                </div>
+
+                <div class="question-item">
+                    <span class="q-text">¿El personal tiene canal directo con la administración y Carabineros?</span>
+                    <div class="toggle-group">
+                        <input type="radio" name="q5" value="SI" id="q5y" class="toggle-radio"><label for="q5y" class="toggle-label">SÍ</label>
+                        <input type="radio" name="q5" value="NO" id="q5n" class="toggle-radio"><label for="q5n" class="toggle-label">NO</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="section-title"><i class="fa-solid fa-id-card"></i> 2. Control de Acceso</h2>
+                
+                <div class="question-item">
+                    <span class="q-text">¿Existe un protocolo estricto de identificación para visitas/delivery?</span>
+                    <div class="toggle-group">
+                        <input type="radio" name="q6" value="SI" id="q6y" class="toggle-radio"><label for="q6y" class="toggle-label">SÍ</label>
+                        <input type="radio" name="q6" value="NO" id="q6n" class="toggle-radio"><label for="q6n" class="toggle-label">NO</label>
+                    </div>
+                </div>
+
+                <div class="question-item">
+                    <span class="q-text">¿Se auditan y desactivan los tags/tarjetas de ex-residentes?</span>
+                    <div class="toggle-group">
+                        <input type="radio" name="q7" value="SI" id="q7y" class="toggle-radio"><label for="q7y" class="toggle-label">SÍ</label>
+                        <input type="radio" name="q7" value="NO" id="q7n" class="toggle-radio"><label for="q7n" class="toggle-label">NO</label>
+                    </div>
+                </div>
+
+                <div class="question-item">
+                    <span class="q-text">¿Existe un protocolo de salvoconducto para mudanzas?</span>
+                    <div class="toggle-group">
+                        <input type="radio" name="q8" value="SI" id="q8y" class="toggle-radio"><label for="q8y" class="toggle-label">SÍ</label>
+                        <input type="radio" name="q8" value="NO" id="q8n" class="toggle-radio"><label for="q8n" class="toggle-label">NO</label>
+                    </div>
+                </div>
+
+                <div class="question-item">
+                    <span class="q-text">¿Las áreas sensibles (bombas, tableros) están cerradas con llave?</span>
+                    <div class="toggle-group">
+                        <input type="radio" name="q9" value="SI" id="q9y" class="toggle-radio"><label for="q9y" class="toggle-label">SÍ</label>
+                        <input type="radio" name="q9" value="NO" id="q9n" class="toggle-radio"><label for="q9n" class="toggle-label">NO</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="section-title"><i class="fa-solid fa-screwdriver-wrench"></i> 3. Infraestructura</h2>
+                
+                <div class="question-item">
+                    <span class="q-text">¿Existe un calendario anual de mantención preventiva (portones, cerco)?</span>
+                    <div class="toggle-group">
+                        <input type="radio" name="q10" value="SI" id="q10y" class="toggle-radio"><label for="q10y" class="toggle-label">SÍ</label>
+                        <input type="radio" name="q10" value="NO" id="q10n" class="toggle-radio"><label for="q10n" class="toggle-label">NO</label>
+                    </div>
+                </div>
+
+                <div class="question-item">
+                    <span class="q-text">¿Se verifica semanalmente que las cámaras graben y tengan la hora correcta?</span>
+                    <div class="toggle-group">
+                        <input type="radio" name="q11" value="SI" id="q11y" class="toggle-radio"><label for="q11y" class="toggle-label">SÍ</label>
+                        <input type="radio" name="q11" value="NO" id="q11n" class="toggle-radio"><label for="q11n" class="toggle-label">NO</label>
+                    </div>
+                </div>
+
+                <div class="question-item">
+                    <span class="q-text">¿Los proveedores de sistemas críticos están certificados?</span>
+                    <div class="toggle-group">
+                        <input type="radio" name="q12" value="SI" id="q12y" class="toggle-radio"><label for="q12y" class="toggle-label">SÍ</label>
+                        <input type="radio" name="q12" value="NO" id="q12n" class="toggle-radio"><label for="q12n" class="toggle-label">NO</label>
+                    </div>
+                </div>
+
+                <div class="question-item">
+                    <span class="q-text">¿Existe iluminación de emergencia funcional en pasillos y accesos?</span>
+                    <div class="toggle-group">
+                        <input type="radio" name="q13" value="SI" id="q13y" class="toggle-radio"><label for="q13y" class="toggle-label">SÍ</label>
+                        <input type="radio" name="q13" value="NO" id="q13n" class="toggle-radio"><label for="q13n" class="toggle-label">NO</label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="leadCapture" class="card lead-form">
+                <h3 style="margin-top:0; color:var(--primary); text-align:center;">
+                    <i class="fa-solid fa-lock"></i> Obtener mi Diagnóstico
+                </h3>
+                <p style="text-align:center; font-size:14px; margin-bottom:20px;">
+                    Para calcular su Nivel de Riesgo y ver el informe detallado, ingrese los datos de su comunidad.
+                </p>
+                
+                <div class="input-group">
+                    <label>Nombre del Condominio / Edificio</label>
+                    <input type="text" id="leadComunidad" class="input-std" placeholder="Ej: Edificio Los Andes" required>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="input-group">
+                        <label>Su Nombre</label>
+                        <input type="text" id="leadNombre" class="input-std" placeholder="Su nombre" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Cargo (Opcional)</label>
+                        <select id="leadCargo" class="input-std">
+                            <option value="Comite">Miembro Comité</option>
+                            <option value="Administrador">Administrador</option>
+                            <option value="Residente">Residente</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Email de contacto</label>
+                    <input type="email" id="leadEmail" class="input-std" placeholder="contacto@ejemplo.com" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Teléfono</label>
+                    <input type="tel" id="leadTelefono" class="input-std" placeholder="+56 9..." required>
+                </div>
+
+                <button type="submit" class="btn-cta">Ver Resultados y Recomendaciones</button>
+            </div>
+        </form>
+
+        <div id="resultArea">
+            <div id="scoreBox" class="result-box risk-high">
+                <span class="score-number" id="lblPuntosNo">0</span>
+                <span style="font-size:20px;"> Vulnerabilidades</span>
+                <span class="score-label" id="lblNivelRiesgo">RIESGO ALTO</span>
+                <p id="lblDiagnostico" style="font-size:14px; padding:0 20px;">...</p>
+            </div>
+
+            <div class="card" style="text-align: center;">
+                <h3 style="color:var(--primary); margin-top:0;">¿Qué hacer ahora?</h3>
+                <p style="margin-bottom:25px;">
+                    La administración profesional es la clave para reducir estos riesgos. En Santa Josefina SpA nos especializamos en cerrar estas brechas.
+                </p>
+                
+                <div class="contact-card">
+                    <img src="https://i.ibb.co/30y4z0h/marcos.jpg" class="contact-avatar" alt="Marcos Castro">
+                    <div style="text-align:left;">
+                        <strong style="display:block; font-size:16px;">Marcos Castro</strong>
+                        <span style="font-size:12px; color:#64748b;">Director Santa Josefina SpA</span>
+                        <div style="margin-top:5px; font-size:13px;">
+                            <a href="tel:+56998647190" style="color:var(--accent); text-decoration:none; font-weight:700;">
+                                <i class="fa-solid fa-phone"></i> +56 9 9864 7190
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top:25px;">
+                    <a href="https://wa.me/56998647190?text=Hola,%20hice%20el%20checklist%20de%20seguridad%20y%20me%20gustaría%20asesoría." 
+                       target="_blank" 
+                       style="background:#25D366; color:white; padding:12px 25px; border-radius:30px; text-decoration:none; font-weight:bold; display:inline-flex; align-items:center; gap:8px;">
+                        <i class="fa-brands fa-whatsapp"></i> Hablar con un Experto
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.getElementById('securityForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // 1. Validar preguntas
+            const totalQuestions = 13;
+            let answeredCount = 0;
+            let countNo = 0;
+
+            for (let i = 1; i <= totalQuestions; i++) {
+                const radios = document.getElementsByName('q' + i);
+                let answered = false;
+                for (let r of radios) {
+                    if (r.checked) {
+                        answered = true;
+                        if (r.value === 'NO') countNo++;
+                        break;
+                    }
+                }
+                if (answered) answeredCount++;
+            }
+
+            if (answeredCount < totalQuestions) {
+                alert(`Por favor responda todas las preguntas (${answeredCount}/${totalQuestions}) para obtener un diagnóstico preciso.`);
+                return;
+            }
+
+            // 2. Spinner ON
+            document.getElementById('spinner').style.display = 'flex';
+            const btn = document.querySelector('.btn-cta');
+            btn.disabled = true;
+            btn.innerText = "Calculando...";
+
+            // 3. Preparar Datos para la Tabla 'contactos'
+            const comunidad = document.getElementById('leadComunidad').value;
+            const cargo = document.getElementById('leadCargo').value;
+
+            // Objeto exacto para tu tabla contactos (ID, Nombre, Email, Telefono, Mensaje, Fecha, Estado, Notas)
+            const contactData = {
+                ID: "LEAD_" + Date.now(),
+                Nombre: document.getElementById('leadNombre').value,
+                Email: document.getElementById('leadEmail').value,
+                Telefono: document.getElementById('leadTelefono').value,
+                Mensaje: `Lead Checklist Seguridad. Comunidad: ${comunidad} (Cargo: ${cargo})`,
+                Fecha: new Date().toISOString().split('T')[0],
+                Estado: "Nuevo",
+                Notas: `Diagnóstico: ${countNo} de 13 puntos vulnerables ("NO").`
+            };
+
+            try {
+                // Guardar en AppSheet - Tabla 'contactos'
+                if (typeof appSheetCRUD === 'function') {
+                    await appSheetCRUD("contactos", "Add", [contactData]);
+                } else {
+                    console.log("Modo Demo: Guardando localmente", contactData);
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+
+            } catch (err) {
+                console.error("Error guardando contacto", err);
+                // No bloqueamos al usuario si falla el guardado, igual le mostramos el resultado
+            } finally {
+                document.getElementById('spinner').style.display = 'none';
+                mostrarResultado(countNo);
+            }
+        });
+
+        function mostrarResultado(countNo) {
+            document.getElementById('securityForm').style.display = 'none';
+            const resultArea = document.getElementById('resultArea');
+            const scoreBox = document.getElementById('scoreBox');
+            
+            document.getElementById('lblPuntosNo').innerText = countNo;
+            
+            let nivel = "";
+            let clase = "";
+            let texto = "";
+
+            if (countNo <= 3) {
+                nivel = "RIESGO BAJO";
+                clase = "risk-low";
+                texto = "Su comunidad tiene una buena base de gestión. Mantengan la vigilancia y sigan mejorando los procesos preventivos.";
+            } else if (countNo <= 7) {
+                nivel = "RIESGO MEDIO";
+                clase = "risk-med";
+                texto = "Existen vulnerabilidades claras que pueden ser explotadas. Es necesario revisar los protocolos administrativos a la brevedad.";
+            } else {
+                nivel = "RIESGO ALTO (CRÍTICO)";
+                clase = "risk-high";
+                texto = "Su edificio es altamente vulnerable. La gestión actual no garantiza estándares mínimos. Se requiere una intervención urgente.";
+            }
+
+            document.getElementById('lblNivelRiesgo').innerText = nivel;
+            document.getElementById('lblDiagnostico').innerText = texto;
+            scoreBox.className = "result-box " + clase;
+
+            resultArea.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+
+</body>
+</html>
