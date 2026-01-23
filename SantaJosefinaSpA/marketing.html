@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -8,12 +8,12 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <link rel="stylesheet" href="assets/css/styles.css" />
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1a2b48">
-<link rel="apple-touch-icon" href="assets/img/icon-192.png">
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#1a2b48" />
+    <link rel="apple-touch-icon" href="assets/img/icon-192.png" />
 
     <script src="assets/js/app.js"></script>
-    
+
     <script>
       requireAuth();
     </script>
@@ -287,6 +287,31 @@
           <span class="kpi-sub" id="kpiConv">0% Cierre</span>
         </div>
       </div>
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <span class="kpi-label">% Click → Lead</span>
+          <span class="kpi-value" id="kpiCTRLead">0%</span>
+          <span class="kpi-sub">Eficiencia Landing</span>
+        </div>
+
+        <div class="kpi-card">
+          <span class="kpi-label">% Lead → Cliente</span>
+          <span class="kpi-value" id="kpiLeadCliente">0%</span>
+          <span class="kpi-sub">Calidad de Leads</span>
+        </div>
+
+        <div class="kpi-card">
+          <span class="kpi-label">Costo Lead Calificado</span>
+          <span class="kpi-value" id="kpiCPLQ">$0</span>
+          <span class="kpi-sub">No todos los leads valen igual</span>
+        </div>
+
+        <div class="kpi-card">
+          <span class="kpi-label">Canal Top</span>
+          <span class="kpi-value" id="kpiTopCanal">—</span>
+          <span class="kpi-sub">Mejor performance real</span>
+        </div>
+      </div>
 
       <div class="dashboard-header no-print">
         <div>
@@ -356,8 +381,7 @@
           >
             <div>
               <label class="label">Canal</label>
-              <select id="mCanal">
-              </select>
+              <select id="mCanal"></select>
             </div>
             <div>
               <label class="label">Fecha Inicio</label>
@@ -511,9 +535,9 @@
           MARKETING_DATA = data || [];
 
           calcularKPIsGlobales();
-          
+
           // --- NUEVO: Cargar opciones del select Canal ---
-          renderOpcionesCanal(); 
+          renderOpcionesCanal();
           // -----------------------------------------------
 
           renderTabla();
@@ -527,14 +551,25 @@
       // --- NUEVA FUNCIÓN: Extrae canales únicos y llena el Select ---
       function renderOpcionesCanal() {
         const select = document.getElementById("mCanal");
-        
+
         // 1. Extraer todos los canales existentes (filtrando vacíos)
-        let canales = MARKETING_DATA
-            .map(m => m.Canal)
-            .filter(c => c && c.trim() !== "");
+        let canales = MARKETING_DATA.map((m) => m.Canal).filter(
+          (c) => c && c.trim() !== "",
+        );
 
         // 2. (Opcional) Agregar canales base por si la tabla está vacía
-        const canalesBase = ["Google Ads", "Facebook Ads", "X.com", "LinkedIn", "Instagram", "Tik Tok","YouTube","Portales", "Email Marketing", "Offline / Volantes"];
+        const canalesBase = [
+          "Google Ads",
+          "Facebook Ads",
+          "X.com",
+          "LinkedIn",
+          "Instagram",
+          "Tik Tok",
+          "YouTube",
+          "Portales",
+          "Email Marketing",
+          "Offline / Volantes",
+        ];
         canales = [...canales, ...canalesBase];
 
         // 3. Eliminar duplicados y ordenar alfabéticamente
@@ -542,8 +577,8 @@
 
         // 4. Generar el HTML
         let html = '<option value="">-- Seleccione --</option>';
-        canalesUnicos.forEach(c => {
-            html += `<option value="${c}">${c}</option>`;
+        canalesUnicos.forEach((c) => {
+          html += `<option value="${c}">${c}</option>`;
         });
 
         // 5. Asignar al select
@@ -596,8 +631,8 @@
       <tr>
         <td>
            <span class="status-dot" style="background:${stColor}" title="${
-            m.Estado
-          }"></span>
+             m.Estado
+           }"></span>
            <span style="font-weight:600; font-size:11px;">${
              m.Estado || "S/D"
            }</span>
@@ -618,7 +653,7 @@
         
         <td style="text-align:center;">${clics}</td>
         <td style="text-align:center; font-size:11px; color:#64748b;">${clp(
-          cpc
+          cpc,
         )}</td>
         
         <td style="text-align:center; font-weight:600;">${leads}</td>
@@ -641,24 +676,51 @@
       function calcularKPIsGlobales() {
         const sumInv = MARKETING_DATA.reduce(
           (s, m) => s + (parseFloat(m.Inversion) || 0),
-          0
+          0,
         );
         const sumIng = MARKETING_DATA.reduce(
           (s, m) => s + (parseFloat(m["Ingresos Generados"]) || 0),
-          0
+          0,
         );
         const sumClics = MARKETING_DATA.reduce(
           (s, m) => s + (parseFloat(m.Clics) || 0),
-          0
+          0,
         );
         const sumLeads = MARKETING_DATA.reduce(
           (s, m) => s + (parseFloat(m.Leads) || 0),
-          0
+          0,
         );
         const sumCli = MARKETING_DATA.reduce(
           (s, m) => s + (parseFloat(m["Clientes Captados"]) || 0),
-          0
+          0,
         );
+        // Conversiones clave
+        const clickToLead = sumClics > 0 ? (sumLeads / sumClics) * 100 : 0;
+        const leadToCliente = sumLeads > 0 ? (sumCli / sumLeads) * 100 : 0;
+
+        // Lead calificado = leads que terminan en venta
+        const cplq = sumCli > 0 ? sumInv / sumCli : 0;
+
+        // Canal Top por clientes
+        let canalTop = "-";
+        let maxClientes = 0;
+
+        MARKETING_DATA.forEach((m) => {
+          const cli = parseFloat(m["Clientes Captados"]) || 0;
+          if (cli > maxClientes) {
+            maxClientes = cli;
+            canalTop = m.Canal || "-";
+          }
+        });
+
+        document.getElementById("kpiCTRLead").textContent =
+          clickToLead.toFixed(1) + "%";
+
+        document.getElementById("kpiLeadCliente").textContent =
+          leadToCliente.toFixed(1) + "%";
+
+        document.getElementById("kpiCPLQ").textContent = clp(cplq);
+        document.getElementById("kpiTopCanal").textContent = canalTop;
 
         const profit = sumIng - sumInv;
         const globalROI = sumInv > 0 ? (profit / sumInv) * 100 : 0;
@@ -706,15 +768,15 @@
         document.getElementById("mID").value = id;
         document.getElementById("mCampana").value = m.Campaña || "";
         document.getElementById("mEstado").value = m.Estado || "Activa";
-        
+
         // Se asigna el valor al select (como ya cargamos las opciones, funcionará)
         document.getElementById("mCanal").value = m.Canal || "";
-        
+
         document.getElementById("mInversion").value = m.Inversion || 0;
 
         // CORRECCIÓN: Usar helper para asignar fechas correctamente
         document.getElementById("mInicio").value = toInputDate(
-          m["Fecha Inicio"]
+          m["Fecha Inicio"],
         );
         document.getElementById("mFin").value = toInputDate(m["Fecha Fin"]);
 
@@ -802,6 +864,123 @@
 
         return "";
       }
+      /* ===========================
+   LEAD SCORING AUTOMÁTICO
+=========================== */
+
+function calcularLeadScore(lead) {
+  let score = 0;
+
+  if (lead.email && lead.email.includes("@")) score += 20;
+  if (lead.telefono && lead.telefono.length >= 8) score += 25;
+  if (lead.urgencia === "Alta") score += 25;
+  if (lead.completoDiagnostico === true) score += 15;
+  if (lead.clickRevision === true) score += 20;
+
+  let categoria = "C";
+  if (score >= 70) categoria = "A";
+  else if (score >= 40) categoria = "B";
+
+  return {
+    score,
+    categoria
+  };
+}
+
+/* ===========================
+   PROCESAR LEAD POST DIAGNÓSTICO
+=========================== */
+
+async function procesarLead(lead) {
+  const resultado = calcularLeadScore(lead);
+
+  const payload = {
+    ID: "LEAD_" + Date.now(),
+    Nombre: lead.nombre || "Sin nombre",
+    Email: lead.email || "",
+    Telefono: lead.telefono || "",
+    Canal: lead.canal || "Web",
+    Puntaje: resultado.score,
+    Score: resultado.categoria,
+    Urgencia: lead.urgencia || "Media",
+    Fecha: new Date().toISOString(),
+    Estado:
+      resultado.categoria === "A"
+        ? "Prioritario"
+        : resultado.categoria === "B"
+        ? "Nurturing"
+        : "Frio"
+  };
+
+  /* Guardar en AppSheet / Google Sheets */
+  if (typeof appSheetCRUD === "function") {
+    await appSheetCRUD("Leads", "Add", [payload]);
+  }
+
+  /* 🔥 SOLO LEADS A VAN A WHATSAPP */
+  if (resultado.categoria === "A") {
+    abrirWhatsAppLeadA(lead);
+  } else {
+    enviarEmailNurturing(lead, resultado.categoria);
+  }
+
+  return resultado;
+}
+function abrirWhatsAppLeadA(lead) {
+  const mensaje = `
+Hola, realicé el diagnóstico de mi comunidad.
+Resultado: RIESGOS DETECTADOS.
+Necesito una revisión urgente.
+
+Nombre: ${lead.nombre || "-"}
+Comunidad: ${lead.comunidad || "-"}
+  `.trim();
+
+  window.open(
+    "https://wa.me/56998647190?text=" + encodeURIComponent(mensaje),
+    "_blank"
+  );
+}
+function enviarEmailNurturing(lead, categoria) {
+  if (typeof emailjs === "undefined") return;
+
+  let asunto = "Resultado diagnóstico de su comunidad";
+  let mensaje = "";
+
+  if (categoria === "B") {
+    mensaje = `
+Detectamos algunos riesgos relevantes en su comunidad.
+
+Le enviaremos información útil para que pueda evaluar
+una revisión más detallada cuando lo estime conveniente.
+
+📊 Resultado: Atención recomendada
+`;
+  } else {
+    mensaje = `
+Gracias por realizar el diagnóstico.
+
+Por ahora no se detectan riesgos críticos, pero
+le compartiremos buenas prácticas para su comunidad.
+`;
+  }
+
+  emailjs.send("service_p9hqkqn", "template_80q9psi", {
+    to_email: lead.email,
+    subject: asunto,
+    html_body: `
+      <div style="font-family:sans-serif;padding:20px">
+        <h3>${asunto}</h3>
+        <p>${mensaje}</p>
+        <a href="https://tusitio.cl/revision"
+           style="display:inline-block;padding:10px 15px;
+           background:#1a2b48;color:white;border-radius:6px;text-decoration:none">
+           Solicitar revisión
+        </a>
+      </div>
+    `
+  });
+}
     </script>
   </body>
 </html>
