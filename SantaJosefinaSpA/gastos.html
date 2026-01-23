@@ -9,7 +9,7 @@
   <script>requireAuth();</script>
 
   <style>
-    /* ===== ESTILOS DASHBOARD (Idénticos a Prospectos/Proveedores) ===== */
+    /* ===== ESTILOS DASHBOARD ===== */
     body{ max-width:1200px; margin:0 auto; color:#1A2B48; }
     main{ padding:40px; }
     .page-title{ font-size:28px; font-weight:700; margin-bottom:16px; }
@@ -20,13 +20,13 @@
     th{ background:#fafafa; font-weight: 600; color: #4b5563; }
     
     /* Inputs y Layout */
-    input,select,textarea{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:6px; font-family:inherit;}
+    input,select,textarea{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:6px; font-family:inherit; box-sizing: border-box;}
     .label{ display:block; font-weight:600; margin-bottom:4px; font-size: 13px; color: #374151; }
     
     /* MODAL */
     .modal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:10000; align-items:center; justify-content:center; }
     .modal.active{ display:flex; }
-    .modal-content{ width:100%; max-width:600px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:25px; box-shadow:0 12px 30px rgba(0,0,0,.18); }
+    .modal-content{ width:100%; max-width:700px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:25px; box-shadow:0 12px 30px rgba(0,0,0,.18); max-height: 90vh; overflow-y: auto; }
     
     /* SPINNER */
     .spinner-backdrop{ position:fixed; inset:0; background:rgba(255,255,255,0.85); display:none; place-items:center; z-index:12000; }
@@ -52,6 +52,7 @@
     .btn-icon:hover { transform: translateY(-2px); color: white; }
     .btn-editar:hover { background-color: #f59e0b; }
     .btn-eliminar:hover { background-color: #ef4444; }
+    .btn-ver:hover { background-color: #3b82f6; }
 
     /* BOTONES CABECERA */
     .btn-head { height: 44px; padding: 0 20px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; transition: all 0.2s; }
@@ -59,6 +60,19 @@
     .btn-nuevo { background-color: #0f172a; color: white; }
     .btn-secundario { background-color: #fff; color: #475569; border: 1px solid #cbd5e1; }
     .btn-secundario:hover { background-color: #f8fafc; border-color: #94a3b8; }
+
+    /* ESTILOS SUBIDA IMAGEN */
+    .upload-area {
+        border: 2px dashed #cbd5e1;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        background: #f8fafc;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .upload-area:hover { border-color: #3b82f6; background: #eff6ff; }
+    .preview-img { max-width: 100%; max-height: 200px; border-radius: 6px; margin-top: 10px; display: none; border: 1px solid #e2e8f0; }
   </style>
 </head>
 <body>
@@ -95,7 +109,7 @@
     <div class="header-filters">
       <div class="filter-item" style="flex-grow: 2;"> 
         <label class="label">Buscar</label>
-        <input id="inpBuscar" class="input-modern" placeholder="Proveedor, Tipo de Gasto, Documento..." type="text" style="width:95%;height:42px;">
+        <input id="inpBuscar" class="input-modern" placeholder="Proveedor, Tipo de Gasto, Documento..." type="text" style="width:95%;">
       </div>
 
       <div class="filter-item" style="flex-grow: 1;">
@@ -116,7 +130,7 @@
         <th style="text-align:right;">Monto</th>
         <th>Fecha</th>
         <th>Documento</th>
-        <th>Obs.</th>
+        <th style="text-align: center;">Recibo</th>
         <th class="no-print">Acciones</th>
       </tr>
     </thead>
@@ -130,8 +144,7 @@
     
     <form id="formG" style="margin-top:20px;">
       <input type="hidden" id="gID">
-      
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+      <input type="hidden" id="gComprobanteURL"> <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
         <div style="grid-column: 1 / -1;">
           <label class="label">Copropiedad</label>
           <select id="gCopro" required></select>
@@ -170,9 +183,24 @@
         </div>
 
         <div style="grid-column: 1 / -1;">
-           <label class="label">Observaciones</label>
-           <textarea id="gObs" rows="3" style="resize:vertical;"></textarea>
+           <label class="label">Observaciones (Concepto)</label>
+           <textarea id="gObs" rows="2" style="resize:vertical;"></textarea>
         </div>
+
+        <div style="grid-column: 1 / -1;">
+            <label class="label">Comprobante / Recibo</label>
+            <div class="upload-area" onclick="document.getElementById('gFile').click()">
+                <i class="fa-solid fa-cloud-arrow-up" style="font-size: 24px; color: #94a3b8;"></i>
+                <div style="font-size: 13px; color: #64748b; margin-top: 5px;">Click para subir imagen (JPG, PNG)</div>
+            </div>
+            <input type="file" id="gFile" accept="image/*" style="display: none;" onchange="previewImage(this)">
+            
+            <div id="previewContainer" style="text-align: center;">
+                <img id="imgPreview" class="preview-img">
+                <div id="fileInfo" style="font-size: 12px; color: #166534; margin-top: 5px;"></div>
+            </div>
+        </div>
+
       </div>
 
       <div style="text-align:right; margin-top:20px;">
@@ -193,6 +221,9 @@
 <div id="footer"></div>
 
 <script>
+/* ===== CONFIGURACIÓN IMGBB ===== */
+const IMGBB_API_KEY = "d096ade1d65ede2aa12f00d94094a854";
+
 /* ===== Utilidades ===== */
 function showSpinner(msg){ const sp=document.getElementById('pageSpinner'); const txt=document.getElementById('spinnerText'); if(msg) txt.textContent=msg; sp.style.display='grid'; }
 function hideSpinner(){ document.getElementById('pageSpinner').style.display='none'; }
@@ -201,9 +232,7 @@ function escapeCSV(v){ if(v==null) return ''; const s=String(v).replaceAll('"','
 function clp(v){ return "$" + new Intl.NumberFormat("es-CL",{maximumFractionDigits:0}).format(Number(v||0)); }
 function fmtFecha(iso){ 
   if(!iso) return ""; 
-  // Intentar manejar formatos de fecha (YYYY-MM-DDT... o YYYY-MM-DD)
   const d = new Date(iso);
-  // Ajuste zona horaria simple si es necesario, o uso directo UTC
   return d.toLocaleDateString("es-CL", { timeZone: 'UTC' }); 
 }
 
@@ -226,18 +255,55 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 });
 
 function bindUI(){
-  // Botones
   document.getElementById('btnNew').addEventListener('click', ()=>abrirForm());
   document.getElementById('btnReload').addEventListener('click', cargarTodo);
   document.getElementById('btnExport').addEventListener('click', exportCSV);
   
-  // Filtros
   document.getElementById('inpBuscar').addEventListener('input', aplicarFiltros);
   document.getElementById('selCoproFilter').addEventListener('change', aplicarFiltros);
   
-  // Modal
   modalG.addEventListener('click', e=>{ if(e.target===modalG) cerrarForm(); });
   document.addEventListener('keydown', e=>{ if(e.key==='Escape') cerrarForm(); });
+}
+
+/* ===== Subida de Imágenes (IMGBB) ===== */
+function previewImage(input) {
+    const preview = document.getElementById('imgPreview');
+    const info = document.getElementById('fileInfo');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.display = 'inline-block';
+            info.textContent = "Imagen seleccionada para subir.";
+        }
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        preview.style.display = 'none';
+        info.textContent = "";
+    }
+}
+
+async function uploadToImgBB(file) {
+    const formData = new FormData();
+    formData.append("image", file);
+    
+    try {
+        const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+            method: "POST",
+            body: formData
+        });
+        const data = await response.json();
+        if (data.success) {
+            return data.data.url; // Retorna la URL pública
+        } else {
+            throw new Error("Fallo en imgbb: " + (data.error ? data.error.message : "Error desconocido"));
+        }
+    } catch (error) {
+        console.error("Error subiendo imagen:", error);
+        throw error;
+    }
 }
 
 /* ===== Carga de Datos ===== */
@@ -261,7 +327,7 @@ async function cargarTodo(){
     document.getElementById('selCoproFilter').innerHTML = '<option value="">(Todas)</option>' + coprosHTML;
     document.getElementById('gCopro').innerHTML = coprosHTML;
 
-    // Llenar Select Proveedores (Para el Formulario)
+    // Llenar Select Proveedores
     document.getElementById('gProv').innerHTML = PROVS.map(x=>`<option value="${getKeyVal(x)}">${x.Nombre}</option>`).join("");
 
     aplicarFiltros();
@@ -278,21 +344,13 @@ async function cargarTodo(){
 function aplicarFiltros(){
   const q = norm(document.getElementById('inpBuscar').value);
   const coproID = document.getElementById('selCoproFilter').value;
-
-  // Mapas para búsqueda rápida de nombres
   const provMap = {}; PROVS.forEach(p => provMap[getKeyVal(p)] = norm(p.Nombre));
   
   VIEW = GASTOS.filter(g => {
-    // Filtro Copropiedad
     if(coproID && String(g.CopropiedadID) !== String(coproID)) return false;
-
-    // Filtro Texto
     if(!q) return true;
-    
-    // Buscar en: Tipo, Documento, Obs, y Nombre del Proveedor (cruzado)
     const nombreProv = provMap[g.ProveedorID] || "";
     const searchStr = [g.TipoGasto, g.Documento, g.Observaciones, nombreProv].map(v=>norm(v)).join(" ");
-    
     return searchStr.includes(q);
   });
 
@@ -303,7 +361,6 @@ function renderTabla(){
   const tb = document.getElementById('tablaG');
   if(!VIEW.length){ tb.innerHTML = '<tr><td colspan="8" class="muted">No hay gastos registrados.</td></tr>'; return; }
 
-  // Mapas para mostrar Nombres en la tabla
   const coproMap={}; COPROS.forEach(c => coproMap[getKeyVal(c)] = c.Nombre);
   const provMap={};  PROVS.forEach(p => provMap[getKeyVal(p)] = p.Nombre);
 
@@ -311,6 +368,13 @@ function renderTabla(){
     const key = getKeyVal(g);
     const nombreCopro = coproMap[g.CopropiedadID] || "—";
     const nombreProv  = provMap[g.ProveedorID] || "—";
+    
+    // Icono de Comprobante
+    let iconComprobante = '<span style="color:#cbd5e1;"><i class="fa-solid fa-file-circle-xmark"></i></span>';
+    if(g.ComprobanteURL || g.FacturaURL){
+        const url = g.ComprobanteURL || g.FacturaURL;
+        iconComprobante = `<a href="${url}" target="_blank" style="color:#1a2b48;" title="Ver Recibo"><i class="fa-solid fa-file-invoice"></i></a>`;
+    }
 
     return `<tr>
       <td><span style="font-weight:600; font-size:13px;">${nombreCopro}</span></td>
@@ -319,7 +383,7 @@ function renderTabla(){
       <td class="mono" style="text-align:right;">${clp(g.Monto)}</td>
       <td>${fmtFecha(g.Fecha)}</td>
       <td class="mono">${g.Documento||""}</td>
-      <td style="font-size:12px; max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${g.Observaciones||""}">${g.Observaciones||""}</td>
+      <td style="text-align:center;">${iconComprobante}</td>
       <td class="no-print">
          <div class="acciones-group">
             <button class="btn-icon btn-editar" onclick="abrirForm('${key}')" title="Editar">
@@ -339,6 +403,9 @@ function abrirForm(id){
   const title = document.getElementById('modalTitle');
   document.getElementById('formG').reset();
   document.getElementById('gID').value = "";
+  document.getElementById('imgPreview').style.display = 'none';
+  document.getElementById('gComprobanteURL').value = "";
+  document.getElementById('fileInfo').textContent = "";
 
   if(id){
     title.textContent = "Editar Gasto";
@@ -351,7 +418,6 @@ function abrirForm(id){
     document.getElementById('gTipo').value = g.TipoGasto||"";
     document.getElementById('gMonto').value = g.Monto||0;
     
-    // Manejo seguro de fecha para el input type="date"
     if(g.Fecha){
         const d = new Date(g.Fecha);
         if(!isNaN(d)) document.getElementById('gFecha').value = d.toISOString().split('T')[0];
@@ -359,9 +425,18 @@ function abrirForm(id){
     
     document.getElementById('gDocumento').value = g.Documento||"";
     document.getElementById('gObs').value = g.Observaciones||"";
+    
+    // Cargar imagen existente
+    const urlExistente = g.ComprobanteURL || g.FacturaURL;
+    if(urlExistente){
+        document.getElementById('gComprobanteURL').value = urlExistente;
+        document.getElementById('imgPreview').src = urlExistente;
+        document.getElementById('imgPreview').style.display = 'inline-block';
+        document.getElementById('fileInfo').textContent = "Imagen actual cargada.";
+    }
+
   } else {
     title.textContent = "Nuevo Gasto";
-    // Fecha hoy por defecto
     document.getElementById('gFecha').value = new Date().toISOString().split('T')[0];
   }
   document.getElementById('modalG').classList.add("active");
@@ -369,41 +444,57 @@ function abrirForm(id){
 
 function cerrarForm(){ document.getElementById('modalG').classList.remove("active"); }
 
+/* SUBMIT CON SUBIDA DE IMAGEN */
 document.getElementById('formG').onsubmit = async (e)=>{
   e.preventDefault();
-  const idValue = document.getElementById('gID').value;
   
-  const payload = {
-    CopropiedadID: document.getElementById('gCopro').value,
-    ProveedorID: document.getElementById('gProv').value,
-    TipoGasto: document.getElementById('gTipo').value.trim(),
-    Monto: parseFloat(document.getElementById('gMonto').value)||0,
-    Fecha: document.getElementById('gFecha').value,
-    Documento: document.getElementById('gDocumento').value.trim(),
-    Observaciones: document.getElementById('gObs').value.trim()
-  };
-
-  const keyField = (idValue ? KEY_NAME : KEY_NAME);
-
-  if(idValue){
-     payload[keyField] = idValue;
-  } else {
-     payload[keyField] = generateKey('GST');
-  }
+  const idValue = document.getElementById('gID').value;
+  const fileInput = document.getElementById('gFile');
+  let finalURL = document.getElementById('gComprobanteURL').value; // URL existente por defecto
 
   try{
-    showSpinner(idValue ? 'Guardando...' : 'Creando...');
+    showSpinner("Procesando...");
+
+    // 1. Subir imagen si hay una nueva seleccionada
+    if(fileInput.files && fileInput.files[0]){
+        showSpinner("Subiendo comprobante...");
+        finalURL = await uploadToImgBB(fileInput.files[0]);
+    }
+
+    // 2. Preparar Payload
+    const payload = {
+        CopropiedadID: document.getElementById('gCopro').value,
+        ProveedorID: document.getElementById('gProv').value,
+        TipoGasto: document.getElementById('gTipo').value.trim(),
+        Monto: parseFloat(document.getElementById('gMonto').value)||0,
+        Fecha: document.getElementById('gFecha').value,
+        Documento: document.getElementById('gDocumento').value.trim(),
+        Observaciones: document.getElementById('gObs').value.trim(),
+        ComprobanteURL: finalURL // Guardamos la URL de imgbb
+    };
+
+    const keyField = (idValue ? KEY_NAME : KEY_NAME);
+    if(idValue){
+         payload[keyField] = idValue;
+    } else {
+         payload[keyField] = generateKey('GST');
+    }
+
+    // 3. Guardar en AppSheet
+    showSpinner("Guardando datos...");
     if(typeof upsertData === 'function'){
        await upsertData("Gastos", payload);
     } else {
        if(idValue) await appSheetCRUD("Gastos","Edit",[payload]);
        else        await appSheetCRUD("Gastos","Add",[payload]);
     }
+    
     cerrarForm();
     await cargarTodo();
+
   }catch(err){
     console.error(err);
-    alert("Error al guardar: " + err.message);
+    alert("Error: " + err.message);
   }finally{
     hideSpinner();
   }
@@ -428,19 +519,23 @@ async function eliminar(id){
 
 /* ===== Exportar ===== */
 function exportCSV(){
-  const headers = ['ID','CopropiedadID','ProveedorID','TipoGasto','Monto','Fecha','Documento','Obs'];
+  const headers = ['ID','Copropiedad','Proveedor','TipoGasto','Monto','Fecha','Documento','Obs','Comprobante'];
   const lines = [headers.join(',')];
   
+  const coproMap={}; COPROS.forEach(c => coproMap[getKeyVal(c)] = c.Nombre);
+  const provMap={};  PROVS.forEach(p => provMap[getKeyVal(p)] = p.Nombre);
+
   VIEW.forEach(r => {
     lines.push([
       escapeCSV(getKeyVal(r)),
-      escapeCSV(r.CopropiedadID),
-      escapeCSV(r.ProveedorID),
+      escapeCSV(coproMap[r.CopropiedadID] || r.CopropiedadID),
+      escapeCSV(provMap[r.ProveedorID] || r.ProveedorID),
       escapeCSV(r.TipoGasto),
       escapeCSV(r.Monto),
       escapeCSV(r.Fecha),
       escapeCSV(r.Documento),
-      escapeCSV(r.Observaciones)
+      escapeCSV(r.Observaciones),
+      escapeCSV(r.ComprobanteURL || r.FacturaURL)
     ].join(','));
   });
 
