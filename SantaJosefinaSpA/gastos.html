@@ -144,7 +144,9 @@
     
     <form id="formG" style="margin-top:20px;">
       <input type="hidden" id="gID">
-      <input type="hidden" id="gComprobanteURL"> <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+      <input type="hidden" id="gComprobanteURL"> 
+      
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
         <div style="grid-column: 1 / -1;">
           <label class="label">Copropiedad</label>
           <select id="gCopro" required></select>
@@ -289,14 +291,17 @@ async function uploadToImgBB(file) {
     const formData = new FormData();
     formData.append("image", file);
     
+    // NOTA: imgbb retorna un JSON completo. Debemos extraer SOLO la URL de display.
     try {
         const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
             method: "POST",
             body: formData
         });
         const data = await response.json();
+        
         if (data.success) {
-            return data.data.url; // Retorna la URL pública
+            // AQUÍ ESTÁ EL CAMBIO CRÍTICO: Devolvemos solo la URL string
+            return data.data.url; 
         } else {
             throw new Error("Fallo en imgbb: " + (data.error ? data.error.message : "Error desconocido"));
         }
@@ -357,6 +362,25 @@ function aplicarFiltros(){
   renderTabla();
 }
 
+/* FUNCIÓN AUXILIAR: Extraer URL limpia de posibles datos corruptos */
+function cleanUrl(val) {
+    if(!val) return "";
+    // Si viene como objeto JSON stringificado (el error que mencionas), intentamos parsear
+    if (val.includes('{') && val.includes('"Url"')) {
+        try {
+            // Limpieza básica por si viene sucio
+            const jsonStr = val.substring(val.indexOf('{'), val.lastIndexOf('}')+1);
+            const obj = JSON.parse(jsonStr);
+            return obj.Url || obj.url || "";
+        } catch (e) {
+            return ""; // Fallo el parseo
+        }
+    }
+    // Si es una URL normal
+    if (val.startsWith('http')) return val;
+    return "";
+}
+
 function renderTabla(){
   const tb = document.getElementById('tablaG');
   if(!VIEW.length){ tb.innerHTML = '<tr><td colspan="8" class="muted">No hay gastos registrados.</td></tr>'; return; }
@@ -369,11 +393,15 @@ function renderTabla(){
     const nombreCopro = coproMap[g.CopropiedadID] || "—";
     const nombreProv  = provMap[g.ProveedorID] || "—";
     
+    // Usamos la función de limpieza para obtener una URL válida
+    const rawUrl = g.ComprobanteURL || g.FacturaURL || g.Documento || "";
+    const cleanLink = cleanUrl(rawUrl);
+    
     // Icono de Comprobante
     let iconComprobante = '<span style="color:#cbd5e1;"><i class="fa-solid fa-file-circle-xmark"></i></span>';
-    if(g.ComprobanteURL || g.FacturaURL){
-        const url = g.ComprobanteURL || g.FacturaURL;
-        iconComprobante = `<a href="${url}" target="_blank" style="color:#1a2b48;" title="Ver Recibo"><i class="fa-solid fa-file-invoice"></i></a>`;
+    
+    if(cleanLink){
+        iconComprobante = `<a href="${cleanLink}" target="_blank" style="color:#1a2b48;" title="Ver Recibo"><i class="fa-solid fa-file-invoice"></i></a>`;
     }
 
     return `<tr>
@@ -382,7 +410,7 @@ function renderTabla(){
       <td>${g.TipoGasto||""}</td>
       <td class="mono" style="text-align:right;">${clp(g.Monto)}</td>
       <td>${fmtFecha(g.Fecha)}</td>
-      <td class="mono">${g.Documento||""}</td>
+      <td class="mono">${g.Documento && !g.Documento.startsWith('http') ? g.Documento : ''}</td>
       <td style="text-align:center;">${iconComprobante}</td>
       <td class="no-print">
          <div class="acciones-group">
@@ -423,14 +451,21 @@ function abrirForm(id){
         if(!isNaN(d)) document.getElementById('gFecha').value = d.toISOString().split('T')[0];
     }
     
-    document.getElementById('gDocumento').value = g.Documento||"";
+    // Si el documento NO es una URL, lo ponemos en el input de texto
+    const docVal = g.Documento || "";
+    if(!docVal.startsWith('http') && !docVal.includes('{')) {
+        document.getElementById('gDocumento').value = docVal;
+    }
+    
     document.getElementById('gObs').value = g.Observaciones||"";
     
-    // Cargar imagen existente
-    const urlExistente = g.ComprobanteURL || g.FacturaURL;
-    if(urlExistente){
-        document.getElementById('gComprobanteURL').value = urlExistente;
-        document.getElementById('imgPreview').src = urlExistente;
+    // Cargar imagen existente (Limpiándola primero)
+    const rawUrl = g.ComprobanteURL || g.FacturaURL || g.Documento || "";
+    const validUrl = cleanUrl(rawUrl);
+    
+    if(validUrl){
+        document.getElementById('gComprobanteURL').value = validUrl;
+        document.getElementById('imgPreview').src = validUrl;
         document.getElementById('imgPreview').style.display = 'inline-block';
         document.getElementById('fileInfo').textContent = "Imagen actual cargada.";
     }
@@ -444,7 +479,7 @@ function abrirForm(id){
 
 function cerrarForm(){ document.getElementById('modalG').classList.remove("active"); }
 
-/* SUBMIT CON SUBIDA DE IMAGEN */
+/* SUBMIT CON SUBIDA DE IMAGEN CORRECTA */
 document.getElementById('formG').onsubmit = async (e)=>{
   e.preventDefault();
   
@@ -457,7 +492,8 @@ document.getElementById('formG').onsubmit = async (e)=>{
 
     // 1. Subir imagen si hay una nueva seleccionada
     if(fileInput.files && fileInput.files[0]){
-        showSpinner("Subiendo comprobante...");
+        showSpinner("Subiendo a la nube...");
+        // Esta función ahora devuelve SOLO la URL string
         finalURL = await uploadToImgBB(fileInput.files[0]);
     }
 
@@ -470,7 +506,7 @@ document.getElementById('formG').onsubmit = async (e)=>{
         Fecha: document.getElementById('gFecha').value,
         Documento: document.getElementById('gDocumento').value.trim(),
         Observaciones: document.getElementById('gObs').value.trim(),
-        ComprobanteURL: finalURL // Guardamos la URL de imgbb
+        ComprobanteURL: finalURL // Guardamos URL limpia
     };
 
     const keyField = (idValue ? KEY_NAME : KEY_NAME);
@@ -526,6 +562,9 @@ function exportCSV(){
   const provMap={};  PROVS.forEach(p => provMap[getKeyVal(p)] = p.Nombre);
 
   VIEW.forEach(r => {
+    // Usamos la versión limpia también para el export
+    const cleanLink = cleanUrl(r.ComprobanteURL || r.FacturaURL || r.Documento);
+    
     lines.push([
       escapeCSV(getKeyVal(r)),
       escapeCSV(coproMap[r.CopropiedadID] || r.CopropiedadID),
@@ -535,7 +574,7 @@ function exportCSV(){
       escapeCSV(r.Fecha),
       escapeCSV(r.Documento),
       escapeCSV(r.Observaciones),
-      escapeCSV(r.ComprobanteURL || r.FacturaURL)
+      escapeCSV(cleanLink)
     ].join(','));
   });
 
