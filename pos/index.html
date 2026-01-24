@@ -65,71 +65,44 @@
       }
 
       @media print {
-        body * {
-          visibility: hidden;
-          height: 0;
-          overflow: hidden;
-        }
-        #printable-area,
-        #printable-area * {
-          visibility: visible;
-          height: auto;
-          overflow: visible;
-        }
-        #printable-area {
-          position: absolute;
-          left: 5mm;
-          top: 0;
-          width: 72mm;
-          margin: 0;
-          padding: 0;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-            "Helvetica Neue", Arial, sans-serif;
-          color: black;
-          background: white;
-          font-size: 13px;
-          line-height: 1.2;
-        }
-        @page {
-          size: auto;
-          margin: 5mm;
-        }
-        .ticket-header {
-          text-align: center;
-          font-weight: bold;
-          margin-bottom: 5px;
-          font-size: 20px;
-        }
-        .ticket-divider {
-          border-bottom: 1px dashed black;
-          margin: 5px 0;
-        }
-        .fs-huge {
-          font-size: 30px;
-          font-weight: bold;
-        }
-        .fs-big {
-          font-size: 20px;
-          font-weight: bold;
-        }
-        .text-center {
-          text-align: center;
-        }
-        .d-flex-between {
-          display: flex;
-          justify-content: space-between;
-          width: 95%;
-        }
-        .force-break {
-          display: block;
-          page-break-before: always;
-          break-before: page;
-          height: 0;
-          margin: 0;
-          border: none;
-          content: "";
-        }
-      }
+  body * {
+    visibility: hidden;
+    height: 0;
+    overflow: hidden;
+  }
+  #printable-area,
+  #printable-area * {
+    visibility: visible;
+    height: auto;
+    overflow: visible;
+  }
+  #printable-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    /* Ajustar a 72mm para impresora de 80mm, o 48mm para la de 58mm */
+    width: 100%; 
+    margin: 0;
+    padding: 0;
+    font-family: 'Courier New', monospace; /* Fuente monoespaciada se ve mejor en térmicas */
+    color: black;
+    background: white;
+    font-size: 13px;
+    line-height: 1.2;
+  }
+  /* ESTO ES CRUCIAL PARA ROLLO CONTINUO */
+  @page {
+    size: auto;   /* auto es lo mejor para tickets de largo variable */
+    margin: 2mm;  /* Cero margenes para que no imprima cabeceras de navegador */
+  }
+  
+  /* ... resto de tus clases utilitarias ... */
+  .ticket-header { text-align: center; font-weight: bold; font-size: 1.2rem; }
+  .ticket-divider { border-bottom: 1px dashed black; margin: 5px 0; }
+  .fs-huge { font-size: 2rem; font-weight: bold; }
+  .fs-big { font-size: 1.5rem; font-weight: bold; }
+  .d-flex-between { display: flex; justify-content: space-between; width: 100%; }
+}
       #printable-area {
         display: none;
       }
