@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mi Comunidad - Escritorio | Santa Josefina</title>
+    <title>Mi Comunidad - Financiero | Santa Josefina</title>
 
     <link
       rel="stylesheet"
@@ -35,8 +35,8 @@
         background-color: var(--bg-light);
         color: var(--text);
         display: flex;
-        height: 100vh; /* Altura fija para pantalla */
-        overflow: hidden; /* Evita scroll doble en pantalla */
+        height: 100vh;
+        overflow: hidden;
       }
 
       /* SIDEBAR */
@@ -103,10 +103,9 @@
       /* MAIN CONTENT */
       .main-content {
         flex: 1;
-        overflow-y: auto; /* Scroll interno para pantalla */
+        overflow-y: auto;
         padding: 30px 40px;
       }
-
       .header-top {
         display: flex;
         justify-content: space-between;
@@ -123,7 +122,6 @@
         font-size: 14px;
       }
 
-      /* BOTONES ACCIÓN */
       .action-buttons {
         display: flex;
         gap: 10px;
@@ -145,14 +143,13 @@
         background: #f8fafc;
       }
 
-      /* DASHBOARD GRID */
+      /* GRID & CARDS */
       .grid-container {
         display: grid;
         grid-template-columns: 2fr 1fr;
         gap: 25px;
-        grid-template-rows: auto auto;
+        grid-template-rows: auto;
       }
-
       .card {
         background: var(--white);
         border-radius: 12px;
@@ -163,14 +160,14 @@
         flex-direction: column;
       }
 
-      /* ESTILOS INTERNOS WIDGETS */
+      /* WIDGETS */
       .finance-row {
         display: flex;
         align-items: center;
         justify-content: space-between;
       }
       .big-number {
-        font-size: 42px;
+        font-size: 36px;
         font-weight: 800;
         color: var(--primary);
         letter-spacing: -1px;
@@ -193,6 +190,7 @@
         color: #991b1b;
       }
 
+      /* TABLAS */
       table {
         width: 100%;
         border-collapse: collapse;
@@ -201,46 +199,224 @@
       th {
         text-align: left;
         color: var(--text-muted);
-        font-size: 12px;
+        font-size: 11px;
         text-transform: uppercase;
         padding-bottom: 10px;
         border-bottom: 2px solid #f1f5f9;
       }
       td {
-        padding: 12px 0;
+        padding: 10px 0;
         border-bottom: 1px solid #f1f5f9;
-        font-size: 14px;
-      }
-      .table-compact td {
-        padding: 8px 0;
         font-size: 13px;
       }
+      .table-compact td {
+        padding: 6px 0;
+        font-size: 12px;
+      }
+      .btn-invoice {
+        border: 1px solid #cbd5e1;
+        background: white;
+        color: var(--text);
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.2s;
+      }
+      .btn-invoice:hover {
+        background: #f1f5f9;
+        color: var(--secondary);
+        border-color: var(--secondary);
+      }
+      .doc-number {
+        font-size: 11px;
+        color: #64748b;
+        background: #f1f5f9;
+        padding: 2px 6px;
+        border-radius: 4px;
+        display: inline-block;
+        margin-right: 5px;
+      }
 
-      /* RESERVAS */
+      /* ESPACIOS Y RESERVAS */
+      .space-details {
+        background: #f8fafc;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 15px;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+      }
+      .space-visual {
+        width: 70px;
+        height: 70px;
+        border-radius: 6px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+      .space-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .space-icon {
+        font-size: 28px;
+        color: var(--secondary);
+      }
+      .space-info {
+        flex: 1;
+      }
+      .space-meta {
+        display: flex;
+        gap: 12px;
+        font-size: 11px;
+        color: #64748b;
+        margin-top: 5px;
+        flex-wrap: wrap;
+      }
+      .meta-item {
+        display: flex;
+        align-items: center;
+        background: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        border: 1px solid #e2e8f0;
+      }
+      .meta-item i {
+        margin-right: 5px;
+        color: var(--secondary);
+      }
+
       .calendar-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
         gap: 10px;
         margin-top: 15px;
       }
       .time-slot {
         border: 1px solid #e2e8f0;
         border-radius: 8px;
-        padding: 10px;
+        padding: 10px 5px;
         text-align: center;
-        font-size: 13px;
         cursor: pointer;
         transition: all 0.2s;
+        background: white;
       }
       .time-slot:hover {
         border-color: var(--secondary);
         background: #eff6ff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      }
+      .time-slot b {
+        display: block;
+        font-size: 12px;
+        color: var(--primary);
+        margin-bottom: 2px;
+      }
+      .time-slot span {
+        font-size: 11px;
+        color: #64748b;
+        display: block;
       }
       .slot-busy {
         background: #f1f5f9;
+        border-color: #e2e8f0;
         color: #94a3b8;
         cursor: not-allowed;
+        opacity: 0.7;
+      }
+      .slot-busy b,
+      .slot-busy span {
+        color: #94a3b8;
         text-decoration: line-through;
+      }
+
+      /* KPIs */
+      .kpi-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 25px;
+      }
+      .kpi-card {
+        background: #f8fafc;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+      }
+      .kpi-title {
+        font-size: 12px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+      .kpi-value {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--primary);
+        margin-top: 5px;
+      }
+      .kpi-trend {
+        font-size: 12px;
+        margin-top: 5px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .trend-up {
+        color: var(--danger);
+      }
+      .trend-down {
+        color: var(--success);
+      }
+
+      /* MODAL */
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 5000;
+        justify-content: center;
+        align-items: center;
+      }
+      .modal.active {
+        display: flex;
+      }
+      .modal-content {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        max-width: 90%;
+        max-height: 90vh;
+        overflow: auto;
+        position: relative;
+        text-align: center;
+      }
+      .modal-close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 24px;
+        cursor: pointer;
+        color: #64748b;
+      }
+      .modal-img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
       }
 
       #spinner {
@@ -255,55 +431,44 @@
         color: var(--primary);
       }
 
-      /* =========================================
-           CONFIGURACIÓN DE IMPRESIÓN Y PDF
-           ========================================= */
-      @media print {
-        /* 1. Configurar hoja carta */
-        @page {
-          size: letter;
-          margin: 1cm;
-        }
+      .no-data-msg {
+        color: #94a3b8;
+        font-style: italic;
+        font-size: 13px;
+        text-align: center;
+        padding: 10px;
+      }
 
-        /* 2. Ocultar elementos de navegación */
+      @media print {
         .sidebar,
         .no-print,
         .action-buttons,
         #spinner {
           display: none !important;
         }
-
-        /* 3. Ajustar el cuerpo para que fluya */
-        body {
+        body,
+        .main-content {
           height: auto !important;
           overflow: visible !important;
-          background: white;
+          display: block;
+          padding: 0;
+        }
+        .grid-container {
           display: block;
         }
-
-        .main-content {
-          padding: 0 !important;
-          height: auto !important;
-          overflow: visible !important;
-          width: 100% !important;
-        }
-
-        /* 4. Ajustar Grid para que no se corte */
-        .grid-container {
-          display: block; /* Cambiamos grid a bloque vertical */
-        }
-
         .card {
-          border: 1px solid #ddd;
+          break-inside: avoid;
+          border: 1px solid #000;
           box-shadow: none;
           margin-bottom: 20px;
-          break-inside: avoid; /* Evitar que una tarjeta se parta entre hojas */
-          page-break-inside: avoid;
         }
-
-        /* 5. Asegurar gráficos visibles */
-        canvas {
-          max-width: 100% !important;
+        .kpi-grid {
+          display: flex;
+          gap: 20px;
+        }
+        .kpi-card {
+          border: 1px solid #000;
+          flex: 1;
         }
       }
     </style>
@@ -314,7 +479,7 @@
         class="fa-solid fa-circle-notch fa-spin"
         style="font-size: 40px; margin-bottom: 15px"
       ></i>
-      <div style="font-weight: 600">Cargando Escritorio...</div>
+      <div style="font-weight: 600">Cargando Portal...</div>
     </div>
 
     <div class="sidebar">
@@ -328,10 +493,10 @@
       </div>
       <nav>
         <div class="nav-item active" onclick="scrollToSection('dashboard')">
-          <i class="fa-solid fa-chart-pie"></i> Resumen
+          <i class="fa-solid fa-chart-line"></i> Resumen
         </div>
-        <div class="nav-item" onclick="scrollToSection('finance')">
-          <i class="fa-solid fa-wallet"></i> Finanzas
+        <div class="nav-item" onclick="scrollToSection('expenses-detail')">
+          <i class="fa-solid fa-file-invoice-dollar"></i> Gastos
         </div>
         <div class="nav-item" onclick="scrollToSection('spaces')">
           <i class="fa-regular fa-calendar-check"></i> Espacios
@@ -362,26 +527,12 @@
     <div class="main-content" id="printArea">
       <div class="header-top">
         <div class="page-title">
-          <h1 id="welcomeTitle">Bienvenido</h1>
-          <p id="buildingName" style="font-size: 1.1rem">
-            Cargando comunidad...
-          </p>
+          <h1 id="welcomeTitle">Resumen</h1>
+          <p id="buildingName">Cargando...</p>
         </div>
-
         <div class="action-buttons no-print">
-          <button
-            onclick="downloadPDF()"
-            class="btn-tool"
-            style="color: #ef4444; border-color: #ef4444"
-          >
+          <button onclick="downloadPDF()" class="btn-tool">
             <i class="fa-solid fa-file-pdf"></i> PDF
-          </button>
-          <button
-            onclick="downloadJPG()"
-            class="btn-tool"
-            style="color: #3b82f6; border-color: #3b82f6"
-          >
-            <i class="fa-solid fa-image"></i> JPG
           </button>
           <button onclick="window.print()" class="btn-tool">
             <i class="fa-solid fa-print"></i> Imprimir
@@ -390,197 +541,245 @@
       </div>
 
       <div class="grid-container" id="dashboard">
-        <div class="card" id="finance" style="grid-row: span 2">
-          <div
-            style="
-              display: flex;
-              justify-content: space-between;
-              align-items: flex-start;
-              margin-bottom: 20px;
-            "
-          >
-            <h3 style="margin: 0">Estado de Cuenta</h3>
-            <div id="statusPill" class="status-pill pill-success">Al día</div>
-          </div>
-
-          <div class="finance-row">
-            <div>
-              <div
+        <div style="display: flex; flex-direction: column; gap: 25px">
+          <div class="card">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+              "
+            >
+              <h3 style="margin: 0; font-size: 16px">
+                Finanzas: Ingresos vs Gastos
+              </h3>
+              <select
+                id="yearSelector"
+                onchange="renderEvolutionChart()"
                 style="
-                  font-size: 13px;
-                  color: var(--text-muted);
-                  text-transform: uppercase;
-                  font-weight: 700;
+                  padding: 4px;
+                  border: 1px solid #ddd;
+                  border-radius: 4px;
+                  font-size: 12px;
                 "
               >
-                Total a Pagar
-              </div>
-              <div class="big-number" id="debtAmount">$0</div>
+                <option value="2026">2026</option>
+                <option value="2025" selected>2025</option>
+              </select>
             </div>
-            <div style="text-align: right" class="no-print">
+            <div style="height: 250px; width: 100%">
+              <canvas id="chartEvolution"></canvas>
+            </div>
+          </div>
+
+          <div class="card" id="expenses-detail">
+            <h3 style="margin: 0; font-size: 16px; margin-bottom: 15px">
+              Detalle de Gastos
+            </h3>
+            <div style="overflow-x: auto">
+              <table style="min-width: 100%">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Concepto</th>
+                    <th>Categ.</th>
+                    <th style="text-align: right">Monto</th>
+                    <th style="text-align: center">Doc</th>
+                  </tr>
+                </thead>
+                <tbody id="detailedExpensesTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 25px">
+          <div class="card">
+            <h3
+              style="
+                margin: 0;
+                font-size: 14px;
+                color: var(--text-muted);
+                text-transform: uppercase;
+              "
+            >
+              Mi Deuda
+            </h3>
+            <div class="finance-row" style="margin-top: 10px">
+              <div class="big-number" id="debtAmount">$0</div>
+              <div id="statusPill" class="status-pill pill-success">Al día</div>
+            </div>
+            <div class="no-print" style="margin-top: 15px">
               <button
                 onclick="window.location.href = 'reportar_pago.html'"
                 style="
-                  padding: 12px 24px;
+                  width: 100%;
+                  padding: 10px;
                   background: var(--secondary);
                   color: white;
                   border: none;
-                  border-radius: 8px;
+                  border-radius: 6px;
                   font-weight: 600;
                   cursor: pointer;
                 "
               >
-                Pagar Ahora
+                Pagar Deuda
               </button>
             </div>
           </div>
 
-          <div style="margin-top: 40px; flex-grow: 1">
-            <h4 style="font-size: 14px; margin-bottom: 15px">
-              Historial de Movimientos
-            </h4>
-            <table>
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Concepto</th>
-                  <th>Estado</th>
-                  <th style="text-align: right">Monto</th>
-                </tr>
-              </thead>
-              <tbody id="historyTable"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3 style="margin: 0; font-size: 16px; margin-bottom: 15px">
-            Distribución de Gastos Comunes
-          </h3>
-
-          <div style="display: flex; align-items: center; margin-bottom: 20px">
-            <div style="height: 160px; width: 160px">
-              <canvas id="chartExpenses"></canvas>
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-title">Reservas Mes</div>
+              <div class="kpi-value" id="kpiReservas">0</div>
+              <div class="kpi-trend trend-down" id="kpiReservasTrend">
+                <i class="fa-solid fa-users"></i> Espacios
+              </div>
             </div>
-            <div
-              style="
-                flex: 1;
-                padding-left: 20px;
-                font-size: 13px;
-                color: var(--text-muted);
-              "
-              id="expenseLegend"
-            >
-              Cargando gráfico...
+            <div class="kpi-card">
+              <div class="kpi-title">Reclamos</div>
+              <div class="kpi-value" id="kpiReclamos">0</div>
+              <div class="kpi-trend" id="kpiReclamosTrend"></div>
             </div>
           </div>
 
-          <div
-            style="
-              border-top: 1px solid #f1f5f9;
-              padding-top: 15px;
-              flex-grow: 1;
-              overflow-y: auto;
-              max-height: 250px;
-            "
-          >
-            <h4
-              style="
-                font-size: 12px;
-                color: var(--text-muted);
-                text-transform: uppercase;
-                margin-top: 0;
-              "
-            >
-              Detalle por Categoría
-            </h4>
-            <table class="table-compact">
-              <thead>
-                <tr>
-                  <th>Categoría</th>
-                  <th style="text-align: right">Monto</th>
-                  <th style="text-align: right">%</th>
-                </tr>
-              </thead>
-              <tbody id="expensesTableBody"></tbody>
-            </table>
+          <div class="card">
+            <h3 style="margin: 0; font-size: 14px; margin-bottom: 10px">
+              Composición del Gasto
+            </h3>
+            <div style="height: 150px; position: relative">
+              <canvas id="chartExpensesDist"></canvas>
+            </div>
+            <div id="expensesTableSimple" style="margin-top: 15px"></div>
           </div>
-        </div>
 
-        <div class="card" id="spaces">
-          <div
-            style="
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              margin-bottom: 15px;
-            "
-          >
-            <h3 style="margin: 0; font-size: 16px">Reservar Espacio</h3>
+          <div class="card" id="spaces">
+            <h3 style="margin: 0; font-size: 14px; margin-bottom: 10px">
+              Reserva de Espacios
+            </h3>
             <select
               id="spaceSelector"
-              onchange="renderSlots()"
+              onchange="renderSpaceDetail()"
               style="
-                padding: 6px;
+                width: 100%;
+                padding: 8px;
                 border-radius: 6px;
                 border: 1px solid #cbd5e1;
+                margin-bottom: 15px;
               "
               class="no-print"
             >
-              <option>Cargando...</option>
+              <option value>Cargando...</option>
             </select>
+
+            <div
+              id="spaceDetailContainer"
+              class="space-details"
+              style="display: none"
+            >
+              <div class="space-visual" id="spaceVisual"></div>
+              <div class="space-info">
+                <div
+                  id="spaceNameTitle"
+                  style="
+                    font-weight: 700;
+                    font-size: 14px;
+                    margin-bottom: 4px;
+                    color: #1e293b;
+                  "
+                ></div>
+                <div
+                  id="spaceRules"
+                  style="
+                    font-size: 12px;
+                    color: #475569;
+                    margin-bottom: 6px;
+                    font-style: italic;
+                  "
+                ></div>
+                <div class="space-meta">
+                  <span class="meta-item" title="Capacidad"
+                    ><i class="fa-solid fa-users"></i>
+                    <span id="spaceCap"></span
+                  ></span>
+                  <span class="meta-item" title="Costo"
+                    ><i class="fa-solid fa-tag"></i> <span id="spaceCost"></span
+                  ></span>
+                  <span class="meta-item" title="Garantía"
+                    ><i class="fa-solid fa-shield-halved"></i>
+                    <span id="spaceWarranty"></span
+                  ></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="calendar-grid" id="slotsContainer"></div>
           </div>
-
-          <div
-            id="spaceInfo"
-            style="
-              font-size: 12px;
-              color: var(--text-muted);
-              margin-bottom: 10px;
-            "
-          ></div>
-          <div class="calendar-grid" id="slotsContainer"></div>
         </div>
+      </div>
+    </div>
 
-        <div class="card" id="tickets" style="grid-column: 1 / -1">
-          <div
+    <div id="modalReceipt" class="modal">
+      <div class="modal-content">
+        <span
+          class="modal-close"
+          onclick="
+            document.getElementById('modalReceipt').classList.remove('active')
+          "
+          >&times;</span
+        >
+        <h3 style="margin-top: 0; color: var(--primary); text-align: left">
+          Comprobante
+        </h3>
+        <div
+          id="modalBody"
+          style="
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          "
+        >
+          <img
+            id="receiptImage"
+            class="modal-img"
+            src
+            alt="Comprobante"
+            style="display: none"
+          />
+          <p id="receiptError" style="display: none; color: #64748b">
+            Cargando vista previa...
+          </p>
+        </div>
+        <div style="margin-top: 20px; text-align: right">
+          <a
+            id="receiptLink"
+            href="#"
+            target="_blank"
+            class="btn-tool"
             style="
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              margin-bottom: 20px;
+              display: inline-block;
+              text-decoration: none;
+              background: var(--secondary);
+              color: white;
+              border: none;
+              padding: 10px 20px;
             "
           >
-            <h3 style="margin: 0">Mis Reclamos y Solicitudes</h3>
-            <button
-              onclick="window.location.href = 'reclamos.html'"
-              class="no-print"
-              style="
-                padding: 8px 16px;
-                background: white;
-                border: 1px solid #e2e8f0;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 13px;
-              "
-            >
-              + Nuevo Ticket
-            </button>
-          </div>
-          <div
-            id="ticketsContainer"
-            style="
-              display: grid;
-              grid-template-columns: repeat(3, 1fr);
-              gap: 15px;
-            "
-          ></div>
+            <i class="fa-solid fa-up-right-from-square"></i> Abrir Original
+          </a>
         </div>
       </div>
     </div>
 
     <script>
       let USER = null;
+      let CURRENT_COPRO_ID = null;
       let DB = {
         Cobros: [],
         Pagos: [],
@@ -591,84 +790,35 @@
         Reclamos: [],
         Copropiedades: [],
         Unidades: [],
+        Proveedores: [],
       };
-      let chartInstance = null;
+      let chartEvolutionInstance = null;
+      let chartDistInstance = null;
 
       document.addEventListener("DOMContentLoaded", async () => {
-        if (window.innerWidth < 1024) {
-          if (
-            confirm(
-              "Estás en una pantalla pequeña. ¿Ir a la versión móvil optimizada?",
-            )
-          ) {
-            window.location.href = "Portal_residente.html";
-            return;
-          }
-        }
         const sesionStr = localStorage.getItem("sesion_externa");
         if (!sesionStr) {
           window.location.href = "login_residente.html";
           return;
         }
         USER = JSON.parse(sesionStr);
-        renderUserProfile(null);
+
         await loadData();
-        renderFinance();
-        renderExpensesChart();
+
+        renderPersonalFinance();
+        renderEvolutionChart();
+        renderDetailedExpenses();
+        renderKPIs();
+        renderExpenseDistribution();
         initSpaces();
-        renderTickets();
+
         document.getElementById("spinner").style.display = "none";
       });
 
-      /* --- FUNCIONES DE DESCARGA PDF/JPG --- */
-      function downloadPDF() {
-        const element = document.getElementById("printArea");
-        const opt = {
-          margin: 0.5,
-          filename: "Resumen_Comunidad.pdf",
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2 },
-          jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
-        };
-        // Usamos html2pdf (Librería importada arriba)
-        html2pdf().set(opt).from(element).save();
-      }
-
-      function downloadJPG() {
-        const element = document.getElementById("printArea");
-        // Usamos html2canvas para crear imagen
-        html2canvas(element).then((canvas) => {
-          const link = document.createElement("a");
-          link.download = "Resumen_Comunidad.jpg";
-          link.href = canvas.toDataURL("image/jpeg");
-          link.click();
-        });
-      }
-
-      /* --- LÓGICA DE DATOS --- */
-      function renderUserProfile(unidadReal) {
-        const nombre = USER.datos.Nombre || "Residente";
-        let labelUnidad = USER.UnidadID || "...";
-        if (unidadReal) {
-          labelUnidad =
-            unidadReal.Unidad ||
-            unidadReal.Numero ||
-            unidadReal.Nombre ||
-            USER.UnidadID;
-        }
-        document.getElementById("sidebarName").innerText = nombre;
-        document.getElementById("sidebarUnit").innerText =
-          `Unidad ${labelUnidad}`;
-        document.getElementById("userInitial").innerText = nombre
-          .charAt(0)
-          .toUpperCase();
-        document.getElementById("welcomeTitle").innerText =
-          `Hola, ${nombre.split(" ")[0]}`;
-      }
-
       async function loadData() {
         try {
-          const [cob, pag, gas, esp, blo, res, rec, cop, uni] =
+          // Carga paralela
+          const [cob, pag, gas, esp, blo, res, rec, cop, uni, prov] =
             await Promise.all([
               fetchData("Cobros"),
               fetchData("Pagos"),
@@ -679,8 +829,8 @@
               fetchData("Reclamos"),
               fetchData("Copropiedades"),
               fetchData("Unidades"),
+              fetchData("Proveedores"),
             ]);
-
           DB = {
             Cobros: cob || [],
             Pagos: pag || [],
@@ -691,20 +841,35 @@
             Reclamos: rec || [],
             Copropiedades: cop || [],
             Unidades: uni || [],
+            Proveedores: prov || [],
           };
 
+          // 1. Identificar Unidad y Comunidad del Usuario
           const myUnidadID = String(USER.UnidadID).trim();
           const unidadEncontrada = DB.Unidades.find(
             (u) => String(u.ID || u.id) === myUnidadID,
           );
-          renderUserProfile(unidadEncontrada);
 
-          const coproID = unidadEncontrada
-            ? unidadEncontrada.CopropiedadID
-            : USER.CopropiedadID;
+          if (unidadEncontrada && unidadEncontrada.CopropiedadID) {
+            CURRENT_COPRO_ID = String(unidadEncontrada.CopropiedadID);
+          } else {
+            CURRENT_COPRO_ID = String(USER.CopropiedadID);
+          }
+
+          // 2. Renderizar Datos Usuario
+          const nombre = USER.datos.Nombre || "Residente";
           const edificio = DB.Copropiedades.find(
-            (c) => String(c.ID || c.id) === String(coproID),
+            (c) => String(c.ID) === CURRENT_COPRO_ID,
           );
+
+          document.getElementById("sidebarName").innerText = nombre;
+          document.getElementById("sidebarUnit").innerText =
+            `Unidad ${myUnidadID}`;
+          document.getElementById("userInitial").innerText = nombre
+            .charAt(0)
+            .toUpperCase();
+          document.getElementById("welcomeTitle").innerText =
+            `Hola, ${nombre.split(" ")[0]}`;
           if (edificio)
             document.getElementById("buildingName").innerText = edificio.Nombre;
         } catch (e) {
@@ -712,159 +877,103 @@
         }
       }
 
-      function renderFinance() {
-        const myID = String(USER.UnidadID);
-        const pendientes = DB.Cobros.filter(
-          (c) => String(c.UnidadID) === myID && c.Estado === "Pendiente",
-        );
-        const totalDeuda = pendientes.reduce(
-          (acc, c) => acc + (parseInt(c.TotalAPagar) || 0),
-          0,
-        );
-        document.getElementById("debtAmount").innerText = clp(totalDeuda);
-        const pill = document.getElementById("statusPill");
-
-        if (totalDeuda > 0) {
-          pill.className = "status-pill pill-danger";
-          pill.innerHTML =
-            '<i class="fa-solid fa-circle-exclamation"></i> Pendiente';
-        } else {
-          pill.className = "status-pill pill-success";
-          pill.innerHTML = '<i class="fa-solid fa-check"></i> Al día';
-        }
-
-        let history = [];
-        DB.Cobros.filter((c) => String(c.UnidadID) === myID).forEach((c) => {
-          history.push({
-            date: c.FechaVencimiento || c.Mes,
-            desc: `Gasto Común ${c.Mes}`,
-            amount: -parseInt(c.TotalAPagar),
-            status: c.Estado,
-          });
-        });
-        DB.Pagos.filter((p) => String(p.UnidadID) === myID).forEach((p) => {
-          history.push({
-            date: p.FechaPago || p.FechaReporte,
-            desc: "Pago Realizado",
-            amount: parseInt(p.Monto),
-            status: "Aprobado",
-          });
-        });
-        history.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-        const tbody = document.getElementById("historyTable");
-        tbody.innerHTML = history
-          .slice(0, 5)
-          .map(
-            (h) => `
-                <tr>
-                    <td>${h.date}</td>
-                    <td>${h.desc}</td>
-                    <td><span style="font-size:11px; background:#f1f5f9; padding:2px 6px; border-radius:4px;">${h.status}</span></td>
-                    <td style="text-align:right; font-weight:600; color:${h.amount > 0 ? "var(--success)" : "var(--text)"}">${h.amount > 0 ? "+" : ""}${clp(h.amount)}</td>
-                </tr>`,
-          )
-          .join("");
-      }
-
-      function renderExpensesChart() {
-        const dataMap = {};
-        let total = 0;
-        DB.Gastos.forEach((g) => {
-          const cat = g.TipoGasto || "Otros";
-          const val = parseInt(g.Monto) || 0;
-          dataMap[cat] = (dataMap[cat] || 0) + val;
-          total += val;
-        });
-
-        document.getElementById("expenseLegend").innerHTML = `
-                <div style="font-size:20px; font-weight:800; color:var(--primary); margin-bottom:5px;">${clp(total)}</div>
-                <div>Gasto Total Edificio (Mes)</div>
-            `;
-
-        const tbody = document.getElementById("expensesTableBody");
-        if (total === 0) {
-          tbody.innerHTML =
-            '<tr><td colspan="3" style="text-align:center; color:#999;">Sin datos</td></tr>';
-        } else {
-          const sorted = Object.entries(dataMap).sort((a, b) => b[1] - a[1]);
-          tbody.innerHTML = sorted
-            .map(([cat, val]) => {
-              const pct = Math.round((val / total) * 100);
-              return `<tr><td>${cat}</td><td style="text-align: right;">${clp(val)}</td><td style="text-align: right; color: var(--text-muted); font-size: 11px;">${pct}%</td></tr>`;
-            })
-            .join("");
-        }
-
-        const ctx = document.getElementById("chartExpenses").getContext("2d");
-        if (chartInstance) chartInstance.destroy();
-        if (total > 0) {
-          chartInstance = new Chart(ctx, {
-            type: "doughnut",
-            data: {
-              labels: Object.keys(dataMap),
-              datasets: [
-                {
-                  data: Object.values(dataMap),
-                  backgroundColor: [
-                    "#1a2b48",
-                    "#3b82f6",
-                    "#f59e0b",
-                    "#10b981",
-                    "#64748b",
-                  ],
-                  borderWidth: 0,
-                },
-              ],
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: { legend: { display: false } },
-            },
-          });
-        }
-      }
-
+      /* --- MÓDULO ESPACIOS CORREGIDO --- */
       function initSpaces() {
         const sel = document.getElementById("spaceSelector");
-        const espaciosActivos = DB.Espacios.filter(
-          (e) => e.Estado === "Activo",
-        );
         sel.innerHTML = "";
+
+        // Filtrar espacios SOLO de la copropiedad actual y ACTIVOS
+        const espaciosActivos = DB.Espacios.filter(
+          (e) =>
+            (e.Estado === "Activo" || e.Estado === "Mantencion") &&
+            String(e.CopropiedadID) === CURRENT_COPRO_ID,
+        );
+
         if (espaciosActivos.length === 0) {
-          sel.innerHTML = "<option>Sin espacios</option>";
+          sel.innerHTML =
+            '<option value="">No hay espacios habilitados</option>';
+          document.getElementById("spaceDetailContainer").style.display =
+            "none";
+          document.getElementById("slotsContainer").innerHTML = "";
           return;
         }
+
         espaciosActivos.forEach((e) => {
           const opt = document.createElement("option");
           opt.value = e.ID;
           opt.text = e.Nombre;
           sel.appendChild(opt);
         });
-        renderSlots();
+
+        // Seleccionar el primero y renderizar
+        sel.value = espaciosActivos[0].ID;
+        renderSpaceDetail();
       }
 
-      function renderSlots() {
+      function renderSpaceDetail() {
         const spaceID = document.getElementById("spaceSelector").value;
-        const espacio = DB.Espacios.find((e) => String(e.ID) === spaceID);
-        const container = document.getElementById("slotsContainer");
-        if (espacio) {
-          document.getElementById("spaceInfo").innerHTML =
-            `<i class="fa-solid fa-users"></i> Capacidad: ${espacio.Capacidad} | <i class="fa-solid fa-tag"></i> Costo: ${clp(espacio.Costo)}`;
+        if (!spaceID) return;
+
+        const espacio = DB.Espacios.find(
+          (e) => String(e.ID) === String(spaceID),
+        );
+        if (!espacio) return;
+
+        // 1. Render Ficha Técnica con Datos Reales
+        document.getElementById("spaceDetailContainer").style.display = "flex";
+        document.getElementById("spaceNameTitle").innerText = espacio.Nombre;
+        document.getElementById("spaceRules").innerText =
+          espacio.Reglas || "Sin reglas especiales.";
+        document.getElementById("spaceCap").innerText =
+          (espacio.Capacidad || 0) + " pers.";
+
+        const costo = parseInt(espacio.Costo) || 0;
+        const garantia = parseInt(espacio.Garantia) || 0;
+        document.getElementById("spaceCost").innerText =
+          costo === 0 ? "Gratis" : clp(costo);
+        document.getElementById("spaceWarranty").innerText =
+          "Gar. " + clp(garantia);
+
+        // Imagen con Fallback (Si falla la URL, muestra icono)
+        const visualContainer = document.getElementById("spaceVisual");
+        if (espacio.Imagen && espacio.Imagen.length > 10) {
+          // Usamos un div contenedor para manejar el error de carga limpiamente
+          visualContainer.innerHTML = `<img src="${espacio.Imagen}" class="space-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><i class="fa-solid ${espacio.Icono || "fa-building"} space-icon" style="display:none; font-size:28px; color:#cbd5e1;"></i>`;
+        } else {
+          const icon = espacio.Icono || "fa-building";
+          visualContainer.innerHTML = `<i class="fa-solid ${icon} space-icon"></i>`;
         }
+
+        // 2. Render Bloques
+        renderSlots(spaceID);
+      }
+
+      function renderSlots(spaceID) {
+        const container = document.getElementById("slotsContainer");
         const hoy = new Date().toISOString().split("T")[0];
+
+        // Filtrar bloques por EspacioID y Estado Activo (true o "true")
         const bloques = DB.Bloques.filter(
-          (b) => String(b.EspacioID) === spaceID && b.Activo,
+          (b) =>
+            String(b.EspacioID) === String(spaceID) &&
+            (b.Activo === true || String(b.Activo).toLowerCase() === "true"),
         );
+
+        // Ordenar bloques por hora
+        bloques.sort((a, b) =>
+          (a.HoraInicio || "").localeCompare(b.HoraInicio || ""),
+        );
+
         const reservas = DB.Reservas.filter(
-          (r) => String(r.EspacioID) === spaceID && r.Fecha === hoy,
+          (r) => String(r.EspacioID) === String(spaceID) && r.Fecha === hoy,
         );
+
         if (bloques.length === 0) {
           container.innerHTML =
-            '<div style="grid-column:1/-1; text-align:center;">No hay bloques configurados.</div>';
+            '<div style="grid-column:1/-1; text-align:center; padding:20px; font-size:13px; color:#94a3b8;">No hay bloques configurados.</div>';
           return;
         }
+
         container.innerHTML = bloques
           .map((b) => {
             const ocupado = reservas.find(
@@ -875,29 +984,209 @@
             const cssClass = ocupado ? "slot-busy" : "time-slot";
             const action = ocupado
               ? ""
-              : `onclick="alert('Reservar ${b.Nombre}')"`;
-            return `<div class="${cssClass}" ${action}><b>${b.Nombre}</b><br>${b.HoraInicio}</div>`;
+              : `onclick="alert('Funcionalidad de reserva en desarrollo para ${b.Nombre}')"`;
+
+            return `
+                <div class="${cssClass}" ${action}>
+                    <b>${b.Nombre}</b>
+                    <span>${b.HoraInicio} - ${b.HoraFin}</span>
+                </div>`;
           })
           .join("");
       }
 
-      function renderTickets() {
+      /* --- OTRAS FUNCIONES (Mantenidas OK) --- */
+      function renderPersonalFinance() {
         const myID = String(USER.UnidadID);
-        const tickets = DB.Reclamos.filter((r) => String(r.UnidadID) === myID);
-        const container = document.getElementById("ticketsContainer");
-        if (tickets.length === 0) {
-          container.innerHTML =
-            '<div style="grid-column:1/-1; padding:20px; text-align:center; color:#94a3b8; border:1px dashed #e2e8f0; border-radius:8px;">No tienes reclamos activos.</div>';
+        const pendientes = DB.Cobros.filter(
+          (c) => String(c.UnidadID) === myID && c.Estado === "Pendiente",
+        );
+        const total = pendientes.reduce(
+          (acc, c) => acc + (parseInt(c.TotalAPagar) || 0),
+          0,
+        );
+        document.getElementById("debtAmount").innerText = clp(total);
+        document.getElementById("statusPill").className =
+          total > 0 ? "status-pill pill-danger" : "status-pill pill-success";
+        document.getElementById("statusPill").innerText =
+          total > 0 ? "Pendiente" : "Al día";
+      }
+
+      function renderEvolutionChart() {
+        const ctx = document.getElementById("chartEvolution").getContext("2d");
+        const year =
+          parseInt(document.getElementById("yearSelector").value) || 2025;
+        const ing = new Array(12).fill(0);
+        const gas = new Array(12).fill(0);
+
+        DB.Pagos.forEach((p) => {
+          if (new Date(p.FechaPago).getFullYear() === year)
+            ing[new Date(p.FechaPago).getMonth()] += parseInt(p.Monto) || 0;
+        });
+        DB.Gastos.forEach((g) => {
+          if (new Date(g.Fecha).getFullYear() === year)
+            gas[new Date(g.Fecha).getMonth()] += parseInt(g.Monto) || 0;
+        });
+
+        if (chartEvolutionInstance) chartEvolutionInstance.destroy();
+        chartEvolutionInstance = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: [
+              "Ene",
+              "Feb",
+              "Mar",
+              "Abr",
+              "May",
+              "Jun",
+              "Jul",
+              "Ago",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dic",
+            ],
+            datasets: [
+              { label: "Ingresos", data: ing, backgroundColor: "#10b981" },
+              { label: "Gastos", data: gas, backgroundColor: "#ef4444" },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true } },
+            plugins: { legend: { position: "bottom" } },
+          },
+        });
+      }
+
+      function renderExpenseDistribution() {
+        const dataMap = {};
+        DB.Gastos.forEach((g) => {
+          const cat = g.TipoGasto || "Otros";
+          const val = parseInt(g.Monto) || 0;
+          dataMap[cat] = (dataMap[cat] || 0) + val;
+        });
+        const ctx = document
+          .getElementById("chartExpensesDist")
+          .getContext("2d");
+        if (chartDistInstance) chartDistInstance.destroy();
+        chartDistInstance = new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            labels: Object.keys(dataMap),
+            datasets: [
+              {
+                data: Object.values(dataMap),
+                backgroundColor: [
+                  "#1a2b48",
+                  "#3b82f6",
+                  "#f59e0b",
+                  "#10b981",
+                  "#64748b",
+                ],
+                borderWidth: 0,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            cutout: "70%",
+          },
+        });
+        const tbody = document.getElementById("expensesTableSimple");
+        const sorted = Object.entries(dataMap)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3);
+        tbody.innerHTML =
+          `<table class="table-compact">` +
+          sorted
+            .map(
+              ([k, v]) =>
+                `<tr><td style="color:#64748b;">${k}</td><td style="text-align:right; font-weight:600;">${clp(v)}</td></tr>`,
+            )
+            .join("") +
+          `</table>`;
+      }
+
+      function renderDetailedExpenses() {
+        const tb = document.getElementById("detailedExpensesTable");
+        const list = DB.Gastos.sort(
+          (a, b) => new Date(b.Fecha) - new Date(a.Fecha),
+        ).slice(0, 10);
+        if (!list.length) {
+          tb.innerHTML =
+            '<tr><td colspan="5" class="no-data-msg">Sin gastos registrados.</td></tr>';
           return;
         }
-        container.innerHTML = tickets
-          .map((t) => {
-            const bgBadge = t.Estado === "Resuelto" ? "#dcfce7" : "#fef3c7";
-            const colorBadge = t.Estado === "Resuelto" ? "#166534" : "#b45309";
-            return `<div style="border:1px solid #e2e8f0; padding:15px; border-radius:8px; break-inside: avoid;"><div style="display:flex; justify-content:space-between; margin-bottom:8px;"><strong style="color:var(--primary); font-size:13px;">${t.Categoria}</strong><span style="background:${bgBadge}; color:${colorBadge}; font-size:10px; padding:2px 8px; border-radius:10px; font-weight:700;">${t.Estado}</span></div><p style="font-size:13px; color:#334155; margin:0;">${t.Descripcion}</p><div style="font-size:11px; color:#94a3b8; margin-top:8px; text-align:right;">${t.Fecha || ""}</div></div>`;
+
+        tb.innerHTML = list
+          .map((g) => {
+            const prov =
+              DB.Proveedores.find((p) => String(p.ID) === String(g.ProveedorID))
+                ?.Nombre || "Proveedor";
+            const concepto = g.Observaciones || g.Concepto || "Sin detalle";
+            const url = g.ComprobanteURL || g.Documento || "";
+
+            const isLink = url.toLowerCase().startsWith("http");
+            let btnHtml = isLink
+              ? `<button class="btn-invoice" onclick="verComprobante('${encodeURI(url)}')" style="color:var(--primary);"><i class="fa-solid fa-eye"></i> Ver</button>`
+              : `<span class="doc-number">${url || "-"}</span>`;
+
+            return `<tr>
+                    <td style="color:#64748b;">${g.Fecha}</td>
+                    <td><div style="font-weight:600;">${prov}</div><div style="font-size:11px; color:#94a3b8;">${concepto}</div></td>
+                    <td><span style="font-size:11px; background:#f1f5f9; padding:2px 6px; border-radius:4px;">${g.TipoGasto}</span></td>
+                    <td style="text-align:right; font-weight:700;">${clp(g.Monto)}</td>
+                    <td style="text-align:center;">${btnHtml}</td>
+                </tr>`;
           })
           .join("");
       }
+
+      function renderKPIs() {
+        document.getElementById("kpiReservas").innerText = DB.Reservas.filter(
+          (r) => r.Fecha.startsWith(new Date().toISOString().slice(0, 7)),
+        ).length;
+        const reclamos = DB.Reclamos.filter(
+          (r) => r.Estado !== "Resuelto",
+        ).length;
+        document.getElementById("kpiReclamos").innerText = reclamos;
+        const kpiTrend = document.getElementById("kpiReclamosTrend");
+        if (reclamos > 5) {
+          kpiTrend.className = "kpi-trend trend-up";
+          kpiTrend.innerHTML =
+            '<i class="fa-solid fa-circle-exclamation"></i> Atención';
+        } else {
+          kpiTrend.className = "kpi-trend trend-down";
+          kpiTrend.innerHTML = '<i class="fa-solid fa-check"></i> OK';
+        }
+      }
+
+      window.verComprobante = function (url) {
+        const decoded = decodeURI(url);
+        if (
+          decoded.match(/\.(jpeg|jpg|png|gif)/i) ||
+          decoded.includes("imgbb")
+        ) {
+          const img = document.getElementById("receiptImage");
+          img.style.display = "none";
+          img.src = decoded;
+          document.getElementById("receiptLink").href = decoded;
+          img.onload = () => {
+            img.style.display = "block";
+            document.getElementById("receiptError").style.display = "none";
+          };
+          img.onerror = () => {
+            document.getElementById("receiptError").style.display = "block";
+          };
+          document.getElementById("modalReceipt").classList.add("active");
+        } else {
+          window.open(decoded, "_blank");
+        }
+      };
 
       function logout() {
         localStorage.removeItem("sesion_externa");
@@ -908,6 +1197,18 @@
       }
       function scrollToSection(id) {
         document.getElementById(id).scrollIntoView({ behavior: "smooth" });
+      }
+
+      function downloadPDF() {
+        const element = document.getElementById("printArea");
+        const opt = {
+          margin: 0.3,
+          filename: "Reporte_Comunidad.pdf",
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: "in", format: "letter", orientation: "landscape" },
+        };
+        html2pdf().set(opt).from(element).save();
       }
     </script>
   </body>
