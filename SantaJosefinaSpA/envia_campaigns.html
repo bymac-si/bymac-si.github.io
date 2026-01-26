@@ -136,16 +136,24 @@ const API_URL = "https://script.google.com/macros/s/AKfycbwycEC87DrivAnbte694A5l
 let campaignsData = [];
 
 window.onload = () => {
-  // Añadimos la URL con el parámetro y configuramos el modo 'cors' explícitamente
+  const s = document.getElementById("campaignSelect");
+  
+  // Usamos una técnica de "Redirect follow" optimizada para Google
   fetch(`${API_URL}?action=getCampaigns`, {
-    method: 'GET',
-    mode: 'cors', // Forzamos modo CORS
-    redirect: 'follow' // OBLIGATORIO: para que siga la redirección de Google
+    method: "GET",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8",
+    },
+    redirect: "follow", // OBLIGATORIO para saltar el proxy de Google
   })
-  .then(r => r.json())
-  .then(populateSelect)
+  .then(response => {
+    if (!response.ok) throw new Error('Error en la respuesta de la API');
+    return response.json();
+  })
+  .then(data => populateSelect(data))
   .catch(err => {
-    console.error("Error detallado:", err);
+    console.error("Error cargando campañas:", err);
+    s.innerHTML = '<option disabled selected>❌ Error de conexión</option>';
   });
 };
 
