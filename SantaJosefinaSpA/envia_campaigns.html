@@ -106,71 +106,60 @@ function loadPreview() {
   document.getElementById("btnSend").innerText = `Enviar a ${Math.min(leadsActivos.length, 30)} leads activos`;
 }
 
-// 2. LÓGICA DE ENVÍO PARCIALIZADO (30 MAILS)
 async function ejecutarEnvioMasivo() {
   const idCampaña = document.getElementById("campaignSelect").value;
   const campania = campaignsData.find(x => x.ID_Campaña === idCampaña);
   
-  // Reducimos el lote a 15 para probar la estabilidad del hosting
   const lote = leadsActivos
     .filter(l => l.Campaña_Enviada !== idCampaña)
-    .slice(0, 15);
+    .slice(0, 15); // Lote inicial de seguridad
 
-  if (lote.length === 0) {
-    alert("No hay leads pendientes.");
-    return;
-  }
+  if (lote.length === 0) return alert("No hay leads pendientes.");
+  if (!confirm(`¿Iniciar envío vía Resend para ${lote.length} leads?`)) return;
 
-  if (!confirm(`¿Enviar a ${lote.length} leads con intervalos de seguridad?`)) return;
-
-  const btn = document.getElementById("btnSend");
-  const msg = document.getElementById("statusMsg");
-  const barra = document.getElementById("barraProgreso");
-  
-  btn.disabled = true;
-  document.getElementById("progresoArea").style.display = "block";
-
+  mostrarProgreso(true);
   let enviados = 0;
 
   for (let i = 0; i < lote.length; i++) {
     const lead = lote[i];
-    msg.innerText = `Enviando ${i + 1} de ${lote.length}: ${lead.Nombre}...`;
+    actualizarStatus(`Enviando a ${lead.Nombre}...`);
     
     try {
-      const cuerpoPersonalizado = campania.Cuerpo_HTML.replace(/{{Nombre}}/g, lead.Nombre || "Vecino");
+      const cuerpoFinal = campania.Cuerpo_HTML.replace(/{{Nombre}}/g, lead.Nombre || "Vecino");
 
-      await emailjs.send("service_p9hqkqn", "template_80q9psi", {
-        to_email: lead.ID,
-        to_name: lead.Nombre || "Vecino",
-        subject: campania.Asunto,
-        html_body: cuerpoPersonalizado,
+      // Llamada a tu Google Script (puente a Resend)
+      const res = await fetch(`${API_URL}?action=apiResend`, {
+        method: "POST",
+        body: JSON.stringify({
+          to: lead.ID,
+          subject: campania.Asunto,
+          html: cuerpoFinal
+        })
       });
 
+      // Actualizamos AppSheet tras éxito
       await appSheetCRUD("Leads_Marketing", "Edit", [{
         ID: lead.ID,
         Campaña_Enviada: idCampaña,
         Ultimo_Envio: new Date().toISOString(),
-        Estado_Envio: "ENVIADO"
+        Estado_Envio: "ENVIADO (RESEND)"
       }]);
 
       enviados++;
     } catch (err) {
-      console.error(`Error con ${lead.ID}:`, err);
+      console.error(`Error en lead ${lead.ID}:`, err);
     }
 
-    // Actualizar barra
-    barra.style.width = `${((i + 1) / lote.length) * 100}%`;
+    actualizarBarra((i + 1) / lote.length * 100);
 
-    // --- INTERVALO ALEATORIO (Humanizado) ---
-    if (i < lote.length - 1) { // No esperar después del último
-      const esperaAleatoria = Math.floor(Math.random() * (15000 - 8000 + 1)) + 8000;
-      msg.innerText = `Esperando ${Math.round(esperaAleatoria/1000)} seg para el siguiente...`;
-      await new Promise(resolve => setTimeout(resolve, esperaAleatoria));
+    // Pausa aleatoria humanizada
+    if (i < lote.length - 1) {
+      const pausa = Math.floor(Math.random() * (10000 - 5000 + 1)) + 5000;
+      await new Promise(r => setTimeout(r, pausa));
     }
   }
 
-  msg.innerText = `✅ Lote completado: ${enviados} enviados.`;
-  alert("Proceso finalizado. Se recomienda esperar una hora antes de enviar otro lote.");
+  alert(`Proceso terminado. ${enviados} correos enviados exitosamente.`);
   window.location.reload();
 }
 </script>
