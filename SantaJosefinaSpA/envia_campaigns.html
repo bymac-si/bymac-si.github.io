@@ -136,10 +136,10 @@ const API_URL = "https://script.google.com/macros/s/AKfycbwaLUMsWRA7m5-KKmZdwyap
 let campaignsData = [];
 
 window.onload = () => {
-  const p = new URLSearchParams();
-  p.append("action","getCampaigns");
-  fetch(API_URL,{method:"POST",body:p})
-    .then(r=>r.json()).then(populateSelect);
+  fetch(`${API_URL}?action=getCampaigns`) // Usamos GET para pedir datos, es más sencillo
+    .then(r => r.json())
+    .then(populateSelect)
+    .catch(err => console.error("Error cargando campañas:", err));
 };
 
 function populateSelect(data){
@@ -163,17 +163,26 @@ function loadPreview(){
   statusMsg.innerText="";
 }
 
-function sendCampaign(){
-  if(!confirm("¿Confirmas el envío?"))return;
-  btnSend.style.display="none";
-  loader.style.display="block";
-  statusMsg.className="text-muted";
-  statusMsg.innerText="⏳ Enviando campaña...";
-  const p=new URLSearchParams();
-  p.append("action","sendCampaign");
-  p.append("id",campaignSelect.value);
-  fetch(API_URL,{method:"POST",body:p})
-    .then(r=>r.json()).then(finishProcess);
+function sendCampaign() {
+  if(!confirm("¿Confirmas el envío?")) return;
+  
+  btnSend.style.display = "none";
+  loader.style.display = "block";
+  statusMsg.innerText = "⏳ Enviando campaña...";
+
+  // IMPORTANTE: Google Script maneja mejor las redirecciones de CORS 
+  // cuando los parámetros van en la URL para Web Apps
+  const urlFinal = `${API_URL}?action=sendCampaign&id=${encodeURIComponent(campaignSelect.value)}`;
+
+  fetch(urlFinal, { method: "POST" }) 
+    .then(r => r.json())
+    .then(finishProcess)
+    .catch(err => {
+       console.error(err);
+       statusMsg.innerText = "❌ Error de conexión con Google";
+       btnSend.style.display = "block";
+       loader.style.display = "none";
+    });
 }
 
 function finishProcess(r){
