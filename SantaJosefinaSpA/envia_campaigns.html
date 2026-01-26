@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+sc<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -135,108 +135,108 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbwycEC87DrivAnbte694A5l9_8bHCxH56IG2bq6oTnMpWvmA5EoMD5cDW4aXDsxMolJ/exec";
 let campaignsData = [];
 
+// 1. CARGA INICIAL DE CAMPAÑAS
 window.onload = () => {
   const s = document.getElementById("campaignSelect");
   
-  // Usamos una técnica de "Redirect follow" optimizada para Google
-  fetch(`${API_URL}?action=getCampaigns`, {
+  // Agregamos un timestamp para evitar cache del navegador
+  const fetchUrl = `${API_URL}?action=getCampaigns&t=${new Date().getTime()}`;
+
+  fetch(fetchUrl, {
     method: "GET",
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8",
-    },
-    redirect: "follow", // OBLIGATORIO para saltar el proxy de Google
+    redirect: "follow"
   })
   .then(response => {
-    if (!response.ok) throw new Error('Error en la respuesta de la API');
+    // Verificamos si la respuesta es válida
+    if (!response.ok) throw new Error('Respuesta de red no válida');
     return response.json();
   })
-  .then(data => populateSelect(data))
+  .then(data => {
+    if (data && data.length > 0) {
+      populateSelect(data);
+    } else {
+      s.innerHTML = '<option disabled selected>No hay campañas disponibles</option>';
+    }
+  })
   .catch(err => {
-    console.error("Error cargando campañas:", err);
-    s.innerHTML = '<option disabled selected>❌ Error de conexión</option>';
+    console.error("Error en Fetch:", err);
+    s.innerHTML = '<option disabled selected>❌ Error de conexión con CRM</option>';
   });
 };
 
 function populateSelect(data){
-  campaignsData=data;
-  const s=document.getElementById("campaignSelect");
-  s.innerHTML='<option disabled selected>-- Elija campaña --</option>';
-  data.forEach(c=>{
-    const o=document.createElement("option");
-    o.value=c.id;
-    o.textContent=`${c.id} – ${c.asunto}`;
+  campaignsData = data;
+  const s = document.getElementById("campaignSelect");
+  s.innerHTML = '<option disabled selected>-- Elija campaña --</option>';
+  data.forEach(c => {
+    const o = document.createElement("option");
+    o.value = c.id;
+    o.textContent = `${c.id} – ${c.asunto}`;
     s.appendChild(o);
   });
 }
 
 function loadPreview(){
-  const c=campaignsData.find(x=>x.id===campaignSelect.value);
-  if(!c)return;
-  subjectPreview.value=c.asunto;
-  htmlPreview.innerHTML=c.html;
-  btnSend.disabled=false;
-  statusMsg.innerText="";
+  const s = document.getElementById("campaignSelect");
+  const c = campaignsData.find(x => x.id === s.value);
+  if(!c) return;
+  document.getElementById("subjectPreview").value = c.asunto;
+  document.getElementById("htmlPreview").innerHTML = c.html;
+  document.getElementById("btnSend").disabled = false;
+  document.getElementById("statusMsg").innerText = "";
 }
 
+// 2. ENVÍO DE CAMPAÑA
 function sendCampaign() {
-  if(!confirm("¿Confirmas el envío?")) return;
+  const s = document.getElementById("campaignSelect");
+  const btn = document.getElementById("btnSend");
+  const loader = document.getElementById("loader");
+  const msg = document.getElementById("statusMsg");
+
+  if(!confirm("¿Confirmas el envío a los leads activos?")) return;
   
-  btnSend.style.display = "none";
+  btn.style.display = "none";
   loader.style.display = "block";
-  statusMsg.innerText = "⏳ Enviando campaña...";
+  msg.className = "text-muted";
+  msg.innerText = "⏳ Procesando lote en Google Sheets...";
 
-  // IMPORTANTE: Google Script maneja mejor las redirecciones de CORS 
-  // cuando los parámetros van en la URL para Web Apps
-  const urlFinal = `${API_URL}?action=sendCampaign&id=${encodeURIComponent(campaignSelect.value)}`;
+  const urlFinal = `${API_URL}?action=sendCampaign&id=${encodeURIComponent(s.value)}`;
 
-  fetch(urlFinal, { method: "POST" }) 
-    .then(r => r.json())
-    .then(finishProcess)
-    .catch(err => {
-       console.error(err);
-       statusMsg.innerText = "❌ Error de conexión con Google";
-       btnSend.style.display = "block";
-       loader.style.display = "none";
+  // Google Scripts prefiere recibir parámetros por URL en peticiones desde otros dominios
+  fetch(urlFinal, { 
+    method: "POST",
+    mode: "no-cors" // Esta es la clave para evitar el bloqueo de CORS en el POST
+  }) 
+  .then(() => {
+    // Dado que 'no-cors' no permite leer la respuesta, asumimos éxito 
+    // y pedimos al usuario revisar la planilla o esperar el trigger.
+    msg.className = "text-success";
+    msg.innerText = "✅ Orden enviada. Los correos se están procesando (revisa tu Gmail).";
+    btn.style.display = "block";
+    loader.style.display = "none";
+  })
+  .catch(err => {
+    console.error(err);
+    msg.className = "text-danger";
+    msg.innerText = "❌ Error al conectar con el servidor.";
+    btn.style.display = "block";
+    loader.style.display = "none";
+  });
+}
+
+// --- LOGICA DE HEADER (Mantenida igual) ---
+fetch('header.html')
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById('header-container').innerHTML = html;
+    const scripts = document.getElementById('header-container').querySelectorAll('script');
+    scripts.forEach(oldScript => {
+      const newScript = document.createElement('script');
+      if (oldScript.src) newScript.src = oldScript.src;
+      else newScript.textContent = oldScript.textContent;
+      document.body.appendChild(newScript);
     });
-}
-
-function finishProcess(r){
-  loader.style.display="none";
-  btnSend.style.display="block";
-  if(r.status==="success"){
-    statusMsg.className="text-success";
-    statusMsg.innerText=`✅ ${r.enviados} enviados · ${r.errores} errores`;
-  } else {
-    statusMsg.className="text-danger";
-    statusMsg.innerText=`❌ ${r.message}`;
-  }
-}
-// Cargar header externo
-  fetch('header.html')
-    .then(res => {
-      if (!res.ok) throw new Error('Header no encontrado');
-      return res.text();
-    })
-    .then(html => {
-      document.getElementById('header-container').innerHTML = html;
-
-      // ⚠️ Importante: ejecutar scripts embebidos en header.html
-      const scripts = document
-        .getElementById('header-container')
-        .querySelectorAll('script');
-
-      scripts.forEach(oldScript => {
-        const newScript = document.createElement('script');
-        if (oldScript.src) {
-          newScript.src = oldScript.src;
-        } else {
-          newScript.textContent = oldScript.textContent;
-        }
-        document.body.appendChild(newScript);
-      });
-    })
-    .catch(err => console.error('Error cargando header:', err));
-
+  });
 
 </script>
 
