@@ -5,83 +5,37 @@
   <title>Gestor de Campañas | CRM Santa Josefina</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <link rel="stylesheet" href="assets/css/styles.css" />
-    <link rel="manifest" href="manifest.json" />
-    <meta name="theme-color" content="#1a2b48" />
-    <link rel="apple-touch-icon" href="assets/img/icon-192.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#1a2b48" />
+  <link rel="apple-touch-icon" href="assets/img/icon-192.png" />
 
-    <script src="assets/js/app.js"></script>
+  <script src="assets/js/app.js"></script>
 
-    <script>
-      requireAuth();
-    </script>
+  <script>
+    // Verificación de sesión integrada con tu app.js
+    if (typeof requireAuth === "function") requireAuth();
+  </script>
+
   <style>
-    body {
-      max-width: 1200px;
-      margin: auto;
-      background-color: #f8f9fa;
-      color: #1a2b48;
-    }
-    main {
-      padding: 40px;
-    }
-    .dashboard-header {
-      background: #fff;
-      padding: 20px 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,.05);
-      margin-bottom: 30px;
-      border: 1px solid #f0f0f0;
-    }
-    .page-title {
-      font-size: 28px;
-      font-weight: 700;
-    }
-    .card {
-      border-radius: 12px;
-      border: 1px solid #f0f0f0;
-      box-shadow: 0 4px 12px rgba(0,0,0,.05);
-    }
-    .preview-box {
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 15px;
-      height: 420px;
-      overflow-y: auto;
-      background: #fff;
-    }
-    .btn-nuevo {
-      background: #0f172a;
-      color: white;
-      font-weight: 600;
-      height: 48px;
-      border-radius: 8px;
-    }
-    .loader {
-      display: none;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 4px solid #eee;
-      border-top-color: #0f172a;
-      animation: spin .9s linear infinite;
-      margin: 15px auto;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+    body { max-width: 1200px; margin: auto; background-color: #f8f9fa; color: #1a2b48; }
+    main { padding: 40px; }
+    .dashboard-header { background: #fff; padding: 20px 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.05); margin-bottom: 30px; border: 1px solid #f0f0f0; }
+    .page-title { font-size: 28px; font-weight: 700; }
+    .card { border-radius: 12px; border: 1px solid #f0f0f0; box-shadow: 0 4px 12px rgba(0,0,0,.05); }
+    .preview-box { border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; height: 420px; overflow-y: auto; background: #fff; }
+    .btn-nuevo { background: #0f172a; color: white; font-weight: 600; height: 48px; border-radius: 8px; border: none; cursor: pointer; transition: opacity 0.2s; }
+    .btn-nuevo:disabled { opacity: 0.5; cursor: not-allowed; }
+    .loader { display: none; width: 32px; height: 32px; border-radius: 50%; border: 4px solid #eee; border-top-color: #0f172a; animation: spin .9s linear infinite; margin: 15px auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 
-<body style="margin: auto;">
+<body>
 <div id="header-container"></div>
 <main>
 
-  <!-- HEADER -->
   <div class="dashboard-header">
     <h1 class="page-title">
       <i class="fa-solid fa-bullhorn"></i> Gestor de Campañas
@@ -89,15 +43,14 @@
     <div class="text-muted">CRM · Santa Josefina SpA</div>
   </div>
 
-  <!-- SELECT CAMPAÑA -->
   <div class="card p-4 mb-4">
     <label class="fw-bold mb-2">Seleccionar campaña</label>
     <select id="campaignSelect" class="form-select" onchange="loadPreview()">
       <option disabled selected>Cargando campañas...</option>
     </select>
   </div>
-<br>
-  <!-- PREVIEW -->
+  <br>
+
   <div class="row g-4 mb-4">
     <div class="col-12">
       <div class="card p-4">
@@ -105,8 +58,9 @@
         <input type="text" id="subjectPreview" class="form-control" readonly style="width:98%"/>
       </div>
     </div>
-</div>
-<br>
+  </div>
+  <br>
+
   <div class="row g-4 mb-4">
     <div class="col-12">
       <div class="card p-4">
@@ -117,58 +71,49 @@
       </div>
     </div>
   </div>
-<br>
-  <!-- ACCIONES -->
+  <br>
+
   <div class="card p-4 text-center">
     <div id="loader" class="loader"></div>
-
     <button id="btnSend" class="btn btn-nuevo w-100 mb-2" onclick="sendCampaign()" disabled>
       <i class="fa-solid fa-paper-plane"></i> Enviar campaña ahora
     </button>
-
     <div id="statusMsg" class="fw-bold mt-3"></div>
   </div>
 
 </main>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxH6DcHDOf9O3KJ0DiLoajgPIIcrKmX9M0kTIGkSCtFz9Kdj1Yn1CEa28u2w_CrVq49/exec";
+// URL de tu Web App de Google Apps Script
+const API_URL = "https://script.google.com/macros/s/AKfycbwycEC87DrivAnbte694A5l9_8bHCxH56IG2bq6oTnMpWvmA5EoMD5cDW4aXDsxMolJ/exec";
 let campaignsData = [];
 
-// 1. CARGA INICIAL DE CAMPAÑAS
+// 1. CARGA INICIAL DE CAMPAÑAS (Mejorado para CORS)
 window.onload = () => {
   const s = document.getElementById("campaignSelect");
   
-  // Usamos 'no-cache' para evitar que el navegador guarde errores viejos
+  // Usamos redirect: "follow" para que el navegador maneje la seguridad de Google
   fetch(`${API_URL}?action=getCampaigns`, {
     method: "GET",
-    mode: "cors", 
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8"
-    }
+    redirect: "follow"
   })
   .then(response => {
-    if (!response.ok) throw new Error('Error en la red');
+    if (!response.ok) throw new Error('Respuesta de red no válida');
     return response.json();
   })
-  .then(data => populateSelect(data))
+  .then(data => {
+    populateSelect(data);
+  })
   .catch(err => {
-    console.error("Error detallado:", err);
-    // Intentamos una segunda vez con un método alternativo si el primero falla
-    s.innerHTML = '<option disabled selected>❌ Reintentando conexión...</option>';
-    setTimeout(reintentarCarga, 2000);
+    console.error("Error cargando campañas:", err);
+    s.innerHTML = '<option disabled selected>❌ Error de conexión con Google</option>';
   });
+
+  // Cargar el header de Santa Josefina
+  cargarHeaderCRM();
 };
 
-function reintentarCarga() {
-  // Segunda técnica: usando la URL directamente
-  const script = document.createElement('script');
-  // Esta es una técnica avanzada si fetch sigue bloqueado
-  console.log("Iniciando reintento...");
-  // ... (si el primer fetch falla, este es el backup)
-}
-
-function populateSelect(data){
+function populateSelect(data) {
   campaignsData = data;
   const s = document.getElementById("campaignSelect");
   s.innerHTML = '<option disabled selected>-- Elija campaña --</option>';
@@ -180,10 +125,11 @@ function populateSelect(data){
   });
 }
 
-function loadPreview(){
-  const s = document.getElementById("campaignSelect");
-  const c = campaignsData.find(x => x.id === s.value);
-  if(!c) return;
+function loadPreview() {
+  const select = document.getElementById("campaignSelect");
+  const c = campaignsData.find(x => x.id === select.value);
+  if (!c) return;
+  
   document.getElementById("subjectPreview").value = c.asunto;
   document.getElementById("htmlPreview").innerHTML = c.html;
   document.getElementById("btnSend").disabled = false;
@@ -192,35 +138,33 @@ function loadPreview(){
 
 // 2. ENVÍO DE CAMPAÑA
 function sendCampaign() {
-  const s = document.getElementById("campaignSelect");
+  const select = document.getElementById("campaignSelect");
   const btn = document.getElementById("btnSend");
   const loader = document.getElementById("loader");
   const msg = document.getElementById("statusMsg");
 
-  if(!confirm("¿Confirmas el envío a los leads activos?")) return;
+  if (!confirm("¿Confirmas el envío a los leads activos de Santa Josefina SpA?")) return;
   
   btn.style.display = "none";
   loader.style.display = "block";
   msg.className = "text-muted";
   msg.innerText = "⏳ Procesando lote en Google Sheets...";
 
-  const urlFinal = `${API_URL}?action=sendCampaign&id=${encodeURIComponent(s.value)}`;
+  // Enviamos los parámetros por URL para asegurar compatibilidad con Google Scripts
+  const urlFinal = `${API_URL}?action=sendCampaign&id=${encodeURIComponent(select.value)}`;
 
-  // Google Scripts prefiere recibir parámetros por URL en peticiones desde otros dominios
   fetch(urlFinal, { 
     method: "POST",
-    mode: "no-cors" // Esta es la clave para evitar el bloqueo de CORS en el POST
+    mode: "no-cors" // Clave para evitar el bloqueo de CORS al enviar órdenes
   }) 
   .then(() => {
-    // Dado que 'no-cors' no permite leer la respuesta, asumimos éxito 
-    // y pedimos al usuario revisar la planilla o esperar el trigger.
     msg.className = "text-success";
-    msg.innerText = "✅ Orden enviada. Los correos se están procesando (revisa tu Gmail).";
+    msg.innerText = "✅ Orden enviada. Los correos se están procesando (revisa tu bandeja de Enviados).";
     btn.style.display = "block";
     loader.style.display = "none";
   })
   .catch(err => {
-    console.error(err);
+    console.error("Error en envío:", err);
     msg.className = "text-danger";
     msg.innerText = "❌ Error al conectar con el servidor.";
     btn.style.display = "block";
@@ -228,20 +172,25 @@ function sendCampaign() {
   });
 }
 
-// --- LOGICA DE HEADER (Mantenida igual) ---
-fetch('header.html')
-  .then(res => res.text())
-  .then(html => {
-    document.getElementById('header-container').innerHTML = html;
-    const scripts = document.getElementById('header-container').querySelectorAll('script');
-    scripts.forEach(oldScript => {
-      const newScript = document.createElement('script');
-      if (oldScript.src) newScript.src = oldScript.src;
-      else newScript.textContent = oldScript.textContent;
-      document.body.appendChild(newScript);
-    });
-  });
-
+// 3. LOGICA DE HEADER UNIFICADA
+function cargarHeaderCRM() {
+  fetch('header.html')
+    .then(res => {
+      if (!res.ok) throw new Error('Header no encontrado');
+      return res.text();
+    })
+    .then(html => {
+      document.getElementById('header-container').innerHTML = html;
+      const scripts = document.getElementById('header-container').querySelectorAll('script');
+      scripts.forEach(oldScript => {
+        const newScript = document.createElement('script');
+        if (oldScript.src) newScript.src = oldScript.src;
+        else newScript.textContent = oldScript.textContent;
+        document.body.appendChild(newScript);
+      });
+    })
+    .catch(err => console.warn('Aviso: Header no cargado.', err));
+}
 </script>
 
 </body>
