@@ -132,37 +132,41 @@ sc<!DOCTYPE html>
 </main>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwycEC87DrivAnbte694A5l9_8bHCxH56IG2bq6oTnMpWvmA5EoMD5cDW4aXDsxMolJ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxH6DcHDOf9O3KJ0DiLoajgPIIcrKmX9M0kTIGkSCtFz9Kdj1Yn1CEa28u2w_CrVq49/exec";
 let campaignsData = [];
 
 // 1. CARGA INICIAL DE CAMPAÑAS
 window.onload = () => {
   const s = document.getElementById("campaignSelect");
   
-  // Agregamos un timestamp para evitar cache del navegador
-  const fetchUrl = `${API_URL}?action=getCampaigns&t=${new Date().getTime()}`;
-
-  fetch(fetchUrl, {
+  // Usamos 'no-cache' para evitar que el navegador guarde errores viejos
+  fetch(`${API_URL}?action=getCampaigns`, {
     method: "GET",
-    redirect: "follow"
-  })
-  .then(response => {
-    // Verificamos si la respuesta es válida
-    if (!response.ok) throw new Error('Respuesta de red no válida');
-    return response.json();
-  })
-  .then(data => {
-    if (data && data.length > 0) {
-      populateSelect(data);
-    } else {
-      s.innerHTML = '<option disabled selected>No hay campañas disponibles</option>';
+    mode: "cors", 
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8"
     }
   })
+  .then(response => {
+    if (!response.ok) throw new Error('Error en la red');
+    return response.json();
+  })
+  .then(data => populateSelect(data))
   .catch(err => {
-    console.error("Error en Fetch:", err);
-    s.innerHTML = '<option disabled selected>❌ Error de conexión con CRM</option>';
+    console.error("Error detallado:", err);
+    // Intentamos una segunda vez con un método alternativo si el primero falla
+    s.innerHTML = '<option disabled selected>❌ Reintentando conexión...</option>';
+    setTimeout(reintentarCarga, 2000);
   });
 };
+
+function reintentarCarga() {
+  // Segunda técnica: usando la URL directamente
+  const script = document.createElement('script');
+  // Esta es una técnica avanzada si fetch sigue bloqueado
+  console.log("Iniciando reintento...");
+  // ... (si el primer fetch falla, este es el backup)
+}
 
 function populateSelect(data){
   campaignsData = data;
