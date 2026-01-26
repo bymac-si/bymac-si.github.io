@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard Conversiones | CRM Santa Josefina</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Bootstrap + Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      max-width: 1300px;
+      margin: 0 auto;
+      background: #f8f9fa;
+      color: #1a2b48;
+    }
+    main {
+      padding: 40px;
+    }
+    .dashboard-header {
+      background: #fff;
+      padding: 20px 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.05);
+      margin-bottom: 30px;
+      border: 1px solid #f0f0f0;
+    }
+    .page-title {
+      font-size: 28px;
+      font-weight: 700;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+      margin-bottom: 30px;
+    }
+    .kpi-card {
+      background: #fff;
+      padding: 24px;
+      border-radius: 8px;
+      border-left: 5px solid #ccc;
+      box-shadow: 0 4px 12px rgba(0,0,0,.05);
+      border: 1px solid #f0f0f0;
+    }
+    .kpi-title {
+      font-size: .8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #6c757d;
+    }
+    .kpi-value {
+      font-size: 2.2rem;
+      font-weight: 700;
+    }
+    .card {
+      border-radius: 12px;
+      border: 1px solid #f0f0f0;
+      box-shadow: 0 4px 12px rgba(0,0,0,.05);
+      background: #fff;
+    }
+    table th {
+      background: #f8fafc;
+      font-weight: 600;
+    }
+    .badge.A { background:#2ecc71; }
+    .badge.B { background:#f1c40f; color:#000; }
+    .badge.C { background:#e74c3c; }
+  </style>
+</head>
+
+<body>
+
+
+<!-- HEADER DINÁMICO -->
+<div id="header-container"></div>
+
+<main>
+
+  <!-- HEADER -->
+  <div class="dashboard-header">
+    <h1 class="page-title">
+      <i class="fa-solid fa-chart-line"></i> Dashboard de Conversiones
+    </h1>
+    <div class="text-muted">CRM · Santa Josefina SpA</div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi-card" style="border-left-color:#0dcaf0">
+      <span class="kpi-title">Total Leads</span>
+      <div class="kpi-value" id="totalLeads">–</div>
+    </div>
+    <div class="kpi-card" style="border-left-color:#2ecc71">
+      <span class="kpi-title">Leads A</span>
+      <div class="kpi-value" id="leadsA">–</div>
+      <span class="badge A mt-2">Alta intención</span>
+    </div>
+    <div class="kpi-card" style="border-left-color:#f1c40f">
+      <span class="kpi-title">Leads B</span>
+      <div class="kpi-value" id="leadsB">–</div>
+      <span class="badge B mt-2">Nutrir</span>
+    </div>
+    <div class="kpi-card" style="border-left-color:#e74c3c">
+      <span class="kpi-title">Leads C</span>
+      <div class="kpi-value" id="leadsC">–</div>
+      <span class="badge C mt-2">Automático</span>
+    </div>
+    <div class="kpi-card" style="border-left-color:#6610f2">
+      <span class="kpi-title">Conversión</span>
+      <div class="kpi-value" id="conversion">–%</div>
+    </div>
+  </div>
+
+  <!-- TABLAS -->
+  <div class="row g-4 mb-4">
+    <div class="col-12 col-lg-6">
+      <div class="card p-4 h-100">
+        <h5>📌 Leads por Fuente</h5>
+        <table class="table table-sm" id="tablaFuente">
+          <thead>
+            <tr><th>Fuente</th><th>Cantidad</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="card p-4 h-100">
+        <h5>📌 Estado del Funnel</h5>
+        <table class="table table-sm" id="tablaEstado">
+          <thead>
+            <tr><th>Estado</th><th>Cantidad</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLA -->
+  <div class="row g-4 mb-4 text-center">
+    <div class="col-md-4">
+      <div class="card p-4 border-success">
+        <h5 class="text-success">🟢 En SLA</h5>
+        <h2 id="sla_ok">0</h2>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-4 border-warning">
+        <h5 class="text-warning">🟡 Por vencer</h5>
+        <h2 id="sla_alerta">0</h2>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-4 border-danger">
+        <h5 class="text-danger">🔴 SLA vencido</h5>
+        <h2 id="sla_vencido">0</h2>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHATSAPP -->
+  <div class="card p-4 text-center mb-4">
+    <button class="btn btn-success btn-lg" onclick="enviarWhatsAppLeadsA()">
+      <i class="fa-brands fa-whatsapp"></i> Enviar WhatsApp a Leads A
+    </button>
+  </div>
+
+  <div class="text-muted text-center">
+    🔥 Recomendación: solo los <b>Leads A</b> deben pasar a contacto directo.
+  </div>
+
+</main>
+
+<script>
+google.script.run.withSuccessHandler(renderDashboard).getDashboardData();
+
+function renderDashboard(data){
+  totalLeads.innerText=data.total;
+  leadsA.innerText=data.A;
+  leadsB.innerText=data.B;
+  leadsC.innerText=data.C;
+  conversion.innerText=data.total?Math.round((data.A/data.total)*100)+"%":"0%";
+  renderTable("tablaFuente",data.fuentes);
+  renderTable("tablaEstado",data.estados);
+}
+
+function renderTable(id,obj){
+  const tb=document.querySelector(`#${id} tbody`);
+  tb.innerHTML="";
+  for(let k in obj){
+    tb.innerHTML+=`<tr><td>${k}</td><td>${obj[k]}</td></tr>`;
+  }
+}
+
+function enviarWhatsAppLeadsA(){
+  google.script.run.withSuccessHandler(leads=>{
+    if(!leads.length){alert("No hay Leads A pendientes");return;}
+    leads.forEach(l=>{
+      const msg=encodeURIComponent(
+        `Hola ${l.nombre}, soy Marcos de Santa Josefina SpA.\n\n¿Agendamos una llamada de 15 minutos?`
+      );
+      window.open(`https://wa.me/56${l.telefono}?text=${msg}`,'_blank');
+      google.script.run.marcarWhatsAppEnviado(l.row);
+    });
+  }).getLeadsAWhatsApp();
+}
+
+function cargarSLA(){
+  google.script.run.withSuccessHandler(d=>{
+    sla_ok.innerText=d.OK;
+    sla_alerta.innerText=d.ALERTA;
+    sla_vencido.innerText=d.VENCIDO;
+  }).getSLADashboard();
+}
+cargarSLA();
+setInterval(cargarSLA,60000);
+// Cargar header externo
+  fetch('header.html')
+    .then(res => {
+      if (!res.ok) throw new Error('Header no encontrado');
+      return res.text();
+    })
+    .then(html => {
+      document.getElementById('header-container').innerHTML = html;
+
+      // ⚠️ Importante: ejecutar scripts embebidos en header.html
+      const scripts = document
+        .getElementById('header-container')
+        .querySelectorAll('script');
+
+      scripts.forEach(oldScript => {
+        const newScript = document.createElement('script');
+        if (oldScript.src) {
+          newScript.src = oldScript.src;
+        } else {
+          newScript.textContent = oldScript.textContent;
+        }
+        document.body.appendChild(newScript);
+      });
+    })
+    .catch(err => console.error('Error cargando header:', err));
+
+
+</script>
+
+</body>
+</html>
