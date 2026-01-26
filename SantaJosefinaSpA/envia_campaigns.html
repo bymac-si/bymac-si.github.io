@@ -12,9 +12,8 @@
   <link rel="apple-touch-icon" href="assets/img/icon-192.png" />
 
   <script src="assets/js/app.js"></script>
-
   <script>
-    // Verificación de sesión integrada con tu app.js
+    // Verificación de sesión heredada de app.js
     if (typeof requireAuth === "function") requireAuth();
   </script>
 
@@ -84,21 +83,22 @@
 </main>
 
 <script>
-// URL de tu Web App de Google Apps Script
-const API_URL = "https://script.google.com/macros/s/AKfycbyohF_csIxDKMqYEUFoNlRJ-98SKuGLSJ3UAVkZ509ffu_qOPzB3gXRjnghgTHRpI6v/exec";
+// URL de la Web App publicada como "Cualquier persona" (Anyone)
+const API_URL = "https://script.google.com/macros/s/AKfycbwycEC87DrivAnbte694A5l9_8bHCxH56IG2bq6oTnMpWvmA5EoMD5cDW4aXDsxMolJ/exec";
 let campaignsData = [];
 
-// 1. CARGA INICIAL DE CAMPAÑAS (Mejorado para CORS)
+// 1. CARGA INICIAL DE CAMPAÑAS
 window.onload = () => {
   const s = document.getElementById("campaignSelect");
   
-  // Usamos redirect: "follow" para que el navegador maneje la seguridad de Google
+  // Agregamos redirect: "follow" para manejar el salto de seguridad de Google
   fetch(`${API_URL}?action=getCampaigns`, {
     method: "GET",
-    redirect: "follow"
+    mode: "cors",
+    redirect: "follow" 
   })
   .then(response => {
-    if (!response.ok) throw new Error('Respuesta de red no válida');
+    if (!response.ok) throw new Error('Error en la respuesta de la API');
     return response.json();
   })
   .then(data => {
@@ -106,14 +106,14 @@ window.onload = () => {
   })
   .catch(err => {
     console.error("Error cargando campañas:", err);
-    s.innerHTML = '<option disabled selected>❌ Error de conexión con Google</option>';
+    s.innerHTML = '<option disabled selected>❌ Error de conexión con el CRM</option>';
   });
 
-  // Cargar el header de Santa Josefina
-  cargarHeaderCRM();
+  // Cargar el header externo
+  cargarHeaderPropio();
 };
 
-function populateSelect(data) {
+function populateSelect(data){
   campaignsData = data;
   const s = document.getElementById("campaignSelect");
   s.innerHTML = '<option disabled selected>-- Elija campaña --</option>';
@@ -125,10 +125,10 @@ function populateSelect(data) {
   });
 }
 
-function loadPreview() {
+function loadPreview(){
   const select = document.getElementById("campaignSelect");
   const c = campaignsData.find(x => x.id === select.value);
-  if (!c) return;
+  if(!c) return;
   
   document.getElementById("subjectPreview").value = c.asunto;
   document.getElementById("htmlPreview").innerHTML = c.html;
@@ -143,23 +143,22 @@ function sendCampaign() {
   const loader = document.getElementById("loader");
   const msg = document.getElementById("statusMsg");
 
-  if (!confirm("¿Confirmas el envío a los leads activos de Santa Josefina SpA?")) return;
+  if(!confirm("¿Confirmas el envío a los leads activos de Santa Josefina SpA?")) return;
   
   btn.style.display = "none";
   loader.style.display = "block";
   msg.className = "text-muted";
   msg.innerText = "⏳ Procesando lote en Google Sheets...";
 
-  // Enviamos los parámetros por URL para asegurar compatibilidad con Google Scripts
   const urlFinal = `${API_URL}?action=sendCampaign&id=${encodeURIComponent(select.value)}`;
 
   fetch(urlFinal, { 
     method: "POST",
-    mode: "no-cors" // Clave para evitar el bloqueo de CORS al enviar órdenes
+    mode: "no-cors" // Permite que la orden llegue a Google sin bloqueos de lectura
   }) 
   .then(() => {
     msg.className = "text-success";
-    msg.innerText = "✅ Orden enviada. Los correos se están procesando (revisa tu bandeja de Enviados).";
+    msg.innerText = "✅ Orden enviada. Los correos se están procesando (revisa tu Gmail).";
     btn.style.display = "block";
     loader.style.display = "none";
   })
@@ -172,13 +171,10 @@ function sendCampaign() {
   });
 }
 
-// 3. LOGICA DE HEADER UNIFICADA
-function cargarHeaderCRM() {
+// 3. CARGAR HEADER (Compatibilidad con tu estructura actual)
+function cargarHeaderPropio() {
   fetch('header.html')
-    .then(res => {
-      if (!res.ok) throw new Error('Header no encontrado');
-      return res.text();
-    })
+    .then(res => res.text())
     .then(html => {
       document.getElementById('header-container').innerHTML = html;
       const scripts = document.getElementById('header-container').querySelectorAll('script');
@@ -189,7 +185,7 @@ function cargarHeaderCRM() {
         document.body.appendChild(newScript);
       });
     })
-    .catch(err => console.warn('Aviso: Header no cargado.', err));
+    .catch(err => console.warn('Header no cargado automáticamente.', err));
 }
 </script>
 
