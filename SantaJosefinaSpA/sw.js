@@ -1,16 +1,16 @@
 const CACHE_NAME = 'crm-josefina-v1';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/login.html',
-  '/index.html',
-  '/dashboard.html',
-  '/prospectos.html',
-  '/mobile_prospecto.html',
-  '/mobile_bitacora.html',
-  '/mobile_mapa.html',
-  '/assets/css/styles.css',
-  '/assets/js/app.js',
-  '/assets/img/logo_santajosefina.png',
+  './',
+  'login.html',
+  'index.html',
+  'dashboard.html',
+  'prospectos.html',
+  'mobile_prospecto.html',
+  'mobile_bitacora.html',
+  'mobile_mapa.html',
+  'assets/css/styles.css',
+  'assets/js/app.js',
+  'assets/img/logo_santajosefina.png',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
   'https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css'
 ];
