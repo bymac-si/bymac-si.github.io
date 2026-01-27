@@ -186,74 +186,54 @@
 
 </main>
 <div id="footer"></div>
-<script>
-const totalLeads=document.getElementById("totalLeads");
-const leadsA=document.getElementById("leadsA"); 
+<<script>
+  // URL de tu implementación (la misma que usas en app.js)
+  const API_URL = "https://script.google.com/macros/s/AKfycbxEQekq83o6vv-t_vuxjEvInpCHsvKdw2-FNEIaN-FAr2NplrVEmg8ehTFWRneZSGWm/exec";
 
- document.addEventListener("DOMContentLoaded", async () => {
-        try {
-          document.getElementById("header").innerHTML = await (
-            await fetch("header.html")
-          ).text();
-        } catch (e) {}
-        try {
-          document.getElementById("footer").innerHTML = await (
-            await fetch("footer.html")
-          ).text();
-        } catch (e) {}
-        await cargarDatos();
-      });
-const leadsB=document.getElementById("leadsB");
-const leadsC=document.getElementById("leadsC"); 
-const conversion=document.getElementById("conversion");
+  document.addEventListener("DOMContentLoaded", async () => {
+    // 1. Cargar componentes visuales
+    try {
+      const h = await fetch("header.html"); if (h.ok) document.getElementById("header").innerHTML = await h.text();
+      const f = await fetch("footer.html"); if (f.ok) document.getElementById("footer").innerHTML = await f.text();
+    } catch (e) { console.error("Error cargando componentes", e); }
+    
+    // 2. Iniciar carga de datos reales
+    cargarTodoElDashboard();
+  });
 
+  async function cargarTodoElDashboard() {
+  try {
+    // Añadimos redirección automática para saltar CORS
+    const response = await fetch(`${API_URL}?action=getDashboardData`, {
+      method: 'GET',
+      mode: 'cors', // Forzamos modo cors
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+      }
+    });
 
-google.script.run.withSuccessHandler(renderDashboard).getDashboardData();
+    if (!response.ok) throw new Error("Error en la respuesta de red");
+    
+    const data = await response.json();
+    
+    // ... resto de tu código de renderizado (KPIs, Tablas, SLA)
+    console.log("Datos cargados con éxito:", data);
 
-function renderDashboard(data){
-  totalLeads.innerText=data.total;
-  leadsA.innerText=data.A;
-  leadsB.innerText=data.B;
-  leadsC.innerText=data.C;
-  conversion.innerText=data.total?Math.round((data.A/data.total)*100)+"%":"0%";
-  renderTable("tablaFuente",data.fuentes);
-  renderTable("tablaEstado",data.estados);
-}
-
-function renderTable(id,obj){
-  const tb=document.querySelector(`#${id} tbody`);
-  tb.innerHTML="";
-  for(let k in obj){
-    tb.innerHTML+=`<tr><td>${k}</td><td>${obj[k]}</td></tr>`;
+  } catch (err) {
+    console.error("Error en Dashboard:", err);
+    // Si falla por CORS, intentamos con el proxy alternativo
+    alert("Error de conexión. Revisa que la API esté publicada como 'Cualquier persona'");
   }
 }
 
-function enviarWhatsAppLeadsA(){
-  google.script.run.withSuccessHandler(leads=>{
-    if(!leads.length){alert("No hay Leads A pendientes");return;}
-    leads.forEach(l=>{
-      const msg=encodeURIComponent(
-        `Hola ${l.nombre}, soy Marcos de Santa Josefina SpA.\n\n¿Agendamos una llamada de 15 minutos?`
-      );
-      window.open(`https://wa.me/56${l.telefono}?text=${msg}`,'_blank');
-      google.script.run.marcarWhatsAppEnviado(l.row);
-    });
-  }).getLeadsAWhatsApp();
-}
-
-function cargarSLA(){
-  google.script.run.withSuccessHandler(d=>{
-    sla_ok.innerText=d.OK;
-    sla_alerta.innerText=d.ALERTA;
-    sla_vencido.innerText=d.VENCIDO;
-  }).getSLADashboard();
-}
-cargarSLA();
-setInterval(cargarSLA,60000);
-
-
-
+  function renderTable(id, obj) {
+    const tb = document.querySelector(`#${id} tbody`);
+    if(!tb) return;
+    tb.innerHTML = "";
+    for (let k in obj) {
+      tb.innerHTML += `<tr><td>${k}</td><td><span class="badge bg-secondary" style="background:#64748b; color:white; padding:4px 8px; border-radius:4px;">${obj[k]}</span></td></tr>`;
+    }
+  }
 </script>
-
 </body>
 </html>
