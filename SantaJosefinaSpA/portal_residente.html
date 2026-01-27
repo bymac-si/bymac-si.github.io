@@ -237,6 +237,28 @@
         font-weight: 400;
         font-style: normal;
       }
+      /* Estilos para el renderizado de unidad con FontAwesome */
+.unit-render-container {
+    display: inline-flex;
+    gap: 2px;
+    align-items: center;
+    vertical-align: middle;
+}
+
+.fa-unit-stack {
+    font-size: 0.5em; /* Ajuste proporcional al contenedor */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fa-unit-stack .fa-square {
+    color: rgba(255, 255, 255, 0.15); /* Fondo sutil para la placa */
+}
+
+.fa-unit-stack .fa-inverse {
+    color: #ffffff;
+}
     </style>
   </head>
   <body>
@@ -259,12 +281,13 @@
             >
             <span style="margin: 0 5px">|</span>
             <span style="font-size: 12px">Unid.:</span>
-            <span
-              id="residenteUnidad"
-              class="ovo-regular"
-              style="font-size: 40px; font-weight: 550; line-height: 1"
-              >...</span
-            >
+<span
+    id="residenteUnidad"
+    class="ovo-regular"
+    style="display: inline-flex; align-items: center; margin-left: 5px;"
+>
+    ...
+</span>
           </div>
         </div>
         <button
@@ -399,6 +422,52 @@
     </div>
 
     <script>
+      // --- MAPA DE CARACTERES FONTAWESOME ---
+const faMap = {
+    '0': 'fa-0', '1': 'fa-1', '2': 'fa-2', '3': 'fa-3', '4': 'fa-4',
+    '5': 'fa-5', '6': 'fa-6', '7': 'fa-7', '8': 'fa-8', '9': 'fa-9',
+    'A': 'fa-a', 'B': 'fa-b', 'C': 'fa-c', 'D': 'fa-d', 'E': 'fa-e',
+    'F': 'fa-f', 'G': 'fa-g', 'H': 'fa-h', 'I': 'fa-i', 'J': 'fa-j',
+    '-': 'fa-minus', '/': 'fa-slash', '.': 'fa-circle-dot'
+};
+
+// --- FUNCIÓN DE RENDERIZADO ---
+function renderUnitIcons(texto) {
+    const container = document.createElement('div');
+    container.className = 'unit-render-container';
+    
+    texto.toString().toUpperCase().split('').forEach(char => {
+        const iconKey = faMap[char];
+        const spanStack = document.createElement('span');
+        spanStack.className = 'fa-stack fa-unit-stack';
+
+        if (iconKey) {
+            spanStack.innerHTML = `
+                <i class="fa-solid fa-square fa-stack-2x"></i>
+                <i class="fa-solid ${iconKey} fa-stack-1x fa-inverse"></i>
+            `;
+        } else {
+            // Si no hay icono, poner el texto plano con estilo
+            spanStack.innerHTML = `<b style="font-size: 20px; margin: 0 2px">${char}</b>`;
+        }
+        container.appendChild(spanStack);
+    });
+    return container;
+}
+
+// --- MODIFICACIÓN DE SAFEUPDATE ---
+function safeUpdate(id, valor) {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    // Si el ID es el de la unidad, usamos el renderizador de iconos
+    if (id === 'residenteUnidad' && valor !== '...' && valor !== 'Cargando...') {
+        el.textContent = ''; // Limpiar
+        el.appendChild(renderUnitIcons(valor));
+    } else {
+        el.textContent = valor;
+    }
+}
       let USUARIO = null;
       let DATOS_COMUNIDAD = null;
       let DATOS_UNIDAD = null;

@@ -188,7 +188,7 @@
 <div id="footer"></div>
 <script>
   // URL de tu implementación (Asegúrate de que sea la última versión publicada)
-  const API_URL = "https://script.google.com/macros/s/AKfycbzTbqlUyr1IaonVZIa_ubfBGaJxYV5pE83WukgxhKQ1WuU3oxnIzYWw--nzIjYAcfRP/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbwqPVm_JeZ456-ipPNu1d79aj6k6LpYkOQJUTvrM1wsB4QbMbDfa6gPXfS6-ZbZios9/exec";
 
   document.addEventListener("DOMContentLoaded", async () => {
     // 1. Cargar componentes visuales
@@ -247,6 +247,49 @@
       tb.innerHTML += `<tr><td>${k}</td><td><span class="badge bg-secondary" style="background:#64748b; color:white; padding:4px 8px; border-radius:4px;">${obj[k]}</span></td></tr>`;
     }
   }
+
+  async function enviarWhatsAppLeadsA() {
+  const btn = document.querySelector(".btn-cta-wa") || document.querySelector(".btn-success");
+  const originalText = btn.innerHTML;
+  
+  try {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Obteniendo Leads...';
+
+    // 1. Pedir a la API solo los Leads A
+    const response = await fetch(`${API_URL}?action=getLeadsA`);
+    const leads = await response.json();
+
+    if (!leads || leads.length === 0) {
+      alert("No hay Leads Categoría A pendientes de contacto hoy.");
+      return;
+    }
+
+    if (!confirm(`Se abrirán ${leads.length} pestañas de WhatsApp. ¿Deseas continuar?`)) return;
+
+    // 2. Abrir WhatsApp para cada Lead
+    leads.forEach(l => {
+      const msg = encodeURIComponent(
+        `Hola ${l.nombre}, soy Marcos de Santa Josefina SpA.\n\nVi que realizaste el diagnóstico de seguridad para ${l.comunidad}. ¿Te parece si agendamos una breve llamada de 10 min para revisar los puntos rojos?`
+      );
+      
+      // Formatear teléfono (asegurar que tenga el 569)
+      let tlf = l.telefono.replace(/\D/g, '');
+      if (tlf.startsWith('9')) tlf = '56' + tlf;
+      if (tlf.startsWith('562')) tlf = tlf.replace('562', '569'); // Corrección común
+
+      window.open(`https://wa.me/${tlf}?text=${msg}`, '_blank');
+    });
+
+  } catch (err) {
+    console.error("Error al obtener leads:", err);
+    alert("Error al conectar con la base de datos.");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+  }
+} 
+
 </script>
 </body>
 </html>

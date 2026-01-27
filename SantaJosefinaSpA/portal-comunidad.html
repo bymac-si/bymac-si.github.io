@@ -34,11 +34,19 @@
         .main-content { flex: 1; overflow-y: auto; padding: 30px 40px; }
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .page-title h1 { margin: 0; font-size: 24px; }
-        .page-title p { margin: 5px 0 0; color: var(--text-muted); font-size: 14px; }
+        .page-title h2 { margin: 5px 0 0; font-size: 18px; color: var(--text); }
+        .page-title h3 { margin: 5px 0 0; color: var(--text-muted); font-size: 14px; font-weight: 400; display: flex; align-items: center; gap: 8px; }
 
         .action-buttons { display: flex; gap: 10px; }
         .btn-tool { padding: 8px 15px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; cursor: pointer; color: var(--text); font-size: 13px; display: flex; align-items: center; gap: 5px; font-weight: 600; }
         .btn-tool:hover { background: #f8fafc; }
+
+        /* --- ESTILOS RENDERIZADO DE UNIDAD --- */
+        .unit-render-portal { display: inline-flex; gap: 2px; align-items: center; vertical-align: middle; }
+        .fa-portal-stack { font-size: 0.55em; }
+        .fa-portal-stack .fa-square { color: var(--primary); }
+        #sidebarUnit .fa-portal-stack .fa-square { color: rgba(255,255,255,0.2); }
+        .fa-portal-stack .fa-inverse { color: #ffffff; }
 
         /* DASHBOARD GRID */
         .grid-container { display: grid; grid-template-columns: 2fr 1fr; gap: 25px; grid-template-rows: auto; }
@@ -130,7 +138,7 @@
             <div class="avatar-circle" id="userInitial">U</div>
             <div style="overflow: hidden;">
                 <div style="font-weight: 600; white-space: nowrap;" id="sidebarName">...</div>
-                <div style="font-size: 16px; color: #94a3b8;" id="sidebarUnit">...</div>
+                <div style="font-size: 16px; color: #94a3b8; display: flex; align-items: center; gap: 5px;" id="sidebarUnit">...</div>
             </div>
             <i class="fa-solid fa-right-from-bracket" style="margin-left: auto; cursor: pointer;" onclick="logout()" title="Salir"></i>
         </div>
@@ -254,6 +262,40 @@
         let chartEvolutionInstance = null;
         let chartDistInstance = null;
 
+        // --- MAPA DE CARACTERES FONTAWESOME ---
+        const faMap = {
+            '0': 'fa-0', '1': 'fa-1', '2': 'fa-2', '3': 'fa-3', '4': 'fa-4',
+            '5': 'fa-5', '6': 'fa-6', '7': 'fa-7', '8': 'fa-8', '9': 'fa-9',
+            'A': 'fa-a', 'B': 'fa-b', 'C': 'fa-c', 'D': 'fa-d', 'E': 'fa-e',
+            'F': 'fa-f', 'G': 'fa-g', 'H': 'fa-h', 'I': 'fa-i', 'J': 'fa-j',
+            '-': 'fa-minus', '/': 'fa-slash', '.': 'fa-circle-dot'
+        };
+
+        // --- FUNCIÓN DE RENDERIZADO DE UNIDAD ---
+        function renderUnitIcons(texto) {
+            if (!texto || texto === '...' || texto === 'Cargando...') return document.createTextNode(texto);
+            
+            const container = document.createElement('div');
+            container.className = 'unit-render-portal';
+            
+            texto.toString().toUpperCase().split('').forEach(char => {
+                const iconKey = faMap[char];
+                const spanStack = document.createElement('span');
+                spanStack.className = 'fa-stack fa-portal-stack';
+
+                if (iconKey) {
+                    spanStack.innerHTML = `
+                        <i class="fa-solid fa-square fa-stack-2x"></i>
+                        <i class="fa-solid ${iconKey} fa-stack-2x fa-inverse"></i>
+                    `;
+                } else {
+                    spanStack.innerHTML = `<b style="margin: 0 2px">${char}</b>`;
+                }
+                container.appendChild(spanStack);
+            });
+            return container;
+        }
+
         document.addEventListener("DOMContentLoaded", async () => {
             const sesionStr = localStorage.getItem('sesion_externa');
             if(!sesionStr) { window.location.href = 'login_residente.html'; return; }
@@ -281,11 +323,9 @@
                 ]);
                 DB = { Cobros:cob||[], Pagos:pag||[], Gastos:gas||[], Espacios:esp||[], Bloques:blo||[], Reservas:res||[], Reclamos:rec||[], Copropiedades:cop||[], Unidades:uni||[], Proveedores:prov||[] };
 
-                // 1. Identificar Unidad y Comunidad del Usuario
                 const myUnidadID = String(USER.UnidadID).trim();
                 const unidadEncontrada = DB.Unidades.find(u => String(u.ID || u.id) === myUnidadID);
                 const numeroUnidad = unidadEncontrada ? unidadEncontrada.Numero : myUnidadID;
-                const labelCompleto = unidadEncontrada ? (unidadEncontrada.Numero + (unidadEncontrada.Torre ? " - " + unidadEncontrada.Torre : "")) : myUnidadID;
                 
                 if (unidadEncontrada && unidadEncontrada.CopropiedadID) {
                     CURRENT_COPRO_ID = String(unidadEncontrada.CopropiedadID);
@@ -296,20 +336,27 @@
                 const nombre = USER.datos.Nombre || "Residente";
                 const edificio = DB.Copropiedades.find(c => String(c.ID) === CURRENT_COPRO_ID);
                 
+                // --- ACTUALIZACIÓN CON ICONOS ---
                 document.getElementById('sidebarName').innerText = nombre;
-                document.getElementById('sidebarUnit').innerText = `Unidad ${numeroUnidad}`;
+                
+                const sidebarUnitEl = document.getElementById('sidebarUnit');
+                sidebarUnitEl.innerHTML = 'Unid. '; 
+                sidebarUnitEl.appendChild(renderUnitIcons(numeroUnidad));
+
                 document.getElementById('userInitial').innerText = nombre.charAt(0).toUpperCase();
                 document.getElementById('welcomeTitle').innerText = `Hola, ${nombre.split(' ')[0]}`;
-                document.getElementById('sidebarUnitTitle').innerText = `Unidad ${numeroUnidad}`;
+                
+                const titleUnitEl = document.getElementById('sidebarUnitTitle');
+                titleUnitEl.innerHTML = 'Panel de Unidad ';
+                titleUnitEl.appendChild(renderUnitIcons(numeroUnidad));
+
                 if(edificio) document.getElementById('buildingName').innerText = edificio.Nombre;
                 
             } catch(e) { console.error(e); }
         }
 
-        /* --- FUNCIÓN CRÍTICA: LIMPIEZA DE URL --- */
         function cleanUrl(val) {
             if(!val) return "";
-            // Si viene sucio como JSON string, limpiarlo
             if (val.includes('{') && val.includes('"Url"')) {
                 try {
                     const jsonStr = val.substring(val.indexOf('{'), val.lastIndexOf('}')+1);
@@ -321,9 +368,9 @@
             return "";
         }
 
-        /* --- MÓDULO ESPACIOS --- */
         function initSpaces() {
             const sel = document.getElementById('spaceSelector');
+            if(!sel) return;
             sel.innerHTML = '';
 
             const espaciosActivos = DB.Espacios.filter(e => 
@@ -387,7 +434,6 @@
             );
             
             bloques.sort((a,b) => (a.HoraInicio || "").localeCompare(b.HoraInicio || ""));
-
             const reservas = DB.Reservas.filter(r => String(r.EspacioID) === String(spaceID) && r.Fecha === hoy && r.Estado !== "Rechazada");
 
             if(bloques.length === 0) { 
@@ -398,21 +444,12 @@
             container.innerHTML = bloques.map(b => {
                 const ocupado = reservas.find(r => String(r.Bloque) === String(b.Nombre) || String(r.Bloque) === String(b.ID));
                 const cssClass = ocupado ? 'slot-busy' : 'time-slot';
+                const action = ocupado ? '' : `onclick="window.location.href='reservas.html?spaceId=${spaceID}&blockId=${b.ID}'"`;
                 
-                // LINK CORRECTO A RESERVAS.HTML
-                const action = ocupado 
-                    ? '' 
-                    : `onclick="window.location.href='reservas.html?spaceId=${spaceID}&blockId=${b.ID}'"`;
-                
-                return `
-                <div class="${cssClass}" ${action} title="${ocupado ? 'Ocupado' : 'Reservar ahora'}">
-                    <b>${b.Nombre}</b>
-                    <span>${b.HoraInicio} - ${b.HoraFin}</span>
-                </div>`;
+                return `<div class="${cssClass}" ${action} title="${ocupado ? 'Ocupado' : 'Reservar ahora'}"><b>${b.Nombre}</b><span>${b.HoraInicio} - ${b.HoraFin}</span></div>`;
             }).join('');
         }
 
-        /* --- GASTOS Y COMPROBANTES --- */
         function renderDetailedExpenses() {
             const tb = document.getElementById('detailedExpensesTable');
             const list = DB.Gastos.sort((a,b)=>new Date(b.Fecha)-new Date(a.Fecha)).slice(0,10);
@@ -421,17 +458,11 @@
             tb.innerHTML = list.map(g => {
                 const prov = DB.Proveedores.find(p=>String(p.ID)===String(g.ProveedorID))?.Nombre || "Proveedor";
                 const concepto = g.Observaciones || g.Concepto || 'Sin detalle';
+                const cleanLink = cleanUrl(g.ComprobanteURL || g.FacturaURL || g.Documento || "");
                 
-                // Usamos cleanUrl para asegurar que sea una URL válida
-                const rawUrl = g.ComprobanteURL || g.FacturaURL || g.Documento || "";
-                const cleanLink = cleanUrl(rawUrl);
-                
-                let btnHtml = "";
-                if(cleanLink){
-                    btnHtml = `<button class="btn-invoice" onclick="verComprobante('${encodeURI(cleanLink)}')" style="color:var(--primary);"><i class="fa-solid fa-eye"></i> Ver</button>`;
-                } else {
-                    btnHtml = `<span class="doc-number">${rawUrl && !rawUrl.includes('{') ? rawUrl : '-'}</span>`;
-                }
+                let btnHtml = cleanLink 
+                    ? `<button class="btn-invoice" onclick="verComprobante('${encodeURI(cleanLink)}')" style="color:var(--primary);"><i class="fa-solid fa-eye"></i> Ver</button>` 
+                    : `<span class="doc-number">-</span>`;
 
                 return `<tr>
                     <td style="color:#64748b;">${g.Fecha}</td>
@@ -450,16 +481,12 @@
                 img.style.display = 'none';
                 img.src = decoded;
                 document.getElementById('receiptLink').href = decoded;
-                img.onload = () => { 
-                    img.style.display = 'block'; 
-                    document.getElementById('receiptError').style.display = 'none';
-                };
+                img.onload = () => { img.style.display = 'block'; document.getElementById('receiptError').style.display = 'none'; };
                 img.onerror = () => { document.getElementById('receiptError').style.display = 'block'; };
                 document.getElementById('modalReceipt').classList.add('active');
             } else { window.open(decoded, '_blank'); }
         }
 
-        /* --- OTRAS FUNCIONES --- */
         function renderPersonalFinance() {
             const myID = String(USER.UnidadID);
             const pendientes = DB.Cobros.filter(c => String(c.UnidadID) === myID && c.Estado === 'Pendiente');
@@ -493,8 +520,7 @@
             const dataMap = {};
             DB.Gastos.forEach(g => {
                 const cat = g.TipoGasto || 'Otros';
-                const val = parseInt(g.Monto)||0;
-                dataMap[cat] = (dataMap[cat]||0) + val;
+                dataMap[cat] = (dataMap[cat]||0) + (parseInt(g.Monto)||0);
             });
             const ctx = document.getElementById('chartExpensesDist').getContext('2d');
             if(chartDistInstance) chartDistInstance.destroy();
@@ -506,18 +532,17 @@
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '70%' }
             });
-            const tbody = document.getElementById('expensesTableSimple');
             const sorted = Object.entries(dataMap).sort((a,b) => b[1] - a[1]).slice(0, 3);
-            tbody.innerHTML = `<table class="table-compact">` + sorted.map(([k,v]) => `<tr><td style="color:#64748b;">${k}</td><td style="text-align:right; font-weight:600;">${clp(v)}</td></tr>`).join('') + `</table>`;
+            document.getElementById('expensesTableSimple').innerHTML = `<table class="table-compact">` + sorted.map(([k,v]) => `<tr><td style="color:#64748b;">${k}</td><td style="text-align:right; font-weight:600;">${clp(v)}</td></tr>`).join('') + `</table>`;
         }
 
         function renderKPIs() {
-            document.getElementById('kpiReservas').innerText = DB.Reservas.filter(r=>r.Fecha.startsWith(new Date().toISOString().slice(0,7))).length;
+            document.getElementById('kpiReservas').innerText = DB.Reservas.filter(r=>r.Fecha && r.Fecha.startsWith(new Date().toISOString().slice(0,7))).length;
             const reclamos = DB.Reclamos.filter(r=>r.Estado!=='Resuelto').length;
             document.getElementById('kpiReclamos').innerText = reclamos;
-            const kpiTrend = document.getElementById('kpiReclamosTrend');
-            if(reclamos > 5) { kpiTrend.className="kpi-trend trend-up"; kpiTrend.innerHTML='<i class="fa-solid fa-circle-exclamation"></i> Atención'; }
-            else { kpiTrend.className="kpi-trend trend-down"; kpiTrend.innerHTML='<i class="fa-solid fa-check"></i> OK'; }
+            const trend = document.getElementById('kpiReclamosTrend');
+            trend.className = reclamos > 5 ? "kpi-trend trend-up" : "kpi-trend trend-down";
+            trend.innerHTML = reclamos > 5 ? '<i class="fa-solid fa-circle-exclamation"></i> Atención' : '<i class="fa-solid fa-check"></i> OK';
         }
 
         function logout() { localStorage.removeItem('sesion_externa'); window.location.href = 'login_residente.html'; }

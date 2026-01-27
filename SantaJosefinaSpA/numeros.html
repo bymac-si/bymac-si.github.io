@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Renderizador de Departamentos - Condominio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #f39c12;
+            --bg-color: #f4f7f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        h1 { color: var(--primary-color); margin-bottom: 1.5rem; font-size: 1.5rem; }
+
+        .input-group {
+            margin-bottom: 2rem;
+        }
+
+        input {
+            padding: 12px;
+            width: 80%;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus { border-color: var(--accent-color); }
+
+        /* Estilos del Renderizado */
+        #display-area {
+            min-height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 20px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            flex-wrap: wrap;
+        }
+
+        .fa-stack {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+        }
+
+        .char-label {
+            color: #555;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1><i class="fa-solid fa-building-user"></i> Visor de Numeración</h1>
+    
+    <div class="input-group">
+        <input type="text" id="deptoInput" placeholder="Ej: 402-B o 1501" maxlength="10">
+        <small class="char-label">Escribe el número de unidad</small>
+    </div>
+
+    <div id="display-area">
+        <span style="color: #666;">Esperando entrada...</span>
+    </div>
+</div>
+
+<script>
+    const input = document.getElementById('deptoInput');
+    const display = document.getElementById('display-area');
+
+    // Mapeo extendido de FontAwesome
+    const faMap = {
+        '0': 'fa-0', '1': 'fa-1', '2': 'fa-2', '3': 'fa-3', '4': 'fa-4',
+        '5': 'fa-5', '6': 'fa-6', '7': 'fa-7', '8': 'fa-8', '9': 'fa-9',
+        'A': 'fa-a', 'B': 'fa-b', 'C': 'fa-c', 'D': 'fa-d', 'E': 'fa-e',
+        'F': 'fa-f', 'G': 'fa-g', 'H': 'fa-h', 'I': 'fa-i', 'J': 'fa-j',
+        '-': 'fa-minus', '/': 'fa-slash', '.': 'fa-circle-dot'
+    };
+
+    input.addEventListener('input', (e) => {
+        const val = e.target.value.toUpperCase();
+        display.innerHTML = '';
+
+        if (val.length === 0) {
+            display.innerHTML = '<span style="color: #666;">Esperando entrada...</span>';
+            return;
+        }
+
+        val.split('').forEach(char => {
+            const iconKey = faMap[char];
+            
+            // Crear contenedor de Stack para que parezca una placa metálica
+            const spanStack = document.createElement('span');
+            spanStack.className = 'fa-stack fa-2x';
+
+            if (iconKey) {
+                spanStack.innerHTML = `
+                    <i class="fa-solid fa-square fa-stack-2x" style="color: #333;"></i>
+                    <i class="fa-solid ${iconKey} fa-stack-1x fa-inverse"></i>
+                `;
+            } else {
+                // Carácter no encontrado en el mapa
+                spanStack.innerHTML = `
+                    <i class="fa-solid fa-square fa-stack-2x" style="color: #c0392b;"></i>
+                    <strong class="fa-stack-1x fa-inverse" style="font-family: sans-serif;">${char}</strong>
+                `;
+            }
+            display.appendChild(spanStack);
+        });
+    });
+</script>
+
+</body>
+</html>
