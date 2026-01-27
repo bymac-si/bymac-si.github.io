@@ -186,9 +186,9 @@
 
 </main>
 <div id="footer"></div>
-<<script>
-  // URL de tu implementación (la misma que usas en app.js)
-  const API_URL = "https://script.google.com/macros/s/AKfycbxEQekq83o6vv-t_vuxjEvInpCHsvKdw2-FNEIaN-FAr2NplrVEmg8ehTFWRneZSGWm/exec";
+<script>
+  // URL de tu implementación (Asegúrate de que sea la última versión publicada)
+  const API_URL = "https://script.google.com/macros/s/AKfycbyUdSx2D9VrrYiWZUpZ_gRh8DYerj1etqhs9jx4Vgz3-LRXL1A6wB49H5U7M8OtVqZP/exec";
 
   document.addEventListener("DOMContentLoaded", async () => {
     // 1. Cargar componentes visuales
@@ -197,38 +197,51 @@
       const f = await fetch("footer.html"); if (f.ok) document.getElementById("footer").innerHTML = await f.text();
     } catch (e) { console.error("Error cargando componentes", e); }
     
-    // 2. Iniciar carga de datos reales
+    // 2. Iniciar carga de datos
     cargarTodoElDashboard();
   });
 
   async function cargarTodoElDashboard() {
-  try {
-    // Añadimos redirección automática para saltar CORS
-    const response = await fetch(`${API_URL}?action=getDashboardData`, {
-      method: 'GET',
-      mode: 'cors', // Forzamos modo cors
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8',
-      }
-    });
+    const statusEl = document.getElementById("conversion");
+    const originalText = statusEl.innerText;
+    statusEl.innerText = "Cargando...";
 
-    if (!response.ok) throw new Error("Error en la respuesta de red");
-    
-    const data = await response.json();
-    
-    // ... resto de tu código de renderizado (KPIs, Tablas, SLA)
-    console.log("Datos cargados con éxito:", data);
+    try {
+      // Cache Buster para evitar que el navegador use datos viejos
+      const response = await fetch(`${API_URL}?action=getDashboardData&t=${Date.now()}`);
+      
+      if (!response.ok) throw new Error("Fallo en red");
+      
+      const data = await response.json();
+      
+      // Renderizado de KPIs
+      document.getElementById("totalLeads").innerText = data.total || 0;
+      document.getElementById("leadsA").innerText = data.A || 0;
+      document.getElementById("leadsB").innerText = data.B || 0;
+      document.getElementById("leadsC").innerText = data.C || 0;
+      
+      const porc = data.total ? Math.round((data.A / data.total) * 100) : 0;
+      document.getElementById("conversion").innerText = porc + "%";
+      
+      // Renderizado de Tablas
+      renderTable("tablaFuente", data.fuentes);
+      renderTable("tablaEstado", data.estados);
 
-  } catch (err) {
-    console.error("Error en Dashboard:", err);
-    // Si falla por CORS, intentamos con el proxy alternativo
-    alert("Error de conexión. Revisa que la API esté publicada como 'Cualquier persona'");
+      // Renderizado de SLA
+      document.getElementById("sla_ok").innerText = data.sla?.OK || 0;
+      document.getElementById("sla_alerta").innerText = data.sla?.ALERTA || 0;
+      document.getElementById("sla_vencido").innerText = data.sla?.VENCIDO || 0;
+
+    } catch (err) {
+      console.error("Error en Dashboard:", err);
+      statusEl.innerText = "Error";
+      alert("Error de conexión con la base de datos de Santa Josefina.");
+    }
   }
-}
 
   function renderTable(id, obj) {
     const tb = document.querySelector(`#${id} tbody`);
-    if(!tb) return;
+    if(!tb || !obj) return;
     tb.innerHTML = "";
     for (let k in obj) {
       tb.innerHTML += `<tr><td>${k}</td><td><span class="badge bg-secondary" style="background:#64748b; color:white; padding:4px 8px; border-radius:4px;">${obj[k]}</span></td></tr>`;
