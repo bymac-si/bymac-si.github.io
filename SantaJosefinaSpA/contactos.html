@@ -514,59 +514,77 @@
         return fecha;
       }
 
-      /* --- FUNCIÓN GESTIONAR (Promoción) --- */
-      async function gestionarLead(id, fuente) {
-        if (fuente === "CRM") {
-          window.location.href = `prospectos.html?id=${id}`;
-          return;
-        }
-        if (fuente === "WEB") {
-          if (!confirm("¿Ingresar este contacto al CRM como Prospecto activo?"))
-            return;
-          const btn = event.currentTarget;
-          const txt = btn.innerHTML;
-          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ...';
-          btn.disabled = true;
+      /* --- FUNCIÓN GESTIONAR (Promoción a CRM y Marketing) --- */
+async function gestionarLead(id, fuente) {
+  if (fuente === "CRM") {
+    window.location.href = `prospectos.html?id=${id}`;
+    return;
+  }
 
-          try {
-            const lista = await fetchData("contactos");
-            const contacto = lista.find(
-              (c) => String(c.ID).trim() === String(id).trim(),
-            );
-            if (!contacto) throw new Error("Contacto no encontrado");
+  if (fuente === "WEB") {
+    if (!confirm("¿Ingresar este contacto al CRM y activar motor de Marketing?")) return;
+    
+    const btn = event.currentTarget;
+    const txt = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Procesando...';
+    btn.disabled = true;
 
-            const nuevoID = "PROS_" + Date.now();
-            const nuevoProspecto = {
-              ID: nuevoID,
-              Nombre: contacto.Nombre,
-              Email: contacto.Email,
-              Telefono: contacto.Telefono,
-              Observaciones:
-                (contacto.Mensaje || "") +
-                (contacto.Notas ? "\n\nDiagnóstico: " + contacto.Notas : ""),
-              "Fecha Registro": new Date().toISOString().split("T")[0],
-              Estado: "Nuevo",
-              Canal: "Web/Checklist",
-              "Tipo Operacion": "Captación",
-              Agente: "Por Asignar",
-            };
+    try {
+      const lista = await fetchData("contactos");
+      const contacto = lista.find(c => String(c.ID).trim() === String(id).trim());
+      
+      if (!contacto) throw new Error("Contacto no encontrado");
 
-            await appSheetCRUD("ProspectosCorretaje", "Add", [nuevoProspecto]);
-            try {
-              await appSheetCRUD("contactos", "Edit", [
-                { ID: contacto.ID, Estado: "Procesado" },
-              ]);
-            } catch (e) {}
+      const nuevoID_CRM = "PROS_" + Date.now();
 
-            alert("✅ Prospecto creado!");
-            window.location.href = `prospectos.html?id=${nuevoID}`;
-          } catch (e) {
-            console.error(e);
-            alert("Error: " + e.message);
-            btn.innerHTML = txt;
-            btn.disabled = false;
-          }
-        }
+      // 1. CREAR EN PROSPECTOS CORRETAJE (Gestión Comercial)
+      const nuevoProspecto = {
+        ID: nuevoID_CRM,
+        Nombre: contacto.Nombre,
+        Email: contacto.Email,
+        Telefono: contacto.Telefono,
+        Observaciones: (contacto.Mensaje || "") + (contacto.Notas ? "\n\nDiagnóstico: " + contacto.Notas : ""),
+        "Fecha Registro": new Date().toISOString().split("T")[0],
+        Estado: "Nuevo",
+        Canal: "Web/Checklist",
+        "Tipo Operacion": "Captación",
+        Agente: "Por Asignar"
+      };
+
+      // 2. CREAR EN LEADS_MARKETING (Motor de Resend/SLA)
+      const leadMarketing = {
+        ID: contacto.Email, // Email como identificador único para campañas
+        Nombre: contacto.Nombre,
+        Fuente: "Web Unificado",
+        Estado: "Activo",
+        Telefono: contacto.Telefono,
+        Fecha_Ingreso: new Date().toISOString(),
+        Respondio_Diagnostico: contacto.Notas ? "SI" : "NO" // Si tiene notas, ya suma puntos
+      };
+
+      // Ejecutamos ambas inserciones
+      await Promise.all([
+        appSheetCRUD("ProspectosCorretaje", "Add", [nuevoProspecto]),
+        appSheetCRUD("Leads_Marketing", "Add", [leadMarketing])
+      ]);
+
+      // Marcamos como procesado en el buzón web
+      await appSheetCRUD("contactos", "Edit", [{ ID: contacto.ID, Estado: "Procesado" }]);
+
+      alert("✅ ¡Éxito! Lead ingresado al CRM y al motor de Marketing.");
+      window.location.href = `prospectos.html?id=${nuevoID_CRM}`;
+
+    } catch (e) {
+      console.error(e);
+      alert("Error en la promoción: " + e.message);
+      btn.innerHTML = txt;
+      btn.disabled = false;
+    }
+  }
+
+
+// Enviamos también a la tabla de Marketing para que entre al flujo de Resend
+await appSheetCRUD("Leads_Marketing", "Add", [leadMarketing]);
       }
 
       /* --- FUNCIÓN EDITAR RÁPIDA --- */
