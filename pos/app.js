@@ -1,5 +1,6 @@
 /**
  * APP.JS - Versión Final con Administración, Historial y Gestión de Productos
+ * CORRECCIÓN: Refresco forzado de datos al abrir Reporte Z
  */
 
 const API_URL = "https://script.google.com/macros/s/AKfycbymRn-iNwAYvbQC9w3FlY7TASVNAkKdOfVJLgz_eWspOxZbYi8j1rub0D-CKu4Grkm5/exec";
@@ -9,7 +10,7 @@ let db = {
     modifiers: { agregados: [], elimina: [], cambia: [] }, 
     categorias: [], 
     usuarios: [],
-    allRawProducts: [] // <--- NUEVO: Para gestión Admin
+    allRawProducts: [] 
 };
 
 let cart = [];
@@ -104,6 +105,7 @@ function calcularTurno() {
   const hora = santiagoDate.getHours();
   
   let fechaComercial = new Date(santiagoDate);
+  // CORTE A LAS 08:00 AM
   if (hora < 8) fechaComercial.setDate(fechaComercial.getDate() - 1);
   
   const yyyy = fechaComercial.getFullYear();
@@ -111,6 +113,7 @@ function calcularTurno() {
   const dd = String(fechaComercial.getDate()).padStart(2, "0");
   const fechaStr = `${yyyy}-${mm}-${dd}`;
   
+  // Turno 1 (08:00 - 17:59), Turno 2 (18:00 - 07:59)
   let idTurno = (hora >= 18 || hora < 8) ? 2 : 1;
   
   currentTurnData = { 
@@ -160,7 +163,7 @@ function renderProducts(lista) {
 }
 function mapColor(c) { if (!c) return "primary"; const map = { red: "danger", orange: "warning", yellow: "warning", green: "success", blue: "primary", cyan: "info", black: "dark", grey: "secondary" }; return map[String(c).toLowerCase()] || "primary"; }
 
-// --- LOGICA MODAL ---
+// --- LOGICA MODAL CONFIGURACION ---
 
 function renderCheckboxes(containerId, list, type) {
   const container = document.getElementById(containerId);
@@ -402,7 +405,6 @@ function updateCartUI() {
   document.getElementById("modal-total-pagar").innerText = totalFmt;
 }
 
-// --- APERTURA ---
 window.setOpeningBalance = async function () {
   if (!currentUser) return checkLogin();
   calcularTurno();
@@ -428,7 +430,6 @@ window.setOpeningBalance = async function () {
   }
 };
 
-// --- PAGOS ---
 function openPaymentModal() {
   if (cart.length === 0) return alert("Carrito vacío");
   const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById("paymentModal"));
@@ -553,16 +554,33 @@ async function saveToDatabase(payload) {
   } catch (e) { console.error(e); alert("Error guardando."); }
 }
 
+// -------------------------------------------------------------
+// CORRECCIÓN AQUÍ: showDailyReport fuerza el refresco
+// -------------------------------------------------------------
 async function showDailyReport() {
-  const modal = new bootstrap.Modal(document.getElementById("reportModal"));
+  const el = document.getElementById("reportModal");
+  // Usar getOrCreateInstance para evitar duplicados
+  const modal = bootstrap.Modal.getOrCreateInstance(el);
   modal.show();
-  calcularTurno();
+  
+  // 1. RECALCULAR FECHA/HORA
+  calcularTurno(); 
+  
+  // 2. LIMPIAR VISUALMENTE EL MODAL (Feedback de carga)
+  document.getElementById("report-body").innerHTML = `<div class="text-center py-4"><div class="spinner-border text-primary"></div><p>Actualizando datos...</p></div>`;
+
   try {
+    // 3. PEDIR DATOS FRESCOS
     const response = await fetch(API_URL, {
       method: "POST",
-      body: JSON.stringify({ action: "get_daily_report", fecha: currentTurnData.fechaComercial }),
+      body: JSON.stringify({ 
+          action: "get_daily_report", 
+          fecha: currentTurnData.fechaComercial 
+      }),
     });
+    
     const result = await response.json();
+    
     if (result.status === "success") {
       currentReportData = result.data;
       renderReportUI(result.data);
@@ -622,7 +640,33 @@ async function printReportAction() {
     setTimeout(async () => { await window.printDailyReport(currentReportData); }, 300);
 }
 
-// === SECCIÓN ADMIN ===
+function startAutoUpdate() {
+  setInterval(() => { if (cart.length === 0) loadSystemData(true); }, 300000);
+  setInterval(() => { updateClock(); checkAutoShiftChange(); }, 30000);
+}
+
+function checkAutoShiftChange() {
+  const ahora = new Date();
+  const santiagoStr = ahora.toLocaleString("en-US", { timeZone: "America/Santiago" });
+  const santiagoDate = new Date(santiagoStr);
+  if (santiagoDate.getHours() === 18 && santiagoDate.getMinutes() <= 1) {
+    const key = `turno_cambiado_${santiagoDate.getDate()}`;
+    if (!sessionStorage.getItem(key)) {
+      sessionStorage.setItem(key, "true");
+      alert("⏰ 18:00 HRS. Cambio de Turno.");
+      window.location.reload(true);
+    }
+  }
+}
+
+window.manualShiftChange = function () {
+  if (cart.length > 0) { if (!confirm("⚠️ Hay venta en curso. ¿Cambiar turno?")) return; }
+  window.location.reload(true);
+};
+
+// ==========================================
+// SECCIÓN ADMINISTRACIÓN
+// ==========================================
 
 function openAdminPanel() {
   populateAdminCategories();
@@ -740,27 +784,3 @@ async function saveProductForm() {
     } else { alert("Error: " + result.message); }
   } catch (e) { alert("Error de conexión"); } finally { btn.innerText = oldText; btn.disabled = false; }
 }
-
-function startAutoUpdate() {
-  setInterval(() => { if (cart.length === 0) loadSystemData(true); }, 300000);
-  setInterval(() => { updateClock(); checkAutoShiftChange(); }, 30000);
-}
-
-function checkAutoShiftChange() {
-  const ahora = new Date();
-  const santiagoStr = ahora.toLocaleString("en-US", { timeZone: "America/Santiago" });
-  const santiagoDate = new Date(santiagoStr);
-  if (santiagoDate.getHours() === 18 && santiagoDate.getMinutes() <= 1) {
-    const key = `turno_cambiado_${santiagoDate.getDate()}`;
-    if (!sessionStorage.getItem(key)) {
-      sessionStorage.setItem(key, "true");
-      alert("⏰ 18:00 HRS. Cambio de Turno.");
-      window.location.reload(true);
-    }
-  }
-}
-
-window.manualShiftChange = function () {
-  if (cart.length > 0) { if (!confirm("⚠️ Hay venta en curso. ¿Cambiar turno?")) return; }
-  window.location.reload(true);
-};
