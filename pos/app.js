@@ -3,7 +3,7 @@
  * CORRECCIÓN: Refresco forzado de datos al abrir Reporte Z
  */
 
-const API_URL = "https://script.google.com/macros/s/AKfycbymRn-iNwAYvbQC9w3FlY7TASVNAkKdOfVJLgz_eWspOxZbYi8j1rub0D-CKu4Grkm5/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzMS2BEJXdditHudvn-zv22rloj4M87Fla5hL2kCZu961XzqK2zsFpOjD3ywWisVMg/exec";
 
 let db = { 
     menu: [], 
