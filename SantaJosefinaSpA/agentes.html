@@ -345,6 +345,36 @@
         >
           Equipo de Agentes
         </h1>
+        <!-- ALERTA LEADS VENCIDOS -->
+<div
+  id="alertaLeads"
+  style="
+    display: none;
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-weight: 700;
+  "
+>
+  ⚠️ Hay <span id="alertaCantidad">0</span> Leads A vencidos
+  <button
+    onclick="verLeadsVencidos()"
+    style="
+      margin-left: 15px;
+      background: #991b1b;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    "
+  >
+    Ver
+  </button>
+</div>
         <div style="display: flex; gap: 10px">
           <button class="btn-primary btn-outline" onclick="cargarTodo()">
             <i class="fa-solid fa-rotate"></i> Actualizar
@@ -375,6 +405,8 @@
           </div>
         </div>
       </div>
+
+      
 
       <div class="table-container">
         <table>
@@ -953,6 +985,7 @@
         } catch (e) {}
         await cargarUTM();
         await cargarTodo();
+        await verificarLeadsVencidos();
       });
 
       async function cargarUTM() {
@@ -1477,7 +1510,36 @@
       function cerrarModal(id) {
         document.getElementById(id).style.display = "none";
       }
-      
+      /* ================================
+   ALERTAS LEADS A VENCIDOS
+================================ */
+
+async function verificarLeadsVencidos() {
+  try {
+    const res = await fetch(
+      API_URL + "?action=getLeadsAVencidos"
+    );
+
+    const data = await res.json();
+
+    if (!data || !data.length) {
+      document.getElementById("alertaLeads").style.display = "none";
+      return;
+    }
+
+    document.getElementById("alertaCantidad").innerText = data.length;
+    document.getElementById("alertaLeads").style.display = "block";
+  } catch (e) {
+    console.warn("Error validando leads:", e);
+  }
+}
+
+function verLeadsVencidos() {
+  window.open("leads.html?filtro=vencidos", "_blank");
+}
+
+/* Auto refresh cada 2 min */
+setInterval(verificarLeadsVencidos, 120000);
     </script>
   </body>
 </html>
