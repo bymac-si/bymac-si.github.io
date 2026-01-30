@@ -469,7 +469,18 @@ async function confirmarAsignacion(email){
 
   }
 }
+async function forzarAutoAsignacion(){
 
+  if(!confirm("Asignar Leads A automáticamente?")) return;
+
+  const r = await fetch(API_URL+"?action=autoAsignar");
+
+  const d = await r.json();
+
+  alert("Asignados: "+d.asignados);
+
+  cargarDashboard();
+}
 </script>
 </body>
 </html>
