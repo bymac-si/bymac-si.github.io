@@ -1,126 +1,296 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-<meta charset="UTF-8" />
-<title>Dashboard Conversiones | CRM Santa Josefina</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+  <head>
+    <meta charset="UTF-8" />
+    <title>Dashboard Conversiones | CRM Santa Josefina</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-<link rel="stylesheet" href="assets/css/styles.css"/>
-<link rel="manifest" href="manifest.json"/>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="manifest" href="manifest.json" />
 
-<script src="assets/js/app.js"></script>
-<script>requireAuth();</script>
+    <script src="assets/js/app.js"></script>
+    <script>
+      requireAuth();
+    </script>
 
-<style>
-body{max-width:1300px;margin:auto;background:#f8f9fa;color:#1a2b48}
-main{padding:40px}
-.dashboard-header{background:#fff;padding:25px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.05);margin-bottom:30px}
-.page-title{font-size:28px;font-weight:800}
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px;margin-bottom:30px}
-.kpi-card{background:#fff;padding:24px;border-radius:10px;border-left:5px solid #ccc;box-shadow:0 4px 12px rgba(0,0,0,.05)}
-.kpi-title{font-size:.75rem;font-weight:800;text-transform:uppercase;color:#6c757d}
-.kpi-value{font-size:2.2rem;font-weight:800}
-.card{background:#fff;border-radius:12px;padding:25px;box-shadow:0 4px 12px rgba(0,0,0,.05)}
-.badge.A{background:#2ecc71}
-.badge.B{background:#f1c40f;color:#000}
-.badge.C{background:#e74c3c}
-.status-fresh{color:#16a34a;font-weight:700}
-.status-stale{color:#dc2626;font-weight:700}
-</style>
-</head>
+    <style>
+      body {
+        max-width: 1300px;
+        margin: auto;
+        background: #f8f9fa;
+        color: #1a2b48;
+      }
+      main {
+        padding: 40px;
+      }
+      .dashboard-header {
+        background: #fff;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        margin-bottom: 30px;
+      }
+      .page-title {
+        font-size: 28px;
+        font-weight: 800;
+      }
+      .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 24px;
+        margin-bottom: 30px;
+      }
+      .kpi-card {
+        background: #fff;
+        padding: 24px;
+        border-radius: 10px;
+        border-left: 5px solid #ccc;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+      .kpi-title {
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #6c757d;
+      }
+      .kpi-value {
+        font-size: 2.2rem;
+        font-weight: 800;
+      }
+      .card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+      .badge.A {
+        background: #2ecc71;
+      }
+      .badge.B {
+        background: #f1c40f;
+        color: #000;
+      }
+      .badge.C {
+        background: #e74c3c;
+      }
+      .status-fresh {
+        color: #16a34a;
+        font-weight: 700;
+      }
+      .status-stale {
+        color: #dc2626;
+        font-weight: 700;
+      }
+      .tabla-leads {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .tabla-leads th,
+      .tabla-leads td {
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+      }
+      .tabla-leads th {
+        background: #f5f5f5;
+      }
+      .btn-wa {
+        background: #25d366;
+        color: #fff;
+        padding: 6px 10px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: bold;
+      }
+    </style>
+  </head>
 
-<body>
-<div id="header"></div>
+  <body>
+    <div id="header"></div>
 
-<main>
+    <main>
+      <div class="dashboard-header">
+        <h1 class="page-title">
+          <i class="fa-solid fa-chart-line"></i> Dashboard de Conversiones
+        </h1>
+        <div id="estadoDatos" class="status-fresh">● Datos actualizados</div>
+      </div>
 
-<div class="dashboard-header">
-<h1 class="page-title"><i class="fa-solid fa-chart-line"></i> Dashboard de Conversiones</h1>
-<div id="estadoDatos" class="status-fresh">● Datos actualizados</div>
-</div>
+      <div class="kpi-grid">
+        <div class="kpi-card" style="border-left-color: #0dcaf0">
+          <span class="kpi-title">Total Leads</span>
+          <div id="totalLeads" class="kpi-value">–</div>
+        </div>
 
-<div class="kpi-grid">
-<div class="kpi-card" style="border-left-color:#0dcaf0">
-<span class="kpi-title">Total Leads</span>
-<div id="totalLeads" class="kpi-value">–</div>
-</div>
+        <div class="kpi-card" style="border-left-color: #2ecc71">
+          <span class="kpi-title">Leads A</span>
+          <div id="leadsA" class="kpi-value">–</div>
+          <span class="badge A">Alta intención</span>
+        </div>
 
-<div class="kpi-card" style="border-left-color:#2ecc71">
-<span class="kpi-title">Leads A</span>
-<div id="leadsA" class="kpi-value">–</div>
-<span class="badge A">Alta intención</span>
-</div>
+        <div class="kpi-card" style="border-left-color: #f1c40f">
+          <span class="kpi-title">Leads B</span>
+          <div id="leadsB" class="kpi-value">–</div>
+        </div>
 
-<div class="kpi-card" style="border-left-color:#f1c40f">
-<span class="kpi-title">Leads B</span>
-<div id="leadsB" class="kpi-value">–</div>
-</div>
+        <div class="kpi-card" style="border-left-color: #e74c3c">
+          <span class="kpi-title">Leads C</span>
+          <div id="leadsC" class="kpi-value">–</div>
+        </div>
 
-<div class="kpi-card" style="border-left-color:#e74c3c">
-<span class="kpi-title">Leads C</span>
-<div id="leadsC" class="kpi-value">–</div>
-</div>
+        <div class="kpi-card" style="border-left-color: #6610f2">
+          <span class="kpi-title">Conversión A</span>
+          <div id="conversion" class="kpi-value">–%</div>
+        </div>
 
-<div class="kpi-card" style="border-left-color:#6610f2">
-<span class="kpi-title">Conversión A</span>
-<div id="conversion" class="kpi-value">–%</div>
-</div>
+        <div class="kpi-card" style="border-left-color: #0f172a">
+          <span class="kpi-title">⏱ Tiempo Medio Primer Contacto</span>
+          <div id="sla_promedio" class="kpi-value">– min</div>
+        </div>
+      </div>
 
-<div class="kpi-card" style="border-left-color:#0f172a">
-<span class="kpi-title">⏱ Tiempo Medio Primer Contacto</span>
-<div id="sla_promedio" class="kpi-value">– min</div>
-</div>
-</div>
+      <h3>⚠️ Leads A vencidos</h3>
 
-<div class="row g-4 mb-4 text-center">
-<div class="col-md-4"><div class="card border-success"><h5>🟢 En SLA</h5><h2 id="sla_ok">0</h2></div></div>
-<div class="col-md-4"><div class="card border-warning"><h5>🟡 Por vencer</h5><h2 id="sla_alerta">0</h2></div></div>
-<div class="col-md-4"><div class="card border-danger"><h5>🔴 SLA vencido</h5><h2 id="sla_vencido">0</h2></div></div>
-</div>
-<br>
-<div class="card text-center mb-4">
-<button id="btnWA" class="btn btn-success btn-lg" onclick="enviarWhatsAppLeadsA()">
-<i class="fa-brands fa-whatsapp"></i> Contactar Leads A
-</button>
-<p id="msgWA" class="text-muted mt-2"></p>
-</div>
+      <table class="tabla-leads">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Atraso (hrs)</th>
+            <th>Contacto</th>
+          </tr>
+        </thead>
+        <tbody id="tablaLeadsVencidos">
+          <tr>
+            <td colspan="3">Cargando...</td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
 
-</main>
-<div id="footer"></div>
+      <div class="row g-4 mb-4 text-center">
+        <div class="col-md-4">
+          <div class="card border-success">
+            <h5>🟢 En SLA</h5>
+            <h2 id="sla_ok">0</h2>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-warning">
+            <h5>🟡 Por vencer</h5>
+            <h2 id="sla_alerta">0</h2>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-danger">
+            <h5>🔴 SLA vencido</h5>
+            <h2 id="sla_vencido">0</h2>
+          </div>
+        </div>
+      </div>
+      <br />
+      <div class="card text-center mb-4">
+        <button
+          id="btnWA"
+          class="btn btn-success btn-lg"
+          onclick="enviarWhatsAppLeadsA()"
+        >
+          <i class="fa-brands fa-whatsapp"></i> Contactar Leads A
+        </button>
+        <p id="msgWA" class="text-muted mt-2"></p>
+      </div>
+    </main>
+    <div id="footer"></div>
 
-<script>
-const API_URL="https://script.google.com/macros/s/AKfycbyGAyUXWvCHli2rZ1Eh1NfxqZm2rXAT7BRgunBjtZv_iU5CDEk7ewwWWG2La3PYKa5G/exec";
-let ultimaCarga=Date.now();
+    <script>
+      const API_URL =
+        "https://script.google.com/macros/s/AKfycbyGAyUXWvCHli2rZ1Eh1NfxqZm2rXAT7BRgunBjtZv_iU5CDEk7ewwWWG2La3PYKa5G/exec";
+      let ultimaCarga = Date.now();
 
-async function cargarDashboard(){
-const r=await fetch(`${API_URL}?action=getDashboardData&t=${Date.now()}`);
-const d=await r.json();
-ultimaCarga=Date.now();
+      async function cargarDashboard() {
+        const r = await fetch(
+          `${API_URL}?action=getDashboardData&t=${Date.now()}`,
+        );
+        const d = await r.json();
+        ultimaCarga = Date.now();
 
-totalLeads.innerText=d.total||0;
-leadsA.innerText=d.A||0;
-leadsB.innerText=d.B||0;
-leadsC.innerText=d.C||0;
+        totalLeads.innerText = d.total || 0;
+        leadsA.innerText = d.A || 0;
+        leadsB.innerText = d.B || 0;
+        leadsC.innerText = d.C || 0;
 
-conversion.innerText=d.total?Math.round(d.A/d.total*100)+"%":"0%";
-sla_ok.innerText=d.sla?.OK||0;
-sla_alerta.innerText=d.sla?.ALERTA||0;
-sla_vencido.innerText=d.sla?.VENCIDO||0;
-sla_promedio.innerText=d.sla?.PROMEDIO||"--";
+        conversion.innerText = d.total
+          ? Math.round((d.A / d.total) * 100) + "%"
+          : "0%";
 
-btnWA.disabled=d.A===0;
-msgWA.innerText=d.A===0?"No hay Leads A listos para contacto":"Leads listos para cierre inmediato";
+        sla_ok.innerText = d.sla?.OK || 0;
+        sla_alerta.innerText = d.sla?.ALERTA || 0;
+        sla_vencido.innerText = d.sla?.VENCIDO || 0;
+        sla_promedio.innerText = d.sla?.PROMEDIO || "--";
+
+        btnWA.disabled = d.A === 0;
+        msgWA.innerText =
+          d.A === 0
+            ? "No hay Leads A listos para contacto"
+            : "Leads listos para cierre inmediato";
+      }
+
+      setInterval(() => {
+        const mins = (Date.now() - ultimaCarga) / 60000;
+        estadoDatos.className = mins > 10 ? "status-stale" : "status-fresh";
+        estadoDatos.innerText =
+          mins > 10 ? "● Datos antiguos" : "● Datos actualizados";
+      }, 60000);
+
+      setInterval(cargarDashboard, 300000);
+      document.addEventListener("DOMContentLoaded", cargarDashboard);
+
+      // SLA DETALLE
+      fetch(API_URL + "?action=sla")
+        .then((r) => r.json())
+        .then((data) => console.log("SLA:", data));
+
+      // ALERTAS
+      fetch(API_URL + "?action=alertas")
+        .then((r) => r.json())
+        .then((alertas) => {
+          alertas.forEach((a) => console.warn("ALERTA:", a.mensaje));
+        });
+        async function cargarLeadsAVencidos(){
+  const r = await fetch(API_URL + '?action=leadsAVencidos');
+  const data = await r.json();
+
+  const tbody = document.getElementById("tablaLeadsVencidos");
+  tbody.innerHTML = "";
+
+  if(!data.length){
+    tbody.innerHTML = "<tr><td colspan='3'>✅ No hay Leads A vencidos</td></tr>";
+    return;
+  }
+
+  data.forEach(l => {
+    const wa = l.telefono.replace(/\D/g,'');
+    const msg = encodeURIComponent(
+      `Hola ${l.nombre}, te escribo desde Santa Josefina para apoyarte con tu solicitud.`
+    );
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${l.nombre}</td>
+        <td>${l.horas}</td>
+        <td>
+          <a class="btn-wa" target="_blank"
+             href="https://wa.me/${wa}?text=${msg}">
+             WhatsApp
+          </a>
+        </td>
+      </tr>`;
+  });
 }
 
-setInterval(()=>{
-const mins=(Date.now()-ultimaCarga)/60000;
-estadoDatos.className=mins>10?"status-stale":"status-fresh";
-estadoDatos.innerText=mins>10?"● Datos antiguos":"● Datos actualizados";
-},60000);
-
-setInterval(cargarDashboard,300000);
-document.addEventListener("DOMContentLoaded",cargarDashboard);
-</script>
-</body>
+document.addEventListener("DOMContentLoaded", cargarLeadsAVencidos);
+    </script>
+  </body>
 </html>
