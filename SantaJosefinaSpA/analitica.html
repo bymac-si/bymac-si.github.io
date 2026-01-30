@@ -1,156 +1,128 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Analítica | CRM Santa Josefina</title>
-   <meta name="viewport" content="width=device-width, initial-scale=1" />
-     <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <link rel="stylesheet" href="assets/css/styles.css" />
-    <link rel="manifest" href="manifest.json" />
-    <meta name="theme-color" content="#1a2b48" />
-    <link rel="apple-touch-icon" href="assets/img/icon-192.png" />
+<meta charset="UTF-8">
+<title>Analítica | CRM Santa Josefina</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<link rel="stylesheet" href="assets/css/styles.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="assets/js/app.js"></script>
 
-    <script>
-      requireAuth();
-    </script>
+<script src="assets/js/app.js"></script>
+<script>requireAuth();</script>
 
-  <style>
-    :root { --primary: #0f172a; --accent: #3b82f6; --bg: #f8f9fa; --text: #1e293b; }
-    body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; }
-    main { max-width: 1100px; margin: 40px auto; padding: 20px; }
-    .grid-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-    .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.05); border: 1px solid #e2e8f0; }
-    .card-title { font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-    .stat-number { font-size: 2.5rem; font-weight: 800; color: var(--primary); }
-    .stat-label { color: #64748b; font-size: 0.9rem; font-weight: 600; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th { text-align: left; padding: 12px; border-bottom: 2px solid #f1f5f9; color: #64748b; font-size: 0.85rem; }
-    td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
-    .badge-click { background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 0.75rem; }
-    @media (max-width: 768px) { .grid-stats { grid-template-columns: 1fr; } }
-  </style>
+<style>
+body{background:#f8f9fa;color:#1e293b}
+main{max-width:1100px;margin:40px auto;padding:20px}
+.card{background:#fff;padding:25px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.05)}
+.alert-good{color:#16a34a;font-weight:700}
+.alert-bad{color:#dc2626;font-weight:700}
+table{width:100%;border-collapse:collapse}
+th,td{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left}
+th{color:#64748b;font-size:.85rem}
+</style>
 </head>
-<body style="margin: auto;">
 
-<!-- HEADER DINÁMICO -->
+<body>
+
+<!-- HEADER -->
 <div id="header"></div>
 
 <main>
-  <div class="card" style="margin-bottom: 20px; border-left: 5px solid var(--primary);">
-    <h1 style="margin:0; font-size: 1.8rem;">Panel de Inteligencia</h1>
-    <p style="color: #64748b; margin: 5px 0 0 0;">Análisis de interacción y rendimiento de Santa Josefina SpA</p>
-  </div>
 
-  <div class="grid-stats">
-    <div class="card">
-      <div class="card-title"><i class="fa-solid fa-mouse-pointer"></i> Interacción General</div>
-      <div style="height: 250px;"><canvas id="clicsChart"></canvas></div>
-    </div>
+<div class="card mb-4" style="border-left:5px solid #0f172a">
+<h1 style="margin:0">📊 Analítica de Campañas</h1>
+<p id="reco" class="alert-good">Cargando análisis...</p>
+</div>
+<br>
+<div class="card mb-4" style="height:300px; align-items:center; display:flex; justify-content:center;">
+<canvas id="chartClics" ></canvas>
+</div>
+<br>
+<div class="card">
+<h3>Rendimiento por campaña</h3>
+<table>
+<thead>
+<tr>
+<th>Campaña</th>
+<th>Enviados</th>
+<th>Clics</th>
+<th>Leads A</th>
+<th>Conversión A</th>
+</tr>
+</thead>
+<tbody id="tablaCampañas"></tbody>
+</table>
+</div>
 
-    <div class="card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-      <div class="stat-label">TOTAL CLICS ACUMULADOS</div>
-      <div id="totalClicsNum" class="stat-number">0</div>
-      <div id="ctrText" style="color: var(--accent); font-weight: 700; margin-top: 10px;">Calculando CTR...</div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title"><i class="fa-solid fa-bullhorn"></i> Rendimiento por Campaña</div>
-    <table>
-      <thead>
-        <tr>
-          <th>ID CAMPAÑA</th>
-          <th>LEADS CONTACTADOS</th>
-          <th>CLICS</th>
-          <th>EFECTIVIDAD</th>
-        </tr>
-      </thead>
-      <tbody id="tablaCampañasBody">
-        </tbody>
-    </table>
-  </div>
 </main>
+
+<!-- FOOTER -->
 <div id="footer"></div>
+
 <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-        try {
-          document.getElementById("header").innerHTML = await (
-            await fetch("header.html")
-          ).text();
-        } catch (e) {}
-        try {
-          document.getElementById("footer").innerHTML = await (
-            await fetch("footer.html")
-          ).text();
-        } catch (e) {}
-        await cargarDatos();
-      });
-  window.onload = async () => {
-    try {
-      const leads = await fetchData("Leads_Marketing");
-      procesarAnalitica(leads);
-    } catch (err) {
-      console.error("Error al cargar analítica:", err);
-    }
-  };
+const API_URL = "https://script.google.com/macros/s/AKfycbyGAyUXWvCHli2rZ1Eh1NfxqZm2rXAT7BRgunBjtZv_iU5CDEk7ewwWWG2La3PYKa5G/exec";
 
-  function procesarAnalitica(leads) {
-    // 1. Cálculos de Clics
-    const enviados = leads.filter(l => l.Estado_Envio && l.Estado_Envio.includes("ENVIADO")).length;
-    const clics = leads.filter(l => l.Estado_Envio === "CLIC EN ENLACE").length;
-    const ctr = enviados > 0 ? ((clics / enviados) * 100).toFixed(1) : 0;
+document.addEventListener("DOMContentLoaded", async () => {
+  // Header / Footer
+  try {
+    document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
+    document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
+  } catch(e){ console.warn("Header/Footer no cargado"); }
 
-    document.getElementById('totalClicsNum').innerText = clics;
-    document.getElementById('ctrText').innerText = `Tasa de Clics (CTR): ${ctr}%`;
+  cargarAnalitica();
+});
 
-    // 2. Gráfico Doughnut
-    const ctx = document.getElementById('clicsChart').getContext('2d');
-    new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Interacción (Clic)', 'Sin Interacción'],
-        datasets: [{
-          data: [clics, enviados - clics],
-          backgroundColor: ['#0f172a', '#e2e8f0'],
-          hoverOffset: 4
-        }]
-      },
-      options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-    });
+async function cargarAnalitica(){
+  const res = await fetch(`${API_URL}?action=getAnaliticaCampanas&t=${Date.now()}`);
+  const data = await res.json();
 
-    // 3. Agrupar por Campaña
-    const resumenCampañas = {};
-    leads.forEach(l => {
-      if (l.Campaña_Enviada) {
-        if (!resumenCampañas[l.Campaña_Enviada]) {
-          resumenCampañas[l.Campaña_Enviada] = { enviados: 0, clics: 0 };
-        }
-        resumenCampañas[l.Campaña_Enviada].enviados++;
-        if (l.Estado_Envio === "CLIC EN ENLACE") {
-          resumenCampañas[l.Campaña_Enviada].clics++;
-        }
-      }
-    });
+  let totalEnviados=0, totalClics=0;
+  const tbody = document.getElementById("tablaCampañas");
+  tbody.innerHTML="";
 
-    const tbody = document.getElementById('tablaCampañasBody');
-    Object.keys(resumenCampañas).forEach(id => {
-      const c = resumenCampañas[id];
-      const efec = ((c.clics / c.enviados) * 100).toFixed(1);
-      tbody.innerHTML += `
-        <tr>
-          <td style="font-weight:700;">${id}</td>
-          <td>${c.enviados}</td>
-          <td><span class="badge-click">${c.clics}</span></td>
-          <td style="color:var(--accent); font-weight:700;">${efec}%</td>
-        </tr>
-      `;
-    });
+  Object.keys(data).forEach(c=>{
+    const r = data[c];
+    const conv = r.enviados ? Math.round((r.leadsA/r.enviados)*100) : 0;
+
+    totalEnviados += r.enviados;
+    totalClics += r.clics;
+
+    tbody.innerHTML += `
+      <tr>
+        <td><b>${c}</b></td>
+        <td>${r.enviados}</td>
+        <td>${r.clics}</td>
+        <td>${r.leadsA}</td>
+        <td><b>${conv}%</b></td>
+      </tr>`;
+  });
+
+  renderChart(totalClics, totalEnviados-totalClics);
+
+  const ctr = totalEnviados ? (totalClics/totalEnviados)*100 : 0;
+  const reco = document.getElementById("reco");
+
+  if(ctr > 15){
+    reco.innerText = "Buen CTR. Optimiza copy y CTA para aumentar Leads A.";
+    reco.className = "alert-good";
+  }else{
+    reco.innerText = "Muchos envíos con bajo impacto. Revisar segmentación y mensaje.";
+    reco.className = "alert-bad";
   }
+}
+
+function renderChart(clics, noclics){
+  new Chart(chartClics,{
+    type:"doughnut",
+    data:{
+      labels:["Clic","Sin clic"],
+      datasets:[{data:[clics,noclics],backgroundColor:["#0f172a","#e5e7eb"]}]
+    },
+    options:{plugins:{legend:{position:"bottom"}}}
+  });
+}
 </script>
 </body>
 </html>
