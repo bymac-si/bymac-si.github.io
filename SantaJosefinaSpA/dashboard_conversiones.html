@@ -205,7 +205,12 @@ margin-bottom:20px;">
       <i class="fa-brands fa-whatsapp"></i> Contactar Leads A
     </button>
 
+    <button  class="btn btn-success btn-lg" onclick="forzarAutoAsignacion()">
+ <i class="fa-solid fa-bolt-lightning"></i> Auto-Asignar Leads A
+</button>
     <p id="msgWA" class="text-muted mt-2"></p>
+
+
   </div>
 
 </main>
@@ -219,9 +224,7 @@ const API_URL = "https://script.google.com/macros/s/AKfycbyGAyUXWvCHli2rZ1Eh1Nfx
 
 let ultimaCarga = Date.now();
 
-let totalLeads, leadsA, leadsB, leadsC, conversion;
-let sla_ok, sla_alerta, sla_vencido, sla_promedio;
-let btnWA, msgWA, estadoDatos;
+let agentesCache = [];
 
 
 /* ===============================
@@ -232,7 +235,6 @@ document.addEventListener("DOMContentLoaded", initDashboard);
 
 async function initDashboard(){
 
-  // Header / Footer
   try{
     header.innerHTML = await (await fetch("header.html")).text();
     footer.innerHTML = await (await fetch("footer.html")).text();
@@ -240,26 +242,32 @@ async function initDashboard(){
     console.warn("Header/Footer no cargado");
   }
 
-  // DOM refs
-  totalLeads   = document.getElementById("totalLeads");
-  leadsA       = document.getElementById("leadsA");
-  leadsB       = document.getElementById("leadsB");
-  leadsC       = document.getElementById("leadsC");
-  conversion   = document.getElementById("conversion");
-
-  sla_ok       = document.getElementById("sla_ok");
-  sla_alerta   = document.getElementById("sla_alerta");
-  sla_vencido  = document.getElementById("sla_vencido");
-  sla_promedio = document.getElementById("sla_promedio");
-
-  btnWA        = document.getElementById("btnWA");
-  msgWA        = document.getElementById("msgWA");
-  estadoDatos  = document.getElementById("estadoDatos");
+  await cargarAgentes();
 
   await cargarDashboard();
   await cargarLeadsAVencidos();
 
   setInterval(cargarDashboard, 300000);
+}
+
+
+/* ===============================
+   AGENTES
+================================ */
+
+async function cargarAgentes(){
+
+  try{
+
+    const r = await fetch(API_URL+"?action=getAgentes");
+    agentesCache = await r.json();
+
+  }catch(e){
+
+    console.error("Error agentes:",e);
+
+  }
+
 }
 
 
@@ -301,30 +309,13 @@ async function cargarDashboard(){
 
 
 /* ===============================
-   STATUS
-================================ */
-
-setInterval(()=>{
-
-  const mins = (Date.now()-ultimaCarga)/60000;
-
-  estadoDatos.className =
-    mins>10 ? "status-stale":"status-fresh";
-
-  estadoDatos.innerText =
-    mins>10 ? "● Datos antiguos":"● Datos actualizados";
-
-},60000);
-
-
-/* ===============================
    LEADS A VENCIDOS
 ================================ */
 
 async function cargarLeadsAVencidos(){
 
   const banner = document.getElementById("alertaVencidos");
-const contador = document.getElementById("cantVencidos");
+  const contador = document.getElementById("cantVencidos");
 
   try{
 
@@ -336,21 +327,17 @@ const contador = document.getElementById("cantVencidos");
     tbody.innerHTML = "";
 
     if(!data.length){
+
+      banner.style.display = "none";
+
       tbody.innerHTML =
         "<tr><td colspan='3'>✅ No hay vencidos</td></tr>";
-      }else{
-        if(data.length){
 
-  banner.style.display = "block";
-  contador.innerText = data.length;
-
-}else{
-
-  banner.style.display = "none";
-
-}
       return;
     }
+
+    banner.style.display = "block";
+    contador.innerText = data.length;
 
     data.forEach(l=>{
 
@@ -360,7 +347,7 @@ const contador = document.getElementById("cantVencidos");
         `Hola ${l.nombre}, te escribo desde Santa Josefina.`
       );
 
-     tbody.innerHTML += `
+      tbody.innerHTML += `
 <tr>
   <td>${l.nombre}</td>
   <td>${l.horas}</td>
@@ -374,7 +361,7 @@ const contador = document.getElementById("cantVencidos");
 
     <button
       style="margin-left:5px"
-      onclick="asignarEjecutivo('${l.email}')">
+      onclick="mostrarSelectorAgente('${l.email}')">
       📌 Asignar
     </button>
 
@@ -386,24 +373,103 @@ const contador = document.getElementById("cantVencidos");
     console.error("Leads vencidos:",e);
   }
 }
-async function asignarEjecutivo(email){
 
-  const ejecutivo = prompt("Nombre del ejecutivo:");
 
-  if(!ejecutivo) return;
+/* ===============================
+   ASIGNACION
+================================ */
 
-  await fetch(API_URL, {
-    method:"POST",
-    body: JSON.stringify({
-      action:"asignarEjecutivo",
-      email,
-      ejecutivo
-    })
-  });
+function mostrarSelectorAgente(email){
 
-  alert("Asignado correctamente");
+  let html = `
+    <div id="modalAgente"
+      style="
+        position:fixed;
+        top:0;left:0;
+        width:100%;
+        height:100%;
+        background:rgba(0,0,0,.5);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        z-index:9999;
+      ">
+      <div style="
+        background:white;
+        padding:25px;
+        border-radius:10px;
+        width:300px;
+        text-align:center;
+      ">
+
+        <h3>Asignar Ejecutivo</h3>
+
+        <select id="selectAgente"
+          style="width:100%;padding:8px;margin:15px 0">
+          ${agentesCache.map(a=>
+            `<option value="${a.nombre}">
+              ${a.nombre}
+            </option>`
+          ).join("")}
+        </select>
+
+        <button onclick="confirmarAsignacion('${email}')">
+          Asignar
+        </button>
+
+        <button
+          style="margin-left:10px"
+          onclick="cerrarModal()">
+          Cancelar
+        </button>
+
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML("beforeend",html);
 }
-</script>
 
+
+function cerrarModal(){
+
+  const m = document.getElementById("modalAgente");
+
+  if(m) m.remove();
+}
+
+
+async function confirmarAsignacion(email){
+
+  const agente =
+    document.getElementById("selectAgente").value;
+
+  if(!agente) return;
+
+  try{
+
+    await fetch(API_URL, {
+      method:"POST",
+      body: JSON.stringify({
+        action:"asignarEjecutivo",
+        email,
+        ejecutivo: agente
+      })
+    });
+
+    alert("✅ Asignado correctamente");
+
+    cerrarModal();
+
+    cargarLeadsAVencidos();
+
+  }catch(e){
+
+    alert("❌ Error asignando");
+
+  }
+}
+
+</script>
 </body>
 </html>
