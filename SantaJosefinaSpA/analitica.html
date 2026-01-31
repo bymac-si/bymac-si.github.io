@@ -62,7 +62,8 @@ th{color:#64748b;font-size:.85rem}
 <div id="footer"></div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbyGAyUXWvCHli2rZ1Eh1NfxqZm2rXAT7BRgunBjtZv_iU5CDEk7ewwWWG2La3PYKa5G/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwBsxC4CnsE26XFBm-IzuL_ftfsVmyQip5lbI-ztoBQzrpwJ7dB_vouLXWvFlwewbQu/exec";
+const chartClics = document.getElementById("chartClics");
 
 document.addEventListener("DOMContentLoaded", async () => {
   // Header / Footer
@@ -114,13 +115,23 @@ async function cargarAnalitica(){
 }
 
 function renderChart(clics, noclics){
-  new Chart(chartClics,{
+
+  const ctx = document.getElementById("chartClics");
+
+  new Chart(ctx,{
     type:"doughnut",
     data:{
       labels:["Clic","Sin clic"],
-      datasets:[{data:[clics,noclics],backgroundColor:["#0f172a","#e5e7eb"]}]
+      datasets:[{
+        data:[clics,noclics],
+        backgroundColor:["#0f172a","#e5e7eb"]
+      }]
     },
-    options:{plugins:{legend:{position:"bottom"}}}
+    options:{
+      plugins:{
+        legend:{position:"bottom"}
+      }
+    }
   });
 }
 </script>

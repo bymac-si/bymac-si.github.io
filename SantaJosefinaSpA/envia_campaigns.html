@@ -181,13 +181,15 @@
           ).text();
         } catch (e) {}
 
-        bindUI();
-        await cargarTodo();
+        if (typeof cargarTodo === "function") {
+  await cargarTodo();
+}
+        
       });
       let campaignsData = [];
       let leadsActivos = [];
       const API_URL =
-        "https://script.google.com/macros/s/AKfycbyGAyUXWvCHli2rZ1Eh1NfxqZm2rXAT7BRgunBjtZv_iU5CDEk7ewwWWG2La3PYKa5G/exec";
+        "https://script.google.com/macros/s/AKfycbwBsxC4CnsE26XFBm-IzuL_ftfsVmyQip5lbI-ztoBQzrpwJ7dB_vouLXWvFlwewbQu/exec";
 
       // 1. CARGAR DATOS (CAMPAÑAS Y LEADS)
       window.onload = async () => {
@@ -264,7 +266,6 @@
             // Reemplaza el bloque del fetch por este:
             const res = await fetch(`${API_URL}?action=apiResend`, {
               method: "POST",
-              mode: "no-cors", // Añadimos esto para evitar bloqueos del navegador
               headers: {
                 "Content-Type": "text/plain", // Google Apps Script prefiere esto para el postData
               },
