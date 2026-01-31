@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
     <title>CRM - Gestión de Agentes</title>
-   <link
+    <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
@@ -346,41 +346,44 @@
           Equipo de Agentes
         </h1>
         <!-- ALERTA LEADS VENCIDOS -->
-<div
-  id="alertaLeads"
-  style="
-    display: none;
-    background: #fee2e2;
-    border: 1px solid #fecaca;
-    color: #991b1b;
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    font-weight: 700;
-  "
->
-  ⚠️ Hay <span id="alertaCantidad">0</span> Leads A vencidos
-  <button
-    onclick="verLeadsVencidos()"
-    style="
-      margin-left: 15px;
-      background: #991b1b;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-    "
-  >
-    Ver
-  </button>
-</div>
+        <div
+          id="alertaLeads"
+          style="
+            display: none;
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 700;
+          "
+        >
+          ⚠️ Hay <span id="alertaCantidad">0</span> Leads A vencidos
+          <button
+            onclick="verLeadsVencidos()"
+            style="
+              margin-left: 15px;
+              background: #991b1b;
+              color: white;
+              border: none;
+              padding: 6px 12px;
+              border-radius: 6px;
+              cursor: pointer;
+            "
+          >
+            Ver
+          </button>
+        </div>
         <div style="display: flex; gap: 10px">
           <button class="btn-primary btn-outline" onclick="cargarTodo()">
             <i class="fa-solid fa-rotate"></i> Actualizar
           </button>
           <button class="btn-primary" onclick="abrirModalAgente()">
             <i class="fa-solid fa-plus"></i> Nuevo Agente
+          </button>
+          <button class="btn-primary" onclick="forzarAsignacion()">
+            <i class="fa-solid fa-bolt-lightning"></i> Asignar Leads
           </button>
         </div>
       </div>
@@ -405,8 +408,6 @@
           </div>
         </div>
       </div>
-
-      
 
       <div class="table-container">
         <table>
@@ -454,7 +455,7 @@
                 <img
                   id="previewAvatar"
                   src="assets/img/default_avatar.png"
-                  onerror="this.style.display='none'"
+                  onerror="this.style.display = 'none'"
                 />
                 <div
                   id="avatarInitials"
@@ -552,10 +553,11 @@
       >
         <div class="modal-sidebar" style="width: 250px">
           <h3 style="margin-top: 0">Nueva Tarea</h3>
-          
+
           <form id="formTarea">
             <input type="hidden" id="tareaAgenteID" />
-            <input type="hidden" id="tareaEditID" /> <div style="margin-bottom: 10px">
+            <input type="hidden" id="tareaEditID" />
+            <div style="margin-bottom: 10px">
               <label class="label">Título</label>
               <input
                 id="tareaTitulo"
@@ -580,26 +582,26 @@
               <label class="label">Detalle</label>
               <textarea id="tareaDesc" class="input-std" rows="3"></textarea>
             </div>
-            
+
             <div style="display: flex; gap: 5px">
-                <button
-                  type="button"
-                  id="btnCancelEdit"
-                  class="btn-primary btn-outline"
-                  style="display: none; flex: 1"
-                  onclick="resetFormTarea()"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  id="btnSubmitTarea"
-                  class="btn-primary"
-                  style="flex: 2; justify-content: center"
-                >
-                  Asignar Tarea
-                </button>
-              </div>
+              <button
+                type="button"
+                id="btnCancelEdit"
+                class="btn-primary btn-outline"
+                style="display: none; flex: 1"
+                onclick="resetFormTarea()"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                id="btnSubmitTarea"
+                class="btn-primary"
+                style="flex: 2; justify-content: center"
+              >
+                Asignar Tarea
+              </button>
+            </div>
           </form>
         </div>
 
@@ -1040,21 +1042,21 @@
         const tb = document.getElementById("tablaAgentes");
         tb.innerHTML = "";
         const tareasTotales = TAREAS.filter(
-          (t) => t.Estado !== "Completada"
+          (t) => t.Estado !== "Completada",
         ).length;
         document.getElementById("kpiTotalTareas").innerText = tareasTotales;
 
         AGENTES.forEach((a) => {
           const negocios = TRANSACCIONES.filter(
-            (t) => String(t.AgenteID) === String(a.ID)
+            (t) => String(t.AgenteID) === String(a.ID),
           );
           const total = negocios.reduce(
             (s, t) => s + (parseInt(t.PagoAgente) || 0),
-            0
+            0,
           );
           const misTareas = TAREAS.filter(
             (t) =>
-              String(t.AgenteID) === String(a.ID) && t.Estado !== "Completada"
+              String(t.AgenteID) === String(a.ID) && t.Estado !== "Completada",
           );
 
           // Estrellas
@@ -1068,7 +1070,7 @@
           }
 
           let avatarHTML = `<div class="avatar">${a.Nombre.charAt(
-            0
+            0,
           ).toUpperCase()}</div>`;
           if (a.Avatar && a.Avatar.startsWith("http"))
             avatarHTML = `<div class="avatar"><img src="${a.Avatar}"></div>`;
@@ -1081,13 +1083,13 @@
                   a.Rol || "Agente"
                 }<br>${a.Email}</div></td>
                 <td style="color:#f59e0b; letter-spacing:1px; font-size:12px;">${stars}</td> <td style="text-align:center; font-weight:700;">${
-            negocios.length
-          }</td>
+                  negocios.length
+                }</td>
                 <td style="text-align:center;"><span class="badge-priority p-Media">${
                   misTareas.length
                 } Pen.</span></td>
                 <td style="text-align:right;"><span style="background:#ecfdf5; color:#065f46; padding:4px 10px; border-radius:20px; font-weight:700;">${clp(
-                  total
+                  total,
                 )}</span></td>
                 <td style="text-align:right;">
                     <button class="btn-primary btn-sm" onclick='abrirModalAgente("${
@@ -1110,7 +1112,7 @@
       function calcularTotalMes() {
         const total = TRANSACCIONES.reduce(
           (s, t) => s + (parseInt(t.PagoAgente) || 0),
-          0
+          0,
         );
         document.getElementById("kpiTotalComision").innerText = clp(total);
       }
@@ -1177,28 +1179,28 @@
         const a = AGENTES.find((x) => String(x.ID) === String(id));
         if (!a) return;
         document.getElementById("tareaAgenteID").value = a.ID;
-        
+
         // Siempre limpiar al abrir
         resetFormTarea();
-        
+
         renderTareasAgente(a.ID);
         document.getElementById("modalTareas").style.display = "flex";
       }
 
       function resetFormTarea() {
-        document.getElementById("tareaEditID").value = ""; 
+        document.getElementById("tareaEditID").value = "";
         document.getElementById("tareaTitulo").value = "";
         document.getElementById("tareaDesc").value = "";
         document.getElementById("tareaPrioridad").value = "Media";
         document.getElementById("tareaFecha").valueAsDate = new Date();
-        
+
         document.getElementById("btnSubmitTarea").innerText = "Asignar Tarea";
         document.getElementById("btnCancelEdit").style.display = "none";
       }
 
       function cargarDatosTarea(idTarea) {
-        const t = TAREAS.find(x => String(x.ID) === String(idTarea));
-        if(!t) return;
+        const t = TAREAS.find((x) => String(x.ID) === String(idTarea));
+        if (!t) return;
 
         document.getElementById("tareaEditID").value = t.ID;
         document.getElementById("tareaTitulo").value = t["Título"];
@@ -1213,10 +1215,10 @@
       function renderTareasAgente(id) {
         const lista = document.getElementById("listaTareasContainer");
         const misTareas = TAREAS.filter(
-          (t) => String(t.AgenteID) === String(id)
+          (t) => String(t.AgenteID) === String(id),
         );
         misTareas.sort(
-          (a, b) => (a.Estado === "Completada") - (b.Estado === "Completada")
+          (a, b) => (a.Estado === "Completada") - (b.Estado === "Completada"),
         );
 
         if (misTareas.length === 0) {
@@ -1231,14 +1233,14 @@
             const style = done
               ? "opacity:0.6; text-decoration:line-through;"
               : "";
-              
+
             const btnState = done
               ? `<button class="btn-primary btn-sm btn-outline" onclick="cambiarEstadoTarea('${t.ID}', 'Pendiente')" title="Reabrir"><i class="fa-solid fa-rotate-left"></i></button>`
               : `<button class="btn-primary btn-sm" style="background:#166534;" onclick="cambiarEstadoTarea('${t.ID}', 'Completada')" title="Completar"><i class="fa-solid fa-check"></i></button>`;
 
-            const btnEdit = !done 
-                ? `<button class="btn-primary btn-sm btn-outline" onclick="cargarDatosTarea('${t.ID}')" title="Editar"><i class="fa-solid fa-pen"></i></button>`
-                : '';
+            const btnEdit = !done
+              ? `<button class="btn-primary btn-sm btn-outline" onclick="cargarDatosTarea('${t.ID}')" title="Editar"><i class="fa-solid fa-pen"></i></button>`
+              : "";
 
             return `
             <div class="task-item">
@@ -1251,8 +1253,8 @@
                     }</div>
                     <div class="task-meta">
                         <span class="badge-priority p-${t.Prioridad}">${
-              t.Prioridad
-            }</span>
+                          t.Prioridad
+                        }</span>
                         <span><i class="fa-regular fa-clock"></i> ${
                           t.FechaLimite || "-"
                         }</span>
@@ -1272,7 +1274,7 @@
         showSpinner();
         const agenteID = document.getElementById("tareaAgenteID").value;
         const editID = document.getElementById("tareaEditID").value;
-        
+
         const payload = {
           AgenteID: agenteID,
           Título: document.getElementById("tareaTitulo").value,
@@ -1287,9 +1289,9 @@
             payload.ID = editID;
             await appSheetCRUD("Tareas", "Edit", [payload]);
             // Actualizar local
-            const idx = TAREAS.findIndex(t => t.ID === editID);
-            if(idx !== -1) {
-                TAREAS[idx] = { ...TAREAS[idx], ...payload };
+            const idx = TAREAS.findIndex((t) => t.ID === editID);
+            if (idx !== -1) {
+              TAREAS[idx] = { ...TAREAS[idx], ...payload };
             }
           } else {
             // CREAR
@@ -1299,7 +1301,7 @@
             await appSheetCRUD("Tareas", "Add", [payload]);
             TAREAS.push(payload);
           }
-          
+
           resetFormTarea();
           renderTareasAgente(agenteID);
           renderTabla();
@@ -1424,7 +1426,7 @@
               : (base + (unid - 20) * (base * 0.013)) * fac;
           const honorarioNeto = Math.round(netoTeorico / 1000) * 1000;
           document.getElementById("lblHonorarioTotal").innerText = clp(
-            Math.round(honorarioNeto * 1.19)
+            Math.round(honorarioNeto * 1.19),
           );
           const comision = Math.round(honorarioNeto * 0.5);
           document.getElementById("lblPagoAgente").innerText = clp(comision);
@@ -1449,7 +1451,7 @@
       function renderHistorial() {
         const div = document.getElementById("listaTransacciones");
         const list = TRANSACCIONES.filter(
-          (t) => String(t.AgenteID) === String(AGENTE_ACTUAL.ID)
+          (t) => String(t.AgenteID) === String(AGENTE_ACTUAL.ID),
         ).reverse();
         if (list.length === 0) {
           div.innerHTML =
@@ -1463,12 +1465,12 @@
                 <div><span style="font-weight:700; color:#475569;">[${
                   t.Tipo
                 }]</span> ${
-              t.Propiedad
-            } <div style="font-size:11px; color:#cbd5e1;">${t.Fecha}</div></div>
+                  t.Propiedad
+                } <div style="font-size:11px; color:#cbd5e1;">${t.Fecha}</div></div>
                 <div style="font-weight:700; color:#166534;">${clp(
-                  t.PagoAgente
+                  t.PagoAgente,
                 )}</div>
-            </div>`
+            </div>`,
           )
           .join("");
       }
@@ -1482,7 +1484,7 @@
         try {
           const res = await fetch(
             `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
-            { method: "POST", body: formData }
+            { method: "POST", body: formData },
           );
           const data = await res.json();
           if (data.success) {
@@ -1514,32 +1516,44 @@
    ALERTAS LEADS A VENCIDOS
 ================================ */
 
-async function verificarLeadsVencidos() {
-  try {
-    const res = await fetch(
-      API_URL + "?action=getLeadsAVencidos"
-    );
+      async function verificarLeadsVencidos() {
+        try {
+          const res = await fetch(API_URL + "?action=getLeadsAVencidos");
 
-    const data = await res.json();
+          const data = await res.json();
 
-    if (!data || !data.length) {
-      document.getElementById("alertaLeads").style.display = "none";
-      return;
-    }
+          if (!data || !data.length) {
+            document.getElementById("alertaLeads").style.display = "none";
+            return;
+          }
 
-    document.getElementById("alertaCantidad").innerText = data.length;
-    document.getElementById("alertaLeads").style.display = "block";
-  } catch (e) {
-    console.warn("Error validando leads:", e);
-  }
-}
+          document.getElementById("alertaCantidad").innerText = data.length;
+          document.getElementById("alertaLeads").style.display = "block";
+        } catch (e) {
+          console.warn("Error validando leads:", e);
+        }
+      }
 
-function verLeadsVencidos() {
-  window.open("leads.html?filtro=vencidos", "_blank");
-}
+      function verLeadsVencidos() {
+        window.open("leads.html?filtro=vencidos", "_blank");
+      }
 
-/* Auto refresh cada 2 min */
-setInterval(verificarLeadsVencidos, 120000);
+      /* Auto refresh cada 2 min */
+      setInterval(verificarLeadsVencidos, 120000);
+
+      async function forzarAsignacion() {
+        if (!confirm("Asignar Leads A automáticamente?")) return;
+
+        try {
+          const r = await fetch(API_URL + "?action=autoAsignarLeads");
+
+          const d = await r.json();
+
+          alert("Leads asignados: " + d.asignados);
+        } catch (e) {
+          alert("Error asignando leads");
+        }
+      }
     </script>
   </body>
 </html>
