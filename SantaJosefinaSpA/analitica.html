@@ -10,127 +10,148 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script src="assets/js/app.js"></script>
-<script>requireAuth();</script>
+<script>if(typeof requireAuth === "function") requireAuth();</script>
 
 <style>
-body{background:#f8f9fa;color:#1e293b}
+body{background:#f8f9fa;color:#1e293b;font-family: sans-serif;}
 main{max-width:1100px;margin:40px auto;padding:20px}
-.card{background:#fff;padding:25px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.05)}
-.alert-good{color:#16a34a;font-weight:700}
-.alert-bad{color:#dc2626;font-weight:700}
+.card{background:#fff;padding:25px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.05);margin-bottom:20px;}
+.alert-good{color:#16a34a;font-weight:700; background: #f0fdf4; padding: 10px; border-radius: 8px;}
+.alert-bad{color:#dc2626;font-weight:700; background: #fef2f2; padding: 10px; border-radius: 8px;}
 table{width:100%;border-collapse:collapse}
 th,td{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left}
-th{color:#64748b;font-size:.85rem}
+th{color:#64748b;font-size:.85rem; text-transform: uppercase;}
+.chart-container { height: 350px; display: flex; justify-content: center; position: relative;}
 </style>
 </head>
 
 <body>
 
-<!-- HEADER -->
 <div id="header"></div>
 
 <main>
+    <div class="card" style="border-left:5px solid #0f172a">
+        <h1 style="margin:0">📊 Analítica de Campañas</h1>
+        <p id="reco">Cargando análisis de datos real...</p>
+    </div>
 
-<div class="card mb-4" style="border-left:5px solid #0f172a">
-<h1 style="margin:0">📊 Analítica de Campañas</h1>
-<p id="reco" class="alert-good">Cargando análisis...</p>
-</div>
-<br>
-<div class="card mb-4" style="height:300px; align-items:center; display:flex; justify-content:center;">
-<canvas id="chartClics" ></canvas>
-</div>
-<br>
-<div class="card">
-<h3>Rendimiento por campaña</h3>
-<table>
-<thead>
-<tr>
-<th>Campaña</th>
-<th>Enviados</th>
-<th>Clics</th>
-<th>Leads A</th>
-<th>Conversión A</th>
-</tr>
-</thead>
-<tbody id="tablaCampañas"></tbody>
-</table>
-</div>
+    <div class="card">
+        <h3>Distribución de Clics (CTR)</h3>
+        <div class="chart-container">
+            <canvas id="chartClics"></canvas>
+        </div>
+    </div>
 
+    <div class="card">
+        <h3>Rendimiento por campaña</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Campaña</th>
+                    <th>Enviados</th>
+                    <th>Clics</th>
+                    <th>Leads A</th>
+                    <th>Conversión A</th>
+                </tr>
+            </thead>
+            <tbody id="tablaCampañas">
+                <tr><td colspan="5">Cargando datos...</td></tr>
+            </tbody>
+        </table>
+    </div>
 </main>
 
-<!-- FOOTER -->
 <div id="footer"></div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwBsxC4CnsE26XFBm-IzuL_ftfsVmyQip5lbI-ztoBQzrpwJ7dB_vouLXWvFlwewbQu/exec";
-const chartClics = document.getElementById("chartClics");
+// URL ACTUALIZADA A VERSIÓN 69
+const API_URL = "https://script.google.com/macros/s/AKfycbzXAuOSwm59jCVMrPwqJ_MymZLXN5g9wsR_DODH76nCk6eVPAep0ER-wHADhDFfijz8/exec";
+let miGrafico = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // Header / Footer
   try {
-    document.getElementById("header").innerHTML = await (await fetch("header.html")).text();
-    document.getElementById("footer").innerHTML = await (await fetch("footer.html")).text();
-  } catch(e){ console.warn("Header/Footer no cargado"); }
+    const h = await fetch("header.html"); if(h.ok) document.getElementById("header").innerHTML = await h.text();
+    const f = await fetch("footer.html"); if(f.ok) document.getElementById("footer").innerHTML = await f.text();
+  } catch(e){ console.warn("Header/Footer no cargado localmente"); }
 
   cargarAnalitica();
 });
 
 async function cargarAnalitica(){
-  const res = await fetch(`${API_URL}?action=getAnaliticaCampanas&t=${Date.now()}`);
-  const data = await res.json();
+  try {
+    const res = await fetch(`${API_URL}?action=getAnaliticaCampanas&t=${Date.now()}`);
+    const data = await res.json();
 
-  let totalEnviados=0, totalClics=0;
-  const tbody = document.getElementById("tablaCampañas");
-  tbody.innerHTML="";
+    let totalEnviados=0, totalClics=0;
+    const tbody = document.getElementById("tablaCampañas");
+    tbody.innerHTML="";
 
-  Object.keys(data).forEach(c=>{
-    const r = data[c];
-    const conv = r.enviados ? Math.round((r.leadsA/r.enviados)*100) : 0;
+    const keys = Object.keys(data);
+    
+    if(keys.length === 0 || (keys.length === 1 && keys[0] === "Sin campaña")) {
+        tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>No hay datos de campañas enviadas aún.</td></tr>";
+        document.getElementById("reco").innerText = "Sin datos suficientes para análisis.";
+        return;
+    }
 
-    totalEnviados += r.enviados;
-    totalClics += r.clics;
+    keys.forEach(c => {
+      const r = data[c];
+      const conv = r.enviados ? Math.round((r.leadsA / r.enviados) * 100) : 0;
 
-    tbody.innerHTML += `
-      <tr>
-        <td><b>${c}</b></td>
-        <td>${r.enviados}</td>
-        <td>${r.clics}</td>
-        <td>${r.leadsA}</td>
-        <td><b>${conv}%</b></td>
-      </tr>`;
-  });
+      totalEnviados += r.enviados;
+      totalClics += r.clics;
 
-  renderChart(totalClics, totalEnviados-totalClics);
+      tbody.innerHTML += `
+        <tr>
+          <td><span class="badge" style="background:#0f172a; color:white; padding:3px 8px; border-radius:4px; font-size:0.8rem">${c}</span></td>
+          <td>${r.enviados}</td>
+          <td>${r.clics}</td>
+          <td>${r.leadsA}</td>
+          <td><b style="color:#0f172a">${conv}%</b></td>
+        </tr>`;
+    });
 
-  const ctr = totalEnviados ? (totalClics/totalEnviados)*100 : 0;
-  const reco = document.getElementById("reco");
+    renderChart(totalClics, Math.max(0, totalEnviados - totalClics));
 
-  if(ctr > 15){
-    reco.innerText = "Buen CTR. Optimiza copy y CTA para aumentar Leads A.";
-    reco.className = "alert-good";
-  }else{
-    reco.innerText = "Muchos envíos con bajo impacto. Revisar segmentación y mensaje.";
-    reco.className = "alert-bad";
+    const ctr = totalEnviados ? (totalClics / totalEnviados) * 100 : 0;
+    const reco = document.getElementById("reco");
+
+    if(ctr > 10){
+      reco.innerText = `Buen CTR (${ctr.toFixed(1)}%). El interés es alto. Asegura un seguimiento rápido por WhatsApp.`;
+      reco.className = "alert-good";
+    } else {
+      reco.innerText = `CTR Bajo (${ctr.toFixed(1)}%). Considera cambiar el asunto del correo o la hora de envío.`;
+      reco.className = "alert-bad";
+    }
+  } catch (err) {
+    console.error(err);
+    document.getElementById("tablaCampañas").innerHTML = "<tr><td colspan='5'>Error al cargar datos.</td></tr>";
   }
 }
 
 function renderChart(clics, noclics){
+  const ctx = document.getElementById("chartClics").getContext('2d');
+  
+  // Destruir gráfico previo si existe para evitar duplicados
+  if(miGrafico) miGrafico.destroy();
 
-  const ctx = document.getElementById("chartClics");
-
-  new Chart(ctx,{
-    type:"doughnut",
-    data:{
-      labels:["Clic","Sin clic"],
-      datasets:[{
-        data:[clics,noclics],
-        backgroundColor:["#0f172a","#e5e7eb"]
+  miGrafico = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: ["Clics Reales", "Sin Interacción"],
+      datasets: [{
+        data: [clics, noclics],
+        backgroundColor: ["#0f172a", "#e2e8f0"],
+        borderWidth: 0
       }]
     },
-    options:{
-      plugins:{
-        legend:{position:"bottom"}
-      }
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: "bottom" }
+      },
+      cutout: '70%'
     }
   });
 }
