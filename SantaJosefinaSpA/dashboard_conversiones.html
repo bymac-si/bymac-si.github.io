@@ -309,68 +309,70 @@ async function cargarDashboard(){
 
 
 /* ===============================
-   LEADS A VENCIDOS
+   LEADS A VENCIDOS (Corregido)
 ================================ */
-
 async function cargarLeadsAVencidos(){
-
   const banner = document.getElementById("alertaVencidos");
   const contador = document.getElementById("cantVencidos");
 
   try{
-
     const r = await fetch(API_URL+"?action=leadsAVencidos");
     const data = await r.json();
-
     const tbody = document.getElementById("tablaLeadsVencidos");
-
     tbody.innerHTML = "";
 
     if(!data.length){
-
       banner.style.display = "none";
-
-      tbody.innerHTML =
-        "<tr><td colspan='3'>✅ No hay vencidos</td></tr>";
-
+      tbody.innerHTML = "<tr><td colspan='3'>✅ No hay vencidos</td></tr>";
       return;
     }
 
     banner.style.display = "block";
     contador.innerText = data.length;
 
-    data.forEach(l=>{
-
+    data.forEach(l => {
       const wa = l.telefono.replace(/\D/g,'');
-
-      const msg = encodeURIComponent(
-        `Hola ${l.nombre}, te escribo desde Santa Josefina.`
-      );
+      const msg = encodeURIComponent(`Hola ${l.nombre}, te escribo de Santa Josefina.`);
 
       tbody.innerHTML += `
-<tr>
-  <td>${l.nombre}</td>
-  <td>${l.horas}</td>
-  <td>
+        <tr>
+          <td>${l.nombre}</td>
+          <td>${l.horas} hrs</td>
+          <td>
+            <a class="btn-wa" target="_blank" href="https://wa.me/${wa}?text=${msg}">WhatsApp</a>
+            <button style="margin-left:5px" onclick="mostrarSelectorAgente('${l.email}')">📌 Asignar</button>
+          </td>
+        </tr>`;
+    });
+  }catch(e){ console.error("Leads vencidos:",e); }
+}
 
-    <a class="btn-wa"
-       target="_blank"
-       href="https://wa.me/${wa}?text=${msg}">
-       WhatsApp
-    </a>
+/* ===============================
+   CONFIRMAR ASIGNACIÓN (Corregido)
+================================ */
+async function confirmarAsignacion(email){
+  const agente = document.getElementById("selectAgente").value;
+  if(!agente) return;
 
-    <button
-      style="margin-left:5px"
-      onclick="mostrarSelectorAgente('${l.email}')">
-      📌 Asignar
-    </button>
-
-  </td>
-</tr>`;
+  try {
+    // Usamos el mismo método que el envío de correos para evitar bloqueos
+    await fetch(API_URL, {
+      method: "POST",
+      mode: "no-cors", 
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({
+        action: "asignarEjecutivo",
+        email: email,
+        ejecutivo: agente
+      })
     });
 
-  }catch(e){
-    console.error("Leads vencidos:",e);
+    alert("📌 Petición enviada. La hoja se actualizará en segundos.");
+    cerrarModal();
+    setTimeout(cargarLeadsAVencidos, 2000); // Recarga después de 2 seg
+  } catch(e) {
+    alert("❌ Error en la conexión");
+    console.error(e);
   }
 }
 
