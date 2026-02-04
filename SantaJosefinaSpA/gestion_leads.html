@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Clientes | Santa Josefina SpA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="assets/js/app.js"></script>
+    <script>if(typeof requireAuth === "function") requireAuth();</script>
+    <style>
+        body { background: #f1f5f9; font-family: sans-serif; }
+        main { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .grid-gestion { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+        .card-lead { background: white; border-radius: 12px; padding: 20px; shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 5px solid #3498db; }
+        .bitacora { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; font-size: 0.85rem; max-height: 150px; overflow-y: auto; white-space: pre-wrap; margin: 15px 0; color: #475569; }
+        .btn-group { display: flex; gap: 10px; }
+        .btn-action { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; color: white; }
+        .btn-convert { background: #2ecc71; }
+        .btn-delete { background: #e74c3c; }
+        .btn-note { background: #0f172a; }
+        .btn-action:hover { opacity: 0.8; }
+        .badge-a { background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="header"></div>
+
+<main>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1><i class="fa-solid fa-handshake"></i> Leads en Negociación</h1>
+        <button onclick="cargarLeadsEnGestion()" class="btn-note" style="padding: 10px 20px; border-radius: 8px; color: white; cursor: pointer; border: none;">
+            <i class="fa-solid fa-sync"></i> Actualizar Lista
+        </button>
+    </div>
+
+    <div id="contenedorLeads" class="grid-gestion">
+        <p>Cargando prospectos en gestión...</p>
+    </div>
+</main>
+
+<div id="footer"></div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzXAuOSwm59jCVMrPwqJ_MymZLXN5g9wsR_DODH76nCk6eVPAep0ER-wHADhDFfijz8/exec";
+
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        const h = await fetch("header.html"); if(h.ok) document.getElementById("header").innerHTML = await h.text();
+        const f = await fetch("footer.html"); if(f.ok) document.getElementById("footer").innerHTML = await f.text();
+    } catch(e) {}
+    cargarLeadsEnGestion();
+});
+
+async function cargarLeadsEnGestion() {
+    const contenedor = document.getElementById("contenedorLeads");
+    try {
+        // Obtenemos todos los leads (puedes reutilizar tu función de carga masiva)
+        const leads = await fetchData("Leads_Marketing");
+        // Filtramos solo los que están "EN GESTIÓN" y son Categoría A
+        const enGestion = leads.filter(l => l.SLA_Estado === "EN GESTIÓN" && l.Categoria_Lead === "A");
+
+        contenedor.innerHTML = "";
+
+        if (enGestion.length === 0) {
+            contenedor.innerHTML = "<p>No hay leads en etapa de negociación actual.</p>";
+            return;
+        }
+
+        enGestion.forEach(l => {
+            contenedor.innerHTML += `
+                <div class="card-lead">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span class="badge-a">CATEGORÍA A</span>
+                        <small style="color:#64748b">${l.ID}</small>
+                    </div>
+                    <h3 style="margin: 10px 0 5px 0;">${l.Nombre}</h3>
+                    <p style="font-size: 0.9rem; color: #64748b;"><i class="fa-brands fa-whatsapp"></i> ${l.Telefono}</p>
+                    
+                    <div class="bitacora"><strong>Historial:</strong>\n${l.Bitacora_Notas || "Sin notas registradas aún."}</div>
+                    
+                    <div class="btn-group">
+                        <button class="btn-action btn-note" onclick="abrirModalNota('${l.ID}', '${l.Nombre}')">
+                            <i class="fa-solid fa-pen"></i> Nota
+                        </button>
+                        <button class="btn-action btn-convert" onclick="procesarAccion('${l.ID}', 'CONVERTIR')">
+                            <i class="fa-solid fa-check"></i> Cliente
+                        </button>
+                        <button class="btn-action btn-delete" onclick="procesarAccion('${l.ID}', 'DESCARTAR')">
+                            <i class="fa-solid fa-times"></i> Sacar
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+    } catch (e) {
+        contenedor.innerHTML = "<p>Error al conectar con la base de datos.</p>";
+    }
+}
+
+async function abrirModalNota(email, nombre) {
+    const nota = prompt(`Agregar avance para ${nombre}:`);
+    if (nota) {
+        await enviarGestion(email, "SOLO_NOTA", nota);
+    }
+}
+
+async function procesarAccion(email, accion) {
+    const confirmacion = confirm(`¿Estás seguro de que quieres ${accion.toLowerCase()} este lead?`);
+    if (!confirmacion) return;
+
+    const comentario = accion === "CONVERTIR" ? "Lead convertido a cliente exitosamente." : "Lead descartado del sistema.";
+    await enviarGestion(email, accion, comentario);
+}
+
+async function enviarGestion(email, accion, comentario) {
+    try {
+        await fetch(API_URL, {
+            method: "POST",
+            mode: "no-cors",
+            body: JSON.stringify({
+                action: "gestionarLead",
+                email: email,
+                tipoAccion: accion,
+                comentario: comentario
+            })
+        });
+        alert("¡Acción registrada!");
+        location.reload();
+    } catch (e) {
+        alert("Error al procesar la solicitud.");
+    }
+}
+</script>
+</body>
+</html>
