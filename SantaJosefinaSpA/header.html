@@ -373,84 +373,74 @@
 </header>
 
 <script>
-  // ATENCIÓN: Usamos window.funcion para que sean globales y accesibles por el HTML inyectado
-
-  // 1. Toggle menú principal
-  window.toggleMenu = function() {
-    const nav = document.getElementById('navMenu');
-    // Toggle simple de clase
-    if (nav.classList.contains('active')) {
-        nav.classList.remove('active');
-    } else {
-        nav.classList.add('active');
-    }
-  };
-  
-  // 2. Toggle dropdowns (Solo Móvil)
-  window.toggleDropdown = function(event, element) {
-    if (window.innerWidth <= 1100) {
-      event.preventDefault();
-      
-      const dropdown = element.nextElementSibling;
-      
-      // Cerrar otros abiertos
-      document.querySelectorAll('.nav-dropdown > .dropdown-menu').forEach(menu => {
-        if (menu !== dropdown) menu.classList.remove('active');
-      });
-      
-      dropdown.classList.toggle('active');
-    }
-  };
-
-  // 3. Toggle submenús (Solo Móvil)
-  window.toggleSubmenu = function(event, element) {
-    if (window.innerWidth <= 1100) {
-      event.preventDefault();
-      event.stopPropagation();
-      const submenu = element.nextElementSibling;
-      submenu.classList.toggle('active');
-    }
-  };
-  
-  // 4. Reset al cambiar tamaño de pantalla
-  window.addEventListener('resize', function() {
-    if (window.innerWidth > 1100) {
-      document.querySelectorAll('.dropdown-menu.active, .submenu.active').forEach(menu => {
-        menu.classList.remove('active');
-      });
+  // Usamos una función de inicialización que se asegure de que el DOM esté listo
+  (function() {
+    
+    // 1. Toggle menú principal (Hamburger)
+    window.toggleMenu = function() {
       const nav = document.getElementById('navMenu');
-      if(nav) nav.classList.remove('active');
-    }
-  });
-  
-  // 5. Cargar datos del usuario
-  (function initUserHeader() {
-    try {
-      // Intentamos leer de app.js si existe, si no, leemos localStorage directo
-      let u = null;
-      if(typeof getAuthUser === 'function') {
-          u = getAuthUser();
+      if (nav) {
+          nav.classList.toggle('active');
+          console.log("Menú toggleado"); // Para debug
       } else {
-          const s = localStorage.getItem('sesion_activa');
-          if(s) u = JSON.parse(s);
+          console.error("No se encontró el elemento #navMenu");
       }
+    };
+    
+    // 2. Toggle dropdowns (Móvil)
+    window.toggleDropdown = function(event, element) {
+      if (window.innerWidth <= 1100) {
+        event.preventDefault();
+        const dropdown = element.nextElementSibling;
+        
+        // Cerrar otros abiertos para que no se amontonen
+        document.querySelectorAll('.nav-dropdown > .dropdown-menu').forEach(menu => {
+          if (menu !== dropdown) menu.classList.remove('active');
+        });
+        
+        dropdown.classList.toggle('active');
+      }
+    };
 
-      if(u && u.Nombre) {
-        const elName = document.getElementById('headerUserName');
-        const elRole = document.getElementById('headerUserRole');
-        if(elName) elName.innerText = u.Nombre.split(' ')[0];
-        if(elRole) elRole.innerText = u.Rol || "Agente";
+    // 3. Toggle submenús (Móvil)
+    window.toggleSubmenu = function(event, element) {
+      if (window.innerWidth <= 1100) {
+        event.preventDefault();
+        event.stopPropagation();
+        const submenu = element.nextElementSibling;
+        submenu.classList.toggle('active');
       }
-    } catch(e) { console.log('Header user info error', e); }
+    };
+    
+    // 4. Limpieza al redimensionar
+    window.addEventListener('resize', function() {
+      if (window.innerWidth > 1100) {
+        document.querySelectorAll('.dropdown-menu.active, .submenu.active, .nav-container.active')
+                .forEach(el => el.classList.remove('active'));
+      }
+    });
+
+    // 5. Cargar datos del usuario al cargar el componente
+    // Usamos un pequeño timeout para asegurar que el DOM se renderizó
+    setTimeout(() => {
+      try {
+        const s = localStorage.getItem('sesion_activa');
+        if(s) {
+          const u = JSON.parse(s);
+          const elName = document.getElementById('headerUserName');
+          const elRole = document.getElementById('headerUserRole');
+          if(elName && u.Nombre) elName.innerText = u.Nombre.split(' ')[0];
+          if(elRole && u.Rol) elRole.innerText = u.Rol;
+        }
+      } catch(e) { console.warn('Error cargando user info', e); }
+    }, 100);
+
+    window.logout = function(event) {
+      event.preventDefault();
+      if (confirm('¿Deseas cerrar sesión?')) {
+        localStorage.removeItem('sesion_activa');
+        window.location.href = 'login.html';
+      }
+    };
   })();
-
-  // 6. Logout
-  window.logout = function(event) {
-    event.preventDefault();
-    if (confirm('¿Deseas cerrar sesión?')) {
-      localStorage.removeItem('sesion_activa');
-      window.location.href = 'login.html';
-    }
-  };
-  
 </script>

@@ -1,4 +1,3 @@
-
 // ==========================================
 // 0. PWA REGISTRATION
 // ==========================================
@@ -29,18 +28,18 @@ function mostrarAvisoOffline(estamosOffline) {
     }
     aviso.style.display = estamosOffline ? 'block' : 'none';
 }
+
 // ==========================================
 // 1. CONFIGURACIÓN APPSHEET
 // ==========================================
 const APP_ID = "247b67e5-5b42-49a5-92a1-16c4357f5c7e";
-const API_KEY = "V2-bKT1n-onhYX-SHl8K-zPPx8-6QwfJ-pp9Pi-UIrcy-gcLGM"; // ⚠️ Ocultar en producción
+const API_KEY = "V2-bKT1n-onhYX-SHl8K-zPPx8-6QwfJ-pp9Pi-UIrcy-gcLGM"; 
 
 // ==========================================
 // 2. CORE: CONEXIÓN DE DATOS (CRUD)
 // ==========================================
 
 async function appSheetCRUD(tabla, action, rows, properties = {}) {
-    // 1. Chequeo de seguridad PWA
     if (!navigator.onLine) {
         alert("⚠️ ESTÁS OFFLINE\n\nNo tienes conexión a internet. Los datos NO se guardarán.\nPor favor, conéctate y vuelve a intentar.");
         throw new Error("Sin conexión a internet.");
@@ -60,8 +59,6 @@ async function appSheetCRUD(tabla, action, rows, properties = {}) {
 
         const text = await res.text();
         if (!res.ok) throw new Error(`AppSheet Error: ${text}`);
-
-        // AppSheet a veces devuelve string vacío en updates exitosos
         return text ? JSON.parse(text) : [];
     } catch (error) {
         console.error("Error CRUD:", error);
@@ -114,7 +111,6 @@ async function inicializarUTM() {
     const CACHE_KEY = 'utm_cache_v2';
     const CACHE_TIME = 1000 * 60 * 60 * 24; 
 
-    // A. Caché
     const cached = localStorage.getItem(CACHE_KEY);
     if (cached) {
         try {
@@ -127,7 +123,6 @@ async function inicializarUTM() {
         } catch (e) { console.warn("Cache inválido"); }
     }
 
-    // B. API
     try {
         const res = await fetch('https://mindicador.cl/api/utm');
         if (!res.ok) throw new Error('Error API');
@@ -200,6 +195,8 @@ function getAuthUser() {
 
 function setAuthUser(user) {
     localStorage.setItem('auth_user', JSON.stringify(user));
+    // También guardamos en sesion_activa para compatibilidad con header
+    localStorage.setItem('sesion_activa', JSON.stringify(user));
 }
 
 function requireAuth() {
@@ -220,14 +217,15 @@ async function loginWithAppSheet(email, password) {
         throw new Error('Contraseña inválida.');
     }
 
-    setAuthUser({
+    const userData = {
         email: u.Email,
-        // CORRECCIÓN: Asegúrate que tu tabla Usuarios tenga la columna "Nombre"
         nombre: u.Nombre || u.Email.split('@')[0], 
         rol: u.Rol || 'Colaborador',
-        avatar: u.Avatar || '', // Guardamos avatar si existe
+        avatar: u.Avatar || '', 
         ts: Date.now()
-    });
+    };
+    
+    setAuthUser(userData);
     return true;
 }
 
@@ -298,10 +296,20 @@ async function cargarDatosPropuesta() {
 }
 
 // ==========================================
-// 8. INICIALIZACIÓN GLOBAL
+// 8. INICIALIZACIÓN GLOBAL Y CARGA COMPONENTES
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // 1. UTM
     inicializarUTM();
+
+    // 2. Cargar Header (Independiente de la página)
+    await loadHeader();
+
+    // 3. Enrutamiento PWA
+    iniciarEnrutamientoInteligente();
+
+    // 4. Lógica de páginas específicas
     const path = window.location.pathname;
     if (path.includes('login.html')) return;
 
@@ -313,219 +321,126 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-/* ==========================================
-   LÓGICA GLOBAL DEL HEADER
-   ========================================== */
-
-window.toggleMenu = function() {
-    const menu = document.getElementById('navMenu');
-    if (menu) menu.classList.toggle('active');
-};
-
-// Logout unificado (Limpia todo)
-window.logout = function() {
-    if(confirm("¿Cerrar sesión?")) {
-        localStorage.removeItem("auth_user"); // El token principal
-        localStorage.removeItem("admin_token"); // Token antiguo por si acaso
-        localStorage.removeItem("sesion_residente");
-        window.location.href = "login.html"; 
-    }
-};
-
-// Esta función se llama al cargar header.html en cada página
-window.initHeader = function() {
-    // 1. Cargar Usuario
-    if(typeof getAuthUser === 'function') {
-        const au = getAuthUser();
-        if (au) {
-            const nameEl = document.getElementById('headerUserName');
-            const roleEl = document.getElementById('headerUserRole');
-            
-            // CORRECCIÓN AQUÍ: Usamos au.nombre (minúscula) que es como se guarda en loginWithAppSheet
-            if(nameEl) nameEl.textContent = (au.nombre || au.email || "Usuario").split(' ')[0];
-            if(roleEl) roleEl.textContent = au.rol || "Agente";
-        }
-    }
-
-    // 2. Marcar Link Activo
-    const path = window.location.pathname.split("/").pop();
-    document.querySelectorAll('.nav-link, .dropdown-menu a').forEach(link => {
-        const href = link.getAttribute('href');
-        if(href && href.split('?')[0] === path) {
-            if(link.closest('.dropdown-menu')) {
-                link.style.fontWeight = "bold";
-                link.style.color = "#3b82f6";
-                link.style.backgroundColor = "#f1f5f9";
-                const parent = link.closest('.nav-dropdown');
-                if(parent) parent.querySelector('.dropdown-toggle').classList.add('active');
-            } else {
-                link.classList.add('active');
-            }
-        }
-    });
-
-    // 3. Lógica Mobile Redirect
-    if (window.innerWidth <= 1100) {
-        const btnListado = document.querySelector('a[href="prospectos.html"]');
-        const btnMapa = document.querySelector('a[href="mapa.html"]');
-        if (btnListado) btnListado.href = "mobile_prospecto.html";
-        if (btnMapa) btnMapa.href = "mobile_mapa.html";
-    }
-};
-
-/* ==========================================
-   LÓGICA DE ENRUTAMIENTO PWA (Router)
-   ========================================== */
-function iniciarEnrutamientoInteligente() {
-    // 1. Verificar si estamos en la Landing Page (index.html)
-    const path = window.location.pathname;
-    if (!path.includes("index.html") && path !== "/") return;
-
-    // 2. Verificar Agente (Prioridad 1)
-    const agente = localStorage.getItem("auth_user");
-    if (agente) {
-        console.log("Detectado Agente: Redirigiendo a Dashboard...");
-        window.location.href = "dashboard.html";
-        return;
-    }
-
-    // 3. Verificar Residente (Prioridad 2)
-    const residente = localStorage.getItem("sesion_residente");
-    if (residente) {
-        console.log("Detectado Residente: Redirigiendo a Portal...");
-        window.location.href = "portal.html"; // O como se llame tu home de residentes
-        return;
-    }
-    
-    // 4. Si no hay nadie, se queda en index.html para que elijan botón
-}
-
-// Ejecutar al cargar la página
-document.addEventListener("DOMContentLoaded", iniciarEnrutamientoInteligente);
-
-/* ================= CARGA DE HEADER Y NAVEGACIÓN ================= */
+// ==========================================
+// 9. LÓGICA DEL HEADER (SISTEMA DE NAVEGACIÓN)
+// ==========================================
 
 async function loadHeader() {
+    const headerContainer = document.getElementById("header");
+    if (!headerContainer) return;
+
     try {
         const response = await fetch("header.html");
         if (!response.ok) throw new Error("No se pudo cargar header.html");
         
         const text = await response.text();
-        const headerDiv = document.getElementById("header");
+        headerContainer.innerHTML = text;
+
+        // --- RE-EJECUCIÓN DE SCRIPTS PARA MOBILE TOGGLE ---
+        const scripts = headerContainer.querySelectorAll("script");
+        scripts.forEach(oldScript => {
+            const newScript = document.createElement("script");
+            Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+            newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+            headerContainer.appendChild(newScript).parentNode.removeChild(newScript);
+        });
+
+        // Configurar UI según sesión
+        setupNavigation();
         
-        if (headerDiv) {
-            headerDiv.innerHTML = text;
-
-            // 1. RE-EJECUTAR SCRIPTS INCRUSTADOS (Tu código original)
-            const scripts = headerDiv.querySelectorAll("script");
-            scripts.forEach(oldScript => {
-                const newScript = document.createElement("script");
-                Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-                newScript.appendChild(document.createTextNode(oldScript.innerHTML));
-                oldScript.parentNode.replaceChild(newScript, oldScript);
-            });
-
-            // 2. CONFIGURAR NAVEGACIÓN (Lógica Agente vs Residente)
-            setupNavigation();
-        }
     } catch (e) { 
         console.error("Error cargando header:", e); 
     }
 }
 
 function setupNavigation() {
-    // Referencias al DOM (elementos que vienen en header.html)
-    const menuAgente = document.getElementById('menuAgente');
+    const menuAgente = document.getElementById('menuAgente') || document.getElementById('navMenu'); 
     const menuResidente = document.getElementById('menuResidente');
-    const lblUser = document.getElementById('navUserName'); // Desktop
-    const btnLogout = document.getElementById('btnLogoutNav'); // Desktop
+    const lblUser = document.getElementById('headerUserName') || document.getElementById('navUserName');
+    const lblRole = document.getElementById('headerUserRole');
 
-    // Chequear Sesiones
-    const sesionAgente = localStorage.getItem('sesion_activa');
-    const sesionResidente = localStorage.getItem('sesion_externa');
+    const sesionAgente = localStorage.getItem('auth_user') || localStorage.getItem('sesion_activa');
+    const sesionResidente = localStorage.getItem('sesion_externa') || localStorage.getItem('sesion_residente');
 
-    // Resetear visualización
+    // Reset Visual
     if(menuAgente) menuAgente.style.display = 'none';
     if(menuResidente) menuResidente.style.display = 'none';
 
-    // CASO 1: ES AGENTE
     if (sesionAgente) {
         if(menuAgente) {
             menuAgente.style.display = 'flex';
             highlightActiveLink(menuAgente);
         }
-        
         try {
             const user = JSON.parse(sesionAgente);
-            if(lblUser) lblUser.innerText = user.nombre || 'Agente';
-            
-            // Configurar Logout Agente
-            if(btnLogout) {
-                btnLogout.onclick = () => {
-                    if(confirm("¿Cerrar sesión de administración?")) {
-                        localStorage.removeItem('sesion_activa');
-                        window.location.href = 'login.html';
-                    }
-                };
-            }
+            if(lblUser) lblUser.innerText = (user.nombre || user.Nombre || 'Usuario').split(' ')[0];
+            if(lblRole) lblRole.innerText = user.rol || user.Rol || 'Agente';
         } catch(e) {}
     } 
-    // CASO 2: ES RESIDENTE
     else if (sesionResidente) {
         if(menuResidente) {
             menuResidente.style.display = 'flex';
             highlightActiveLink(menuResidente);
         }
-
         try {
             const user = JSON.parse(sesionResidente);
-            // El objeto residente suele tener estructura { datos: { Nombre: ... } }
-            const nombre = user.datos ? user.datos.Nombre.split(' ')[0] : 'Vecino';
-            
-            if(lblUser) lblUser.innerText = nombre;
-            
-            // Configurar Logout Residente
-            if(btnLogout) {
-                btnLogout.onclick = () => {
-                    if(confirm("¿Salir del portal de residentes?")) {
-                        localStorage.removeItem('sesion_externa');
-                        window.location.href = 'login_residente.html';
-                    }
-                };
-            }
+            const nombre = user.datos ? user.datos.Nombre : (user.Nombre || 'Vecino');
+            if(lblUser) lblUser.innerText = nombre.split(' ')[0];
+            if(lblRole) lblRole.innerText = 'Residente';
         } catch(e) {}
     }
-}
-
-// Función auxiliar para resaltar la página actual en el menú
-function highlightActiveLink(menuContainer) {
-    if(!menuContainer) return;
-    const currentPath = window.location.pathname.split('/').pop(); // Ej: 'reservas.html'
-    const links = menuContainer.getElementsByTagName('a');
     
-    for(let link of links) {
-        const href = link.getAttribute('href');
-        if(href && (href === currentPath || (currentPath === '' && href === 'index.html'))) {
-            link.classList.add('active');
-            link.style.color = 'white';
-            link.style.fontWeight = '700';
-            link.style.borderBottom = '2px solid white'; // Opcional para dar más énfasis
-        }
+    // Ajuste links mobile
+    if (window.innerWidth <= 1100) {
+        document.querySelectorAll('a[href="prospectos.html"]').forEach(a => a.href = "mobile_prospecto.html");
+        document.querySelectorAll('a[href="mapa.html"]').forEach(a => a.href = "mobile_mapa.html");
     }
 }
 
-// Función global para el menú hamburguesa (móvil)
-window.toggleMenu = function() {
-    const m1 = document.getElementById('menuAgente');
-    const m2 = document.getElementById('menuResidente');
-    
-    // Toggle solo al que esté visible (display: flex)
-    if(m1 && m1.style.display !== 'none') {
-        m1.classList.toggle('active');
-    } else if(m2 && m2.style.display !== 'none') {
-        m2.classList.toggle('active');
+function highlightActiveLink(container) {
+    if(!container) return;
+    const path = window.location.pathname.split("/").pop() || "index.html";
+    container.querySelectorAll('a').forEach(link => {
+        const href = link.getAttribute('href');
+        if(href && href.split('?')[0] === path) {
+            link.classList.add('active');
+            if(link.closest('.dropdown-menu')) {
+                link.style.fontWeight = "bold";
+                link.style.color = "#3b82f6";
+            }
+        }
+    });
+}
+
+// ==========================================
+// 10. ENRUTAMIENTO PWA (Router)
+// ==========================================
+
+function iniciarEnrutamientoInteligente() {
+    const path = window.location.pathname;
+    const isRoot = path.includes("index.html") || path === "/" || path.endsWith("/");
+    if (!isRoot) return;
+
+    if (localStorage.getItem("auth_user") || localStorage.getItem("sesion_activa")) {
+        window.location.href = "dashboard.html";
+    } else if (localStorage.getItem("sesion_residente") || localStorage.getItem("sesion_externa")) {
+        window.location.href = "portal.html";
+    }
+}
+
+// Global Logout Unificado
+window.logout = function(event) {
+    if(event) event.preventDefault();
+    if(confirm("¿Cerrar sesión?")) {
+        localStorage.removeItem("auth_user");
+        localStorage.removeItem("sesion_activa");
+        localStorage.removeItem("sesion_residente");
+        localStorage.removeItem("sesion_externa");
+        window.location.href = "login.html"; 
     }
 };
 
-/* ================= FIN HEADER ================= */
-
+window.toggleMenu = function() {
+    const menu = document.getElementById('navMenu') || document.getElementById('menuAgente') || document.getElementById('menuResidente');
+    if (menu) menu.classList.toggle('active');
+};
