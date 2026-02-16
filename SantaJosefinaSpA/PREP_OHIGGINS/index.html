@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Padrón O'Higgins Pro</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root { --primary: #1a73e8; --bg: #f0f2f5; }
+    body { background-color: var(--bg); font-family: 'Segoe UI', sans-serif; padding-bottom: 50px; }
+    
+    /* Header estilo App */
+    .app-header { background: var(--primary); color: white; padding: 20px; border-radius: 0 0 25px 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    
+    /* Buscador flotante */
+    .search-container { background: white; border-radius: 15px; padding: 15px; margin-top: -30px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+    
+    /* Tarjetas de Militantes */
+    .card-militante { border: none; border-radius: 15px; transition: transform 0.2s; margin-bottom: 15px; }
+    .card-militante:active { transform: scale(0.98); }
+    .comuna-badge { background: #e8f0fe; color: var(--primary); font-size: 0.8rem; font-weight: bold; padding: 5px 12px; border-radius: 20px; }
+    
+    /* Botones de acción rápida */
+    .btn-action { width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: 0.3s; }
+    .btn-whatsapp { background: #25d366; color: white; }
+    .btn-mail { background: #ea4335; color: white; }
+    .btn-log { background: #6c757d; color: white; }
+
+    .antiguedad-text { font-size: 0.85rem; color: #5f6368; font-style: italic; }
+  </style>
+</head>
+<body>
+
+  <div class="app-header text-center">
+    <h2 class="mb-0">Padrón O'Higgins</h2>
+    <p class="small opacity-75">Gestión de Militancia 2025</p>
+  </div>
+
+  <div class="container">
+    <div class="search-container mb-4">
+      <input type="text" id="filtroNombre" class="form-control mb-2 border-0 bg-light" placeholder="🔍 Buscar por nombre o RUT..." onkeyup="filtrar()">
+      <select id="filtroComuna" class="form-select border-0 bg-light" onchange="filtrar()">
+        <option value="">📍 Todas las Comunas</option>
+        <option value="CHIMBARONGO">Chimbarongo</option>
+        <option value="MOSTAZAL">Mostazal</option>
+        <option value="MACHALI">Machalí</option>
+        <option value="NAVIDAD">Navidad</option>
+      </select>
+    </div>
+
+    <div id="lista" class="row">
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2">Cargando base de datos...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let datosCompletos = [];
+
+    window.onload = () => {
+      google.script.run.withSuccessHandler(data => {
+        datosCompletos = data;
+        renderizar(data);
+      }).obtenerDatos();
+    };
+
+    function renderizar(data) {
+      const contenedor = document.getElementById('lista');
+      if(data.length === 0) {
+        contenedor.innerHTML = '<div class="text-center">No se encontraron resultados</div>';
+        return;
+      }
+
+      contenedor.innerHTML = data.map(m => `
+        <div class="col-12 col-md-6">
+          <div class="card card-militante shadow-sm">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="comuna-badge">${m.COMUNA}</span>
+                <small class="text-muted">#${m.N°}</small>
+              </div>
+              <h5 class="card-title mb-1 text-dark">${m.NOMBRE}</h5>
+              <p class="text-muted small mb-2">RUT: ${m.ID}</p>
+              
+              <div class="antiguedad-text mb-3">
+                <i class="far fa-calendar-check me-1"></i> Antigüedad: ${m.Antigüedad}
+              </div>
+
+              <div class="d-flex gap-3 border-top pt-3">
+                <a href="https://wa.me/${m.TELEFONO}" target="_blank" class="btn-action btn-whatsapp">
+                  <i class="fab fa-whatsapp"></i>
+                </a>
+                <a href="mailto:${m.MAIL}" class="btn-action btn-mail">
+                  <i class="far fa-envelope"></i>
+                </a>
+                <button onclick="verDetalle('${m.ID}', '${m.NOMBRE}')" class="btn-action btn-log ms-auto">
+                  <i class="fas fa-edit"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filtrar() {
+      const busqueda = document.getElementById('filtroNombre').value.toLowerCase();
+      const comuna = document.getElementById('filtroComuna').value;
+      
+      const filtrados = datosCompletos.filter(m => {
+        const matchBusqueda = m.NOMBRE.toLowerCase().includes(busqueda) || m.ID.includes(busqueda);
+        const matchComuna = comuna === "" || m.COMUNA === comuna;
+        return matchBusqueda && matchComuna;
+      });
+      renderizar(filtrados);
+    }
+
+    function verDetalle(id, nombre) {
+      const obs = prompt("Bitácora para: " + nombre + "\nIngrese gestión realizada:");
+      if(obs) {
+        google.script.run.withSuccessHandler(msg => {
+            alert("✅ " + msg);
+        }).registrarBitacora(id, obs);
+      }
+    }
+  </script>
+</body>
+</html>
