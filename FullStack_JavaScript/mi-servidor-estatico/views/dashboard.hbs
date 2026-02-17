@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  {{> header}}
+
+  <h2>Bienvenido, {{user.name}}</h2>
+
+  {{#if user.isAdmin}}
+    <p style="color: green;"><strong>Acceso de Administrador</strong></p>
+  {{/if}}
+
+  <h3>Tus Proyectos:</h3>
+
+  {{#each projects}}
+    <div class="project-card">
+
+      <h4>
+        {{this.name}} -
+        {{#if this.isCompleted}}
+          Completado ✔
+        {{else}}
+          En Progreso ⏳
+        {{/if}}
+      </h4>
+
+      {{#if this.tasks.length}}
+
+        <ul>
+          {{#each this.tasks}}
+            <li class="{{priorityClass this.priority}}">
+              {{this.description}}
+            </li>
+          {{/each}}
+        </ul>
+
+      {{else}}
+
+        <p>Este proyecto no tiene tareas asignadas todavía.</p>
+
+      {{/if}}
+
+    </div>
+  {{/each}}
+
+  {{> footer}}
+
+</body>
+</html>
