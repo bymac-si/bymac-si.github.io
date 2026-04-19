@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Nueva Solicitud de Visita</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root { --primary: #B46A55; --dark: #333; }
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; background: #f9f9f9; }
+    .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    .logo { text-align: center; margin-bottom: 20px; }
+    .logo img { width: 120px; }
+    h2 { text-align: center; color: var(--dark); margin-bottom: 25px; }
+    
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+    select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+    
+    .btn-save { 
+      background: var(--primary); color: white; border: none; width: 100%; 
+      padding: 15px; border-radius: 6px; font-size: 18px; cursor: pointer; transition: 0.3s;
+    }
+    .btn-save:hover { background: #963f2f; }
+    
+    /* Loading Spinner */
+    .hidden { display: none; }
+    .overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; z-index: 10; }
+  </style>
+</head>
+<body>
+
+<div id="loading" class="overlay hidden"><div>Cargando datos...</div></div>
+
+<div class="card">
+  <div class="logo"><img src="assets/img/logo_santajosefina.png" alt="Logo"></div>
+  <h2>Solicitud de Visita</h2>
+  
+  <form id="visitaForm">
+    <div class="form-group">
+      <label>Seleccionar Cliente</label>
+      <select id="cliente" required>
+        <option value="">Cargando clientes...</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Propiedad a Visitar</label>
+      <select id="propiedad" required>
+        <option value="">Cargando propiedades...</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Fecha de Visita</label>
+      <input type="date" id="fecha" required>
+    </div>
+
+    <button type="submit" class="btn-save" id="btnSubmit">
+      <i class="fas fa-paper-plane"></i> Generar Solicitud
+    </button>
+  </form>
+</div>
+
+<script src="assets/js/app.js"></script>
+<script>
+// 1. Cargar datos iniciales en los Selects
+async function initForm() {
+  document.getElementById('loading').classList.remove('hidden');
+  try {
+    const [clientes, propiedades] = await Promise.all([
+      fetchData("Clientes"),
+      fetchData("Propiedades")
+    ]);
+
+    const selectCliente = document.getElementById('cliente');
+    selectCliente.innerHTML = '<option value="">Seleccione un cliente</option>';
+    clientes.forEach(c => {
+      let option = new Element('option'); // Ajustar según cómo tu app.js maneja objetos
+      selectCliente.innerHTML += `<option value="${getKeyVal(c)}">${c.Nombre}</option>`;
+    });
+
+    const selectProp = document.getElementById('propiedad');
+    selectProp.innerHTML = '<option value="">Seleccione propiedad</option>';
+    propiedades.forEach(p => {
+      selectProp.innerHTML += `<option value="${getKeyVal(p)}">${p.Direccion} - ${p.Comuna}</option>`;
+    });
+
+  } catch (err) {
+    alert("Error cargando datos: " + err.message);
+  } finally {
+    document.getElementById('loading').classList.add('hidden');
+  }
+}
+
+// 2. Enviar datos a AppSheet / Google Sheets
+document.getElementById('visitaForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btnSubmit');
+  btn.disabled = true;
+  btn.innerText = "Enviando...";
+
+  const datos = {
+    Cliente: document.getElementById('cliente').value,
+    Propiedad: document.getElementById('propiedad').value,
+    Fecha: document.getElementById('fecha').value,
+    Estado: "Pendiente" // Valor por defecto para AppSheet
+  };
+
+  try {
+    // Aquí debes usar la función de guardado que tengas en assets/js/app.js
+    // Ejemplo genérico asumiendo que tienes una función postData:
+    const response = await postData("Visitas", datos); 
+    
+    if(response && response.id) {
+       alert("Solicitud generada con éxito");
+       // Redirigir a la vista de impresión que ya tienes
+       window.location.href = `orden-visita.html?id=${response.id}`;
+    }
+  } catch (err) {
+    alert("Error al guardar: " + err.message);
+    btn.disabled = false;
+    btn.innerText = "Generar Solicitud";
+  }
+});
+
+initForm();
+</script>
+</body>
+</html>
