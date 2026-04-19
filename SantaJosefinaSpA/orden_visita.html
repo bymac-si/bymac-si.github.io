@@ -2,193 +2,193 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Orden de Visita</title>
+  <title>Orden de Visita - Santa Josefina</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="assets/js/app.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script>requireAuth();</script>
   <style>
     body{
-		max-width:900px;
-		margin:10px auto;
-		padding:20px;
-		line-height:1.6;
-		font-family:Arial, sans-serif;color:#333;
-		background-color: #fff;
-	  }
-    h1{
-		font-size:22px;
-		text-align:center;
-		margin-bottom:20px;
-	  }
-    .campo{
-		margin:8px 0;
-	  }
-    .campo b{
-		display:inline-block;
-		width:140px;
-	  }
-    table{
-		width:100%;
-		border-collapse:collapse;
-		margin-top:20px;
-	  }
-    th,td{
-		border:1px solid #ccc;
-		padding:8px;
-		text-align:center;
-	  }
-    .firma{
-		margin-top:60px;
-	  }
-    .firma div{
-		display:inline-block;
-		width:45%;
-		text-align:center;
-	  }
-    .legal{
-		margin-top:40px;
-		font-size:13px;
-		color:#444;
-	  }
-    .logo{
-		text-align:center;
-		margin-bottom:10px;
-	  }
-    .logo img{
-		width:130px;
-	  }
-    .acciones{
-		margin-top:20px;
-		text-align:right;
-	  }
-    .btn-print{
-		background:#B46A55;
-		color:#fff;
-		padding:10px 18px;
-		border:none;
-		border-radius:6px;
-		cursor:pointer;
-	  }
-    .btn-print:hover{
-		background:#963f2f;
-	  }
+      max-width:900px;
+      margin:10px auto;
+      padding:20px;
+      line-height:1.6;
+      font-family:Arial, sans-serif; color:#333;
+      background-color: #fff;
+    }
+    h1{ font-size:22px; text-align:center; margin-bottom:20px; }
+    .campo{ margin:8px 0; }
+    .campo b{ display:inline-block; width:140px; }
+    table{ width:100%; border-collapse:collapse; margin-top:20px; }
+    th,td{ border:1px solid #ccc; padding:8px; text-align:center; }
+    .firma{ margin-top:60px; display: flex; justify-content: space-between; }
+    .firma div{ width:45%; text-align:center; }
+    .legal{ margin-top:40px; font-size:12px; color:#444; text-align: justify; }
+    .logo{ text-align:center; margin-bottom:10px; }
+    .logo img{ width:130px; }
+    
+    .acciones {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #fff;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: 0.3s;
+    }
+    .btn-print { background: #B46A55; }
+    .btn-pdf { background: #1a2b48; }
+    .btn-whatsapp { background: #25D366; }
+    .btn:hover { opacity: 0.8; transform: translateY(-1px); }
 
-    /* Configuración de impresión */
-    @media print {
-      .acciones{display:none;}
-    }
-    @page {
-      size: Letter;
-      margin: 0.1in; /* márgenes de 0.1 pulgadas */
-    }
+    @media print { .acciones{display:none;} }
+    @page { size: Letter; margin: 0.5in; }
 
     /* Spinner */
-    .spinner-backdrop{
-		position:fixed; 
-		inset:0; 
-		background:rgba(255,255,255,0.85);
-		display:flex; 
-		align-items:center; 
-		justify-content:center; 
-		z-index:9999;
-	  }
-    .spinner-card{
-		background:#fff; 
-		padding:18px 22px; 
-		border:1px solid #e5e7eb; 
-		border-radius:8px;
-		box-shadow:0 6px 18px rgba(0,0,0,.08); text-align:center; min-width:260px; color:#1A2B48; font-weight:600;}
-    .spinner{width:28px; height:28px; border-radius:50%; border:3px solid #eee; border-top-color:#B46A55;
-      margin:0 auto 10px auto; animation:spin 0.9s linear infinite;}
+    .spinner-backdrop{ position:fixed; inset:0; background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; z-index:9999; }
+    .spinner-card{ background:#fff; padding:20px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1); text-align:center; }
+    .spinner{ width:30px; height:30px; border-radius:50%; border:3px solid #eee; border-top-color:#B46A55; margin:0 auto 10px; animation:spin 0.8s linear infinite; }
     @keyframes spin{ to{ transform:rotate(360deg);} }
-    .hidden{display:none !important;}
-    #printArea { display:block; position:absolute; top:0; left:0; width:100%; padding:20px; color:black; }
+    .hidden{ display:none !important; }
   </style>
 </head>
 <body>
-<div class="logo">
-  <img src="assets/img/logo_santajosefina.png" alt="Santa Josefina SpA">
-</div>
-<h1>Orden de Visita</h1>
 
-<div id="contenidoOrden"></div>
+<div id="pdf-content">
+  <div class="logo">
+    <img src="assets/img/logo_santajosefina.png" alt="Santa Josefina SpA">
+  </div>
+  <h1>Orden de Visita</h1>
 
-<div class="legal">
-  <p>
-    El interesado declara haber visitado la propiedad por intermedio de Santa Josefina SpA, y acepta expresamente que, en caso de efectuarse la venta, deberá pagar, por concepto de honorarios, la suma equivalente al 2% más IVA, sobre el monto de la operación de compraventa, con un mínimo de 50 UF. más IVA. 
-  </p>
-  <p>
-    Todas las obligaciones antes señaladas también se harán efectivas en el caso que la compra la realicen ascendientes o descendientes en toda línea recta y colaterales por consanguinidad hasta el segundo grado inclusive, sociedad de personas o capital en que el interesado tenga participación como accionista, socio o representante administrador, y si la compra fuera financiada por una institución de Leasing, caso en el cual en la Escritura de compraventa quedará como compradora dicha institución, y la comisión a cancelar será sobre el valor real de la propiedad.
-  </p>
-</div>
+  <div id="contenidoOrden"></div>
 
-<div class="firma">
-  <div>_________________________<br>Firma Cliente</div>
-  <div>_________________________<br>Firma Agente</div>
+  <div class="legal">
+    <p>El interesado declara haber visitado la propiedad por intermedio de Santa Josefina SpA, y acepta expresamente que, en caso de efectuarse la venta, deberá pagar el 2% más IVA sobre el monto de la operación.</p>
+    <p>Esta obligación se extiende a familiares directos o sociedades donde el interesado tenga participación.</p>
+  </div>
+
+  <div class="firma">
+    <div>_________________________<br>Firma Cliente</div>
+    <div>_________________________<br>Firma Agente</div>
+  </div>
 </div>
 
 <div class="acciones">
-  <button class="btn-print" onclick="window.print()">🖨 Imprimir Orden</button>
+  <button class="btn btn-whatsapp" onclick="enviarWhatsApp()">
+    <i class="fab fa-whatsapp"></i> Enviar WhatsApp
+  </button>
+  <button class="btn btn-pdf" onclick="descargarPDF()">
+    <i class="fas fa-file-pdf"></i> Guardar PDF
+  </button>
+  <button class="btn btn-print" onclick="window.print()">
+    <i class="fas fa-print"></i> Imprimir
+  </button>
 </div>
 
-<!-- SPINNER -->
 <div id="pageSpinner" class="spinner-backdrop">
   <div class="spinner-card">
     <div class="spinner"></div>
-    <div id="spinnerText">Generando Orden...</div>
+    <div id="spinnerText">Cargando datos...</div>
   </div>
 </div>
 
 <script>
+let datosGlobales = {};
+
 async function cargarOrden(){
   try{
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
-    if(!id){ document.getElementById("contenidoOrden").innerHTML="<p>No se recibió ID de visita</p>"; return; }
+    if(!id) return;
 
-    const [visitas, clientes, propiedades] = await Promise.all([
+    const [visitas, clientes, propiedades, prospectos] = await Promise.all([
       fetchData("Visitas"),
       fetchData("Clientes"),
-      fetchData("Propiedades")
+      fetchData("Propiedades"),
+      fetchData("ProspectosCorretaje")
     ]);
 
     const visita = visitas.find(v=>String(getKeyVal(v))===String(id));
-    if(!visita){ document.getElementById("contenidoOrden").innerHTML="<p>Visita no encontrada</p>"; return; }
+    if(!visita) return;
 
-    const cliente = clientes.find(c=>String(getKeyVal(c))===String(visita.Cliente));
+    let contacto = clientes.find(c=>String(getKeyVal(c))===String(visita.Cliente)) || 
+                   prospectos.find(p=>String(getKeyVal(p))===String(visita.Cliente));
+
     const propiedad = propiedades.find(p=>String(getKeyVal(p))===String(visita.Propiedad));
+    
+    // Guardar para uso en WhatsApp
+    datosGlobales = { visita, contacto, propiedad, url: window.location.href };
 
-    const fecha = visita.Fecha || visita["Fecha Visita"] || "";
-    const fechaTexto = fecha ? new Date(fecha).toLocaleDateString("es-CL") : "—";
+    const fechaFmt = visita.Fecha ? new Date(visita.Fecha).toLocaleDateString("es-CL") : "—";
+    
+    // Lógica UF vs Pesos
+    let precio = "—";
+    if (propiedad?.Precio) {
+      const p = parseFloat(propiedad.Precio);
+      precio = p < 1000000 ? `UF ${p}` : `$${new Intl.NumberFormat("es-CL").format(p)}`;
+    }
 
     document.getElementById("contenidoOrden").innerHTML = `
-      <div class="campo"><b>Por esta orden Don(ña):</b> ${cliente?.Nombre||"—"}</div>
-      <div class="campo"><b>Fecha:</b> ${fechaTexto}</div>
-      <div class="campo"><b>Celular:</b> ${cliente?.Telefono||"—"}</div>
-      <div class="campo"><b>Mail:</b> ${cliente?.Email||"—"}</div>
+      <div class="campo"><b>Cliente:</b> ${contacto?.Nombre || contacto?.['Nombre Condominio'] || "—"}</div>
+      <div class="campo"><b>Fecha:</b> ${fechaFmt}</div>
+      <div class="campo"><b>Celular:</b> ${contacto?.Telefono || contacto?.Celular || "—"}</div>
+      <div class="campo"><b>Email:</b> ${contacto?.Email || contacto?.Correo || "—"}</div>
 
-      <h3 style="margin-top:20px;">Visita la siguiente propiedad:</h3>
+      <h3 style="margin-top:20px;">Propiedad Visitada:</h3>
       <table>
-        <tr><th>Dirección</th><th>Comuna</th><th>Región</th><th>Precio</th></tr>
+        <tr><th>Dirección</th><th>Comuna</th><th>Precio</th></tr>
         <tr>
           <td>${propiedad?.Direccion||"—"}</td>
           <td>${propiedad?.Comuna||"—"}</td>
-          <td>${propiedad?.Region||"—"}</td>
-          <td>${propiedad?.Precio ? "$"+new Intl.NumberFormat("es-CL").format(propiedad.Precio) : "—"}</td>
+          <td>${precio}</td>
         </tr>
       </table>
-
-      <h3 style="margin-top:20px;">Opción de Compra</h3>
-      <p>☐ Crédito Hipotecario &nbsp;&nbsp; ☐ Contado</p>
     `;
-  }catch(err){
+  } catch(err) {
     console.error(err);
-    document.getElementById("contenidoOrden").innerHTML="<p>Error al generar la orden</p>";
-  }finally{
+  } finally {
     document.getElementById("pageSpinner").classList.add("hidden");
   }
 }
+
+function descargarPDF() {
+  const element = document.getElementById('pdf-content');
+  const opt = {
+    margin: 10,
+    filename: `Orden_Visita_${datosGlobales.contacto?.Nombre || 'Cliente'}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
+  };
+  html2pdf().set(opt).from(element).save();
+}
+
+function enviarWhatsApp() {
+  const nombre = datosGlobales.contacto?.Nombre || datosGlobales.contacto?.['Nombre Condominio'] || "Cliente";
+  const propiedad = datosGlobales.propiedad?.Direccion || "la propiedad";
+  const telefono = datosGlobales.contacto?.Telefono || datosGlobales.contacto?.Celular || "";
+  
+  const mensaje = window.encodeURIComponent(
+    `*Santa Josefina SpA - Orden de Visita*\n\n` +
+    `Hola ${nombre}, adjuntamos el detalle de su visita a: ${propiedad}.\n\n` +
+    `Puede ver la orden oficial aquí:\n${datosGlobales.url}`
+  );
+
+  // Intenta abrir con el número del cliente si existe, sino abre selección general
+  const wsUrl = telefono ? `https://wa.me/${telefono.replace(/\+/g,'')}?text=${mensaje}` : `https://wa.me/?text=${mensaje}`;
+  window.open(wsUrl, '_blank');
+}
+
 cargarOrden();
 </script>
 </body>
