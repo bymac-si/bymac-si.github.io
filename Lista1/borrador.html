@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programa Fuerza Republicana O'Higgins 2026-2030</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --azul-oscuro: #0a1f44;
+            --azul-medio: #113264;
+            --rojo-republicano: #be111a;
+            --blanco: #ffffff;
+            --gris-claro: #f4f6f9;
+            --texto-oscuro: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--gris-claro);
+            color: var(--texto-oscuro);
+            line-height: 1.6;
+        }
+
+        /* Encabezado Principal */
+        header {
+            background: linear-gradient(135deg, var(--azul-oscuro) 0%, var(--azul-medio) 100%);
+            color: var(--blanco);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 8px solid var(--rojo-republicano);
+            position: relative;
+        }
+
+        .logo-container {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            font-size: 2.2rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .logo-container span {
+            color: var(--rojo-republicano);
+        }
+
+        .subtitle {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 5px;
+            color: var(--blanco);
+        }
+
+        .badge-programa {
+            background-color: var(--rojo-republicano);
+            color: var(--blanco);
+            display: inline-block;
+            padding: 6px 20px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 1.3rem;
+            margin-top: 15px;
+            border-radius: 3px;
+        }
+
+        /* Contenedor y Menú Lateral */
+        .main-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+            padding: 0 20px;
+        }
+
+        @media (max-width: 900px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            nav {
+                position: static !important;
+            }
+        }
+
+        nav {
+            background-color: var(--azul-oscuro);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+
+        nav h3 {
+            color: var(--blanco);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--rojo-republicano);
+            text-transform: uppercase;
+        }
+
+        nav ul {
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-bottom: 8px;
+        }
+
+        nav ul li a {
+            color: #bdcddc;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: block;
+            padding: 6px 10px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        nav ul li a:hover, nav ul li a.active {
+            background-color: var(--rojo-republicano);
+            color: var(--blanco);
+        }
+
+        /* Secciones de Contenido */
+        .content-area {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        section {
+            background-color: var(--blanco);
+            padding: 35px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-left: 6px solid var(--azul-medio);
+            scroll-margin-top: 20px;
+        }
+
+        section#presentacion {
+            border-left-color: var(--rojo-republicano);
+        }
+
+        h2 {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--azul-oscuro);
+            font-size: 1.6rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        p {
+            margin-bottom: 15px;
+            font-size: 1.05rem;
+            color: #444;
+            text-align: justify;
+        }
+
+        /* Bloques de Datos, Listas y Grid */
+        .meta-box {
+            background-color: #f8eff0;
+            border: 1px solid #ebd2d4;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: var(--rojo-republicano);
+        }
+
+        .grid-blocks {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 650px) {
+            .grid-blocks {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .block {
+            background-color: var(--gris-claro);
+            padding: 20px;
+            border-radius: 6px;
+            border-top: 4px solid var(--azul-oscuro);
+        }
+
+        .block h4 {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--azul-oscuro);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+        }
+
+        ul.items-list {
+            list-style: none;
+        }
+
+        ul.items-list li {
+            position: relative;
+            padding-left: 25px;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        ul.items-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--rojo-republicano);
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        /* Listas de Áreas Específicas */
+        .areas-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .area-tag {
+            background-color: var(--azul-oscuro);
+            color: var(--blanco);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        /* Estilo para los 5 Grandes Proyectos Destacados */
+        .proyecto-card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .proyecto-num {
+            background-color: var(--rojo-republicano);
+            color: var(--blanco);
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .proyecto-info h4 {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--azul-oscuro);
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        /* Footer con Principios Estilo Afiche */
+        footer {
+            background-color: var(--azul-oscuro);
+            color: var(--blanco);
+            padding: 40px 20px;
+            margin-top: 50px;
+            border-top: 6px solid var(--rojo-republicano);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .footer-col h3 {
+            font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--blanco);
+            border-left: 4px solid var(--rojo-republicano);
+            padding-left: 10px;
+        }
+
+        .principios-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .principio-item {
+            font-size: 0.95rem;
+            padding: 4px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .principio-item::before {
+            content: "•";
+            color: var(--rojo-republicano);
+            font-size: 1.5rem;
+        }
+
+        .compromiso-list li {
+            margin-bottom: 8px;
+            list-style: none;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .compromiso-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #00ffcc;
+            font-weight: bold;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">Fuerza <span>Republicana</span></div>
+        <div class="subtitle">Región de O'Higgins</div>
+        <div class="badge-programa">PROGRAMA DE GESTIÓN 2026-2030</div>
+    </header>
+
+    <div class="main-container">
+        <nav>
+            <h3>Contenidos</h3>
+            <ul>
+                <li><a href="#presentacion" class="active">Presentación</a></li>
+                <li><a href="#eje1">Eje 1: Presencia Territorial</a></li>
+                <li><a href="#eje2">Eje 2: Militancia Protagonista</a></li>
+                <li><a href="#eje3">Eje 3: Formación para Gobernar</a></li>
+                <li><a href="#eje4">Eje 4: Juventud</a></li>
+                <li><a href="#eje5">Eje 5: Vinculación Comunitaria</a></li>
+                <li><a href="#eje6">Eje 6: Gestión Transparente</a></li>
+                <li><a href="#eje7">Eje 7: Preparación Electoral</a></li>
+                <li><a href="#proyectos">5 Iniciativas Permanentes</a></li>
+            </ul>
+        </nav>
+
+        <div class="content-area">
+            
+            <section id="presentacion">
+                <h2>Presentación</h2>
+                <p>El Partido Republicano enfrenta una etapa decisiva para consolidar su presencia en la Región de O'Higgins[cite: 9]. El crecimiento alcanzado durante los últimos años exige una organización moderna, cercana y territorialmente activa, capaz de fortalecer la participación de la militancia y proyectar un liderazgo regional sólido[cite: 10].</p>
+                <p>Nuestra candidatura propone una conducción que combine experiencia, renovación y trabajo permanente[cite: 11]. Aspiramos a una directiva que no solo administre el partido, sino que impulse una organización viva, conectada con las comunas y preparada para los desafíos políticos de los próximos años[cite: 12]. Este Programa de Gestión establece los compromisos que orientarán nuestro trabajo entre 2026 y 2030[cite: 13].</p>
+                <div class="meta-box">
+                    Experiencia para liderar. Visión para avanzar[cite: 8].
+                </div>
+            </section>
+
+            <section id="eje1">
+                <h2>Eje 1: Un Partido presente en las 33 comunas</h2>
+                <p>Creemos en una organización territorial fuerte, con dirigentes respaldados y una directiva regional presente en toda la región[cite: 16].</p>
+                
+                <div class="grid-blocks">
+                    <div class="block">
+                        <h4>Objetivos</h4>
+                        <ul class="items-list">
+                            <li>Fortalecer la estructura comunal del partido[cite: 18].</li>
+                            <li>Acompañar permanentemente a los dirigentes locales[cite: 19].</li>
+                            <li>Reducir las brechas entre comunas[cite: 20].</li>
+                            <li>Desarrollar liderazgos territoriales[cite: 21].</li>
+                        </ul>
+                    </div>
+                    <div class="block">
+                        <h4>Compromisos</h4>
+                        <ul class="items-list">
+                            <li>Agenda permanente de visitas a todas las comunas[cite: 23].</li>
+                            <li>Reuniones regionales trimestrales con encargados comunales[cite: 24].</li>
+                            <li>Coordinadores provinciales permanentes[cite: 25].</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="meta-box">
+                    Meta 2030: Que cada comuna cuente con equipos activos, organizados y funcionando regularmente[cite: 26, 27].
+                </div>
+            </section>
+
+            <section id="eje2">
+                <h2>Eje 2: Militancia protagonista</h2>
+                <p>La fortaleza del partido está en sus militantes. Nuestra prioridad será que todos tengan oportunidades reales para participar y aportar[cite: 30, 31].</p>
+                
+                <div class="block">
+                    <h4>Compromisos</h4>
+                    <ul class="items-list">
+                        <li>Plataforma permanente de comunicación con la militancia[cite: 33].</li>
+                        <li>Encuentros regionales cada año[cite: 34].</li>
+                        <li>Instancias internas para recoger propuestas[cite: 35].</li>
+                        <li>Programa de reconocimiento de dirigentes y voluntarios[cite: 36].</li>
+                        <li>Integración activa de jóvenes y mujeres[cite: 37].</li>
+                        <li>Red de bienvenida para nuevos militantes[cite: 38].</li>
+                    </ul>
+                </div>
+                <div class="meta-box">
+                    Meta 2030: Incrementar significativamente la participación activa de la militancia en las actividades regionales[cite: 39, 40].
+                </div>
+            </section>
+
+            <section id="eje3">
+                <h2>Eje 3: Formación para gobernar</h2>
+                <p>Queremos preparar a quienes representarán nuestras ideas en los distintos espacios públicos[cite: 43]. Para ello, el compromiso principal radica en la creación de una <strong>Academia Regional Republicana</strong>[cite: 45].</p>
+                
+                <div class="block">
+                    <h4>Áreas de Capacitación Planificadas:</h4>
+                    <div class="areas-container">
+                        <div class="area-tag">Formación Doctrinaria [cite: 48]</div>
+                        <div class="area-tag">Liderazgo Político [cite: 49]</div>
+                        <div class="area-tag">Comunicación Efectiva [cite: 50]</div>
+                        <div class="area-tag">Negociación [cite: 51]</div>
+                        <div class="area-tag">Políticas Públicas [cite: 52]</div>
+                        <div class="area-tag">Adm. Municipal [cite: 53]</div>
+                        <div class="area-tag">Gestión Pública [cite: 54]</div>
+                        <div class="area-tag">Trabajo Legislativo [cite: 55]</div>
+                        <div class="area-tag">Campañas Electorales [cite: 56]</div>
+                    </div>
+                </div>
+                <div class="meta-box">
+                    Meta 2030: Contar con una nueva generación de dirigentes preparados para asumir responsabilidades políticas y públicas[cite: 57, 58].
+                </div>
+            </section>
+
+            <section id="eje4">
+                <h2>Eje 4: Programa de participación de la Juventud</h2>
+                <p>Queremos que la juventud sea parte del equipo, motivar su participación, potenciar los liderazgos y ser un apoyo permanente en sus iniciativas y desafíos[cite: 61].</p>
+                
+                <div class="block">
+                    <h4>Compromisos</h4>
+                    <ul class="items-list">
+                        <li>Formación de jóvenes Líderes[cite: 63].</li>
+                        <li>Creación de una red de mentores para transmitir experiencias y acompañar el proceso formativo[cite: 64, 65].</li>
+                        <li>Encuentros permanentes con la juventud[cite: 66].</li>
+                        <li>Motivar la participación activa en trabajo territorial, social y campañas[cite: 67].</li>
+                    </ul>
+                </div>
+                <div class="meta-box">
+                    Meta 2030: Contar con un número importante de jóvenes militantes motivados y comprometidos con el Partido en la Región[cite: 68, 69].
+                </div>
+            </section>
+
+            <section id="eje5">
+                <h2>Eje 5: Vinculación con la comunidad</h2>
+                <p>Queremos que nuestras propuestas nazcan desde las necesidades reales de la región[cite: 72].</p>
+                
+                <div class="block">
+                    <h4>Mesas Regionales de Trabajo:</h4>
+                    <div class="areas-container">
+                        <div class="area-tag" style="background-color: var(--rojo-republicano);">Agricultura [cite: 75]</div>
+                        <div class="area-tag" style="background-color: var(--rojo-republicano);">Seguridad [cite: 76]</div>
+                        <div class="area-tag" style="background-color: var(--rojo-republicano);">Recursos Hídricos [cite: 77]</div>
+                        <div class="area-tag" style="background-color: var(--rojo-republicano);">Desarrollo Rural [cite: 78]</div>
+                        <div class="area-tag" style="background-color: var(--rojo-republicano);">Emprendimiento [cite: 79]</div>
+                        <div class="area-tag" style="background-color: var(--rojo-republicano);">Educación [cite: 80]</div>
+                        <div class="area-tag" style="background-color: var(--rojo-republicano);">Salud [cite: 81]</div>
+                        <div class="area-tag" style="background-color: var(--rojo-republicano);">Familia [cite: 82]</div>
+                        <div class="area-tag" style="background-color: var(--rojo-republicano);">Juventud [cite: 83]</div>
+                    </div>
+                </div>
+
+                <div class="block" style="margin-top: 20px;">
+                    <h4>Encuentros con Actores Clave:</h4>
+                    <p style="font-size: 0.95rem; font-style: italic;">Se realizarán jornadas con agricultores, emprendedores, dirigentes vecinales, gremios, organizaciones sociales, adultos mayores, iglesias y centros de estudiantes[cite: 84, 85, 86, 87, 88, 89, 90, 91, 92].</p>
+                </div>
+                <div class="meta-box">
+                    Meta 2030: Consolidar al Partido Republicano como un referente regional de propuestas y diálogo con la sociedad civil[cite: 93, 94].
+                </div>
+            </section>
+
+            <section id="eje6">
+                <h2>Eje 6: Gestión moderna, transparente y orientada a resultados</h2>
+                <p>La confianza se construye con transparencia y cumplimiento. Nuestra gestión estará basada en planificación, información y evaluación permanente[cite: 97, 98].</p>
+                
+                <div class="block">
+                    <h4>Compromisos Operativos</h4>
+                    <ul class="items-list">
+                        <li>Plan Estratégico Regional actualizado[cite: 100].</li>
+                        <li>Cuenta pública anual[cite: 101].</li>
+                        <li>Boletín mensual para la militancia[cite: 104].</li>
+                        <li>Implementación de indicadores de gestión y seguimiento continuo[cite: 105, 106].</li>
+                        <li>Coordinación estrecha con parlamentarios, COREs, alcaldes y concejales de la región[cite: 107].</li>
+                    </ul>
+                </div>
+                <div class="meta-box">
+                    Meta 2030: Instalar una cultura de gestión basada en resultados y transparencia[cite: 108, 109].
+                </div>
+            </section>
+
+            <section id="eje7">
+                <h2>Eje 7: Preparación Electoral y Desarrollo de Liderazgos</h2>
+                <p>El crecimiento del Partido Republicano requiere una planificación estratégica que permita identificar, formar y acompañar a quienes representarán nuestras ideas en los distintos espacios de representación pública[cite: 112]. Nuestro compromiso es construir una organización preparada para enfrentar cada proceso electoral con unidad, profesionalismo y un profundo arraigo territorial[cite: 113].</p>
+                
+                <div class="grid-blocks">
+                    <div class="block">
+                        <h4>Objetivos</h4>
+                        <ul class="items-list">
+                            <li>Identificar nuevos liderazgos en las 33 comunas[cite: 115].</li>
+                            <li>Planificación anticipada para los desafíos 2026-2030[cite: 116].</li>
+                            <li>Fortalecer capacidades de equipos locales[cite: 117].</li>
+                            <li>Fomentar el trabajo colaborativo e integral[cite: 118].</li>
+                        </ul>
+                    </div>
+                    <div class="block">
+                        <h4>Compromisos</h4>
+                        <ul class="items-list">
+                            <li>Plan Regional de Preparación Electoral de largo plazo[cite: 121].</li>
+                            <li>Talleres de comunicación, legislación electoral y gestión[cite: 124].</li>
+                            <li>Banco Regional de Talentos[cite: 125].</li>
+                            <li>Constitución de equipos técnicos de apoyo programático[cite: 126].</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="meta-box">
+                    Metas al 2030: Equipos políticos activos en las 33 comunas y posicionar a O'Higgins como referente nacional en organización territorial[cite: 130, 134].
+                </div>
+            </section>
+
+            <section id="proyectos">
+                <h2>Iniciativas Permanentes (Proyectos Clave)</h2>
+                <p style="margin-bottom: 25px;">Durante nuestra gestión impulsaremos de manera transversal cinco iniciativas de gran impacto regional[cite: 136]:</p>
+
+                <div class="proyecto-card">
+                    <div class="proyecto-num">1</div>
+                    <div class="proyecto-info">
+                        <h4>Escuela de Liderazgo Republicano</h4>
+                        <p>Programa anual enfocado directamente en la formación continua para dirigentes y futuros candidatos de la zona[cite: 137, 138].</p>
+                    </div>
+                </div>
+
+                <div class="proyecto-card">
+                    <div class="proyecto-num">2</div>
+                    <div class="proyecto-info">
+                        <h4>Fuerza Republicana en Terreno</h4>
+                        <p>Despliegue y visitas permanentes de la directiva por la totalidad de las comunas que componen la región[cite: 139, 140].</p>
+                    </div>
+                </div>
+
+                <div class="proyecto-card">
+                    <div class="proyecto-num">3</div>
+                    <div class="proyecto-info">
+                        <h4>Red Regional de Dirigentes</h4>
+                        <p>Un sistema moderno de coordinación robusta entre las estructuras comunales y provinciales de O'Higgins[cite: 141, 142].</p>
+                    </div>
+                </div>
+
+                <div class="proyecto-card">
+                    <div class="proyecto-num">4</div>
+                    <div class="proyecto-info">
+                        <h4>Observatorio Regional</h4>
+                        <p>Equipo especializado encargado de analizar las principales problemáticas locales y elaborar propuestas de solución programática[cite: 143, 144].</p>
+                    </div>
+                </div>
+
+                <div class="proyecto-card">
+                    <div class="proyecto-num">5</div>
+                    <div class="proyecto-info">
+                        <h4>Congreso Regional Republicano</h4>
+                        <p>Encuentro político anual estructurado para evaluar la gestión, definir prioridades críticas y consolidar la unidad interna[cite: 145, 146].</p>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-col">
+                <h3>Principios de nuestra Gestión</h3>
+                <div class="principios-grid">
+                    <div class="principio-item">Servicio [cite: 150]</div>
+                    <div class="principio-item">Honestidad [cite: 151]</div>
+                    <div class="principio-item">Unidad [cite: 152]</div>
+                    <div class="principio-item">Lealtad [cite: 153]</div>
+                    <div class="principio-item">Cercanía [cite: 154]</div>
+                    <div class="principio-item">Respeto [cite: 155]</div>
+                    <div class="principio-item">Transparencia [cite: 156]</div>
+                    <div class="principio-item">Trabajo Territorial [cite: 157]</div>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h3>Nuestro Compromiso</h3>
+                <ul class="compromiso-list">
+                    <li>Una directiva presente que escuche y acompañe[cite: 161, 162, 163].</li>
+                    <li>Que forme constantemente nuevos liderazgos[cite: 164].</li>
+                    <li>Que fortalezca las realidades de cada comuna[cite: 165].</li>
+                    <li>Que represente con un profundo orgullo a nuestra región[cite: 166].</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            ¡Con experiencia para liderar, visión para avanzar. Con Fuerza Republicana! [cite: 168, 169, 172]
+        </div>
+    </footer>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    const id = entry.target.getAttribute('id');
+                    if (entry.isIntersecting) {
+                        document.querySelectorAll('nav ul li a').forEach(a => a.classList.remove('active'));
+                        const activeLink = document.querySelector(`nav ul li a[href="#${id}"]`);
+                        if(activeLink) activeLink.classList.add('active');
+                    }
+                });
+            }, { threshold: 0.2, rootMargin: "0px 0px -50% 0px" });
+
+            document.querySelectorAll('section').forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+</body>
+</html>
