@@ -936,126 +936,271 @@
     </footer>
 
     
+/**
+ * @OnlyCurrentDoc
+ */
 
-    <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            const observer = new IntersectionObserver(entries => {
-                entries.forEach(entry => {
-                    const id = entry.target.getAttribute('id');
-                    if (entry.isIntersecting) {
-                        document.querySelectorAll('nav ul li a').forEach(a => a.classList.remove('active'));
-                        const activeLink = document.querySelector(`nav ul li a[href="#${id}"]`);
-                        if(activeLink) activeLink.classList.add('active');
-                    }
-                });
-            }, { threshold: 0.2, rootMargin: "0px 0px -50% 0px" });
+/********************************************************************
+ * CONFIGURACIÓN GLOBAL
+ ********************************************************************/
+const PLANILLA_DESTINO_ID = '1gc7C-FgM_ywC2NqHwTh5oMwySCPhTQU8QE6gQW8COh4'; 
+const HOJA_MILITANTES_BASE = 'Militantes_Base'; 
 
-            document.querySelectorAll('section').forEach(section => {
-                observer.observe(section);
-            });
-        });
+const COL_COMUNA = 5;     // Columna E (Comuna)
+const COL_TELEFONO = 20;  // Columna T (Teléfono)
 
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbxv-gg9V1aYR8kqrhPMoUvWTT0rONGxaiE-nlYJ-4XNxjGAtynZdxvOJIB0gxGpnAFg/exec';
-const form = document.getElementById('formComentarios');
-const responseDiv = document.getElementById('formResponse');
+const IDX_COL_H = 7; 
+const IDX_COL_I = 8;
+const IDX_COL_J = 9;
 
-form.addEventListener('submit', e => {
-  e.preventDefault();
-  responseDiv.style.display = 'block';
-  responseDiv.style.color = '#0A1B3D';
-  responseDiv.textContent = 'Enviando comentario...';
+var sheetName = 'comentarios';
 
-  fetch(scriptURL, { method: 'POST', body: new FormData(form)})
-    .then(response => {
-       responseDiv.style.color = 'green';
-       responseDiv.textContent = '¡Gracias! Tu comentario ha sido recibido con éxito.';
-       form.reset();
-    })
-    .catch(error => {
-       responseDiv.style.color = '#D92332';
-       responseDiv.textContent = 'Hubo un error al enviar. Por favor, inténtalo nuevamente.';
-       console.error('Error!', error.message);
-    });
-});
-
-const scriptURL = 'https://script.google.com/macros/s/AKfycbxv-gg9V1aYR8kqrhPMoUvWTT0rONGxaiE-nlYJ-4XNxjGAtynZdxvOJIB0gxGpnAFg/exec';
-const form = document.getElementById('formComentarios');
-const responseDiv = document.getElementById('formResponse');
-
-// Al cargar la página ejecutamos el rastreo y la carga de datos
-document.addEventListener('DOMContentLoaded', () => {
-  const uaInfo = navigator.userAgent;
-  const urlParams = new URLSearchParams(window.location.search);
-  const comunaParam = urlParams.get('comuna') || '';
-
-  // Enviamos tracking en formato JSON
-  fetch(scriptURL, {
-    method: 'POST',
-    mode: 'no-cors', // Evita problemas de políticas de origen cruzado en tracking silencioso
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'track_visit', ua: uaInfo, comuna: comunaParam })
-  });
-
-  // Cargamos los contadores en la pantalla
-  actualizarMetricasVisibles();
-});
-
-function actualizarMetricasVisibles() {
-  fetch(scriptURL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'get_metrics' })
-  })
-  .then(res => res.json())
-  .then(data => {
-    document.getElementById('visitasTotales').textContent = data.totales || 0;
-    document.getElementById('visitasUnicas').textContent = data.unicas || 0;
-    
-    const muro = document.getElementById('muroUsuarios');
-    muro.innerHTML = ''; 
-
-    if(data.usuarios && data.usuarios.length > 0) {
-      data.usuarios.forEach(user => {
-        const inicial = user.nombre.charAt(0).toUpperCase();
-        muro.innerHTML += `
-          <div class="fr-user-badge" title="Comuna: ${user.comuna}">
-            <span class="fr-avatar-circle">${inicial}</span>
-            ${user.nombre.split(' ')[0]} (${user.comuna})
-          </div>
-        `;
-      });
-    } else {
-      muro.innerHTML = '<span class="text-muted" style="font-size:11px;">Esperando nuevos participantes territoriales.</span>';
-    }
-  })
-  .catch(err => {
-    console.error("Error al traer analítica:", err);
-    document.getElementById('visitasTotales').textContent = '0';
-    document.getElementById('visitasUnicas').textContent = '0';
-  });
+function doGet(e) {
+  let comunaDetectada = e && e.parameter ? (e.parameter.comuna || e.parameter.Comuna || "") : "";
+  const htmlTemplate = HtmlService.createTemplateFromFile('InterfazWhatsApp');
+  htmlTemplate.comunaPreseleccionada = comunaDetectada;
+  return htmlTemplate.evaluate()
+      .setWidth(450)
+      .setHeight(400)
+      .setTitle('Envío Masivo de WhatsApp por Comuna')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
-// Envío del formulario de comentarios (se mantiene tradicional por FormData)
-form.addEventListener('submit', e => {
-  e.preventDefault();
-  responseDiv.style.display = 'block';
-  responseDiv.style.color = '#0A1B3D';
-  responseDiv.textContent = 'Enviando comentario...';
+function obtenerComunasDisponibles() {
+  return [
+    "CODEGUA", "COINCO", "COLTAUCO", "DOÑIHUE", "GRANEROS", "MACHALI", 
+    "MALLOA", "MOSTAZAL", "OLIVAR", "QUINTA", "RANCAGUA", "RENGO", 
+    "REQUINOA", "CHEPICA", "CHIMBARONGO", "LA ESTRELLA", "LAS CABRAS", 
+    "LITUECHE", "LOLOL", "MARCHIGUE", "NANCAGUA", "NAVIDAD", "PALMILLA", 
+    "PAREDONES", "PERALILLO", "PEUMO", "PICHIDEGUA", "PICHILEMU", 
+    "PLACILLA", "PUMANQUE", "SAN FERNANDO", "SAN VICENTE", "SANTA CRUZ"
+  ];
+}
 
-  fetch(scriptURL, { method: 'POST', body: new FormData(form)})
-    .then(response => {
-       responseDiv.style.color = 'green';
-       responseDiv.textContent = '¡Gracias! Tu comentario ha sido recibido con éxito.';
-       form.reset();
-       // Refrescamos contadores y muro de inmediato al comentar con éxito
-       setTimeout(actualizarMetricasVisibles, 1500); 
-    })
-    .catch(error => {
-       responseDiv.style.color = '#D92332';
-       responseDiv.textContent = 'Hubo un error al enviar. Por favor, inténtalo nuevamente.';
-       console.error('Error!', error.message);
+function obtenerAuditoriaYLinks(comunaSeleccionada, mensajeTexto) {
+  const respuesta = { links: [], militantesRevisados: [] };
+  try {
+    const ss = SpreadsheetApp.openById(PLANILLA_DESTINO_ID);
+    let sheet = ss.getSheetByName(HOJA_MILITANTES_BASE); 
+    if (!sheet) {
+      const todasLasHojas = ss.getSheets();
+      for (let i = 0; i < todasLasHojas.length; i++) {
+        const nombreHojaActual = todasLasHojas[i].getName().toLowerCase();
+        if (nombreHojaActual.includes("militante") || nombreHojaActual.includes("base")) {
+          sheet = todasLasHojas[i];
+          break;
+        }
+      }
+    }
+    if (!sheet) sheet = ss.getSheets()[0];
+    
+    const lastRow = sheet.getLastRow();
+    if (lastRow < 2) return respuesta;
+
+    const lastColumn = sheet.getLastColumn();
+    const cabeceras = sheet.getRange(1, 1, 1, lastColumn).getValues()[0];
+    
+    let colNombreIdx = -1;
+    let colComunaIdx = -1;
+    let colTelefonoIdx = -1;
+
+    for (let i = 0; i < cabeceras.length; i++) {
+      let nombreCabecera = String(cabeceras[i]).trim().toLowerCase();
+      nombreCabecera = nombreCabecera.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
+
+      if (nombreCabecera === "nombre" || nombreCabecera === "nombre completo" || nombreCabecera === "militante") colNombreIdx = i;
+      if (nombreCabecera === "comuna") colComunaIdx = i;
+      if (nombreCabecera === "telefono" || nombreCabecera === "celular" || nombreCabecera === "num_telefono" || nombreCabecera === "fono") colTelefonoIdx = i;
+    }
+
+    if (colNombreIdx === -1) colNombreIdx = 1;     
+    if (colComunaIdx === -1) colComunaIdx = 4;     
+    if (colTelefonoIdx === -1) colTelefonoIdx = 19; 
+
+    const data = sheet.getRange(2, 1, lastRow - 1, lastColumn).getValues();
+    const textoCodificado = encodeURIComponent(mensajeTexto || "");
+    const comunaBuscada = String(comunaSeleccionada).trim().toUpperCase();
+
+    data.forEach((fila, index) => {
+      const marcaH = String(fila[IDX_COL_H] || '').trim().toUpperCase();
+      const marcaI = String(fila[IDX_COL_I] || '').trim().toUpperCase();
+      const marcaJ = String(fila[IDX_COL_J] || '').trim().toUpperCase();
+
+      if (marcaH === 'X' || marcaI === 'X' || marcaJ === 'X') return; 
+
+      const comunaMilitante = String(fila[colComunaIdx] || '').trim().toUpperCase();
+      
+      if (comunaMilitante !== "" && (comunaMilitante.includes(comunaBuscada) || comunaBuscada.includes(comunaMilitante))) {
+        let valorCrudoTelefono = fila[colTelefonoIdx];
+        let telOriginalStr = String(valorCrudoTelefono || '').trim();
+        if (typeof valorCrudoTelefono === 'number') telOriginalStr = valorCrudoTelefono.toFixed(0); 
+
+        let telefonoLimpio = telOriginalStr.replace(/[^0-9]/g, '');
+        let esValido = false;
+        let linkFinal = "";
+
+        if (telefonoLimpio.length >= 8) {
+          esValido = true;
+          if (telefonoLimpio.startsWith("56") && telefonoLimpio.length === 11) {
+            // Nativo
+          } else if (!telefonoLimpio.startsWith("56") && telefonoLimpio.length === 9) {
+            telefonoLimpio = "56" + telefonoLimpio;
+          } else if (!telefonoLimpio.startsWith("56") && telefonoLimpio.length === 8) {
+            telefonoLimpio = "569" + telefonoLimpio;
+          }
+          linkFinal = `https://wa.me/${telefonoLimpio}?text=${textoCodificado}`;
+          respuesta.links.push(linkFinal);
+        }
+
+        let idUnico = String(fila[0] || 'Fila ' + (index + 2)).trim();
+        let nombreMilitante = String(fila[colNombreIdx] || '').trim();
+
+        respuesta.militantesRevisados.push({
+          id: idUnico,
+          nombre: nombreMilitante ? nombreMilitante : "Sin Nombre", 
+          comuna: comunaMilitante,
+          telOriginal: telOriginalStr === "" ? "[Celda Vacía]" : telOriginalStr,
+          valido: esValido
+        });
+      }
     });
-});
-    </script>
+  } catch(e) {
+    console.error("Error en escáner: " + e.toString());
+  }
+  return respuesta;
+}
+
+/********************************************************************
+ * RECEPCIÓN PROCESADA: FORMULARIO Y MÉTRICAS (UNIFICADO)
+ ********************************************************************/
+function doPost(e) {
+  var lock = LockService.getScriptLock();
+  lock.tryLock(10000); 
+
+  try {
+    var postData = {};
+    
+    // Detectamos si la información entra como JSON o como parámetros de formulario clásico
+    if (e.postData && e.postData.contents) {
+      try {
+        postData = JSON.parse(e.postData.contents);
+      } catch(parseError) {
+        postData = e.parameter;
+      }
+    } else {
+      postData = e.parameter;
+    }
+
+    // ACCIÓN 1: Registrar Visita
+    if (postData.action === 'track_visit') {
+      registrarVisita(postData);
+      return ContentService.createTextOutput(JSON.stringify({ result: 'tracked' })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // ACCIÓN 2: Obtener contadores para la UI
+    if (postData.action === 'get_metrics') {
+      const ss = SpreadsheetApp.openById(PLANILLA_DESTINO_ID);
+      
+      let sheetAn = ss.getSheetByName('analitica');
+      let totales = 0, unicas = 0;
+      if (sheetAn) {
+        let rows = sheetAn.getDataRange().getValues();
+        for(let i = 1; i < rows.length; i++) {
+          if(rows[i][0] === 'Total') totales++;
+          if(rows[i][0] === 'Unica') unicas++;
+        }
+      }
+
+      let sheetCom = ss.getSheetByName(sheetName);
+      let usuarios = [];
+      if (sheetCom) {
+        let rowsCom = sheetCom.getDataRange().getValues();
+        let inicio = Math.max(1, rowsCom.length - 5);
+        for(let j = rowsCom.length - 1; j >= inicio; j--) {
+          if(rowsCom[j][2]) { 
+            usuarios.push({
+              nombre: rowsCom[j][2], // Columna C (Nombre)
+              comuna: rowsCom[j][4]  // Columna E (Comuna)
+            });
+          }
+        }
+      }
+
+      return ContentService.createTextOutput(JSON.stringify({
+        totales: totales,
+        unicas: unicas,
+        usuarios: usuarios
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // ACCIÓN 3: Guardar Comentario (FormData)
+    var doc = SpreadsheetApp.openById(PLANILLA_DESTINO_ID);
+    var sheet = doc.getSheetByName(sheetName);
+    var encabezadosCorrectos = ['ID', 'Timestamp', 'Nombre', 'RUT', 'Comuna', 'Email', 'Telefono', 'Interes', 'Comentario'];
+    
+    if (!sheet) {
+      sheet = doc.insertSheet(sheetName);
+      sheet.appendRow(encabezadosCorrectos);
+    }
+
+    var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    var nextRow = sheet.getLastRow() + 1;
+    var uniqueID = Utilities.getUuid(); 
+    var row = [];
+
+    for (var i = 0; i < headers.length; i++) {
+      var headerName = headers[i].toString().trim();
+      if (headerName.toUpperCase() === 'ID') {
+        row.push(uniqueID);
+      } else if (headerName.toUpperCase() === 'TIMESTAMP') {
+        row.push(new Date());
+      } else {
+        // Buscamos el parámetro de forma robusta en postData mapeada
+        var valorFormulario = postData[headerName] || postData[headerName.toLowerCase()] || postData[headerName.toUpperCase()] || "";
+        row.push(valorFormulario);
+      }
+    }
+
+    sheet.getRange(nextRow, 1, 1, row.length).setValues([row]);
+    return ContentService.createTextOutput(JSON.stringify({ 'result': 'success', 'row': nextRow, 'id': uniqueID })).setMimeType(ContentService.MimeType.JSON);
+
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ 'result': 'error', 'error': error.toString() })).setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function registrarVisita(data) {
+  try {
+    const ss = SpreadsheetApp.openById(PLANILLA_DESTINO_ID);
+    let sheet = ss.getSheetByName('analitica');
+    if (!sheet) {
+      sheet = ss.insertSheet('analitica');
+      sheet.appendRow(['Tipo', 'Timestamp', 'IP_Hash', 'Comuna']);
+    }
+
+    let userAgent = data.ua || "";
+    let comuna = data.comuna || "";
+    let ipHash = Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, userAgent));
+
+    sheet.appendRow(['Total', new Date(), ipHash, comuna]);
+
+    let rows = sheet.getDataRange().getValues();
+    let esUnica = true;
+    for (let i = 1; i < rows.length; i++) {
+      if (rows[i][0] === 'Unica' && rows[i][2] === ipHash) {
+        esUnica = false;
+        break;
+      }
+    }
+
+    if (esUnica) {
+      sheet.appendRow(['Unica', new Date(), ipHash, comuna]);
+    }
+  } catch (err) {
+    console.error("Error en registrarVisita: " + err.toString());
+  }
+}
 </body>
 </html>
