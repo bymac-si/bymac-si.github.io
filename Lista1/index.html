@@ -620,6 +620,103 @@
         </div>
     </div>
     <div class="text-center logo-container"><h1>Nuestro equipo de Consejeros</h1><br><img src="assets/img/consejeros.jpeg" alt="" class="img-fluid"></div>
+    <!-- PANEL DE MÉTRICAS Y ACCESOS RECIENTES -->
+<div class="fr-metrics-container">
+  <div class="fr-counter-wrapper">
+    <div class="fr-counter-card">
+      <i class="bi bi-eye-fill text-primary"></i>
+      <div class="fr-counter-number" id="visitasTotales">...</div>
+      <div class="fr-counter-label">Visitas Totales</div>
+    </div>
+    <div class="fr-counter-card">
+      <i class="bi bi-people-fill text-danger"></i>
+      <div class="fr-counter-number" id="visitasUnicas">...</div>
+      <div class="fr-counter-label">Visitas Únicas</div>
+    </div>
+  </div>
+
+  <div class="fr-users-log">
+    <h5><i class="bi bi-shield-check"></i> Conexiones Recientes en la Región</h5>
+    <div class="fr-avatar-list" id="muroUsuarios">
+      <!-- Los avatares se generan dinámicamente -->
+      <span class="text-muted" style="font-size: 12px;">Cargando actividad...</span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .fr-metrics-container {
+    max-width: 650px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    font-family: 'Montserrat', sans-serif;
+  }
+  .fr-counter-wrapper {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  .fr-counter-card {
+    flex: 1;
+    background: #f4f6f9;
+    padding: 15px;
+    text-align: center;
+    border-radius: 6px;
+    border-bottom: 3px solid #0A1B3D;
+  }
+  .fr-counter-card i {
+    font-size: 20px;
+  }
+  .fr-counter-number {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0A1B3D;
+  }
+  .fr-counter-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #718096;
+    font-weight: bold;
+  }
+  .fr-users-log h5 {
+    font-size: 13px;
+    color: #0A1B3D;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+  .fr-avatar-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .fr-user-badge {
+    display: flex;
+    align-items: center;
+    background: #e2e8f0;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #2d3748;
+  }
+  .fr-avatar-circle {
+    width: 20px;
+    height: 20px;
+    background-color: #be111a;
+    color: #fff;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    margin-right: 6px;
+    font-weight: bold;
+  }
+</style>
 <div class="fr-contact-container">
   <h2>Contacto y Sugerencias</h2>
   <p>Tu opinión es fundamental para construir el futuro de la Región de O'Higgins. Escríbenos.</p>
@@ -880,6 +977,50 @@ form.addEventListener('submit', e => {
        console.error('Error!', error.message);
     });
 });
+
+// Al cargar la página, se ejecutan las métricas automáticas
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Enviar hit de rastreo de visita de manera silenciosa
+  const uaInfo = navigator.userAgent;
+  const urlParams = new URLSearchParams(window.location.search);
+  const comunaParam = urlParams.get('comuna') || '';
+
+  fetch(`${scriptURL}?action=track_visit&ua=${encodeURIComponent(uaInfo)}&comuna=${encodeURIComponent(comunaParam)}`, { method: 'POST' });
+
+  // 2. Cargar contadores y muro de usuarios en la interfaz
+  actualizarMetricasVisibles();
+});
+
+function actualizarMetricasVisibles() {
+  fetch(`${scriptURL}?action=get_metrics`, { method: 'POST' })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('visitasTotales').textContent = data.totales || 0;
+      document.getElementById('visitasUnicas').textContent = data.unicas || 0;
+      
+      const muro = document.getElementById('muroUsuarios');
+      muro.innerHTML = ''; // Limpiar cargando
+
+      if(data.usuarios && data.usuarios.length > 0) {
+        data.usuarios.forEach(user => {
+          const inicial = user.nombre.charAt(0).toUpperCase();
+          muro.innerHTML += `
+            <div class="fr-user-badge" title="Comuna: ${user.comuna}">
+              <span class="fr-avatar-circle">${inicial}</span>
+              ${user.nombre.split(' ')[0]} (${user.comuna})
+            </div>
+          `;
+        });
+      } else {
+        muro.innerHTML = '<span class="text-muted" style="font-size:11px;">Esperando nuevos participantes territoriales.</span>';
+      }
+    })
+    .catch(err => console.error("Error al traer analítica:", err));
+}
+
+// Modificación en tu evento actual 'submit' del formulario:
+// Agrega la llamada a 'actualizarMetricasVisibles()' dentro del .then del envío exitoso
+// para que el muro de usuarios se refresque al instante en que alguien comenta.
     </script>
 </body>
 </html>
