@@ -978,49 +978,84 @@ form.addEventListener('submit', e => {
     });
 });
 
-// Al cargar la página, se ejecutan las métricas automáticas
+const scriptURL = 'https://script.google.com/macros/s/AKfycbxv-gg9V1aYR8kqrhPMoUvWTT0rONGxaiE-nlYJ-4XNxjGAtynZdxvOJIB0gxGpnAFg/exec';
+const form = document.getElementById('formComentarios');
+const responseDiv = document.getElementById('formResponse');
+
+// Al cargar la página ejecutamos el rastreo y la carga de datos
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Enviar hit de rastreo de visita de manera silenciosa
   const uaInfo = navigator.userAgent;
   const urlParams = new URLSearchParams(window.location.search);
   const comunaParam = urlParams.get('comuna') || '';
 
-  fetch(`${scriptURL}?action=track_visit&ua=${encodeURIComponent(uaInfo)}&comuna=${encodeURIComponent(comunaParam)}`, { method: 'POST' });
+  // Enviamos tracking en formato JSON
+  fetch(scriptURL, {
+    method: 'POST',
+    mode: 'no-cors', // Evita problemas de políticas de origen cruzado en tracking silencioso
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'track_visit', ua: uaInfo, comuna: comunaParam })
+  });
 
-  // 2. Cargar contadores y muro de usuarios en la interfaz
+  // Cargamos los contadores en la pantalla
   actualizarMetricasVisibles();
 });
 
 function actualizarMetricasVisibles() {
-  fetch(`${scriptURL}?action=get_metrics`, { method: 'POST' })
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById('visitasTotales').textContent = data.totales || 0;
-      document.getElementById('visitasUnicas').textContent = data.unicas || 0;
-      
-      const muro = document.getElementById('muroUsuarios');
-      muro.innerHTML = ''; // Limpiar cargando
+  fetch(scriptURL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'get_metrics' })
+  })
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById('visitasTotales').textContent = data.totales || 0;
+    document.getElementById('visitasUnicas').textContent = data.unicas || 0;
+    
+    const muro = document.getElementById('muroUsuarios');
+    muro.innerHTML = ''; 
 
-      if(data.usuarios && data.usuarios.length > 0) {
-        data.usuarios.forEach(user => {
-          const inicial = user.nombre.charAt(0).toUpperCase();
-          muro.innerHTML += `
-            <div class="fr-user-badge" title="Comuna: ${user.comuna}">
-              <span class="fr-avatar-circle">${inicial}</span>
-              ${user.nombre.split(' ')[0]} (${user.comuna})
-            </div>
-          `;
-        });
-      } else {
-        muro.innerHTML = '<span class="text-muted" style="font-size:11px;">Esperando nuevos participantes territoriales.</span>';
-      }
-    })
-    .catch(err => console.error("Error al traer analítica:", err));
+    if(data.usuarios && data.usuarios.length > 0) {
+      data.usuarios.forEach(user => {
+        const inicial = user.nombre.charAt(0).toUpperCase();
+        muro.innerHTML += `
+          <div class="fr-user-badge" title="Comuna: ${user.comuna}">
+            <span class="fr-avatar-circle">${inicial}</span>
+            ${user.nombre.split(' ')[0]} (${user.comuna})
+          </div>
+        `;
+      });
+    } else {
+      muro.innerHTML = '<span class="text-muted" style="font-size:11px;">Esperando nuevos participantes territoriales.</span>';
+    }
+  })
+  .catch(err => {
+    console.error("Error al traer analítica:", err);
+    document.getElementById('visitasTotales').textContent = '0';
+    document.getElementById('visitasUnicas').textContent = '0';
+  });
 }
 
-// Modificación en tu evento actual 'submit' del formulario:
-// Agrega la llamada a 'actualizarMetricasVisibles()' dentro del .then del envío exitoso
-// para que el muro de usuarios se refresque al instante en que alguien comenta.
+// Envío del formulario de comentarios (se mantiene tradicional por FormData)
+form.addEventListener('submit', e => {
+  e.preventDefault();
+  responseDiv.style.display = 'block';
+  responseDiv.style.color = '#0A1B3D';
+  responseDiv.textContent = 'Enviando comentario...';
+
+  fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+    .then(response => {
+       responseDiv.style.color = 'green';
+       responseDiv.textContent = '¡Gracias! Tu comentario ha sido recibido con éxito.';
+       form.reset();
+       // Refrescamos contadores y muro de inmediato al comentar con éxito
+       setTimeout(actualizarMetricasVisibles, 1500); 
+    })
+    .catch(error => {
+       responseDiv.style.color = '#D92332';
+       responseDiv.textContent = 'Hubo un error al enviar. Por favor, inténtalo nuevamente.';
+       console.error('Error!', error.message);
+    });
+});
     </script>
 </body>
 </html>
