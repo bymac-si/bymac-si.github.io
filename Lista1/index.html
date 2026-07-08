@@ -16,6 +16,9 @@
             --blanco: #ffffff;
             --gris-claro: #f4f6f9;
             --texto-oscuro: #333333;
+            --azul-republicano: #0A1B3D;
+            --gris-suave: #F4F6F9;
+            --texto-oscuro-card: #2D3748;
         }
 
         * {
@@ -48,20 +51,6 @@
             letter-spacing: 1px;
             text-transform: uppercase;
             margin-bottom: 5px;
-        }
-
-        .logo-container span {
-            color: var(--rojo-republicano);
-        }
-
-        .subtitle {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-top: 5px;
-            color: var(--blanco);
         }
 
         .badge-programa {
@@ -176,7 +165,6 @@
             text-align: justify;
         }
 
-        /* Bloques de Datos, Listas y Grid */
         .meta-box {
             background-color: #f8eff0;
             border: 1px solid #ebd2d4;
@@ -235,7 +223,6 @@
             font-size: 1.1rem;
         }
 
-        /* Listas de Áreas Específicas */
         .areas-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -253,7 +240,6 @@
             text-align: center;
         }
 
-        /* Estilo para los 5 Grandes Proyectos Destacados */
         .proyecto-card {
             background-color: #fff;
             border: 1px solid #ddd;
@@ -288,7 +274,173 @@
             margin-bottom: 5px;
         }
 
-        /* Footer con Principios Estilo Afiche */
+        /* Analítica de Métricas */
+        .fr-metrics-container {
+            max-width: 650px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            font-family: 'Montserrat', sans-serif;
+        }
+        .fr-counter-wrapper {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .fr-counter-card {
+            flex: 1;
+            background: #f4f6f9;
+            padding: 15px;
+            text-align: center;
+            border-radius: 6px;
+            border-bottom: 3px solid #0A1B3D;
+        }
+        .fr-counter-card i {
+            font-size: 20px;
+        }
+        .fr-counter-number {
+            font-size: 24px;
+            font-weight: 800;
+            color: #0A1B3D;
+        }
+        .fr-counter-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #718096;
+            font-weight: bold;
+        }
+        .fr-users-log h5 {
+            font-size: 13px;
+            color: #0A1B3D;
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+        .fr-avatar-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .fr-user-badge {
+            display: flex;
+            align-items: center;
+            background: #e2e8f0;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        .fr-avatar-circle {
+            width: 20px;
+            height: 20px;
+            background-color: #be111a;
+            color: #fff;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            margin-right: 6px;
+            font-weight: bold;
+        }
+
+        /* Formulario de Contacto */
+        .fr-contact-container {
+            max-width: 650px;
+            margin: 40px auto;
+            padding: 30px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            font-family: 'Arial', sans-serif;
+            color: var(--texto-oscuro-card);
+            border-top: 5px solid var(--azul-republicano);
+        }
+
+        .fr-contact-container h2 {
+            color: var(--azul-republicano);
+            font-size: 24px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .fr-contact-container p {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 25px;
+        }
+
+        .fr-form-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .fr-form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .fr-form-row .fr-form-group {
+            flex: 1;
+        }
+
+        .fr-form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--azul-republicano);
+        }
+
+        .fr-form-group input, 
+        .fr-form-group select, 
+        .fr-form-group textarea {
+            padding: 10px 14px;
+            border: 1px solid #CBD5E0;
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: var(--gris-suave);
+            transition: all 0.3s ease;
+        }
+
+        .fr-form-group input:focus, 
+        .fr-form-group select:focus, 
+        .fr-form-group textarea:focus {
+            outline: none;
+            border-color: var(--azul-republicano);
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(10, 27, 61, 0.1);
+        }
+
+        .fr-btn-submit {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--azul-republicano);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .fr-btn-submit:hover {
+            background-color: #142d5e;
+        }
+        
+        @media (max-width: 600px) {
+            .fr-form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+
+        /* Footer */
         footer {
             background-color: var(--azul-oscuro);
             color: var(--blanco);
@@ -372,12 +524,9 @@
 <body>
 
     <header>
-       <!-- <div class="logo-container">Fuerza <span>Republicana</span></div>
-        <div class="subtitle">Región de O'Higgins</div>
--->
         <div class="logo-container"><img src="assets/img/equipolista1.png" alt="" class="img-fluid"></div>
         <div class="logo-container"><img src="assets/img/nombres.png" alt="" class="img-fluid"></div>
-                <div class="badge-programa">PROGRAMA DE GESTIÓN 2026-2030</div>
+        <div class="badge-programa">PROGRAMA DE GESTIÓN 2026-2030</div>
     </header>
 
     <div class="main-container">
@@ -402,15 +551,12 @@
                 <h2>Presentación</h2>
                 <p>El Partido Republicano enfrenta una etapa decisiva para consolidar su presencia en la Región de O'Higgins. El crecimiento alcanzado durante los últimos años exige una organización moderna, cercana y territorialmente activa, capaz de fortalecer la participación de la militancia y proyectar un liderazgo regional sólido.</p>
                 <p>Nuestra candidatura propone una conducción que combine experiencia, renovación y trabajo permanente. Aspiramos a una directiva que no solo administre el partido, sino que impulse una organización viva, conectada con las comunas y preparada para los desafíos políticos de los próximos años. Este Programa de Gestión establece los compromisos que orientarán nuestro trabajo entre 2026 y 2030.</p>
-                <div class="meta-box">
-                    Experiencia para liderar. Visión para avanzar.
-                </div>
+                <div class="meta-box">Experiencia para liderar. Visión para avanzar.</div>
             </section>
 
             <section id="eje1">
                 <h2><i class="bi bi-pin-map-fill"></i> Eje 1: Un Partido presente en las 33 comunas</h2>
                 <p>Creemos en una organización territorial fuerte, con dirigentes respaldados y una directiva regional presente en toda la región.</p>
-                
                 <div class="grid-blocks">
                     <div class="block">
                         <h4>Objetivos</h4>
@@ -430,15 +576,12 @@
                         </ul>
                     </div>
                 </div>
-                <div class="meta-box">
-                    Meta 2030: Que cada comuna cuente con equipos activos, organizados y funcionando regularmente.
-                </div>
+                <div class="meta-box">Meta 2030: Que cada comuna cuente con equipos activos, organizados y funcionando regularmente.</div>
             </section>
 
             <section id="eje2">
                 <h2><i class="bi bi-person-arms-up"></i> Eje 2: Militancia protagonista</h2>
                 <p>La fortaleza del partido está en sus militantes. Nuestra prioridad será que todos tengan oportunidades reales para participar y aportar.</p>
-                
                 <div class="block">
                     <h4>Compromisos</h4>
                     <ul class="items-list">
@@ -450,15 +593,12 @@
                         <li>Red de bienvenida para nuevos militantes.</li>
                     </ul>
                 </div>
-                <div class="meta-box">
-                    Meta 2030: Incrementar significativamente la participación activa de la militancia en las actividades regionales.
-                </div>
+                <div class="meta-box">Meta 2030: Incrementar significativamente la participación activa de la militancia en las actividades regionales.</div>
             </section>
 
             <section id="eje3">
                 <h2><i class="bi bi-marker-tip"></i> Eje 3: Formación para gobernar</h2>
                 <p>Queremos preparar a quienes representarán nuestras ideas en los distintos espacios públicos. Para ello, el compromiso principal radica en la creación de una <strong>Academia Regional Republicana</strong>.</p>
-                
                 <div class="block">
                     <h4>Posibles Áreas de Capacitación:</h4>
                     <div class="areas-container">
@@ -473,15 +613,12 @@
                         <div class="area-tag">Campañas Electorales</div>
                     </div>
                 </div>
-                <div class="meta-box">
-                    Meta 2030: Contar con una nueva generación de dirigentes preparados para asumir responsabilidades políticas y públicas.
-                </div>
+                <div class="meta-box">Meta 2030: Contar con una nueva generación de dirigentes preparados para asumir responsabilidades políticas y públicas.</div>
             </section>
 
             <section id="eje4">
                 <h2><i class="bi bi-person-raised-hand"></i> Eje 4: Programa de participación de la Juventud</h2>
                 <p>Queremos que la juventud sea parte del equipo, motivar su participación, potenciar los liderazgos y ser un apoyo permanente en sus iniciativas y desafíos.</p>
-                
                 <div class="block">
                     <h4>Compromisos</h4>
                     <ul class="items-list">
@@ -491,15 +628,12 @@
                         <li>Motivar la participación activa en trabajo territorial, social y campañas.</li>
                     </ul>
                 </div>
-                <div class="meta-box">
-                    Meta 2030: Contar con un número importante de jóvenes militantes motivados y comprometidos con el Partido en la Región.
-                </div>
+                <div class="meta-box">Meta 2030: Contar con un número importante de jóvenes militantes motivados y comprometidos con el Partido en la Región.</div>
             </section>
 
             <section id="eje5">
                 <h2><i class="bi bi-globe2"></i> Eje 5: Vinculación con la comunidad</h2>
                 <p>Queremos que nuestras propuestas nazcan desde las necesidades reales de la región.</p>
-                
                 <div class="block">
                     <h4>Mesas Regionales de Trabajo en Áreas como:</h4>
                     <div class="areas-container">
@@ -514,20 +648,16 @@
                         <div class="area-tag" style="background-color: var(--rojo-republicano);">Juventud</div>
                     </div>
                 </div>
-
                 <div class="block" style="margin-top: 20px;">
                     <h4>Encuentros con Actores Clave:</h4>
                     <p style="font-size: 0.95rem; font-style: italic;">Jornadas con agricultores, emprendedores, dirigentes vecinales, gremios, organizaciones sociales, adultos mayores, iglesias, centros de estudiantes, etc.</p>
                 </div>
-                <div class="meta-box">
-                    Meta 2030: Consolidar al Partido Republicano como un referente regional de propuestas y diálogo con la sociedad civil.
-                </div>
+                <div class="meta-box">Meta 2030: Consolidar al Partido Republicano como un referente regional de propuestas y diálogo con la sociedad civil.</div>
             </section>
 
             <section id="eje6">
                 <h2><i class="bi bi-file-earmark-bar-graph"></i> Eje 6: Gestión moderna, transparente y orientada a resultados</h2>
                 <p>La confianza se construye con transparencia y cumplimiento. Nuestra gestión estará basada en planificación, información y evaluación permanente.</p>
-                
                 <div class="block">
                     <h4>Compromisos Operativos</h4>
                     <ul class="items-list">
@@ -538,15 +668,12 @@
                         <li>Coordinación estrecha con parlamentarios, COREs, alcaldes y concejales de la región.</li>
                     </ul>
                 </div>
-                <div class="meta-box">
-                    Meta 2030: Instalar una cultura de gestión basada en resultados y transparencia.
-                </div>
+                <div class="meta-box">Meta 2030: Instalar una cultura de gestión basada en resultados y transparencia.</div>
             </section>
 
             <section id="eje7">
                 <h2><i class="bi bi-check2-square"></i> Eje 7: Preparación Electoral y Desarrollo de Liderazgos</h2>
-                <p>El crecimiento del Partido Republicano requiere una planificación estratégica que permita identificar, formar y acompañar a quienes representarán nuestras ideas en los distintos espacios de representación pública. Nuestro compromiso es construir una organización preparada para enfrentar cada proceso electoral con unidad, profesionalismo y un profundo arraigo territorial.</p>
-                
+                <p>El crecimiento del Partido Republicano requiere una planificación estratégica que permita identificar, formar y acompañar a quienes representarán nuestras ideas en los distintos espacios de representación pública.</p>
                 <div class="grid-blocks">
                     <div class="block">
                         <h4>Objetivos</h4>
@@ -567,9 +694,7 @@
                         </ul>
                     </div>
                 </div>
-                <div class="meta-box">
-                    Metas al 2030: Equipos políticos activos en las 33 comunas y posicionar a O'Higgins como referente nacional en organización territorial.
-                </div>
+                <div class="meta-box">Metas al 2030: Equipos políticos activos en las 33 comunas y posicionar a O'Higgins como referente nacional en organización territorial.</div>
             </section>
 
             <section id="proyectos">
@@ -583,7 +708,6 @@
                         <p>Programa enfocado directamente en el trabajo con dirigentes y futuros candidatos de la zona.</p>
                     </div>
                 </div>
-
                 <div class="proyecto-card">
                     <div class="proyecto-num">2</div>
                     <div class="proyecto-info">
@@ -591,7 +715,6 @@
                         <p>Despliegue y visitas permanentes de la directiva por la totalidad de las comunas que componen la región.</p>
                     </div>
                 </div>
-
                 <div class="proyecto-card">
                     <div class="proyecto-num">3</div>
                     <div class="proyecto-info">
@@ -599,7 +722,6 @@
                         <p>Un sistema moderno de coordinación robusta entre las estructuras comunales y provinciales de O'Higgins.</p>
                     </div>
                 </div>
-
                 <div class="proyecto-card">
                     <div class="proyecto-num">4</div>
                     <div class="proyecto-info">
@@ -607,7 +729,6 @@
                         <p>Volver a recuperar el liderazgo del Partido Republicano en la Región.</p>
                     </div>
                 </div>
-
                 <div class="proyecto-card">
                     <div class="proyecto-num">5</div>
                     <div class="proyecto-info">
@@ -616,295 +737,125 @@
                     </div>
                 </div>
             </section>
-
         </div>
     </div>
-    <div class="text-center logo-container"><h1>Nuestro equipo de Consejeros</h1><br><img src="assets/img/consejeros.jpeg" alt="" class="img-fluid"></div>
+
+    <div class="text-center logo-container">
+        <h1>Nuestro equipo de Consejeros</h1><br>
+        <img src="assets/img/consejeros.jpeg" alt="" class="img-fluid">
+    </div>
+
     <!-- PANEL DE MÉTRICAS Y ACCESOS RECIENTES -->
-<div class="fr-metrics-container">
-  <div class="fr-counter-wrapper">
-    <div class="fr-counter-card">
-      <i class="bi bi-eye-fill text-primary"></i>
-      <div class="fr-counter-number" id="visitasTotales">...</div>
-      <div class="fr-counter-label">Visitas Totales</div>
-    </div>
-    <div class="fr-counter-card">
-      <i class="bi bi-people-fill text-danger"></i>
-      <div class="fr-counter-number" id="visitasUnicas">...</div>
-      <div class="fr-counter-label">Visitas Únicas</div>
-    </div>
-  </div>
-
-  <div class="fr-users-log">
-    <h5><i class="bi bi-shield-check"></i> Conexiones Recientes en la Región</h5>
-    <div class="fr-avatar-list" id="muroUsuarios">
-      <!-- Los avatares se generan dinámicamente -->
-      <span class="text-muted" style="font-size: 12px;">Cargando actividad...</span>
-    </div>
-  </div>
-</div>
-
-<style>
-  .fr-metrics-container {
-    max-width: 650px;
-    margin: 20px auto;
-    padding: 20px;
-    background: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-    font-family: 'Montserrat', sans-serif;
-  }
-  .fr-counter-wrapper {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
-  }
-  .fr-counter-card {
-    flex: 1;
-    background: #f4f6f9;
-    padding: 15px;
-    text-align: center;
-    border-radius: 6px;
-    border-bottom: 3px solid #0A1B3D;
-  }
-  .fr-counter-card i {
-    font-size: 20px;
-  }
-  .fr-counter-number {
-    font-size: 24px;
-    font-weight: 800;
-    color: #0A1B3D;
-  }
-  .fr-counter-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    color: #718096;
-    font-weight: bold;
-  }
-  .fr-users-log h5 {
-    font-size: 13px;
-    color: #0A1B3D;
-    font-weight: 700;
-    margin-bottom: 12px;
-    text-transform: uppercase;
-  }
-  .fr-avatar-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  .fr-user-badge {
-    display: flex;
-    align-items: center;
-    background: #e2e8f0;
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    color: #2d3748;
-  }
-  .fr-avatar-circle {
-    width: 20px;
-    height: 20px;
-    background-color: #be111a;
-    color: #fff;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 9px;
-    margin-right: 6px;
-    font-weight: bold;
-  }
-</style>
-<div class="fr-contact-container">
-  <h2>Contacto y Sugerencias</h2>
-  <p>Tu opinión es fundamental para construir el futuro de la Región de O'Higgins. Escríbenos.</p>
-  
-  <form id="formComentarios">
-    <div class="fr-form-group">
-      <label for="nombre">Nombre Completo *</label>
-      <input type="text" id="nombre" name="Nombre" required placeholder="Ej. Juan Pérez">
+    <div class="fr-metrics-container">
+        <div class="fr-counter-wrapper">
+            <div class="fr-counter-card">
+                <i class="bi bi-eye-fill text-primary"></i>
+                <div class="fr-counter-number" id="visitasTotales">...</div>
+                <div class="fr-counter-label">Visitas Totales</div>
+            </div>
+            <div class="fr-counter-card">
+                <i class="bi bi-people-fill text-danger"></i>
+                <div class="fr-counter-number" id="visitasUnicas">...</div>
+                <div class="fr-counter-label">Visitas Únicas</div>
+            </div>
+        </div>
+        <div class="fr-users-log">
+            <h5><i class="bi bi-shield-check"></i> Conexiones Recientes en la Región</h5>
+            <div class="fr-avatar-list" id="muroUsuarios">
+                <span class="text-muted" style="font-size: 12px;">Cargando actividad...</span>
+            </div>
+        </div>
     </div>
 
-    <div class="fr-form-row">
-      <div class="fr-form-group">
-        <label for="rut">RUT (Opcional)</label>
-        <input type="text" id="rut" name="RUT" placeholder="12.345.678-9">
-      </div>
-     <div class="fr-form-group">
-  <label for="comuna">Comuna de la Región *</label>
-  <select id="comuna" name="Comuna" required>
-    <option value="" disabled selected>Selecciona tu comuna</option>
-    <option value="CODEGUA">CODEGUA</option>
-    <option value="COINCO">COINCO</option>
-    <option value="COLTAUCO">COLTAUCO</option>
-    <option value="DOÑIHUE">DOÑIHUE</option>
-    <option value="GRANEROS">GRANEROS</option>
-    <option value="MACHALI">MACHALI</option>
-    <option value="MALLOA">MALLOA</option>
-    <option value="MOSTAZAL">MOSTAZAL</option>
-    <option value="OLIVAR">OLIVAR</option>
-    <option value="QUINTA">QUINTA</option>
-    <option value="RANCAGUA">RANCAGUA</option>
-    <option value="RENGO">RENGO</option>
-    <option value="REQUINOA">REQUINOA</option>
-    <option value="CHEPICA">CHEPICA</option>
-    <option value="CHIMBARONGO">CHIMBARONGO</option>
-    <option value="LA ESTRELLA">LA ESTRELLA</option>
-    <option value="LAS CABRAS">LAS CABRAS</option>
-    <option value="LITUECHE">LITUECHE</option>
-    <option value="LOLOL">LOLOL</option>
-    <option value="MARCHIGUE">MARCHIGUE</option>
-    <option value="NANCAGUA">NANCAGUA</option>
-    <option value="NAVIDAD">NAVIDAD</option>
-    <option value="PALMILLA">PALMILLA</option>
-    <option value="PAREDONES">PAREDONES</option>
-    <option value="PERALILLO">PERALILLO</option>
-    <option value="PEUMO">PEUMO</option>
-    <option value="PICHIDEGUA">PICHIDEGUA</option>
-    <option value="PICHILEMU">PICHILEMU</option>
-    <option value="PLACILLA">PLACILLA</option>
-    <option value="PUMANQUE">PUMANQUE</option>
-    <option value="SAN FERNANDO">SAN FERNANDO</option>
-    <option value="SAN VICENTE">SAN VICENTE</option>
-    <option value="SANTA CRUZ">SANTA CRUZ</option>
-  </select>
-</div>
+    <!-- FORMULARIO DE CONTACTO -->
+    <div class="fr-contact-container">
+        <h2>Contacto y Sugerencias</h2>
+        <p>Tu opinión es fundamental para construir el futuro de la Región de O'Higgins. Escríbenos.</p>
+        
+        <form id="formComentarios">
+            <div class="fr-form-group">
+                <label for="nombre">Nombre Completo *</label>
+                <input type="text" id="nombre" name="Nombre" required placeholder="Ej. Juan Pérez">
+            </div>
+
+            <div class="fr-form-row">
+                <div class="fr-form-group">
+                    <label for="rut">RUT (Opcional)</label>
+                    <input type="text" id="rut" name="RUT" placeholder="12.345.678-9">
+                </div>
+                <div class="fr-form-group">
+                    <label for="comuna">Comuna de la Región *</label>
+                    <select id="comuna" name="Comuna" required>
+                        <option value="" disabled selected>Selecciona tu comuna</option>
+                        <option value="CODEGUA">CODEGUA</option>
+                        <option value="COINCO">COINCO</option>
+                        <option value="COLTAUCO">COLTAUCO</option>
+                        <option value="DOÑIHUE">DOÑIHUE</option>
+                        <option value="GRANEROS">GRANEROS</option>
+                        <option value="MACHALI">MACHALI</option>
+                        <option value="MALLOA">MALLOA</option>
+                        <option value="MOSTAZAL">MOSTAZAL</option>
+                        <option value="OLIVAR">OLIVAR</option>
+                        <option value="QUINTA">QUINTA</option>
+                        <option value="RANCAGUA">RANCAGUA</option>
+                        <option value="RENGO">RENGO</option>
+                        <option value="REQUINOA">REQUINOA</option>
+                        <option value="CHEPICA">CHEPICA</option>
+                        <option value="CHIMBARONGO">CHIMBARONGO</option>
+                        <option value="LA ESTRELLA">LA ESTRELLA</option>
+                        <option value="LAS CABRAS">LAS CABRAS</option>
+                        <option value="LITUECHE">LITUECHE</option>
+                        <option value="LOLOL">LOLOL</option>
+                        <option value="MARCHIGUE">MARCHIGUE</option>
+                        <option value="NANCAGUA">NANCAGUA</option>
+                        <option value="NAVIDAD">NAVIDAD</option>
+                        <option value="PALMILLA">PALMILLA</option>
+                        <option value="PAREDONES">PAREDONES</option>
+                        <option value="PERALILLO">PERALILLO</option>
+                        <option value="PEUMO">PEUMO</option>
+                        <option value="PICHIDEGUA">PICHIDEGUA</option>
+                        <option value="PICHILEMU">PICHILEMU</option>
+                        <option value="PLACILLA">PLACILLA</option>
+                        <option value="PUMANQUE">PUMANQUE</option>
+                        <option value="SAN FERNANDO">SAN FERNANDO</option>
+                        <option value="SAN VICENTE">SAN VICENTE</option>
+                        <option value="SANTA CRUZ">SANTA CRUZ</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="fr-form-row">
+                <div class="fr-form-group">
+                    <label for="email">Correo Electrónico *</label>
+                    <input type="email" id="email" name="Email" required placeholder="ejemplo@correo.com">
+                </div>
+                <div class="fr-form-group">
+                    <label for="telefono">Teléfono *</label>
+                    <input type="tel" id="telefono" name="Telefono" required placeholder="+56 9 1234 5678">
+                </div>
+            </div>
+
+            <div class="fr-form-group">
+                <label for="interes">¿Cómo te gustaría participar? *</label>
+                <select id="interes" name="Interes" required>
+                    <option value="" disabled selected>Selecciona una opción</option>
+                    <option value="Quiero ser Voluntario / Apoderado">Quiero ser Voluntario / Apoderado</option>
+                    <option value="Participar en la Juventud">Participar en la Juventud (Eje 4)</option>
+                    <option value="Mesas Regionales de Trabajo">Mesas Regionales de Trabajo (Eje 5)</option>
+                    <option value="Consultas / Sugerencias Generales">Consultas / Sugerencias Generales</option>
+                </select>
+            </div>
+
+            <div class="fr-form-group">
+                <label for="mensaje">Mensaje o Comentario *</label>
+                <textarea id="mensaje" name="Comentario" rows="5" required placeholder="Escribe aquí tu propuesta o comentario..."></textarea>
+            </div>
+
+            <button type="submit" class="fr-btn-submit">Enviar Mensaje</button>
+        </form>
+        <div id="formResponse" style="display:none; margin-top:15px; font-weight:bold; text-align:center;"></div>
     </div>
 
-    <div class="fr-form-row">
-      <div class="fr-form-group">
-        <label for="email">Correo Electrónico *</label>
-        <input type="email" id="email" name="Email" required placeholder="ejemplo@correo.com">
-      </div>
-      <div class="fr-form-group">
-        <label for="telefono">Teléfono *</label>
-        <input type="tel" id="telefono" name="Telefono" required placeholder="+56 9 1234 5678">
-      </div>
-    </div>
-
-    <div class="fr-form-group">
-      <label for="interes">¿Cómo te gustaría participar? *</label>
-      <select id="interes" name="Interes" required>
-        <option value="" disabled selected>Selecciona una opción</option>
-        <option value="Quiero ser Voluntario / Apoderado">Quiero ser Voluntario / Apoderado</option>
-        <option value="Participar en la Juventud">Participar en la Juventud (Eje 4)</option>
-        <option value="Mesas Regionales de Trabajo">Mesas Regionales de Trabajo (Eje 5)</option>
-        <option value="Consultas / Sugerencias Generales">Consultas / Sugerencias Generales</option>
-      </select>
-    </div>
-
-    <div class="fr-form-group">
-      <label for="mensaje">Mensaje o Comentario *</label>
-      <textarea id="mensaje" name="Comentario" rows="5" required placeholder="Escribe aquí tu propuesta o comentario..."></textarea>
-    </div>
-
-    <button type="submit" class="fr-btn-submit">Enviar Mensaje</button>
-  </form>
-  <div id="formResponse" style="display:none; margin-top:15px; font-weight:bold; text-align:center;"></div>
-</div>
-
-<style>
-  :root {
-    --azul-republicano: #0A1B3D; /* Azul Marino Institucional */
-    --rojo-republicano: #D92332; /* Rojo Acento */
-    --gris-suave: #F4F6F9;
-    --texto-oscuro: #2D3748;
-  }
-
-  .fr-contact-container {
-    max-width: 650px;
-    margin: 40px auto;
-    padding: 30px;
-    background: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-    font-family: 'Arial', sans-serif;
-    color: var(--texto-oscuro);
-    border-top: 5px solid var(--azul-republicano);
-  }
-
-  .fr-contact-container h2 {
-    color: var(--azul-republicano);
-    font-size: 24px;
-    margin-bottom: 5px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .fr-contact-container p {
-    font-size: 14px;
-    color: #718096;
-    margin-bottom: 25px;
-  }
-
-  .fr-form-group {
-    margin-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .fr-form-row {
-    display: flex;
-    gap: 15px;
-  }
-
-  .fr-form-row .fr-form-group {
-    flex: 1;
-  }
-
-  .fr-form-group label {
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 6px;
-    color: var(--azul-republicano);
-  }
-
-  .fr-form-group input, 
-  .fr-form-group select, 
-  .fr-form-group textarea {
-    padding: 10px 14px;
-    border: 1px solid #CBD5E0;
-    border-radius: 4px;
-    font-size: 14px;
-    background-color: var(--gris-suave);
-    transition: all 0.3s ease;
-  }
-
-  .fr-form-group input:focus, 
-  .fr-form-group select:focus, 
-  .fr-form-group textarea:focus {
-    outline: none;
-    border-color: var(--azul-republicano);
-    background-color: #fff;
-    box-shadow: 0 0 0 3px rgba(10, 27, 61, 0.1);
-  }
-
-  .fr-btn-submit {
-    width: 100%;
-    padding: 12px;
-    background-color: var(--azul-republicano);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.3s ease;
-  }
-
-  .fr-btn-submit:hover {
-    background-color: #142d5e;
-  }
-  
-  @media (max-width: 600px) {
-    .fr-form-row {
-      flex-direction: column;
-      gap: 0;
-    }
-  }
-</style>
     <footer>
         <div class="footer-content">
             <div class="footer-col">
@@ -935,272 +886,106 @@
         </div>
     </footer>
 
-    
-/**
- * @OnlyCurrentDoc
- */
+    <!-- LOGICA FRONTEND SCRIPT -->
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxv-gg9V1aYR8kqrhPMoUvWTT0rONGxaiE-nlYJ-4XNxjGAtynZdxvOJIB0gxGpnAFg/exec';
+        const form = document.getElementById('formComentarios');
+        const responseDiv = document.getElementById('formResponse');
 
-/********************************************************************
- * CONFIGURACIÓN GLOBAL
- ********************************************************************/
-const PLANILLA_DESTINO_ID = '1gc7C-FgM_ywC2NqHwTh5oMwySCPhTQU8QE6gQW8COh4'; 
-const HOJA_MILITANTES_BASE = 'Militantes_Base'; 
+        // 1. Observer del menú lateral para scroll activo
+        window.addEventListener('DOMContentLoaded', () => {
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    const id = entry.target.getAttribute('id');
+                    if (entry.isIntersecting) {
+                        document.querySelectorAll('nav ul li a').forEach(a => a.classList.remove('active'));
+                        const activeLink = document.querySelector(`nav ul li a[href="#${id}"]`);
+                        if(activeLink) activeLink.classList.add('active');
+                    }
+                });
+            }, { threshold: 0.2, rootMargin: "0px 0px -50% 0px" });
 
-const COL_COMUNA = 5;     // Columna E (Comuna)
-const COL_TELEFONO = 20;  // Columna T (Teléfono)
-
-const IDX_COL_H = 7; 
-const IDX_COL_I = 8;
-const IDX_COL_J = 9;
-
-var sheetName = 'comentarios';
-
-function doGet(e) {
-  let comunaDetectada = e && e.parameter ? (e.parameter.comuna || e.parameter.Comuna || "") : "";
-  const htmlTemplate = HtmlService.createTemplateFromFile('InterfazWhatsApp');
-  htmlTemplate.comunaPreseleccionada = comunaDetectada;
-  return htmlTemplate.evaluate()
-      .setWidth(450)
-      .setHeight(400)
-      .setTitle('Envío Masivo de WhatsApp por Comuna')
-      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-}
-
-function obtenerComunasDisponibles() {
-  return [
-    "CODEGUA", "COINCO", "COLTAUCO", "DOÑIHUE", "GRANEROS", "MACHALI", 
-    "MALLOA", "MOSTAZAL", "OLIVAR", "QUINTA", "RANCAGUA", "RENGO", 
-    "REQUINOA", "CHEPICA", "CHIMBARONGO", "LA ESTRELLA", "LAS CABRAS", 
-    "LITUECHE", "LOLOL", "MARCHIGUE", "NANCAGUA", "NAVIDAD", "PALMILLA", 
-    "PAREDONES", "PERALILLO", "PEUMO", "PICHIDEGUA", "PICHILEMU", 
-    "PLACILLA", "PUMANQUE", "SAN FERNANDO", "SAN VICENTE", "SANTA CRUZ"
-  ];
-}
-
-function obtenerAuditoriaYLinks(comunaSeleccionada, mensajeTexto) {
-  const respuesta = { links: [], militantesRevisados: [] };
-  try {
-    const ss = SpreadsheetApp.openById(PLANILLA_DESTINO_ID);
-    let sheet = ss.getSheetByName(HOJA_MILITANTES_BASE); 
-    if (!sheet) {
-      const todasLasHojas = ss.getSheets();
-      for (let i = 0; i < todasLasHojas.length; i++) {
-        const nombreHojaActual = todasLasHojas[i].getName().toLowerCase();
-        if (nombreHojaActual.includes("militante") || nombreHojaActual.includes("base")) {
-          sheet = todasLasHojas[i];
-          break;
-        }
-      }
-    }
-    if (!sheet) sheet = ss.getSheets()[0];
-    
-    const lastRow = sheet.getLastRow();
-    if (lastRow < 2) return respuesta;
-
-    const lastColumn = sheet.getLastColumn();
-    const cabeceras = sheet.getRange(1, 1, 1, lastColumn).getValues()[0];
-    
-    let colNombreIdx = -1;
-    let colComunaIdx = -1;
-    let colTelefonoIdx = -1;
-
-    for (let i = 0; i < cabeceras.length; i++) {
-      let nombreCabecera = String(cabeceras[i]).trim().toLowerCase();
-      nombreCabecera = nombreCabecera.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
-
-      if (nombreCabecera === "nombre" || nombreCabecera === "nombre completo" || nombreCabecera === "militante") colNombreIdx = i;
-      if (nombreCabecera === "comuna") colComunaIdx = i;
-      if (nombreCabecera === "telefono" || nombreCabecera === "celular" || nombreCabecera === "num_telefono" || nombreCabecera === "fono") colTelefonoIdx = i;
-    }
-
-    if (colNombreIdx === -1) colNombreIdx = 1;     
-    if (colComunaIdx === -1) colComunaIdx = 4;     
-    if (colTelefonoIdx === -1) colTelefonoIdx = 19; 
-
-    const data = sheet.getRange(2, 1, lastRow - 1, lastColumn).getValues();
-    const textoCodificado = encodeURIComponent(mensajeTexto || "");
-    const comunaBuscada = String(comunaSeleccionada).trim().toUpperCase();
-
-    data.forEach((fila, index) => {
-      const marcaH = String(fila[IDX_COL_H] || '').trim().toUpperCase();
-      const marcaI = String(fila[IDX_COL_I] || '').trim().toUpperCase();
-      const marcaJ = String(fila[IDX_COL_J] || '').trim().toUpperCase();
-
-      if (marcaH === 'X' || marcaI === 'X' || marcaJ === 'X') return; 
-
-      const comunaMilitante = String(fila[colComunaIdx] || '').trim().toUpperCase();
-      
-      if (comunaMilitante !== "" && (comunaMilitante.includes(comunaBuscada) || comunaBuscada.includes(comunaMilitante))) {
-        let valorCrudoTelefono = fila[colTelefonoIdx];
-        let telOriginalStr = String(valorCrudoTelefono || '').trim();
-        if (typeof valorCrudoTelefono === 'number') telOriginalStr = valorCrudoTelefono.toFixed(0); 
-
-        let telefonoLimpio = telOriginalStr.replace(/[^0-9]/g, '');
-        let esValido = false;
-        let linkFinal = "";
-
-        if (telefonoLimpio.length >= 8) {
-          esValido = true;
-          if (telefonoLimpio.startsWith("56") && telefonoLimpio.length === 11) {
-            // Nativo
-          } else if (!telefonoLimpio.startsWith("56") && telefonoLimpio.length === 9) {
-            telefonoLimpio = "56" + telefonoLimpio;
-          } else if (!telefonoLimpio.startsWith("56") && telefonoLimpio.length === 8) {
-            telefonoLimpio = "569" + telefonoLimpio;
-          }
-          linkFinal = `https://wa.me/${telefonoLimpio}?text=${textoCodificado}`;
-          respuesta.links.push(linkFinal);
-        }
-
-        let idUnico = String(fila[0] || 'Fila ' + (index + 2)).trim();
-        let nombreMilitante = String(fila[colNombreIdx] || '').trim();
-
-        respuesta.militantesRevisados.push({
-          id: idUnico,
-          nombre: nombreMilitante ? nombreMilitante : "Sin Nombre", 
-          comuna: comunaMilitante,
-          telOriginal: telOriginalStr === "" ? "[Celda Vacía]" : telOriginalStr,
-          valido: esValido
-        });
-      }
-    });
-  } catch(e) {
-    console.error("Error en escáner: " + e.toString());
-  }
-  return respuesta;
-}
-
-/********************************************************************
- * RECEPCIÓN PROCESADA: FORMULARIO Y MÉTRICAS (UNIFICADO)
- ********************************************************************/
-function doPost(e) {
-  var lock = LockService.getScriptLock();
-  lock.tryLock(10000); 
-
-  try {
-    var postData = {};
-    
-    // Detectamos si la información entra como JSON o como parámetros de formulario clásico
-    if (e.postData && e.postData.contents) {
-      try {
-        postData = JSON.parse(e.postData.contents);
-      } catch(parseError) {
-        postData = e.parameter;
-      }
-    } else {
-      postData = e.parameter;
-    }
-
-    // ACCIÓN 1: Registrar Visita
-    if (postData.action === 'track_visit') {
-      registrarVisita(postData);
-      return ContentService.createTextOutput(JSON.stringify({ result: 'tracked' })).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // ACCIÓN 2: Obtener contadores para la UI
-    if (postData.action === 'get_metrics') {
-      const ss = SpreadsheetApp.openById(PLANILLA_DESTINO_ID);
-      
-      let sheetAn = ss.getSheetByName('analitica');
-      let totales = 0, unicas = 0;
-      if (sheetAn) {
-        let rows = sheetAn.getDataRange().getValues();
-        for(let i = 1; i < rows.length; i++) {
-          if(rows[i][0] === 'Total') totales++;
-          if(rows[i][0] === 'Unica') unicas++;
-        }
-      }
-
-      let sheetCom = ss.getSheetByName(sheetName);
-      let usuarios = [];
-      if (sheetCom) {
-        let rowsCom = sheetCom.getDataRange().getValues();
-        let inicio = Math.max(1, rowsCom.length - 5);
-        for(let j = rowsCom.length - 1; j >= inicio; j--) {
-          if(rowsCom[j][2]) { 
-            usuarios.push({
-              nombre: rowsCom[j][2], // Columna C (Nombre)
-              comuna: rowsCom[j][4]  // Columna E (Comuna)
+            document.querySelectorAll('section').forEach(section => {
+                observer.observe(section);
             });
-          }
+        });
+
+        // 2. Rastreo de visitas al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            const uaInfo = navigator.userAgent;
+            const urlParams = new URLSearchParams(window.location.search);
+            const comunaParam = urlParams.get('comuna') || '';
+
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'track_visit', ua: uaInfo, comuna: comunaParam })
+            });
+
+            actualizarMetricasVisibles();
+        });
+
+        function actualizarMetricasVisibles() {
+            fetch(scriptURL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'get_metrics' })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('visitasTotales').textContent = data.totales || 0;
+                document.getElementById('visitasUnicas').textContent = data.unicas || 0;
+                
+                const muro = document.getElementById('muroUsuarios');
+                muro.innerHTML = ''; 
+
+                if (data.usuarios && data.usuarios.length > 0) {
+                    data.usuarios.forEach(user => {
+                        const inicial = user.nombre.charAt(0).toUpperCase();
+                        muro.innerHTML += `
+                            <div class="fr-user-badge" title="Comuna: ${user.comuna}">
+                                <span class="fr-avatar-circle">${inicial}</span>
+                                ${user.nombre.split(' ')[0]} (${user.comuna})
+                            </div>
+                        `;
+                    });
+                } else {
+                    muro.innerHTML = '<span class="text-muted" style="font-size:11px;">Esperando nuevos participantes territoriales.</span>';
+                }
+            })
+            .catch(err => {
+                console.error("Error al traer analítica:", err);
+                document.getElementById('visitasTotales').textContent = '0';
+                document.getElementById('visitasUnicas').textContent = '0';
+            });
         }
-      }
 
-      return ContentService.createTextOutput(JSON.stringify({
-        totales: totales,
-        unicas: unicas,
-        usuarios: usuarios
-      })).setMimeType(ContentService.MimeType.JSON);
-    }
+        // 3. Envío del formulario
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            responseDiv.style.display = 'block';
+            responseDiv.style.color = '#0A1B3D';
+            responseDiv.textContent = 'Enviando comentario...';
 
-    // ACCIÓN 3: Guardar Comentario (FormData)
-    var doc = SpreadsheetApp.openById(PLANILLA_DESTINO_ID);
-    var sheet = doc.getSheetByName(sheetName);
-    var encabezadosCorrectos = ['ID', 'Timestamp', 'Nombre', 'RUT', 'Comuna', 'Email', 'Telefono', 'Interes', 'Comentario'];
-    
-    if (!sheet) {
-      sheet = doc.insertSheet(sheetName);
-      sheet.appendRow(encabezadosCorrectos);
-    }
-
-    var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-    var nextRow = sheet.getLastRow() + 1;
-    var uniqueID = Utilities.getUuid(); 
-    var row = [];
-
-    for (var i = 0; i < headers.length; i++) {
-      var headerName = headers[i].toString().trim();
-      if (headerName.toUpperCase() === 'ID') {
-        row.push(uniqueID);
-      } else if (headerName.toUpperCase() === 'TIMESTAMP') {
-        row.push(new Date());
-      } else {
-        // Buscamos el parámetro de forma robusta en postData mapeada
-        var valorFormulario = postData[headerName] || postData[headerName.toLowerCase()] || postData[headerName.toUpperCase()] || "";
-        row.push(valorFormulario);
-      }
-    }
-
-    sheet.getRange(nextRow, 1, 1, row.length).setValues([row]);
-    return ContentService.createTextOutput(JSON.stringify({ 'result': 'success', 'row': nextRow, 'id': uniqueID })).setMimeType(ContentService.MimeType.JSON);
-
-  } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({ 'result': 'error', 'error': error.toString() })).setMimeType(ContentService.MimeType.JSON);
-  } finally {
-    lock.releaseLock();
-  }
-}
-
-function registrarVisita(data) {
-  try {
-    const ss = SpreadsheetApp.openById(PLANILLA_DESTINO_ID);
-    let sheet = ss.getSheetByName('analitica');
-    if (!sheet) {
-      sheet = ss.insertSheet('analitica');
-      sheet.appendRow(['Tipo', 'Timestamp', 'IP_Hash', 'Comuna']);
-    }
-
-    let userAgent = data.ua || "";
-    let comuna = data.comuna || "";
-    let ipHash = Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, userAgent));
-
-    sheet.appendRow(['Total', new Date(), ipHash, comuna]);
-
-    let rows = sheet.getDataRange().getValues();
-    let esUnica = true;
-    for (let i = 1; i < rows.length; i++) {
-      if (rows[i][0] === 'Unica' && rows[i][2] === ipHash) {
-        esUnica = false;
-        break;
-      }
-    }
-
-    if (esUnica) {
-      sheet.appendRow(['Unica', new Date(), ipHash, comuna]);
-    }
-  } catch (err) {
-    console.error("Error en registrarVisita: " + err.toString());
-  }
-}
+            fetch(scriptURL, { method: 'POST', body: new FormData(form) })
+            .then(response => response.json())
+            .then(data => {
+                if (data.result === 'success') {
+                    responseDiv.style.color = 'green';
+                    responseDiv.textContent = '¡Gracias! Tu comentario ha sido recibido con éxito.';
+                    form.reset();
+                    setTimeout(actualizarMetricasVisibles, 1000);
+                } else {
+                    throw new Error(data.error || 'Error desconocido');
+                }
+            })
+            .catch(error => {
+                responseDiv.style.color = '#D92332';
+                responseDiv.textContent = 'Hubo un error al enviar. Por favor, inténtalo nuevamente.';
+                console.error('Error!', error.message);
+            });
+        });
+    </script>
 </body>
 </html>
