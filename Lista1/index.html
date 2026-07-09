@@ -748,6 +748,22 @@
     <!-- PANEL DE MÉTRICAS SIMPLIFICADO -->
      <div class="text-center"><h3>Visitas</h3></div>
 <div id="sfcswld9zj75gy3ktrrrf3433r7fmb9kn7q" class="text-center"></div><script type="text/javascript" src="https://counter11.optistats.ovh/private/counter.js?c=swld9zj75gy3ktrrrf3433r7fmb9kn7q&down=async" async></script><noscript><a href="https://www.contadorvisitasgratis.com" title="contador de visitas gratis blogger"><img src="https://counter11.optistats.ovh/private/contadorvisitasgratis.php?c=swld9zj75gy3ktrrrf3433r7fmb9kn7q" border="0" title="contador de visitas gratis blogger" alt="contador de visitas gratis blogger"></a></noscript>
+    <!-- PANEL DE MÉTRICAS SIMPLIFICADO RESTAURADO -->
+    <div class="fr-metrics-container">
+        <div class="fr-counter-wrapper">
+            <div class="fr-counter-card">
+                <i class="bi bi-eye-fill text-primary"></i>
+                <div class="fr-counter-number" id="visitasTotales">...</div>
+                <div class="fr-counter-label">Visitas Totales</div>
+            </div>
+            <div class="fr-counter-card">
+                <i class="bi bi-fingerprint text-danger"></i>
+                <div class="fr-counter-number" id="visitasUnicas">...</div>
+                <div class="fr-counter-label">Visitas Únicas</div>
+            </div>
+        </div>
+    </div>
+
     <!-- FORMULARIO DE CONTACTO -->
     <div class="fr-contact-container">
         <h2>Contacto y Sugerencias</h2>
@@ -867,67 +883,100 @@
         </div>
     </footer>
 
-    <!-- LOGICA FRONTEND SCRIPT -->
+    <!-- LOGICA FRONTEND SCRIPT UNIFICADA -->
     <script>
         const scriptURL = 'https://script.google.com/macros/s/AKfycbxv-gg9V1aYR8kqrhPMoUvWTT0rONGxaiE-nlYJ-4XNxjGAtynZdxvOJIB0gxGpnAFg/exec';
-const form = document.getElementById('formComentarios');
-const responseDiv = document.getElementById('formResponse');
+        const form = document.getElementById('formComentarios');
+        const responseDiv = document.getElementById('formResponse');
 
-// Al cargar la página registramos la visita y traemos las métricas puras
-document.addEventListener('DOMContentLoaded', () => {
-  // Enviar hit de rastreo en formato JSON
-  fetch(scriptURL, {
-    method: 'POST',
-    mode: 'no-cors', 
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'track_visit' })
-  });
+        // Observer para menú de navegación
+        window.addEventListener('DOMContentLoaded', () => {
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    const id = entry.target.getAttribute('id');
+                    if (entry.isIntersecting) {
+                        document.querySelectorAll('nav ul li a').forEach(a => a.classList.remove('active'));
+                        const activeLink = document.querySelector(`nav ul li a[href="#${id}"]`);
+                        if(activeLink) activeLink.classList.add('active');
+                    }
+                });
+            }, { threshold: 0.2, rootMargin: "0px 0px -50% 0px" });
 
-  actualizarMetricasVisibles();
-});
+            document.querySelectorAll('section').forEach(section => {
+                observer.observe(section);
+            });
+        });
 
-function actualizarMetricasVisibles() {
-  fetch(scriptURL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'get_metrics' })
-  })
-  .then(res => res.json())
-  .then(data => {
-    document.getElementById('visitasTotales').textContent = data.totales || 0;
-    document.getElementById('visitasUnicas').textContent = data.unicas || 0;
-  })
-  .catch(err => {
-    console.error("Error al traer contadores:", err);
-    document.getElementById('visitasTotales').textContent = '0';
-    document.getElementById('visitasUnicas').textContent = '0';
-  });
-}
+        // Al cargar la página registramos la visita y traemos las métricas puras
+        document.addEventListener('DOMContentLoaded', () => {
+            const uaInfo = navigator.userAgent;
+            const urlParams = new URLSearchParams(window.location.search);
+            const comunaParam = urlParams.get('comuna') || '';
 
-// Envío tradicional del formulario de comentarios
-form.addEventListener('submit', e => {
-  e.preventDefault();
-  responseDiv.style.display = 'block';
-  responseDiv.style.color = '#0A1B3D';
-  responseDiv.textContent = 'Enviando comentario...';
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'track_visit', ua: uaInfo, comuna: comunaParam })
+            });
 
-  fetch(scriptURL, { method: 'POST', body: new FormData(form) })
-    .then(response => response.json())
-    .then(data => {
-       if (data.result === 'success') {
-         responseDiv.style.color = 'green';
-         responseDiv.textContent = '¡Gracias! Tu comentario ha sido recibido con éxito.';
-         form.reset();
-       } else {
-         throw new Error(data.error || 'Error en Sheets');
-       }
-    })
-    .catch(error => {
-       responseDiv.style.color = '#D92332';
-       responseDiv.textContent = 'Hubo un error al enviar. Por favor, inténtalo nuevamente.';
-       console.error('Error!', error.message);
-    });
-});
+            actualizarMetricasVisibles();
+        });
+
+        function actualizarMetricasVisibles() {
+            fetch(scriptURL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'get_metrics' })
+            })
+            .then(res => res.json())
+            .then(data => {
+                const elTotales = document.getElementById('visitasTotales');
+                const elUnicas = document.getElementById('visitasUnicas');
+                if(elTotales) elTotales.textContent = data.totales || 0;
+                if(elUnicas) elUnicas.textContent = data.unicas || 0;
+            })
+            .catch(err => {
+                console.error("Error al traer contadores:", err);
+            });
+        }
+
+        // Envío del formulario convertido a JSON estructurado para compatibilidad total
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            responseDiv.style.display = 'block';
+            responseDiv.style.color = '#0A1B3D';
+            responseDiv.textContent = 'Enviando comentario...';
+
+            // Convertimos los datos del formulario a un objeto JSON plano limpio
+            const formData = new FormData(form);
+            const datosJSON = {};
+            formData.forEach((value, key) => {
+                datosJSON[key] = value;
+            });
+
+            fetch(scriptURL, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datosJSON) 
+            })
+            .then(response => response.json())
+            .then(data => {
+               if (data.result === 'success') {
+                 responseDiv.style.color = 'green';
+                 responseDiv.textContent = '¡Gracias! Tu comentario ha sido recibido con éxito.';
+                 form.reset();
+                 setTimeout(actualizarMetricasVisibles, 1000);
+               } else {
+                 throw new Error(data.error || 'Error devuelto por la hoja de cálculo');
+               }
+            })
+            .catch(error => {
+               responseDiv.style.color = '#D92332';
+               responseDiv.textContent = 'Hubo un error al enviar. Por favor, inténtalo nuevamente.';
+               console.error('Error!', error.message);
+            });
+        });
     </script>
 </body>
 </html>
