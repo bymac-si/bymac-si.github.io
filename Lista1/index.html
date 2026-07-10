@@ -649,21 +649,7 @@
         <img src="assets/img/consejeros.jpeg" alt="" class="img-fluid">
     </div>
 
-    <!-- PANEL DE MÉTRICAS -->
-    <div class="fr-metrics-container">
-        <div class="fr-counter-wrapper">
-            <div class="fr-counter-card">
-                <i class="bi bi-eye-fill text-primary"></i>
-                <div class="fr-counter-number" id="visitasTotales">...</div>
-                <div class="fr-counter-label">Visitas Totales</div>
-            </div>
-            <div class="fr-counter-card">
-                <i class="bi bi-fingerprint text-danger"></i>
-                <div class="fr-counter-number" id="visitasUnicas">...</div>
-                <div class="fr-counter-label">Visitas Únicas</div>
-            </div>
-        </div>
-    </div>
+ 
 
     <!-- FORMULARIO DE CONTACTO -->
     <div class="fr-contact-container">
@@ -805,39 +791,7 @@
             document.querySelectorAll('section').forEach(section => observer.observe(section));
         });
 
-        // Contadores seguros sin Preflight CORS
-        document.addEventListener('DOMContentLoaded', () => {
-            const trackParams = new URLSearchParams();
-            trackParams.append('action', 'track_visit');
-
-            fetch(scriptURL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: trackParams.toString()
-            }).then(() => {
-                actualizarMetricasVisibles();
-            }).catch(console.error);
-        });
-
-        function actualizarMetricasVisibles() {
-            const metricParams = new URLSearchParams();
-            metricParams.append('action', 'get_metrics');
-
-            fetch(scriptURL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: metricParams.toString()
-            })
-            .then(res => res.json())
-            .then(data => {
-                const elTotales = document.getElementById('visitasTotales');
-                const elUnicas = document.getElementById('visitasUnicas');
-                if(elTotales) elTotales.textContent = data.totales || 0;
-                if(elUnicas) elUnicas.textContent = data.unicas || 0;
-            })
-            .catch(console.error);
-        }
+       
 
         // Envío blindado del Formulario (Modo No-CORS)
         form.addEventListener('submit', e => {
