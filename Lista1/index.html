@@ -34,7 +34,6 @@
             line-height: 1.6;
         }
 
-        /* Encabezado Principal */
         header {
             background: linear-gradient(135deg, var(--azul-oscuro) 0%, var(--azul-medio) 100%);
             color: var(--blanco);
@@ -65,7 +64,6 @@
             border-radius: 3px;
         }
 
-        /* Contenedor y Menú Lateral */
         .main-container {
             max-width: 1200px;
             margin: 30px auto;
@@ -104,14 +102,8 @@
             text-transform: uppercase;
         }
 
-        nav ul {
-            list-style: none;
-        }
-
-        nav ul li {
-            margin-bottom: 8px;
-        }
-
+        nav ul { list-style: none; }
+        nav ul li { margin-bottom: 8px; }
         nav ul li a {
             color: #bdcddc;
             text-decoration: none;
@@ -128,7 +120,6 @@
             color: var(--blanco);
         }
 
-        /* Secciones de Contenido */
         .content-area {
             display: flex;
             flex-direction: column;
@@ -144,9 +135,7 @@
             scroll-margin-top: 20px;
         }
 
-        section#presentacion {
-            border-left-color: var(--rojo-republicano);
-        }
+        section#presentacion { border-left-color: var(--rojo-republicano); }
 
         h2 {
             font-family: 'Montserrat', sans-serif;
@@ -183,9 +172,7 @@
         }
 
         @media (max-width: 650px) {
-            .grid-blocks {
-                grid-template-columns: 1fr;
-            }
+            .grid-blocks { grid-template-columns: 1fr; }
         }
 
         .block {
@@ -203,17 +190,13 @@
             text-transform: uppercase;
         }
 
-        ul.items-list {
-            list-style: none;
-        }
-
+        ul.items-list { list-style: none; }
         ul.items-list li {
             position: relative;
             padding-left: 25px;
             margin-bottom: 10px;
             font-size: 1rem;
         }
-
         ul.items-list li::before {
             content: "✓";
             position: absolute;
@@ -287,7 +270,6 @@
         .fr-counter-wrapper {
             display: flex;
             gap: 15px;
-            margin-bottom: 20px;
         }
         .fr-counter-card {
             flex: 1;
@@ -297,9 +279,7 @@
             border-radius: 6px;
             border-bottom: 3px solid #0A1B3D;
         }
-        .fr-counter-card i {
-            font-size: 20px;
-        }
+        .fr-counter-card i { font-size: 20px; }
         .fr-counter-number {
             font-size: 24px;
             font-weight: 800;
@@ -309,41 +289,6 @@
             font-size: 11px;
             text-transform: uppercase;
             color: #718096;
-            font-weight: bold;
-        }
-        .fr-users-log h5 {
-            font-size: 13px;
-            color: #0A1B3D;
-            font-weight: 700;
-            margin-bottom: 12px;
-            text-transform: uppercase;
-        }
-        .fr-avatar-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .fr-user-badge {
-            display: flex;
-            align-items: center;
-            background: #e2e8f0;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            color: #2d3748;
-        }
-        .fr-avatar-circle {
-            width: 20px;
-            height: 20px;
-            background-color: #be111a;
-            color: #fff;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 9px;
-            margin-right: 6px;
             font-weight: bold;
         }
 
@@ -385,9 +330,7 @@
             gap: 15px;
         }
 
-        .fr-form-row .fr-form-group {
-            flex: 1;
-        }
+        .fr-form-row .fr-form-group { flex: 1; }
 
         .fr-form-group label {
             font-size: 13px;
@@ -429,15 +372,10 @@
             transition: background 0.3s ease;
         }
 
-        .fr-btn-submit:hover {
-            background-color: #142d5e;
-        }
+        .fr-btn-submit:hover { background-color: #142d5e; }
         
         @media (max-width: 600px) {
-            .fr-form-row {
-                flex-direction: column;
-                gap: 0;
-            }
+            .fr-form-row { flex-direction: column; gap: 0; }
         }
 
         /* Footer */
@@ -458,9 +396,7 @@
         }
 
         @media (max-width: 768px) {
-            .footer-content {
-                grid-template-columns: 1fr;
-            }
+            .footer-content { grid-template-columns: 1fr; }
         }
 
         .footer-col h3 {
@@ -745,9 +681,6 @@
         <img src="assets/img/consejeros.jpeg" alt="" class="img-fluid">
     </div>
 
-    <!-- PANEL DE MÉTRICAS SIMPLIFICADO -->
-     <div class="text-center"><h3>Visitas</h3></div>
-<div id="sfcswld9zj75gy3ktrrrf3433r7fmb9kn7q" class="text-center"></div><script type="text/javascript" src="https://counter11.optistats.ovh/private/counter.js?c=swld9zj75gy3ktrrrf3433r7fmb9kn7q&down=async" async></script><noscript><a href="https://www.contadorvisitasgratis.com" title="contador de visitas gratis blogger"><img src="https://counter11.optistats.ovh/private/contadorvisitasgratis.php?c=swld9zj75gy3ktrrrf3433r7fmb9kn7q" border="0" title="contador de visitas gratis blogger" alt="contador de visitas gratis blogger"></a></noscript>
     <!-- PANEL DE MÉTRICAS SIMPLIFICADO RESTAURADO -->
     <div class="fr-metrics-container">
         <div class="fr-counter-wrapper">
@@ -907,27 +840,33 @@
             });
         });
 
-        // Al cargar la página registramos la visita y traemos las métricas puras
+        // Al cargar la página registramos la visita y traemos las métricas puras usando URLSearchParams para Bypass CORS
         document.addEventListener('DOMContentLoaded', () => {
             const uaInfo = navigator.userAgent;
             const urlParams = new URLSearchParams(window.location.search);
             const comunaParam = urlParams.get('comuna') || '';
 
+            // Envío en formato de formulario clásico para no detonar el chequeo Preflight de Google
+            const trackParams = new URLSearchParams();
+            trackParams.append('action', 'track_visit');
+            trackParams.append('ua', uaInfo);
+            trackParams.append('comuna', comunaParam);
+
             fetch(scriptURL, {
                 method: 'POST',
-                mode: 'no-cors', 
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'track_visit', ua: uaInfo, comuna: comunaParam })
-            });
-
-            actualizarMetricasVisibles();
+                body: trackParams
+            }).then(() => {
+                actualizarMetricasVisibles();
+            }).catch(console.error);
         });
 
         function actualizarMetricasVisibles() {
+            const metricParams = new URLSearchParams();
+            metricParams.append('action', 'get_metrics');
+
             fetch(scriptURL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'get_metrics' })
+                body: metricParams
             })
             .then(res => res.json())
             .then(data => {
@@ -941,46 +880,41 @@
             });
         }
 
-        // Evento único para procesar el envío del Formulario de Comentarios sin bloquearse por CORS
-form.addEventListener('submit', e => {
-    e.preventDefault();
-    responseDiv.style.display = 'block';
-    responseDiv.style.color = '#0A1B3D';
-    responseDiv.textContent = 'Enviando comentario...';
+        // Envío del formulario de comentarios (bypass nativo CORS)
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            responseDiv.style.display = 'block';
+            responseDiv.style.color = '#0A1B3D';
+            responseDiv.textContent = 'Enviando comentario...';
 
-    // Capturamos los datos del formulario nativo
-    const formData = new FormData(form);
-    
-    // Convertimos a URLSearchParams para enviarlo como formulario clásico (Bypass de CORS)
-    const params = new URLSearchParams();
-    formData.forEach((value, key) => {
-        params.append(key, value);
-    });
+            // Convertimos la data del formulario a URLSearchParams para ser enviada limpia
+            const formData = new FormData(form);
+            const formParams = new URLSearchParams();
+            formData.forEach((value, key) => {
+                formParams.append(key, value);
+            });
 
-    // Enviamos la petición usando el modo seguro para Google Scripts
-    fetch(scriptURL, { 
-        method: 'POST',
-        mode: 'no-cors', // Evita que el navegador lance el error de Preflight
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: params.toString()
-    })
-    .then(() => {
-        // Al usar 'no-cors', la respuesta viene opaca (vacia), pero si llega aquí es porque se envió con éxito
-        responseDiv.style.color = 'green';
-        responseDiv.textContent = '¡Gracias! Tu comentario ha sido recibido con éxito.';
-        form.reset();
-        
-        // Refrescamos tus contadores visuales tras 1.5 segundos
-        if (typeof actualizarMetricasVisibles === "function") {
-            setTimeout(actualizarMetricasVisibles, 1500);
-        }
-    })
-    .catch(error => {
-        responseDiv.style.color = '#D92332';
-        responseDiv.textContent = 'Hubo un error al enviar. Por favor, inténtalo nuevamente.';
-        console.error('Error!', error.message);
-    });
-});
+            fetch(scriptURL, { 
+                method: 'POST', 
+                body: formParams 
+            })
+            .then(response => response.json())
+            .then(data => {
+               if (data.result === 'success') {
+                 responseDiv.style.color = 'green';
+                 responseDiv.textContent = '¡Gracias! Tu comentario ha sido recibido con éxito.';
+                 form.reset();
+                 setTimeout(actualizarMetricasVisibles, 1000);
+               } else {
+                 throw new Error(data.error || 'Error devuelto por la hoja de cálculo');
+               }
+            })
+            .catch(error => {
+               responseDiv.style.color = '#D92332';
+               responseDiv.textContent = 'Hubo un error al enviar. Por favor, inténtalo nuevamente.';
+               console.error('Error!', error.message);
+            });
+        });
     </script>
 </body>
 </html>
