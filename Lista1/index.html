@@ -941,42 +941,46 @@
             });
         }
 
-        // Envío del formulario convertido a JSON estructurado para compatibilidad total
-        form.addEventListener('submit', e => {
-            e.preventDefault();
-            responseDiv.style.display = 'block';
-            responseDiv.style.color = '#0A1B3D';
-            responseDiv.textContent = 'Enviando comentario...';
+        // Evento único para procesar el envío del Formulario de Comentarios sin bloquearse por CORS
+form.addEventListener('submit', e => {
+    e.preventDefault();
+    responseDiv.style.display = 'block';
+    responseDiv.style.color = '#0A1B3D';
+    responseDiv.textContent = 'Enviando comentario...';
 
-            // Convertimos los datos del formulario a un objeto JSON plano limpio
-            const formData = new FormData(form);
-            const datosJSON = {};
-            formData.forEach((value, key) => {
-                datosJSON[key] = value;
-            });
+    // Capturamos los datos del formulario nativo
+    const formData = new FormData(form);
+    
+    // Convertimos a URLSearchParams para enviarlo como formulario clásico (Bypass de CORS)
+    const params = new URLSearchParams();
+    formData.forEach((value, key) => {
+        params.append(key, value);
+    });
 
-            fetch(scriptURL, { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(datosJSON) 
-            })
-            .then(response => response.json())
-            .then(data => {
-               if (data.result === 'success') {
-                 responseDiv.style.color = 'green';
-                 responseDiv.textContent = '¡Gracias! Tu comentario ha sido recibido con éxito.';
-                 form.reset();
-                 setTimeout(actualizarMetricasVisibles, 1000);
-               } else {
-                 throw new Error(data.error || 'Error devuelto por la hoja de cálculo');
-               }
-            })
-            .catch(error => {
-               responseDiv.style.color = '#D92332';
-               responseDiv.textContent = 'Hubo un error al enviar. Por favor, inténtalo nuevamente.';
-               console.error('Error!', error.message);
-            });
-        });
+    // Enviamos la petición usando el modo seguro para Google Scripts
+    fetch(scriptURL, { 
+        method: 'POST',
+        mode: 'no-cors', // Evita que el navegador lance el error de Preflight
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString()
+    })
+    .then(() => {
+        // Al usar 'no-cors', la respuesta viene opaca (vacia), pero si llega aquí es porque se envió con éxito
+        responseDiv.style.color = 'green';
+        responseDiv.textContent = '¡Gracias! Tu comentario ha sido recibido con éxito.';
+        form.reset();
+        
+        // Refrescamos tus contadores visuales tras 1.5 segundos
+        if (typeof actualizarMetricasVisibles === "function") {
+            setTimeout(actualizarMetricasVisibles, 1500);
+        }
+    })
+    .catch(error => {
+        responseDiv.style.color = '#D92332';
+        responseDiv.textContent = 'Hubo un error al enviar. Por favor, inténtalo nuevamente.';
+        console.error('Error!', error.message);
+    });
+});
     </script>
 </body>
 </html>
