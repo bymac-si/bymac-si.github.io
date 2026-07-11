@@ -649,21 +649,97 @@
         <img src="assets/img/consejeros.jpeg" alt="" class="img-fluid">
     </div>
 
-    <!-- FORMULARIO APPSHEET MODO KIOSCO (APP EXCLUSIVA) -->
-<div class="fr-contact-container" style="padding: 0; background: transparent; box-shadow: none; border-top: none;">
-    <h2 style="text-align: center; margin-bottom: 20px;">Contacto y Sugerencias</h2>
-    <p style="text-align: center; margin-bottom: 25px;">Tu opinión es fundamental para construir el futuro de la Región de O'Higgins. Escríbenos.</p>
+    <div class="fr-contact-container" style="max-width: 650px; margin: 40px auto; padding: 30px; background: #ffffff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-top: 5px solid #0A1B3D; font-family: 'Arial', sans-serif;">
+    <h2 style="color: #0A1B3D; font-size: 24px; margin-bottom: 5px; text-transform: uppercase;">Contacto y Sugerencias</h2>
+    <p style="color: #718096; margin-bottom: 25px; font-size: 14px;">Tu opinión es fundamental para construir el futuro de la Región de O'Higgins.</p>
     
-    <div style="width: 100%; height: 850px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); background: #fff;">
-        <iframe 
-            src="https://www.appsheet.com/start/30851829-d28f-4d47-856c-5e8725c0fd5b#appName=comentarios-985773532&view=comentarios_Form&rm=1" 
-            width="100%" 
-            height="100%" 
-            frameborder="0" 
-            style="border: none;">
-        </iframe>
-    </div>
+    <form id="formComentariosAppSheet">
+        <div style="margin-bottom: 20px;">
+            <label style="font-weight: 600; color: #0A1B3D; font-size: 13px; display: block; margin-bottom: 5px;">Nombre Completo *</label>
+            <input type="text" name="Nombre" required placeholder="Ej. Juan Pérez" style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; background: #F4F6F9;">
+        </div>
+
+        <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+            <div style="flex: 1;">
+                <label style="font-weight: 600; color: #0A1B3D; font-size: 13px; display: block; margin-bottom: 5px;">RUT</label>
+                <input type="text" name="RUT" placeholder="12.345.678-9" style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; background: #F4F6F9;">
+            </div>
+            <div style="flex: 1;">
+                <label style="font-weight: 600; color: #0A1B3D; font-size: 13px; display: block; margin-bottom: 5px;">Comuna *</label>
+                <select name="Comuna" required style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; background: #F4F6F9;">
+                    <option value="" disabled selected>Selecciona tu comuna</option>
+                    <option value="RANCAGUA">RANCAGUA</option>
+                    <option value="MACHALI">MACHALI</option>
+                    <option value="SAN FERNANDO">SAN FERNANDO</option>
+                    <!-- Agrega las demás comunas aquí -->
+                </select>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+            <div style="flex: 1;">
+                <label style="font-weight: 600; color: #0A1B3D; font-size: 13px; display: block; margin-bottom: 5px;">Correo *</label>
+                <input type="email" name="Email" required placeholder="correo@ejemplo.com" style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; background: #F4F6F9;">
+            </div>
+            <div style="flex: 1;">
+                <label style="font-weight: 600; color: #0A1B3D; font-size: 13px; display: block; margin-bottom: 5px;">Teléfono *</label>
+                <input type="tel" name="Telefono" required placeholder="+56 9 1234 5678" style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; background: #F4F6F9;">
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="font-weight: 600; color: #0A1B3D; font-size: 13px; display: block; margin-bottom: 5px;">Interés *</label>
+            <select name="Interes" required style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; background: #F4F6F9;">
+                <option value="" disabled selected>Selecciona una opción</option>
+                <option value="Voluntario">Quiero ser Voluntario / Apoderado</option>
+                <option value="Juventud">Participar en la Juventud</option>
+                <option value="Mesas">Mesas Regionales de Trabajo</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="font-weight: 600; color: #0A1B3D; font-size: 13px; display: block; margin-bottom: 5px;">Mensaje *</label>
+            <textarea name="Comentario" rows="4" required style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; background: #F4F6F9;"></textarea>
+        </div>
+
+        <button type="submit" style="width: 100%; padding: 12px; background: #0A1B3D; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Enviar a AppSheet</button>
+    </form>
+    <div id="formResponse" style="display:none; margin-top:15px; font-weight:bold; text-align:center;"></div>
 </div>
+
+<script>
+    // PEGA AQUÍ LA URL DE TU WEB APP DE GOOGLE APPS SCRIPT
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwLfACVlgc9we66psv4VCoRTqg0UmIQfqI8fvkhh6GpAHibktHjf4PGqBw6zvz73Cqq/exec';
+    
+    const form = document.getElementById('formComentariosAppSheet');
+    const responseDiv = document.getElementById('formResponse');
+
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+        responseDiv.style.display = 'block';
+        responseDiv.style.color = '#0A1B3D';
+        responseDiv.textContent = 'Procesando envío...';
+
+        // Convertir datos para evitar bloqueos CORS
+        const formParams = new URLSearchParams(new FormData(form));
+
+        fetch(scriptURL, { 
+            method: 'POST',
+            mode: 'no-cors', // Fundamental para que el navegador no bloquee la petición
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formParams.toString() 
+        })
+        .then(() => {
+             responseDiv.style.color = 'green';
+             responseDiv.textContent = '¡Registro ingresado correctamente!';
+             form.reset();
+        })
+        .catch(error => {
+             responseDiv.style.color = '#D92332';
+             responseDiv.textContent = 'Error de conexión.';
+        });
+    });
+</script>
     <footer>
         <div class="footer-content">
             <div class="footer-col">
