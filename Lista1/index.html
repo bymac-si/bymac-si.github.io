@@ -1,13 +1,33 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Programa Fuerza Republicana O'Higgins 2026-2030</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&family=Open+Sans:wght@400;600&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
     <style>
         :root {
             --azul-oscuro: #0a1f44;
@@ -21,7 +41,11 @@
             --texto-oscuro-card: #2D3748;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         body {
             font-family: 'Open Sans', sans-serif;
@@ -70,15 +94,20 @@
         }
 
         @media (max-width: 900px) {
-            .main-container { grid-template-columns: 1fr; }
-            nav { position: static !important; }
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+
+            nav {
+                position: static !important;
+            }
         }
 
         nav {
             background-color: var(--azul-oscuro);
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 20px;
             height: fit-content;
@@ -94,8 +123,14 @@
             text-transform: uppercase;
         }
 
-        nav ul { list-style: none; }
-        nav ul li { margin-bottom: 8px; }
+        nav ul {
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-bottom: 8px;
+        }
+
         nav ul li a {
             color: #bdcddc;
             text-decoration: none;
@@ -106,7 +141,9 @@
             border-radius: 4px;
             transition: all 0.3s ease;
         }
-        nav ul li a:hover, nav ul li a.active {
+
+        nav ul li a:hover,
+        nav ul li a.active {
             background-color: var(--rojo-republicano);
             color: var(--blanco);
         }
@@ -121,12 +158,14 @@
             background-color: var(--blanco);
             padding: 35px;
             border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
             border-left: 6px solid var(--azul-medio);
             scroll-margin-top: 20px;
         }
 
-        section#presentacion { border-left-color: var(--rojo-republicano); }
+        section#presentacion {
+            border-left-color: var(--rojo-republicano);
+        }
 
         h2 {
             font-family: 'Montserrat', sans-serif;
@@ -163,7 +202,9 @@
         }
 
         @media (max-width: 650px) {
-            .grid-blocks { grid-template-columns: 1fr; }
+            .grid-blocks {
+                grid-template-columns: 1fr;
+            }
         }
 
         .block {
@@ -181,13 +222,17 @@
             text-transform: uppercase;
         }
 
-        ul.items-list { list-style: none; }
+        ul.items-list {
+            list-style: none;
+        }
+
         ul.items-list li {
             position: relative;
             padding-left: 25px;
             margin-bottom: 10px;
             font-size: 1rem;
         }
+
         ul.items-list li::before {
             content: "✓";
             position: absolute;
@@ -223,7 +268,7 @@
             display: flex;
             align-items: flex-start;
             gap: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .proyecto-num {
@@ -254,13 +299,15 @@
             padding: 20px;
             background: #ffffff;
             border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
             font-family: 'Montserrat', sans-serif;
         }
+
         .fr-counter-wrapper {
             display: flex;
             gap: 15px;
         }
+
         .fr-counter-card {
             flex: 1;
             background: #f4f6f9;
@@ -269,12 +316,17 @@
             border-radius: 6px;
             border-bottom: 3px solid #0A1B3D;
         }
-        .fr-counter-card i { font-size: 20px; }
+
+        .fr-counter-card i {
+            font-size: 20px;
+        }
+
         .fr-counter-number {
             font-size: 24px;
             font-weight: 800;
             color: #0A1B3D;
         }
+
         .fr-counter-label {
             font-size: 11px;
             text-transform: uppercase;
@@ -288,11 +340,12 @@
             padding: 30px;
             background: #ffffff;
             border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
             font-family: 'Arial', sans-serif;
             color: var(--texto-oscuro-card);
             border-top: 5px solid var(--azul-republicano);
         }
+
         .fr-contact-container h2 {
             color: var(--azul-republicano);
             font-size: 24px;
@@ -300,29 +353,37 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
         .fr-contact-container p {
             font-size: 14px;
             color: #718096;
             margin-bottom: 25px;
         }
+
         .fr-form-group {
             margin-bottom: 20px;
             display: flex;
             flex-direction: column;
         }
+
         .fr-form-row {
             display: flex;
             gap: 15px;
         }
-        .fr-form-row .fr-form-group { flex: 1; }
+
+        .fr-form-row .fr-form-group {
+            flex: 1;
+        }
+
         .fr-form-group label {
             font-size: 13px;
             font-weight: 600;
             margin-bottom: 6px;
             color: var(--azul-republicano);
         }
-        .fr-form-group input, 
-        .fr-form-group select, 
+
+        .fr-form-group input,
+        .fr-form-group select,
         .fr-form-group textarea {
             padding: 10px 14px;
             border: 1px solid #CBD5E0;
@@ -331,14 +392,16 @@
             background-color: var(--gris-suave);
             transition: all 0.3s ease;
         }
-        .fr-form-group input:focus, 
-        .fr-form-group select:focus, 
+
+        .fr-form-group input:focus,
+        .fr-form-group select:focus,
         .fr-form-group textarea:focus {
             outline: none;
             border-color: var(--azul-republicano);
             background-color: #fff;
             box-shadow: 0 0 0 3px rgba(10, 27, 61, 0.1);
         }
+
         .fr-btn-submit {
             width: 100%;
             padding: 12px;
@@ -351,9 +414,16 @@
             cursor: pointer;
             transition: background 0.3s ease;
         }
-        .fr-btn-submit:hover { background-color: #142d5e; }
+
+        .fr-btn-submit:hover {
+            background-color: #142d5e;
+        }
+
         @media (max-width: 600px) {
-            .fr-form-row { flex-direction: column; gap: 0; }
+            .fr-form-row {
+                flex-direction: column;
+                gap: 0;
+            }
         }
 
         footer {
@@ -363,6 +433,7 @@
             margin-top: 50px;
             border-top: 6px solid var(--rojo-republicano);
         }
+
         .footer-content {
             max-width: 1200px;
             margin: 0 auto;
@@ -370,9 +441,13 @@
             grid-template-columns: 1fr 1fr;
             gap: 40px;
         }
+
         @media (max-width: 768px) {
-            .footer-content { grid-template-columns: 1fr; }
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
         }
+
         .footer-col h3 {
             font-family: 'Montserrat', sans-serif;
             text-transform: uppercase;
@@ -382,11 +457,13 @@
             border-left: 4px solid var(--rojo-republicano);
             padding-left: 10px;
         }
+
         .principios-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
         }
+
         .principio-item {
             font-size: 0.95rem;
             padding: 4px 0;
@@ -394,17 +471,20 @@
             align-items: center;
             gap: 8px;
         }
+
         .principio-item::before {
             content: "•";
             color: var(--rojo-republicano);
             font-size: 1.5rem;
         }
+
         .compromiso-list li {
             margin-bottom: 8px;
             list-style: none;
             padding-left: 20px;
             position: relative;
         }
+
         .compromiso-list li::before {
             content: "✓";
             position: absolute;
@@ -412,11 +492,12 @@
             color: #00ffcc;
             font-weight: bold;
         }
+
         .footer-bottom {
             text-align: center;
             margin-top: 40px;
             padding-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
             font-family: 'Montserrat', sans-serif;
             font-size: 0.9rem;
             font-weight: 700;
@@ -425,6 +506,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <header>
@@ -450,17 +532,24 @@
         </nav>
 
         <div class="content-area">
-            
+
             <section id="presentacion">
                 <h2>Presentación</h2>
-                <p>El Partido Republicano enfrenta una etapa decisiva para consolidar su presencia en la Región de O'Higgins. El crecimiento alcanzado durante los últimos años exige una organización moderna, cercana y territorialmente activa, capaz de fortalecer la participación de la militancia y proyectar un liderazgo regional sólido.</p>
-                <p>Nuestra candidatura propone una conducción que combine experiencia, renovación y trabajo permanente. Aspiramos a una directiva que no solo administre el partido, sino que impulse una organización viva, conectada con las comunas y preparada para los desafíos políticos de los próximos años. Este Programa de Gestión establece los compromisos que orientarán nuestro trabajo entre 2026 y 2030.</p>
+                <p>El Partido Republicano enfrenta una etapa decisiva para consolidar su presencia en la Región de
+                    O'Higgins. El crecimiento alcanzado durante los últimos años exige una organización moderna, cercana
+                    y territorialmente activa, capaz de fortalecer la participación de la militancia y proyectar un
+                    liderazgo regional sólido.</p>
+                <p>Nuestra candidatura propone una conducción que combine experiencia, renovación y trabajo permanente.
+                    Aspiramos a una directiva que no solo administre el partido, sino que impulse una organización viva,
+                    conectada con las comunas y preparada para los desafíos políticos de los próximos años. Este
+                    Programa de Gestión establece los compromisos que orientarán nuestro trabajo entre 2026 y 2030.</p>
                 <div class="meta-box">Experiencia para liderar. Visión para avanzar.</div>
             </section>
 
             <section id="eje1">
                 <h2><i class="bi bi-pin-map-fill"></i> Eje 1: Un Partido presente en las 33 comunas</h2>
-                <p>Creemos en una organización territorial fuerte, con dirigentes respaldados y una directiva regional presente en toda la región.</p>
+                <p>Creemos en una organización territorial fuerte, con dirigentes respaldados y una directiva regional
+                    presente en toda la región.</p>
                 <div class="grid-blocks">
                     <div class="block">
                         <h4>Objetivos</h4>
@@ -480,12 +569,14 @@
                         </ul>
                     </div>
                 </div>
-                <div class="meta-box">Meta 2030: Que cada comuna cuente con equipos activos, organizados y funcionando regularmente.</div>
+                <div class="meta-box">Meta 2030: Que cada comuna cuente con equipos activos, organizados y funcionando
+                    regularmente.</div>
             </section>
 
             <section id="eje2">
                 <h2><i class="bi bi-person-arms-up"></i> Eje 2: Militancia protagonista</h2>
-                <p>La fortaleza del partido está en sus militantes. Nuestra prioridad será que todos tengan oportunidades reales para participar y aportar.</p>
+                <p>La fortaleza del partido está en sus militantes. Nuestra prioridad será que todos tengan
+                    oportunidades reales para participar y aportar.</p>
                 <div class="block">
                     <h4>Compromisos</h4>
                     <ul class="items-list">
@@ -497,12 +588,15 @@
                         <li>Red de bienvenida para nuevos militantes.</li>
                     </ul>
                 </div>
-                <div class="meta-box">Meta 2030: Incrementar significativamente la participación activa de la militancia en las actividades regionales.</div>
+                <div class="meta-box">Meta 2030: Incrementar significativamente la participación activa de la militancia
+                    en las actividades regionales.</div>
             </section>
 
             <section id="eje3">
                 <h2><i class="bi bi-marker-tip"></i> Eje 3: Formación para gobernar</h2>
-                <p>Queremos preparar a quienes representarán nuestras ideas en los distintos espacios públicos. Para ello, el compromiso principal radica en la creación de una <strong>Academia Regional Republicana</strong>.</p>
+                <p>Queremos preparar a quienes representarán nuestras ideas en los distintos espacios públicos. Para
+                    ello, el compromiso principal radica en la creación de una <strong>Academia Regional
+                        Republicana</strong>.</p>
                 <div class="block">
                     <h4>Posibles Áreas de Capacitación:</h4>
                     <div class="areas-container">
@@ -517,22 +611,26 @@
                         <div class="area-tag">Campañas Electorales</div>
                     </div>
                 </div>
-                <div class="meta-box">Meta 2030: Contar con una nueva generación de dirigentes preparados para asumir responsabilidades políticas y públicas.</div>
+                <div class="meta-box">Meta 2030: Contar con una nueva generación de dirigentes preparados para asumir
+                    responsabilidades políticas y públicas.</div>
             </section>
 
             <section id="eje4">
                 <h2><i class="bi bi-person-raised-hand"></i> Eje 4: Programa de participación de la Juventud</h2>
-                <p>Queremos que la juventud sea parte del equipo, motivar su participación, potenciar los liderazgos y ser un apoyo permanente en sus iniciativas y desafíos.</p>
+                <p>Queremos que la juventud sea parte del equipo, motivar su participación, potenciar los liderazgos y
+                    ser un apoyo permanente en sus iniciativas y desafíos.</p>
                 <div class="block">
                     <h4>Compromisos</h4>
                     <ul class="items-list">
                         <li>Formación de jóvenes Líderes.</li>
-                        <li>Creación de una red de mentores para transmitir experiencias y acompañar el proceso formativo.</li>
+                        <li>Creación de una red de mentores para transmitir experiencias y acompañar el proceso
+                            formativo.</li>
                         <li>Encuentros permanentes con la juventud.</li>
                         <li>Motivar la participación activa en trabajo territorial, social y campañas.</li>
                     </ul>
                 </div>
-                <div class="meta-box">Meta 2030: Contar con un número importante de jóvenes militantes motivados y comprometidos con el Partido en la Región.</div>
+                <div class="meta-box">Meta 2030: Contar con un número importante de jóvenes militantes motivados y
+                    comprometidos con el Partido en la Región.</div>
             </section>
 
             <section id="eje5">
@@ -554,14 +652,19 @@
                 </div>
                 <div class="block" style="margin-top: 20px;">
                     <h4>Encuentros con Actores Clave:</h4>
-                    <p style="font-size: 0.95rem; font-style: italic;">Jornadas con agricultores, emprendedores, dirigentes vecinales, gremios, organizaciones sociales, adultos mayores, iglesias, centros de estudiantes, etc.</p>
+                    <p style="font-size: 0.95rem; font-style: italic;">Jornadas con agricultores, emprendedores,
+                        dirigentes vecinales, gremios, organizaciones sociales, adultos mayores, iglesias, centros de
+                        estudiantes, etc.</p>
                 </div>
-                <div class="meta-box">Meta 2030: Consolidar al Partido Republicano como un referente regional de propuestas y diálogo con la sociedad civil.</div>
+                <div class="meta-box">Meta 2030: Consolidar al Partido Republicano como un referente regional de
+                    propuestas y diálogo con la sociedad civil.</div>
             </section>
 
             <section id="eje6">
-                <h2><i class="bi bi-file-earmark-bar-graph"></i> Eje 6: Gestión moderna, transparente y orientada a resultados</h2>
-                <p>La confianza se construye con transparencia y cumplimiento. Nuestra gestión estará basada en planificación, información y evaluación permanente.</p>
+                <h2><i class="bi bi-file-earmark-bar-graph"></i> Eje 6: Gestión moderna, transparente y orientada a
+                    resultados</h2>
+                <p>La confianza se construye con transparencia y cumplimiento. Nuestra gestión estará basada en
+                    planificación, información y evaluación permanente.</p>
                 <div class="block">
                     <h4>Compromisos Operativos</h4>
                     <ul class="items-list">
@@ -572,12 +675,15 @@
                         <li>Coordinación estrecha con parlamentarios, COREs, alcaldes y concejales de la región.</li>
                     </ul>
                 </div>
-                <div class="meta-box">Meta 2030: Instalar una cultura de gestión basada en resultados y transparencia.</div>
+                <div class="meta-box">Meta 2030: Instalar una cultura de gestión basada en resultados y transparencia.
+                </div>
             </section>
 
             <section id="eje7">
                 <h2><i class="bi bi-check2-square"></i> Eje 7: Preparación Electoral y Desarrollo de Liderazgos</h2>
-                <p>El crecimiento del Partido Republicano requiere una planificación estratégica que permita identificar, formar y acompañar a quienes representarán nuestras ideas en los distintos espacios de representación pública.</p>
+                <p>El crecimiento del Partido Republicano requiere una planificación estratégica que permita
+                    identificar, formar y acompañar a quienes representarán nuestras ideas en los distintos espacios de
+                    representación pública.</p>
                 <div class="grid-blocks">
                     <div class="block">
                         <h4>Objetivos</h4>
@@ -598,32 +704,37 @@
                         </ul>
                     </div>
                 </div>
-                <div class="meta-box">Metas al 2030: Equipos políticos activos en las 33 comunas y posicionar a O'Higgins como referente nacional en organización territorial.</div>
+                <div class="meta-box">Metas al 2030: Equipos políticos activos en las 33 comunas y posicionar a
+                    O'Higgins como referente nacional en organización territorial.</div>
             </section>
 
             <section id="proyectos">
                 <h2>Iniciativas Permanentes (Proyectos Clave)</h2>
-                <p style="margin-bottom: 25px;">Durante nuestra gestión impulsaremos de manera transversal cinco iniciativas de gran impacto regional:</p>
+                <p style="margin-bottom: 25px;">Durante nuestra gestión impulsaremos de manera transversal cinco
+                    iniciativas de gran impacto regional:</p>
 
                 <div class="proyecto-card">
                     <div class="proyecto-num">1</div>
                     <div class="proyecto-info">
                         <h4>Potenciar el Liderazgo Republicano</h4>
-                        <p>Programa enfocado directamente en el trabajo con dirigentes y futuros candidatos de la zona.</p>
+                        <p>Programa enfocado directamente en el trabajo con dirigentes y futuros candidatos de la zona.
+                        </p>
                     </div>
                 </div>
                 <div class="proyecto-card">
                     <div class="proyecto-num">2</div>
                     <div class="proyecto-info">
                         <h4>Fuerza Republicana en Terreno</h4>
-                        <p>Despliegue y visitas permanentes de la directiva por la totalidad de las comunas que componen la región.</p>
+                        <p>Despliegue y visitas permanentes de la directiva por la totalidad de las comunas que componen
+                            la región.</p>
                     </div>
                 </div>
                 <div class="proyecto-card">
                     <div class="proyecto-num">3</div>
                     <div class="proyecto-info">
                         <h4>Red Regional de Dirigentes</h4>
-                        <p>Un sistema moderno de coordinación robusta entre las estructuras comunales y provinciales de O'Higgins.</p>
+                        <p>Un sistema moderno de coordinación robusta entre las estructuras comunales y provinciales de
+                            O'Higgins.</p>
                     </div>
                 </div>
                 <div class="proyecto-card">
@@ -637,7 +748,8 @@
                     <div class="proyecto-num">5</div>
                     <div class="proyecto-info">
                         <h4>Congreso Regional Republicano</h4>
-                        <p>Encuentro político anual estructurado para evaluar la gestión, definir prioridades críticas y consolidar la unidad interna.</p>
+                        <p>Encuentro político anual estructurado para evaluar la gestión, definir prioridades críticas y
+                            consolidar la unidad interna.</p>
                     </div>
                 </div>
             </section>
@@ -649,25 +761,37 @@
         <img src="assets/img/consejeros.jpeg" alt="" class="img-fluid">
     </div>
 
-    <div class="fr-contact-container" style="max-width: 650px; margin: 40px auto; padding: 30px; background: #ffffff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-top: 5px solid #0A1B3D; font-family: 'Arial', sans-serif;">
-    <h2 style="color: #0A1B3D; font-size: 24px; margin-bottom: 5px; text-transform: uppercase;">Contacto y Sugerencias</h2>
-    <p style="color: #718096; margin-bottom: 25px; font-size: 14px;">Tu opinión es fundamental para construir el futuro de la Región de O'Higgins.</p>
-    
-    <form id="formComentariosAppSheet">
-        <div style="margin-bottom: 20px;">
-            <label style="font-weight: 600; color: #0A1B3D; font-size: 13px; display: block; margin-bottom: 5px;">Nombre Completo *</label>
-            <input type="text" name="Nombre" required placeholder="Ej. Juan Pérez" style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; background: #F4F6F9;">
-        </div>
+    <div class="fr-contact-container"
+        style="max-width: 650px; margin: 40px auto; padding: 30px; background: #ffffff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-top: 5px solid #0A1B3D; font-family: 'Arial', sans-serif;">
+        <h2 style="color: #0A1B3D; font-size: 24px; margin-bottom: 5px; text-transform: uppercase;">Contacto y
+            Sugerencias</h2>
+        <p style="color: #718096; margin-bottom: 25px; font-size: 14px;">Tu opinión es fundamental para construir el
+            futuro de la Región de O'Higgins.</p>
 
-        <div style="display: flex; gap: 15px; margin-bottom: 20px;">
-            <div style="flex: 1;">
-                <label style="font-weight: 600; color: #0A1B3D; font-size: 13px; display: block; margin-bottom: 5px;">RUT (opcional)</label>
-                <input type="text" name="RUT" placeholder="12.345.678-9" style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; background: #F4F6F9;">
+        <form id="formComentariosAppSheet">
+            <div style="margin-bottom: 20px;">
+                <label
+                    style="font-weight: 600; color: #0A1B3D; font-size: 13px; display: block; margin-bottom: 5px;">Nombre
+                    Completo *</label>
+                <input type="text" name="Nombre" required placeholder="Ej. Juan Pérez"
+                    style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; background: #F4F6F9;">
             </div>
-            <div style="flex: 1;">
-                <label style="font-weight: 600; color: #0A1B3D; font-size: 13px; display: block; margin-bottom: 5px;">Comuna *</label>
-                <select name="Comuna" required style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; background: #F4F6F9;">
-                    <option value="" disabled selected>Selecciona tu comuna</option>
+
+            <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                <div style="flex: 1;">
+                    <label
+                        style="font-weight: 600; color: #0A1B3D; font-size: 13px; display: block; margin-bottom: 5px;">RUT
+                        (opcional)</label>
+                    <input type="text" name="RUT" placeholder="12.345.678-9"
+                        style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; background: #F4F6F9;">
+                </div>
+                <div style="flex: 1;">
+                    <label
+                        style="font-weight: 600; color: #0A1B3D; font-size: 13px; display: block; margin-bottom: 5px;">Comuna
+                        *</label>
+                    <select name="Comuna" required
+                        style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; background: #F4F6F9;">
+                        <option value="" disabled selected>Selecciona tu comuna</option>
                         <option value="CODEGUA">CODEGUA</option>
                         <option value="COINCO">COINCO</option>
                         <option value="COLTAUCO">COLTAUCO</option>
@@ -701,77 +825,90 @@
                         <option value="SAN FERNANDO">SAN FERNANDO</option>
                         <option value="SAN VICENTE">SAN VICENTE</option>
                         <option value="SANTA CRUZ">SANTA CRUZ</option>
-                    <!-- Agrega las demás comunas aquí -->
-                </select>
+                        <!-- Agrega las demás comunas aquí -->
+                    </select>
+                </div>
             </div>
-        </div>
 
-        <div style="display: flex; gap: 15px; margin-bottom: 20px;">
-            <div style="flex: 1;">
-                <label style="font-weight: 600; color: #0A1B3D; font-size: 13px; display: block; margin-bottom: 5px;">Correo *</label>
-                <input type="email" name="Email" required placeholder="correo@ejemplo.com" style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; background: #F4F6F9;">
+            <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                <div style="flex: 1;">
+                    <label
+                        style="font-weight: 600; color: #0A1B3D; font-size: 13px; display: block; margin-bottom: 5px;">Correo
+                        *</label>
+                    <input type="email" name="Email" required placeholder="correo@ejemplo.com"
+                        style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; background: #F4F6F9;">
+                </div>
+                <div style="flex: 1;">
+                    <label
+                        style="font-weight: 600; color: #0A1B3D; font-size: 13px; display: block; margin-bottom: 5px;">Teléfono
+                        *</label>
+                    <input type="text" name="Telefono" required placeholder="+56 9 1234 5678"
+                        style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; background: #F4F6F9;">
+                </div>
             </div>
-            <div style="flex: 1;">
-                <label style="font-weight: 600; color: #0A1B3D; font-size: 13px; display: block; margin-bottom: 5px;">Teléfono *</label>
-                <input type="text" name="Telefono" required placeholder="+56 9 1234 5678" style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; background: #F4F6F9;">
-            </div>
-        </div>
 
-        <div style="margin-bottom: 20px;">
-            <label style="font-weight: 600; color: #0A1B3D; font-size: 13px; display: block; margin-bottom: 5px;">Interés *</label>
-            <select name="Interes" required style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; background: #F4F6F9;">
-                <option value="" disabled selected>Selecciona una opción</option>
+            <div style="margin-bottom: 20px;">
+                <label
+                    style="font-weight: 600; color: #0A1B3D; font-size: 13px; display: block; margin-bottom: 5px;">Interés
+                    *</label>
+                <select name="Interes" required
+                    style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; background: #F4F6F9;">
+                    <option value="" disabled selected>Selecciona una opción</option>
                     <option value="Quiero ser Voluntario / Apoderado">Quiero ser Voluntario / Apoderado</option>
                     <option value="Participar en la Juventud">Participar en la Juventud (Eje 4)</option>
                     <option value="Mesas Regionales de Trabajo">Mesas Regionales de Trabajo (Eje 5)</option>
                     <option value="Consultas / Sugerencias Generales">Consultas / Sugerencias Generales</option>
                 </select>
-            </select>
-        </div>
+                </select>
+            </div>
 
-        <div style="margin-bottom: 20px;">
-            <label style="font-weight: 600; color: #0A1B3D; font-size: 13px; display: block; margin-bottom: 5px;">Mensaje *</label>
-            <textarea name="Comentario" rows="4" required style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; background: #F4F6F9;"></textarea>
-        </div>
+            <div style="margin-bottom: 20px;">
+                <label
+                    style="font-weight: 600; color: #0A1B3D; font-size: 13px; display: block; margin-bottom: 5px;">Mensaje
+                    *</label>
+                <textarea name="Comentario" rows="4" required
+                    style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; background: #F4F6F9;"></textarea>
+            </div>
 
-        <button type="submit" style="width: 100%; padding: 12px; background: #0A1B3D; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Enviar</button>
-    </form>
-    <div id="formResponse" style="display:none; margin-top:15px; font-weight:bold; text-align:center;"></div>
-</div>
+            <button type="submit"
+                style="width: 100%; padding: 12px; background: #0A1B3D; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Enviar</button>
+        </form>
+        <div id="formResponse" style="display:none; margin-top:15px; font-weight:bold; text-align:center;"></div>
+    </div>
 
-<script>
-    // PEGA AQUÍ LA URL DE TU WEB APP DE GOOGLE APPS SCRIPT
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbwLfACVlgc9we66psv4VCoRTqg0UmIQfqI8fvkhh6GpAHibktHjf4PGqBw6zvz73Cqq/exec';
-    
-    const form = document.getElementById('formComentariosAppSheet');
-    const responseDiv = document.getElementById('formResponse');
+    <script>
+        // PEGA AQUÍ LA URL DE TU WEB APP DE GOOGLE APPS SCRIPT
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwLfACVlgc9we66psv4VCoRTqg0UmIQfqI8fvkhh6GpAHibktHjf4PGqBw6zvz73Cqq/exec';
 
-    form.addEventListener('submit', e => {
-        e.preventDefault();
-        responseDiv.style.display = 'block';
-        responseDiv.style.color = '#0A1B3D';
-        responseDiv.textContent = 'Procesando envío...';
+        const form = document.getElementById('formComentariosAppSheet');
+        const responseDiv = document.getElementById('formResponse');
 
-        // Convertir datos para evitar bloqueos CORS
-        const formParams = new URLSearchParams(new FormData(form));
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            responseDiv.style.display = 'block';
+            responseDiv.style.color = '#0A1B3D';
+            responseDiv.textContent = 'Procesando envío...';
 
-        fetch(scriptURL, { 
-            method: 'POST',
-            mode: 'no-cors', // Fundamental para que el navegador no bloquee la petición
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: formParams.toString() 
-        })
-        .then(() => {
-             responseDiv.style.color = 'green';
-             responseDiv.textContent = '¡Registro ingresado correctamente!';
-             form.reset();
-        })
-        .catch(error => {
-             responseDiv.style.color = '#D92332';
-             responseDiv.textContent = 'Error de conexión.';
+            // Convertir datos para evitar bloqueos CORS
+            const formParams = new URLSearchParams(new FormData(form));
+
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors', // Fundamental para que el navegador no bloquee la petición
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formParams.toString()
+            })
+                .then(() => {
+                    responseDiv.style.color = 'green';
+                    responseDiv.textContent = '¡Registro ingresado correctamente!';
+                    form.reset();
+                })
+                .catch(error => {
+                    responseDiv.style.color = '#D92332';
+                    responseDiv.textContent = 'Error de conexión.';
+                });
         });
-    });
-</script>
+    </script>
     <footer>
         <div class="footer-content">
             <div class="footer-col">
@@ -798,7 +935,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            ¡Con experiencia para liderar, visión para avanzar. Con Fuerza Republicana! 
+            ¡Con experiencia para liderar, visión para avanzar. Con Fuerza Republicana!
         </div>
     </footer>
 
@@ -815,7 +952,7 @@
                     if (entry.isIntersecting) {
                         document.querySelectorAll('nav ul li a').forEach(a => a.classList.remove('active'));
                         const activeLink = document.querySelector(`nav ul li a[href="#${id}"]`);
-                        if(activeLink) activeLink.classList.add('active');
+                        if (activeLink) activeLink.classList.add('active');
                     }
                 });
             }, { threshold: 0.2, rootMargin: "0px 0px -50% 0px" });
@@ -823,7 +960,7 @@
             document.querySelectorAll('section').forEach(section => observer.observe(section));
         });
 
-       
+
 
         // Envío blindado del Formulario (Modo No-CORS)
         form.addEventListener('submit', e => {
@@ -840,24 +977,25 @@
 
             // En este modo, el navegador garantiza el envío silenciando el bloqueo. 
             // Confiamos en el éxito del .then()
-            fetch(scriptURL, { 
+            fetch(scriptURL, {
                 method: 'POST',
-                mode: 'no-cors', 
+                mode: 'no-cors',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: formParams.toString() 
+                body: formParams.toString()
             })
-            .then(() => {
-                 responseDiv.style.color = 'green';
-                 responseDiv.textContent = '¡Gracias! Tu comentario ha sido recibido con éxito y derivado a AppSheet.';
-                 form.reset();
-                 setTimeout(actualizarMetricasVisibles, 1500);
-            })
-            .catch(error => {
-                 responseDiv.style.color = '#D92332';
-                 responseDiv.textContent = 'Hubo un error de conexión con la red, por favor inténtalo nuevamente.';
-                 console.error('Network Error!', error.message);
-            });
+                .then(() => {
+                    responseDiv.style.color = 'green';
+                    responseDiv.textContent = '¡Gracias! Tu comentario ha sido recibido con éxito y derivado a AppSheet.';
+                    form.reset();
+                    setTimeout(actualizarMetricasVisibles, 1500);
+                })
+                .catch(error => {
+                    responseDiv.style.color = '#D92332';
+                    responseDiv.textContent = 'Hubo un error de conexión con la red, por favor inténtalo nuevamente.';
+                    console.error('Network Error!', error.message);
+                });
         });
     </script>
 </body>
+
 </html>
