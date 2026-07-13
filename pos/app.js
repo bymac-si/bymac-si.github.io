@@ -784,3 +784,148 @@ async function saveProductForm() {
     } else { alert("Error: " + result.message); }
   } catch (e) { alert("Error de conexión"); } finally { btn.innerText = oldText; btn.disabled = false; }
 }
+// ==========================================
+// SECCIÓN VENTAS DEL DÍA (ANULAR / EDITAR)
+// ==========================================
+
+let todaySalesList = [];
+
+// 1. Abrir Modal y cargar datos
+async function openSalesModal() {
+  if (!currentUser) return checkLogin();
+  calcularTurno();
+
+  const modal = new bootstrap.Modal(document.getElementById("salesModal"));
+  modal.show();
+  document.getElementById("sales-list-body").innerHTML = `<tr><td colspan="6" class="text-center p-3"><div class="spinner-border text-primary"></div><p class="mt-2 mb-0">Cargando ventas...</p></td></tr>`;
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "get_today_sales", fecha: currentTurnData.fechaComercial, turno: currentTurnData.idTurno }),
+    });
+    const result = await response.json();
+    if (result.status === "success") {
+      todaySalesList = result.data;
+      renderSalesTable();
+    } else {
+      document.getElementById("sales-list-body").innerHTML = `<tr><td colspan="6" class="text-center text-danger">${result.message}</td></tr>`;
+    }
+  } catch (e) {
+    document.getElementById("sales-list-body").innerHTML = `<tr><td colspan="6" class="text-center text-danger">Error de conexión</td></tr>`;
+  }
+}
+
+function renderSalesTable() {
+  const tbody = document.getElementById("sales-list-body");
+  if (todaySalesList.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted p-4">No hay ventas registradas en este turno.</td></tr>`;
+    return;
+  }
+
+  let html = "";
+  // Invertir para mostrar las más recientes arriba
+  [...todaySalesList].reverse().forEach(sale => {
+    const horaStr = sale.FechaHora.split(" ")[1] || sale.FechaHora;
+    const isAnulado = sale.Estado.toUpperCase() === "ANULADO";
+    const badgeStatus = isAnulado ? '<span class="badge bg-danger">Anulado</span>' : '<span class="badge bg-success">Pagado</span>';
+    
+    // Solo mostrar botones si NO está anulado
+    let actions = "";
+    if (!isAnulado) {
+      actions = `
+        <button class="btn btn-sm btn-outline-warning me-1" onclick="editSale('${sale.ID_Pedido}')" title="Editar Venta">✏️</button>
+        <button class="btn btn-sm btn-outline-danger" onclick="cancelSale('${sale.ID_Pedido}')" title="Anular Venta">🚫</button>
+      `;
+    }
+
+    html += `
+      <tr class="${isAnulado ? 'table-secondary text-muted' : ''}">
+        <td>${horaStr}</td>
+        <td class="fw-bold">#${sale.Numero_Turno}</td>
+        <td>${sale.Medio_Pago.split('|')[0]}</td>
+        <td class="fw-bold">${formatter.format(sale.Total_Bruto)}</td>
+        <td>${badgeStatus}</td>
+        <td>${actions}</td>
+      </tr>
+    `;
+  });
+  tbody.innerHTML = html;
+}
+
+// 2. Anular una Venta
+async function cancelSale(idPedido) {
+  if (!confirm("⚠️ ¿Estás seguro de ANULAR este pedido? Esta acción no se puede deshacer y el dinero se restará del reporte Z.")) return;
+
+  try {
+    document.getElementById("sales-list-body").innerHTML = `<tr><td colspan="6" class="text-center p-3"><div class="spinner-border text-danger"></div><p class="mt-2 mb-0">Anulando...</p></td></tr>`;
+    const response = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "cancel_order", id_pedido: idPedido }),
+    });
+    const result = await response.json();
+    if (result.status === "success") {
+      alert("✅ Pedido Anulado");
+      openSalesModal(); // Recargar tabla
+    } else {
+      alert("Error: " + result.message);
+      openSalesModal();
+    }
+  } catch (e) {
+    alert("Error de conexión al anular.");
+    openSalesModal();
+  }
+}
+
+// 3. Editar una Venta
+async function editSale(idPedido) {
+  if (!confirm("✏️ Para editar esta venta, primero se anulará la original y los productos volverán a tu carrito. ¿Deseas continuar?")) return;
+
+  const saleToEdit = todaySalesList.find(s => s.ID_Pedido === idPedido);
+  if (!saleToEdit || !saleToEdit.detalles) return alert("Error leyendo los detalles de la venta.");
+
+  // Paso 1: Anular en BD
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "cancel_order", id_pedido: idPedido }),
+    });
+    const result = await response.json();
+    if (result.status !== "success") return alert("No se pudo anular el pedido original.");
+  } catch (e) {
+    return alert("Error de conexión al anular.");
+  }
+
+  // Paso 2: Cargar al carrito
+  cart = []; // Limpiamos carrito actual
+  
+  // Reconstruimos el cart leyendo los detalles de la venta anulada
+  saleToEdit.detalles.forEach(d => {
+    // Intentar deducir si es LLEVAR o SERVIR de los comentarios (si existe)
+    let servicio = "SERVIR";
+    let commentClean = d.Comentarios || "";
+    if (commentClean.includes("[LLEVAR]")) {
+        servicio = "LLEVAR";
+        commentClean = commentClean.replace("[LLEVAR]", "").trim();
+    } else if (commentClean.includes("[SERVIR]")) {
+        commentClean = commentClean.replace("[SERVIR]", "").trim();
+    }
+
+    cart.push({
+      uuid: Date.now() + Math.random(),
+      id: d.ID_Producto,
+      nombre: d.Nombre_Producto,
+      precio: parseInt(d.Precio_Unitario) || 0,
+      cantidad: parseInt(d.Cantidad) || 1,
+      cocina: true, // Asumimos true por defecto, el usuario puede revisar
+      comentario: commentClean,
+      manualNote: "",
+      selectedModifiers: [],
+      tipoServicio: servicio
+    });
+  });
+
+  updateCartUI();
+  bootstrap.Modal.getInstance(document.getElementById("salesModal")).hide();
+  alert("✅ Venta original anulada. Los productos están en tu carrito listos para ser editados y cobrados nuevamente.");
+}
