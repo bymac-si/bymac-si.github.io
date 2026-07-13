@@ -1,9 +1,6 @@
 /**
- * printer.js - VERSIÓN FINAL CON HORA DE CIERRE
+ * printer.js - VERSIÓN FINAL CON HORA DE CIERRE Y CORTES DE PÁGINA
  */
-
-// ... (getPrintableArea, connectPrinter, imprimirYLimpiar, footerHtml, printOpeningTicket, printTicket SE MANTIENEN IGUAL) ...
-// PEGA AQUI LO ANTERIOR O USA ESTE BLOQUE COMPLETO:
 
 function getPrintableArea() {
   let area = document.getElementById("printable-area");
@@ -32,12 +29,13 @@ function imprimirYLimpiar(area) {
 }
 
 const footerHtml = `
-    <div class="text-center" style="font-size: 0.6rem; margin-top: 15px; margin-bottom: 5px; color: #444;">
+    <div class="text-center" style="font-size: 0.8rem; margin-top: 15px; margin-bottom: 5px; color: #999;">
         Desarrollado por Asesorías Profesionales<br>
         Marcos Alberto Castro Abarca E.I.R.L
     </div>
 `;
 
+// === 1. TICKET DE APERTURA ===
 window.printOpeningTicket = async function (amount, cashier, turno) {
   const area = getPrintableArea();
   const fecha = new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" });
@@ -55,11 +53,13 @@ window.printOpeningTicket = async function (amount, cashier, turno) {
         <div class="text-center">Firma Cajero</div>
         <br>
         ${footerHtml}
-        <br>.
+        <div class="text-center">.</div>
+        <div class="force-break"></div>
     `;
   imprimirYLimpiar(area);
 };
 
+// === 2. TICKET DE VENTA (COCINA Y CLIENTE) ===
 window.printTicket = async function (cart, total, method, orderNum, cashInfo = null) {
   const ticketArea = getPrintableArea();
   const fechaHora = new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" });
@@ -68,6 +68,7 @@ window.printTicket = async function (cart, total, method, orderNum, cashInfo = n
   let displayMethod = method;
   if (method.includes("MIXTO")) displayMethod = "Mixto";
 
+  // --- TICKET COCINA ---
   const itemsCocina = cart.filter((i) => i.cocina);
   let htmlCocina = "";
   if (itemsCocina.length > 0) {
@@ -83,9 +84,11 @@ window.printTicket = async function (cart, total, method, orderNum, cashInfo = n
             <div class="text-center" style="font-size:1.1rem;font-weight: bold;">${soloHora}</div>
             <div class="ticket-divider"></div>
             <div class="fs-big text-uppercase" style="text-align:left; margin-bottom: 10px; font-size: 1.8rem;">${listadoCocina}</div>
-            <div class="text-center">.</div><div class="force-break"></div>`;
+            <div class="text-center">.</div>
+            <div class="force-break"></div>`; // SALTO DE PÁGINA PARA CORTAR LA COCINA
   }
 
+  // --- TICKET CLIENTE ---
   let listadoCliente = "";
   cart.forEach((item) => {
     const totalItem = (item.precio * item.cantidad).toLocaleString("es-CL");
@@ -124,8 +127,10 @@ window.printTicket = async function (cart, total, method, orderNum, cashInfo = n
         <div style="font-size: 1.2rem;">Pago: ${displayMethod}</div>
         <div class="text-center" style="margin-top:15px; font-size:1.1rem;">¡Gracias por su preferencia!</div>
         ${footerHtml}
-        <div style="text-align:center; margin-top:10px;">.</div>`;
+        <div style="text-align:center; margin-top:10px;">.</div>
+        <div class="force-break"></div>`; // SALTO DE PÁGINA PARA CORTAR TICKET CLIENTE
 
+  // Unimos ambos tickets. La impresora imprimirá Cocina, cortará el papel, e imprimirá Cliente.
   ticketArea.innerHTML = htmlCocina + htmlCliente;
   imprimirYLimpiar(ticketArea);
 };
@@ -211,7 +216,8 @@ window.printDailyReport = async function (data) {
         <br>
         
         ${footerHtml}
-        <br><br>.`;
+        <br><br>.
+        <div class="force-break"></div>`; // SALTO DE PÁGINA PARA CORTAR REPORTE Z
 
   imprimirYLimpiar(ticketArea);
 };
