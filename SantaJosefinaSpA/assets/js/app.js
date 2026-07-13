@@ -32,8 +32,8 @@ function mostrarAvisoOffline(estamosOffline) {
 // ==========================================
 // 1. CONFIGURACIÓN APPSHEET
 // ==========================================
-const APP_ID = "247b67e5-5b42-49a5-92a1-16c4357f5c7e";
-const API_KEY = "V2-bKT1n-onhYX-SHl8K-zPPx8-6QwfJ-pp9Pi-UIrcy-gcLGM"; 
+const APP_ID = "d45b4c7d-3f42-4027-b174-2cd013a6d071";
+const API_KEY = "V2-f2GuM-DImV3-kaoEX-ws7hB-M9o67-W0hee-JaOSD-oZZeA"; 
 
 // ==========================================
 // 2. CORE: CONEXIÓN DE DATOS (CRUD)
