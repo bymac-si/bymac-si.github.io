@@ -949,6 +949,7 @@
           display: block;
           page-break-before: always;
           break-before: page;
+>>>>>>> 26362fa964ba7f573f6ff4d67af24784b2fce4a1
           height: 0;
           margin: 0;
           border: none;
@@ -1037,6 +1038,14 @@
                   title="Sincronizar"
                 >
                   🔄
+                </button>
+                <!-- NUEVO BOTÓN: VENTAS DEL DÍA -->
+                <button
+                  class="btn btn-info shadow-sm text-white"
+                  onclick="openSalesModal()"
+                  title="Ventas del Día (Editar/Anular)"
+                >
+                  🧾 Ventas
                 </button>
                 <button
                   class="btn btn-dark shadow-sm"
@@ -1391,6 +1400,42 @@
       </div>
     </div>
 
+    <!-- MODAL VENTAS DEL DÍA (NUEVO) -->
+    <div class="modal fade" id="salesModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-light">
+          <div class="modal-header bg-info text-white">
+            <h5 class="modal-title">🧾 Ventas del Día</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="table-responsive bg-white shadow-sm rounded">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                  <tr>
+                    <th>Hora</th>
+                    <th>Nº Pedido</th>
+                    <th>Pago</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="sales-list-body">
+                  <tr>
+                    <td colspan="6" class="text-center p-3">
+                      <div class="spinner-border text-primary"></div>
+                      <p class="mt-2 mb-0">Cargando ventas...</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="modal fade" id="reportModal" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -1424,6 +1469,7 @@
         </div>
       </div>
     </div>
+    
     <div class="modal fade" id="adminModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-fullscreen">
         <div class="modal-content bg-light">
