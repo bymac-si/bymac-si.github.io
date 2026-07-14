@@ -1,5 +1,5 @@
 /**
- * printer.js - VERSIÓN FINAL CON HORA DE CIERRE Y CORTES DE PÁGINA
+ * printer.js - VERSIÓN CORREGIDA Y SEGURA
  */
 
 function getPrintableArea() {
@@ -17,15 +17,24 @@ function connectPrinter() {
   alert("✅ Impresión Nativa Activada.");
 }
 
+// NUEVO: Limpieza segura usando eventos nativos del navegador
+window.addEventListener("afterprint", () => {
+  const area = document.getElementById("printable-area");
+  if (area) {
+    area.style.display = "none";
+    area.innerHTML = "";
+    document.body.classList.remove("is-printing"); // Removemos clase de impresión
+  }
+});
+
 function imprimirYLimpiar(area) {
   area.style.display = "block";
+  document.body.classList.add("is-printing"); // Añadimos clase para ocultar el resto de la app
+  
+  // Damos 250ms para que el DOM renderice las imágenes/fuentes antes de abrir el diálogo
   setTimeout(() => {
     window.print();
-    setTimeout(() => {
-      area.style.display = "none";
-      area.innerHTML = "";
-    }, 100);
-  }, 50);
+  }, 250);
 }
 
 const footerHtml = `
@@ -47,7 +56,7 @@ window.printOpeningTicket = async function (amount, cashier, turno) {
         <div class="text-center">Turno: ${turno}</div>
         <div class="text-center">Cajero: ${cashier}</div>
         <br>
-        <div class="text-center fs-huge">FONDO: $${amount.toLocaleString("es-CL")}</div>
+        <div class="text-center fs-huge">FONDO: $${Number(amount).toLocaleString("es-CL")}</div>
         <br><br>
         <div class="ticket-divider"></div>
         <div class="text-center">Firma Cajero</div>
@@ -65,8 +74,9 @@ window.printTicket = async function (cart, total, method, orderNum, cashInfo = n
   const fechaHora = new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" });
   const soloHora = fechaHora.split(" ")[1] || fechaHora;
   const nombreCajero = typeof currentUser !== "undefined" && currentUser ? currentUser.Nombre : "Cajero";
+  
   let displayMethod = method;
-  if (method.includes("MIXTO")) displayMethod = "Mixto";
+  if (method && method.includes("MIXTO")) displayMethod = "Mixto";
 
   // --- TICKET COCINA ---
   const itemsCocina = cart.filter((i) => i.cocina);
@@ -85,7 +95,7 @@ window.printTicket = async function (cart, total, method, orderNum, cashInfo = n
             <div class="ticket-divider"></div>
             <div class="fs-big text-uppercase" style="text-align:left; margin-bottom: 10px; font-size: 1.8rem;">${listadoCocina}</div>
             <div class="text-center">.</div>
-            <div class="force-break"></div>`; // SALTO DE PÁGINA PARA CORTAR LA COCINA
+            <div class="force-break"></div>`; 
   }
 
   // --- TICKET CLIENTE ---
@@ -106,11 +116,11 @@ window.printTicket = async function (cart, total, method, orderNum, cashInfo = n
       cashHtml = `
         <div class="d-flex-between" style="font-size:1.1rem;">
             <span>Efectivo:</span>
-            <span>$${cashInfo.recibido.toLocaleString("es-CL")}</span>
+            <span>$${Number(cashInfo.recibido).toLocaleString("es-CL")}</span>
         </div>
         <div class="d-flex-between fw-bold" style="font-size:1.3rem;">
             <span>Vuelto:</span>
-            <span>$${cashInfo.vuelto.toLocaleString("es-CL")}</span>
+            <span>$${Number(cashInfo.vuelto).toLocaleString("es-CL")}</span>
         </div>
       `;
   }
@@ -120,7 +130,7 @@ window.printTicket = async function (cart, total, method, orderNum, cashInfo = n
         <div class="text-center ticket-divider"><span class="fs-huge">PEDIDO: #${orderNum}</span></div>
         <div class="text-center text-uppercase" style="font-size:1.1rem; margin-bottom:5px;">${fechaHora}<br>ATENDIDO POR: ${nombreCajero}</div>
         <div class="ticket-divider text-uppercase" style="font-size: 1rem;">${listadoCliente}</div>
-        <div class="d-flex-between fs-big" style="margin-top:5px;"><span>TOTAL:</span><span>$${total.toLocaleString("es-CL")}</span></div>
+        <div class="d-flex-between fs-big" style="margin-top:5px;"><span>TOTAL:</span><span>$${Number(total).toLocaleString("es-CL")}</span></div>
         
         ${cashHtml}
 
@@ -128,9 +138,8 @@ window.printTicket = async function (cart, total, method, orderNum, cashInfo = n
         <div class="text-center" style="margin-top:15px; font-size:1.1rem;">¡Gracias por su preferencia!</div>
         ${footerHtml}
         <div style="text-align:center; margin-top:10px;">.</div>
-        <div class="force-break"></div>`; // SALTO DE PÁGINA PARA CORTAR TICKET CLIENTE
+        <div class="force-break"></div>`; 
 
-  // Unimos ambos tickets. La impresora imprimirá Cocina, cortará el papel, e imprimirá Cliente.
   ticketArea.innerHTML = htmlCocina + htmlCliente;
   imprimirYLimpiar(ticketArea);
 };
@@ -145,20 +154,27 @@ window.printDailyReport = async function (data) {
     fechaFormateada = `${dia}/${mes}/${anio}`;
   }
 
-  // HORA DE EMISIÓN
   const horaCierre = data.hora || "--:--";
 
+  // CORRECCIÓN: Acceso seguro a los turnos para evitar crasheos si un turno no existe
+  const t1 = data.turnos && data.turnos[1] ? data.turnos[1] : { efectivo: 0, tarjeta: 0, transferencia: 0 };
+  const t2 = data.turnos && data.turnos[2] ? data.turnos[2] : { efectivo: 0, tarjeta: 0, transferencia: 0 };
+
   const totalApertura = parseInt(data.fondo_inicial) || 0;
-  const totalEfectivo = (data.turnos[1].efectivo || 0) + (data.turnos[2].efectivo || 0);
-  const totalTarjeta = (data.turnos[1].tarjeta || 0) + (data.turnos[2].tarjeta || 0);
-  const totalTransf = (data.turnos[1].transferencia || 0) + (data.turnos[2].transferencia || 0);
+  const totalEfectivo = (t1.efectivo || 0) + (t2.efectivo || 0);
+  const totalTarjeta = (t1.tarjeta || 0) + (t2.tarjeta || 0);
+  const totalTransf = (t1.transferencia || 0) + (t2.transferencia || 0);
   const totalVentaDia = totalEfectivo + totalTarjeta + totalTransf;
   const totalEnCaja = totalApertura + totalEfectivo;
 
   let prodHtml = "";
-  const ranking = Object.entries(data.productos).sort((a, b) => b[1] - a[1]);
-  if (ranking.length === 0) prodHtml = "<div>Sin ventas.</div>";
-  else ranking.forEach(([nom, cant]) => (prodHtml += `<div style="display:flex; justify-content:space-between;"><span style="flex:1;">${cant} x ${nom}</span></div>`));
+  const productos = data.productos || {};
+  const ranking = Object.entries(productos).sort((a, b) => b[1] - a[1]);
+  if (ranking.length === 0) {
+      prodHtml = "<div>Sin ventas.</div>";
+  } else {
+      ranking.forEach(([nom, cant]) => (prodHtml += `<div style="display:flex; justify-content:space-between;"><span style="flex:1;">${cant} x ${nom}</span></div>`));
+  }
 
   ticketArea.innerHTML = `
         <div class="ticket-header fs-big">REPORTE Z (DIARIO)<br><b>El Carro del 8</b></div>
@@ -212,12 +228,12 @@ window.printDailyReport = async function (data) {
         <div style="font-size:1.1em">${prodHtml}</div>
         <br>
         <div class="ticket-divider"></div>
-        <div class="text-center fs-big">UNIDADES: <strong>${data.total_unidades}</strong></div>
+        <div class="text-center fs-big">UNIDADES: <strong>${data.total_unidades || 0}</strong></div>
         <br>
         
         ${footerHtml}
         <br><br>.
-        <div class="force-break"></div>`; // SALTO DE PÁGINA PARA CORTAR REPORTE Z
+        <div class="force-break"></div>`; 
 
   imprimirYLimpiar(ticketArea);
 };
