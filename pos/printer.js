@@ -85,7 +85,7 @@ window.printTicket = async function (cart, total, method, orderNum, cashInfo = n
     let listadoCocina = "";
     itemsCocina.forEach((item) => {
       const srvTag = item.tipoServicio === "LLEVAR" ? "LLEVAR" : "SERVIR";
-      const nota = item.comentario ? `<div style="font-size:0.8em; font-weight:normal;">( ${item.comentario} )</div>` : "";
+      const nota = item.comentario ? `<div style="font-size:0.8em; font-weight:bold;">( ${item.comentario} )</div>` : "";
       listadoCocina += `<div>${item.cantidad} x ${item.nombre} <b>${srvTag}</b> ${nota}</div>`;
     });
     htmlCocina = `
@@ -103,11 +103,11 @@ window.printTicket = async function (cart, total, method, orderNum, cashInfo = n
   cart.forEach((item) => {
     const totalItem = (item.precio * item.cantidad).toLocaleString("es-CL");
     const srvTag = item.tipoServicio === "LLEVAR" ? "(LLEVAR)" : "(SERVIR)";
-    const nota = item.comentario ? `<div style="font-size:0.8em; font-style:italic;">* ${item.comentario}</div>` : "";
+    const nota = item.comentario ? `<div style="font-size:0.8em; font-weight:bold;">* ${item.comentario}</div>` : "";
     listadoCliente += `
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 2px; font-size:1.2rem;">
-                <span style="flex:1; padding-right:5px; text-align:left;">${item.cantidad} x ${item.nombre} ${srvTag} ${nota}</span>
-                <span style="white-space:nowrap;">$${totalItem}</span>
+                <span style="flex:1; padding-right:5px; text-align:left; font-weight:bold;">${item.cantidad} x ${item.nombre} ${srvTag} ${nota}</span>
+                <span style="white-space:nowrap; font-weight:bold;">$${totalItem}</span>
             </div>`;
   });
 
@@ -116,11 +116,11 @@ window.printTicket = async function (cart, total, method, orderNum, cashInfo = n
       cashHtml = `
         <div class="d-flex-between" style="font-size:1.1rem;">
             <span>Efectivo:</span>
-            <span>$${Number(cashInfo.recibido).toLocaleString("es-CL")}</span>
+            <span style=" font-weight:bold;">$${Number(cashInfo.recibido).toLocaleString("es-CL")}</span>
         </div>
         <div class="d-flex-between fw-bold" style="font-size:1.3rem;">
             <span>Vuelto:</span>
-            <span>$${Number(cashInfo.vuelto).toLocaleString("es-CL")}</span>
+            <span style=" font-weight:bold;">$${Number(cashInfo.vuelto).toLocaleString("es-CL")}</span>
         </div>
       `;
   }
