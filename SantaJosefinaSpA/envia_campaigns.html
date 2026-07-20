@@ -52,10 +52,43 @@
       opacity: 0.5;
       cursor: not-allowed;
     }
+    .btn-secundario {
+      background: #e5e7eb;
+      color: #1a2b48;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+    }
     .text-center { text-align: center; }
     #statusMsg { font-size: 14px; margin-top: 10px; color: #64748b; }
     .barra-container { height: 10px; background: #eee; border-radius: 5px; overflow: hidden; margin-top: 20px; }
     #barraProgreso { height: 100%; background: #2563eb; width: 0%; transition: width 0.3s; }
+    
+    /* Estilos del Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      width: 90%;
+      max-width: 600px;
+      position: relative;
+    }
+    .cerrar-modal {
+      position: absolute;
+      top: 15px; right: 20px;
+      font-size: 24px;
+      cursor: pointer;
+      color: #64748b;
+    }
   </style>
 </head>
 
@@ -70,7 +103,12 @@
   </div>
 
   <div class="card">
-    <label>1. Seleccionar Campaña</label>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <label>1. Seleccionar Campaña</label>
+      <button class="btn-secundario" onclick="abrirModalNuevaCampaña()">
+        <i class="fa-solid fa-plus"></i> Nueva Campaña
+      </button>
+    </div>
     <select id="campaignSelect" onchange="loadPreview()" style="width:100%;padding:12px;margin-top:10px;border-radius:8px;border:1px solid #ddd;">
       <option>Cargando campañas...</option>
     </select>
@@ -101,6 +139,29 @@
 </main>
 
 <div id="footer"></div>
+
+<!-- Modal Nueva Campaña -->
+<div id="modalNuevaCampana" class="modal-overlay">
+  <div class="card modal-content">
+    <span class="cerrar-modal" onclick="cerrarModalNuevaCampaña()">&times;</span>
+    <h2 style="margin-top: 0; color: #0f172a;"><i class="fa-solid fa-pen-to-square"></i> Crear Nueva Campaña</h2>
+    
+    <div style="margin-top: 20px;">
+      <label style="font-weight: 600;">Asunto de la Campaña:</label>
+      <input type="text" id="nuevoAsunto" placeholder="Ej: Administrar su edificio puede ser más simple..." style="width:100%; padding:12px; margin-top:8px; border-radius:8px; border:1px solid #ddd; box-sizing: border-box;">
+    </div>
+    
+    <div style="margin-top: 20px;">
+      <label style="font-weight: 600;">Cuerpo HTML:</label>
+      <textarea id="nuevoHTML" placeholder="Pegue aquí el código HTML de su campaña..." style="width:100%; height:200px; padding:12px; margin-top:8px; border-radius:8px; border:1px solid #ddd; box-sizing: border-box; resize: vertical; font-family: monospace;"></textarea>
+    </div>
+
+    <div style="margin-top: 20px; text-align: center;">
+      <button id="btnGuardarCampaña" class="btn-nuevo" onclick="guardarNuevaCampaña()">Guardar en Base de Datos</button>
+      <div id="msgGuardar" style="margin-top: 10px; font-size: 14px; font-weight: bold;"></div>
+    </div>
+  </div>
+</div>
 
 <script>
 // URL unificada con analitica.html (Versión actual de tu script)
@@ -140,6 +201,7 @@ async function cargarBaseDeDatos() {
     const sel = document.getElementById("campaignSelect");
     sel.innerHTML = `<option disabled selected>-- Seleccione una campaña --</option>`;
     
+    // Invertir el array para que las campañas más nuevas salgan primero si se desea, o dejar tal cual
     campaignsData.forEach(c => {
       sel.innerHTML += `<option value="${c.ID_Campaña}">${c.ID_Campaña} - ${c.Asunto}</option>`;
     });
@@ -242,6 +304,72 @@ function actualizarUI(mensaje, porcentaje) {
   const barraProgreso = document.getElementById("barraProgreso");
   if(statusMsg) statusMsg.innerText = mensaje;
   if(barraProgreso) barraProgreso.style.width = porcentaje + "%";
+}
+
+/* ===== LÓGICA DE NUEVA CAMPAÑA ===== */
+function abrirModalNuevaCampaña() {
+  document.getElementById("modalNuevaCampana").style.display = "flex";
+}
+
+function cerrarModalNuevaCampaña() {
+  document.getElementById("modalNuevaCampana").style.display = "none";
+  document.getElementById("nuevoAsunto").value = "";
+  document.getElementById("nuevoHTML").value = "";
+  document.getElementById("msgGuardar").innerText = "";
+  document.getElementById("btnGuardarCampaña").disabled = false;
+}
+
+async function guardarNuevaCampaña() {
+  const asunto = document.getElementById("nuevoAsunto").value.trim();
+  const html = document.getElementById("nuevoHTML").value.trim();
+  const msgDiv = document.getElementById("msgGuardar");
+  const btnGuardar = document.getElementById("btnGuardarCampaña");
+
+  if (!asunto || !html) {
+    msgDiv.style.color = "red";
+    msgDiv.innerText = "Por favor, complete el Asunto y el HTML.";
+    return;
+  }
+
+  // Generar ID único basado en fecha y hora (Ej: CAMP-1718900000000)
+  const idUnico = "CAMP-" + Date.now();
+
+  btnGuardar.disabled = true;
+  msgDiv.style.color = "#2563eb";
+  msgDiv.innerText = "Guardando campaña en la base de datos...";
+
+  try {
+    if (typeof appSheetCRUD === "function") {
+      await appSheetCRUD("Campañas", "Add", [{
+        ID_Campaña: idUnico,
+        Asunto: asunto,
+        Cuerpo_HTML: html
+      }]);
+      
+      msgDiv.style.color = "green";
+      msgDiv.innerText = "¡Campaña creada con éxito!";
+      
+      // Recargar los datos del select
+      await cargarBaseDeDatos();
+      
+      // Seleccionar automáticamente la nueva campaña
+      document.getElementById("campaignSelect").value = idUnico;
+      loadPreview();
+
+      // Cerrar modal tras un breve retraso
+      setTimeout(() => {
+        cerrarModalNuevaCampaña();
+      }, 1500);
+
+    } else {
+      throw new Error("appSheetCRUD no está definido. Asegúrese de que app.js esté cargado correctamente.");
+    }
+  } catch (error) {
+    console.error("Error al guardar campaña:", error);
+    msgDiv.style.color = "red";
+    msgDiv.innerText = "Error al intentar guardar la campaña. Revise la consola.";
+    btnGuardar.disabled = false;
+  }
 }
 </script>
 
