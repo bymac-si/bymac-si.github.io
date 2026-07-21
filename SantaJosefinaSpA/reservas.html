@@ -645,35 +645,37 @@
       }
 
       async function enviarCorreosSolicitud(datos) {
-        if (typeof emailjs === "undefined")
-          return console.warn("EmailJS no cargado");
+  if (typeof emailjs === "undefined")
+    return console.warn("EmailJS no cargado");
 
-        // A. Correo Residente
-        if (datos.residente_email) {
-          const htmlResidente = generarHTMLResidente(datos);
-          emailjs
-            .send("service_p9hqkqn", "template_80q9psi", {
-              to_email: datos.residente_email,
-              subject: "Solicitud Recibida: " + datos.espacio,
-              html_body: htmlResidente,
-            })
-            .catch((err) => console.error("Fallo mail residente", err));
-        }
+  // A. Correo Residente (AHORA CON AWAIT)
+  if (datos.residente_email) {
+    const htmlResidente = generarHTMLResidente(datos);
+    try {
+      await emailjs.send("service_p9hqkqn", "template_80q9psi", {
+        to_email: datos.residente_email,
+        subject: "Solicitud Recibida: " + datos.espacio,
+        html_body: htmlResidente,
+      });
+    } catch (err) {
+      console.error("Fallo mail residente", err);
+    }
+  }
 
-        // B. Correo Admin
-        if (datos.admin_email) {
-          const htmlAdmin = generarHTMLAdmin(datos);
-          try {
-            await emailjs.send("service_p9hqkqn", "template_80q9psi", {
-              to_email: datos.admin_email,
-              subject: "NUEVA RESERVA: " + datos.espacio + " - " + datos.unidad,
-              html_body: htmlAdmin,
-            });
-          } catch (err) {
-            console.error("Fallo mail admin", err);
-          }
-        }
-      }
+  // B. Correo Admin
+  if (datos.admin_email) {
+    const htmlAdmin = generarHTMLAdmin(datos);
+    try {
+      await emailjs.send("service_p9hqkqn", "template_80q9psi", {
+        to_email: datos.admin_email,
+        subject: "NUEVA RESERVA: " + datos.espacio + " - " + datos.unidad,
+        html_body: htmlAdmin,
+      });
+    } catch (err) {
+      console.error("Fallo mail admin", err);
+    }
+  }
+}
 
       // Plantillas HTML para correos
       function generarHTMLResidente(d) {
