@@ -10,6 +10,12 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script>
+        (function(){
+            if(typeof emailjs !== 'undefined') emailjs.init("7Il4AhmGHchP7qfxu"); 
+        })();
+    </script>
     <script src="assets/js/app.js"></script>
 
     <style>
@@ -64,17 +70,19 @@
         /* FINANZAS PERSONALES */
         .finance-row { display: flex; align-items: center; justify-content: space-between; }
         .big-number { font-size: 36px; font-weight: 800; color: var(--primary); letter-spacing: -1px; }
-        .status-pill { padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+        .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
         .pill-success { background: #dcfce7; color: #166534; }
         .pill-danger { background: #fee2e2; color: #991b1b; }
+        .pill-warning { background: #fef3c7; color: #b45309; }
+        .pill-info { background: #e0f2fe; color: #0369a1; }
 
         /* TABLAS */
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th { text-align: left; color: var(--text-muted); font-size: 11px; text-transform: uppercase; padding-bottom: 10px; border-bottom: 2px solid #f1f5f9; }
         td { padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
         .table-compact td { padding: 6px 0; font-size: 12px; }
-        .btn-invoice { border: 1px solid #cbd5e1; background: white; color: var(--text); padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s; }
-        .btn-invoice:hover { background: #f1f5f9; color: var(--secondary); border-color: var(--secondary); }
+        .btn-invoice, .btn-action { border: 1px solid #cbd5e1; background: white; color: var(--text); padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s; }
+        .btn-invoice:hover, .btn-action:hover { background: #f1f5f9; color: var(--secondary); border-color: var(--secondary); }
         .doc-number { font-size: 11px; color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-right: 5px; }
 
         /* ESPACIOS Y RESERVAS */
@@ -98,12 +106,25 @@
         /* MODAL */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 5000; justify-content: center; align-items: center; }
         .modal.active { display: flex; }
-        .modal-content { background: white; padding: 20px; border-radius: 12px; max-width: 90%; max-height: 90vh; overflow: auto; position: relative; text-align: center; }
-        .modal-close { position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer; color: #64748b; }
+        .modal-content { background: white; padding: 20px; border-radius: 12px; max-width: 90%; max-height: 90vh; overflow: auto; position: relative; text-align: center; width: 100%; box-sizing: border-box; }
+        .modal-close { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #64748b; z-index: 10;}
         .modal-img { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #e5e7eb; }
 
-        #spinner { position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--primary); }
+        /* ESTILOS FORM Y CHAT RECLAMOS */
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .label-portal { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px; }
+        .input-portal, .textarea-portal, .select-portal { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: white; box-sizing: border-box; font-family: inherit; }
+        .upload-box { border: 2px dashed #cbd5e1; border-radius: 8px; padding: 20px; text-align: center; color: #64748b; position: relative; background: #f8fafc; transition: all 0.2s; cursor: pointer;}
+        .upload-box.has-file { border-color: #10b981; background: #ecfdf5; color: #065f46; }
+        .btn-submit-portal { background: var(--secondary); color: white; width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; margin-top: 10px; transition: 0.2s; }
+        .btn-submit-portal:hover { background: #2563eb; }
         
+        .chat-bubble { padding: 12px 15px; border-radius: 12px; margin-bottom: 15px; font-size: 13px; max-width: 85%; line-height: 1.4; word-wrap: break-word; }
+        .chat-bubble.admin { background: white; color: #1e293b; border: 1px solid #e2e8f0; margin-right: auto; border-bottom-left-radius: 2px; }
+        .chat-bubble.user { background: var(--primary); color: white; margin-left: auto; border-bottom-right-radius: 2px; }
+        .bubble-meta { font-size: 10px; margin-bottom: 4px; opacity: 0.7; font-weight: 700; text-transform: uppercase;}
+        
+        #spinner { position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 6000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--primary); }
         .no-data-msg { color:#94a3b8; font-style:italic; font-size:13px; text-align:center; padding:10px; }
 
         @media print {
@@ -120,7 +141,7 @@
 
     <div id="spinner">
         <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 40px; margin-bottom: 15px;"></i>
-        <div style="font-weight: 600;">Cargando Portal...</div>
+        <div style="font-weight: 600;">Procesando...</div>
     </div>
 
     <div class="sidebar">
@@ -176,6 +197,22 @@
                         <table style="min-width: 100%;">
                             <thead><tr><th>Fecha</th><th>Concepto</th><th>Categ.</th><th style="text-align:right;">Monto</th><th style="text-align:center;">Doc</th></tr></thead>
                             <tbody id="detailedExpensesTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- SECCIÓN RECLAMOS -->
+                <div class="card" id="tickets">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="margin:0; font-size: 16px;">Mis Reclamos</h3>
+                        <button onclick="abrirModalNuevoReclamo()" class="btn-tool no-print" style="background: var(--secondary); color: white; border: none;">
+                            <i class="fa-solid fa-plus"></i> Nuevo Reclamo
+                        </button>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table style="min-width: 100%;">
+                            <thead><tr><th>Ticket</th><th>Fecha</th><th>Categoría</th><th>Estado</th><th style="text-align:center;">Acción</th></tr></thead>
+                            <tbody id="ticketsTableBody"></tbody>
                         </table>
                     </div>
                 </div>
@@ -239,6 +276,8 @@
         </div>
     </div>
 
+    <!-- MODALES DE COMPROBANTES Y RECLAMOS -->
+
     <div id="modalReceipt" class="modal">
         <div class="modal-content">
             <span class="modal-close" onclick="document.getElementById('modalReceipt').classList.remove('active')">&times;</span>
@@ -255,12 +294,98 @@
         </div>
     </div>
 
+    <div id="modalNewTicket" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="modal-close" onclick="cerrarModalNuevoReclamo()">&times;</span>
+            <h3 style="margin-top:0; color:var(--primary); text-align:left; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">Ingresar Solicitud / Reclamo</h3>
+            
+            <form id="formTicketPortal" onsubmit="enviarReclamoPortal(event)">
+                <div class="form-group">
+                    <label class="label-portal">Categoría</label>
+                    <select id="catTicketPortal" class="select-portal" required>
+                        <option value="">Selecciona...</option>
+                        <option value="Mantención">Mantención / Reparaciones</option>
+                        <option value="Ruidos">Ruidos Molestos</option>
+                        <option value="Seguridad">Seguridad / Acceso</option>
+                        <option value="Aseo">Aseo y Limpieza</option>
+                        <option value="Administración">Administración / Gastos Comunes</option>
+                        <option value="Otros">Otros</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="label-portal">Descripción del problema</label>
+                    <textarea id="descTicketPortal" class="textarea-portal" rows="4" placeholder="Describe qué pasó, dónde y cuándo. Entre más detalles, mejor." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="label-portal">Evidencia (Opcional)</label>
+                    <div class="upload-box" id="uploadAreaPortal">
+                        <i class="fa-solid fa-camera" style="font-size:24px; margin-bottom:5px;"></i>
+                        <div style="font-size:12px;">Haz clic para subir foto</div>
+                        <input type="file" id="fileInputPortal" accept="image/*" style="position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer;" onchange="previewFilePortal()">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit-portal">Enviar Solicitud</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modalViewTicket" class="modal">
+        <div class="modal-content" style="max-width: 550px; text-align: left; padding:0; display:flex; flex-direction:column; max-height:85vh;">
+            
+            <!-- Header Modal Reclamo -->
+            <div style="background:white; padding:15px 20px; border-bottom:1px solid #e2e8f0; border-radius:12px 12px 0 0; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h3 style="margin:0; font-size:16px; color:var(--primary);">Ticket <span id="mdlID"></span></h3>
+                    <div style="font-size:12px; color:#64748b;" id="mdlCat">Categoria</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <span id="mdlStatus" class="status-pill">...</span>
+                    <i class="fa-solid fa-xmark" style="font-size:20px; cursor:pointer; color:#64748b;" onclick="cerrarDetalleReclamo()"></i>
+                </div>
+            </div>
+
+            <!-- Body Modal Reclamo -->
+            <div style="padding:20px; flex:1; overflow-y:auto; background:#f8fafc;" id="chatScrollPortal">
+                <div style="background:white; padding:15px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:20px;">
+                    <div style="font-size:11px; color:#94a3b8; font-weight:700; margin-bottom:5px;">DESCRIPCIÓN INICIAL</div>
+                    <div id="mdlDesc" style="color:#334155; font-size:13px; line-height:1.5;">...</div>
+                    <div id="mdlFotoContainer" style="margin-top:10px; display:none;">
+                        <img id="mdlFoto" src="" style="width:100%; border-radius:8px; border:1px solid #e2e8f0; max-height:200px; object-fit:cover;">
+                    </div>
+                    <div style="font-size:11px; color:#cbd5e1; text-align:right; margin-top:5px;" id="mdlDate">Fecha</div>
+                </div>
+
+                <div style="text-align:center; margin:20px 0; position:relative;">
+                    <span style="background:#f8fafc; padding:0 10px; color:#94a3b8; font-size:11px; position:relative; z-index:1;">HISTORIAL DE RESPUESTAS</span>
+                    <div style="border-top:1px solid #e2e8f0; position:absolute; top:50%; width:100%; z-index:0;"></div>
+                </div>
+
+                <div id="chatContainerPortal"></div>
+            </div>
+
+            <!-- Footer Modal Reclamo -->
+            <div id="replyFooterPortal" style="padding:15px; border-top:1px solid #e2e8f0; background:white; border-radius:0 0 12px 12px; display:none; gap:10px; align-items:center;">
+                <textarea id="replyInputPortal" style="flex:1; border: 1px solid #cbd5e1; border-radius: 20px; padding: 10px 15px; font-size: 13px; outline: none; background: #f8fafc; resize: none; height:40px; box-sizing:border-box;" placeholder="Escribe una respuesta..."></textarea>
+                <button onclick="enviarRespuestaChatPortal()" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink:0;">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let USER = null;
         let CURRENT_COPRO_ID = null; 
         let DB = { Cobros:[], Pagos:[], Gastos:[], Espacios:[], Bloques:[], Reservas:[], Reclamos:[], Copropiedades:[], Unidades:[], Proveedores:[] };
         let chartEvolutionInstance = null;
         let chartDistInstance = null;
+        
+        let FILE_BASE64_PORTAL = "";
+        let TICKET_ACTUAL_PORTAL = null;
+        const ADMIN_EMAIL = "marcos.castro@santajosefinaspa.cl";
 
         // --- MAPA DE CARACTERES FONTAWESOME ---
         const faMap = {
@@ -309,6 +434,7 @@
             renderKPIs();
             renderExpenseDistribution();
             initSpaces(); 
+            renderTicketsTable();
 
             document.getElementById('spinner').style.display = 'none';
         });
@@ -333,7 +459,7 @@
                     CURRENT_COPRO_ID = String(USER.CopropiedadID);
                 }
 
-                const nombre = USER.datos.Nombre || "Residente";
+                const nombre = (USER.datos && USER.datos.Nombre) ? USER.datos.Nombre : "Residente";
                 const edificio = DB.Copropiedades.find(c => String(c.ID) === CURRENT_COPRO_ID);
                 
                 // --- ACTUALIZACIÓN CON ICONOS ---
@@ -543,6 +669,303 @@
             const trend = document.getElementById('kpiReclamosTrend');
             trend.className = reclamos > 5 ? "kpi-trend trend-up" : "kpi-trend trend-down";
             trend.innerHTML = reclamos > 5 ? '<i class="fa-solid fa-circle-exclamation"></i> Atención' : '<i class="fa-solid fa-check"></i> OK';
+        }
+
+        /* ----- FUNCIONES RECLAMOS PORTAL ----- */
+
+        function getStatusPill(status) {
+            const s = status || 'Pendiente';
+            if (s === 'Resuelto') return `<span class="status-pill pill-success">${s}</span>`;
+            if (s === 'En Proceso' || s === 'Proceso') return `<span class="status-pill pill-info">${s}</span>`;
+            return `<span class="status-pill pill-warning">${s}</span>`;
+        }
+
+        function formatearFecha(iso) { 
+            if(!iso) return ""; 
+            const [y,m,d] = iso.split("-");
+            return `${d}/${m}/${y}`;
+        }
+
+        function renderTicketsTable() {
+            const tb = document.getElementById('ticketsTableBody');
+            const misTickets = DB.Reclamos.filter(t => String(t.UnidadID) === String(USER.UnidadID));
+            misTickets.sort((a,b) => (a.ID < b.ID) ? 1 : -1);
+
+            if(misTickets.length === 0) { 
+                tb.innerHTML='<tr><td colspan="5" class="no-data-msg">No tienes reclamos registrados.</td></tr>'; 
+                return; 
+            }
+            
+            tb.innerHTML = misTickets.map(t => {
+                const shortID = t.ID.replace("REQ_", "#");
+                return `<tr>
+                    <td style="font-weight:600; color:var(--primary);">${shortID}</td>
+                    <td style="color:#64748b;">${formatearFecha(t.Fecha)}</td>
+                    <td><span style="font-size:11px; font-weight:600; color:#475569;">${t.Categoria}</span></td>
+                    <td>${getStatusPill(t.Estado)}</td>
+                    <td style="text-align:center;">
+                        <button class="btn-action" onclick="abrirDetalleReclamo('${t.ID}')" style="color:var(--secondary);"><i class="fa-solid fa-comment-dots"></i> Ver</button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function abrirModalNuevoReclamo() {
+            document.getElementById('formTicketPortal').reset();
+            FILE_BASE64_PORTAL = "";
+            const box = document.getElementById("uploadAreaPortal");
+            box.classList.remove("has-file");
+            box.innerHTML = `<i class="fa-solid fa-camera" style="font-size:24px; margin-bottom:5px;"></i><div style="font-size:12px;">Haz clic para subir foto</div><input type="file" id="fileInputPortal" accept="image/*" style="position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer;" onchange="previewFilePortal()">`;
+            
+            document.getElementById('modalNewTicket').classList.add('active');
+        }
+
+        function cerrarModalNuevoReclamo() {
+            document.getElementById('modalNewTicket').classList.remove('active');
+        }
+
+        function previewFilePortal() {
+            const file = document.getElementById("fileInputPortal").files[0];
+            const box = document.getElementById("uploadAreaPortal");
+            
+            if (file) {
+                if(file.size > 2 * 1024 * 1024) {
+                    alert("La imagen es muy pesada. Máximo 2MB.");
+                    document.getElementById("fileInputPortal").value = "";
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    FILE_BASE64_PORTAL = e.target.result; 
+                    box.classList.add("has-file");
+                    box.innerHTML = `<i class="fa-solid fa-check-circle" style="color:#10b981; font-size:24px; margin-bottom:5px;"></i><div style="font-size:12px; font-weight:600; color:#065f46;">Imagen lista</div>`;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function enviarReclamoPortal(e) {
+            e.preventDefault();
+            document.getElementById("spinner").style.display = "flex";
+
+            const categoria = document.getElementById("catTicketPortal").value;
+            const descripcion = document.getElementById("descTicketPortal").value;
+            const idTicket = "REQ_" + Date.now().toString().slice(-6);
+            const fechaHoy = new Date().toISOString().split('T')[0];
+            const nombreUser = (USER.datos && USER.datos.Nombre) ? USER.datos.Nombre : "Residente";
+
+            const historialInicial = [
+                { autor: "user", nombre: nombreUser, texto: descripcion, fecha: fechaHoy }
+            ];
+
+            const payload = {
+                "ID": idTicket,
+                "CopropiedadID": String(CURRENT_COPRO_ID),
+                "UnidadID": String(USER.UnidadID),
+                "UsuarioID": String(USER.ID || (USER.datos ? USER.datos.ID : "")), 
+                "Categoria": categoria,
+                "Descripcion": descripcion,
+                "Foto": FILE_BASE64_PORTAL || "", 
+                "Estado": "Pendiente",
+                "Fecha": fechaHoy,
+                "RespuestaAdmin": "", 
+                "Historial": JSON.stringify(historialInicial)
+            };
+
+            try {
+                if(typeof appSheetCRUD === 'function') {
+                    await appSheetCRUD("Reclamos", "Add", [payload]);
+                }
+
+                if (typeof notificarNuevoReclamoPortal === 'function') {
+                    await notificarNuevoReclamoPortal(payload, nombreUser);
+                }
+
+                DB.Reclamos.unshift(payload);
+                renderTicketsTable();
+                renderKPIs();
+
+                alert("✅ Reclamo enviado correctamente.");
+                cerrarModalNuevoReclamo();
+            } catch(err) {
+                const msgError = err.message || JSON.stringify(err);
+                alert("Error al enviar: " + msgError);
+            } finally {
+                document.getElementById("spinner").style.display = "none";
+            }
+        }
+
+        function abrirDetalleReclamo(id) {
+            const t = DB.Reclamos.find(x => x.ID === id);
+            if(!t) return;
+            TICKET_ACTUAL_PORTAL = t;
+
+            document.getElementById("mdlID").innerText = id.replace("REQ_", "#");
+            document.getElementById("mdlCat").innerText = t.Categoria;
+            document.getElementById("mdlDesc").innerText = t.Descripcion;
+            document.getElementById("mdlDate").innerText = formatearFecha(t.Fecha);
+            
+            const badgeContainer = document.getElementById("mdlStatus");
+            badgeContainer.innerHTML = getStatusPill(t.Estado);
+            
+            const imgCont = document.getElementById("mdlFotoContainer");
+            if(t.Foto && t.Foto.length > 10) {
+                imgCont.style.display = "block";
+                document.getElementById("mdlFoto").src = t.Foto;
+            } else {
+                imgCont.style.display = "none";
+            }
+
+            const chat = document.getElementById("chatContainerPortal");
+            chat.innerHTML = "";
+            
+            let historial = [];
+            try {
+                if(t.Historial) {
+                    historial = typeof t.Historial === 'object' ? t.Historial : JSON.parse(t.Historial);
+                }
+                if(historial.length === 0 && t.RespuestaAdmin) {
+                    historial.push({ autor: "admin", nombre: "Administración", texto: t.RespuestaAdmin });
+                }
+            } catch(e) {
+                if(t.RespuestaAdmin) historial.push({ autor: "admin", nombre: "Admin", texto: t.RespuestaAdmin });
+            }
+
+            if(historial.length > 0) {
+                historial.forEach((msg, idx) => {
+                    if(idx === 0 && msg.texto === t.Descripcion) return;
+                    const isMe = msg.autor === 'user';
+                    chat.innerHTML += `
+                        <div class="chat-bubble ${isMe ? 'user' : 'admin'}">
+                            <div class="bubble-meta">${msg.nombre || (isMe ? 'Tú' : 'Admin')}</div>
+                            ${msg.texto}
+                        </div>
+                    `;
+                });
+            }
+
+            if(chat.innerHTML === "") {
+                chat.innerHTML = `<div style="text-align:center; color:#cbd5e1; font-size:12px; padding:20px;">Sin interacciones adicionales.</div>`;
+            }
+
+            const hasAdminReply = historial.some(h => h.autor === 'admin') || t.RespuestaAdmin;
+            const footer = document.getElementById("replyFooterPortal");
+            
+            if (hasAdminReply && t.Estado !== 'Resuelto') {
+                footer.style.display = "flex";
+            } else {
+                footer.style.display = "none";
+            }
+
+            document.getElementById("modalViewTicket").classList.add("active");
+            const body = document.getElementById("chatScrollPortal");
+            setTimeout(() => body.scrollTop = body.scrollHeight, 100);
+        }
+
+        function cerrarDetalleReclamo() {
+            document.getElementById("modalViewTicket").classList.remove("active");
+            TICKET_ACTUAL_PORTAL = null;
+        }
+
+        async function enviarRespuestaChatPortal() {
+            const input = document.getElementById("replyInputPortal");
+            const texto = input.value.trim();
+            
+            if(!texto) return alert("Escribe un mensaje.");
+            if(!TICKET_ACTUAL_PORTAL || !TICKET_ACTUAL_PORTAL.ID) return alert("Error de ticket.");
+
+            document.getElementById("spinner").style.display = "flex";
+
+            try {
+                let historial = [];
+                if (TICKET_ACTUAL_PORTAL.Historial) {
+                    try {
+                        historial = typeof TICKET_ACTUAL_PORTAL.Historial === 'string' 
+                            ? JSON.parse(TICKET_ACTUAL_PORTAL.Historial) 
+                            : TICKET_ACTUAL_PORTAL.Historial;
+                    } catch(e) {
+                        if(TICKET_ACTUAL_PORTAL.RespuestaAdmin) {
+                            historial.push({autor:"admin", nombre:"Admin", texto:TICKET_ACTUAL_PORTAL.RespuestaAdmin});
+                        }
+                    }
+                } else if (TICKET_ACTUAL_PORTAL.RespuestaAdmin) {
+                    historial.push({autor:"admin", nombre:"Admin", texto:TICKET_ACTUAL_PORTAL.RespuestaAdmin});
+                }
+
+                const nombreUser = (USER.datos && USER.datos.Nombre) ? USER.datos.Nombre : "Residente";
+                const nuevoMsg = {
+                    autor: "user",
+                    nombre: nombreUser,
+                    texto: texto,
+                    fecha: new Date().toISOString()
+                };
+                historial.push(nuevoMsg);
+
+                const jsonHistorial = JSON.stringify(historial);
+                const payload = {
+                    "ID": String(TICKET_ACTUAL_PORTAL.ID),
+                    "Historial": jsonHistorial,
+                    "Estado": "En Proceso"
+                };
+
+                if(typeof appSheetCRUD === 'function') {
+                    await appSheetCRUD("Reclamos", "Edit", [payload]);
+                } else {
+                    throw new Error("No hay conexión con AppSheet.");
+                }
+
+                if (typeof emailjs !== 'undefined') {
+                    const htmlBody = `
+                        <div style="font-family:sans-serif; padding:20px; border:1px solid #1A2B48;">
+                            <h3>💬 Nueva respuesta de residente</h3>
+                            <p><strong>${nombreUser}</strong> ha respondido al ticket #${TICKET_ACTUAL_PORTAL.ID}:</p>
+                            <p style="background:#f1f5f9; padding:10px;"><em>"${texto}"</em></p>
+                        </div>
+                    `;
+                    emailjs.send("service_p9hqkqn", "template_80q9psi", {
+                        to_email: ADMIN_EMAIL,
+                        subject: `[RESPUESTA] Ticket #${TICKET_ACTUAL_PORTAL.ID}`,
+                        html_body: htmlBody
+                    }).catch(e => console.warn("Email error", e));
+                }
+
+                input.value = "";
+                TICKET_ACTUAL_PORTAL.Historial = jsonHistorial;
+                TICKET_ACTUAL_PORTAL.Estado = "En Proceso";
+                
+                // Actualizamos DB local y redibujamos
+                const idx = DB.Reclamos.findIndex(r => r.ID === TICKET_ACTUAL_PORTAL.ID);
+                if(idx > -1) DB.Reclamos[idx] = TICKET_ACTUAL_PORTAL;
+                renderTicketsTable();
+
+                abrirDetalleReclamo(TICKET_ACTUAL_PORTAL.ID);
+
+            } catch(e) {
+                const msg = e.message || JSON.stringify(e);
+                alert("Error al enviar respuesta: " + msg);
+            } finally {
+                document.getElementById("spinner").style.display = "none";
+            }
+        }
+
+        async function notificarNuevoReclamoPortal(data, nombreUsuario) {
+            if (typeof emailjs === 'undefined') return;
+            const htmlBody = `
+                <div style="font-family:sans-serif; padding:20px; border:2px solid #1A2B48;">
+                    <h2>⚠️ Nuevo Reclamo (Portal Web)</h2>
+                    <ul>
+                        <li><strong>Categoría:</strong> ${data.Categoria}</li>
+                        <li><strong>Residente:</strong> ${nombreUsuario}</li>
+                        <li><strong>Unidad:</strong> ${data.UnidadID}</li>
+                    </ul>
+                    <p>${data.Descripcion}</p>
+                </div>
+            `;
+            emailjs.send("service_p9hqkqn", "template_80q9psi", {
+                to_email: ADMIN_EMAIL,
+                subject: `[TICKET] ${data.Categoria}`,
+                html_body: htmlBody
+            }).catch(e => console.warn(e));
         }
 
         function logout() { localStorage.removeItem('sesion_externa'); window.location.href = 'login_residente.html'; }
