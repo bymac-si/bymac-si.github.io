@@ -24,6 +24,7 @@
     <meta name="theme-color" content="#1a2b48" />
     <link rel="apple-touch-icon" href="assets/img/icon-192.png" />
 
+    <script src="assets/js/api_cliente.js"></script>
     <script src="assets/js/app.js"></script>
 
     <style>
@@ -469,84 +470,121 @@ function safeUpdate(id, valor) {
     }
 }
       let USUARIO = null;
+      let PORTAL = null;
+      let UNIDADES = [];
+      let UNIDAD_ACTUAL_ID = null;
       let DATOS_COMUNIDAD = null;
       let DATOS_UNIDAD = null;
 
       // --- INICIO SEGURO ---
       document.addEventListener("DOMContentLoaded", async () => {
+        const loader = document.getElementById("loader");
         try {
-          // 1. Obtener Sesión
-          const sesionStr = localStorage.getItem("sesion_externa");
-          if (!sesionStr) throw new Error("No session");
+          // 1. El servidor valida la sesión y devuelve SOLO los datos de sus unidades.
+          PORTAL = await cargarPortalResidente();
 
-          const sesionObj = JSON.parse(sesionStr);
-          USUARIO = sesionObj.datos; // Datos crudos del login
+          UNIDADES = PORTAL.unidades || [];
+          USUARIO = PORTAL.residente || {};
+          if (!UNIDADES.length) {
+            throw new Error("Su usuario no tiene unidades asignadas. Contacte a la administración.");
+          }
+          UNIDAD_ACTUAL_ID = String(getKeyVal(UNIDADES[0]));
 
           // Render Básico
-          const nombre = (USUARIO.Nombre || "Usuario").split(" ")[0];
+          const nombre = String(USUARIO.Nombre || USUARIO.nombre || "Usuario").split(" ")[0];
           safeUpdate("residenteNombre", nombre);
           safeUpdate("residenteUnidad", "...");
+
+          pintarSelectorUnidades();
 
           // 2. Cargar Datos
           await cargarTodo();
         } catch (e) {
-          console.error("Error crítico de sesión:", e);
-          window.location.href = "login_residente.html";
+          console.error("Error del portal de residentes:", e);
+          safeUpdate("montoTotal", "--");
+          safeUpdate("textoEstadoDeuda", e.message || "No se pudo cargar su información");
+          safeUpdate("nombreEdificio", "Sin conexión");
         } finally {
-          document.getElementById("loader").style.display = "none";
+          if (loader) loader.style.display = "none";
         }
       });
 
+      // Si el residente tiene más de una unidad, se agrega un selector en la cabecera.
+      function pintarSelectorUnidades() {
+        const cont = document.getElementById("residenteUnidad");
+        if (!cont) return;
+        const contenedor = cont.parentElement;
+        const previo = document.getElementById("selectorUnidad");
+        if (previo) previo.remove();
+        if (UNIDADES.length <= 1) return;
+
+        const sel = document.createElement("select");
+        sel.id = "selectorUnidad";
+        sel.setAttribute("aria-label", "Elegir unidad");
+        sel.style.cssText = "margin-left:6px;padding:2px 6px;border-radius:6px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);color:inherit;font-size:12px;";
+
+        UNIDADES.forEach((u) => {
+          const id = String(getKeyVal(u));
+          const opt = document.createElement("option");
+          opt.value = id;
+          opt.textContent = u.Unidad || u.Numero || u.Nombre || id;
+          sel.appendChild(opt);
+        });
+        sel.value = UNIDAD_ACTUAL_ID;
+        sel.addEventListener("change", async () => {
+          UNIDAD_ACTUAL_ID = sel.value;
+          const loader = document.getElementById("loader");
+          if (loader) loader.style.display = "flex";
+          try {
+            await cargarTodo();
+          } finally {
+            if (loader) loader.style.display = "none";
+          }
+        });
+        contenedor.appendChild(sel);
+        cont.style.display = "none"; // el selector muestra la unidad elegida
+      }
+
       async function cargarTodo() {
         try {
-          const [
-            copropiedades,
-            unidades,
-            gastosComunes,
-            gastos,
-            cobros,
-            pagos,
-            reservas,
-          ] = await Promise.all([
-            fetchData("Copropiedades"),
-            fetchData("Unidades"),
-            fetchData("GastosComunes").catch(() => []),
-            fetchData("Gastos").catch(() => []),
-            fetchData("Cobros").catch(() => []),
-            fetchData("Pagos").catch(() => []),
-            fetchData("Reservas").catch(() => []),
-          ]);
+          const unidades = PORTAL.unidades || [];
+          const copropiedades = PORTAL.copropiedades || [];
+          const gastosComunes = PORTAL.gastosComunes || [];
+          const gastos = PORTAL.gastos || [];
+          const cobros = PORTAL.cobros || [];
+          const pagos = PORTAL.pagos || [];
+          const reservas = PORTAL.reservas || [];
 
-          // 3. Vincular Unidad y Comunidad
-          // Usamos comparaciones flexibles (String y trim)
-          const myUnidadID = String(USUARIO.UnidadID).trim();
+          // 3. Vincular Unidad y Comunidad (comparaciones flexibles)
+          const myUnidadID = String(UNIDAD_ACTUAL_ID);
 
           DATOS_UNIDAD = unidades.find(
             (u) => String(getKeyVal(u)) === myUnidadID
-          );
+          ) || null;
 
-          // Si encontramos la unidad, obtenemos el ID de la comunidad desde ahí (más seguro)
-          // Si no, tratamos de usar el que viene en el usuario
-          let coproID = DATOS_UNIDAD
+          const coproID = DATOS_UNIDAD
             ? String(DATOS_UNIDAD.CopropiedadID)
-            : String(USUARIO.CopropiedadID);
+            : String(USUARIO.CopropiedadID || "");
 
           DATOS_COMUNIDAD = copropiedades.find(
             (c) => String(getKeyVal(c)) === coproID
-          );
+          ) || null;
 
           // Render Header
-          if (DATOS_COMUNIDAD)
-            safeUpdate("nombreEdificio", DATOS_COMUNIDAD.Nombre);
-          if (DATOS_UNIDAD) {
-            const nombreReal =
-              DATOS_UNIDAD.Unidad ||
-              DATOS_UNIDAD.Numero ||
-              DATOS_UNIDAD.Nombre ||
-              myUnidadID;
-            safeUpdate("residenteUnidad", nombreReal);
-          } else {
-            safeUpdate("residenteUnidad", "Unidad no encontrada");
+          safeUpdate(
+            "nombreEdificio",
+            DATOS_COMUNIDAD ? (DATOS_COMUNIDAD.Nombre || "Comunidad") : "Comunidad"
+          );
+
+          if (!document.getElementById("selectorUnidad")) {
+            if (DATOS_UNIDAD) {
+              safeUpdate(
+                "residenteUnidad",
+                DATOS_UNIDAD.Unidad || DATOS_UNIDAD.Numero || DATOS_UNIDAD.Nombre || myUnidadID
+              );
+            } else {
+              safeUpdate("residenteUnidad", "Unidad no encontrada");
+            }
           }
 
           // 4. Procesar Datos
@@ -554,7 +592,6 @@ function safeUpdate(id, valor) {
           renderNotificaciones(pagos, reservas);
         } catch (err) {
           console.error("Error cargando datos:", err);
-          // No redirigimos al login aquí para evitar loop, solo mostramos error visual
           safeUpdate("montoTotal", "--");
           safeUpdate("textoEstadoDeuda", "Error de conexión");
         }
@@ -578,7 +615,7 @@ function safeUpdate(id, valor) {
           // Buscar cobro YA generado para este mes
           const cobroRegistrado = cobrosExistentes.find(
             (c) =>
-              String(c.UnidadID) === String(USUARIO.UnidadID) &&
+              String(c.UnidadID) === String(UNIDAD_ACTUAL_ID) &&
               c.Mes === mesStr
           );
 
@@ -592,7 +629,7 @@ function safeUpdate(id, valor) {
               // Buscar deudas anteriores
               const deudasViejas = cobrosExistentes.filter(
                 (c) =>
-                  String(c.UnidadID) === String(USUARIO.UnidadID) &&
+                  String(c.UnidadID) === String(UNIDAD_ACTUAL_ID) &&
                   c.Estado === "Pendiente"
               );
               totalVisual = deudasViejas.reduce(
@@ -618,7 +655,7 @@ function safeUpdate(id, valor) {
             // Para evitar confusiones, mostraremos deudas previas si hay
             const deudasViejas = cobrosExistentes.filter(
               (c) =>
-                String(c.UnidadID) === String(USUARIO.UnidadID) &&
+                String(c.UnidadID) === String(UNIDAD_ACTUAL_ID) &&
                 c.Estado === "Pendiente"
             );
             totalVisual = deudasViejas.reduce(
@@ -661,7 +698,7 @@ function safeUpdate(id, valor) {
 
         const items = [];
         // Filtramos por UnidadID
-        const myID = String(USUARIO.UnidadID);
+        const myID = String(UNIDAD_ACTUAL_ID);
 
         pagos.forEach((p) => {
           if (String(p.UnidadID) === myID) {
@@ -724,11 +761,6 @@ function safeUpdate(id, valor) {
           .join("");
       }
 
-      function logoutResidente() {
-        localStorage.removeItem("sesion_externa");
-        window.location.href = "login_residente.html";
-      }
-
       /* UTILS */
       function safeUpdate(id, valor) {
         const el = document.getElementById(id);
@@ -748,9 +780,6 @@ function safeUpdate(id, valor) {
       }
       function clp(v) {
         return "$" + new Intl.NumberFormat("es-CL").format(v);
-      }
-      function getKeyVal(o) {
-        return o.ID || o.id || "";
       }
     </script>
   </body>

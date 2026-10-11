@@ -16,6 +16,7 @@
     <meta name="theme-color" content="#1a2b48">
     <link rel="apple-touch-icon" href="assets/img/icon-192.png">
 
+    <script src="assets/js/api_cliente.js"></script>
     <script src="assets/js/app.js"></script>
 
     <style>
@@ -325,52 +326,55 @@
       }
 
       let USUARIO = null;
+      let PORTAL = null;
       let PROV_MAP = {}; // Mapa de proveedores: ID -> Nombre
 
       document.addEventListener("DOMContentLoaded", async () => {
         try {
-          // 1. CORRECCIÓN SESIÓN: Leer sesion_externa
-          const sesionStr = localStorage.getItem("sesion_externa");
-          
-          if (!sesionStr) {
-             console.warn("No session found, redirecting");
-             window.location.href = "login_residente.html";
-             return;
-          }
-          
-          const sesionObj = JSON.parse(sesionStr);
-          USUARIO = sesionObj.datos; // Extraer datos reales del envoltorio
+          // 1. Sesión del residente: el servidor entrega solo los datos de sus unidades.
+          PORTAL = await cargarPortalResidente();
 
-          // Mostrar Unidad en Header (si existe etiqueta, si no el ID)
-          document.getElementById("lblUnidad").textContent =
-            USUARIO.UnidadLabel || USUARIO.UnidadID || "...";
+          const unidades = PORTAL.unidades || [];
+          if (!unidades.length) throw new Error("Su usuario no tiene unidades asignadas.");
+
+          const u0 = unidades[0];
+          const u0Id = String(getKeyVal(u0));
+          const coproID = String(
+            u0.CopropiedadID || (PORTAL.persona && PORTAL.persona.CopropiedadID) || ""
+          );
+          const copro = (PORTAL.copropiedades || []).find(
+            (c) => String(getKeyVal(c)) === coproID
+          );
+
+          USUARIO = Object.assign({}, PORTAL.persona, {
+            UnidadID: u0Id,
+            CopropiedadID: coproID,
+            UnidadLabel: u0.Unidad || u0.Numero || u0.Nombre || u0Id
+          });
+
+          document.getElementById("lblUnidad").textContent = USUARIO.UnidadLabel;
+          const lblEdif = document.getElementById("lblEdificio");
+          if (lblEdif && copro) lblEdif.textContent = copro.Nombre || "";
 
           await cargarDetalle();
         } catch (e) {
           console.error(e);
-          alert("Error cargando detalles. Revisa tu conexión.");
+          alert("No se pudo cargar el detalle: " + (e.message || e));
         } finally {
-          document.getElementById("loader").style.display = "none";
+          const l = document.getElementById("loader");
+          if (l) l.style.display = "none";
         }
       });
 
       async function cargarDetalle() {
         // 2. CARGA DE DATOS (Incluyendo Proveedores ahora)
-        const [
-          copropiedades,
-          unidades,
-          gastos,
-          cobros,
-          gastosComunes,
-          proveedores,
-        ] = await Promise.all([
-          fetchData("Copropiedades"),
-          fetchData("Unidades"),
-          fetchData("Gastos").catch(() => []),
-          fetchData("Cobros").catch(() => []),
-          fetchData("GastosComunes").catch(() => []),
-          fetchData("Proveedores").catch(() => []), // <--- NUEVO
-        ]);
+        // Todo viene ya filtrado por el servidor para las unidades del residente.
+        const copropiedades = PORTAL.copropiedades || [];
+        const unidades = PORTAL.unidades || [];
+        const gastos = PORTAL.gastos || [];
+        const cobros = PORTAL.cobros || [];
+        const gastosComunes = PORTAL.gastosComunes || [];
+        const proveedores = PORTAL.proveedores || [];
 
         // 3. Crear Mapa de Proveedores para búsqueda rápida
         proveedores.forEach((p) => {

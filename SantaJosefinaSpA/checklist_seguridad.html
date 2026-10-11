@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="assets/css/styles.css" />
     <link href="https://fonts.googleapis.com/css2?family=Ovo&display=swap" rel="stylesheet" />
 
+    <script src="assets/js/api_cliente.js"></script>
     <script src="assets/js/app.js"></script>
 
     <style>
@@ -390,7 +391,7 @@
     </div>
 
     <script>
-      const API_URL = "https://script.google.com/macros/s/AKfycbw6pg39TiLiOWxbjhvfuM2rS3AYDRNbnqyjDOtyv3btMU8VZN9wbOx4pMJDlVl_zVYbXw/exec";
+      // La URL del backend vive en assets/js/api_cliente.js (API_URL). No la duplique aquí.
 
       document.getElementById("securityForm").addEventListener("submit", async function (e) {
         e.preventDefault();
@@ -423,35 +424,18 @@
         const telefono = document.getElementById("leadTelefono").value;
         const comunidad = document.getElementById("leadComunidad").value;
 
-        // 1. OBJETO CENTRALIZADO PARA EL GOOGLE SCRIPT (API CENTRAL)
-        const payloadCentral = {
-          action: 'registrarDiagnostico',
-          nombre: nombre,
-          email: email,
-          telefono: telefono,
-          comunidad: comunidad,
-          countNo: countNo,
-          nivel: nivel,
-          puntosCriticos: puntosCriticos.join(", ")
-        };
-
-        // 2. OBJETOS OPERATIVOS PARA APPSHEET
-        const contactData = { ID: "LEAD_" + Date.now(), Nombre: nombre, Email: email, Telefono: telefono, Mensaje: `Checklist Seguridad: ${comunidad}`, Fecha: new Date().toISOString().split('T')[0], Estado: "Nuevo", Notas: `Riesgo ${nivel} (${countNo} fallas): ${puntosCriticos.join(", ")}` };
-        const bitacoraData = { ID: "BIT_" + Date.now(), ProspectoID: contactData.ID, Fecha: contactData.Fecha, Tipo: "Diagnostico Web", Nota: `Resultado: ${countNo} fallas.`, Usuario: "Web" };
-        const marketingData = { ID: email, Nombre: nombre, Fuente: "Checklist Seguridad", Estado: "Activo", Telefono: telefono, Riesgos_Detectados: countNo, Respondio_Diagnostico: "SI", Fecha_Ingreso: new Date().toISOString() };
-
         try {
-          // A. ENVÍO A LA API CENTRAL (GMAIL + MARKETING AUTO)
-          fetch(API_URL, { method: 'POST', body: JSON.stringify(payloadCentral), mode: 'no-cors' });
-
-          // B. ENVÍO A APPSHEET (TABLAS OPERATIVAS)
-          if (typeof appSheetCRUD === "function") {
-            await Promise.all([
-              appSheetCRUD("contactos", "Add", [contactData]),
-              appSheetCRUD("Bitacora", "Add", [bitacoraData]),
-              appSheetCRUD("Leads_Marketing", "Add", [marketingData])
-            ]);
-          }
+          // Un solo envío al backend: guarda el contacto, la bitácora y el lead de marketing,
+          // y avisa al equipo por correo. Esta página es pública, así que no lleva sesión.
+          await accionPublica("registrarDiagnostico", {
+            nombre: nombre,
+            email: email,
+            telefono: telefono,
+            comunidad: comunidad,
+            countNo: countNo,
+            nivel: nivel,
+            puntosCriticos: puntosCriticos.join(", ")
+          });
         } catch (err) {
           console.error("Error en el guardado:", err);
         } finally {

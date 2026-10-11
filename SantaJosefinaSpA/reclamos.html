@@ -15,6 +15,7 @@
       })();
   </script>
 
+  <script src="assets/js/api_cliente.js"></script>
   <script src="assets/js/app.js"></script>
   
   <style>
@@ -224,6 +225,7 @@
 
   <script>
     let USUARIO = null;
+    let PORTAL = null;
     let TICKETS = [];
     let FILE_BASE64 = "";
     let TICKET_ACTUAL = null;
@@ -233,14 +235,16 @@
     // --- INICIALIZACIÓN CORREGIDA ---
     document.addEventListener("DOMContentLoaded", async () => {
         try {
-            // CORRECCIÓN: Leer la sesión correcta "sesion_externa"
-            const sesionStr = localStorage.getItem("sesion_externa");
-            if(!sesionStr) throw new Error("No session");
-            
-            const sesionObj = JSON.parse(sesionStr);
-            // CORRECCIÓN: Extraer los datos reales del usuario
-            USUARIO = sesionObj.datos; 
-            
+            // Sesión del residente: el servidor entrega solo los reclamos de sus unidades.
+            PORTAL = await cargarPortalResidente();
+            const listaUnidades = PORTAL.unidades || [];
+            if (!listaUnidades.length) throw new Error("Su usuario no tiene unidades asignadas.");
+            const u0 = listaUnidades[0];
+            USUARIO = Object.assign({}, PORTAL.persona, {
+                UnidadID: String(getKeyVal(u0)),
+                CopropiedadID: String(u0.CopropiedadID || (PORTAL.persona && PORTAL.persona.CopropiedadID) || "")
+            });
+
             await cargarHistorial();
         } catch(e) {
             console.error("Error sesión:", e);
@@ -297,24 +301,26 @@
             { autor: "user", nombre: USUARIO.Nombre, texto: descripcion, fecha: fechaHoy }
         ];
 
+        // El servidor fija el ID, el usuario, la unidad y el estado.
         const payload = {
             "ID": idTicket,
             "CopropiedadID": String(USUARIO.CopropiedadID || ""),
             "UnidadID": String(USUARIO.UnidadID),
-            "UsuarioID": String(USUARIO.ID), // Aseguramos ID correcto
             "Categoria": categoria,
             "Descripcion": descripcion,
-            "Foto": FILE_BASE64 || "", 
+            "Foto": FILE_BASE64 || "",
             "Estado": "Pendiente",
             "Fecha": fechaHoy,
-            "RespuestaAdmin": "", 
             "Historial": JSON.stringify(historialInicial)
         };
 
         try {
-            if(typeof appSheetCRUD === 'function') {
-                await appSheetCRUD("Reclamos", "Add", [payload]);
-            }
+            await crearReclamoResidente({
+                categoria: categoria,
+                descripcion: descripcion,
+                unidadId: String(USUARIO.UnidadID),
+                foto: FILE_BASE64 || ""
+            });
 
             if (typeof notificarNuevoReclamo === 'function') {
                 await notificarNuevoReclamo(payload);
@@ -337,9 +343,8 @@
     async function cargarHistorial() {
         const container = document.getElementById("listaTickets");
         try {
-            const data = await fetchData("Reclamos").catch(() => []);
-            // Filtro robusto por ID de Unidad
-            TICKETS = data.filter(t => String(t.UnidadID) === String(USUARIO.UnidadID));
+            // El servidor ya devolvió solo los reclamos de sus unidades.
+            TICKETS = (PORTAL.reclamos || []).slice();
             TICKETS.sort((a,b) => (a.ID < b.ID) ? 1 : -1);
 
             if(TICKETS.length === 0) {
@@ -484,17 +489,8 @@
             historial.push(nuevoMsg);
 
             const jsonHistorial = JSON.stringify(historial);
-            const payload = {
-                "ID": String(TICKET_ACTUAL.ID),
-                "Historial": jsonHistorial,
-                "Estado": "En Proceso"
-            };
-
-            if(typeof appSheetCRUD === 'function') {
-                await appSheetCRUD("Reclamos", "Edit", [payload]);
-            } else {
-                throw new Error("No hay conexión con AppSheet.");
-            }
+            // El servidor valida que el reclamo sea de una unidad del residente.
+            await actualizarReclamoResidente(String(TICKET_ACTUAL.ID), jsonHistorial);
 
             if (typeof emailjs !== 'undefined') {
                 const htmlBody = `

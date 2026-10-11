@@ -23,6 +23,7 @@
       })();
     </script>
 
+    <script src="assets/js/api_cliente.js"></script>
     <script src="assets/js/app.js"></script>
 
     <style>
@@ -376,6 +377,7 @@
 
     <script>
       let USUARIO = null;
+      let PORTAL = null;
       let ESPACIOS = [];
       let RESERVAS = [];
       let BLOQUES_DB = [];
@@ -391,11 +393,17 @@
 
       document.addEventListener("DOMContentLoaded", async () => {
         try {
-          const sesion = localStorage.getItem("sesion_externa");
-          if (!sesion) throw new Error("No session");
-          const objSesion = JSON.parse(sesion);
-          USUARIO = objSesion.datos; // El usuario logueado
+          // Sesión del residente: el servidor entrega solo los datos de sus unidades.
+          PORTAL = await cargarPortalResidente();
+          const listaUnidades = PORTAL.unidades || [];
+          if (!listaUnidades.length) throw new Error("Su usuario no tiene unidades asignadas.");
+          const u0 = listaUnidades[0];
+          USUARIO = Object.assign({}, PORTAL.persona, {
+            UnidadID: String(getKeyVal(u0)),
+            CopropiedadID: String(u0.CopropiedadID || (PORTAL.persona && PORTAL.persona.CopropiedadID) || "")
+          });
         } catch (e) {
+          console.error(e);
           window.location.href = "login_residente.html";
           return;
         }
@@ -411,15 +419,12 @@
 
       async function cargarDatos() {
         try {
-          // Cargar TODAS las tablas necesarias para cruzar datos
-          const [espacios, reservas, bloques, unidades, copropiedades] =
-            await Promise.all([
-              fetchData("Espacios").catch(() => []),
-              fetchData("Reservas").catch(() => []),
-              fetchData("Bloques").catch(() => []),
-              fetchData("Unidades").catch(() => []), // Para saber el nombre real de la unidad (ej: 402)
-              fetchData("Copropiedades").catch(() => []), // Para el nombre del edificio
-            ]);
+          // Todo viene ya filtrado por el servidor para la comunidad del residente.
+          const espacios = PORTAL.espacios || [];
+          const reservas = PORTAL.reservas || [];
+          const bloques = PORTAL.bloques || [];
+          const unidades = PORTAL.unidades || [];
+          const copropiedades = PORTAL.copropiedades || [];
 
           UNIDADES = unidades || [];
           COPROPIEDADES = copropiedades || [];
@@ -576,28 +581,21 @@
 
         document.getElementById("spinner").style.display = "flex";
 
-        // Objeto para AppSheet
+        // El servidor fija el estado y valida que el espacio sea de su comunidad.
         const payload = {
-          ID: "RES_" + Date.now(),
-          CopropiedadID: String(USUARIO.CopropiedadID),
-          UnidadID: String(USUARIO.UnidadID),
-          UsuarioID: String(USUARIO.ID),
-          EspacioID: String(espacioSeleccionado.ID),
-          Fecha: fecha,
-          Bloque: bloqueSeleccionadoID, // Guardamos el ID del bloque
-          Estado: "Pendiente",
-          Costo: parseFloat(espacioSeleccionado.Costo) || 0,
-          Garantia: parseFloat(espacioSeleccionado.Garantia) || 0,
-          EstadoPago: "Pendiente",
-          EspacioNombre: espacioSeleccionado.Nombre,
-          FechaCreacion: new Date().toISOString(),
+          espacioId: String(espacioSeleccionado.ID),
+          unidadId: String(USUARIO.UnidadID),
+          fecha: fecha,
+          bloque: bloqueSeleccionadoID,
+          hora: bloqueSeleccionadoNombre || "",
+          costo: parseFloat(espacioSeleccionado.Costo) || 0,
+          garantia: parseFloat(espacioSeleccionado.Garantia) || 0,
+          observaciones: "Reserva de " + (espacioSeleccionado.Nombre || "")
         };
 
         try {
-          // 1. Guardar en DB
-          if (typeof appSheetCRUD === "function") {
-            await appSheetCRUD("Reservas", "Add", [payload]);
-          }
+          // 1. Guardar en la base (ruta de residentes)
+          await crearReservaResidente(payload);
 
           // 2. Preparar Datos Limpios para el Email
 

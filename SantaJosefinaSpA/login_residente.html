@@ -10,6 +10,7 @@
     <link rel="apple-touch-icon" href="assets/img/icon-192.png" />
 
     <link rel="stylesheet" href="assets/css/styles.css" />
+    <script src="assets/js/api_cliente.js"></script>
     <script src="assets/js/app.js"></script>
 
     <style>
@@ -115,7 +116,7 @@
             type="text"
             id="resUser"
             class="input-modern"
-            placeholder="Ej: 12345678-9"
+            placeholder="correo@mail.cl o 12345678-9"
             required
           />
         </div>
@@ -149,122 +150,41 @@
     </div>
 
 <script>
-  /* 1. LIMPIAR SESIÓN AL ENTRAR */
+  /* 1. LIMPIAR SESIÓN DE RESIDENTE AL ENTRAR (no se toca la sesión del equipo) */
   document.addEventListener("DOMContentLoaded", () => {
-    localStorage.removeItem("sesion_externa");
-    // Opcional: Limpiar también la de agente para evitar conflictos
-    localStorage.removeItem("sesion_activa");
+    if (typeof logoutResidente === "function") {
+      logoutResidente();
+    } else {
+      ["sesion_residente", "sesion_externa", "crm_token_res", "crm_tipo_res"]
+        .forEach(k => localStorage.removeItem(k));
+    }
   });
 
-  /* 2. LOGICA DE LOGIN */
+  /* 2. LÓGICA DE LOGIN: la validación la hace el servidor (Apps Script) */
   document.getElementById("formLogin").addEventListener("submit", async (e) => {
-      e.preventDefault();
+    e.preventDefault();
 
-      const btn = document.querySelector(".btn-residente");
-      const originalText = btn.innerText;
-      const role = document.getElementById("userRole").value;
-      const u = document.getElementById("resUser").value.trim();
-      const p = document.getElementById("resPass").value.trim();
+    const btn = document.querySelector(".btn-residente");
+    const originalText = btn.innerText;
+    const role = document.getElementById("userRole").value;
+    const u = document.getElementById("resUser").value.trim();
+    const p = document.getElementById("resPass").value; // no se recorta: los espacios cuentan
 
-      if (!u || !p) return alert("Completa todos los campos.");
+    if (!u || !p) return alert("Completa todos los campos.");
 
-      btn.innerText = "Verificando...";
-      btn.disabled = true;
+    btn.innerText = "Verificando...";
+    btn.disabled = true;
 
-      try {
-        let usuarioEncontrado = null;
-
-        // CASO 1: RESIDENTE (Comunidad)
-        if (role === "residente") {
-          // Buscamos en Copropietarios (residentes dueños)
-          let lista = await fetchData("Copropietarios").catch(() => []);
-          usuarioEncontrado = lista.find(
-            (r) => (r.RUT === u || r.Email === u) && (r.Password === p || p === "1234")
-          );
-          
-          // Si no, buscamos en Unidades (residentes habitacionales) si tienes esa data ahí
-          if(!usuarioEncontrado) {
-             const unidades = await fetchData("Unidades").catch(() => []);
-             // Lógica extra si tus usuarios están directo en Unidades
-          }
-        }
-
-        // CASO 2: ARRENDATARIO
-        else if (role === "arrendatario") {
-          const lista = await fetchData("ContratosArriendo").catch(() => []);
-          usuarioEncontrado = lista.find(
-            (c) => (c["RUT Arrendatario"] === u || c.Email === u) && (c.Password === p || p === "1234")
-          );
-        }
-
-        // CASO 3: DUEÑO
-        else if (role === "propietario") {
-          const lista = await fetchData("Propiedades").catch(() => []);
-          usuarioEncontrado = lista.find(
-            (v) => (v["RUT Propietario"] === u || v["Email Propietario"] === u) && (v.Password === p || p === "1234")
-          );
-        }
-
-        // VALIDACIÓN FINAL
-        if (usuarioEncontrado) {
-          // Inyectamos el ROL en el objeto para que los portales sepan quién es
-          usuarioEncontrado.Rol = role; 
-          guardarSesion(role, usuarioEncontrado);
-        } else {
-          throw new Error("Usuario no encontrado o clave incorrecta.");
-        }
-      } catch (err) {
-        console.error(err);
-        alert(err.message);
-        btn.innerText = originalText;
-        btn.disabled = false;
-      }
-    });
-
-  /* FUNCIONES AUXILIARES */
-  function guardarSesion(tipo, datos) {
-    const payload = {
-      tipo: tipo,
-      timestamp: Date.now(),
-      datos: datos,
-      // Guardamos IDs clave para facilitar la vida a los portales
-      UnidadID: datos.UnidadID || datos.ID || "U_PENDIENTE",
-      CopropiedadID: datos.CopropiedadID || "COP_01" 
-    };
-    localStorage.setItem("sesion_externa", JSON.stringify(payload));
-    
-    redirigirInteligente(tipo);
-  }
-
-  /* --- AQUÍ ESTÁ LA MAGIA DEL RESPONSIVE --- */
-  function redirigirInteligente(tipo) {
-    const anchoPantalla = window.innerWidth;
-    const esDesktop = anchoPantalla >= 1024; // Consideramos Desktop desde 1024px (iPad Pro horizontal / Laptop)
-
-    switch (tipo) {
-      case "residente":
-        if (esDesktop) {
-            // Versión Dashboard Grande
-            window.location.href = "portal-comunidad.html"; 
-        } else {
-            // Versión App Mobile
-            window.location.href = "Portal_residente.html"; 
-        }
-        break;
-        
-      case "arrendatario":
-        // Si no tienes versión desktop para ellos, usa la mobile siempre
-        window.location.href = "portal_arrendatario.html";
-        break;
-        
-      case "propietario":
-        window.location.href = "portal_vendedor.html";
-        break;
-        
-      default:
-        alert("Rol no configurado");
+    try {
+      await loginResidente(u, p, role);
+      irAlPortalResidente(role);
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Usuario no encontrado o clave incorrecta.");
+      btn.innerText = originalText;
+      btn.disabled = false;
     }
-  }
+  });
 </script>
   </body>
 </html>

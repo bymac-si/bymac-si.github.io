@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="assets/js/api_cliente.js"></script>
     <script src="assets/js/app.js"></script>
     <script>if(typeof requireAuth === "function") requireAuth();</script>
     <style>
@@ -43,7 +44,7 @@
 <div id="footer"></div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbw6pg39TiLiOWxbjhvfuM2rS3AYDRNbnqyjDOtyv3btMU8VZN9wbOx4pMJDlVl_zVYbXw/exec";
+// La URL del backend vive en assets/js/api_cliente.js (API_URL). No la duplique aquí.
 
 document.addEventListener("DOMContentLoaded", async () => {
     try {
@@ -116,15 +117,10 @@ async function procesarAccion(email, accion) {
 
 async function enviarGestion(email, accion, comentario) {
     try {
-        await fetch(API_URL, {
-            method: "POST",
-            mode: "no-cors",
-            body: JSON.stringify({
-                action: "gestionarLead",
-                email: email,
-                tipoAccion: accion,
-                comentario: comentario
-            })
+        await accionCRM("gestionarLead", {
+            email: email,
+            tipoAccion: accion,
+            comentario: comentario
         });
         alert("¡Acción registrada!");
         location.reload();

@@ -12,7 +12,7 @@
 // ============================================================================
 
 const CACHE_PREFIX = 'crm-josefina-';
-const CACHE_NAME = CACHE_PREFIX + 'v3'; // al subir de versión se borran las cachés anteriores (v2 incluye el app.js antiguo)
+const CACHE_NAME = CACHE_PREFIX + 'v4'; // al subir de versión se borran las cachés anteriores (v3 incluía app.js con AppSheet)
 const ESPERA_RED_MS = 3500;             // con copia guardada, si la red tarda más se muestra la copia
 
 // Nunca interceptar: aquí viajan los datos del CRM.

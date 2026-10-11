@@ -101,7 +101,7 @@ get_header();
 
   <div class="contrato" id="areaContrato">
     <div style="font-size:0.8em;">
-      <img src="/assets/img/logo_santajosefina.png" alt="Logo Santa Josefina" style="width: 140px; position: relative; top: -50px;" class="logo-print">
+      <img src="assets/img/logo_santajosefina.png" alt="Logo Santa Josefina" style="width: 140px; position: relative; top: -50px;" class="logo-print">
       <div><div class="small muted logo-print" style="position:relative; top:-75px;">Administración de Edificios y Condominios</div></div><br>
       <div style="position:relative; top:-75px;">
         <h3 class="page-title" style="text-align:center;">Contrato de Corretaje</h3>
@@ -149,7 +149,8 @@ get_header();
   </div>
 </div>
 
-<script src="/assets/js/app.js"></script>
+<script src="assets/js/api_cliente.js"></script>
+<script src="assets/js/app.js"></script>
 <script>
 requireAuth();
 
@@ -200,7 +201,7 @@ function calcular(){
 
   document.getElementById("cxPrecio").textContent = precio? formatoCLP(precio): "—";
   document.getElementById("cxPct").textContent = pct? (pct.toString().replace(".",",")+"%") : "—";
-  document.getElementById("c_pct").textContent = pct? (pct.toString().replace(".",","")) : "[Pct]";
+  document.getElementById("c_pct").textContent = pct? (pct.toString().replace(".", ",")) : "[Pct]";
 
   let neto = Math.round(precio * (pct/100));
   let iva  = Math.round(neto * 0.19);
@@ -321,7 +322,7 @@ get_header();
 
   <div class="contrato" id="areaContrato2">
     <div style="font-size:0.8em;">
-      <img src="/assets/img/logo_santajosefina.png" alt="Logo Santa Josefina" style="width: 140px; position: relative; top: -50px;" class="logo-print">
+      <img src="assets/img/logo_santajosefina.png" alt="Logo Santa Josefina" style="width: 140px; position: relative; top: -50px;" class="logo-print">
       <div><div class="small muted logo-print" style="position:relative; top:-75px;">Administración de Edificios y Condominios</div></div><br>
       <div style="position:relative; top:-75px;">
         <h3 class="page-title" style="text-align:center;">Contrato de Administración de Arriendo</h3>
@@ -369,7 +370,8 @@ get_header();
   </div>
 </div>
 
-<script src="/assets/js/app.js"></script>
+<script src="assets/js/api_cliente.js"></script>
+<script src="assets/js/app.js"></script>
 <script>
 requireAuth();
 
@@ -420,7 +422,7 @@ function calcular2(){
 
   document.getElementById("cxCanon").textContent = canon? formatoCLP(canon): "—";
   document.getElementById("cxPct2").textContent = pct? (pct.toString().replace(".",",")+"%") : "—";
-  document.getElementById("c2_pct").textContent = pct? (pct.toString().replace(".",","")) : "[Pct]";
+  document.getElementById("c2_pct").textContent = pct? (pct.toString().replace(".", ",")) : "[Pct]";
 
   let neto = Math.round(canon * (pct/100));
   let iva  = Math.round(neto * 0.19);

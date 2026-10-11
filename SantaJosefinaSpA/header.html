@@ -472,6 +472,12 @@
       window.location.href = 'login.html';
     };
 
+    // Algunas páginas llaman initHeader() después de inyectar el header.
+    window.initHeader = function () {
+      pintarUsuario();
+      marcarPaginaActual();
+    };
+
     pintarUsuario();
     marcarPaginaActual();
   })();

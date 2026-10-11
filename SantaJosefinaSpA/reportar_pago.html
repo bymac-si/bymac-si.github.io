@@ -12,6 +12,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <link rel="stylesheet" href="assets/css/styles.css" />
+    <script src="assets/js/api_cliente.js"></script>
     <script src="assets/js/app.js"></script>
 
     <style>
@@ -252,16 +253,22 @@
 
     <script>
       let USUARIO = null;
+      let PORTAL = null;
       let OPCIONES_PAGO = [];
 
       const IMGBB_API_KEY = "d096ade1d65ede2aa12f00d94094a854";
 
       document.addEventListener("DOMContentLoaded", async () => {
         try {
-          const sesionStr = localStorage.getItem("sesion_externa");
-          if (!sesionStr) throw new Error("No session");
-          const sesionObj = JSON.parse(sesionStr);
-          USUARIO = sesionObj.datos;
+          // Sesión del residente: el servidor entrega solo los datos de sus unidades.
+          PORTAL = await cargarPortalResidente();
+          const listaUnidades = PORTAL.unidades || [];
+          if (!listaUnidades.length) throw new Error("Su usuario no tiene unidades asignadas.");
+          const u0 = listaUnidades[0];
+          USUARIO = Object.assign({}, PORTAL.persona, {
+            UnidadID: String(getKeyVal(u0)),
+            CopropiedadID: String(u0.CopropiedadID || (PORTAL.persona && PORTAL.persona.CopropiedadID) || "")
+          });
         } catch (e) {
           window.location.href = "login_residente.html";
           return;
@@ -276,14 +283,12 @@
       async function cargarOpcionesDeuda() {
         const sel = document.getElementById("selCobro");
         try {
-          const [copropiedades, unidades, gastosComunes, gastos, cobrosInd] =
-            await Promise.all([
-              fetchData("Copropiedades"),
-              fetchData("Unidades"),
-              fetchData("GastosComunes").catch(() => []),
-              fetchData("Gastos"),
-              fetchData("Cobros").catch(() => []),
-            ]);
+          // Todo viene ya filtrado por el servidor para las unidades del residente.
+          const copropiedades = PORTAL.copropiedades || [];
+          const unidades = PORTAL.unidades || [];
+          const gastosComunes = PORTAL.gastosComunes || [];
+          const gastos = PORTAL.gastos || [];
+          const cobrosInd = PORTAL.cobros || [];
 
           const coproID = String(USUARIO.CopropiedadID).trim();
           const unidadID = String(USUARIO.UnidadID).trim();
@@ -455,23 +460,19 @@
           else if (tipoPago === "TOTAL") cobroRef = "TOTAL_DEUDA";
           else cobroRef = "ABONO";
 
+          // El servidor fija el estado ("Pendiente") y la unidad: el navegador no manda identidad.
           const payload = {
-            ID: "PAY_" + Date.now(),
-            CobroID: cobroRef,
-            UnidadID: String(USUARIO.UnidadID),
-            FechaPago: document.getElementById("fechaPago").value,
-            Monto: monto,
-            Metodo: "Transferencia",
-            Estado: "Pendiente",
-            ComprobanteURL: urlComprobante,
-            Observaciones: document.getElementById("obsPago").value,
-            RegistradoPor: USUARIO.Email,
-            FechaRegistro: new Date().toISOString(),
+            cobroId: cobroRef,
+            unidadId: String(USUARIO.UnidadID),
+            copropiedadId: String(USUARIO.CopropiedadID),
+            fechaPago: document.getElementById("fechaPago").value,
+            monto: monto,
+            metodo: "Transferencia",
+            comprobanteUrl: urlComprobante,
+            observaciones: document.getElementById("obsPago").value
           };
 
-          if (typeof appSheetCRUD === "function") {
-            await appSheetCRUD("Pagos", "Add", [payload]);
-          }
+          await reportarPagoResidente(payload);
 
           alert("✅ ¡Pago enviado con éxito!");
           window.location.href = "portal_residente.html";

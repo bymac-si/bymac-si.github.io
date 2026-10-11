@@ -17,6 +17,7 @@
 <link rel="manifest" href="manifest.json" />
     <meta name="theme-color" content="#1a2b48" />
 
+    <script src="assets/js/api_cliente.js"></script>
     <script src="assets/js/app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script>
@@ -262,9 +263,8 @@
         };
 
         try {
-          if (typeof appSheetCRUD === "function") {
-            await appSheetCRUD("ProspectosCorretaje", "Add", [payload]);
-          }
+          // Formulario público: no lleva sesión
+          await registrarProspectoPublico("ProspectosCorretaje", payload);
           if (typeof emailjs !== "undefined") {
             await emailjs.send("service_p9hqkqn", "template_80q9psi", {
               to_email: "marcos.castro@santajosefinaspa.cl",

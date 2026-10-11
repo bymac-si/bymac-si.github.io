@@ -16,6 +16,7 @@
             if(typeof emailjs !== 'undefined') emailjs.init("7Il4AhmGHchP7qfxu"); 
         })();
     </script>
+    <script src="assets/js/api_cliente.js"></script>
     <script src="assets/js/app.js"></script>
 
     <style>
@@ -378,6 +379,7 @@
 
     <script>
         let USER = null;
+        let PORTAL = null;
         let CURRENT_COPRO_ID = null; 
         let DB = { Cobros:[], Pagos:[], Gastos:[], Espacios:[], Bloques:[], Reservas:[], Reclamos:[], Copropiedades:[], Unidades:[], Proveedores:[] };
         let chartEvolutionInstance = null;
@@ -422,10 +424,26 @@
         }
 
         document.addEventListener("DOMContentLoaded", async () => {
-            const sesionStr = localStorage.getItem('sesion_externa');
-            if(!sesionStr) { window.location.href = 'login_residente.html'; return; }
-            USER = JSON.parse(sesionStr);
-            
+            // El servidor valida la sesión del residente y devuelve solo sus datos.
+            try {
+                PORTAL = await cargarPortalResidente();
+            } catch (e) {
+                console.error("Sesión de residente:", e);
+                window.location.href = 'login_residente.html';
+                return;
+            }
+
+            const unidades = PORTAL.unidades || [];
+            if (!unidades.length) {
+                alert("Su usuario no tiene unidades asignadas. Contacte a la administración.");
+                return;
+            }
+            const residente = PORTAL.residente || {};
+            USER = Object.assign({}, residente, {
+                UnidadID: String(getKeyVal(unidades[0])),
+                datos: residente
+            });
+
             await loadData();
             
             renderPersonalFinance();
@@ -441,17 +459,24 @@
 
         async function loadData() {
             try {
-                const [cob, pag, gas, esp, blo, res, rec, cop, uni, prov] = await Promise.all([
-                    fetchData('Cobros'), fetchData('Pagos'), fetchData('Gastos'),
-                    fetchData('Espacios'), fetchData('Bloques'), fetchData('Reservas'),
-                    fetchData('Reclamos'), fetchData('Copropiedades'), fetchData('Unidades'),
-                    fetchData('Proveedores')
-                ]);
-                DB = { Cobros:cob||[], Pagos:pag||[], Gastos:gas||[], Espacios:esp||[], Bloques:blo||[], Reservas:res||[], Reclamos:rec||[], Copropiedades:cop||[], Unidades:uni||[], Proveedores:prov||[] };
+                // Todo viene ya filtrado por el servidor: el residente nunca recibe datos de otras unidades.
+                DB = {
+                    Cobros: PORTAL.cobros || [],
+                    Pagos: PORTAL.pagos || [],
+                    Gastos: PORTAL.gastos || [],
+                    Espacios: PORTAL.espacios || [],
+                    Bloques: PORTAL.bloques || [],
+                    Reservas: PORTAL.reservas || [],
+                    Reclamos: PORTAL.reclamos || [],
+                    Copropiedades: PORTAL.copropiedades || [],
+                    Unidades: PORTAL.unidades || [],
+                    Proveedores: PORTAL.proveedores || [],
+                    GastosComunes: PORTAL.gastosComunes || []
+                };
 
                 const myUnidadID = String(USER.UnidadID).trim();
                 const unidadEncontrada = DB.Unidades.find(u => String(u.ID || u.id) === myUnidadID);
-                const numeroUnidad = unidadEncontrada ? unidadEncontrada.Numero : myUnidadID;
+                const numeroUnidad = unidadEncontrada ? (unidadEncontrada.Numero || unidadEncontrada.Unidad || myUnidadID) : myUnidadID;
                 
                 if (unidadEncontrada && unidadEncontrada.CopropiedadID) {
                     CURRENT_COPRO_ID = String(unidadEncontrada.CopropiedadID);
@@ -773,9 +798,12 @@
             };
 
             try {
-                if(typeof appSheetCRUD === 'function') {
-                    await appSheetCRUD("Reclamos", "Add", [payload]);
-                }
+                await crearReclamoResidente({
+                    categoria: categoria,
+                    descripcion: descripcion,
+                    unidadId: String(USER.UnidadID),
+                    foto: FILE_BASE64_PORTAL || ""
+                });
 
                 if (typeof notificarNuevoReclamoPortal === 'function') {
                     await notificarNuevoReclamoPortal(payload, nombreUser);
@@ -908,11 +936,7 @@
                     "Estado": "En Proceso"
                 };
 
-                if(typeof appSheetCRUD === 'function') {
-                    await appSheetCRUD("Reclamos", "Edit", [payload]);
-                } else {
-                    throw new Error("No hay conexión con AppSheet.");
-                }
+                await actualizarReclamoResidente(TICKET_ACTUAL_PORTAL.ID, jsonHistorial);
 
                 if (typeof emailjs !== 'undefined') {
                     const htmlBody = `
@@ -968,7 +992,7 @@
             }).catch(e => console.warn(e));
         }
 
-        function logout() { localStorage.removeItem('sesion_externa'); window.location.href = 'login_residente.html'; }
+        function logout() { if (typeof logoutResidente === 'function') logoutResidente(); else localStorage.removeItem('sesion_externa'); window.location.href = 'login_residente.html'; }
         function clp(v) { return "$" + new Intl.NumberFormat("es-CL").format(v||0); }
         function scrollToSection(id) { document.getElementById(id).scrollIntoView({ behavior: 'smooth' }); }
         

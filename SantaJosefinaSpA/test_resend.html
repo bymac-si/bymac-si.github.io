@@ -29,35 +29,40 @@
         <div id="log">Esperando inicio de prueba...</div>
     </div>
 
+    <script src="assets/js/api_cliente.js"></script>
     <script>
+        // Herramienta de diagnóstico. Requiere una sesión del equipo: el envío de correo
+        // usa la clave de Resend que vive en el servidor, así que no puede ser público.
+        if (!getToken() || tokenVencido(getToken())) {
+          document.getElementById("log").textContent =
+            "Debe iniciar sesión en el CRM (login.html) antes de usar esta herramienta.";
+        }
+
         async function probarEnvioProxy() {
             const log = document.getElementById('log');
-            const apiUrl = document.getElementById('apiUrl').value;
             const email = document.getElementById('testEmail').value;
-            
-            log.innerHTML = "> [1/3] Iniciando comunicación con Google Apps Script...\n";
+
+            if (!getToken() || tokenVencido(getToken())) {
+              log.textContent = "🔴 Sin sesión. Entre por login.html y vuelva a intentarlo.";
+              return;
+            }
+
+            log.innerHTML = "> [1/3] Enviando la orden al backend de Apps Script...\n";
 
             try {
-                // Usamos text/plain para evitar el error de CORS Preflight
-                const response = await fetch(apiUrl, {
-                    method: "POST",
-                    mode: "no-cors", 
-                    headers: { "Content-Type": "text/plain" },
-                    body: JSON.stringify({
-                        action: "apiResend",
-                        to: email,
-                        subject: "TEST DE PROXY EXITOSO",
-                        html: "<h1>Conexión Validada</h1><p>Este correo confirma que el Dashboard puede enviar a través de Google Apps Script.</p>"
-                    })
+                const r = await accionCRM("apiResend", {
+                    to: email,
+                    subject: "TEST DE PROXY EXITOSO",
+                    html: "<h1>Conexión Validada</h1><p>Este correo confirma que el Dashboard puede enviar a través de Google Apps Script.</p>"
                 });
 
-                log.innerHTML += "> [2/3] Petición enviada (modo no-cors).\n";
-                log.innerHTML += "> [INFO] En modo no-cors no podemos leer la respuesta del servidor por seguridad del navegador, pero si el correo llega, el puente está perfecto.\n";
-                log.innerHTML += "> [3/3] Verificando... Revisa tu bandeja de entrada y el panel de Resend en 10 segundos.\n";
-                log.innerHTML += "\n✅ PROCESO COMPLETADO DESDE EL NAVEGADOR.";
+                log.innerHTML += "> [2/3] El servidor respondió correctamente.\n";
+                log.innerHTML += "> [3/3] ID del envío: " + (r && r.id ? r.id : "(sin id)") + "\n";
+                log.innerHTML += "\n✅ PROCESO COMPLETADO. Revise la bandeja de entrada y el panel de Resend.\n";
 
             } catch (error) {
-                log.innerHTML += "\n🔴 ERROR CRÍTICO: " + error.message;
+                log.innerHTML += "\n🔴 ERROR: " + (error.message || error) + "\n";
+                log.innerHTML += "> Revise que RESEND_API_KEY y RESEND_FROM estén configuradas en el script.\n";
             }
         }
     </script>

@@ -24,6 +24,7 @@
     <meta name="theme-color" content="#1a2b48" />
     <link rel="apple-touch-icon" href="assets/img/icon-192.png" />
 
+    <script src="assets/js/api_cliente.js"></script>
     <script src="assets/js/app.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
@@ -982,12 +983,8 @@
         };
 
         try {
-          // A. Guardar en AppSheet (Tabla Corretaje)
-          if (typeof appSheetCRUD === "function") {
-            await appSheetCRUD("ProspectosCorretaje", "Add", [payload]);
-          } else {
-            console.warn("AppSheet CRUD no disponible.");
-          }
+          // A. Guardar el prospecto (formulario público, sin sesión)
+          await registrarProspectoPublico("ProspectosCorretaje", payload);
 
           // B. Enviar notificación por correo
           await notificarNuevoLead(payload);

@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<script src="assets/js/api_cliente.js"></script>
 <script src="assets/js/app.js"></script>
 <script>if(typeof requireAuth === "function") requireAuth();</script>
 
@@ -65,7 +66,7 @@ th{color:#64748b;font-size:.85rem; text-transform: uppercase;}
 
 <script>
 // URL ACTUALIZADA
-const API_URL = "https://script.google.com/macros/s/AKfycbw6pg39TiLiOWxbjhvfuM2rS3AYDRNbnqyjDOtyv3btMU8VZN9wbOx4pMJDlVl_zVYbXw/exec";
+// La URL del backend vive en assets/js/api_cliente.js (API_URL). No la duplique aquí.
 let miGrafico = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -79,8 +80,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function cargarAnalitica(){
   try {
-    const res = await fetch(`${API_URL}?action=getAnaliticaCampanas&t=${Date.now()}`);
-    const data = await res.json();
+    const data = await accionCRM("getAnaliticaCampanas");
 
     let totalEnviados=0, totalClics=0;
     const tbody = document.getElementById("tablaCampañas");

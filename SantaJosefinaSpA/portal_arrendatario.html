@@ -10,6 +10,7 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/styles.css">
+    <script src="assets/js/api_cliente.js"></script>
     <script src="assets/js/app.js"></script>
 
     <style>
@@ -155,47 +156,56 @@
     </div>
 
     <script>
-        // --- LÓGICA DEL PORTAL ---
-        
-        // 1. Obtener Sesión (Simulada para el ejemplo, usar localStorage real)
-        // En producción: const SESION = JSON.parse(localStorage.getItem('sesion_arrendatario'));
-        const SESION_DEMO = {
-            RUT: "11.111.111-1",
-            Nombre: "Juan Arrendatario",
-            ContratoID: "CNT_001",
-            Propiedad: "Av. Las Condes 1234, Depto 505",
-            Monto: 450000,
-            DiaPago: 5
-        };
+        // --- LÓGICA DEL PORTAL DEL ARRENDATARIO ---
+        // La sesión y los datos los entrega el servidor (Apps Script).
+        let CONTRATO = null;
 
-        document.addEventListener("DOMContentLoaded", () => {
-            // Verificar Login
-            // if(!localStorage.getItem('sesion_arrendatario')) window.location.href = 'login_residente.html';
-            
-            cargarInfo(SESION_DEMO);
-            cargarHistorialDemo(); // Reemplazar por fetch a PagosArriendo
+        document.addEventListener("DOMContentLoaded", async () => {
+            let PORTAL;
+            try {
+                PORTAL = await cargarPortalResidente();
+            } catch (e) {
+                console.error("Sesión:", e);
+                window.location.href = "login_residente.html";
+                return;
+            }
+
+            CONTRATO = PORTAL.contrato || null;
+            if (!CONTRATO) {
+                document.getElementById("lblInquilino").innerText = "Arrendatario";
+                document.getElementById("lblDireccion").innerText = "Sin contrato vigente";
+                document.getElementById("lblMonto").innerText = "-";
+                document.getElementById("lblEstadoPago").innerHTML =
+                    '<i class="fa-solid fa-circle-info"></i> No hay contratos asociados a su cuenta.';
+                document.getElementById("listaPagos").innerHTML =
+                    '<div style="padding:20px; text-align:center; color:#94a3b8;">Sin movimientos.</div>';
+                return;
+            }
+
+            cargarInfo(CONTRATO);
+            cargarHistorial(PORTAL.pagosArriendo || []);
         });
 
         function cargarInfo(datos) {
-            document.getElementById("lblInquilino").innerText = datos.Nombre.split(" ")[0];
-            document.getElementById("lblDireccion").innerText = datos.Propiedad;
-            
-            // Formatear Monto
-            const montoFmt = new Intl.NumberFormat('es-CL', {style: 'currency', currency: 'CLP'}).format(datos.Monto);
-            document.getElementById("lblMonto").innerText = montoFmt;
-            document.getElementById("pagoMonto").value = datos.Monto; // Prellenar modal
+            document.getElementById("lblInquilino").innerText =
+                String(datos.nombre || "Arrendatario").split(" ")[0];
+            document.getElementById("lblDireccion").innerText = datos.direccion || "";
 
-            // Calcular próximo vencimiento
+            const monto = Number(datos.monto) || 0;
+            document.getElementById("lblMonto").innerText =
+                new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(monto);
+            document.getElementById("pagoMonto").value = monto;
+
             const hoy = new Date();
             let mes = hoy.getMonth();
-            if (hoy.getDate() > datos.DiaPago) mes++; // Si ya pasó el día, es el otro mes
-            
-            // Asignar mes actual al input date
-            const anioActual = hoy.getFullYear();
-            const mesStr = (hoy.getMonth() + 1).toString().padStart(2, '0');
-            document.getElementById("pagoPeriodo").value = `${anioActual}-${mesStr}`;
+            const diaPago = Number(datos.diaPago) || 5;
+            if (hoy.getDate() > diaPago) mes++;
 
-            document.getElementById("lblEstadoPago").innerHTML = `<i class="fa-regular fa-clock"></i> Próximo pago: <b>${datos.DiaPago}/${mes + 1}</b>`;
+            document.getElementById("pagoPeriodo").value =
+                `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}`;
+
+            document.getElementById("lblEstadoPago").innerHTML =
+                `<i class="fa-regular fa-clock"></i> Próximo pago: <b>${diaPago}/${((mes % 12) + 1)}</b>`;
         }
 
         /* --- UX --- */
@@ -216,58 +226,71 @@
         async function enviarReportePago() {
             const monto = document.getElementById("pagoMonto").value;
             const periodo = document.getElementById("pagoPeriodo").value;
+            if (!monto || !periodo) return alert("Completa los datos");
+            if (!CONTRATO) return alert("No hay un contrato asociado.");
 
-            if(!monto || !periodo) return alert("Completa los datos");
-
-            const payload = {
-                "ID": "PAY_ARR_" + Date.now(),
-                "ContratoID": SESION_DEMO.ContratoID,
-                "Periodo": periodo,
-                "Monto": monto,
-                "Fecha Reporte": new Date().toISOString().split('T')[0],
-                "Estado": "Pendiente"
-                // Aquí iría el base64 de la imagen
-            };
-
-            // await appSheetCRUD("PagosArriendo", "Add", [payload]);
-            alert("¡Reporte enviado! Lo validaremos a la brevedad.");
-            cerrarModals();
+            try {
+                await resPost("res.pagoArriendo", {
+                    contratoId: CONTRATO.id,
+                    periodo: periodo,
+                    monto: monto
+                });
+                alert("¡Reporte enviado! Lo validaremos a la brevedad.");
+                cerrarModals();
+            } catch (e) {
+                alert("No se pudo enviar el reporte: " + (e.message || "error"));
+            }
         }
 
         async function enviarSolicitud() {
+            const tipo = document.getElementById("manTipo") ? document.getElementById("manTipo").value : "Otro";
             const desc = document.getElementById("manDesc").value;
-            if(!desc) return alert("Describe el problema");
+            if (!desc) return alert("Describe el problema");
 
-            // Lógica de envío a Tickets
-            alert("Solicitud enviada al equipo de Corretaje.");
-            cerrarModals();
+            try {
+                await crearReclamoResidente({
+                    categoria: tipo,
+                    descripcion: desc,
+                    unidadId: CONTRATO ? CONTRATO.unidadId : ""
+                });
+                document.getElementById("manDesc").value = "";
+                alert("Solicitud enviada al equipo de Corretaje.");
+                cerrarModals();
+            } catch (e) {
+                alert("No se pudo enviar la solicitud: " + (e.message || "error"));
+            }
         }
 
         function verContrato() {
-            alert("Descargando PDF del contrato...");
-            // window.open(SESION_DEMO.ContratoURL);
+            if (CONTRATO && CONTRATO.urlContrato) { window.open(CONTRATO.urlContrato, "_blank"); return; }
+            alert("El contrato todavía no está disponible para descarga. Solicítelo a la administración.");
         }
 
-        function cargarHistorialDemo() {
+        function cargarHistorial(historial) {
             const lista = document.getElementById("listaPagos");
-            // Mock de datos
-            const historial = [
-                { periodo: "2026-04", monto: 450000, estado: "Pendiente", fecha: "04-05-2026" },
-                { periodo: "2026-03", monto: 450000, estado: "Validado", fecha: "05-03-2026" },
-                { periodo: "2026-02", monto: 450000, estado: "Validado", fecha: "04-02-2026" }
-            ];
+            if (!lista) return;
+
+            if (!historial.length) {
+                lista.innerHTML = '<div style="padding:20px; text-align:center; color:#94a3b8;">Sin pagos reportados.</div>';
+                return;
+            }
 
             lista.innerHTML = historial.map(h => {
-                const esOk = h.estado === 'Validado';
+                const estado = h.Estado || h.estado || "Pendiente";
+                const esOk = /validado|aprobado|pagado/i.test(estado);
+                const monto = Number(String(h.Monto || h.monto || 0).toString().replace(/[^0-9]/g, "")) || 0;
+                const periodo = h.Periodo || h.periodo || "";
+                const fecha = h["Fecha Reporte"] || h.FechaReporte || h.Fecha || "";
+
                 return `
                 <div class="trx-item ${esOk ? 'trx-ok' : 'trx-pending'}">
                     <div>
-                        <div style="font-weight: bold; font-size: 14px;">Arriendo ${h.periodo}</div>
-                        <div style="font-size: 12px; color: #64748b;">Reportado el ${h.fecha}</div>
+                        <div style="font-weight: bold; font-size: 14px;">Arriendo ${periodo}</div>
+                        <div style="font-size: 12px; color: #64748b;">Reportado el ${fecha}</div>
                     </div>
                     <div style="text-align: right;">
-                        <div style="font-weight: 800; color: #134e4a;">$${h.monto.toLocaleString()}</div>
-                        <span style="font-size: 10px; text-transform: uppercase; font-weight: bold; color: ${esOk ? '#166534' : '#b45309'};">${h.estado}</span>
+                        <div style="font-weight: 800; color: #134e4a;">$${monto.toLocaleString('es-CL')}</div>
+                        <span style="font-size: 10px; text-transform: uppercase; font-weight: bold; color: ${esOk ? '#166534' : '#b45309'};">${estado}</span>
                     </div>
                 </div>`;
             }).join("");
