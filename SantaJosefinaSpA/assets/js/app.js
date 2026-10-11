@@ -1,15 +1,19 @@
 // ============================================================================
-// app.js: utilidades comunes del CRM Santa Josefina
-// Requiere assets/js/api_cliente.js cargado ANTES (datos, sesión, fetchData, requireAuth...).
-// Ya no contiene claves ni lógica de acceso a datos.
+// app.js — utilidades del CRM Santa Josefina
+//
+// IMPORTANTE: este archivo YA NO habla con AppSheet. Toda la conexión con los
+// datos vive en assets/js/api_cliente.js, que debe cargarse ANTES que este
+// archivo en cada página:
+//
+//     <script src="assets/js/api_cliente.js"></script>
+//     <script src="assets/js/app.js"></script>
+//
+// Aquí solo quedan: PWA, avisos de conexión, utilidades, UTM, honorarios,
+// propuesta comercial, cabecera, navegación y router.
 // ============================================================================
 
-if (typeof apiPost !== 'function') {
-    console.error('app.js: falta cargar assets/js/api_cliente.js antes de app.js');
-}
-
 // ==========================================
-// 0. PWA Y AVISO SIN CONEXIÓN
+// 0. PWA REGISTRATION
 // ==========================================
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -19,8 +23,13 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-window.addEventListener('offline', () => mostrarAvisoOffline(true));
-window.addEventListener('online', () => mostrarAvisoOffline(false));
+// Detección de Estado Offline (Para avisar al agente)
+window.addEventListener('offline', () => {
+    mostrarAvisoOffline(true);
+});
+window.addEventListener('online', () => {
+    mostrarAvisoOffline(false);
+});
 
 function mostrarAvisoOffline(estamosOffline) {
     let aviso = document.getElementById('aviso-offline');
@@ -28,43 +37,21 @@ function mostrarAvisoOffline(estamosOffline) {
         aviso = document.createElement('div');
         aviso.id = 'aviso-offline';
         aviso.style.cssText = "position:fixed; bottom:0; left:0; right:0; background:#ef4444; color:white; text-align:center; padding:10px; z-index:9999; font-weight:bold; display:none;";
-        aviso.textContent = "⚠️ Sin conexión. No podrás guardar cambios.";
+        aviso.innerText = "⚠️ Sin conexión. No podrás guardar cambios.";
         document.body.appendChild(aviso);
     }
     aviso.style.display = estamosOffline ? 'block' : 'none';
 }
 
 // ==========================================
-// 1. UTILIDADES
+// 1. UTILIDADES / HELPERS
 // ==========================================
 
-// Escapa texto antes de ponerlo dentro de HTML (innerHTML). Úselo con TODO dato que venga de la hoja.
-function escapeHtml(v) {
-    return String(v === undefined || v === null ? '' : v).replace(/[&<>"']/g, c =>
-        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
-
-// Convierte lo que llegue de la hoja en una fecha LOCAL (sin correr un día por la zona horaria).
-//  - "2026-10-09" o "2026-10-09T14:30:00" -> ISO (formato normal del backend)
-//  - "10/09/2026" -> MM/DD/AAAA (formato antiguo de AppSheet); si el primer número pasa de 12 se lee como DD/MM
-function parseFechaLocal(v) {
-    if (v === undefined || v === null || v === '') return null;
-    if (Object.prototype.toString.call(v) === '[object Date]') return isNaN(v.getTime()) ? null : v;
-    const s = String(v).trim();
-    let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-    if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
-    m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-    if (m) {
-        const a = +m[1], b = +m[2], y = +m[3];
-        return a > 12 ? new Date(y, b - 1, a) : new Date(y, a - 1, b);
-    }
-    const d = new Date(s);
-    return isNaN(d.getTime()) ? null : d;
-}
-
-function formatearFecha(v) {
-    const d = parseFechaLocal(v);
-    return d ? d.toLocaleDateString("es-CL") : "";
+function formatearFecha(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return String(iso);
+    return d.toLocaleDateString("es-CL");
 }
 
 function formatoPrecio(valor) {
@@ -87,22 +74,25 @@ function norm(s) {
 }
 
 // ==========================================
-// 2. UTM (valor del mes, con caché de 24 h)
+// 2. LÓGICA DE UTM AUTOMÁTICA (GLOBAL & CACHÉ)
 // ==========================================
-window.UTM_VALOR = 69751;        // valor de respaldo: solo se usa si no hay API ni caché
-window.UTM_FUENTE = 'respaldo';  // 'api' | 'cache' | 'cache-antigua' | 'respaldo'
+
+window.UTM_VALOR = 69751;
 
 async function inicializarUTM() {
     const CACHE_KEY = 'utm_cache_v2';
     const CACHE_TIME = 1000 * 60 * 60 * 24;
-    let guardado = null;
 
-    try { guardado = JSON.parse(localStorage.getItem(CACHE_KEY)); } catch (e) { guardado = null; }
-    if (guardado && guardado.valor > 0 && Date.now() - guardado.timestamp < CACHE_TIME) {
-        window.UTM_VALOR = guardado.valor;
-        window.UTM_FUENTE = 'cache';
-        actualizarDOMconUTM();
-        return window.UTM_VALOR;
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+        try {
+            const data = JSON.parse(cached);
+            if (Date.now() - data.timestamp < CACHE_TIME) {
+                window.UTM_VALOR = data.valor;
+                actualizarDOMconUTM();
+                return window.UTM_VALOR;
+            }
+        } catch (e) { console.warn("Cache inválido"); }
     }
 
     try {
@@ -110,22 +100,17 @@ async function inicializarUTM() {
         if (!res.ok) throw new Error('Error API');
         const data = await res.json();
         const valorReal = data.serie[0].valor;
-        if (!(valorReal > 0)) throw new Error('Valor inválido');
+
         window.UTM_VALOR = valorReal;
-        window.UTM_FUENTE = 'api';
-        try { localStorage.setItem(CACHE_KEY, JSON.stringify({ valor: valorReal, timestamp: Date.now() })); } catch (e) {}
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ valor: valorReal, timestamp: Date.now() }));
+
+        actualizarDOMconUTM();
+        return window.UTM_VALOR;
+
     } catch (e) {
-        if (guardado && guardado.valor > 0) {
-            // Mejor un valor viejo real que el de respaldo fijo.
-            window.UTM_VALOR = guardado.valor;
-            window.UTM_FUENTE = 'cache-antigua';
-        } else {
-            window.UTM_FUENTE = 'respaldo';
-        }
-        console.warn("No se pudo obtener la UTM. Fuente:", window.UTM_FUENTE);
+        console.warn("Fallo al obtener UTM. Usando valor por defecto.");
+        return window.UTM_VALOR;
     }
-    actualizarDOMconUTM();
-    return window.UTM_VALOR;
 }
 
 async function obtenerUTM() {
@@ -133,24 +118,19 @@ async function obtenerUTM() {
 }
 
 function actualizarDOMconUTM() {
-    let texto = formatoPrecio(window.UTM_VALOR);
-    if (window.UTM_FUENTE === 'respaldo' || window.UTM_FUENTE === 'cache-antigua') texto += ' ⚠';
+    const texto = formatoPrecio(window.UTM_VALOR);
     const elId = document.getElementById('lblUTM');
     if (elId) elId.textContent = texto;
-    document.querySelectorAll('.live-utm').forEach(el => { el.textContent = texto; });
+    document.querySelectorAll('.live-utm').forEach(el => el.textContent = texto);
 }
 
 // ==========================================
-// 3. HONORARIO DE ADMINISTRACIÓN
+// 3. CÁLCULO MATEMÁTICO
 // ==========================================
-// Base del honorario en UTM para una comunidad de hasta 20 unidades con factor 1.
-// ATENCIÓN: las propuestas usan 2 y dashboardcopropiedades.html usa 2,15. Conviene dejar un solo valor.
-const HONORARIO_BASE_UTM = 2;
-
-function calcularHonorarioGlobal(unidades, factor, utm, baseUtm = HONORARIO_BASE_UTM) {
+function calcularHonorarioGlobal(unidades, factor, utm) {
     if (!(factor > 0 && utm > 0)) return { neto: 0, iva: 0, total: 0 };
 
-    const baseF1 = utm * baseUtm;
+    const baseF1 = utm * 2;
     let netoTeorico = 0;
 
     if (unidades < 20) {
@@ -170,8 +150,9 @@ function calcularHonorarioGlobal(unidades, factor, utm, baseUtm = HONORARIO_BASE
 }
 
 // ==========================================
-// 4. PROPUESTA COMERCIAL
+// 4. LÓGICA DE PROPUESTA COMERCIAL
 // ==========================================
+
 function imprimirPDF() {
     const tituloOriginal = document.title;
     const nombreCliente = document.querySelector('.client-box h3')?.innerText || "Cliente";
@@ -187,37 +168,35 @@ async function cargarDatosPropuesta() {
 
     try {
         document.body.style.cursor = 'wait';
-        // Solo se pide la fila del prospecto (la tabla tiene cientos de edificios).
-        const filas = await fetchData("ProspectosCopro", { column: "ID", value: idPropuesta });
-        const data = filas.find(r => String(getKeyVal(r)) === String(idPropuesta));
+        const tablaFuente = "ProspectosCopro";
+        const datos = await fetchData(tablaFuente);
+        const data = (datos || []).find(r => getKeyVal(r) == idPropuesta);
 
         if (!data) {
             alert("No se encontraron datos.");
             return;
         }
 
-        const nombreCliente = data['Nombre'] || "Cliente";
+        const nombreCliente = data['Nombre'] || data['Nombre Condominio'] || "Cliente";
         const clienteEl = document.querySelector('.client-box h3');
         if (clienteEl) clienteEl.textContent = nombreCliente;
 
-        const unidades = parseInt(data['Unidades'] || 0) || 0;
-        let precioNeto = parseInt(data['Presupuesto'] || 0) || 0;
+        const unidades = parseInt(data['Unidades'] || 0);
+        if (!window.UTM_VALOR || window.UTM_VALOR === 69751) await inicializarUTM();
 
-        // Sin presupuesto cargado: se calcula con la tarifa de la comuna y la UTM del mes.
-        if (!(precioNeto > 0) && unidades > 0) {
-            if (window.UTM_FUENTE === 'respaldo') await inicializarUTM();
-            const tarifas = await fetchData("TablaTarifas");
-            const t = tarifas.find(x => norm(x.Comuna) === norm(data['Comuna']));
-            const factor = t ? parseFloat(t.FactorComuna ?? t.Factor) : 0;
-            precioNeto = calcularHonorarioGlobal(unidades, factor, window.UTM_VALOR).neto;
+        let precioNeto = parseInt(data['Precio Neto'] || 0);
+        let total = 0;
+        let costoUnitario = 0;
+
+        if (precioNeto > 0) {
+            const iva = Math.round(precioNeto * 0.19);
+            total = precioNeto + iva;
         }
 
         if (precioNeto > 0 && unidades > 0) {
-            const total = precioNeto + Math.round(precioNeto * 0.19);
-            const costoUnitario = Math.round(total / unidades);
+            costoUnitario = Math.round(total / unidades);
             const tbody = document.querySelector('.print-table tbody');
             if (tbody) {
-                // Solo números ya calculados: no entra texto de la hoja en este HTML.
                 tbody.innerHTML = `
                     <tr>
                         <td>${unidades} Unidades</td>
@@ -228,6 +207,7 @@ async function cargarDatosPropuesta() {
                 `;
             }
         }
+
     } catch (e) {
         console.error("Error cargando propuesta:", e);
     } finally {
@@ -236,91 +216,108 @@ async function cargarDatosPropuesta() {
 }
 
 // ==========================================
-// 5. HEADER Y FOOTER (se cargan aquí; las páginas no necesitan su propio cargador)
+// 5. INICIALIZACIÓN GLOBAL Y CARGA COMPONENTES
 // ==========================================
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // 1. UTM
+    inicializarUTM();
+
+    // 2. Cargar Header (Independiente de la página)
+    await loadHeader();
+
+    // 3. Enrutamiento PWA
+    iniciarEnrutamientoInteligente();
+
+    // 4. Lógica de páginas específicas
+    const path = window.location.pathname;
+    if (path.includes('login.html')) return;
+
+    const esPaginaPropuesta = document.querySelector('.print-table') && document.querySelector('.client-box');
+    const esPaginaContrato = path.includes('admin-condominios') || path.includes('admin-copropiedades');
+
+    if (esPaginaPropuesta && !esPaginaContrato) {
+        cargarDatosPropuesta();
+    }
+});
+
+// ==========================================
+// 6. LÓGICA DEL HEADER (SISTEMA DE NAVEGACIÓN)
+// ==========================================
+
 async function loadHeader() {
     const headerContainer = document.getElementById("header");
     if (!headerContainer) return;
 
+    // Algunas páginas ya inyectan header.html por su cuenta (con initHeader()).
+    if (headerContainer.querySelector('header') || headerContainer.dataset.cargado === '1') {
+        setupNavigation();
+        return;
+    }
+
     try {
         const response = await fetch("header.html");
         if (!response.ok) throw new Error("No se pudo cargar header.html");
-        headerContainer.innerHTML = await response.text();
 
-        // innerHTML no ejecuta scripts: se vuelven a crear para que corran (menú, usuario, salir).
-        headerContainer.querySelectorAll("script").forEach(oldScript => {
+        const text = await response.text();
+        headerContainer.innerHTML = text;
+        headerContainer.dataset.cargado = '1';
+
+        // --- RE-EJECUCIÓN DE SCRIPTS PARA MOBILE TOGGLE ---
+        const scripts = headerContainer.querySelectorAll("script");
+        scripts.forEach(oldScript => {
             const newScript = document.createElement("script");
             Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-            newScript.appendChild(document.createTextNode(oldScript.textContent));
+            newScript.appendChild(document.createTextNode(oldScript.innerHTML));
             headerContainer.appendChild(newScript).parentNode.removeChild(newScript);
         });
 
+        // Configurar UI según sesión
         setupNavigation();
+
     } catch (e) {
         console.error("Error cargando header:", e);
     }
 }
 
-async function loadFooter() {
-    const footerContainer = document.getElementById("footer");
-    if (!footerContainer) return;
-    try {
-        const response = await fetch("footer.html");
-        if (!response.ok) throw new Error("No se pudo cargar footer.html");
-        footerContainer.innerHTML = await response.text();
-        const y = document.getElementById("y");
-        if (y) y.textContent = new Date().getFullYear();
-    } catch (e) {
-        console.error("Error cargando footer:", e);
-    }
-}
-
-// ==========================================
-// 6. NAVEGACIÓN SEGÚN SESIÓN
-// ==========================================
-function sesionEquipoValida() {
-    const t = (typeof getToken === 'function') ? getToken() : null;
-    return !!(t && !tokenVencido(t) && getAuthUser());
-}
-
-function sesionResidenteValida() {
-    const t = localStorage.getItem('crm_token_res');
-    return !!(t && !tokenVencido(t));
-}
-
 function setupNavigation() {
-    // #navMenu (menú del equipo) NO se toca: su visibilidad la controla el CSS del header.
-    // Esto solo aplica a headers que tengan #menuAgente / #menuResidente (portal).
-    const menuAgente = document.getElementById('menuAgente');
+    const menuAgente = document.getElementById('menuAgente') || document.getElementById('navMenu');
     const menuResidente = document.getElementById('menuResidente');
     const lblUser = document.getElementById('headerUserName') || document.getElementById('navUserName');
     const lblRole = document.getElementById('headerUserRole');
 
+    const sesionAgente = localStorage.getItem('auth_user') || localStorage.getItem('sesion_activa');
+    const sesionResidente = localStorage.getItem('sesion_residente') || localStorage.getItem('sesion_externa');
+
+    // Reset Visual
     if (menuAgente) menuAgente.style.display = 'none';
     if (menuResidente) menuResidente.style.display = 'none';
 
-    if (sesionEquipoValida()) {
+    if (sesionAgente) {
         if (menuAgente) {
             menuAgente.style.display = 'flex';
             highlightActiveLink(menuAgente);
         }
-        const user = getAuthUser() || {};
-        if (lblUser) lblUser.textContent = String(user.nombre || user.Nombre || 'Usuario').split(' ')[0];
-        if (lblRole) lblRole.textContent = user.rol || user.Rol || 'Agente';
-    } else if (sesionResidenteValida()) {
+        try {
+            const user = JSON.parse(sesionAgente);
+            if (lblUser) lblUser.innerText = (user.nombre || user.Nombre || 'Usuario').split(' ')[0];
+            if (lblRole) lblRole.innerText = user.rol || user.Rol || 'Agente';
+        } catch (e) {}
+    }
+    else if (sesionResidente) {
         if (menuResidente) {
             menuResidente.style.display = 'flex';
             highlightActiveLink(menuResidente);
         }
         try {
-            const user = JSON.parse(localStorage.getItem('sesion_residente'));
-            const nombre = user && user.datos ? user.datos.Nombre : ((user && user.Nombre) || 'Vecino');
-            if (lblUser) lblUser.textContent = String(nombre || 'Vecino').split(' ')[0];
-            if (lblRole) lblRole.textContent = 'Residente';
+            const user = JSON.parse(sesionResidente);
+            const nombre = user.datos ? user.datos.Nombre : (user.Nombre || 'Vecino');
+            if (lblUser) lblUser.innerText = String(nombre).split(' ')[0];
+            if (lblRole) lblRole.innerText = 'Residente';
         } catch (e) {}
     }
 
-    // En pantallas chicas se usan las versiones móviles
+    // Ajuste links mobile
     if (window.innerWidth <= 1100) {
         document.querySelectorAll('a[href="prospectos.html"]').forEach(a => a.href = "mobile_prospecto.html");
         document.querySelectorAll('a[href="mapa.html"]').forEach(a => a.href = "mobile_mapa.html");
@@ -342,52 +339,40 @@ function highlightActiveLink(container) {
     });
 }
 
-// Desde la portada: con sesión válida va directo al panel (o al portal del residente).
+// ==========================================
+// 7. ENRUTAMIENTO PWA (Router)
+// ==========================================
+
 function iniciarEnrutamientoInteligente() {
     const path = window.location.pathname;
     const isRoot = path.includes("index.html") || path === "/" || path.endsWith("/");
     if (!isRoot) return;
 
-    if (sesionEquipoValida()) {
-        if (localStorage.getItem("crm_cc") === "1") window.location.href = "cambiar-clave.html";
-        else irAlPanel();
-    } else if (sesionResidenteValida()) {
-        window.location.href = "portal.html";
+    // El equipo tiene prioridad; los residentes van a su portal real.
+    if (localStorage.getItem("auth_user") || localStorage.getItem("sesion_activa")) {
+        window.location.href = "dashboard.html";
+    } else if (localStorage.getItem("sesion_residente") || localStorage.getItem("sesion_externa")) {
+        window.location.href = "portal_residente.html";
     }
 }
 
-// Cerrar sesión (equipo o residente)
+// ==========================================
+// 8. SESIÓN: SALIR Y MENÚ
+// ==========================================
+
+// Cierre de sesión del equipo. Borra el token del CRM y los datos de pantalla.
 window.logout = function (event) {
     if (event) event.preventDefault();
     if (!confirm("¿Cerrar sesión?")) return;
-    const eraResidente = !sesionEquipoValida() && sesionResidenteValida();
-    cerrarSesionLocal();
-    logoutResidente();
-    window.location.href = eraResidente ? LOGIN_RESIDENTE_URL : "login.html";
+    if (typeof cerrarSesionLocal === "function") {
+        cerrarSesionLocal();
+    } else {
+        ["crm_token", "crm_cc", "auth_user", "sesion_activa"].forEach(k => localStorage.removeItem(k));
+    }
+    window.location.href = "login.html";
 };
 
 window.toggleMenu = function () {
     const menu = document.getElementById('navMenu') || document.getElementById('menuAgente') || document.getElementById('menuResidente');
     if (menu) menu.classList.toggle('active');
 };
-
-// ==========================================
-// 7. INICIALIZACIÓN
-// ==========================================
-document.addEventListener('DOMContentLoaded', async () => {
-    inicializarUTM(); // no bloquea la carga de la página
-
-    await Promise.all([loadHeader(), loadFooter()]);
-
-    iniciarEnrutamientoInteligente();
-
-    const path = window.location.pathname;
-    if (path.includes('login')) return;
-
-    const esPaginaPropuesta = document.querySelector('.print-table') && document.querySelector('.client-box');
-    const esPaginaContrato = path.includes('admin-condominios') || path.includes('admin-copropiedades');
-
-    if (esPaginaPropuesta && !esPaginaContrato) {
-        cargarDatosPropuesta();
-    }
-});
