@@ -2,7 +2,7 @@
   /* =========================================
      HEADER - ESTILO UNIFICADO
      ========================================= */
-  
+
   .main-header {
     background-color: #ffffff;
     border-bottom: 1px solid #e2e8f0;
@@ -19,171 +19,176 @@
     box-sizing: border-box; /* Asegura que el padding no rompa el ancho */
   }
 
-  .logo-img { 
+  .logo-img {
     height: 70px; /* Ajustado para que no rompa el header de 70px */
-    width: auto; 
-    transition: transform 0.2s; 
-    display: block; 
+    width: auto;
+    transition: transform 0.2s;
+    display: block;
   }
   .logo-img:hover { transform: scale(1.05); }
 
   /* --- MENU DESKTOP --- */
   .nav-container {
-    display: flex; 
-    gap: 5px; 
-    height: 100%; 
-    align-items: center; 
+    display: flex;
+    gap: 5px;
+    height: 100%;
+    align-items: center;
     margin-left: auto;
   }
 
   .nav-link {
-    text-decoration: none; 
-    color: #64748b; 
-    font-weight: 600; 
+    text-decoration: none;
+    color: #64748b;
+    font-weight: 600;
     font-size: 13px;
-    padding: 8px 12px; 
-    border-radius: 6px; 
+    padding: 8px 12px;
+    border-radius: 6px;
     transition: all 0.2s;
-    display: flex; 
-    align-items: center; 
-    gap: 6px; 
+    display: flex;
+    align-items: center;
+    gap: 6px;
     white-space: nowrap;
     cursor: pointer;
   }
   .nav-link:hover { color: #0f172a; background-color: #f1f5f9; }
   .nav-link i { font-size: 14px; }
+  /* Página actual */
+  .nav-link.active { color: #0f172a; background-color: #f1f5f9; }
 
   /* Dropdowns */
-  .nav-dropdown { 
-    position: relative; 
-    height: 100%; 
-    display: flex; 
-    align-items: center; 
+  .nav-dropdown {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
   }
-  
+
   .dropdown-menu {
-    display: none; 
-    position: absolute; 
-    top: 60px; 
+    display: none;
+    position: absolute;
+    top: 60px;
     left: 0;
-    background: white; 
+    background: white;
     min-width: 220px;
-    border: 1px solid #e2e8f0; 
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-    padding: 5px 0; 
+    padding: 5px 0;
     margin: 0;
-    list-style: none; 
+    list-style: none;
     z-index: 1001;
     animation: fadeIn 0.15s ease;
   }
-  
-  /* DESKTOP: hover funciona */
+
+  /* DESKTOP: abre con el mouse o con el teclado (Tab) */
   @media (min-width: 1101px) {
-    .nav-dropdown:hover .dropdown-menu { display: block; }
+    .nav-dropdown:hover .dropdown-menu,
+    .nav-dropdown:focus-within .dropdown-menu { display: block; }
   }
-  
+
   /* MOBILE/TABLET: usar clase .active */
   .dropdown-menu.active { display: block; }
-  
+
   .dropdown-menu li a {
-    display: flex; 
-    align-items: center; 
+    display: flex;
+    align-items: center;
     gap: 10px;
-    padding: 10px 15px; 
-    color: #475569; 
+    padding: 10px 15px;
+    color: #475569;
     text-decoration: none;
-    font-size: 13px; 
+    font-size: 13px;
     transition: background 0.2s;
   }
-  .dropdown-menu li a:hover { 
-    background-color: #f8fafc; 
-    color: #0f172a; 
-    padding-left: 20px; 
+  .dropdown-menu li a:hover {
+    background-color: #f8fafc;
+    color: #0f172a;
+    padding-left: 20px;
   }
-  .dropdown-menu li a i { 
-    width: 18px; 
-    text-align: center; 
-    color: #94a3b8; 
+  .dropdown-menu li a.active { color: #0f172a; font-weight: 700; }
+  .dropdown-menu li a i {
+    width: 18px;
+    text-align: center;
+    color: #94a3b8;
   }
-  
+
   /* Submenús */
   .dropdown-submenu { position: relative; }
   .dropdown-submenu .submenu {
-    display: none; 
-    position: absolute; 
-    top: -5px; 
-    left: 100%; 
+    display: none;
+    position: absolute;
+    top: -5px;
+    left: 100%;
     margin-left: 5px;
-    background: white; 
-    border-radius: 8px; 
+    background: white;
+    border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    border: 1px solid #e2e8f0; 
-    min-width: 180px; 
-    padding: 5px 0; 
+    border: 1px solid #e2e8f0;
+    min-width: 180px;
+    padding: 5px 0;
     list-style: none;
   }
-  
+
   @media (min-width: 1101px) {
-    .dropdown-submenu:hover > .submenu { display: block; }
+    .dropdown-submenu:hover > .submenu,
+    .dropdown-submenu:focus-within > .submenu { display: block; }
   }
   .dropdown-submenu .submenu.active { display: block; }
 
   /* User Area */
   .user-actions {
-    display: flex; 
-    align-items: center; 
-    gap: 15px; 
+    display: flex;
+    align-items: center;
+    gap: 15px;
     margin-left: 20px;
-    padding-left: 20px; 
-    border-left: 1px solid #e2e8f0; 
+    padding-left: 20px;
+    border-left: 1px solid #e2e8f0;
     height: 40px;
   }
   .user-info { text-align: right; line-height: 1.2; }
-  .user-name { 
-    font-weight: 700; 
-    font-size: 13px; 
-    color: #1e293b; 
-    display: block; 
+  .user-name {
+    font-weight: 700;
+    font-size: 13px;
+    color: #1e293b;
+    display: block;
   }
-  .user-role { 
-    font-size: 11px; 
-    color: #94a3b8; 
-    text-transform: uppercase; 
+  .user-role {
+    font-size: 11px;
+    color: #94a3b8;
+    text-transform: uppercase;
   }
   .btn-logout {
-    color: #ef4444; 
-    border: 1px solid #fee2e2; 
+    color: #ef4444;
+    border: 1px solid #fee2e2;
     background: #fef2f2;
-    width: 32px; 
-    height: 32px; 
-    border-radius: 6px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: 0.2s;
     cursor: pointer;
     text-decoration: none;
   }
-  .btn-logout:hover { 
-    background: #fee2e2; 
-    transform: scale(1.05); 
+  .btn-logout:hover {
+    background: #fee2e2;
+    transform: scale(1.05);
   }
 
   /* Mobile Toggle */
-  .mobile-toggle { 
-    display: none; 
-    background: none; 
-    border: none; 
-    font-size: 24px; 
-    color: #1e293b; 
+  .mobile-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #1e293b;
     cursor: pointer;
     padding: 5px;
   }
 
-  @keyframes fadeIn { 
-    from { opacity: 0; transform: translateY(-5px); } 
-    to { opacity: 1; transform: translateY(0); } 
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   /* =========================================
@@ -191,47 +196,49 @@
      ========================================= */
   @media (max-width: 1100px) {
     .mobile-toggle { display: block; }
-    
+
     .nav-container {
-      display: none; 
-      position: fixed; 
-      top: 70px; 
-      left: 0; 
-      width: 100%; 
+      display: none;
+      position: fixed;
+      top: 70px;
+      left: 0;
+      width: 100%;
       height: calc(100vh - 70px);
-      background: white; 
-      flex-direction: column; 
+      background: white;
+      flex-direction: column;
       align-items: flex-start;
-      padding: 0; 
-      overflow-y: auto; 
+      padding: 0;
+      overflow-y: auto;
       border-top: 1px solid #e2e8f0;
       z-index: 999; /* Z-INDEX IMPORTANTE PARA QUE SE VEA */
     }
     .nav-container.active { display: flex; }
+    /* El menú solo se muestra con .active, aunque otro script le ponga display inline */
+    .nav-container:not(.active) { display: none !important; }
 
     .nav-link, .nav-dropdown { width: 100%; }
-    .nav-link { 
-      padding: 15px 20px; 
-      border-bottom: 1px solid #f1f5f9; 
-      font-size: 15px; 
+    .nav-link {
+      padding: 15px 20px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 15px;
       justify-content: space-between;
       border-radius: 0;
     }
-    
+
     .dropdown-menu {
-      position: static; 
-      box-shadow: none; 
-      border: none; 
+      position: static;
+      box-shadow: none;
+      border: none;
       border-radius: 0;
-      width: 100%; 
-      padding: 0; 
+      width: 100%;
+      padding: 0;
       background: #f8fafc;
       animation: none;
     }
 
-    .dropdown-menu li a { 
-      padding-left: 40px; 
-      border-bottom: 1px solid #eee; 
+    .dropdown-menu li a {
+      padding-left: 40px;
+      border-bottom: 1px solid #eee;
     }
 
     .dropdown-submenu .submenu {
@@ -245,16 +252,16 @@
     .dropdown-submenu .submenu li a {
       padding-left: 60px;
     }
-    
+
     .user-actions {
-      width: 100%; 
-      margin: 0; 
-      padding: 20px; 
-      border-top: 1px solid #e2e8f0; 
+      width: 100%;
+      margin: 0;
+      padding: 20px;
+      border-top: 1px solid #e2e8f0;
       border-left: none;
-      justify-content: space-between; 
-      flex-direction: row-reverse; 
-      background: #fff; 
+      justify-content: space-between;
+      flex-direction: row-reverse;
+      background: #fff;
       margin-top: auto;
       box-sizing: border-box;
     }
@@ -267,14 +274,14 @@
     <img src="assets/img/logo_santajosefina.png" alt="Santa Josefina" class="logo-img" />
   </a>
 
-  <button class="mobile-toggle" onclick="toggleMenu()">
+  <button class="mobile-toggle" id="btnMenu" onclick="toggleMenu()" aria-label="Abrir menú" aria-expanded="false" aria-controls="navMenu">
     <i class="fa-solid fa-bars"></i>
   </button>
 
   <nav class="nav-container" id="navMenu">
-    
+
     <div class="nav-dropdown">
-      <a href="#" class="nav-link" onclick="toggleDropdown(event, this)">
+      <a href="#" class="nav-link" onclick="toggleDropdown(event, this)" aria-haspopup="true" aria-expanded="false">
         <div style="display:flex; align-items:center; gap:6px;">
           <i class="fa-solid fa-handshake"></i> Corretaje
         </div>
@@ -290,7 +297,7 @@
     </div>
 
     <div class="nav-dropdown">
-      <a href="#" class="nav-link" onclick="toggleDropdown(event, this)">
+      <a href="#" class="nav-link" onclick="toggleDropdown(event, this)" aria-haspopup="true" aria-expanded="false">
         <div style="display:flex; align-items:center; gap:6px;">
           <i class="fa-solid fa-building"></i> Condominios
         </div>
@@ -315,7 +322,7 @@
     </div>
 
     <div class="nav-dropdown">
-      <a href="#" class="nav-link" onclick="toggleDropdown(event, this)">
+      <a href="#" class="nav-link" onclick="toggleDropdown(event, this)" aria-haspopup="true" aria-expanded="false">
         <div style="display:flex; align-items:center; gap:6px;">
           <i class="fa-solid fa-coins"></i> Finanzas
         </div>
@@ -330,7 +337,7 @@
     </div>
 
     <div class="nav-dropdown">
-      <a href="#" class="nav-link" onclick="toggleDropdown(event, this)">
+      <a href="#" class="nav-link" onclick="toggleDropdown(event, this)" aria-haspopup="true" aria-expanded="false">
         <div style="display:flex; align-items:center; gap:6px;">
           <i class="fa-solid fa-tree"></i> Espacios
         </div>
@@ -342,11 +349,12 @@
         <li><a href="gestion_reclamos.html"><i class="fa-solid fa-triangle-exclamation"></i> Reclamos</a></li>
       </ul>
     </div>
-<div class="nav-dropdown">
-      <a href="#" class="nav-link" onclick="toggleDropdown(event, this)">
+
+    <div class="nav-dropdown">
+      <a href="#" class="nav-link" onclick="toggleDropdown(event, this)" aria-haspopup="true" aria-expanded="false">
         <div style="display:flex; align-items:center; gap:6px;">
           <i class="fa-solid fa-bullhorn"></i> MKT
-    </div>
+        </div>
         <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i>
       </a>
       <ul class="dropdown-menu">
@@ -357,6 +365,7 @@
         <li><a href="gestion_leads.html"><i class="fa-solid fa-person-walking-arrow-right"></i> Gestión de Leads</a></li>
       </ul>
     </div>
+
     <a href="agentes.html" class="nav-link"><i class="fa-solid fa-user-tie"></i> Agentes</a>
 
     <div class="user-actions">
@@ -364,83 +373,106 @@
         <span class="user-name" id="headerUserName">Usuario</span>
         <span class="user-role" id="headerUserRole">Agente</span>
       </div>
-      <a href="#" class="btn-logout" onclick="logout(event)" title="Salir">
+      <a href="#" class="btn-logout" onclick="logout(event)" title="Salir" aria-label="Cerrar sesión">
         <i class="fa-solid fa-power-off"></i>
       </a>
     </div>
-    
+
   </nav>
 </header>
 
 <script>
-  // Usamos una función de inicialización que se asegure de que el DOM esté listo
-  (function() {
-    
-    // 1. Toggle menú principal (Hamburger)
-    window.toggleMenu = function() {
-      const nav = document.getElementById('navMenu');
-      if (nav) {
-          nav.classList.toggle('active');
-          console.log("Menú toggleado"); // Para debug
-      } else {
-          console.error("No se encontró el elemento #navMenu");
-      }
-    };
-    
-    // 2. Toggle dropdowns (Móvil)
-    window.toggleDropdown = function(event, element) {
-      if (window.innerWidth <= 1100) {
-        event.preventDefault();
-        const dropdown = element.nextElementSibling;
-        
-        // Cerrar otros abiertos para que no se amontonen
-        document.querySelectorAll('.nav-dropdown > .dropdown-menu').forEach(menu => {
-          if (menu !== dropdown) menu.classList.remove('active');
-        });
-        
-        dropdown.classList.toggle('active');
-      }
+  (function () {
+    var BP = 1100; // mismo punto de quiebre que el CSS
+
+    // 1. Menú principal (hamburguesa)
+    window.toggleMenu = function () {
+      var nav = document.getElementById('navMenu');
+      var btn = document.getElementById('btnMenu');
+      if (!nav) return;
+      var abierto = nav.classList.toggle('active');
+      if (btn) btn.setAttribute('aria-expanded', abierto ? 'true' : 'false');
     };
 
-    // 3. Toggle submenús (Móvil)
-    window.toggleSubmenu = function(event, element) {
-      if (window.innerWidth <= 1100) {
-        event.preventDefault();
-        event.stopPropagation();
-        const submenu = element.nextElementSibling;
-        submenu.classList.toggle('active');
-      }
+    // 2. Dropdowns (móvil)
+    window.toggleDropdown = function (event, element) {
+      if (window.innerWidth > BP) return;
+      event.preventDefault();
+      var dropdown = element.nextElementSibling;
+      if (!dropdown) return;
+      // Cerrar los otros para que no se amontonen
+      document.querySelectorAll('.nav-dropdown > .dropdown-menu').forEach(function (menu) {
+        if (menu !== dropdown) {
+          menu.classList.remove('active');
+          var t = menu.previousElementSibling;
+          if (t) t.setAttribute('aria-expanded', 'false');
+        }
+      });
+      var abierto = dropdown.classList.toggle('active');
+      element.setAttribute('aria-expanded', abierto ? 'true' : 'false');
     };
-    
+
+    // 3. Submenús (móvil)
+    window.toggleSubmenu = function (event, element) {
+      if (window.innerWidth > BP) return;
+      event.preventDefault();
+      event.stopPropagation();
+      var submenu = element.nextElementSibling;
+      if (submenu) submenu.classList.toggle('active');
+    };
+
     // 4. Limpieza al redimensionar
-    window.addEventListener('resize', function() {
-      if (window.innerWidth > 1100) {
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > BP) {
         document.querySelectorAll('.dropdown-menu.active, .submenu.active, .nav-container.active')
-                .forEach(el => el.classList.remove('active'));
+          .forEach(function (el) { el.classList.remove('active'); });
+        var btn = document.getElementById('btnMenu');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
       }
     });
 
-    // 5. Cargar datos del usuario al cargar el componente
-    // Usamos un pequeño timeout para asegurar que el DOM se renderizó
-    setTimeout(() => {
+    // 5. Datos del usuario. La sesión guarda { nombre, rol } (api_cliente.js); se aceptan también Nombre y Rol.
+    function pintarUsuario() {
       try {
-        const s = localStorage.getItem('sesion_activa');
-        if(s) {
-          const u = JSON.parse(s);
-          const elName = document.getElementById('headerUserName');
-          const elRole = document.getElementById('headerUserRole');
-          if(elName && u.Nombre) elName.innerText = u.Nombre.split(' ')[0];
-          if(elRole && u.Rol) elRole.innerText = u.Rol;
-        }
-      } catch(e) { console.warn('Error cargando user info', e); }
-    }, 100);
+        var raw = localStorage.getItem('auth_user') || localStorage.getItem('sesion_activa');
+        if (!raw) return;
+        var u = JSON.parse(raw);
+        var nombre = u.nombre || u.Nombre;
+        var rol = u.rol || u.Rol;
+        var elName = document.getElementById('headerUserName');
+        var elRole = document.getElementById('headerUserRole');
+        if (elName && nombre) elName.textContent = String(nombre).split(' ')[0];
+        if (elRole && rol) elRole.textContent = rol;
+      } catch (e) { console.warn('Error cargando datos del usuario', e); }
+    }
 
-    window.logout = function(event) {
-      event.preventDefault();
-      if (confirm('¿Deseas cerrar sesión?')) {
-        localStorage.removeItem('sesion_activa');
-        window.location.href = 'login.html';
-      }
+    // 6. Marcar la página actual (y el menú que la contiene)
+    function marcarPaginaActual() {
+      var pagina = window.location.pathname.split('/').pop() || 'index.html';
+      var nav = document.getElementById('navMenu');
+      if (!nav) return;
+      nav.querySelectorAll('a[href]').forEach(function (a) {
+        var href = (a.getAttribute('href') || '').split('?')[0];
+        if (href !== pagina) return;
+        a.classList.add('active');
+        var dd = a.closest('.nav-dropdown');
+        if (dd) {
+          var disparador = dd.querySelector(':scope > .nav-link');
+          if (disparador) disparador.classList.add('active');
+        }
+      });
+    }
+
+    // 7. Cerrar sesión: borra la sesión del equipo (token incluido) y vuelve al login
+    window.logout = function (event) {
+      if (event) event.preventDefault();
+      if (!confirm('¿Deseas cerrar sesión?')) return;
+      if (typeof cerrarSesionLocal === 'function') cerrarSesionLocal();
+      ['crm_token', 'crm_cc', 'auth_user', 'sesion_activa'].forEach(function (k) { localStorage.removeItem(k); });
+      window.location.href = 'login.html';
     };
+
+    pintarUsuario();
+    marcarPaginaActual();
   })();
 </script>

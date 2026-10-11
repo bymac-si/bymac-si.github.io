@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cambiar contraseña - CRM Santa Josefina</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#1a2b48" />
+    <link rel="apple-touch-icon" href="assets/img/icon-192.png" />
+
+    <style>
+      body {
+        margin: auto;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f1f5f9;
+        font-family: "Inter", sans-serif;
+      }
+      .login-card {
+        background: white;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+        border: 1px solid #e2e8f0;
+      }
+      .logo { max-width: 180px; margin-bottom: 20px; }
+      h1 { font-size: 20px; color: #1e293b; margin-bottom: 8px; font-weight: 800; }
+      p { color: #64748b; font-size: 14px; margin-bottom: 30px; }
+      .form-group { text-align: left; margin-bottom: 20px; }
+      label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+      }
+      input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 16px;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+      }
+      input:focus { border-color: #1a2b48; outline: none; }
+      .btn-login {
+        width: 100%;
+        padding: 14px;
+        background-color: #1a2b48;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      .btn-login:hover { background-color: #0f172a; }
+      .btn-login:disabled { opacity: 0.6; cursor: default; }
+      .error-msg {
+        color: #ef4444;
+        font-size: 13px;
+        margin-top: 15px;
+        display: none;
+        padding: 10px;
+        background: #fef2f2;
+        border-radius: 6px;
+        text-align: left;
+      }
+      .hint { font-size: 12px; margin: 6px 0 0; color: #64748b; }
+      .link-home {
+        margin-top: 20px;
+        display: block;
+        font-size: 13px;
+        color: #64748b;
+        text-decoration: none;
+      }
+      .link-home:hover { text-decoration: underline; }
+    </style>
+  </head>
+  <body>
+    <div class="login-card">
+      <img src="assets/img/logo_santajosefina.png" alt="Santa Josefina Logo" class="logo" />
+      <h1>Cambiar contraseña</h1>
+      <p id="aviso">Elige una contraseña de al menos 10 caracteres.</p>
+
+      <form id="claveForm">
+        <div class="form-group">
+          <label for="actual">Contraseña actual</label>
+          <input type="password" id="actual" autocomplete="current-password" required />
+        </div>
+
+        <div class="form-group">
+          <label for="nueva">Contraseña nueva</label>
+          <input type="password" id="nueva" autocomplete="new-password" minlength="10" required />
+          <p class="hint">Mínimo 10 caracteres.</p>
+        </div>
+
+        <div class="form-group">
+          <label for="repetir">Repetir contraseña nueva</label>
+          <input type="password" id="repetir" autocomplete="new-password" required />
+        </div>
+
+        <button type="submit" class="btn-login" id="btnGuardar">Guardar contraseña</button>
+      </form>
+
+      <div id="errorMsg" class="error-msg" role="alert"></div>
+
+      <a href="login.html" class="link-home" id="salir">← Salir</a>
+    </div>
+
+    <script src="assets/js/api_cliente.js"></script>
+    <script>
+      if (!getToken() || tokenVencido(getToken()) || !getAuthUser()) {
+        cerrarSesionLocal();
+        window.location.replace("login.html");
+      }
+
+      const forzado = localStorage.getItem("crm_cc") === "1";
+      if (forzado) {
+        document.getElementById("aviso").textContent =
+          "Entraste con una contraseña temporal. Por seguridad, elige ahora tu contraseña personal. Escribe la temporal como contraseña actual.";
+      }
+      document.getElementById("salir").addEventListener("click", () => cerrarSesionLocal());
+
+      const form = document.getElementById("claveForm");
+      const errorDiv = document.getElementById("errorMsg");
+      const btn = document.getElementById("btnGuardar");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (btn.disabled) return;
+        const fallo = (m) => { errorDiv.textContent = m; errorDiv.style.display = "block"; };
+        errorDiv.style.display = "none";
+
+        const actual = document.getElementById("actual").value;
+        const nueva = document.getElementById("nueva").value;
+        const repetir = document.getElementById("repetir").value;
+        if (nueva.length < 10) return fallo("La contraseña nueva debe tener al menos 10 caracteres.");
+        if (nueva !== repetir) return fallo("Las contraseñas nuevas no coinciden.");
+        if (nueva === actual) return fallo("La contraseña nueva debe ser distinta de la actual.");
+
+        btn.disabled = true;
+        btn.textContent = "Guardando...";
+        try {
+          await cambiarClaveEquipo(actual, nueva);
+          irAlPanel();
+        } catch (err) {
+          fallo(err.message || "No se pudo cambiar la contraseña.");
+          btn.disabled = false;
+          btn.textContent = "Guardar contraseña";
+        }
+      });
+    </script>
+  </body>
+</html>
