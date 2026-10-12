@@ -13,9 +13,31 @@
 // ============================================================================
 
 // ==========================================
-// 0. PWA REGISTRATION
+// 0. CONFIGURACIÓN GLOBAL: PÁGINAS PÚBLICAS
+// ✅ CAMBIO: lista central de páginas donde NUNCA debe redirigir el router
+// ni inyectarse el header de administración.
 // ==========================================
-if ('serviceWorker' in navigator) {
+const PAGINAS_PUBLICAS = [
+    "index.html",
+    "landing_desktop.html",
+    "landing_mobile.html",
+    "checklist_seguridad.html",
+    "propiedades_publicas.html",
+    "login.html",
+    "login_residente.html",
+];
+
+function esPaginaPublica() {
+    const path = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+    if (path === "" || path === "/") return true; // raíz del sitio
+    return PAGINAS_PUBLICAS.includes(path);
+}
+
+// ==========================================
+// 1. PWA REGISTRATION
+// ✅ CAMBIO: no registrar Service Worker en páginas públicas (landing).
+// ==========================================
+if ('serviceWorker' in navigator && !esPaginaPublica()) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
             .then(reg => console.log('Service Worker registrado:', reg.scope))
@@ -44,7 +66,7 @@ function mostrarAvisoOffline(estamosOffline) {
 }
 
 // ==========================================
-// 1. UTILIDADES / HELPERS
+// 2. UTILIDADES / HELPERS
 // ==========================================
 
 function formatearFecha(iso) {
@@ -74,7 +96,7 @@ function norm(s) {
 }
 
 // ==========================================
-// 2. LÓGICA DE UTM AUTOMÁTICA (GLOBAL & CACHÉ)
+// 3. LÓGICA DE UTM AUTOMÁTICA (GLOBAL & CACHÉ)
 // ==========================================
 
 window.UTM_VALOR = 69751;
@@ -125,7 +147,7 @@ function actualizarDOMconUTM() {
 }
 
 // ==========================================
-// 3. CÁLCULO MATEMÁTICO
+// 4. CÁLCULO MATEMÁTICO
 // ==========================================
 function calcularHonorarioGlobal(unidades, factor, utm) {
     if (!(factor > 0 && utm > 0)) return { neto: 0, iva: 0, total: 0 };
@@ -150,7 +172,7 @@ function calcularHonorarioGlobal(unidades, factor, utm) {
 }
 
 // ==========================================
-// 4. LÓGICA DE PROPUESTA COMERCIAL
+// 5. LÓGICA DE PROPUESTA COMERCIAL
 // ==========================================
 
 function imprimirPDF() {
@@ -216,10 +238,19 @@ async function cargarDatosPropuesta() {
 }
 
 // ==========================================
-// 5. INICIALIZACIÓN GLOBAL Y CARGA COMPONENTES
+// 6. INICIALIZACIÓN GLOBAL Y CARGA COMPONENTES
+// ✅ CAMBIO: en páginas públicas (landing) NO se carga header, NO se
+// inicializa UTM, NO se enruta. Solo se cargan helpers globales.
 // ==========================================
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // ✅ CAMBIO: salida temprana para páginas públicas
+    if (esPaginaPublica()) {
+        // En login solo se necesita el helper de sesión, nada más.
+        // En landing no se necesita nada de app.js.
+        return;
+    }
+
     // 1. UTM
     inicializarUTM();
 
@@ -242,10 +273,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ==========================================
-// 6. LÓGICA DEL HEADER (SISTEMA DE NAVEGACIÓN)
+// 7. LÓGICA DEL HEADER (SISTEMA DE NAVEGACIÓN)
+// ✅ CAMBIO: loadHeader() se salta páginas públicas para no inyectar
+// el header de admin en la landing.
 // ==========================================
 
 async function loadHeader() {
+    // ✅ CAMBIO: no cargar header de admin en páginas públicas
+    if (esPaginaPublica()) return;
+
     const headerContainer = document.getElementById("header");
     if (!headerContainer) return;
 
@@ -340,12 +376,19 @@ function highlightActiveLink(container) {
 }
 
 // ==========================================
-// 7. ENRUTAMIENTO PWA (Router)
+// 8. ENRUTAMIENTO PWA (Router)
+// ✅ CAMBIO: el router ya NO actúa en páginas públicas. Además
+// solo redirige si REALMENTE hay sesión activa.
 // ==========================================
 
 function iniciarEnrutamientoInteligente() {
-    const path = window.location.pathname;
-    const isRoot = path.includes("index.html") || path === "/" || path.endsWith("/");
+    // ✅ CAMBIO: nunca redirigir desde páginas públicas
+    if (esPaginaPublica()) return;
+
+    const path = window.location.pathname.split("/").pop() || "index.html";
+
+    // Solo actúa en la raíz real del sitio (index.html o "/")
+    const isRoot = path === "index.html" || path === "" || window.location.pathname === "/";
     if (!isRoot) return;
 
     // El equipo tiene prioridad; los residentes van a su portal real.
@@ -354,10 +397,11 @@ function iniciarEnrutamientoInteligente() {
     } else if (localStorage.getItem("sesion_residente") || localStorage.getItem("sesion_externa")) {
         window.location.href = "portal_residente.html";
     }
+    // ✅ Si no hay ninguna sesión, no hace nada: la landing se muestra normal.
 }
 
 // ==========================================
-// 8. SESIÓN: SALIR Y MENÚ
+// 9. SESIÓN: SALIR Y MENÚ
 // ==========================================
 
 // Cierre de sesión del equipo. Borra el token del CRM y los datos de pantalla.
