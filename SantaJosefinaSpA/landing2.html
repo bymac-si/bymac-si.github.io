@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Santa Josefina SpA - Gestión Inmobiliaria Integral</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Arriendo y administración de edificios, condominios y propiedades en Santiago. Ley 21.442, transparencia y trato directo. Santa Josefina SpA." />
+  <meta name="theme-color" content="#1a2b48" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="assets/img/icon-192.png" />
+
+  <!-- Preconnect solo si mantienes EmailJS -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+
+  <link rel="stylesheet" href="assets/css/styles.css" />
+
+  <style>
+    :root {
+      --brand: #1a2b48;
+      --accent: #e74e35;
+      --accent-dark: #c33a23;   /* para texto sobre blanco: 4.6:1 */
+      --muted: #5b5b5b;
+      --muted-2: #6b6459;       /* secundarios sobre blanco */
+      --line: #e5e7eb;
+      --max: 1200px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: var(--brand);
+      background: #f7f7f7;
+    }
+    a { text-decoration: none; }
+    img { max-width: 100%; height: auto; display: block; }
+    .container-narrow { max-width: var(--max); padding: 0 20px; margin: 0 auto; }
+
+    ul.plain { list-style: none; padding: 0; }
+    ul.bullets { padding-left: 1.2rem; }
+    ul.bullets li { list-style: square; font-weight: 700; text-align: left; margin-bottom: .5rem; }
+
+    /* ==== HEADER ==== */
+    .main-header {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: var(--max);
+      z-index: 30;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(6px);
+      transition: background .25s, box-shadow .25s;
+      height: 88px;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .main-header.scrolled {
+      background: rgba(255,255,255,0.98);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    .navbar-custom {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      height: 100%;
+    }
+    .brand img { width: 130px; height: auto; }
+    .nav-links { display: flex; align-items: center; }
+    .nav-links a {
+      margin-left: 18px;
+      color: var(--brand);
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .95rem;
+    }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-actions { display: flex; gap: 8px; }
+
+    /* ==== BOTONES ==== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: .6rem 1rem;
+      border-radius: 999px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 0;
+      transition: transform .15s, filter .15s, background .15s;
+      font-size: .95rem;
+      line-height: 1;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    .btn-lg { padding: .85rem 1.4rem; font-size: 1rem; }
+    .btn-sm { padding: .45rem .9rem; font-size: .85rem; }
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--brand);
+      color: var(--brand);
+    }
+    .btn-outline:hover { background: var(--brand); color: #fff; }
+
+    /* ==== MENÚ MÓVIL ==== */
+    .menu-toggle {
+      display: none;
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .mobile-menu {
+      position: fixed;
+      inset: 0 0 0 auto;
+      width: min(320px, 88vw);
+      background: #fff;
+      transform: translateX(100%);
+      transition: transform .25s ease;
+      z-index: 40;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: -10px 0 30px rgba(0,0,0,.15);
+      overflow-y: auto;
+    }
+    .mobile-menu[aria-hidden="false"] { transform: translateX(0); }
+    .mobile-menu a {
+      color: var(--brand);
+      font-weight: 600;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.4);
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s;
+      z-index: 35;
+    }
+    .backdrop.active { opacity: 1; pointer-events: auto; }
+
+    @media (max-width: 900px) {
+      .nav-links, .nav-actions { display: none; }
+      .menu-toggle { display: inline-flex; }
+    }
+
+    /* ==== HERO ==== */
+    .hero {
+      position: relative;
+      min-height: 70vh;
+      display: grid;
+      place-items: center;
+      padding: 130px 0 60px;
+      isolation: isolate;
+    }
+    .hero::before {
+      content: "";
+      position: absolute; inset: 0;
+      background: url("assets/img/administracion-hero.png") center/cover no-repeat;
+      opacity: .12;
+      z-index: -1;
+    }
+    .hero-wrap { color: var(--brand); text-align: center; }
+    .hero-kicker {
+      color: #455c78; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; margin-bottom: 10px;
+    }
+    .hero-title {
+      color: #cd241c; font-weight: 900; line-height: 1.1;
+      font-size: clamp(32px, 5vw, 56px);
+      max-width: 900px; margin: 0 auto 20px;
+    }
+    .hero p.lead {
+      max-width: 700px; margin: 0 auto 30px;
+      font-size: 1.15rem; color: #3a5273;
+    }
+    .hero-cta {
+      display: flex; gap: 12px; justify-content: center;
+      margin-top: 30px; flex-wrap: wrap;
+    }
+
+    /* ==== FEATURES ==== */
+    .features { padding: 60px 0; }
+    .features-grid {
+      display: grid;
+      gap: 40px;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+    }
+    .circles {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    .circle {
+      aspect-ratio: 1/1;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 8px solid #fff;
+      box-shadow: 0 10px 25px rgba(0,0,0,.1);
+      margin: 0;
+    }
+    .circle:nth-child(2) { transform: translateY(24px); }
+    .circle img { width: 100%; height: 100%; object-fit: cover; }
+
+    .kicker {
+      font-size: 13px; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--muted-2); margin: 0 0 8px; display: block; font-weight: 700;
+    }
+    .h2 {
+      font-size: clamp(26px, 3.2vw, 40px);
+      margin: 0 0 12px; line-height: 1.15;
+    }
+    .list { display: grid; gap: 20px; margin: 30px 0 0; }
+    .item b { display: block; margin-bottom: 6px; color: var(--brand); text-transform: uppercase; }
+    .item p { margin: 0; color: var(--muted-2); }
+
+    /* ==== SECCIONES ==== */
+    #copropiedad {
+      padding: 60px 40px;
+      background: #fff;
+      border-radius: 16px;
+      margin: 0 auto 60px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,.03);
+      max-width: var(--max);
+    }
+    #copropiedad h2 { color: var(--accent-dark); }
+    #copropiedad p { max-width: 800px; margin: 0 auto 20px; font-size: 18px; color: var(--muted-2); }
+    #copropiedad h3 { font-size: 20px; font-weight: 700; color: var(--brand); }
+
+    #propiedades { padding: 60px 0; background: #eef2f6; }
+    #listaPropiedades {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+    .prop-card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,.05);
+      transition: transform .2s;
+      display: flex; flex-direction: column;
+    }
+    .prop-card:hover { transform: translateY(-5px); }
+    .prop-media { position: relative; }
+    .prop-media img { width: 100%; height: 200px; object-fit: cover; }
+    .prop-badge {
+      position: absolute; top: 10px; right: 10px;
+      background: var(--accent); color: #fff;
+      padding: 4px 10px; border-radius: 20px;
+      font-size: 12px; font-weight: 700;
+    }
+    .prop-body { padding: 18px; }
+    .prop-body h3 { font-size: 18px; margin: 0 0 5px; font-weight: 700; }
+    .prop-body p.meta { color: var(--muted-2); font-size: 14px; margin: 0 0 10px; }
+    .prop-body p.price { font-weight: 800; font-size: 20px; color: var(--brand); margin: 0 0 14px; }
+
+    #servicios { padding: 60px 0; background: #fafafa; }
+    .services {
+      display: grid; gap: 40px;
+      grid-template-columns: 1fr 1fr; align-items: start;
+    }
+    .contact {
+      display: grid; gap: 12px;
+      background: #fff; padding: 28px;
+      border-radius: 16px; box-shadow: var(--shadow);
+    }
+    .contact a { font-weight: 700; color: var(--brand); display: flex; align-items: center; gap: 10px; }
+    .contact .hint { color: var(--muted-2); font-size: 14px; }
+
+    #formSection { padding: 60px 0; background: #fff; }
+    #formContacto { display: grid; gap: 14px; max-width: 600px; margin: 0 auto; }
+    #formContacto input,
+    #formContacto textarea {
+      border: 1px solid var(--line);
+      border-radius: 8px; padding: 12px;
+      width: 100%; background: #f9fafb; font: inherit;
+    }
+    #formContacto input:focus,
+    #formContacto textarea:focus {
+      outline: 2px solid var(--brand); background: #fff;
+    }
+    .form-msg {
+      display: none; text-align: center; margin-top: 20px;
+      padding: 15px; background: #dcfce7; color: #14532d;
+      border-radius: 8px;
+    }
+
+    footer {
+      background: var(--brand); padding: 40px 0;
+      color: #fff; text-align: center; font-size: 14px;
+    }
+
+    /* ==== MODAL ==== */
+    .modal {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.6); z-index: 10000;
+      align-items: center; justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: #fff; width: min(700px, 92vw);
+      border-radius: 16px; padding: 25px;
+      box-shadow: var(--shadow); max-height: 90vh; overflow-y: auto;
+    }
+    .modal-close {
+      background: none; border: 0; cursor: pointer;
+      font-size: 24px; color: var(--muted); line-height: 1;
+      padding: 4px 8px; border-radius: 6px;
+    }
+    .modal-close:hover { background: #f1f5f9; }
+
+    @media (max-width: 900px) {
+      .features-grid { grid-template-columns: 1fr; }
+      .services { grid-template-columns: 1fr; }
+      #copropiedad { padding: 40px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="main-header" id="mainHeader">
+  <div class="navbar-custom">
+    <a class="brand" href="index.html" aria-label="Inicio">
+      <img src="assets/img/logo_santajosefina.png" alt="Santa Josefina" width="130" height="60" />
+    </a>
+
+    <nav class="nav-links" aria-label="Principal">
+      <a href="#servicios"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg> Servicios</a>
+      <a href="#copropiedad"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01"/></svg> Copropiedades</a>
+      <a href="#propiedades"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4"/></svg> Propiedades</a>
+      <a href="#contacto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="m22 6-10 7L2 6"/></svg> Contacto</a>
+    </nav>
+
+    <div class="nav-actions">
+      <a href="login_residente.html" class="btn btn-outline btn-sm">Residentes</a>
+      <a href="dashboard.html" class="btn btn-primary btn-sm">Acceso Empresa</a>
+    </div>
+
+    <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileMenu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="backdrop" id="backdrop"></div>
+<nav class="mobile-menu" id="mobileMenu" aria-hidden="true" aria-label="Menú móvil">
+  <button class="modal-close" id="menuClose" aria-label="Cerrar menú" style="align-self:flex-end">×</button>
+  <a href="#servicios">Servicios</a>
+  <a href="#copropiedad">Copropiedades</a>
+  <a href="#propiedades">Propiedades</a>
+  <a href="#contacto">Contacto</a>
+  <a href="login_residente.html" class="btn btn-outline">Portal Residentes</a>
+  <a href="dashboard.html" class="btn btn-primary">Acceso Corporativo</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container-narrow hero-wrap">
+    <div class="hero-kicker">Gestión Inmobiliaria Integral</div>
+    <h1 class="hero-title">ADMINISTRAR SU EDIFICIO PUEDE SER MÁS SIMPLE</h1>
+    <p class="lead">Nosotros lo acompañamos para que su comunidad funcione mejor, con orden, transparencia y cercanía.</p>
+    <div class="hero-cta">
+      <a href="#contacto" class="btn btn-primary btn-lg">Habla con un especialista</a>
+      <a href="#propiedades" class="btn btn-primary btn-lg">Ver Propiedades</a>
+      <a href="checklist_seguridad.html" class="btn btn-primary btn-lg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Diagnóstico de Seguridad
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features container-narrow">
+  <div class="features-grid">
+    <div class="circles" aria-hidden="true">
+      <figure class="circle"><img src="assets/img/circ-3.jpg" alt="" loading="lazy" width="550" height="550"></figure>
+      <figure class="circle"><img src="assets/img/circ-1.jpg" alt="" loading="lazy" width="550" height="550"></figure>
+    </div>
+    <div class="features-copy">
+      <span class="kicker">lo que nos define</span>
+      <h2 class="h2" style="margin-bottom:30px;color:var(--brand)">
+        Gastos comunes claros.<br>Administración Ley 21.442.<br>Trato directo.
+      </h2>
+      <div class="list">
+        <div class="item">
+          <b>Transparencia real</b>
+          <p>Gastos comunes claros, bien explicados y siempre disponibles para el comité.</p>
+        </div>
+        <div class="item">
+          <b>Planificación que da tranquilidad</b>
+          <p>Presupuestos semestrales y anuales que permiten anticipar gastos y evitar imprevistos.</p>
+        </div>
+        <div class="item">
+          <b>Acompañamiento permanente</b>
+          <p>Presencia, respuesta oportuna y trabajo conjunto con su comunidad.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COPROPIEDAD -->
+<section id="copropiedad">
+  <h2>Una administración cercana, que se hace cargo</h2>
+  <p>En Santa Josefina SpA entendemos que administrar un edificio no es solo manejar números, es acompañar a personas, comités y comunidades. Trabajamos con orden, transparencia y responsabilidad.</p>
+  <h3>Cuando la administración funciona, la comunidad se siente tranquila.</h3>
+</section>
+
+<!-- PROPIEDADES -->
+<section id="propiedades">
+  <div class="container-narrow">
+    <div style="text-align:center;margin-bottom:40px">
+      <span class="kicker">Corretaje</span>
+      <h2 style="color:var(--brand)">Propiedades Disponibles</h2>
+    </div>
+    <div id="listaPropiedades"><p style="text-align:center;width:100%">Cargando propiedades...</p></div>
+  </div>
+</section>
+
+<!-- SERVICIOS + CONTACTO -->
+<section id="servicios">
+  <div class="container-narrow services">
+    <div>
+      <h2>Servicios Especializados</h2>
+      <p style="color:var(--muted-2);margin-bottom:20px">
+        Santa Josefina SpA se especializa en la Administración de Edificios y Condominios Horizontales, además de servicios de corretaje integrales.
+      </p>
+      <ul class="bullets" style="color:var(--brand)">
+        <li>Compra y venta de propiedades residenciales y comerciales.</li>
+        <li>Arriendos y gestión integral para inversionistas.</li>
+        <li>Asesoría legal y financiera en transacciones.</li>
+        <li>Promoción y marketing digital de propiedades.</li>
+      </ul>
+    </div>
+    <aside id="contacto" class="contact">
+      <h3 style="margin-top:0">Solicite una evaluación</h3>
+      <p class="hint">Sin compromiso. Respuesta en horario hábil.</p>
+      <a href="tel:+56998647190">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        +56 9 9864 7190
+      </a>
+      <a href="mailto:marcos.castro@santajosefinaspa.cl">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="m22 6-10 7L2 6"/></svg>
+        marcos.castro@santajosefinaspa.cl
+      </a>
+      <a class="btn btn-primary" href="https://wa.me/56998647190?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20administraci%C3%B3n" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm5.78 14.13c-.24.68-1.42 1.31-1.95 1.36-.53.05-1.03.24-3.46-.72-2.92-1.15-4.77-4.14-4.91-4.33-.14-.19-1.17-1.55-1.17-2.96 0-1.41.74-2.1 1-2.39.26-.29.57-.36.76-.36.19 0 .38 0 .55.01.18.01.42-.07.65.5.24.58.82 2 .89 2.14.07.14.12.31.02.5-.1.19-.15.31-.29.48-.14.17-.3.38-.43.51-.14.14-.29.29-.12.57.17.29.75 1.24 1.61 2.01 1.11.99 2.04 1.3 2.33 1.44.29.14.46.12.63-.07.17-.19.72-.84.91-1.13.19-.29.38-.24.65-.14.26.1 1.66.78 1.94.92.29.14.48.22.55.34.07.12.07.7-.17 1.38z"/></svg>
+        Escribir por WhatsApp
+      </a>
+      <a class="btn btn-outline" href="mailto:marcos.castro@santajosefinaspa.cl?subject=Consulta%20Web">Enviar correo directo</a>
+    </aside>
+  </div>
+</section>
+
+<!-- FORM -->
+<section id="formSection">
+  <div class="container-narrow">
+    <div style="text-align:center;margin-bottom:30px">
+      <h2>Contáctenos</h2>
+      <p style="color:var(--muted-2)">Déjenos sus datos y lo contactaremos a la brevedad.</p>
+    </div>
+    <form id="formContacto" novalidate>
+      <label for="contactoNombre" class="sr-only" hidden>Nombre completo</label>
+      <input id="contactoNombre" name="nombre" type="text" placeholder="Nombre completo" autocomplete="name" required />
+      <input id="contactoEmail" name="email" type="email" placeholder="Correo electrónico" autocomplete="email" required />
+      <input id="contactoTelefono" name="telefono" type="tel" placeholder="Teléfono (+569...)" autocomplete="tel" />
+      <textarea id="contactoMensaje" name="mensaje" placeholder="¿En qué podemos ayudarle?" rows="4" required></textarea>
+      <button type="submit" class="btn btn-primary" id="btnSubmitContacto">Enviar Mensaje</button>
+    </form>
+    <div id="msgConfirmacion" class="form-msg" role="status" aria-live="polite">
+      ¡Gracias! Su mensaje ha sido recibido correctamente.
+    </div>
+  </div>
+</section>
+
+<!-- MODAL -->
+<div id="modalPropiedad" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="detalleTitulo">
+  <div class="modal-content">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:15px">
+      <h2 id="detalleTitulo" style="font-size:20px;font-weight:bold;margin:0;color:var(--brand)"></h2>
+      <button class="modal-close" onclick="cerrarModal()" aria-label="Cerrar">×</button>
+    </div>
+    <img id="detalleImagen" src="" alt="Propiedad" style="width:100%;height:300px;object-fit:cover;border-radius:8px;margin-bottom:15px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px;background:#f8fafc;padding:15px;border-radius:8px">
+      <div><b>Tipo:</b> <span id="detalleTipo"></span></div>
+      <div><b>Precio:</b> <span id="detallePrecio" style="color:var(--accent-dark);font-weight:bold"></span></div>
+      <div><b>Comuna:</b> <span id="detalleComuna"></span></div>
+      <div><b>Región:</b> <span id="detalleRegion"></span></div>
+    </div>
+    <h4 style="font-size:16px;border-bottom:1px solid #eee;padding-bottom:5px">Características</h4>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px">
+      <div>Const: <span id="detalleMetrosConstruidos"></span></div>
+      <div>Total: <span id="detalleMetrosTotales"></span></div>
+      <div>Dorms: <span id="detalleDormitorios"></span></div>
+      <div>Baños: <span id="detalleBanos"></span></div>
+    </div>
+    <div style="margin-top:25px;text-align:center">
+      <a href="#contacto" onclick="cerrarModal()" class="btn btn-primary" style="width:100%">Me interesa esta propiedad</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="container-narrow">
+    <p style="margin:0;opacity:.85">© <span id="y">2026</span> Santa Josefina SpA · Gestión Inmobiliaria Integral</p>
+  </div>
+</footer>
+
+<script src="assets/js/api_cliente.js"></script>
+<script src="assets/js/app.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js" defer></script>
+
+<script>
+  // Header scroll
+  const h = document.getElementById("mainHeader");
+  const onScroll = () => h.classList.toggle("scrolled", window.scrollY > 10);
+  document.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  document.getElementById("y").textContent = new Date().getFullYear();
+
+  // Menú móvil
+  const menuToggle = document.getElementById("menuToggle");
+  const mobileMenu = document.getElementById("mobileMenu");
+  const backdrop = document.getElementById("backdrop");
+  const menuClose = document.getElementById("menuClose");
+  function openMenu() {
+    mobileMenu.setAttribute("aria-hidden", "false");
+    menuToggle.setAttribute("aria-expanded", "true");
+    backdrop.classList.add("active");
+    document.body.style.overflow = "hidden";
+  }
+  function closeMenu() {
+    mobileMenu.setAttribute("aria-hidden", "true");
+    menuToggle.setAttribute("aria-expanded", "false");
+    backdrop.classList.remove("active");
+    document.body.style.overflow = "";
+  }
+  menuToggle.addEventListener("click", openMenu);
+  menuClose.addEventListener("click", closeMenu);
+  backdrop.addEventListener("click", closeMenu);
+  mobileMenu.querySelectorAll("a").forEach(a => a.addEventListener("click", closeMenu));
+
+  // Propiedades
+  let propiedadesGlobal = [];
+  let propiedadesDisponibles = [];
+
+  async function cargarPropiedadesLanding() {
+    try {
+      propiedadesGlobal = typeof fetchData === "function" ? await fetchData("Propiedades") : [];
+    } catch (e) { console.error(e); }
+
+    propiedadesDisponibles = propiedadesGlobal
+      .filter(p => (p.Estado || "") === "Disponible")
+      .slice(0, 6);
+
+    const contenedor = document.getElementById("listaPropiedades");
+    if (propiedadesDisponibles.length === 0) {
+      contenedor.innerHTML = '<p style="text-align:center;width:100%;color:#6b6459">No hay propiedades destacadas en este momento.</p>';
+      return;
+    }
+    contenedor.innerHTML = propiedadesDisponibles.map((p, i) => `
+      <article class="prop-card">
+        <div class="prop-media">
+          <img src="${p.ImagenURL || 'assets/img/default_prop.jpg'}" alt="Propiedad en ${p.Comuna || ''}" loading="lazy" width="600" height="400">
+          <span class="prop-badge">${p.Operacion || "Venta"}</span>
+        </div>
+        <div class="prop-body">
+          <h3>${p.Titulo || "Propiedad"}</h3>
+          <p class="meta">${p.Tipo || ""} en ${p.Comuna || ""}</p>
+          <p class="price">$${new Intl.NumberFormat("es-CL").format(p.Precio || 0)}</p>
+          <button onclick="abrirModal(${i})" class="btn btn-primary btn-sm" style="width:100%">Ver detalles</button>
+        </div>
+      </article>
+    `).join("");
+  }
+
+  function abrirModal(index) {
+    const p = propiedadesDisponibles[index] || {};
+    document.getElementById("detalleTitulo").textContent = p.Titulo || "Detalle Propiedad";
+    document.getElementById("detalleImagen").src = p.ImagenURL || "";
+    document.getElementById("detalleTipo").textContent = p.Tipo || "-";
+    document.getElementById("detalleComuna").textContent = p.Comuna || "-";
+    document.getElementById("detalleRegion").textContent = p.Region || "-";
+    document.getElementById("detallePrecio").textContent = "$" + new Intl.NumberFormat("es-CL").format(p.Precio || 0);
+    document.getElementById("detalleMetrosConstruidos").textContent = (p.MetrosConstruidos || "-") + " m²";
+    document.getElementById("detalleMetrosTotales").textContent = (p.MetrosTotales || "-") + " m²";
+    document.getElementById("detalleDormitorios").textContent = p.Dormitorios || "-";
+    document.getElementById("detalleBanos").textContent = p.Banos || "-";
+    const modal = document.getElementById("modalPropiedad");
+    modal.classList.add("active");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+  function cerrarModal() {
+    const modal = document.getElementById("modalPropiedad");
+    modal.classList.remove("active");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") { cerrarModal(); closeMenu(); }
+  });
+
+  cargarPropiedadesLanding();
+
+  // Formulario
+  const formContacto = document.getElementById("formContacto");
+  formContacto.onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById("btnSubmitContacto");
+    const originalText = btn.innerText;
+    btn.innerText = "Enviando...";
+    btn.disabled = true;
+
+    const nuevoID = "WEB_" + Date.now();
+    const fechaHoy = new Date().toISOString().split("T")[0];
+    const payload = {
+      ID: nuevoID,
+      Nombre: document.getElementById("contactoNombre").value.trim(),
+      Email: document.getElementById("contactoEmail").value.trim(),
+      Telefono: document.getElementById("contactoTelefono").value.trim(),
+      Observaciones: document.getElementById("contactoMensaje").value.trim(),
+      "Fecha Registro": fechaHoy,
+      Estado: "Nuevo",
+      Canal: "Web Landing",
+      "Tipo Operacion": "Consulta Web",
+      Agente: "Asignar",
+    };
+
+    try {
+      await registrarProspectoPublico("ProspectosCorretaje", payload);
+      await notificarNuevoLead(payload);
+      formContacto.reset();
+      document.getElementById("msgConfirmacion").style.display = "block";
+      setTimeout(() => { document.getElementById("msgConfirmacion").style.display = "none"; }, 6000);
+    } catch (err) {
+      console.error(err);
+      alert("Hubo un error al procesar la solicitud.");
+    } finally {
+      btn.innerText = originalText;
+      btn.disabled = false;
+    }
+  };
+
+  async function notificarNuevoLead(data) {
+    if (typeof emailjs === "undefined") return;
+    const htmlBody = `
+      <div style="font-family:sans-serif;padding:20px;border:2px solid #1A2B48;border-radius:10px">
+        <h2 style="color:#1A2B48">🚀 Nuevo Prospecto Web</h2>
+        <p>Un visitante ha completado el formulario de contacto:</p>
+        <ul style="background:#f9fafb;padding:15px;border-radius:5px">
+          <li><strong>Nombre:</strong> ${data.Nombre}</li>
+          <li><strong>Email:</strong> ${data.Email}</li>
+          <li><strong>Teléfono:</strong> ${data.Telefono}</li>
+          <li><strong>Fecha:</strong> ${data["Fecha Registro"]}</li>
+        </ul>
+        <p><strong>Mensaje:</strong></p>
+        <blockquote style="border-left:4px solid #e74e35;padding-left:10px;color:#555">${data.Observaciones}</blockquote>
+      </div>`;
+    return emailjs.send("service_p9hqkqn", "template_80q9psi", {
+      to_email: ADMIN_EMAIL,
+      subject: `[WEB] Nuevo Lead: ${data.Nombre}`,
+      html_body: htmlBody,
+      nombre: data.Nombre,
+      email: data.Email,
+      mensaje: data.Observaciones,
+    }).catch(e => console.warn("Error enviando email:", e));
+  }
+</script>
+</body>
+</html>
