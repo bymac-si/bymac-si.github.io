@@ -423,12 +423,12 @@
           style="position: relative; top: -30px"
         >
         
-          <a href="login_residente.html" class="btn btn-primary btn-sm px-3">
-            <i class="fa-solid fa-house-user"></i> Residentes
-          </a>
-          <a href="dashboard.html" class="btn btn-primary btn-sm px-3">
-            <i class="fa-solid fa-briefcase"></i> Acceso Empresa
-          </a>
+          <button type="button" class="btn btn-primary btn-sm px-3" onclick="abrirLogin('residente')">
+  <i class="fa-solid fa-house-user"></i> Residentes
+</button>
+<button type="button" class="btn btn-primary btn-sm px-3" onclick="abrirLogin('empresa')">
+  <i class="fa-solid fa-briefcase"></i> Acceso Empresa
+</button>
         </div>
       </div>
     </header>
@@ -470,15 +470,12 @@
           >
         </nav>
         <div class="d-grid gap-2">
-          <a
-            class="btn btn-outline-dark rounded-pill"
-            href="login_residente.html"
-          >
-            <i class="fa-solid fa-house-user"></i> Portal Residentes
-          </a>
-          <a class="btn btn-primary rounded-pill" href="dashboard.html">
-            Acceso Corporativo
-          </a>
+          <button type="button" class="btn btn-outline-dark rounded-pill" onclick="abrirLogin('residente'); cerrarOffcanvas();">
+  <i class="fa-solid fa-house-user"></i> Portal Residentes
+</button>
+<button type="button" class="btn btn-primary rounded-pill" onclick="abrirLogin('empresa'); cerrarOffcanvas();">
+  Acceso Corporativo
+</button>
         </div>
       </div>
     </div>
@@ -1052,6 +1049,124 @@
           });
         });
       });
+      /* ========= LOGIN BAJO DEMANDA ========= */
+const loginModal = document.getElementById("loginModal");
+const loginTitulo = document.getElementById("loginTitulo");
+const loginSubtitulo = document.getElementById("loginSubtitulo");
+const formLogin = document.getElementById("formLogin");
+const loginError = document.getElementById("loginError");
+
+// Destino según rol: ajusta estas rutas a tus páginas reales
+const DESTINOS = {
+  residente: "portal_residente.html",
+  empresa: "dashboard.html",
+};
+
+function abrirLogin(tipo) {
+  formLogin.dataset.rol = tipo;
+  if (tipo === "empresa") {
+    loginTitulo.textContent = "Acceso Corporativo";
+    loginSubtitulo.textContent = "Ingresa tus credenciales de agente";
+  } else {
+    loginTitulo.textContent = "Portal Residentes";
+    loginSubtitulo.textContent = "Ingresa tus credenciales de residente";
+  }
+  loginError.style.display = "none";
+  formLogin.reset();
+  loginModal.classList.add("active");
+  loginModal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  setTimeout(() => document.getElementById("loginUser").focus(), 50);
+}
+
+function cerrarLogin() {
+  loginModal.classList.remove("active");
+  loginModal.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+
+// Cerrar al hacer clic fuera de la tarjeta
+loginModal.addEventListener("click", (e) => {
+  if (e.target === loginModal) cerrarLogin();
+});
+
+// Cerrar con Escape
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && loginModal.classList.contains("active")) cerrarLogin();
+});
+
+// Envío del formulario
+formLogin.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById("btnSubmitLogin");
+  const original = btn.textContent;
+  btn.textContent = "Ingresando...";
+  btn.disabled = true;
+  loginError.style.display = "none";
+
+  const usuario = document.getElementById("loginUser").value.trim();
+  const password = document.getElementById("loginPass").value;
+  const rol = formLogin.dataset.rol;
+
+  try {
+    // Si tienes una función de autenticación en api_cliente.js, úsala aquí.
+    // Ejemplo:  const ok = await autenticar(usuario, password, rol);
+    // Por ahora dejamos un placeholder que redirige si hay credenciales.
+    if (!usuario || !password) throw new Error("Credenciales incompletas");
+
+    // TODO: sustituir por tu llamada real de autenticación.
+    // const ok = await autenticar(usuario, password, rol);
+    // if (!ok) throw new Error("Usuario o contraseña incorrectos");
+
+    window.location.href = DESTINOS[rol] || "dashboard.html";
+  } catch (err) {
+    loginError.textContent = err.message || "No se pudo iniciar sesión.";
+    loginError.style.display = "block";
+  } finally {
+    btn.textContent = original;
+    btn.disabled = false;
+  }
+});
+
+// Helper para cerrar el offcanvas desde un botón
+function cerrarOffcanvas() {
+  const off = document.getElementById("mobileMenu");
+  if (!off || typeof bootstrap === "undefined") return;
+  const inst = bootstrap.Offcanvas.getInstance(off);
+  if (inst) inst.hide();
+}
     </script>
+    <!-- Modal de login bajo demanda -->
+<div id="loginModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="loginTitulo">
+  <div class="modal-content" style="width:min(420px,92vw)">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+      <h2 id="loginTitulo" style="font-size:20px;margin:0;color:var(--brand)">Acceso</h2>
+      <button class="btn-close" onclick="cerrarLogin()" aria-label="Cerrar"></button>
+    </div>
+
+    <p id="loginSubtitulo" style="color:var(--muted);font-size:14px;margin:0 0 20px">
+      Ingresa tus credenciales
+    </p>
+
+    <form id="formLogin" autocomplete="on">
+      <label for="loginUser" style="display:block;font-size:13px;color:var(--muted);margin-bottom:4px">Usuario o correo</label>
+      <input id="loginUser" name="username" type="text" autocomplete="username" required
+             style="border:1px solid var(--line);border-radius:8px;padding:12px;width:100%;background:#f9fafb;margin-bottom:12px" />
+
+      <label for="loginPass" style="display:block;font-size:13px;color:var(--muted);margin-bottom:4px">Contraseña</label>
+      <input id="loginPass" name="password" type="password" autocomplete="current-password" required
+             style="border:1px solid var(--line);border-radius:8px;padding:12px;width:100%;background:#f9fafb;margin-bottom:16px" />
+
+      <button type="submit" class="btn btn-primary w-100" id="btnSubmitLogin">Ingresar</button>
+    </form>
+
+    <p id="loginError" role="alert" aria-live="polite"
+       style="display:none;margin-top:14px;padding:10px;background:#fee2e2;color:#991b1b;border-radius:8px;font-size:14px"></p>
+
+    <p style="margin-top:18px;font-size:13px;color:var(--muted);text-align:center">
+      ¿Olvidaste tu contraseña? Pide una nueva al administrador.
+    </p>
+  </div>
+</div>
   </body>
 </html>
