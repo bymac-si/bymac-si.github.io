@@ -433,18 +433,49 @@
 
     // 5. Datos del usuario. La sesión guarda { nombre, rol } (api_cliente.js); se aceptan también Nombre y Rol.
     function pintarUsuario() {
-      try {
-        var raw = localStorage.getItem('auth_user') || localStorage.getItem('sesion_activa');
-        if (!raw) return;
-        var u = JSON.parse(raw);
-        var nombre = u.nombre || u.Nombre;
-        var rol = u.rol || u.Rol;
-        var elName = document.getElementById('headerUserName');
-        var elRole = document.getElementById('headerUserRole');
-        if (elName && nombre) elName.textContent = String(nombre).split(' ')[0];
-        if (elRole && rol) elRole.textContent = rol;
-      } catch (e) { console.warn('Error cargando datos del usuario', e); }
+  var userActions = document.querySelector('.user-actions');
+
+  if (!userActions) return;
+
+  try {
+    var raw =
+      localStorage.getItem('auth_user') ||
+      localStorage.getItem('sesion_activa');
+
+    if (!raw) {
+      userActions.classList.remove('authenticated');
+      return;
     }
+
+    var u = JSON.parse(raw);
+
+    var nombre = u.nombre || u.Nombre;
+    var rol = u.rol || u.Rol;
+
+    // No considerar válida una sesión si no hay datos identificables.
+    if (!nombre || !rol) {
+      userActions.classList.remove('authenticated');
+      return;
+    }
+
+    var elName = document.getElementById('headerUserName');
+    var elRole = document.getElementById('headerUserRole');
+
+    if (elName) {
+      elName.textContent = String(nombre).split(' ')[0];
+    }
+
+    if (elRole) {
+      elRole.textContent = String(rol);
+    }
+
+    userActions.classList.add('authenticated');
+
+  } catch (e) {
+    userActions.classList.remove('authenticated');
+    console.warn('Error cargando datos del usuario', e);
+  }
+}
 
     // 6. Marcar la página actual (y el menú que la contiene)
     function marcarPaginaActual() {
