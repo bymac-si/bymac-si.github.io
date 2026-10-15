@@ -851,291 +851,713 @@
     </footer>
 
     <script>
-      // CONFIGURACIÓN NOTIFICACIONES
-      const ADMIN_EMAIL = "marcos.castro@santajosefinaspa.cl";
+  "use strict";
 
-      // 1. Efecto Scroll Header
-      const h = document.getElementById("mainHeader");
-      const onScroll = () =>
-        h.classList.toggle("scrolled", window.scrollY > 10);
-      document.addEventListener("scroll", onScroll, { passive: true });
-      onScroll();
+  // ============================================================
+  // SANTA JOSEFINA SPA — LANDING PÚBLICA
+  // ============================================================
+  // - No exige iniciar sesión para visitar la landing.
+  // - El login se abre únicamente al pulsar un botón.
+  // - Utiliza autenticación real del CRM.
+  // - Conserva el formulario público de contacto.
+  // - No consulta tablas privadas del CRM sin autenticación.
+  // ============================================================
 
-      // 2. Año actual
-      document.getElementById("y").textContent = new Date().getFullYear();
+  const ADMIN_EMAIL = "marcos.castro@santajosefinaspa.cl";
 
-      // 3. Cargar Propiedades
-      let propiedadesGlobal = [];
+  let propiedadesGlobal = [];
 
-      async function cargarPropiedadesLanding() {
-        try {
-          propiedadesGlobal =
-            typeof fetchData === "function"
-              ? await fetchData("Propiedades")
-              : [];
-        } catch (e) {
-          console.error(e);
+  // ------------------------------------------------------------
+  // INICIALIZACIÓN
+  // ------------------------------------------------------------
+
+  document.addEventListener("DOMContentLoaded", inicializarLanding);
+
+  function inicializarLanding() {
+    inicializarHeader();
+    inicializarAnio();
+    inicializarModalLogin();
+    inicializarModalPropiedad();
+    inicializarMenuMovil();
+    inicializarFormularioContacto();
+
+    cargarPropiedadesLanding();
+  }
+
+  // ------------------------------------------------------------
+  // HEADER Y AÑO
+  // ------------------------------------------------------------
+
+  function inicializarHeader() {
+    const header = document.getElementById("mainHeader");
+
+    if (!header) return;
+
+    function actualizarHeader() {
+      header.classList.toggle("scrolled", window.scrollY > 10);
+    }
+
+    window.addEventListener("scroll", actualizarHeader, {
+      passive: true
+    });
+
+    actualizarHeader();
+  }
+
+  function inicializarAnio() {
+    const elemento = document.getElementById("y");
+
+    if (elemento) {
+      elemento.textContent = new Date().getFullYear();
+    }
+  }
+
+  // ------------------------------------------------------------
+  // LOGIN: INICIALMENTE CERRADO
+  // ------------------------------------------------------------
+
+  function inicializarModalLogin() {
+    const modal = document.getElementById("loginModal");
+
+    if (!modal) {
+      console.error("No se encontró el elemento loginModal.");
+      return;
+    }
+
+    // El modal nunca debe abrirse automáticamente.
+    modal.classList.remove("active");
+    modal.setAttribute("aria-hidden", "true");
+
+    // Cerrar al hacer clic en el fondo.
+    modal.addEventListener("click", function (event) {
+      if (event.target === modal) {
+        cerrarLogin();
+      }
+    });
+
+    // Cerrar con Escape.
+    document.addEventListener("keydown", function (event) {
+      if (
+        event.key === "Escape" &&
+        modal.classList.contains("active")
+      ) {
+        cerrarLogin();
+      }
+    });
+
+    const formulario = document.getElementById("formLogin");
+
+    if (formulario) {
+      formulario.addEventListener("submit", procesarLogin);
+    }
+  }
+
+  // Exponemos las funciones porque los botones HTML usan onclick.
+  window.abrirLogin = function (tipo) {
+    const modal = document.getElementById("loginModal");
+    const titulo = document.getElementById("loginTitulo");
+    const subtitulo = document.getElementById("loginSubtitulo");
+    const formulario = document.getElementById("formLogin");
+    const error = document.getElementById("loginError");
+    const usuario = document.getElementById("loginUser");
+
+    if (!modal || !formulario) {
+      console.error("No se pudo abrir el formulario de acceso.");
+      return;
+    }
+
+    if (tipo !== "residente" && tipo !== "empresa") {
+      console.error("Tipo de acceso no válido:", tipo);
+      return;
+    }
+
+    formulario.dataset.rol = tipo;
+    formulario.reset();
+
+    if (titulo) {
+      titulo.textContent =
+        tipo === "empresa"
+          ? "Acceso Corporativo"
+          : "Portal Residentes";
+    }
+
+    if (subtitulo) {
+      subtitulo.textContent =
+        tipo === "empresa"
+          ? "Ingresa tus credenciales de empresa"
+          : "Ingresa tus credenciales de residente";
+    }
+
+    if (error) {
+      error.textContent = "";
+      error.style.display = "none";
+    }
+
+    modal.classList.add("active");
+    modal.setAttribute("aria-hidden", "false");
+
+    document.body.style.overflow = "hidden";
+
+    window.setTimeout(function () {
+      if (usuario) usuario.focus();
+    }, 100);
+  };
+
+  window.cerrarLogin = function () {
+    const modal = document.getElementById("loginModal");
+
+    if (!modal) return;
+
+    modal.classList.remove("active");
+    modal.setAttribute("aria-hidden", "true");
+
+    document.body.style.overflow = "";
+  };
+
+  // ------------------------------------------------------------
+  // AUTENTICACIÓN REAL
+  // ------------------------------------------------------------
+
+  async function procesarLogin(event) {
+    event.preventDefault();
+
+    const formulario = event.currentTarget;
+    const boton = document.getElementById("btnSubmitLogin");
+    const error = document.getElementById("loginError");
+
+    const usuario = document
+      .getElementById("loginUser")
+      .value
+      .trim();
+
+    const password = document.getElementById("loginPass").value;
+
+    const rol = formulario.dataset.rol;
+
+    if (!boton || !error) return;
+
+    const textoOriginal = boton.textContent;
+
+    error.textContent = "";
+    error.style.display = "none";
+
+    if (!usuario || !password) {
+      mostrarErrorLogin("Ingresa tu usuario y contraseña.");
+      return;
+    }
+
+    boton.disabled = true;
+    boton.textContent = "Validando credenciales...";
+
+    try {
+      if (rol === "empresa") {
+        // Autenticación del equipo mediante el backend del CRM.
+        if (typeof loginEquipo !== "function") {
+          throw new Error(
+            "No está disponible el servicio de autenticación corporativa."
+          );
         }
 
-        const disponibles = propiedadesGlobal
-          .filter((p) => (p.Estado || "") === "Disponible")
-          .slice(0, 6);
+        const resultado = await loginEquipo(usuario, password);
 
-        const contenedor = document.getElementById("listaPropiedades");
-
-        if (disponibles.length === 0) {
-          contenedor.innerHTML =
-            '<p style="text-align: center; width: 100%; color: #888;">No hay propiedades destacadas en este momento.</p>';
+        // La función loginEquipo guarda la sesión en localStorage.
+        if (resultado && resultado.debeCambiarClave) {
+          window.location.replace("cambiar-clave.html");
           return;
         }
 
-        contenedor.innerHTML = disponibles
-          .map(
-            (p, i) => `
+        // Redirigir al panel adecuado según el dispositivo.
+        if (typeof irAlPanel === "function") {
+          irAlPanel();
+        } else {
+          window.location.replace(
+            window.innerWidth < 900
+              ? "mobile_dashboard.html"
+              : "dashboard.html"
+          );
+        }
+
+        return;
+      }
+
+      if (rol === "residente") {
+        // Autenticación independiente de residentes.
+        if (typeof loginResidente !== "function") {
+          throw new Error(
+            "No está disponible el servicio de autenticación de residentes."
+          );
+        }
+
+        await loginResidente(usuario, password, "residente");
+
+        // El backend debe validar las credenciales antes de continuar.
+        if (typeof irAlPortalResidente === "function") {
+          irAlPortalResidente("residente");
+        } else {
+          window.location.replace(
+            window.innerWidth < 1024
+              ? "portal_residente.html"
+              : "portal-comunidad.html"
+          );
+        }
+
+        return;
+      }
+
+      throw new Error("Selecciona un tipo de acceso válido.");
+
+    } catch (err) {
+      console.error("Error de autenticación:", err);
+
+      mostrarErrorLogin(
+        err && err.message
+          ? err.message
+          : "No fue posible iniciar sesión. Inténtalo nuevamente."
+      );
+
+    } finally {
+      boton.disabled = false;
+      boton.textContent = textoOriginal;
+    }
+
+    function mostrarErrorLogin(mensaje) {
+      error.textContent = mensaje;
+      error.style.display = "block";
+    }
+  }
+
+  // ------------------------------------------------------------
+  // MENÚ MÓVIL
+  // ------------------------------------------------------------
+
+  window.cerrarOffcanvas = function () {
+    const elemento = document.getElementById("mobileMenu");
+
+    if (!elemento || typeof bootstrap === "undefined") return;
+
+    const instancia =
+      bootstrap.Offcanvas.getInstance(elemento);
+
+    if (instancia) {
+      instancia.hide();
+    }
+  };
+
+  function inicializarMenuMovil() {
+    const menu = document.getElementById("mobileMenu");
+
+    if (!menu || typeof bootstrap === "undefined") return;
+
+    menu.querySelectorAll("a[href^='#']").forEach(function (enlace) {
+      enlace.addEventListener("click", function () {
+        window.cerrarOffcanvas();
+      });
+    });
+  }
+
+  // ------------------------------------------------------------
+  // PROPIEDADES PÚBLICAS
+  // ------------------------------------------------------------
+  // IMPORTANTE:
+  // No utilizamos fetchData("Propiedades") porque api_cliente.js
+  // exige una sesión del equipo para consultar tablas privadas.
+  //
+  // Hasta implementar una ruta pública autorizada en Api.gs,
+  // mostramos un mensaje informativo.
+  // ------------------------------------------------------------
+
+  async function cargarPropiedadesLanding() {
+    const contenedor = document.getElementById("listaPropiedades");
+
+    if (!contenedor) return;
+
+    propiedadesGlobal = [];
+
+    renderizarPropiedades();
+  }
+
+  function renderizarPropiedades() {
+    const contenedor = document.getElementById("listaPropiedades");
+
+    if (!contenedor) return;
+
+    const disponibles = propiedadesGlobal
+      .filter(function (propiedad) {
+        return propiedad.Estado === "Disponible";
+      })
+      .slice(0, 6);
+
+    if (disponibles.length === 0) {
+      contenedor.innerHTML = `
+        <div style="
+          grid-column: 1 / -1;
+          text-align: center;
+          padding: 30px 15px;
+          color: #5b5b5b;
+        ">
+          <i class="fa-solid fa-house"
+             style="font-size: 36px; color: #1a2b48; margin-bottom: 15px;">
+          </i>
+          <p style="margin: 0;">
+            Estamos preparando nuestras propiedades destacadas.
+          </p>
+          <p style="margin-top: 8px;">
+            Para consultas, contáctenos directamente.
+          </p>
+        </div>
+      `;
+
+      return;
+    }
+
+    contenedor.innerHTML = disponibles
+      .map(function (p, index) {
+        const titulo = escaparHTML(p.Titulo || "Propiedad");
+        const tipo = escaparHTML(p.Tipo || "");
+        const comuna = escaparHTML(p.Comuna || "");
+        const operacion = escaparHTML(p.Operacion || "Venta");
+        const imagen = escaparAtributo(
+          p.ImagenURL || "assets/img/default_prop.jpg"
+        );
+
+        const precio = new Intl.NumberFormat("es-CL").format(
+          Number(p.Precio) || 0
+        );
+
+        return `
           <div>
             <div style="position:relative;">
-                <img src="${
-                  p.ImagenURL || "assets/img/default_prop.jpg"
-                }" alt="Propiedad" style="width:100%; height:200px; object-fit:cover;">
-                <span style="position:absolute; top:10px; right:10px; background:var(--accent); color:white; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:bold;">${
-                  p.Operacion || "Venta"
-                }</span>
+              <img
+                src="${imagen}"
+                alt="${titulo}"
+                loading="lazy"
+                style="width:100%; height:200px; object-fit:cover;"
+                onerror="this.onerror=null;this.src='assets/img/default_prop.jpg';"
+              >
+
+              <span style="
+                position:absolute;
+                top:10px;
+                right:10px;
+                background:var(--accent);
+                color:white;
+                padding:4px 10px;
+                border-radius:20px;
+                font-size:12px;
+                font-weight:bold;
+              ">${operacion}</span>
             </div>
+
             <div class="card-body">
-              <h3 style="font-size:18px; margin-bottom:5px; font-weight:700;">${
-                p.Titulo || "Propiedad"
-              }</h3>
-              <p style="color:var(--muted); font-size:14px; margin-bottom:10px;">${
-                p.Tipo || ""
-              } en ${p.Comuna || ""}</p>
-              <p style="font-weight:800; font-size:20px; color:var(--brand);">
-                ${"$" + new Intl.NumberFormat("es-CL").format(p.Precio || 0)}
-              </p>
-              <div style="display:flex; gap:10px; margin-top:15px;">
-                <button onclick="abrirModal(${i})" class="btn btn-primary btn-sm w-100">Ver detalles</button>
-              </div>
+              <h3 style="
+                font-size:18px;
+                margin-bottom:5px;
+                font-weight:700;
+              ">${titulo}</h3>
+
+              <p style="
+                color:var(--muted);
+                font-size:14px;
+                margin-bottom:10px;
+              ">${tipo}${comuna ? " en " + comuna : ""}</p>
+
+              <p style="
+                font-weight:800;
+                font-size:20px;
+                color:var(--brand);
+              ">$${precio}</p>
+
+              <button
+                type="button"
+                onclick="abrirModal(${index})"
+                class="btn btn-primary btn-sm w-100"
+              >Ver detalles</button>
             </div>
           </div>
-        `,
-          )
-          .join("");
+        `;
+      })
+      .join("");
+  }
+
+  // ------------------------------------------------------------
+  // MODAL DE DETALLE DE PROPIEDAD
+  // ------------------------------------------------------------
+
+  function inicializarModalPropiedad() {
+    const modal = document.getElementById("modalPropiedad");
+
+    if (!modal) return;
+
+    modal.addEventListener("click", function (event) {
+      if (event.target === modal) {
+        window.cerrarModal();
       }
+    });
+  }
 
-      // 4. Modal
-      function abrirModal(index) {
-        const p = propiedadesGlobal[index] || {};
-        document.getElementById("detalleTitulo").textContent =
-          p.Titulo || "Detalle Propiedad";
-        document.getElementById("detalleImagen").src = p.ImagenURL || "";
-        document.getElementById("detalleTipo").textContent = p.Tipo || "-";
-        document.getElementById("detalleComuna").textContent = p.Comuna || "-";
-        document.getElementById("detalleRegion").textContent = p.Region || "-";
-        document.getElementById("detallePrecio").textContent =
-          "$" + new Intl.NumberFormat("es-CL").format(p.Precio || 0);
+  window.abrirModal = function (index) {
+    const p = propiedadesGlobal[index];
 
-        document.getElementById("detalleMetrosConstruidos").textContent =
-          (p.MetrosConstruidos || "-") + " m²";
-        document.getElementById("detalleMetrosTotales").textContent =
-          (p.MetrosTotales || "-") + " m²";
-        document.getElementById("detalleDormitorios").textContent =
-          p.Dormitorios || "-";
-        document.getElementById("detalleBanos").textContent = p.Banos || "-";
+    if (!p) return;
 
-        document.getElementById("modalPropiedad").classList.add("active");
-      }
-      function cerrarModal() {
-        document.getElementById("modalPropiedad").classList.remove("active");
-      }
+    establecerTexto("detalleTitulo", p.Titulo || "Detalle de propiedad");
 
-      cargarPropiedadesLanding();
+    const imagen = document.getElementById("detalleImagen");
 
-      // 5. ENVÍO FORMULARIO -> CRM & EMAIL
-      const formContacto = document.getElementById("formContacto");
+    if (imagen) {
+      imagen.src = p.ImagenURL || "assets/img/default_prop.jpg";
+      imagen.alt = p.Titulo || "Propiedad";
+    }
 
-      formContacto.onsubmit = async (e) => {
-        e.preventDefault();
+    establecerTexto("detalleTipo", p.Tipo || "-");
+    establecerTexto("detalleComuna", p.Comuna || "-");
+    establecerTexto("detalleRegion", p.Region || "-");
 
-        const btn = document.getElementById("btnSubmitContacto");
-        const originalText = btn.innerText;
-        btn.innerText = "Enviando...";
-        btn.disabled = true;
+    establecerTexto(
+      "detallePrecio",
+      "$" + new Intl.NumberFormat("es-CL").format(
+        Number(p.Precio) || 0
+      )
+    );
 
-        const nuevoID = "WEB_" + Date.now();
-        const fechaHoy = new Date().toISOString().split("T")[0];
+    establecerTexto(
+      "detalleMetrosConstruidos",
+      p.MetrosConstruidos ? p.MetrosConstruidos + " m²" : "-"
+    );
 
-        // Datos del prospecto
-        const payload = {
-          ID: nuevoID,
-          Nombre: document.getElementById("contactoNombre").value.trim(),
-          Email: document.getElementById("contactoEmail").value.trim(),
-          Telefono: document.getElementById("contactoTelefono").value.trim(),
-          Observaciones: document
-            .getElementById("contactoMensaje")
-            .value.trim(),
-          "Fecha Registro": fechaHoy,
-          Estado: "Nuevo",
-          Canal: "Web Landing",
-          "Tipo Operacion": "Consulta Web",
-          Agente: "Asignar",
-        };
+    establecerTexto(
+      "detalleMetrosTotales",
+      p.MetrosTotales ? p.MetrosTotales + " m²" : "-"
+    );
 
-        try {
-          // A. Guardar el prospecto (formulario público, sin sesión)
-          await registrarProspectoPublico("ProspectosCorretaje", payload);
+    establecerTexto("detalleDormitorios", p.Dormitorios || "-");
+    establecerTexto("detalleBanos", p.Banos || "-");
 
-          // B. Enviar notificación por correo
-          await notificarNuevoLead(payload);
+    const modal = document.getElementById("modalPropiedad");
 
-          // C. Feedback y Reset
-          formContacto.reset();
-          document.getElementById("msgConfirmacion").style.display = "block";
-          setTimeout(() => {
-            document.getElementById("msgConfirmacion").style.display = "none";
-          }, 6000);
-        } catch (err) {
-          console.error(err);
-          alert("Hubo un error al procesar la solicitud.");
-        } finally {
-          btn.innerText = originalText;
-          btn.disabled = false;
-        }
+    if (modal) {
+      modal.classList.add("active");
+      modal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+  };
+
+  window.cerrarModal = function () {
+    const modal = document.getElementById("modalPropiedad");
+
+    if (!modal) return;
+
+    modal.classList.remove("active");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  };
+
+  function establecerTexto(id, valor) {
+    const elemento = document.getElementById(id);
+
+    if (elemento) {
+      elemento.textContent = valor == null ? "" : String(valor);
+    }
+  }
+
+  // ------------------------------------------------------------
+  // UTILIDADES PARA CONTENIDO DINÁMICO
+  // ------------------------------------------------------------
+
+  function escaparHTML(valor) {
+    return String(valor).replace(/[&<>"']/g, function (caracter) {
+      const entidades = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
       };
 
-      // Función específica para notificación de Leads Web
-      async function notificarNuevoLead(data) {
-        if (typeof emailjs === "undefined") return;
+      return entidades[caracter];
+    });
+  }
 
-        const htmlBody = `
-            <div style="font-family:sans-serif; padding:20px; border:2px solid #1A2B48; border-radius:10px;">
-                <h2 style="color:#1A2B48;">🚀 Nuevo Prospecto Web</h2>
-                <p>Un visitante ha completado el formulario de contacto:</p>
-                <ul style="background:#f9fafb; padding:15px; border-radius:5px;">
-                    <li><strong>Nombre:</strong> ${data.Nombre}</li>
-                    <li><strong>Email:</strong> ${data.Email}</li>
-                    <li><strong>Teléfono:</strong> ${data.Telefono}</li>
-                    <li><strong>Fecha:</strong> ${data["Fecha Registro"]}</li>
-                </ul>
-                <p><strong>Mensaje:</strong></p>
-                <blockquote style="border-left:4px solid #e74e35; padding-left:10px; color:#555;">
-                    ${data.Observaciones}
-                </blockquote>
-                <p style="font-size:12px; color:#888;">Lead guardado en CRM (ProspectosCorretaje).</p>
-            </div>
-        `;
+  function escaparAtributo(valor) {
+    return escaparHTML(valor);
+  }
 
-        // Envío usando Template genérico
-        // Ajusta ServiceID y TemplateID según tu cuenta EmailJS
-        return emailjs
-          .send("service_p9hqkqn", "template_80q9psi", {
-            to_email: ADMIN_EMAIL,
-            subject: `[WEB] Nuevo Lead: ${data.Nombre}`,
-            html_body: htmlBody,
-            // Parámetros de respaldo por si el template usa {{variables}}
-            nombre: data.Nombre,
-            email: data.Email,
-            mensaje: data.Observaciones,
-          })
-          .catch((e) => console.warn("Error enviando email:", e));
+  // ------------------------------------------------------------
+  // FORMULARIO DE CONTACTO
+  // ------------------------------------------------------------
+
+  function inicializarFormularioContacto() {
+    const formulario = document.getElementById("formContacto");
+
+    if (!formulario) return;
+
+    formulario.addEventListener("submit", enviarFormularioContacto);
+  }
+
+  async function enviarFormularioContacto(event) {
+    event.preventDefault();
+
+    const formulario = event.currentTarget;
+    const boton = document.getElementById("btnSubmitContacto");
+    const confirmacion = document.getElementById("msgConfirmacion");
+
+    if (!boton) return;
+
+    const textoOriginal = boton.textContent;
+
+    const payload = {
+      ID: "WEB_" + Date.now(),
+
+      Nombre: document
+        .getElementById("contactoNombre")
+        .value
+        .trim(),
+
+      Email: document
+        .getElementById("contactoEmail")
+        .value
+        .trim(),
+
+      Telefono: document
+        .getElementById("contactoTelefono")
+        .value
+        .trim(),
+
+      Observaciones: document
+        .getElementById("contactoMensaje")
+        .value
+        .trim(),
+
+      "Fecha Registro": new Date().toISOString().split("T")[0],
+
+      Estado: "Nuevo",
+      Canal: "Web Landing",
+      "Tipo Operacion": "Consulta Web",
+      Agente: "Asignar"
+    };
+
+    if (!payload.Nombre || !payload.Email || !payload.Observaciones) {
+      alert("Completa tu nombre, correo y mensaje.");
+      return;
+    }
+
+    boton.disabled = true;
+    boton.textContent = "Enviando...";
+
+    try {
+      // Guardar mediante el endpoint público del backend.
+      if (typeof registrarProspectoPublico !== "function") {
+        throw new Error(
+          "El servicio de registro público no está disponible."
+        );
       }
 
-      // 6. Cerrar menú móvil
-      document.addEventListener("DOMContentLoaded", function () {
-        const off = document.getElementById("mobileMenu");
-        if (!off) return;
-        off.querySelectorAll("a").forEach((a) => {
-          a.addEventListener("click", () => {
-            const inst = bootstrap.Offcanvas.getInstance(off);
-            if (inst) inst.hide();
-          });
-        });
-      });
-      /* ========= LOGIN BAJO DEMANDA ========= */
-const loginModal = document.getElementById("loginModal");
-const loginTitulo = document.getElementById("loginTitulo");
-const loginSubtitulo = document.getElementById("loginSubtitulo");
-const formLogin = document.getElementById("formLogin");
-const loginError = document.getElementById("loginError");
+      await registrarProspectoPublico(
+        "ProspectosCorretaje",
+        payload
+      );
 
-// Destino según rol: ajusta estas rutas a tus páginas reales
-const DESTINOS = {
-  residente: "portal_residente.html",
-  empresa: "dashboard.html",
-};
+      // Notificación por correo: un fallo de correo no debe hacer
+      // creer que el formulario no se guardó en el CRM.
+      try {
+        await notificarNuevoLead(payload);
+      } catch (errorCorreo) {
+        console.warn(
+          "El prospecto se guardó, pero no se pudo notificar por correo.",
+          errorCorreo
+        );
+      }
 
-function abrirLogin(tipo) {
-  formLogin.dataset.rol = tipo;
-  if (tipo === "empresa") {
-    loginTitulo.textContent = "Acceso Corporativo";
-    loginSubtitulo.textContent = "Ingresa tus credenciales de agente";
-  } else {
-    loginTitulo.textContent = "Portal Residentes";
-    loginSubtitulo.textContent = "Ingresa tus credenciales de residente";
+      formulario.reset();
+
+      if (confirmacion) {
+        confirmacion.style.display = "block";
+        confirmacion.textContent =
+          "¡Gracias! Su mensaje ha sido recibido correctamente.";
+
+        window.setTimeout(function () {
+          confirmacion.style.display = "none";
+        }, 6000);
+      }
+
+    } catch (error) {
+      console.error("Error enviando el formulario:", error);
+
+      alert(
+        "No pudimos registrar tu solicitud. " +
+        "Por favor, inténtalo nuevamente."
+      );
+
+    } finally {
+      boton.disabled = false;
+      boton.textContent = textoOriginal;
+    }
   }
-  loginError.style.display = "none";
-  formLogin.reset();
-  loginModal.classList.add("active");
-  loginModal.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
-  setTimeout(() => document.getElementById("loginUser").focus(), 50);
-}
 
-function cerrarLogin() {
-  loginModal.classList.remove("active");
-  loginModal.setAttribute("aria-hidden", "true");
-  document.body.style.overflow = "";
-}
+  // ------------------------------------------------------------
+  // NOTIFICACIÓN EMAILJS
+  // ------------------------------------------------------------
 
-// Cerrar al hacer clic fuera de la tarjeta
-loginModal.addEventListener("click", (e) => {
-  if (e.target === loginModal) cerrarLogin();
-});
+  async function notificarNuevoLead(data) {
+    if (
+      typeof emailjs === "undefined" ||
+      typeof emailjs.send !== "function"
+    ) {
+      console.warn("EmailJS no está disponible.");
+      return;
+    }
 
-// Cerrar con Escape
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && loginModal.classList.contains("active")) cerrarLogin();
-});
+    const htmlBody = `
+      <div style="
+        font-family:Arial,sans-serif;
+        padding:20px;
+        border:2px solid #1A2B48;
+        border-radius:10px;
+      ">
+        <h2 style="color:#1A2B48;">Nuevo prospecto web</h2>
 
-// Envío del formulario
-formLogin.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const btn = document.getElementById("btnSubmitLogin");
-  const original = btn.textContent;
-  btn.textContent = "Ingresando...";
-  btn.disabled = true;
-  loginError.style.display = "none";
+        <p>Un visitante completó el formulario de contacto.</p>
 
-  const usuario = document.getElementById("loginUser").value.trim();
-  const password = document.getElementById("loginPass").value;
-  const rol = formLogin.dataset.rol;
+        <ul>
+          <li><strong>Nombre:</strong> ${escaparHTML(data.Nombre)}</li>
+          <li><strong>Email:</strong> ${escaparHTML(data.Email)}</li>
+          <li><strong>Teléfono:</strong> ${escaparHTML(data.Telefono || "No informado")}</li>
+          <li><strong>Fecha:</strong> ${escaparHTML(data["Fecha Registro"])}</li>
+        </ul>
 
-  try {
-    // Si tienes una función de autenticación en api_cliente.js, úsala aquí.
-    // Ejemplo:  const ok = await autenticar(usuario, password, rol);
-    // Por ahora dejamos un placeholder que redirige si hay credenciales.
-    if (!usuario || !password) throw new Error("Credenciales incompletas");
+        <p><strong>Mensaje:</strong></p>
 
-    // TODO: sustituir por tu llamada real de autenticación.
-    // const ok = await autenticar(usuario, password, rol);
-    // if (!ok) throw new Error("Usuario o contraseña incorrectos");
+        <blockquote style="
+          border-left:4px solid #E74E35;
+          padding-left:10px;
+          color:#555;
+        ">${escaparHTML(data.Observaciones)}</blockquote>
 
-    window.location.href = DESTINOS[rol] || "dashboard.html";
-  } catch (err) {
-    loginError.textContent = err.message || "No se pudo iniciar sesión.";
-    loginError.style.display = "block";
-  } finally {
-    btn.textContent = original;
-    btn.disabled = false;
+        <p style="font-size:12px;color:#888;">
+          Prospecto enviado desde la landing de Santa Josefina.
+        </p>
+      </div>
+    `;
+
+    try {
+      await emailjs.send(
+        "service_p9hqkqn",
+        "template_80q9psi",
+        {
+          to_email: ADMIN_EMAIL,
+          subject: "[WEB] Nuevo Lead: " + data.Nombre,
+          html_body: htmlBody,
+          nombre: data.Nombre,
+          email: data.Email,
+          mensaje: data.Observaciones
+        }
+      );
+
+    } catch (error) {
+      console.warn("No se pudo enviar el correo de notificación:", error);
+    }
   }
-});
-
-// Helper para cerrar el offcanvas desde un botón
-function cerrarOffcanvas() {
-  const off = document.getElementById("mobileMenu");
-  if (!off || typeof bootstrap === "undefined") return;
-  const inst = bootstrap.Offcanvas.getInstance(off);
-  if (inst) inst.hide();
-}
-    </script>
+</script>
     <!-- Modal de login bajo demanda -->
 <div id="loginModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="loginTitulo">
   <div class="modal-content" style="width:min(420px,92vw)">
