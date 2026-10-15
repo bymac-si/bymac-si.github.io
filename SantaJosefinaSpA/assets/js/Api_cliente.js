@@ -1,23 +1,27 @@
 // ============================================================================
-// api_cliente.js: cliente del CRM para Google Apps Script (reemplaza a AppSheet)
-// Cárguelo ANTES de app.js. No contiene secretos.
+// api_cliente.js — cliente del CRM para Google Apps Script (reemplaza a AppSheet)
 //
-// En app.js ELIMINE estos bloques (ahora viven aquí):
-//   - APP_ID y API_KEY
-//   - appSheetCRUD() y fetchData()
-//   - sha256(), getAuthUser(), setAuthUser(), requireAuth(), loginWithAppSheet()
-// y en window.logout agregue:  localStorage.removeItem("crm_token");
-// El resto de app.js (helpers, UTM, honorarios, header, router) sigue igual.
+// Cárguelo ANTES de app.js en TODAS las páginas:
+//     <script src="assets/js/api_cliente.js"></script>
+//     <script src="assets/js/app.js"></script>
+//
+// Este archivo es el ÚNICO que habla con el backend (Api.gs). No contiene
+// secretos: la URL /exec es pública, la seguridad la aplica el servidor.
+//
+// Equipo (agentes):  loginEquipo(), apiCRUD()/appSheetCRUD(), fetchData()
+// Residentes:        loginResidente(), cargarPortalResidente()
 // ============================================================================
 
 const API_URL = "https://script.google.com/macros/s/AKfycbw6pg39TiLiOWxbjhvfuM2rS3AYDRNbnqyjDOtyv3btMU8VZN9wbOx4pMJDlVl_zVYbXw/exec";
-// Página donde el residente escribe su correo y clave. Ajústela al nombre real.
-const LOGIN_RESIDENTE_URL = "login-residente.html";
+
+// Página de acceso de residentes.
+const LOGIN_RESIDENTE_URL = "login_residente.html";
 
 // ---------------------------------------------------------------------------
 // Llamada base. Apps Script no responde a preflight CORS, por eso se envía
 // text/plain (petición "simple") con el JSON en el cuerpo, y el token va dentro
-// del cuerpo (no en una cabecera). Siempre responde 200: el resultado real viene en { ok, status, error }.
+// del cuerpo (no en una cabecera). Siempre responde 200: el resultado real
+// viene en { ok, status, error }.
 // ---------------------------------------------------------------------------
 async function apiPost(route, payload = {}) {
   let res;
@@ -77,7 +81,7 @@ async function apiCRUD(tabla, action, rows, properties = {}) {
     throw new Error("Sesión vencida.");
   }
   try {
-    // Find devuelve un arreglo; Add/Edit/Delete devuelven { Rows: [...] }, como antes con AppSheet.
+    // Find devuelve un arreglo; Add/Edit/Delete devuelven { Rows: [...] }.
     return await apiPost("data", { token, table: tabla, action, rows, filter: properties.filter });
   } catch (e) {
     if (e.status === 401) { cerrarSesionLocal(); window.location.href = "login.html"; }
@@ -88,7 +92,8 @@ async function apiCRUD(tabla, action, rows, properties = {}) {
 const appSheetCRUD = apiCRUD; // nombre anterior, para que las páginas existentes sigan funcionando
 
 async function fetchData(tabla, filter) {
-  return apiCRUD(tabla, "Find", [], filter ? { filter } : {});
+  const datos = await apiCRUD(tabla, "Find", [], filter ? { filter } : {});
+  return Array.isArray(datos) ? datos : (datos && datos.Rows) || [];
 }
 
 function getAuthUser() {
@@ -145,21 +150,29 @@ async function generarClaveUsuario(email, password) {
 
 // SOLO ADMIN: fija o genera la clave de un residente (misma idea que generarClaveUsuario).
 // Ej.: await generarClaveResidente("rosa@mail.cl")
-async function generarClaveResidente(email, password) {
-  return apiPost("admin.resClave", { token: getToken(), email, password });
+async function generarClaveResidente(email, password, tipo) {
+  return apiPost("admin.resClave", { token: getToken(), email, password, tipo });
 }
 
 // ---------------------------------------------------------------------------
-// PORTAL DE RESIDENTES (sesión propia, solo ven los datos de su unidad)
+// PORTAL DE RESIDENTES / ARRENDATARIOS / PROPIETARIOS
+// (sesión propia; el servidor decide qué datos devuelve)
 // ---------------------------------------------------------------------------
 const RES_TOKEN_KEY = "crm_token_res";
+const RES_TIPO_KEY = "crm_tipo_res";
+const RES_DATOS_KEY = "sesion_residente";
+
+function getTokenResidente() { return localStorage.getItem(RES_TOKEN_KEY); }
 
 function logoutResidente() {
-  ["sesion_residente", "sesion_externa", RES_TOKEN_KEY].forEach(k => localStorage.removeItem(k));
+  ["sesion_residente", "sesion_externa", RES_TOKEN_KEY, RES_TIPO_KEY]
+    .forEach(k => localStorage.removeItem(k));
 }
 
+window.cerrarSesionResidente = logoutResidente;
+
 async function resPost(route, payload = {}) {
-  const token = localStorage.getItem(RES_TOKEN_KEY);
+  const token = getTokenResidente();
   try {
     return await apiPost(route, { token, ...payload });
   } catch (e) {
@@ -168,25 +181,94 @@ async function resPost(route, payload = {}) {
   }
 }
 
-async function loginResidente(email, password) {
-  const data = await apiPost("res.login", { email, password });
+// tipo: "residente" (por defecto), "arrendatario" o "propietario".
+async function loginResidente(usuario, password, tipo) {
+  const data = await apiPost("res.login", { email: usuario, password, tipo: tipo || "residente" });
   localStorage.setItem(RES_TOKEN_KEY, data.token);
-  // Mismo formato que ya lee setupNavigation() en app.js; solo sirve para mostrar el nombre.
-  localStorage.setItem("sesion_residente", JSON.stringify({ datos: data.residente, ts: Date.now() }));
-  return data.residente;
+  localStorage.setItem(RES_TIPO_KEY, tipo || "residente");
+  // Mismo formato que lee setupNavigation() en app.js; solo sirve para mostrar el nombre.
+  localStorage.setItem(RES_DATOS_KEY, JSON.stringify({ tipo: tipo || "residente", datos: data.persona, ts: Date.now() }));
+  return data.persona;
 }
 
-// Devuelve { residente, unidades, copropiedades, cobros, pagos, reclamos, gastosComunes }
+// Devuelve, según el perfil:
+//   { tipo, persona, unidades, copropiedades, cobros, pagos, reclamos, gastosComunes,
+//     gastos, reservas, espacios, bloques, proveedores, propiedades, visitas, contratos, pagosArriendo }
 async function cargarPortalResidente() {
-  const t = localStorage.getItem(RES_TOKEN_KEY);
-  if (!t || tokenVencido(t)) { logoutResidente(); window.location.href = LOGIN_RESIDENTE_URL; throw new Error("Sin sesión."); }
+  const t = getTokenResidente();
+  if (!t || tokenVencido(t)) {
+    logoutResidente();
+    window.location.href = LOGIN_RESIDENTE_URL;
+    throw new Error("Su sesión expiró. Vuelva a ingresar.");
+  }
   return resPost("res.portal");
 }
 
-function crearReclamoResidente(categoria, descripcion, unidadId) {
-  return resPost("res.reclamo", { categoria, descripcion, unidadId });
+// Crea un reclamo. Acepta un objeto { categoria, descripcion, unidadId, foto }
+// o los tres argumentos sueltos (categoria, descripcion, unidadId).
+// El servidor fija el usuario, la unidad y el estado: el navegador no manda la identidad.
+function crearReclamoResidente(categoriaOObj, descripcion, unidadId) {
+  const datos = (categoriaOObj && typeof categoriaOObj === "object")
+    ? categoriaOObj
+    : { categoria: categoriaOObj, descripcion: descripcion, unidadId: unidadId };
+  return resPost("res.reclamo", datos);
+}
+
+// Agrega una respuesta del residente al historial de un reclamo suyo.
+function actualizarReclamoResidente(id, historial) {
+  return resPost("res.reclamoEdit", { id: id, historial: historial });
 }
 
 function cambiarClaveResidente(actual, nueva) {
   return resPost("res.clave", { actual, nueva });
+}
+
+// El residente reserva un espacio común (el servidor valida que sea de su comunidad).
+function crearReservaResidente(datos) {
+  return resPost("res.reserva", datos);
+}
+
+// El residente reporta un pago de gasto común (queda Pendiente de aprobación).
+function reportarPagoResidente(datos) {
+  return resPost("res.pago", datos);
+}
+
+// Redirige al portal que corresponde al perfil y al tamaño de pantalla.
+function irAlPortalResidente(tipo) {
+  const perfil = tipo || localStorage.getItem(RES_TIPO_KEY) || "residente";
+  const movil = window.innerWidth < 1024;
+  if (perfil === "arrendatario") window.location.replace("portal_arrendatario.html");
+  else if (perfil === "propietario") window.location.replace("portal_vendedor.html");
+  else window.location.replace(movil ? "portal_residente.html" : "portal-comunidad.html");
+}
+
+// ---------------------------------------------------------------------------
+// PANEL DE MARKETING Y CAPTACIÓN DE LEADS (equipo)
+// ---------------------------------------------------------------------------
+// Ejecuta una acción del panel de marketing con la sesión del equipo.
+//   await accionCRM("getDashboardData")
+//   await accionCRM("gestionarLead", { email: "x@y.cl", tipoAccion: "CONVERTIR", comentario: "..." })
+//   await accionCRM("apiResend", { to: "x@y.cl", subject: "Hola", html: "<b>Hola</b>" })
+async function accionCRM(action, extra) {
+  const token = getToken();
+  if (!token || tokenVencido(token)) {
+    cerrarSesionLocal();
+    window.location.href = "login.html";
+    throw new Error("Sesión vencida.");
+  }
+  return apiPost("accion", Object.assign({ token, action }, extra || {}));
+}
+
+// ---------------------------------------------------------------------------
+// FORMULARIOS PÚBLICOS (landing, checklist). No llevan sesión.
+// ---------------------------------------------------------------------------
+//   await accionPublica("add", { table: "ProspectosCorretaje", rows: [payload] })
+async function accionPublica(action, payload) {
+  if (!navigator.onLine) throw new Error("Sin conexión a internet.");
+  return apiPost("publico", Object.assign({ action }, payload || {}));
+}
+
+// Guarda un prospecto desde las landings públicas.
+function registrarProspectoPublico(tabla, fila) {
+  return accionPublica("add", { table: tabla, rows: [fila] });
 }
