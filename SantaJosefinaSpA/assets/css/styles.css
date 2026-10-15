@@ -1105,7 +1105,14 @@ th {
     flex-wrap: wrap;
     gap: 15px;
 }
+.user-actions {
+  display: none;
+}
 
+/* Mostrar únicamente cuando exista una sesión */
+.user-actions.authenticated {
+  display: flex;
+}
 .page-title {
     margin: 0;
     font-size: 24px;
