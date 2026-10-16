@@ -1,461 +1,188 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Diagnóstico de Seguridad | Santa Josefina SpA</title>
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Diagnóstico de Seguridad para Edificios y Condominios | Santa Josefina SpA</title>
+<meta name="description" content="Autoevaluación de 13 preguntas para detectar puntos de mejora en personal, control de acceso e infraestructura de su edificio o condominio."/>
+<!-- CAMBIAR canonical a https://www.santajosefinaspa.cl/checklist_seguridad.html cuando el dominio sirva el sitio sin redirección -->
+<link rel="canonical" href="https://bymac-si.github.io/SantaJosefinaSpA/checklist_seguridad.html"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<link rel="stylesheet" href="assets/css/styles.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Ovo&display=swap" rel="stylesheet"/>
+<script defer src="assets/js/api_cliente.js"></script>
+<script defer src="assets/js/app.js"></script>
+<script>
+/* ANALÍTICA — usar los MISMOS IDs que en index.html. Con "XXXXX" o vacío no se carga nada. */
+const CFG={GA:"G-XXXXXXXXXX",ADS:"AW-XXXXXXXXXX",ADS_LABEL:"",PIXEL:""};
+const cfgOk=v=>v&&!/X{5}/.test(v);
+window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}
+if(cfgOk(CFG.GA)||cfgOk(CFG.ADS)){const s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id="+(cfgOk(CFG.GA)?CFG.GA:CFG.ADS);document.head.appendChild(s);gtag("js",new Date());cfgOk(CFG.GA)&&gtag("config",CFG.GA);cfgOk(CFG.ADS)&&gtag("config",CFG.ADS)}
+if(cfgOk(CFG.PIXEL)){!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version="2.0";n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,"script","https://connect.facebook.net/en_US/fbevents.js");fbq("init",CFG.PIXEL);fbq("track","PageView")}
+function ev(n,p){try{cfgOk(CFG.GA)&&gtag("event",n,p||{});if(n==="generate_lead"){window.fbq&&fbq("track","Lead");cfgOk(CFG.ADS)&&CFG.ADS_LABEL&&gtag("event","conversion",{send_to:CFG.ADS+"/"+CFG.ADS_LABEL})}}catch(e){}}
+</script>
+<style>
+:root{--primary:#1a2b48;--accent:#e74e35;--bg:#f8fafc}
+[hidden]{display:none!important}
+body{font-family:-apple-system,system-ui,sans-serif;background:var(--bg);margin:auto;color:#334155}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.hero{background:linear-gradient(135deg,var(--primary) 0%,#0f172a 100%);color:#fff;padding:40px 20px;text-align:center}
+.hero h1{font-family:"Ovo",serif;font-size:28px;margin-bottom:10px}
+.hero p{opacity:.9;max-width:600px;margin:0 auto;line-height:1.6}
+.container{max-width:800px;margin:-30px auto 40px;padding:0 20px;position:relative;z-index:10}
+.card{background:#fff;border-radius:16px;padding:30px;box-shadow:0 10px 25px rgba(0,0,0,.08);margin-bottom:25px}
+h2.section-title{color:var(--primary);font-size:18px;border-bottom:2px solid #e2e8f0;padding-bottom:10px;margin-top:0;display:flex;align-items:center;gap:10px}
+fieldset.question-item{border:0;padding:0;margin:0 0 25px;min-width:0}
+.q-text{font-weight:600;font-size:15px;margin-bottom:10px;display:block;padding:0}
+.missing{outline:2px solid #ef4444;border-radius:8px;outline-offset:8px}
+.q-err{color:#991b1b;font-weight:600;text-align:center}
+.toggle-group{display:flex;gap:10px;position:relative}
+.toggle-radio{position:absolute;opacity:0;pointer-events:none}
+.toggle-radio:focus-visible+label{outline:3px solid var(--accent);outline-offset:2px}
+.toggle-label{flex:1;padding:12px;border:1px solid #cbd5e1;border-radius:8px;text-align:center;cursor:pointer;font-weight:700;font-size:14px;transition:all .2s;color:#64748b}
+input[value="SI"]:checked+label{background:#dcfce7;color:#166534;border-color:#166534}
+input[value="NO"]:checked+label{background:#fee2e2;color:#991b1b;border-color:#991b1b}
+.lead-form{background:#eff6ff;border:1px solid #bfdbfe;padding:25px;border-radius:12px;margin-top:30px}
+.input-group{margin-bottom:15px}
+.input-group label{display:block;font-size:12px;font-weight:700;color:var(--primary);margin-bottom:5px;text-transform:uppercase}
+.input-std{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:8px;box-sizing:border-box}
+.consent{display:flex;gap:8px;align-items:flex-start;font-size:13px;margin:0 0 15px}.consent input{margin-top:3px}
+.hp{position:absolute;left:-9999px;height:0;overflow:hidden}
+.btn-cta{background:var(--accent);color:#fff;width:100%;padding:16px;border:none;border-radius:50px;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(231,78,53,.4);transition:transform .2s}
+.btn-cta:hover{transform:translateY(-2px)}
+#resultArea{animation:slideUp .5s ease}
+.result-box{text-align:center;padding:40px 20px;border-radius:16px;color:#fff;margin-bottom:20px}
+.risk-low{background:linear-gradient(135deg,#10b981 0%,#059669 100%)}
+.risk-med{background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%)}
+.risk-high{background:linear-gradient(135deg,#ef4444 0%,#b91c1c 100%)}
+.score-number{font-size:48px;font-weight:800;line-height:1}
+.score-label{font-size:20px;font-weight:600;opacity:.9;margin-bottom:15px;display:block}
+.contact-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;display:flex;align-items:center;gap:15px}
+.contact-avatar{width:60px;height:60px;border-radius:50%;object-fit:cover}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+#spinner{position:fixed;inset:0;background:rgba(255,255,255,.9);z-index:999;display:none;justify-content:center;align-items:center}
+@media(prefers-reduced-motion:reduce){#resultArea{animation:none}.btn-cta,.toggle-label{transition:none}}
+@media(max-width:520px){.lead-grid{grid-template-columns:1fr!important}}
+</style>
+</head>
+<body>
+<div id="spinner"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:40px;color:var(--primary)"></i></div>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link rel="stylesheet" href="assets/css/styles.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Ovo&display=swap" rel="stylesheet" />
+<div class="hero">
+  <a href="index.html" style="color:#fff;text-decoration:none;display:inline-block;margin-bottom:15px"><i class="fa-solid fa-arrow-left"></i> Volver al inicio</a>
+  <img src="assets/img/logo_santajosefina.png" alt="Santa Josefina" style="height:120px;display:block;margin:0 auto 15px;filter:brightness(0) invert(1)"/>
+  <h1>¿Su comunidad está protegida… o solo cree que lo está?</h1>
+  <p>Esta autoevaluación ayuda a detectar puntos de mejora operativos, legales y de gestión que pueden derivar en robos, demandas o pérdidas económicas.</p>
+</div>
 
-    <script src="assets/js/api_cliente.js"></script>
-    <script src="assets/js/app.js"></script>
-
-    <style>
-      :root {
-        --primary: #1a2b48;
-        --accent: #e74e35;
-        --bg: #f8fafc;
-      }
-      body {
-        font-family: -apple-system, system-ui, sans-serif;
-        background: var(--bg);
-        margin: auto;
-        color: #334155;
-      }
-
-      .hero {
-        background: linear-gradient(135deg, var(--primary) 0%, #0f172a 100%);
-        color: white;
-        padding: 40px 20px;
-        text-align: center;
-      }
-      .hero h1 {
-        font-family: "Ovo", serif;
-        font-size: 28px;
-        margin-bottom: 10px;
-      }
-      .hero p {
-        opacity: 0.9;
-        max-width: 600px;
-        margin: 0 auto;
-        line-height: 1.6;
-      }
-
-      .container {
-        max-width: 800px;
-        margin: -30px auto 40px;
-        padding: 0 20px;
-        position: relative;
-        z-index: 10;
-      }
-
-      .card {
-        background: white;
-        border-radius: 16px;
-        padding: 30px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-        margin-bottom: 25px;
-      }
-
-      h2.section-title {
-        color: var(--primary);
-        font-size: 18px;
-        border-bottom: 2px solid #e2e8f0;
-        padding-bottom: 10px;
-        margin-top: 0;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .question-item {
-        margin-bottom: 25px;
-      }
-      .q-text {
-        font-weight: 600;
-        font-size: 15px;
-        margin-bottom: 10px;
-        display: block;
-      }
-
-      .toggle-group {
-        display: flex;
-        gap: 10px;
-      }
-      .toggle-radio {
-        display: none;
-      }
-      .toggle-label {
-        flex: 1;
-        padding: 12px;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        text-align: center;
-        cursor: pointer;
-        font-weight: 700;
-        font-size: 14px;
-        transition: all 0.2s;
-        color: #64748b;
-      }
-
-      input[value="SI"]:checked + label {
-        background: #dcfce7;
-        color: #166534;
-        border-color: #166534;
-      }
-      input[value="NO"]:checked + label {
-        background: #fee2e2;
-        color: #991b1b;
-        border-color: #991b1b;
-      }
-
-      .lead-form {
-        background: #eff6ff;
-        border: 1px solid #bfdbfe;
-        padding: 25px;
-        border-radius: 12px;
-        margin-top: 30px;
-      }
-      .input-group {
-        margin-bottom: 15px;
-      }
-      .input-group label {
-        display: block;
-        font-size: 12px;
-        font-weight: 700;
-        color: var(--primary);
-        margin-bottom: 5px;
-        text-transform: uppercase;
-      }
-      .input-std {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        box-sizing: border-box;
-      }
-
-      .btn-cta {
-        background: var(--accent);
-        color: white;
-        width: 100%;
-        padding: 16px;
-        border: none;
-        border-radius: 50px;
-        font-size: 18px;
-        font-weight: bold;
-        cursor: pointer;
-        box-shadow: 0 4px 15px rgba(231, 78, 53, 0.4);
-        transition: transform 0.2s;
-      }
-      .btn-cta:hover {
-        transform: translateY(-2px);
-      }
-
-      #resultArea {
-        display: none;
-        animation: slideUp 0.5s ease;
-      }
-      .result-box {
-        text-align: center;
-        padding: 40px 20px;
-        border-radius: 16px;
-        color: white;
-        margin-bottom: 20px;
-      }
-      .risk-low { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-      .risk-med { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
-      .risk-high { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); }
-
-      .score-number { font-size: 48px; font-weight: 800; line-height: 1; }
-      .score-label { font-size: 20px; font-weight: 600; opacity: 0.9; margin-bottom: 15px; display: block; }
-
-      .contact-card {
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 20px;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-      }
-      .contact-avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; }
-
-      @keyframes slideUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-
-      #spinner {
-        position: fixed;
-        inset: 0;
-        background: rgba(255, 255, 255, 0.9);
-        z-index: 999;
-        display: none;
-        justify-content: center;
-        align-items: center;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="spinner">
-      <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 40px; color: var(--primary)"></i>
+<div class="container">
+  <form id="securityForm">
+    <div class="card" style="padding-bottom:5px">
+      <p style="font-size:13px;color:#475569;text-align:center;margin:0 0 20px">13 preguntas de sí o no · El resultado es inmediato</p>
+      <noscript><p class="q-err">Active JavaScript para realizar el diagnóstico.</p></noscript>
+      <div id="preguntas"></div>
     </div>
-
-    <div class="hero">
-      <a href="index.html" style="color: white; text-decoration: none; display: inline-block; margin-bottom: 15px;">
-        <i class="fa-solid fa-arrow-left"></i> Volver al inicio
-      </a>
-      <img src="assets/img/logo_santajosefina.png" alt="Santa Josefina" style="height: 120px; display: block; margin: 0 auto 15px; filter: brightness(0) invert(1);" />
-      <h1>¿Su comunidad está protegida… o solo cree que lo está?</h1>
-      <p>Este diagnóstico revela riesgos operativos, legales y de gestión que pueden terminar en robos, demandas o pérdidas económicas.</p>
+    <div id="leadCapture" class="card lead-form">
+      <h3><i class="fa-solid fa-triangle-exclamation"></i> Ver mi nivel de riesgo real</h3>
+      <div class="input-group"><label for="leadComunidad">Nombre del condominio / edificio</label><input type="text" id="leadComunidad" class="input-std" placeholder="Ej: Edificio Los Andes" autocomplete="organization" required/></div>
+      <div class="lead-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:15px">
+        <div class="input-group"><label for="leadNombre">Su nombre</label><input type="text" id="leadNombre" class="input-std" placeholder="Su nombre" autocomplete="name" required/></div>
+        <div class="input-group"><label for="leadCargo">Rol en la comunidad</label><select id="leadCargo" class="input-std"><option value="Comite">Miembro Comité</option><option value="Administrador">Administrador</option><option value="Residente">Residente</option></select></div>
+      </div>
+      <div class="input-group"><label for="leadEmail">Email de contacto</label><input type="email" id="leadEmail" class="input-std" placeholder="contacto@ejemplo.com" autocomplete="email" required/></div>
+      <div class="input-group"><label for="leadTelefono">Teléfono</label><input type="tel" id="leadTelefono" class="input-std" placeholder="+56 9..." autocomplete="tel"/></div>
+      <div class="hp" aria-hidden="true"><label>No completar <input type="text" name="sitio_web" tabindex="-1" autocomplete="off"/></label></div>
+      <label class="consent"><input type="checkbox" id="leadConsent" required/><span>Acepto que Santa Josefina SpA use mis datos y respuestas para entregarme este diagnóstico y contactarme al respecto, según la <a href="index.html?privacidad" target="_blank" rel="noopener">política de privacidad</a>.</span></label>
+      <p id="qErr" class="q-err" role="alert" hidden>Responda todas las preguntas marcadas en rojo.</p>
+      <button type="submit" class="btn-cta">Revisar riesgos de mi comunidad</button>
     </div>
+  </form>
 
-    <div class="container">
-      <form id="securityForm">
-        <div class="card">
-          <p style="font-size: 13px; color: #475569; text-align: center; margin-bottom: 20px;">
-            ✔ No se guardan respuestas sin tu autorización ✔ El resultado es inmediato
-          </p>
-          <h2 class="section-title"><i class="fa-solid fa-user-shield"></i> 1. Personal y Conserjería</h2>
-          
-          <div class="question-item">
-            <span class="q-text">¿Existe un manual de procedimientos actualizado y firmado?</span>
-            <div class="toggle-group">
-              <input type="radio" name="q1" value="SI" id="q1y" class="toggle-radio" /><label for="q1y" class="toggle-label">SÍ</label>
-              <input type="radio" name="q1" value="NO" id="q1n" class="toggle-radio" /><label for="q1n" class="toggle-label">NO</label>
-            </div>
-          </div>
-
-          <div class="question-item">
-            <span class="q-text">¿Se realizan capacitaciones semestrales de emergencia?</span>
-            <div class="toggle-group">
-              <input type="radio" name="q2" value="SI" id="q2y" class="toggle-radio" /><label for="q2y" class="toggle-label">SÍ</label>
-              <input type="radio" name="q2" value="NO" id="q2n" class="toggle-radio" /><label for="q2n" class="toggle-label">NO</label>
-            </div>
-          </div>
-
-          <div class="question-item">
-            <span class="q-text">¿Se realizan chequeos de antecedentes rigurosos?</span>
-            <div class="toggle-group">
-              <input type="radio" name="q3" value="SI" id="q3y" class="toggle-radio" /><label for="q3y" class="toggle-label">SÍ</label>
-              <input type="radio" name="q3" value="NO" id="q3n" class="toggle-radio" /><label for="q3n" class="toggle-label">NO</label>
-            </div>
-          </div>
-
-          <div class="question-item">
-            <span class="q-text">¿Existen turnos supervisados para evitar fatiga?</span>
-            <div class="toggle-group">
-              <input type="radio" name="q4" value="SI" id="q4y" class="toggle-radio" /><label for="q4y" class="toggle-label">SÍ</label>
-              <input type="radio" name="q4" value="NO" id="q4n" class="toggle-radio" /><label for="q4n" class="toggle-label">NO</label>
-            </div>
-          </div>
-
-          <div class="question-item">
-            <span class="q-text">¿El personal tiene canal directo con Carabineros?</span>
-            <div class="toggle-group">
-              <input type="radio" name="q5" value="SI" id="q5y" class="toggle-radio" /><label for="q5y" class="toggle-label">SÍ</label>
-              <input type="radio" name="q5" value="NO" id="q5n" class="toggle-radio" /><label for="q5n" class="toggle-label">NO</label>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <h2 class="section-title"><i class="fa-solid fa-id-card"></i> 2. Control de Acceso</h2>
-          <div class="question-item">
-            <span class="q-text">¿Existe protocolo estricto para visitas/delivery?</span>
-            <div class="toggle-group">
-              <input type="radio" name="q6" value="SI" id="q6y" class="toggle-radio" /><label for="q6y" class="toggle-label">SÍ</label>
-              <input type="radio" name="q6" value="NO" id="q6n" class="toggle-radio" /><label for="q6n" class="toggle-label">NO</label>
-            </div>
-          </div>
-          <div class="question-item">
-            <span class="q-text">¿Se auditan y desactivan los tags de ex-residentes?</span>
-            <div class="toggle-group">
-              <input type="radio" name="q7" value="SI" id="q7y" class="toggle-radio" /><label for="q7y" class="toggle-label">SÍ</label>
-              <input type="radio" name="q7" value="NO" id="q7n" class="toggle-radio" /><label for="q7n" class="toggle-label">NO</label>
-            </div>
-          </div>
-          <div class="question-item">
-            <span class="q-text">¿Existe protocolo de salvoconducto para mudanzas?</span>
-            <div class="toggle-group">
-              <input type="radio" name="q8" value="SI" id="q8y" class="toggle-radio" /><label for="q8y" class="toggle-label">SÍ</label>
-              <input type="radio" name="q8" value="NO" id="q8n" class="toggle-radio" /><label for="q8n" class="toggle-label">NO</label>
-            </div>
-          </div>
-          <div class="question-item">
-            <span class="q-text">¿Las áreas sensibles están cerradas con llave?</span>
-            <div class="toggle-group">
-              <input type="radio" name="q9" value="SI" id="q9y" class="toggle-radio" /><label for="q9y" class="toggle-label">SÍ</label>
-              <input type="radio" name="q9" value="NO" id="q9n" class="toggle-radio" /><label for="q9n" class="toggle-label">NO</label>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <h2 class="section-title"><i class="fa-solid fa-screwdriver-wrench"></i> 3. Infraestructura</h2>
-          <div class="question-item">
-            <span class="q-text">¿Existe calendario anual de mantención preventiva?</span>
-            <div class="toggle-group">
-              <input type="radio" name="q10" value="SI" id="q10y" class="toggle-radio" /><label for="q10y" class="toggle-label">SÍ</label>
-              <input type="radio" name="q10" value="NO" id="q10n" class="toggle-radio" /><label for="q10n" class="toggle-label">NO</label>
-            </div>
-          </div>
-          <div class="question-item">
-            <span class="q-text">¿Se verifica semanalmente que las cámaras graben?</span>
-            <div class="toggle-group">
-              <input type="radio" name="q11" value="SI" id="q11y" class="toggle-radio" /><label for="q11y" class="toggle-label">SÍ</label>
-              <input type="radio" name="q11" value="NO" id="q11n" class="toggle-radio" /><label for="q11n" class="toggle-label">NO</label>
-            </div>
-          </div>
-          <div class="question-item">
-            <span class="q-text">¿Los proveedores críticos están certificados?</span>
-            <div class="toggle-group">
-              <input type="radio" name="q12" value="SI" id="q12y" class="toggle-radio" /><label for="q12y" class="toggle-label">SÍ</label>
-              <input type="radio" name="q12" value="NO" id="q12n" class="toggle-radio" /><label for="q12n" class="toggle-label">NO</label>
-            </div>
-          </div>
-          <div class="question-item">
-            <span class="q-text">¿Existe iluminación de emergencia funcional?</span>
-            <div class="toggle-group">
-              <input type="radio" name="q13" value="SI" id="q13y" class="toggle-radio" /><label for="q13y" class="toggle-label">SÍ</label>
-              <input type="radio" name="q13" value="NO" id="q13n" class="toggle-radio" /><label for="q13n" class="toggle-label">NO</label>
-            </div>
-          </div>
-        </div>
-
-        <div id="leadCapture" class="card lead-form">
-          <h3><i class="fa-solid fa-triangle-exclamation"></i> Ver mi nivel de riesgo real</h3>
-          <div class="input-group">
-            <label>Nombre del Condominio / Edificio</label>
-            <input type="text" id="leadComunidad" class="input-std" placeholder="Ej: Edificio Los Andes" required />
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px">
-            <div class="input-group">
-              <label>Su Nombre</label>
-              <input type="text" id="leadNombre" class="input-std" placeholder="Su nombre" required />
-            </div>
-            <div class="input-group">
-              <label>Rol en la comunidad</label>
-              <select id="leadCargo" class="input-std">
-                <option value="Comite">Miembro Comité</option>
-                <option value="Administrador">Administrador</option>
-                <option value="Residente">Residente</option>
-              </select>
-            </div>
-          </div>
-          <div class="input-group">
-            <label>Email de contacto</label>
-            <input type="email" id="leadEmail" class="input-std" placeholder="contacto@ejemplo.com" required />
-          </div>
-          <div class="input-group">
-            <label>Teléfono</label>
-            <input type="tel" id="leadTelefono" class="input-std" placeholder="+56 9..." />
-          </div>
-          <button type="submit" class="btn-cta">Revisar Riesgos de mi Comunidad</button>
-        </div>
-      </form>
-
-      <div id="resultArea">
-        <div id="scoreBox" class="result-box risk-high">
-          <span class="score-number" id="lblPuntosNo">0</span>
-          <span style="font-size: 20px"> Vulnerabilidades</span>
-          <span class="score-label" id="lblNivelRiesgo">RIESGO ALTO</span>
-          <p id="lblDiagnostico" style="font-size: 14px; padding: 0 20px">...</p>
-        </div>
-
-        <div class="card" style="text-align: center">
-          <h3>¿Qué hacer ahora?</h3>
-          <p>La administración profesional es la clave para reducir estos riesgos.</p>
-          <div class="contact-card">
-            <img src="https://i.ibb.co/60BZRgdy/Whats-App-Image-2026-01-13-at-09-00-15.jpg" class="contact-avatar" alt="Marcos Castro" />
-            <div style="text-align: left">
-              <strong>Marcos Castro</strong>
-              <span style="font-size: 12px; color: #64748b">Director Santa Josefina SpA</span>
-              <div style="margin-top: 5px; font-size: 13px">
-                <a href="tel:+56998647190" style="color: var(--accent); text-decoration: none; font-weight: 700;">
-                  <i class="fa-solid fa-phone"></i> +56 9 9864 7190
-                </a>
-              </div>
-            </div>
-          </div>
-          <div style="margin-top: 25px">
-            <a href="https://wa.me/56998647190?text=Hola,%20hice%20el%20checklist%20de%20seguridad." target="_blank" style="background: #25d366; color: white; padding: 12px 25px; border-radius: 30px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 8px;">
-              <i class="fa-brands fa-whatsapp"></i> Revisar mi caso (15 min)
-            </a>
-          </div>
+  <div id="resultArea" hidden>
+    <div id="scoreBox" class="result-box risk-high" aria-live="polite">
+      <span class="score-number" id="lblPuntosNo">0</span><span style="font-size:20px"> Vulnerabilidades</span>
+      <span class="score-label" id="lblNivelRiesgo">RIESGO ALTO</span>
+      <p id="lblDiagnostico" style="font-size:14px;padding:0 20px;margin:0 0 10px"></p>
+      <p id="lblLista" style="font-size:14px;padding:0 20px;margin:0"></p>
+    </div>
+    <p id="saveWarn" class="q-err" hidden>No pudimos registrar sus datos. Para que le contactemos, escríbanos por WhatsApp.</p>
+    <div class="card" style="text-align:center">
+      <h3>¿Qué hacer ahora?</h3>
+      <p>La administración profesional es la clave para reducir estos riesgos.</p>
+      <div class="contact-card">
+        <img src="https://i.ibb.co/60BZRgdy/Whats-App-Image-2026-01-13-at-09-00-15.jpg" class="contact-avatar" alt="Marcos Castro"/>
+        <div style="text-align:left"><strong>Marcos Castro</strong><br/><span style="font-size:12px;color:#64748b">Director Santa Josefina SpA</span>
+          <div style="margin-top:5px;font-size:13px"><a href="tel:+56998647190" style="color:var(--accent);text-decoration:none;font-weight:700"><i class="fa-solid fa-phone"></i> +56 9 9864 7190</a></div>
         </div>
       </div>
+      <div style="margin-top:25px"><a id="btnWa" href="https://wa.me/56998647190" target="_blank" rel="noopener" style="background:#25d366;color:#fff;padding:12px 25px;border-radius:30px;text-decoration:none;font-weight:700;display:inline-flex;align-items:center;gap:8px"><i class="fa-brands fa-whatsapp"></i> Revisar mi caso (15 min)</a></div>
+      <p style="font-size:12px;color:#64748b;margin:20px 0 0">Autoevaluación orientativa; no reemplaza una auditoría de seguridad.</p>
     </div>
+  </div>
+</div>
 
-    <script>
-      // La URL del backend vive en assets/js/api_cliente.js (API_URL). No la duplique aquí.
+<script>
+"use strict";
+const $=id=>document.getElementById(id),T0=Date.now();
+const PREGUNTAS=[
+ ["Personal y conserjería","fa-user-shield",[
+  ["Manuales","¿Existe un manual de procedimientos actualizado y firmado?"],
+  ["Capacitación","¿Se realizan capacitaciones semestrales de emergencia?"],
+  ["Antecedentes","¿Se realizan chequeos de antecedentes rigurosos?"],
+  ["Turnos","¿Existen turnos supervisados para evitar fatiga?"],
+  ["Comunicación","¿El personal tiene canal directo con Carabineros?"]]],
+ ["Control de acceso","fa-id-card",[
+  ["Visitas","¿Existe protocolo estricto para visitas/delivery?"],
+  ["Tags","¿Se auditan y desactivan los tags de ex-residentes?"],
+  ["Mudanzas","¿Existe protocolo de salvoconducto para mudanzas?"],
+  ["Áreas","¿Las áreas sensibles están cerradas con llave?"]]],
+ ["Infraestructura","fa-screwdriver-wrench",[
+  ["Mantención","¿Existe calendario anual de mantención preventiva?"],
+  ["Cámaras","¿Se verifica semanalmente que las cámaras graben?"],
+  ["Certificación","¿Los proveedores críticos están certificados?"],
+  ["Iluminación","¿Existe iluminación de emergencia funcional?"]]]
+];
+let TOTAL=0;
+$("preguntas").innerHTML=PREGUNTAS.map(([t,ic,qs],i)=>`<div class="card" style="box-shadow:none;padding:0;margin-bottom:25px"><h2 class="section-title"><i class="fa-solid ${ic}"></i> ${i+1}. ${t}</h2>${qs.map(([tema,txt])=>{const n=++TOTAL;return `<fieldset class="question-item" id="f${n}" data-tema="${tema}"><legend class="q-text">${txt}</legend><div class="toggle-group"><input type="radio" name="q${n}" value="SI" id="q${n}y" class="toggle-radio"/><label for="q${n}y" class="toggle-label">SÍ</label><input type="radio" name="q${n}" value="NO" id="q${n}n" class="toggle-radio"/><label for="q${n}n" class="toggle-label">NO</label></div></fieldset>`}).join("")}</div>`).join("");
 
-      document.getElementById("securityForm").addEventListener("submit", async function (e) {
-        e.preventDefault();
+document.addEventListener("click",e=>{const a=e.target.closest("a");if(!a)return;const u=a.getAttribute("href")||"";if(u.includes("wa.me"))ev("click_whatsapp",{origen:"diagnostico"});else if(u.startsWith("tel:"))ev("click_telefono",{origen:"diagnostico"})});
 
-        const totalQuestions = 13;
-        let countNo = 0;
-        let resumenRespuestas = [];
-        let puntosCriticos = [];
+$("securityForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const f=e.currentTarget;
+  if(f.sitio_web.value||Date.now()-T0<8000)return; /* anti-spam: campo trampa y envío demasiado rápido */
+  document.querySelectorAll(".missing").forEach(x=>x.classList.remove("missing"));
+  $("qErr").hidden=true;
+  let no=0;const criticos=[];
+  for(let i=1;i<=TOTAL;i++){
+    const v=document.querySelector(`input[name="q${i}"]:checked`)?.value,fs=$("f"+i);
+    if(!v){fs.classList.add("missing");fs.scrollIntoView({behavior:"smooth",block:"center"});$("qErr").hidden=false;return}
+    if(v==="NO"){no++;criticos.push(fs.dataset.tema)}
+  }
+  const nivel=no>7?"ALTO":no>3?"MEDIO":"BAJO";
+  $("spinner").style.display="flex";
+  let guardado=true;
+  try{
+    /* Un solo envío al backend (guarda contacto, bitácora y lead, y avisa al equipo). URL en assets/js/api_cliente.js */
+    await accionPublica("registrarDiagnostico",{nombre:$("leadNombre").value.trim(),email:$("leadEmail").value.trim(),telefono:$("leadTelefono").value.trim(),comunidad:$("leadComunidad").value.trim(),cargo:$("leadCargo").value,countNo:no,nivel,puntosCriticos:criticos.join(", ")});
+  }catch(err){guardado=false;console.error("Error en el guardado:",err)}
+  finally{$("spinner").style.display="none"}
+  ev(guardado?"generate_lead":"diagnostico_error_guardado",{tipo:"diagnostico",nivel,vulnerabilidades:no});
+  mostrarResultado(no,nivel,criticos,guardado);
+});
 
-        const temas = { 1: "Manuales", 2: "Capacitación", 3: "Antecedentes", 4: "Turnos", 5: "Comunicación", 6: "Visitas", 7: "Tags", 8: "Mudanzas", 9: "Áreas", 10: "Mantención", 11: "Cámaras", 12: "Certificación", 13: "Iluminación" };
-
-        for (let i = 1; i <= totalQuestions; i++) {
-          const val = document.querySelector(`input[name="q${i}"]:checked`)?.value;
-          if (val) {
-            resumenRespuestas.push(`P${i}(${val})`);
-            if (val === "NO") {
-              countNo++;
-              puntosCriticos.push(`${temas[i]}`);
-            }
-          } else {
-            alert("Por favor responda todas las preguntas."); return;
-          }
-        }
-
-        let nivel = countNo > 7 ? "ALTO" : (countNo > 3 ? "MEDIO" : "BAJO");
-        document.getElementById("spinner").style.display = "flex";
-
-        const nombre = document.getElementById("leadNombre").value;
-        const email = document.getElementById("leadEmail").value;
-        const telefono = document.getElementById("leadTelefono").value;
-        const comunidad = document.getElementById("leadComunidad").value;
-
-        try {
-          // Un solo envío al backend: guarda el contacto, la bitácora y el lead de marketing,
-          // y avisa al equipo por correo. Esta página es pública, así que no lleva sesión.
-          await accionPublica("registrarDiagnostico", {
-            nombre: nombre,
-            email: email,
-            telefono: telefono,
-            comunidad: comunidad,
-            countNo: countNo,
-            nivel: nivel,
-            puntosCriticos: puntosCriticos.join(", ")
-          });
-        } catch (err) {
-          console.error("Error en el guardado:", err);
-        } finally {
-          document.getElementById("spinner").style.display = "none";
-          mostrarResultado(countNo, nivel);
-        }
-      });
-
-      function mostrarResultado(countNo, nivel) {
-        document.getElementById("securityForm").style.display = "none";
-        document.getElementById("lblPuntosNo").innerText = countNo;
-        document.getElementById("lblNivelRiesgo").innerText = "RIESGO " + nivel;
-        
-        const box = document.getElementById("scoreBox");
-        box.className = "result-box " + (nivel === "ALTO" ? "risk-high" : (nivel === "MEDIO" ? "risk-med" : "risk-low"));
-        
-        document.getElementById("lblDiagnostico").innerText = nivel === "ALTO" ? "Su edificio es altamente vulnerable." : "Su comunidad tiene una base de gestión aceptable.";
-        document.getElementById("resultArea").style.display = "block";
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-    </script>
-  </body>
+function mostrarResultado(no,nivel,crit,guardado){
+  $("securityForm").style.display="none";
+  $("lblPuntosNo").textContent=no;
+  $("lblNivelRiesgo").textContent="RIESGO "+nivel;
+  $("scoreBox").className="result-box "+({ALTO:"risk-high",MEDIO:"risk-med",BAJO:"risk-low"})[nivel];
+  $("lblDiagnostico").textContent={ALTO:"Su comunidad presenta varias brechas importantes en seguridad y gestión.",MEDIO:"Su comunidad tiene una base de gestión, pero con puntos que conviene reforzar pronto.",BAJO:"Su comunidad tiene una base de gestión aceptable; conviene mantener los controles al día."}[nivel];
+  $("lblLista").textContent=crit.length?"Puntos a reforzar: "+crit.join(", ")+".":"No marcó ningún punto crítico.";
+  $("btnWa").href="https://wa.me/56998647190?text="+encodeURIComponent(`Hola, hice el diagnóstico de seguridad de mi comunidad (${no} vulnerabilidades, riesgo ${nivel.toLowerCase()}).`);
+  $("saveWarn").hidden=guardado;
+  $("resultArea").hidden=false;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+</script>
+</body>
 </html>
