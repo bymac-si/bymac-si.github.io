@@ -271,6 +271,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   const h=$("mainHeader"),upd=()=>h.classList.toggle("scrolled",window.scrollY>10);
   window.addEventListener("scroll",upd,{passive:true});upd();
   $("y").textContent=new Date().getFullYear();
+  if(location.search.includes("privacidad"))$("priv").showModal();
   const m=$("loginModal");
   $("formLogin").addEventListener("submit",procesarLogin);
   m.addEventListener("click",e=>{if(e.target===m)cerrarLogin()});
