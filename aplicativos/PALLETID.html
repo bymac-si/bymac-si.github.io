@@ -210,7 +210,7 @@ pre.zpl{background:#111;color:#c9f7c9;padding:10px;border-radius:8px;max-height:
 <script>
 const MATS_SEED='';
 const $=id=>document.getElementById(id);
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;N'}[c]));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const p2=n=>String(n).padStart(2,'0');
 const fmt=(n,d=3)=>n==null||n===''?'':Number(n).toLocaleString('es-CL',{maximumFractionDigits:d});
 function num(v){
