@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- ICB Food Service 2026 · PalletID de término de picking (etiqueta 100 x 100 mm, Zebra portátil) -->
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PalletID · ICB Food Service</title>
+<link rel="icon" href="https://www.icbfs.cl/wp-content/uploads/2022/01/cropped-favicon-32x32.jpg" sizes="32x32">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#f5f5f7;--panel:#fff;--line:#e2e2e8;--ink:#1d1d22;--muted:#6c6c78;--brand:#ed2750;--soft:#fdecef;--green:#15803d;--red:#b42318;box-sizing:border-box}
+@media(prefers-color-scheme:dark){:root{--bg:#131316;--panel:#1c1c21;--line:#2c2c34;--ink:#f2f2f5;--muted:#9b9ba7;--soft:#2a1a20}}
+*,*::before,*::after{box-sizing:inherit}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+.app{display:grid;grid-template-columns:200px minmax(0,1fr);min-height:100vh}
+aside{background:var(--brand);color:#fff;padding:18px 12px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh;overflow:auto}
+aside .brand{display:flex;flex-direction:column;align-items:center;margin-bottom:10px}
+aside img{width:120px;height:auto;max-width:100%;object-fit:contain;margin:2px auto 8px}
+.side-title{font-weight:800;text-align:center;font-size:15px}.side-sub{font-size:12px;text-align:center;opacity:.85}
+.nav{display:flex;flex-direction:column;gap:3px;margin-top:10px}
+.nav button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:9px;padding:10px;border-radius:8px;font-size:14px;font-weight:600;color:#fff;opacity:.92}
+.nav button:hover{background:rgba(255,255,255,.14)}.nav button.on{background:#fff;color:var(--brand);opacity:1}
+.nav button:focus-visible{outline:2px solid #fff;outline-offset:1px}.nav .ic{width:22px;text-align:center}
+.side-menu{margin-top:auto;color:#fff;font-weight:700;font-size:13px;text-decoration:none;border:1.5px solid rgba(255,255,255,.7);border-radius:8px;padding:8px 14px;text-align:center}
+.side-menu:hover{background:rgba(255,255,255,.15)}
+.content{min-width:0}header.top{padding:16px 22px 0}
+h1{font-size:21px;margin:0 0 2px;font-weight:750}.subtle,.hint{color:var(--muted);font-size:13px}
+.wrap{padding:14px 22px 30px}h2{font-size:16px;margin:0 0 10px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.grid{display:grid;gap:10px 12px}.g2{grid-template-columns:1fr 1fr}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
+input,select,textarea{width:100%;border:1.5px solid var(--line);border-radius:8px;padding:9px 11px;background:var(--bg);color:var(--ink);font:inherit;min-height:40px}
+input:focus,select:focus,textarea:focus{outline:2px solid rgba(237,39,80,.35);border-color:var(--brand)}
+textarea{resize:vertical;min-height:84px}
+.btn{background:var(--brand);border:1.5px solid var(--brand);border-radius:8px;padding:9px 14px;color:#fff;font:inherit;font-weight:700;cursor:pointer;white-space:nowrap;min-height:40px}
+.btn.gray{background:transparent;color:var(--brand)}.btn.sm{padding:5px 9px;font-size:13px;min-height:32px}.btn.big{padding:13px 20px;font-size:16px;width:100%}
+.btn.danger{color:var(--red);border-color:var(--red);background:transparent}.btn:disabled{opacity:.45;cursor:default}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}.toolbar .sp{flex:1}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,440px);gap:18px;align-items:start}.sticky{position:sticky;top:12px}
+.chk{display:inline-flex;align-items:center;gap:7px;margin:0;color:var(--ink);font-size:14px;cursor:pointer}.chk input{width:auto;min-height:0;accent-color:var(--brand)}
+.tab{display:none}.tab.on{display:block}
+.scroll{overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--panel);max-height:calc(100vh - 360px);min-height:90px}
+table.t{border-collapse:collapse;width:100%;font-size:13px}
+table.t th,table.t td{border-bottom:1px solid var(--line);padding:4px 7px;text-align:left;vertical-align:middle;white-space:nowrap}
+table.t thead th{background:var(--bg);color:var(--muted);position:sticky;top:0;z-index:2}
+table.t td.n,table.t th.n{text-align:right;font-variant-numeric:tabular-nums}table.t td.txt{white-space:normal;min-width:180px}
+table.t input{border:1px solid transparent;background:transparent;padding:4px 5px;border-radius:6px;font-size:13px;min-height:32px}
+table.t input:hover{border-color:var(--line)}table.t input:focus{background:var(--bg);border-color:var(--brand)}
+table.t input.q{width:84px;text-align:right}table.t input.u{width:56px}
+table.t tr.void td{color:var(--muted);text-decoration:line-through}table.t tr.sel td{background:var(--soft)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:10px 0}
+.kpi{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:7px 11px}.kpi .t{font-size:12px;color:var(--muted)}.kpi .v{font-size:19px;font-weight:800;font-variant-numeric:tabular-nums}
+.bn{border-radius:8px;padding:7px 12px;font-weight:800;font-size:13px;margin-bottom:8px;display:inline-block}
+.bn.warn{background:#fff200;color:#c00000}.bn.ok{background:rgba(21,128,61,.12);color:var(--green)}.bn.void{background:#fee2e2;color:#7f1d1d}
+.pv{background:#d9d9e0;padding:12px;border-radius:8px;overflow:auto;display:flex;flex-wrap:wrap;gap:12px;justify-content:center}.pv:empty{display:none}
+.modal{position:fixed;inset:0;z-index:100;background:rgba(15,15,20,.6);display:none;align-items:center;justify-content:center;padding:14px}.modal.open{display:flex}
+.dialog{background:var(--panel);border-radius:12px;width:min(720px,100%);max-height:100%;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.dialog header{padding:13px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.dialog header h3{margin:0;font-size:16px}
+.x{background:none;border:0;font-size:26px;line-height:1;cursor:pointer;color:var(--muted);padding:2px 8px}
+.dialog .body{padding:14px 18px}.dialog .foot{padding:12px 18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1d1d22;color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:300;max-width:90vw}.toast.on{opacity:1}
+.big-in input{font-size:18px;min-height:48px}
+.matdesc{font-size:13px;min-height:20px;margin-top:3px;font-weight:600}.matdesc.no{color:var(--red)}
+pre.zpl{background:#111;color:#c9f7c9;padding:10px;border-radius:8px;max-height:260px;overflow:auto;font-size:12px;white-space:pre-wrap;word-break:break-all}
+#scanRow{grid-template-columns:1.1fr 1.6fr .7fr .6fr auto;align-items:start}
+
+/* ===== ETIQUETA 100 x 100 mm ===== */
+#printRoot{display:none}
+@page{size:100mm 100mm;margin:0}
+.lbl{position:relative;width:100mm;height:100mm;background:#fff;color:#000;overflow:hidden;font-family:Arial,Helvetica,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact;flex:none}
+.lbl *{box-sizing:border-box}
+.lbl-in{position:absolute;left:calc(3mm + var(--ox,0mm));top:calc(3mm + var(--oy,0mm));width:94mm;height:94mm;display:flex;flex-direction:column}
+.lb-h{height:4mm;display:flex;justify-content:space-between;font-size:6.5pt;font-weight:700;line-height:4mm;white-space:nowrap}
+.lb-top{display:flex;gap:2mm;height:22mm}.lb-l{width:70mm;display:flex;flex-direction:column}
+.lb-zone{height:13mm;background:#000;color:#fff;display:flex;align-items:center;padding:0 3mm;font-weight:900;font-size:27pt;line-height:1;white-space:nowrap}
+.lb-r{width:22mm;height:22mm;display:flex;align-items:center;justify-content:center}.lb-r svg{display:block}
+.lb-kv{height:4.5mm;font-size:9pt;line-height:4.5mm;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-kv small{font-weight:400;font-size:6.5pt;margin-right:1mm}
+.lb-ent{height:4.5mm;font-size:9pt;line-height:4.5mm;font-weight:700;white-space:nowrap;margin-top:.5mm}.lb-ent small{font-weight:400;font-size:6.5pt;margin-right:1mm}
+.lb-bc{display:flex;justify-content:center;margin-top:1mm}.lb-bc svg{display:block}
+.lb-id{height:4mm;text-align:center;font-size:9pt;font-weight:700;line-height:4mm;letter-spacing:.6pt}
+.lb-sum{height:4.5mm;margin-top:1mm;border-top:.4mm solid #000;border-bottom:.2mm solid #000;font-size:7pt;font-weight:800;line-height:4mm;display:flex;justify-content:space-between;padding:0 .5mm}
+.lb-list{flex:1;overflow:hidden}
+.lb-row{height:3.4mm;display:flex;gap:1.5mm;font-size:6.6pt;line-height:3.4mm;white-space:nowrap}
+.lb-row .c{width:15mm;font-weight:700}.lb-row .d{flex:1;overflow:hidden;text-overflow:ellipsis}.lb-row .q{width:14mm;text-align:right;font-weight:700}.lb-row .u{width:7mm}
+.lb-more{font-size:6.6pt;font-weight:800;text-align:center;margin-top:.5mm}
+.lb-zc{height:8mm;background:#000;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:2mm;padding:0 2.5mm;font-weight:900;font-size:15pt;white-space:nowrap}
+.lb-zc small{font-size:7pt;font-weight:700;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.lb-wm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18pt;font-weight:900;color:rgba(0,0,0,.12);transform:rotate(-30deg);pointer-events:none}
+@media screen{.pv .lbl{zoom:1.2;box-shadow:0 2px 12px rgba(0,0,0,.25)}}
+@media print{html,body{margin:0!important;padding:0!important;background:#fff}
+ body.printing>.app,body.printing>.toast,body.printing>.modal{display:none!important}body.printing #printRoot{display:block}
+ .lbl{break-after:page;page-break-after:always}.lbl:last-child{break-after:auto;page-break-after:auto}}
+@media(max-width:1000px){.app{grid-template-columns:1fr}aside{position:static;height:auto}.nav{flex-direction:row;overflow:auto}.nav button{white-space:nowrap}.side-menu{margin-top:6px}.layout{grid-template-columns:1fr}.sticky{position:static}.scroll{max-height:none}}
+@media(max-width:620px){.g2{grid-template-columns:1fr}#scanRow{grid-template-columns:1fr 1fr}header.top,.wrap{padding-left:12px;padding-right:12px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside>
+  <div class="brand"><img src="https://www.icbfs.cl/wp-content/uploads/2022/02/logo-icbfs.png" alt="ICB Food Service"><div class="side-title">PalletID</div><div class="side-sub">Término de picking</div></div>
+  <nav class="nav" id="nav" aria-label="Secciones">
+    <button data-tab="armar"><span class="ic">📦</span>Armar pallet</button>
+    <button data-tab="cerrados"><span class="ic">🗂</span>Pallets cerrados</button>
+    <button data-tab="config"><span class="ic">⚙️</span>Configuración</button>
+  </nav>
+  <a class="side-menu" href="MENU_ICB.html">← Menú</a>
+</aside>
+<div class="content">
+<header class="top"><h1 id="pgTitle">Armar pallet</h1><div class="subtle" id="pgSub"></div></header>
+<main class="wrap">
+
+<section class="tab" id="tab-armar">
+ <div class="layout">
+  <div>
+   <div class="panel">
+    <h2>1) Exportación de SAP</h2>
+    <div class="toolbar" style="margin-bottom:8px"><button class="btn gray sm" id="sLoad" type="button">📂 Cargar Excel de SAP (.xlsx)</button><input type="file" id="fSap" accept=".xlsx,.xls" style="display:none"><span class="hint" id="sInfo"></span></div>
+    <label for="aZsel">Zona a armar (trae sus productos)</label><select id="aZsel"></select>
+   </div>
+   <div class="panel">
+    <h2>2) Datos del pallet</h2>
+    <div class="grid g2">
+      <div><label for="aZona">Número de zona</label><input id="aZona" inputmode="numeric" maxlength="3" placeholder="Ej: 609" autocomplete="off"></div>
+      <div><label for="aPick">Pickeador</label><input id="aPick" list="pickList" autocomplete="off" placeholder="Nombre"><datalist id="pickList"></datalist></div>
+      <div><label for="aCli">Cliente</label><input id="aCli" list="cliList" autocomplete="off" placeholder="Nombre del cliente"><datalist id="cliList"></datalist></div>
+      <div><label for="aEnt">Entrega / pedido SAP <span class="hint">(opcional)</span></label><input id="aEnt" inputmode="numeric" placeholder="100974414" autocomplete="off"></div>
+    </div>
+   </div>
+   <div class="panel">
+    <h2>3) Productos del pallet</h2>
+    <div class="grid" id="scanRow">
+      <div class="big-in"><label for="aMat">Material (escanear o digitar)</label><input id="aMat" inputmode="numeric" autocomplete="off" placeholder="104547470"></div>
+      <div><label for="aTxt">Descripción</label><input id="aTxt" autocomplete="off"></div>
+      <div class="big-in"><label for="aQty">Cantidad</label><input id="aQty" inputmode="decimal" value="1"></div>
+      <div><label for="aUn">Unidad</label><input id="aUn" autocomplete="off" placeholder="UN"></div>
+      <div style="padding-top:22px"><button class="btn" id="aAdd" type="button">Agregar</button></div>
+    </div>
+    <div class="matdesc" id="aDesc"></div>
+    <div class="toolbar" style="margin:8px 0 10px"><label class="chk"><input type="checkbox" id="aAuto"> Sumar 1 por cada escaneo</label><span class="sp"></span><button class="btn danger sm" id="aClear" type="button">Vaciar</button></div>
+    <div class="scroll"><table class="t"><thead><tr><th>Material</th><th>Descripción</th><th class="n">Cantidad</th><th>Un.</th><th></th></tr></thead><tbody id="aBody"></tbody></table></div>
+    <div class="kpis" id="aKpis"></div>
+   </div>
+  </div>
+  <div class="sticky">
+   <div class="panel">
+    <h2>Vista previa de la etiqueta</h2>
+    <div class="pv" id="aPv"></div>
+    <div class="hint" style="margin:8px 0 12px">El PalletID (con fecha y hora de término) se asigna al cerrar el pallet y va en el código de barras.</div>
+    <div id="aWarn"></div>
+    <button class="btn big" id="aClose" type="button">Cerrar pallet y generar etiqueta</button>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="tab" id="tab-cerrados">
+ <div class="toolbar">
+   <div style="flex:1;min-width:230px"><input id="cQ" type="search" placeholder="Escanear PalletID o buscar cliente, entrega, pickeador, material…" aria-label="Buscar"></div>
+   <div><input id="cDate" type="date" aria-label="Fecha" style="width:auto"></div>
+   <button class="btn gray sm" id="cExport" type="button">Exportar</button>
+ </div>
+ <div class="layout">
+  <div><div class="scroll"><table class="t"><thead><tr><th>Término</th><th>PalletID</th><th>Zona</th><th>Cliente</th><th>Pickeador</th><th>Entrega</th><th class="n">Prod.</th><th class="n">Cant.</th></tr></thead><tbody id="cBody"></tbody></table></div><p class="hint" id="cInfo"></p></div>
+  <div class="sticky"><div class="panel" id="cDetail"></div></div>
+ </div>
+</section>
+
+<section class="tab" id="tab-config">
+ <div class="grid g2">
+  <div class="panel"><h2>Pickeadores</h2><label for="kPick">Uno por línea</label><textarea id="kPick" style="min-height:130px"></textarea>
+    <div style="margin-top:8px"><button class="btn gray sm" id="kPickSave" type="button">Guardar lista</button></div></div>
+  <div class="panel"><h2>Etiqueta e impresión</h2>
+    <div class="grid g2">
+      <div><label for="kSite">Texto de cabecera (CD / sucursal)</label><input id="kSite" placeholder="Ej: CD Calama"></div>
+      <div><label for="kDpi">Resolución de la Zebra (ZPL)</label><select id="kDpi"><option value="203">203 dpi (8 puntos/mm)</option><option value="300">300 dpi (12 puntos/mm)</option></select></div>
+      <div><label for="kOx">Ajuste horizontal (mm)</label><input id="kOx" type="number" step="0.5" min="-10" max="10"></div>
+      <div><label for="kOy">Ajuste vertical (mm)</label><input id="kOy" type="number" step="0.5" min="-10" max="10"></div>
+      <div style="grid-column:1/-1"><label for="kUrl">Enlace base para el QR <span class="hint">(opcional; si queda vacío el QR lleva solo el PalletID)</span></label><input id="kUrl" placeholder="https://intranet…/PALLETID.html"></div>
+      <div style="grid-column:1/-1"><label class="chk"><input type="checkbox" id="kQr"> Imprimir código QR junto al código de barras</label></div>
+    </div>
+    <div class="toolbar" style="margin:12px 0 0"><button class="btn gray sm" id="kSave" type="button">Guardar</button><button class="btn gray sm" id="kTest" type="button">🖨 Etiqueta de prueba</button></div>
+  </div>
+ </div>
+ <div class="grid g2">
+  <div class="panel"><h2>Maestro de materiales</h2><div class="hint" id="kMatInfo" style="margin-bottom:8px"></div>
+    <button class="btn gray sm" id="kMatSeed" type="button">Restaurar incluido</button>
+    <p class="hint">Se usa para mostrar la descripción al ingresar el material. Se actualiza solo cada vez que cargas el Excel de SAP.</p></div>
+  <div class="panel"><h2>Respaldo de pallets</h2>
+    <button class="btn gray sm" id="kBackup" type="button">Descargar respaldo</button>
+    <button class="btn gray sm" id="kRestore" type="button">Cargar respaldo</button>
+    <input type="file" id="fRest" accept=".json" style="display:none">
+    <p class="hint" id="kCount"></p></div>
+ </div>
+</section>
+
+</main></div></div>
+<div id="printRoot"></div>
+<div class="toast" id="toast"></div>
+
+<div class="modal" id="mdDone" role="dialog" aria-modal="true" aria-labelledby="mdDoneT"><div class="dialog" style="width:min(640px,100%)">
+ <header><h3 id="mdDoneT">Pallet cerrado</h3><button class="x" data-close aria-label="Cerrar">×</button></header>
+ <div class="body"><div class="pv" id="dPv"></div><div class="hint" id="dMsg" style="margin-top:8px"></div></div>
+ <div class="foot"><button class="btn gray" id="dZpl">ZPL</button><button class="btn" id="dPrint">🖨 Imprimir etiqueta</button><button class="btn gray" id="dNew">Nuevo pallet</button></div></div></div>
+
+<div class="modal" id="mdZpl" role="dialog" aria-modal="true" aria-labelledby="mdZplT"><div class="dialog">
+ <header><h3 id="mdZplT">Código ZPL</h3><button class="x" data-close aria-label="Cerrar">×</button></header>
+ <div class="body"><p class="hint" style="margin-top:0">Para enviar directo a la Zebra (Bluetooth o red) sin pasar por el controlador de Windows o Android. Etiqueta de 100 × 100 mm.</p><pre class="zpl" id="zOut"></pre></div>
+ <div class="foot"><button class="btn gray" id="zCopy">Copiar</button><button class="btn" id="zDown">Descargar .zpl</button></div></div></div>
+<script>
+const MATS_SEED='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';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const p2=n=>String(n).padStart(2,'0');
+const fmt=(n,d=3)=>n==null||n===''?'':Number(n).toLocaleString('es-CL',{maximumFractionDigits:d});
+function num(v){
+  if(v===null||v===undefined||v==='')return null;if(typeof v==='number')return isFinite(v)?v:null;
+  let s=String(v).trim().replace(/\s/g,'');if(!s)return null;
+  if(s.includes(',')&&s.includes('.'))s=s.lastIndexOf(',')>s.lastIndexOf('.')?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,'');
+  else if(s.includes(','))s=s.replace(',','.');
+  else if(/^-?\d{1,3}(\.\d{3})+$/.test(s))s=s.replace(/\./g,'');
+  const n=parseFloat(s);return isNaN(n)?null:n;
+}
+const normH=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
+const keyStr=v=>{if(v==null)return '';if(typeof v==='number'&&Number.isInteger(v))return String(v);return String(v).trim()};
+function nowTS(d=new Date()){return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+'T'+p2(d.getHours())+':'+p2(d.getMinutes())+':'+p2(d.getSeconds())}
+function tsDate(ts){const m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/.exec(ts||'');return m?new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+m[6]):null}
+const fmtDT=ts=>{const m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(ts||'');return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`:''};
+let tt;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),3800)}
+function download(name,blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000)}
+const lsGet=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}};
+
+/* ===== CODE 128 ===== */
+const C128=['212222','222122','222221','121223','121322','131222','122213','122312','132212','221213','221312','231212','112232','122132','122231','113222','123122','123221','223211','221132','221231','213212','223112','312131','311222','321122','321221','312212','322112','322211','212123','212321','232121','111323','131123','131321','112313','132113','132311','211313','231113','231311','112133','112331','132131','113123','113321','133121','313121','211331','231131','213113','213311','213131','311123','311321','331121','312113','312311','332111','314111','221411','431111','111224','111422','121124','121421','141122','141221','112214','112412','122114','122411','142112','142211','241211','221114','413111','241112','134111','111242','121142','121241','114212','124112','124211','411212','421112','421211','212141','214121','412121','111143','111341','131141','114113','114311','411113','411311','113141','114131','311141','411131','211412','211214','211232','2331112'];
+function code128(str){
+  str=String(str).replace(/[^\x20-\x7E]/g,'?');
+  const isD=c=>c>='0'&&c<='9',run=i=>{let j=i;while(j<str.length&&isD(str[j]))j++;return j-i};
+  const vals=[];let mode,pos=0;const r0=run(0);
+  if(str.length&&(r0>=4||(r0===str.length&&r0>=2))){
+    if(r0%2===0){vals.push(105);mode='C'}else{vals.push(104,str.charCodeAt(0)-32,99);pos=1;mode='C'}
+  }else{vals.push(104);mode='B'}
+  while(pos<str.length){
+    if(mode==='C'){
+      if(pos+1<str.length&&isD(str[pos])&&isD(str[pos+1])){vals.push(+str.slice(pos,pos+2));pos+=2}else{vals.push(100);mode='B'}
+    }else{
+      const r=run(pos);
+      if(r>=4){if(r%2===1){vals.push(str.charCodeAt(pos)-32);pos++}vals.push(99);mode='C'}else{vals.push(str.charCodeAt(pos)-32);pos++}
+    }
+  }
+  let sum=vals[0];for(let i=1;i<vals.length;i++)sum+=vals[i]*i;
+  vals.push(sum%103,106);
+  const w=[];vals.forEach(v=>{for(const ch of C128[v])w.push(+ch)});
+  return w;
+}
+const code128Total=s=>code128(s).reduce((a,b)=>a+b,0);
+function barSVG(str,mod,h,quiet=10){
+  const w=code128(str);let x=quiet,d='';
+  w.forEach((n,i)=>{if(i%2===0)d+=`M${x} 0h${n}v1h-${n}z`;x+=n});
+  const T=x+quiet;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${T} 1" width="${(T*mod).toFixed(3)}mm" height="${h}mm" preserveAspectRatio="none" shape-rendering="crispEdges"><path d="${d}" fill="#000"/></svg>`;
+}
+
+/* ===== QR (byte, ECC M, v1-6) ===== */
+const QR_SPEC={1:{dc:16,ec:10,nb:1},2:{dc:28,ec:16,nb:1},3:{dc:44,ec:26,nb:1},4:{dc:64,ec:18,nb:2},5:{dc:86,ec:24,nb:2},6:{dc:108,ec:16,nb:4}};
+const QR_ALIGN={2:18,3:22,4:26,5:30,6:34};
+function gfMul(a,b){let r=0;while(b){if(b&1)r^=a;a<<=1;if(a&256)a^=0x11D;b>>=1}return r}
+function rsDivisor(deg){const r=new Array(deg).fill(0);r[deg-1]=1;let root=1;for(let i=0;i<deg;i++){for(let j=0;j<deg;j++){r[j]=gfMul(r[j],root);if(j+1<deg)r[j]^=r[j+1]}root=gfMul(root,2)}return r}
+function rsRemainder(data,div){const r=new Array(div.length).fill(0);for(const b of data){const f=b^r.shift();r.push(0);div.forEach((c,i)=>{r[i]^=gfMul(c,f)})}return r}
+function qrMatrix(text){
+  const data=[...new TextEncoder().encode(text)];
+  let v=0;for(let k=1;k<=6;k++){if(Math.ceil((12+8*data.length)/8)<=QR_SPEC[k].dc){v=k;break}}
+  if(!v)return null;
+  const sp=QR_SPEC[v],size=17+4*v,bits=[];
+  const put=(val,len)=>{for(let i=len-1;i>=0;i--)bits.push((val>>>i)&1)};
+  put(4,4);put(data.length,8);data.forEach(b=>put(b,8));
+  for(let i=0;i<4&&bits.length<sp.dc*8;i++)bits.push(0);
+  while(bits.length%8)bits.push(0);
+  const cw=[];for(let i=0;i<bits.length;i+=8){let b=0;for(let j=0;j<8;j++)b=(b<<1)|bits[i+j];cw.push(b)}
+  for(let pad=0xEC;cw.length<sp.dc;pad^=0xEC^0x11)cw.push(pad);
+  const bl=sp.dc/sp.nb,div=rsDivisor(sp.ec),blocks=[],ecs=[];
+  for(let i=0;i<sp.nb;i++){const d=cw.slice(i*bl,(i+1)*bl);blocks.push(d);ecs.push(rsRemainder(d,div))}
+  const all=[];for(let i=0;i<bl;i++)blocks.forEach(b=>all.push(b[i]));for(let i=0;i<sp.ec;i++)ecs.forEach(e=>all.push(e[i]));
+  const mk=()=>Array.from({length:size},()=>new Array(size).fill(false));
+  const m=mk(),fn=mk();
+  const setF=(mm,ff,x,y,d)=>{if(x>=0&&y>=0&&x<size&&y<size){mm[y][x]=d;if(ff)ff[y][x]=true}};
+  for(let i=0;i<size;i++){setF(m,fn,6,i,i%2===0);setF(m,fn,i,6,i%2===0)}
+  const finder=(cx,cy)=>{for(let dy=-4;dy<=4;dy++)for(let dx=-4;dx<=4;dx++){const d=Math.max(Math.abs(dx),Math.abs(dy));setF(m,fn,cx+dx,cy+dy,d!==2&&d!==4)}};
+  finder(3,3);finder(size-4,3);finder(3,size-4);
+  if(v>=2){const a=QR_ALIGN[v];for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)setF(m,fn,a+dx,a+dy,Math.max(Math.abs(dx),Math.abs(dy))!==1)}
+  const drawFmt=(mm,ff,mask)=>{
+    const d=(0<<3)|mask;let rem=d;for(let i=0;i<10;i++)rem=(rem<<1)^((rem>>>9)*0x537);
+    const bits=((d<<10)|rem)^0x5412,gb=i=>((bits>>>i)&1)!==0;
+    for(let i=0;i<=5;i++)setF(mm,ff,8,i,gb(i));
+    setF(mm,ff,8,7,gb(6));setF(mm,ff,8,8,gb(7));setF(mm,ff,7,8,gb(8));
+    for(let i=9;i<15;i++)setF(mm,ff,14-i,8,gb(i));
+    for(let i=0;i<8;i++)setF(mm,ff,size-1-i,8,gb(i));
+    for(let i=8;i<15;i++)setF(mm,ff,8,size-15+i,gb(i));
+    setF(mm,ff,8,size-8,true);
+  };
+  drawFmt(m,fn,0);
+  let i=0;const total=all.length*8;
+  for(let right=size-1;right>=1;right-=2){
+    if(right===6)right=5;
+    for(let vert=0;vert<size;vert++){for(let j=0;j<2;j++){
+      const x=right-j,up=((right+1)&2)===0,y=up?size-1-vert:vert;
+      if(!fn[y][x]&&i<total){m[y][x]=((all[i>>>3]>>>(7-(i&7)))&1)!==0;i++}
+    }}
+  }
+  const maskFn=[(x,y)=>(x+y)%2===0,(x,y)=>y%2===0,(x,y)=>x%3===0,(x,y)=>(x+y)%3===0,(x,y)=>(Math.floor(x/3)+Math.floor(y/2))%2===0,(x,y)=>x*y%2+x*y%3===0,(x,y)=>(x*y%2+x*y%3)%2===0,(x,y)=>((x+y)%2+x*y%3)%2===0];
+  const penalty=mm=>{
+    let p=0;const lines=[];for(let y=0;y<size;y++){lines.push(mm[y]);lines.push(mm.map(r=>r[y]))}
+    for(const ln of lines){
+      let run=1;for(let k=1;k<=size;k++){if(k<size&&ln[k]===ln[k-1])run++;else{if(run>=5)p+=3+(run-5);run=1}}
+      const s=ln.map(b=>b?1:0).join('');
+      for(const pat of ['10111010000','00001011101']){let at=-1;while((at=s.indexOf(pat,at+1))>=0)p+=40}
+    }
+    for(let y=0;y<size-1;y++)for(let x=0;x<size-1;x++){const c=mm[y][x];if(c===mm[y][x+1]&&c===mm[y+1][x]&&c===mm[y+1][x+1])p+=3}
+    let dark=0;mm.forEach(r=>r.forEach(b=>{if(b)dark++}));
+    p+=Math.floor(Math.abs(dark*20-size*size*10)/(size*size))*10;return p;
+  };
+  let best=null,bp=Infinity;
+  for(let mask=0;mask<8;mask++){
+    const mm=m.map(r=>r.slice());
+    for(let y=0;y<size;y++)for(let x=0;x<size;x++)if(!fn[y][x]&&maskFn[mask](x,y))mm[y][x]=!mm[y][x];
+    drawFmt(mm,null,mask);const pn=penalty(mm);if(pn<bp){bp=pn;best=mm}
+  }
+  return{n:size,v,m:best};
+}
+function qrSVG(text,maxMM){
+  const q=qrMatrix(text);if(!q)return '';
+  const quiet=4,T=q.n+quiet*2;
+  let mod=Math.floor(maxMM/T/0.125)*0.125;if(mod<0.25)mod=0.25;
+  let d='';for(let y=0;y<q.n;y++)for(let x=0;x<q.n;x++)if(q.m[y][x])d+=`M${x+quiet} ${y+quiet}h1v1h-1z`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${T} ${T}" width="${(T*mod).toFixed(3)}mm" height="${(T*mod).toFixed(3)}mm" shape-rendering="crispEdges"><path d="${d}" fill="#000"/></svg>`;
+}
+
+/* ===== DATOS ===== */
+const CFG=Object.assign({pickers:[],offX:0,offY:0,qr:true,baseUrl:'',dpi:203,sitio:''},lsGet('icb_pid_cfg_v1',{}));
+const saveCfg=()=>lsSet('icb_pid_cfg_v1',CFG);
+let MAT=new Map(),H=[],SAP=null,D=Object.assign({zona:'',picker:'',cliente:'',entrega:'',lines:[]},lsGet('icb_pid_draft_v1',{}));
+const saveDraft=()=>lsSet('icb_pid_draft_v1',D);
+const IDB={db:null,
+  open(){return new Promise(res=>{try{const r=indexedDB.open('icb_pid_v1',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>{IDB.db=r.result;res()};r.onerror=()=>res()}catch(e){res()}})},
+  get(k){return new Promise(res=>{if(!IDB.db)return res(lsGet('icb_pid_'+k,undefined));try{const q=IDB.db.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>res(undefined)}catch(e){res(undefined)}})},
+  set(k,v){return new Promise(res=>{if(!IDB.db){res(lsSet('icb_pid_'+k,v));return}try{const t=IDB.db.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=()=>res(true);t.onerror=()=>res(false)}catch(e){res(false)}})}};
+const saveHist=()=>IDB.set('hist',H).then(ok=>{if(!ok)toast('No se pudo guardar el historial en este navegador')});
+async function loadSeedMats(){
+  if(!window.DecompressionStream){toast('Este navegador no puede leer el maestro de materiales incluido.');return}
+  const bin=Uint8Array.from(atob(MATS_SEED),c=>c.charCodeAt(0));
+  const txt=await new Response(new Blob([bin]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+  const arr=txt.split('\n').filter(Boolean).map(l=>{const i=l.indexOf('|');return[l.slice(0,i),l.slice(i+1)]});
+  MAT=new Map(arr);await IDB.set('mats',arr);await IDB.set('matmeta',{src:'Incluido (export SAP LABEL)',n:arr.length});
+}
+async function loadAll(){
+  await IDB.open();H=(await IDB.get('hist'))||[];SAP=(await IDB.get('sap'))||null;
+  const mats=await IDB.get('mats');if(mats&&mats.length)MAT=new Map(mats);else await loadSeedMats();
+}
+const normMat=s=>{s=String(s||'').trim();return /^\d+$/.test(s)?s.replace(/^0+(?=\d)/,''):s};
+const sumOf=lines=>lines.reduce((a,l)=>a+(l.qty||0),0);
+const todayStr=()=>nowTS().slice(0,10);
+const doneToday=z=>H.some(p=>!p.void&&p.zona===String(z)&&p.ts.startsWith(todayStr()));
+
+/* ===== EXPORTACIÓN SAP (Excel) ===== */
+function sapParse(rows){
+  const h=(rows[0]||[]).map(normH),f=t=>h.findIndex(x=>x.includes(t));
+  const iz=f('zona'),im=h.indexOf('material'),it=f('texto'),iu=f('unidad'),iq=h.findIndex(x=>x.includes('ctd')||x.includes('cantidad')),ic=f('cliente'),ie=f('entrega');
+  if(iz<0||im<0||iq<0)return null;
+  const Z={},mats=[];let n=0,nz=0,bad=0;
+  for(let r=1;r<rows.length;r++){
+    const c=rows[r],mat=normMat(keyStr(c[im])),q=num(c[iq]);
+    if(!mat&&!keyStr(c[iz]))continue;
+    if(!mat||!(q>0)){bad++;continue}
+    const zm=/\d+/.exec(keyStr(c[iz])),zk=zm?String(parseInt(zm[0],10)):'';
+    if(!(zk>=1&&zk<=999)){nz++;continue}
+    const txt=it>=0?String(c[it]||'').trim():'',un=iu>=0?String(c[iu]||'').trim().toUpperCase():'';
+    const z=Z[zk]||(Z[zk]={lines:[],cli:'',ent:''}),ex=z.lines.find(l=>l.mat===mat&&l.un===un);
+    if(ex)ex.qty=Math.round((ex.qty+q)*1000)/1000;else z.lines.push({mat,txt,un,qty:Math.round(q*1000)/1000});
+    if(ic>=0&&!z.cli)z.cli=keyStr(c[ic]);if(ie>=0&&!z.ent)z.ent=keyStr(c[ie]);
+    if(txt)mats.push([mat,txt]);n++;
+  }
+  return{zones:Z,mats,n,nz,bad};
+}
+$('sLoad').onclick=()=>window.XLSX?$('fSap').click():toast('Para leer Excel se necesita conexión a internet');
+$('fSap').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{
+    const wb=XLSX.read(await f.arrayBuffer(),{type:'array'}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:''});
+    const r=sapParse(rows);if(!r)return toast('No encuentro las columnas Zona, Material y Cantidad (Ctd.real dest.)');
+    const nzn=Object.keys(r.zones).length;if(!nzn)return toast('El archivo no tiene líneas con zona');
+    r.mats.forEach(([m,t])=>MAT.set(m,t));
+    SAP={name:f.name,at:nowTS(),zones:r.zones,n:r.n,nz:r.nz,bad:r.bad};
+    await IDB.set('sap',SAP);await IDB.set('mats',[...MAT]);renderArmar();
+    toast(`${nzn} zonas · ${r.n} líneas${r.nz?` · ${r.nz} sin zona omitidas`:''}${r.bad?` · ${r.bad} sin cantidad omitidas`:''}`);
+  }catch(err){toast('No se pudo leer el archivo: '+err.message)}
+};
+function fromSap(k){
+  const z=SAP&&SAP.zones[k];if(!z)return renderArmar();
+  if(D.lines.length&&!confirm('Se reemplazarán los productos que ya están en el pallet. ¿Continuar?'))return renderArmar();
+  if(doneToday(k)&&!confirm(`Ya hay un pallet cerrado hoy en la zona ${k}. ¿Cargarla de nuevo?`))return renderArmar();
+  D.zona=k;D.lines=z.lines.map(l=>({...l}));
+  if(z.cli&&!D.cliente)D.cliente=z.cli;if(z.ent&&!D.entrega)D.entrega=z.ent;
+  saveDraft();syncArmar();renderArmar();toast(`Zona ${k}: ${D.lines.length} producto(s) cargado(s)`);
+}
+$('aZsel').onchange=e=>e.target.value?fromSap(e.target.value):renderArmar();
+
+/* ===== PALLET ID ===== */
+function luhn(s){let sum=0,alt=true;for(let i=s.length-1;i>=0;i--){let n=+s[i];if(alt){n*=2;if(n>9)n-=9}sum+=n;alt=!alt}return (10-sum%10)%10}
+function makeId(zona,ts){const d=ts.replace(/\D/g,'');const base=d.slice(2,14)+String(zona).padStart(3,'0');return base+luhn(base)}
+const fmtId=id=>id&&id.length===16?`${id.slice(0,6)}-${id.slice(6,12)}-${id.slice(12,15)}-${id[15]}`:(id||'');
+function parseScan(t){
+  t=String(t||'').trim();if(!t)return null;
+  let m=/[#?&]p=(\d{16})/.exec(t);if(m)return m[1];
+  if(/[A-Za-z]/.test(t))return null;
+  const d=t.replace(/\D/g,'');return d.length===16?d:null;
+}
+function splitPages(p){
+  const e=!!p.entrega,L=p.lines.slice(),pages=[];let first=true;
+  for(;;){
+    const full=first?(e?10:14):18,more=first?(e?9:13):17;
+    if(L.length<=full){pages.push(L.splice(0));break}
+    pages.push(L.splice(0,more));first=false;
+  }
+  return pages;
+}
+function qrData(p){const b=(CFG.baseUrl||'').trim();return b?`${b.replace(/#.*$/,'')}#p=${p.id}`:p.id}
+
+/* ===== ETIQUETA HTML (sin campo Término: la hora va solo dentro del PalletID) ===== */
+function labelHTML(p,pi,pages){
+  const tot=pages.length,first=pi===0,lines=pages[pi],n=p.lines.length,sum=sumOf(p.lines);
+  const up=s=>esc(String(s||'').toUpperCase());
+  const head=`<div class="lb-h"><span>ICB FOOD SERVICE${CFG.sitio?' · '+up(CFG.sitio):''}</span><span>${p.draft?'VISTA PREVIA':'FIN DE PICKING'}${tot>1?` · ${pi+1}/${tot}`:''}${p.reimp?` · REIMP. ${p.reimp}`:''}</span></div>`;
+  const rows=lines.map(l=>`<div class="lb-row"><span class="c">${esc(l.mat)}</span><span class="d">${up(l.txt)}</span><span class="q">${fmt(l.qty)}</span><span class="u">${up(l.un)}</span></div>`).join('');
+  const more=pi<tot-1?`<div class="lb-more">… CONTINÚA EN ETIQUETA ${pi+2}/${tot} …</div>`:'';
+  const idBar=p.id?barSVG(p.id,0.5,first?11:8):`<div style="height:${first?11:8}mm;border:.3mm dashed #000;width:70mm;display:flex;align-items:center;justify-content:center;font-size:7pt">CÓDIGO DE BARRAS AL CERRAR</div>`;
+  const idTxt=`<div class="lb-id">${p.id?fmtId(p.id):'—'}</div>`;
+  let inner;
+  if(first){
+    const qr=CFG.qr?(p.id?qrSVG(qrData(p),21):`<div style="width:20mm;height:20mm;border:.3mm dashed #000;display:flex;align-items:center;justify-content:center;font-size:6pt">QR</div>`):'';
+    inner=`${head}<div class="lb-top"><div class="lb-l"><div class="lb-zone">ZONA ${up(p.zona)}</div><div class="lb-kv"><small>PICKEADOR</small>${up(p.picker)}</div><div class="lb-kv"><small>CLIENTE</small>${up(p.cliente||'—')}</div></div><div class="lb-r">${qr}</div></div>
+    ${p.entrega?`<div class="lb-ent"><small>ENTREGA SAP</small>${esc(p.entrega)}</div>`:''}
+    <div class="lb-bc">${idBar}</div>${idTxt}
+    ${p.entrega?`<div class="lb-bc" style="margin-top:.5mm">${barSVG(p.entrega,0.375,7)}</div>`:''}
+    <div class="lb-sum"><span>CONTENIDO · ${n} PROD.</span><span>CANT. TOTAL ${fmt(sum)}</span></div><div class="lb-list">${rows}${more}</div>`;
+  }else{
+    inner=`${head}<div class="lb-zc"><span>ZONA ${up(p.zona)}</span><small>${up(p.cliente)} · ${up(p.picker)}</small></div>
+    <div class="lb-bc">${idBar}</div>${idTxt}
+    <div class="lb-sum"><span>CONTENIDO (CONT.) · ${n} PROD.</span><span>CANT. TOTAL ${fmt(sum)}</span></div><div class="lb-list">${rows}${more}</div>`;
+  }
+  return `<div class="lbl" style="--ox:${CFG.offX}mm;--oy:${CFG.offY}mm"><div class="lbl-in">${inner}</div>${p.draft?'<div class="lb-wm">VISTA PREVIA</div>':''}</div>`;
+}
+const labelsHTML=p=>{const pg=splitPages(p);return pg.map((_,i)=>labelHTML(p,i,pg)).join('')};
+
+/* ===== ZPL (Zebra) ===== */
+const zs=s=>String(s==null?'':s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\x20-\x7E]/g,' ').replace(/[\^~\\]/g,' ').toUpperCase();
+function zplFor(p){
+  const k=CFG.dpi===300?11.811:8,Dm=mm=>Math.round(mm*k),X=mm=>Dm(3+CFG.offX+mm),Y=mm=>Dm(3+CFG.offY+mm);
+  const pages=splitPages(p),out=[],n=p.lines.length,sum=sumOf(p.lines);
+  const txt=(x,y,h,s,fb)=>`^FO${x},${y}^A0N,${Dm(h)}${fb?`^FB${Dm(fb[0])},1,0,${fb[1]}`:''}^FD${zs(s)}^FS`;
+  pages.forEach((lines,pi)=>{
+    const z=[`^XA^MMT^PW${Dm(100)}^LL${Dm(100)}^LS0^LH0,0`];
+    const tot=pages.length,first=pi===0;
+    z.push(txt(X(0),Y(0.6),2.6,'ICB FOOD SERVICE'+(CFG.sitio?' - '+CFG.sitio:'')));
+    z.push(txt(X(0),Y(0.6),2.6,(p.draft?'VISTA PREVIA':'FIN DE PICKING')+(tot>1?` - ${pi+1}/${tot}`:'')+(p.reimp?` - REIMP. ${p.reimp}`:''),[94,'R']));
+    let y;
+    const bw=Math.max(2,Math.round(0.5*k));
+    const idMod=p.id?code128Total(p.id):0;
+    const idBar=(yy,hh)=>p.id?`^BY${bw},3,${Dm(hh)}^FO${X(0)+Math.round((Dm(94)-idMod*bw)/2)},${yy}^BCN,${Dm(hh)},N,N,N,A^FD${p.id}^FS`:'';
+    if(first){
+      z.push(`^FO${X(0)},${Y(5)}^GB${Dm(70)},${Dm(13)},${Dm(13)}^FS`);
+      z.push(`^FO${X(3)},${Y(6.4)}^A0N,${Dm(10)}^FR^FDZONA ${zs(p.zona)}^FS`);
+      z.push(txt(X(0),Y(19.3),3.2,'PICKEADOR: '+String(p.picker||'').slice(0,28)));
+      z.push(txt(X(0),Y(23.8),3.2,'CLIENTE: '+String(p.cliente||'-').slice(0,32)));
+      if(CFG.qr&&p.id){const q=qrMatrix(qrData(p));if(q){const mag=Math.max(2,Math.min(10,Math.floor(Dm(20)/q.n)));z.push(`^FO${X(72)},${Y(5)}^BQN,2,${mag}^FDMA,${qrData(p)}^FS`)}}
+      y=28.5;
+      if(p.entrega){z.push(txt(X(0),Y(y),3.2,'ENTREGA SAP: '+p.entrega));y+=5}
+      z.push(idBar(Y(y),11));y+=11.5;
+      z.push(txt(X(0),Y(y),3.4,fmtId(p.id),[94,'C']));y+=4.5;
+      if(p.entrega){const eb=Math.max(2,Math.round(0.375*k)),em=code128Total(p.entrega);z.push(`^BY${eb},3,${Dm(7)}^FO${X(0)+Math.round((Dm(94)-em*eb)/2)},${Y(y)}^BCN,${Dm(7)},N,N,N,A^FD${zs(p.entrega)}^FS`);y+=8}
+    }else{
+      z.push(`^FO${X(0)},${Y(5)}^GB${Dm(94)},${Dm(8)},${Dm(8)}^FS`);
+      z.push(`^FO${X(2.5)},${Y(6)}^A0N,${Dm(6)}^FR^FDZONA ${zs(p.zona)}^FS`);
+      z.push(`^FO${X(0)},${Y(7.2)}^A0N,${Dm(2.6)}^FB${Dm(91.5)},1,0,R^FR^FD${zs(String(p.cliente||'').slice(0,24))} ${zs(String(p.picker||'').slice(0,20))}^FS`);
+      y=14;z.push(idBar(Y(y),8));y+=8.5;
+      z.push(txt(X(0),Y(y),3.4,fmtId(p.id),[94,'C']));y+=4.5;
+    }
+    z.push(`^FO${X(0)},${Y(y)}^GB${Dm(94)},${Dm(0.4)},${Dm(0.4)}^FS`);
+    z.push(txt(X(0.5),Y(y+0.8),2.6,(first?'CONTENIDO - ':'CONTENIDO (CONT.) - ')+n+' PROD.'));
+    z.push(txt(X(0),Y(y+0.8),2.6,'CANT. TOTAL '+fmt(sum),[94,'R']));
+    y+=5.2;
+    lines.forEach((l,i)=>{
+      const yy=Y(y+i*3.4);
+      z.push(txt(X(0),yy,2.6,l.mat));
+      z.push(`^FO${X(16.5)},${yy}^A0N,${Dm(2.6)}^FB${Dm(48)},1,0,L^FD${zs(String(l.txt||'').slice(0,34))}^FS`);
+      z.push(txt(X(64),yy,2.6,fmt(l.qty),[15,'R']));
+      z.push(txt(X(81),yy,2.6,l.un));
+    });
+    if(pi<tot-1)z.push(txt(X(0),Y(y+lines.length*3.4+0.4),2.6,`... CONTINUA EN ETIQUETA ${pi+2}/${tot} ...`,[94,'C']));
+    z.push('^PQ1,0,1,N^XZ');out.push(z.join('\n'));
+  });
+  return out.join('\n');
+}
+
+/* ===== NAVEGACIÓN ===== */
+const TABS={armar:['Armar pallet','Carga el Excel de SAP, elige la zona y cierra el pallet para imprimir su etiqueta'],cerrados:['Pallets cerrados','Consulta por código de barras, cliente, entrega o pickeador'],config:['Configuración','Pickeadores, etiqueta y maestro de materiales']};
+let cur='armar',selId=null,doneId=null;
+function go(t){
+  if(!TABS[t])t='armar';cur=t;
+  document.querySelectorAll('.tab').forEach(e=>e.classList.toggle('on',e.id==='tab-'+t));
+  document.querySelectorAll('#nav button').forEach(b=>{b.classList.toggle('on',b.dataset.tab===t);b.setAttribute('aria-current',b.dataset.tab===t?'page':'false')});
+  $('pgTitle').textContent=TABS[t][0];$('pgSub').textContent=TABS[t][1];
+  try{history.replaceState(null,'','#'+t)}catch(e){}
+  ({armar:()=>{syncArmar();renderArmar()},cerrados:renderCerrados,config:renderConfig})[t]();
+}
+$('nav').addEventListener('click',e=>{const b=e.target.closest('button[data-tab]');if(b)go(b.dataset.tab)});
+document.querySelectorAll('.modal').forEach(m=>{m.addEventListener('mousedown',e=>{if(e.target===m)m.classList.remove('open')});m.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>m.classList.remove('open')))});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open'))});
+
+/* ===== IMPRESIÓN ===== */
+function printHTML(html){
+  const root=$('printRoot');root.innerHTML=html;document.body.classList.add('printing');
+  const done=()=>{document.body.classList.remove('printing');root.innerHTML='';window.removeEventListener('afterprint',done)};
+  window.addEventListener('afterprint',done);setTimeout(()=>window.print(),80);
+}
+function printPallet(id){
+  const p=H.find(x=>x.id===id);if(!p)return;
+  if(p.void&&!confirm('Este pallet está ANULADO. ¿Imprimir de todos modos?'))return;
+  if(p.printed)p.reimp=(p.reimp||0)+1;else p.printed=true;
+  saveHist();printHTML(labelsHTML(p));
+  if(cur==='cerrados')renderCerrados();
+}
+function showZpl(p){$('zOut').textContent=zplFor(p);$('mdZpl').dataset.id=p.id||'';$('mdZpl').classList.add('open')}
+$('zCopy').onclick=async()=>{try{await navigator.clipboard.writeText($('zOut').textContent);toast('ZPL copiado')}catch(e){toast('No se pudo copiar; descárgalo')}};
+$('zDown').onclick=()=>download(`palletid_${$('mdZpl').dataset.id||'prueba'}.zpl`,new Blob([$('zOut').textContent],{type:'text/plain'}));
+
+/* ===== ARMAR PALLET ===== */
+function addLine(mat,qty,un,txt){
+  mat=normMat(mat);if(!mat){toast('Ingresa el material');return false}
+  const q=num(qty);if(!(q>0)){toast('La cantidad debe ser mayor que 0');return false}
+  un=String(un||'').trim().toUpperCase();txt=String(txt||'').trim()||MAT.get(mat)||'';
+  const ex=D.lines.find(l=>l.mat===mat&&l.un===un);
+  if(ex){ex.qty=Math.round((ex.qty+q)*1000)/1000;if(!ex.txt)ex.txt=txt}else D.lines.push({mat,txt,un,qty:q});
+  saveDraft();return true;
+}
+function syncArmar(){$('aZona').value=D.zona;$('aPick').value=D.picker;$('aCli').value=D.cliente;$('aEnt').value=D.entrega}
+function issues(){
+  const i=[],z=parseInt(D.zona,10);
+  if(!(z>=1&&z<=999))i.push('Indica el número de zona (1 a 999)');
+  if(!D.picker.trim())i.push('Indica el pickeador');
+  if(!D.cliente.trim())i.push('Indica el cliente');
+  if(!D.lines.length)i.push('Agrega al menos un producto');
+  return i;
+}
+function renderArmar(){
+  $('pickList').innerHTML=CFG.pickers.map(x=>`<option value="${esc(x)}">`).join('');
+  $('cliList').innerHTML=[...new Set(H.map(p=>p.cliente).filter(Boolean))].slice(0,80).map(x=>`<option value="${esc(x)}">`).join('');
+  const zk=SAP?Object.keys(SAP.zones).sort((a,b)=>a-b):[],cz=String(parseInt(D.zona,10));
+  $('aZsel').innerHTML=`<option value="">${zk.length?'— elegir zona —':'Carga primero el Excel de SAP'}</option>`+zk.map(k=>`<option value="${k}"${k===cz?' selected':''}>Zona ${k} · ${SAP.zones[k].lines.length} línea(s)${doneToday(k)?' · ✔ cerrada hoy':''}</option>`).join('');
+  $('aZsel').disabled=!zk.length;
+  $('sInfo').textContent=SAP?`${SAP.name} · ${zk.length} zonas · ${SAP.n} líneas${SAP.nz?` · ${SAP.nz} sin zona omitidas`:''}`:'Sin archivo cargado';
+  $('aBody').innerHTML=D.lines.length?D.lines.map((l,i)=>`<tr data-i="${i}"><td><b>${esc(l.mat)}</b></td><td class="txt">${esc(l.txt)||'<span class="hint">sin descripción</span>'}</td><td class="n"><input class="q" data-f="qty" inputmode="decimal" value="${esc(fmt(l.qty))}" aria-label="Cantidad"></td><td><input class="u" data-f="un" value="${esc(l.un)}" aria-label="Unidad"></td><td><button class="btn danger sm" data-del aria-label="Quitar">✕</button></td></tr>`).join(''):'<tr><td colspan="5" class="hint" style="padding:22px;text-align:center">Elige una zona del Excel de SAP, o escanea / digita un material.</td></tr>';
+  const pg=splitPages({lines:D.lines,entrega:D.entrega});
+  $('aKpis').innerHTML=[['Productos',D.lines.length],['Cantidad total',fmt(sumOf(D.lines))],['Etiquetas',pg.length]].map(([t,v])=>`<div class="kpi"><div class="t">${t}</div><div class="v">${v}</div></div>`).join('');
+  $('aPv').innerHTML=labelsHTML({id:'',draft:true,zona:D.zona||'—',picker:D.picker||'—',cliente:D.cliente||'—',entrega:D.entrega,ts:nowTS(),lines:D.lines,reimp:0});
+  const is=issues();$('aWarn').innerHTML=is.length?is.map(x=>`<div class="bn warn">${esc(x)}</div>`).join('<br>'):'<div class="bn ok">Listo para cerrar</div>';
+  $('aClose').disabled=is.length>0;
+}
+$('aZona').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,3);D.zona=e.target.value;saveDraft();renderArmar()});
+$('aPick').addEventListener('input',e=>{D.picker=e.target.value;saveDraft();renderArmar()});
+$('aCli').addEventListener('input',e=>{D.cliente=e.target.value;saveDraft();renderArmar()});
+$('aEnt').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,12);D.entrega=e.target.value;saveDraft();renderArmar()});
+let autoTxt=true;
+function lookup(){
+  const m=normMat($('aMat').value),t=MAT.get(m);
+  $('aDesc').className='matdesc'+(m&&!t?' no':'');
+  $('aDesc').textContent=!m?'':(t||'Material no está en el maestro: escribe la descripción');
+  if(autoTxt)$('aTxt').value=t||'';
+}
+$('aMat').addEventListener('input',lookup);
+$('aTxt').addEventListener('input',()=>{autoTxt=false});
+function clearEntry(){$('aMat').value='';$('aTxt').value='';$('aQty').value='1';$('aUn').value='';autoTxt=true;$('aDesc').textContent='';$('aMat').focus()}
+function doAdd(){if(addLine($('aMat').value,$('aQty').value,$('aUn').value,$('aTxt').value)){clearEntry();renderArmar()}}
+$('aMat').addEventListener('keydown',e=>{
+  if(e.key!=='Enter')return;e.preventDefault();
+  if(!normMat($('aMat').value))return;
+  if($('aAuto').checked){$('aQty').value='1';doAdd()}else{$('aQty').focus();$('aQty').select()}
+});
+['aQty','aUn'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();doAdd()}}));
+$('aTxt').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('aQty').focus()}});
+$('aAdd').onclick=doAdd;
+$('aBody').addEventListener('change',e=>{
+  const tr=e.target.closest('tr[data-i]');if(!tr||!e.target.dataset.f)return;const l=D.lines[+tr.dataset.i];
+  if(e.target.dataset.f==='qty'){const q=num(e.target.value);if(q>0)l.qty=q;e.target.value=fmt(l.qty)}else l.un=e.target.value.trim().toUpperCase();
+  saveDraft();renderArmar();
+});
+$('aBody').addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b)return;D.lines.splice(+b.closest('tr').dataset.i,1);saveDraft();renderArmar()});
+$('aClear').onclick=()=>{if(D.lines.length&&confirm('¿Vaciar la lista de productos?')){D.lines=[];saveDraft();renderArmar()}};
+$('aClose').onclick=closePallet;
+
+function closePallet(){
+  const is=issues();if(is.length)return toast(is[0]);
+  const zona=parseInt(D.zona,10);
+  if(!confirm(`¿Cerrar el pallet de la zona ${zona} (${D.cliente.trim()}) con ${D.lines.length} producto(s)?\nSe asignará el PalletID y la hora de término.`))return;
+  let ts=nowTS(),id=makeId(zona,ts);
+  while(H.some(p=>p.id===id)){const d=tsDate(ts);d.setSeconds(d.getSeconds()+1);ts=nowTS(d);id=makeId(zona,ts)}
+  const p={id,zona:String(zona),picker:D.picker.trim(),cliente:D.cliente.trim(),entrega:D.entrega.trim(),ts,lines:D.lines.map(l=>({...l})),reimp:0,printed:false,void:false};
+  H.unshift(p);saveHist();
+  if(!CFG.pickers.includes(p.picker)){CFG.pickers.push(p.picker);saveCfg()}
+  D={zona:'',picker:D.picker,cliente:'',entrega:'',lines:[]};saveDraft();
+  syncArmar();renderArmar();showDone(p);
+}
+function showDone(p){
+  doneId=p.id;$('dPv').innerHTML=labelsHTML(p);
+  $('dMsg').textContent=`PalletID ${fmtId(p.id)} · ${p.lines.length} producto(s) · ${splitPages(p).length} etiqueta(s) de 100 × 100 mm`;
+  $('mdDone').classList.add('open');
+}
+$('dPrint').onclick=()=>doneId&&printPallet(doneId);
+$('dZpl').onclick=()=>{const p=H.find(x=>x.id===doneId);if(p)showZpl(p)};
+$('dNew').onclick=()=>{$('mdDone').classList.remove('open');if(cur!=='armar')go('armar');clearEntry()};
+
+/* ===== PALLETS CERRADOS ===== */
+function filtered(){
+  const q=$('cQ').value.trim().toLowerCase(),d=$('cDate').value;
+  return H.filter(p=>(!d||p.ts.startsWith(d))&&(!q||[p.id,fmtId(p.id),p.zona,p.cliente,p.picker,p.entrega,...p.lines.map(l=>l.mat+' '+l.txt)].join(' ').toLowerCase().includes(q)));
+}
+function renderCerrados(){
+  const f=filtered();
+  $('cBody').innerHTML=f.length?f.map(p=>`<tr data-id="${p.id}" class="${p.void?'void':''}${p.id===selId?' sel':''}" style="cursor:pointer"><td>${esc(fmtDT(p.ts))}</td><td><b>${esc(fmtId(p.id))}</b></td><td>${esc(p.zona)}</td><td>${esc(p.cliente)}</td><td>${esc(p.picker)}</td><td>${esc(p.entrega)}</td><td class="n">${p.lines.length}</td><td class="n">${fmt(sumOf(p.lines))}</td></tr>`).join(''):`<tr><td colspan="8" class="hint" style="padding:22px;text-align:center">${H.length?'Sin resultados.':'Aún no hay pallets cerrados.'}</td></tr>`;
+  $('cInfo').textContent=`${f.length} de ${H.length} pallet(s)`;
+  renderDetail();
+}
+function renderDetail(){
+  const p=H.find(x=>x.id===selId),box=$('cDetail');
+  if(!p){box.innerHTML='<div class="hint">Selecciona un pallet o escanea su código para ver todos sus productos.</div>';return}
+  const kp=(t,v,s)=>`<div class="kpi"><div class="t">${t}</div><div class="v"${s?' style="font-size:14px"':''}>${esc(v)}</div></div>`;
+  box.innerHTML=`<h2>Pallet ${esc(fmtId(p.id))}</h2>${p.void?'<div class="bn void">ANULADO</div>':''}
+   <div class="kpis">${kp('Zona',p.zona)}${kp('Cliente',p.cliente||'—',1)}${kp('Pickeador',p.picker,1)}${kp('Término',fmtDT(p.ts),1)}${kp('Entrega SAP',p.entrega||'—',1)}</div>
+   <div class="scroll" style="max-height:260px"><table class="t"><thead><tr><th>Material</th><th>Descripción</th><th class="n">Cant.</th><th>Un.</th></tr></thead><tbody>${p.lines.map(l=>`<tr><td><b>${esc(l.mat)}</b></td><td class="txt">${esc(l.txt)}</td><td class="n">${fmt(l.qty)}</td><td>${esc(l.un)}</td></tr>`).join('')}</tbody></table></div>
+   <p class="hint">${p.lines.length} producto(s) · cantidad total ${fmt(sumOf(p.lines))}${p.reimp?` · reimpreso ${p.reimp} vez/veces`:''}</p>
+   <div class="toolbar" style="margin:0"><button class="btn" data-act="print">🖨 Reimprimir</button><button class="btn gray" data-act="zpl">ZPL</button><button class="btn danger sm" data-act="void">${p.void?'Reactivar':'Anular'}</button></div>
+   <div class="pv" style="margin-top:12px">${labelsHTML(p)}</div>`;
+}
+$('cBody').addEventListener('click',e=>{const tr=e.target.closest('tr[data-id]');if(tr){selId=tr.dataset.id;renderCerrados()}});
+$('cDetail').addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b)return;const p=H.find(x=>x.id===selId);if(!p)return;
+  if(b.dataset.act==='print')printPallet(p.id);
+  else if(b.dataset.act==='zpl')showZpl(p);
+  else if(confirm(p.void?'¿Reactivar este pallet?':'¿Anular este pallet? Quedará marcado en el historial.')){p.void=!p.void;saveHist();renderCerrados()}
+});
+$('cQ').addEventListener('input',renderCerrados);$('cDate').addEventListener('input',renderCerrados);
+$('cQ').addEventListener('keydown',e=>{
+  if(e.key!=='Enter')return;const id=parseScan($('cQ').value);if(!id)return;
+  e.preventDefault();const p=H.find(x=>x.id===id);
+  if(p){selId=id;$('cQ').value='';$('cDate').value='';renderCerrados();toast('Pallet '+fmtId(id))}else toast('PalletID no encontrado en este equipo');
+});
+$('cExport').onclick=()=>{
+  if(!H.length)return toast('No hay pallets para exportar');
+  const m=[['PalletID','Zona','Cliente','Pickeador','Entrega SAP','Término','Estado','Material','Descripción','Unidad','Cantidad']];
+  H.forEach(p=>p.lines.forEach(l=>m.push([p.id,p.zona,p.cliente||'',p.picker,p.entrega,fmtDT(p.ts),p.void?'ANULADO':'OK',l.mat,l.txt,l.un,l.qty])));
+  if(window.XLSX){const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(m),'Pallets');XLSX.writeFile(wb,'pallets_cerrados.xlsx')}
+  else download('pallets_cerrados.csv',new Blob(['\ufeff'+m.map(r=>r.map(x=>'"'+String(x??'').replaceAll('"','""')+'"').join(';')).join('\n')],{type:'text/csv;charset=utf-8'}));
+};
+
+/* ===== CONFIGURACIÓN ===== */
+async function renderConfig(){
+  $('kPick').value=CFG.pickers.join('\n');$('kSite').value=CFG.sitio;$('kDpi').value=String(CFG.dpi);$('kOx').value=CFG.offX;$('kOy').value=CFG.offY;$('kUrl').value=CFG.baseUrl;$('kQr').checked=CFG.qr;
+  const mm=await IDB.get('matmeta');$('kMatInfo').textContent=`${fmt(MAT.size,0)} materiales${mm?` · base: ${mm.src}`:''}`;
+  $('kCount').textContent=`${H.length} pallet(s) guardados en este equipo.`;
+}
+$('kPickSave').onclick=()=>{CFG.pickers=[...new Set($('kPick').value.split('\n').map(x=>x.trim()).filter(Boolean))];saveCfg();toast('Lista guardada')};
+$('kSave').onclick=()=>{
+  const ox=parseFloat($('kOx').value)||0,oy=parseFloat($('kOy').value)||0;
+  if(Math.abs(ox)>10||Math.abs(oy)>10)return toast('Los ajustes deben estar entre -10 y 10 mm');
+  CFG.sitio=$('kSite').value.trim();CFG.dpi=parseInt($('kDpi').value,10)||203;CFG.offX=ox;CFG.offY=oy;CFG.baseUrl=$('kUrl').value.trim();CFG.qr=$('kQr').checked;saveCfg();toast('Configuración guardada');
+};
+$('kTest').onclick=()=>{
+  $('kSave').click();const ts=nowTS();
+  printHTML(labelsHTML({id:makeId(12,ts),zona:'12',picker:'Prueba de impresión',cliente:'Cliente de prueba',entrega:'100974414',ts,reimp:0,lines:[...MAT.entries()].slice(0,12).map(([m,t],i)=>({mat:m,txt:t,un:'UN',qty:i+1}))}));
+};
+$('kMatSeed').onclick=async()=>{await loadSeedMats();renderConfig();toast('Maestro incluido restaurado')};
+$('kBackup').onclick=()=>download(`palletid_respaldo_${nowTS().slice(0,10)}.json`,new Blob([JSON.stringify({v:1,H})],{type:'application/json'}));
+$('kRestore').onclick=()=>$('fRest').click();
+$('fRest').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const o=JSON.parse(await f.text());if(!Array.isArray(o.H))throw new Error('formato no válido');const ids=new Set(H.map(p=>p.id));let n=0;o.H.forEach(p=>{if(p&&p.id&&!ids.has(p.id)&&Array.isArray(p.lines)){H.push(p);n++}});H.sort((a,b)=>b.ts.localeCompare(a.ts));await saveHist();renderConfig();toast(`${n} pallet(s) incorporado(s)`)}catch(err){toast('No se pudo cargar el respaldo: '+err.message)}};
+
+/* ===== ARRANQUE ===== */
+(async function init(){
+  await loadAll();
+  const hm=/#p=(\d{16})/.exec(location.hash);
+  if(hm&&H.some(p=>p.id===hm[1])){selId=hm[1];go('cerrados')}else go(location.hash.replace('#','')||'armar');
+  window.addEventListener('hashchange',()=>{const m=/#p=(\d{16})/.exec(location.hash);if(m&&H.some(p=>p.id===m[1])){selId=m[1];go('cerrados')}else go(location.hash.replace('#',''))});
+})();
+</script>
+</body></html>
