@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Separación por temperatura</title>
+<link rel="icon" href="https://www.icbfs.cl/wp-content/uploads/2022/01/cropped-favicon-32x32.jpg" sizes="32x32" />
+<style>
+:root{--bg:#f5f5f7;--card:#fff;--ink:#1d1d22;--mut:#6c6c78;--line:#e2e2e8;--brand:#ed2750;--soft:#fdecef;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#131316;--card:#1c1c21;--ink:#f2f2f5;--mut:#9b9ba7;--line:#2c2c34;--soft:#3a1821}}
+:root[data-theme="dark"]{--bg:#131316;--card:#1c1c21;--ink:#f2f2f5;--mut:#9b9ba7;--line:#2c2c34;--soft:#3a1821}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+.app{display:grid;grid-template-columns:200px 1fr;min-height:100vh}
+aside{background:var(--brand);color:#fff;padding:20px 14px;display:flex;flex-direction:column;gap:6px}
+aside img{width:140px;height:auto;display:block;margin:0 auto 14px}
+.tabs{display:flex;flex-direction:column;gap:6px}
+.tab{all:unset;cursor:pointer;display:flex;justify-content:space-between;gap:8px;padding:11px 12px;border-radius:8px;font-weight:600;color:#fff;opacity:.85}
+.tab:hover{background:rgba(255,255,255,.14)}
+.tab.on{background:#fff;color:var(--brand);opacity:1}
+.tab small{opacity:.75;font-weight:600}
+.tab:focus-visible,.btn:focus-visible,input:focus-visible{outline:3px solid #ffb703;outline-offset:2px}
+main{padding:24px;max-width:980px;width:100%}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--mut);margin:0 0 18px}
+.form{display:flex;flex-wrap:wrap;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+.form label{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--mut);flex:1;min-width:150px}
+.form input,input[type=search]{padding:9px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+input[type=search]{flex:1;min-width:140px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+label.chk{display:flex;gap:6px;align-items:center;color:var(--mut);font-size:14px}
+.btn{all:unset;cursor:pointer;display:inline-block;background:transparent;color:var(--brand);border:1.5px solid var(--brand);font-weight:600;padding:9.5px 18.5px;border-radius:8px}
+.btn.pri{background:var(--brand);color:#fff;padding:11px 20px;border:0}
+.sheet{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px}
+.sheet h2{margin:0;font-size:17px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.badge{display:inline-block;min-width:48px;text-align:center;font-size:13px;font-weight:700;padding:2px 8px;border-radius:6px;color:#fff}
+.SEC{background:#c27a00}.CON{background:#2f6fdb}.FRI{background:#0e8fa8}
+.ptitle{display:flex;flex-wrap:wrap;align-items:center;gap:4px 22px;margin:10px 0 4px;padding:8px 0;border-top:2px solid var(--ink);border-bottom:1px solid var(--line)}
+.ptitle b{color:var(--mut);font-weight:600}
+.ptitle h2{display:inline;font-size:17px;margin:0 4px 0 0}
+.meta{color:var(--mut);font-size:13px;margin:4px 0 10px}
+.wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+td.d{white-space:normal;min-width:200px}
+th{font-size:13px;color:var(--mut);font-weight:600;border-bottom:2px solid var(--line)}
+.n{text-align:right;font-variant-numeric:tabular-nums}td.n{font-weight:700}
+.empty{color:var(--mut);padding:14px 0}
+@media (max-width:760px){.app{grid-template-columns:1fr}aside{flex-direction:row;flex-wrap:wrap;align-items:center;padding:10px 12px}aside img{width:40px;margin:0 8px 0 0}.tabs{flex-direction:row;flex-wrap:wrap}main{padding:16px}}
+@media print{
+ body{background:#fff;color:#000;font-size:12px}.app{display:block}
+ aside,.noprint{display:none!important}
+ main{padding:0;max-width:none}
+ .sheet{border:0;padding:0;margin:0;border-radius:0;page-break-after:always;break-after:page;background:#fff}
+ .sheet:last-child{page-break-after:auto;break-after:auto}
+ .badge{color:#000!important;background:none!important;border:1px solid #000}
+ .ptitle{border-color:#000}.ptitle b,.meta{color:#000}
+ th,td{border:1px solid #000;color:#000;padding:6px 8px;white-space:normal}
+ thead{display:table-header-group}tr{break-inside:avoid}
+ @page{margin:12mm}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="noprint">
+ <img src="https://www.icbfs.cl/wp-content/uploads/2022/02/logo-icbfs.png" alt="ICB Food Service">
+ <div class="tabs" id="tabs"></div>
+</aside>
+<main>
+ <div class="noprint">
+  <h1>Separación por temperatura</h1>
+  <p class="sub" id="info"></p>
+  <div class="form">
+   <label>Fecha<input type="date" id="fd"></label>
+   <label>Lugar de destino<input type="text" id="fl" placeholder="Ej: Sucursal Providencia"></label>
+   <label>Zona<input type="text" id="fz" placeholder="Ej: 100"></label>
+  </div>
+  <div class="bar">
+   <input type="search" id="q" placeholder="Buscar material o descripción…">
+   <label class="chk"><input type="checkbox" id="hz"> Ocultar cantidad 0</label>
+   <button class="btn pri" id="pr">🖨 Imprimir</button>
+   <label class="btn">Cargar otro Excel<input type="file" id="f" accept=".xlsx,.xls" hidden></label>
+  </div>
+ </div>
+ <div id="out"></div>
+</main></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+let DATA={"t":"2367853","rows":[["SEC","104549200","CAPSULA ESPRESSO TRASTEVERE LAVAZZA 8g","Z00",12],["SEC","104549180","CAPSULA DOBLE ESP TRASTEVERE LAVAZZA 16g","Z00",6],["SEC","201700734","RUSTICAS SAL DE MAR 14X185g","C14",2],["SEC","104512170","PANCHITOS PANCHO VILLA 500g","C08",5],["SEC","104543630","TORTILLAS ZANAFOODS 23cm 12uds.","C11",2],["SEC","104540490","ACEITE MARAVILLA PARRAL 5l","C04",2],["SEC","104529100","TORTILLAS ZANAFOODS 18cm 12uds.","C13",2],["SEC","104533720","MAYONESA KRAFT REAL MAYO 789g","C12",3],["SEC","104550590","POUCH ATUN LOMITO AGUA ZANAFOODS 1kg","C10",1],["SEC","104542770","CORAZONES DE ALCACHOFA DON GIUSEPPE 400g","C24",1],["SEC","102500003","SALSA BASILICO BARILLA ALBAHACA 400g","C06",0],["SEC","102310110","NUTELLA & GO 52 g","C24",2],["SEC","104552120","SALSA SRIRACHA CRY THAIGER 740ml","C12",0],["SEC","150000582","SALERO PARRILLERO LOBOS 750g","C15",2],["SEC","104530760","SALSA TABASCO HOT 60ml","C24",1],["SEC","104549190","CAPSULA ESPRESSO CANAL GRANDE LAVAZZA 8g","Z00",6],["SEC","104549210","CAPSULA DOBLE ESP CANAL GRA LAVAZZA 16g","Z00",4],["FRI","104543200","QUESO CHEDDAR AMERICANO LAMINADO 272g","C12",0],["FRI","150001961","ENTRAÑA FINA CAT V VACIO PARAGUAY","KG",20],["CON","104541880","ARANDANOS IQF 1kg","C10",4],["CON","104539160","AROS CEBOLLA 1kg 16,5g","C06",4],["CON","104521820","ARROLLADO PRIMAVERA 2kg","C02",2],["CON","104547810","CAMARON CRUDO PELADO DESVENADO 36/40 1kg","C10",7],["CON","104548240","CROISSANT JAMON QUESO 145g","C20",4],["CON","104548250","CROISSANT SALAME QUESO 160g","C20",3],["CON","104551930","CROQUETA JAMON SERRANO 20g 30uds.","C06",0],["CON","104544830","EMPANADA ORIENTAL CAMARON QUESO 50uds.","C02",2],["CON","104534440","GYOZAS CAMARON SAMOSA 28g","Z80",3],["CON","104560320","MIX BERRIES IQF 1kg","C10",4],["CON","104523170","MIX DE MINI DONUT 18g","Z12",8],["CON","104538930","MIX DE MINI DONUT RELLENAS 23g","C48",3],["CON","104545350","MUFFIN VAINILLA CHIPS 115g","C30",1],["CON","104538370","NUGGETS DE REINETA APANADO BOLSA 400g","C14",3],["CON","104548570","PAN CIABATTA 130g","C40",1],["CON","104527430","PAPA 12mm 2,5kg","C04",8],["CON","104544660","PAPA CRUNCH 10mm 2,5kg","C04",8],["CON","103001080","PEPPERONI ULTRADELGADO 5,67kg","C02",2],["CON","104518910","PULPA JUGO FRUTILLA C/AZUCAR 1kg","C10",1],["CON","104519510","PULPA JUGO LIMON S/AZUCAR 1kg","C10",1],["CON","104549930","PULPA JUGO NARANJA C/CELDAS 1kg","C10",1],["CON","104544640","PULPA JUGO PIÑA 1kg","C10",1],["CON","104535110","QUESO RICOTTA IQF 2kg","C06",2],["CON","104550380","QUICHE CEBOLLA TOCINO 12cm PACK 2uds.","C15",3],["CON","104550390","QUICHE CHAMPIÑON 12cm PACK 2uds.","C15",3],["CON","104550400","QUICHE ESPINACA 12cm PACK 2uds.","C15",3],["CON","104528170","SALMON AHUMADO RECORTE 500g CONG","C10",4],["CON","104551790","SALMON FILETE PREMIUM TD C/PIEL 2-3lb","KG",0],["CON","104549460","SALMON FILETE PREMIUM TE S/PIEL 3-4lb","KG",0],["FRI","104540420","QUESO PARMESANO RALLADO AMERICANO 453g","C12",2],["FRI","104501110","HUEVO GRANDE BLANCO","Z80",2],["FRI","104534220","JAMON SERRANO 500g","C08",6],["SEC","104529120","TORTILLAS ZANAFOODS 28cm 12uds.","C10",2],["CON","104534620","TOCINO LAMINADO AMERICANO 1kg","C05",3],["SEC","104517170","NUTELLA BALDE 3kg","C02",4],["SEC","104516010","ACEITUNA NEGRA RODAJA 936g","C10",1]]};
+const TN={SEC:'Seco',CON:'Congelado',FRI:'Refrigerado'};
+const HEAD=['Grupo transp.','Material','Texto breve material','U.M. base','Cant. entrega'];
+let tab='SEC';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function fmtDate(){const v=$('fd').value;if(!v)return '—';const [y,m,d]=v.split('-');return `${d}/${m}/${y}`}
+function saveForm(){
+ document.title=`Separación por Temperaturas ${$('fl').value.trim()} ${fmtDate()}`.replace(/\s+/g,' ').trim();
+ try{localStorage.setItem('tq_form',JSON.stringify([$('fd').value,$('fl').value,$('fz').value]))}catch(e){}
+}
+function rowsOf(t){
+ let r=DATA.rows.filter(x=>x[0]===t);
+ if($('hz').checked)r=r.filter(x=>Number(x[4])>0);
+ const q=$('q').value.trim().toLowerCase();
+ if(q)r=r.filter(x=>x.join(' ').toLowerCase().includes(q));
+ return r.sort((a,b)=>String(a[2]).localeCompare(String(b[2]),'es',{sensitivity:'base',numeric:true}));
+}
+function sheet(t){
+ const r=rowsOf(t),tot=r.reduce((a,x)=>a+(Number(x[4])||0),0);
+ const body=r.map(x=>`<tr><td>${esc(x[0])}</td><td>${esc(x[1])}</td><td class="d">${esc(x[2])}</td><td>${esc(x[3])}</td><td class="n">${esc(x[4])}</td></tr>`).join('');
+ return `<section class="sheet"><h2><span class="badge ${t}">${t}</span>${TN[t]}</h2>
+ <div class="ptitle"><span><b>Fecha:</b> ${esc(fmtDate())}</span><span><h2>Destino: ${esc($('fl').value.trim()||'—')}</h2></span><span><h2>Zona: ${esc($('fz').value.trim()||'—')}</h2></span></div>
+ <div class="meta">Transporte ${esc(DATA.t)} · ${r.length} ítems · ${tot} unidades</div>
+ ${r.length?`<div class="wrap"><table><thead><tr>${HEAD.map((h,i)=>`<th${i==4?' class="n"':''}>${h}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table></div>`:'<div class="empty">Sin resultados.</div>'}</section>`;
+}
+function render(){
+ $('info').textContent=`Transporte ${DATA.t} · ${DATA.rows.length} líneas · se imprimen las columnas C a G · orden A–Z por texto breve (col. E)`;
+ $('tabs').innerHTML=['SEC','CON','FRI','TODOS'].map(t=>`<button class="tab ${t==tab?'on':''}" data-t="${t}">${t==='TODOS'?'Todos':t}<small>${t==='TODOS'?DATA.rows.length:DATA.rows.filter(x=>x[0]===t).length}</small></button>`).join('');
+ $('out').innerHTML=(tab==='TODOS'?['SEC','CON','FRI']:[tab]).map(sheet).join('');
+}
+$('tabs').onclick=e=>{const b=e.target.closest('.tab');if(b){tab=b.dataset.t;render()}};
+$('q').oninput=$('hz').onchange=render;
+['fd','fl','fz'].forEach(i=>$(i).oninput=()=>{saveForm();render()});
+try{const s=JSON.parse(localStorage.getItem('tq_form'));if(s){$('fd').value=s[0];$('fl').value=s[1];$('fz').value=s[2]}}catch(e){}
+if(!$('fd').value){const n=new Date();$('fd').value=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`}
+saveForm();
+$('pr').onclick=()=>window.print();
+$('f').onchange=async e=>{
+ const file=e.target.files[0];if(!file)return;
+ try{
+  if(typeof XLSX==='undefined')throw new Error('No se pudo cargar el lector de Excel.');
+  const wb=XLSX.read(await file.arrayBuffer(),{type:'array'});
+  const a=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}).slice(1);
+  const rows=a.filter(r=>TN[String(r[2]).trim().toUpperCase()]).map(r=>[String(r[2]).trim().toUpperCase(),String(r[3]),String(r[4]),String(r[5]),Number(r[6])||0]);
+  if(!rows.length)throw new Error('No se encontraron filas SEC/CON/FRI en la columna C.');
+  DATA={t:String(a[0][1]||''),rows};render();
+ }catch(err){alert(err.message)}
+ e.target.value='';
+};
+render();
+</script>
+</body>
+</html>

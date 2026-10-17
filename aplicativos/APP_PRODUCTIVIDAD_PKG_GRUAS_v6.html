@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <!--Creado por Miguel Avilés
+  Modificado por Marcos Castro Abarca
+  ICB Food Service 2026-->
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Productividad PKG VENTA - formato tendencia</title>
+<link rel="icon" href="https://www.icbfs.cl/wp-content/uploads/2022/01/cropped-favicon-32x32.jpg" sizes="32x32" />
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<style>
+:root{--bg:#f6f8fb;--panel:#fff;--line:#d9e2ec;--grid:#e5e7eb;--ink:#1f2937;--muted:#6b7280;--brand:#0f766e;--seco:#f2b35b;--frio:#4f83bd;--cong:#7bb6e3;--lineBlue:#23527c;--proj:#d97706;--green:#15803d;--yellow:#ca8a04;--red:#b42318}*{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}header{padding:18px 18px 4px}.wrap{max-width:1580px;margin:auto;padding:12px 16px}h1{margin:0 0 8px;font-size:24px}.topline{display:flex;justify-content:space-between;align-items:center;gap:12px}.subtle{color:var(--muted);font-size:13px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px;margin-bottom:14px;box-shadow:0 3px 12px rgba(16,24,40,.035)}.controls{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:10px;align-items:end}label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}input,select{width:100%;border:1px solid #cbd5e1;border-radius:9px;padding:9px;background:#fff}.btn{border:0;border-radius:9px;padding:10px 14px;background:var(--brand);color:white;font-weight:800;cursor:pointer}.btn.gray{background:#334155}.btn:disabled{opacity:.55}.hint{font-size:13px;color:var(--muted);line-height:1.45}.msg{padding:10px;border-radius:10px;border-left:5px solid var(--brand);background:#eefdf9}.err{border-left-color:var(--red);background:#fff1f1}.warn{border-left:5px solid var(--yellow);background:#fffbeb;padding:10px;border-radius:10px;color:#713f12;margin-top:10px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0 20px}.card{background:#f8fbff;border:1px solid #e6edf5;border-radius:12px;padding:14px}.card .t{font-size:12px;font-weight:800;letter-spacing:.04em;color:#6b7280;text-transform:uppercase}.card .v{font-size:24px;font-weight:900;margin-top:4px;color:#111827}.card .s{font-size:12px;color:#6b7280;margin-top:5px}.tabs,.subtabs,.metricTabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.tab,.subtab,.metricTab{background:#e7edf5;color:#0f172a;border:0;border-radius:999px;padding:8px 14px;font-weight:900;cursor:pointer}.tab.active,.metricTab.active,.subtab.active{background:var(--brand);color:white}.subtab.seco.active{background:#d97706}.subtab.frio.active{background:#2563eb}.subtab.cong.active{background:#7c3aed}.legend{display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;margin:8px 0 4px}.leg{display:inline-flex;align-items:center;gap:6px;color:#606b7a;font-size:13px}.sw{width:34px;height:12px;border-radius:2px;display:inline-block}.sw.line{height:4px;border-radius:99px}.chartBox{height:460px;background:#fff;margin:8px 0 12px;padding:0}.chartBox canvas{width:100%;height:100%}.pill{display:inline-block;border-radius:999px;padding:5px 10px;color:white;font-weight:900;font-size:12px}.pill.green{background:var(--green)}.pill.yellow{background:var(--yellow);color:#111}.pill.red{background:var(--red)}.pill.turno{background:#334155}.pill.metric{background:var(--brand)}.scroll{overflow:auto;border:1px solid #b7d8e4;border-radius:10px;max-height:540px;background:#fff}table{border-collapse:collapse;width:100%;font-size:13px;white-space:nowrap}th,td{border:1px solid #b7d8e4;padding:6px 8px;text-align:right}th:first-child,td:first-child{text-align:left;min-width:260px}thead th{background:#bfeaf6;font-weight:900;color:#000;position:sticky;top:0;z-index:1}.subhead th{background:#dff5fb}.totalRow td{background:#bfeaf6;font-weight:900}.totalCol{background:#eef8fc;font-weight:900}.zero{color:#cbd5e1}.stateCell{text-align:center!important;font-weight:900}.state-green{background:#dcfce7;color:#14532d}.state-yellow{background:#fef9c3;color:#713f12}.state-blue{background:#5e4df8;color:#fff}.state-red{background:#fee2e2;color:#7f1d1d}.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}.barrow{display:grid;grid-template-columns:260px 1fr 90px;gap:10px;align-items:center;margin:8px 0}.bar{height:12px;background:#e2e8f0;border-radius:999px;overflow:hidden}.bar span{display:block;height:100%;background:var(--brand)}@media(max-width:1200px){.controls,.cards,.two{grid-template-columns:1fr}.topline{display:block}.barrow{grid-template-columns:145px 1fr 65px}}
+
+/* Look & feel alineado con Separación por temperatura */
+:root{--bg:#f5f5f7;--panel:#fff;--line:#e2e2e8;--grid:#e2e2e8;--ink:#1d1d22;--muted:#6c6c78;--brand:#ed2750;--seco:#c27a00;--frio:#2f6fdb;--cong:#0e8fa8;--lineBlue:#e2e2e8;--proj:#c27a00;--green:#15803d;--yellow:#ca8a04;--red:#b42318;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#131316;--panel:#1c1c21;--line:#2c2c34;--grid:#2c2c34;--ink:#f2f2f5;--muted:#9b9ba7}}
+*,*::before,*::after{box-sizing:inherit}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+.app{display:grid;grid-template-columns:200px minmax(0,1fr);min-height:100vh}
+aside{background:var(--brand);color:#fff;padding:20px 14px;display:flex;flex-direction:column;align-items:center;gap:7px}
+aside img{width:140px;height:auto;max-width:100%;object-fit:contain;margin:4px auto 14px}
+.side-title{font-weight:800;text-align:center;font-size:16px}.side-sub{font-size:12px;text-align:center;opacity:.8}.side-divider{height:1px;background:rgba(255,255,255,.3);width:100%;margin:14px 0}.side-note{text-align:center;line-height:1.8;font-size:13px;font-weight:600}
+.content{min-width:0}
+header{padding:20px 24px 4px}
+header .wrap{max-width:none;padding:0}
+header img{display:none}
+h1{font-size:22px;margin:0 0 4px;font-weight:750}
+.topline{justify-content:flex-start}
+.wrap{max-width:1200px;margin:0;padding:16px 24px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px;box-shadow:none}
+h2{font-size:17px;margin:0 0 12px}
+.controls{gap:10px}
+label{font-size:13px;color:var(--muted);margin-bottom:5px}
+input,select{border:1.5px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--bg);color:var(--ink);font:inherit}
+.btn{background:var(--brand);border:1.5px solid var(--brand);border-radius:8px;padding:10px 16px;color:#fff;font-weight:700}
+.btn.gray{background:transparent;color:var(--brand);border:1.5px solid var(--brand)}
+.tabs,.subtabs,.metricTabs{gap:6px;margin-bottom:12px}
+.tab,.subtab,.metricTab{border-radius:8px;padding:9px 12px;font-weight:650;background:var(--bg);color:var(--ink);border:1px solid var(--line)}
+.tab.active,.metricTab.active,.subtab.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+.subtab.seco.active{background:#c27a00;border-color:#c27a00}.subtab.frio.active{background:#2f6fdb;border-color:#2f6fdb}.subtab.cong.active{background:#0e8fa8;border-color:#0e8fa8}
+.cards{gap:10px;margin:12px 0 18px}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px}
+.card .t{color:var(--muted)}.card .v{color:var(--ink)}
+.scroll{border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+table{font-size:13px}
+th,td{border-color:var(--line);padding:9px 10px}
+thead th{background:var(--bg);color:var(--muted);border-color:var(--line)}
+.subhead th{background:var(--soft,#fdecef)}
+.totalRow td{background:var(--bg)}.totalCol{background:rgba(237,39,80,.07)}
+.chartBox{border-radius:8px;background:var(--panel)}
+.msg{border-left-color:var(--brand);background:rgba(237,39,80,.08)}
+@media(max-width:760px){.app{grid-template-columns:1fr}aside{flex-direction:row;flex-wrap:wrap;justify-content:flex-start;align-items:center;padding:10px 12px;gap:8px}aside img{width:42px;margin:0 8px 0 0}.side-title{font-size:14px}.side-sub,.side-divider,.side-note{display:none}header{padding:14px 16px 0}.wrap{padding:12px 16px}.controls,.cards,.two{grid-template-columns:1fr}.topline{display:block}.barrow{grid-template-columns:145px 1fr 65px}}
+@media print{.app{display:block}aside{display:none!important}.content{display:block}header{padding:0 0 8px}header img{display:none}.wrap{padding:0;max-width:none}.panel{border:0;padding:0;margin:0 0 12px;box-shadow:none;background:#fff}body{background:#fff;color:#000}}
+
+/* ===== Reporte (PDF / imagen) ===== */
+.reportBar{display:flex;justify-content:flex-end;margin:0 0 12px}
+.reportBar .btn{display:inline-flex;align-items:center;gap:8px}
+.rptModal{position:fixed;inset:0;z-index:1000;background:rgba(15,15,20,.62);display:none;align-items:center;justify-content:center;padding:18px}
+.rptModal.open{display:flex}
+.rptDialog{background:var(--panel);color:var(--ink);border-radius:12px;width:min(1100px,100%);max-height:100%;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.rptDialog header{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+.rptDialog header h3{margin:0;font-size:16px}
+.rptClose{background:none;border:0;font-size:24px;line-height:1;cursor:pointer;color:var(--muted);padding:2px 8px}
+.rptPreview{flex:1;min-height:180px;overflow:auto;background:var(--bg);padding:14px;text-align:center}
+.rptPreview img{max-width:100%;height:auto;border:1px solid var(--line);background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.rptPreview .loading{padding:50px 0;color:var(--muted)}
+.rptActions{padding:14px 18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.rptActions .sep{flex:1}
+.rptActions .btn{padding:9px 13px;font-size:14px}
+.rptActions .btn.wa{background:#1fa855;border-color:#1fa855;color:#fff}
+.rptActions .btn:disabled{opacity:.5;cursor:default}
+.rptToast{padding:0 18px 12px;font-size:13px;color:var(--muted);min-height:20px}
+.rpt{background:#fff;color:#1d1d22;font:14px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;padding:26px 28px 18px;box-sizing:border-box;text-align:left}
+.rpt *{box-sizing:border-box}
+.rpt-top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #ed2750;padding-bottom:10px;margin-bottom:12px;gap:16px}
+.rpt-top .b{font-size:12px;font-weight:700;color:#ed2750}
+.rpt-top h1{font-size:22px;margin:2px 0 0;font-weight:750;color:#1d1d22}
+.rpt-top .d{font-size:12px;color:#6c6c78;text-align:right}
+.rpt-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.rpt-chip{background:#f5f5f7;border:1px solid #e2e2e8;border-radius:999px;padding:4px 11px;font-size:12px;color:#1d1d22}
+.rpt-chip b{font-weight:700}
+.rpt table{border-collapse:collapse;width:100%;font-size:13px;white-space:nowrap}
+.rpt th,.rpt td{border:1px solid #e2e2e8;padding:8px 10px;text-align:right;background:#fff;color:#1d1d22}
+.rpt thead th{background:#f5f5f7;color:#6c6c78;font-weight:700;position:static}
+.rpt thead tr.subhead th{background:#fdecef}
+.rpt th:first-child,.rpt td:first-child{text-align:left}
+.rpt td.totalCol{background:#fdecef;font-weight:700}
+.rpt tr.totalRow td{background:#f5f5f7;font-weight:700}
+.rpt td.zero{color:#cbd5e1}
+.rpt td.stateCell{text-align:center;font-weight:800}
+.rpt td.state-green{background:#dcfce7;color:#14532d}
+.rpt td.state-yellow{background:#fef9c3;color:#713f12}
+.rpt td.state-red{background:#fee2e2;color:#7f1d1d}
+.rpt td.state-blue{background:#5e4df8;color:#fff}
+.rpt .scroll{overflow:visible;max-height:none;border:0;border-radius:0;background:#fff}
+.rpt-crit{margin-top:14px;border:1px solid #e2e2e8;border-radius:10px;padding:12px 14px;background:#fafafb}
+.rpt-crit h3{margin:0 0 8px;font-size:14px;color:#1d1d22}
+.rpt-crit ul{margin:0;padding-left:18px;font-size:12.5px;color:#1d1d22}
+.rpt-crit li{margin:2px 0}
+.rpt-sem{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.rpt-sem>div{border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.35}
+.rpt-sem b{display:block;font-size:12.5px;margin-bottom:2px}
+.rpt-sem .g{background:#dcfce7;color:#14532d}.rpt-sem .y{background:#fef9c3;color:#713f12}.rpt-sem .r{background:#fee2e2;color:#7f1d1d}.rpt-sem .n{background:#5e4df8;color:#fff}
+.rpt-foot{margin-top:10px;font-size:11px;color:#6c6c78;text-align:right}
+@media(max-width:760px){.rptDialog{max-height:100%}.reportBar{justify-content:stretch}.reportBar .btn{width:100%;justify-content:center}}
+@media print{.reportBar,.rptModal{display:none!important}}
+
+</style>
+</head>
+<body><div class="app">
+  <aside class="noprint"><img src="https://www.icbfs.cl/wp-content/uploads/2022/02/logo-icbfs.png" alt="ICB Food Service">
+  <div class="side-title">ICB Food Service</div><div class="side-sub">Productividad operacional</div>
+  <div class="side-divider"></div><div class="side-note">PKG VENTA<br>y Productividad Grúas</div>
+</aside>
+<div class="content"><header><div class="wrap topline"><img src="https://www.icbfs.cl/wp-content/uploads/2022/02/logo-icbfs.png" height="100px"><h1 id="title">Tendencia y productividad · PKG VENTA</h1><div class="subtle" id="subtitle">Barras por hora + acumulado</div></div></header>
+<main class="wrap">
+<section class="panel"><h2>1) Cargar productividad</h2><div class="controls"><div><label>Excel base o Excel con hora agregada</label><input type="file" id="file" accept=".xlsx,.xls" multiple></div><div><label>Ver archivo/día</label><select id="fileFilter"><option value="__ALL__">Todos</option></select></div><div><label>Ver operador</label><select id="opFilter"><option value="__ALL__">Todos</option></select></div><div><label>Umbral rojo bajo % promedio</label><input id="redLimit" type="number" min="0" max="100" value="85"></div><div><label>Hora del cuadro</label><select id="hourSource"><option value="auto" selected>Auto: Hora si existe, si no confirmación</option><option value="confirmacion">Siempre desde confirmación</option></select></div></div><p class="hint"><b>Si el Excel no trae Hora/HORA</b>, la app calcula la hora desde <b>Hora de confirmación</b>. Turnos: A 08:30-16:30, B 16:30-00:00, C 00:00-08:30.</p><p class="hint"><b>Filtro de apoyo:</b> en cuadros de operadores, semáforo y rankings sólo se consideran operadores con <b>4 horas activas o más</b> dentro del turno y temperatura seleccionados.</p><p class="hint"><b>Módulo grúas:</b> sólo se consideran las actividades <b>ALMACENAMIENTO</b> y <b>REPOSICIÓN</b> (columna "Nombre Tipo Actividad Bodega") de los 13 operadores de grúa autorizados (columna "Nombre completo"). Cualquier otro usuario se descarta.</p><button class="btn" id="process">Procesar</button> <button class="btn gray" id="exportClean" disabled>Exportar detalle limpio CSV</button> <button class="btn gray" id="exportScore" disabled>Exportar semáforo CSV</button><div id="msg" style="margin-top:10px"></div></section>
+<section class="panel">
+<div class="tabs mainTabs"><button class="tab active" data-main="pkg">PKG VENTA</button><button class="tab" data-main="gruas">PRODUCTIVIDAD GRÚAS</button></div>
+<div id="pkgModule">
+<div class="metricTabs"><button class="metricTab active" data-measure="lineas">Líneas/materiales por hora</button><button class="metricTab" data-measure="zonas">Zonas únicas por hora</button></div><div class="tabs"><button class="tab active" data-turno="ALL">Todos los turnos</button><button class="tab" data-turno="A">Turno A 08:30-16:30</button><button class="tab" data-turno="B">Turno B 16:30-00:00</button><button class="tab" data-turno="C">Turno C 00:00-08:30</button></div><div class="subtabs"><button class="subtab active" data-zone="ALL">Resumen temperaturas</button><button class="subtab seco" data-zone="SECO">SECO</button><button class="subtab frio" data-zone="FRIO">FRIO</button><button class="subtab cong" data-zone="CONG">CONGELADO</button></div><div class="reportBar noprint"><button class="btn" id="btnRptPkg" disabled>📄 Generar reporte (PDF / imagen)</button></div><div class="cards" id="cards"></div><div id="pivotArea"></div>
+</div>
+<div id="gruasModule" style="display:none">
+<div class="tabs craneTurnTabs">
+<button class="tab active" data-crane-turn="ALL">Todos los turnos</button>
+<button class="tab" data-crane-turn="A">Turno A 08:30-16:30</button>
+<button class="tab" data-crane-turn="B">Turno B 16:30-00:00</button>
+<button class="tab" data-crane-turn="C">Turno C 00:00-08:30</button>
+</div>
+<div class="subtabs craneTabs"><button class="subtab active" data-crane-act="ALMACENAMIENTO">ALMACENAMIENTO</button><button class="subtab" data-crane-act="REPOSICIÓN">REPOSICIÓN</button><button class="subtab" data-crane-act="ALL">AMBAS ACTIVIDADES</button></div>
+<div class="subtabs craneTempTabs"><button class="subtab active" data-crane-temp="ALL">TODAS LAS TEMPERATURAS</button><button class="subtab seco" data-crane-temp="SECO">SECO</button><button class="subtab frio" data-crane-temp="FRIO">FRÍO</button><button class="subtab cong" data-crane-temp="CONG">CONGELADO</button></div>
+<div class="metricTabs craneMetrics"><button class="metricTab active" data-crane-measure="pallets">Pallets/hora</button><button class="metricTab" data-crane-measure="bultos">Bultos/hora</button><button class="metricTab" data-crane-measure="movimientos">Movimientos/hora</button></div>
+<div class="reportBar noprint"><button class="btn" id="btnRptCrane" disabled>📄 Generar reporte (PDF / imagen)</button></div><div class="cards" id="craneCards"></div>
+<div id="craneSummary"></div>
+</div>
+</section>
+<section class="two"><div class="panel"><h2>Operadores bajo promedio</h2><div id="lowOps"></div></div><div class="panel"><h2>Ranking promedio por hora activa</h2><div id="rankOps"></div></div></section>
+<section class="panel" id="detailPanel"><h2>Detalle limpio PKG VENTA</h2><div class="scroll"><table id="detail"></table></div></section></main></div></div>
+<div class="rptModal noprint" id="rptModal" role="dialog" aria-modal="true" aria-label="Reporte">
+<div class="rptDialog">
+<header><h3 id="rptTitleTxt">Reporte</h3><button class="rptClose" id="rptClose" aria-label="Cerrar">×</button></header>
+<div class="rptPreview" id="rptPreview"><div class="loading">Generando reporte…</div></div>
+<div class="rptToast" id="rptToast"></div>
+<div class="rptActions">
+<button class="btn" id="rptPdf" disabled>⬇ Descargar PDF</button>
+<button class="btn gray" id="rptPng" disabled>⬇ Descargar imagen</button>
+<button class="btn gray" id="rptCopy" disabled>Copiar imagen</button>
+<span class="sep"></span>
+<button class="btn wa" id="rptWa" disabled>WhatsApp</button>
+<button class="btn gray" id="rptMail" disabled>Email</button>
+</div></div></div>
+<script>
+let allRows=[], currentTurno='ALL', currentZone='ALL', currentMeasure='lineas', scoreRows=[];
+let currentMain='pkg', currentCraneAct='ALMACENAMIENTO', currentCraneMeasure='pallets', currentCraneTemp='ALL';
+const req={fecha:['Fecha confirmación'],hora:['Hora','HORA'],horaConf:['Hora de confirmación'],actividad:['Nombre Tipo Actividad Bodega'],operador:['Nombre completo'],almacen:['Denom.tipo almacén','Denom.tipo almacen'],zonaPuesta:['Zona puesta dispos.','Zona puesta dispos','Zona puesta disponibilidad'],material:['Material'],desc:['Texto breve material'],bultos:['Bultos'],bultosOp:['Bultos Operarios'],pallet:['Cantidad de Pallet'],cantOrigen:['Ctd.real procedencia'],cantDestino:['Ctd.real dest.']};
+function norm(x){return String(x??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase().replace(/\s+/g,' ')}
+function findIdx(headers,names,occ=1){let n=names.map(norm),k=0;for(let i=0;i<headers.length;i++){if(n.includes(norm(headers[i]))){k++;if(k===occ)return i}}return -1}
+function num(x){if(typeof x==='number')return x;let n=parseFloat(String(x??'').replace(',','.').replace(/[^0-9.-]/g,''));return isNaN(n)?0:n}
+function hourDec(v){if(typeof v==='number')return Math.round((v%1)*86400)/3600;if(v instanceof Date)return v.getHours()+v.getMinutes()/60;let m=String(v??'').match(/(\d{1,2})[:.](\d{2})/);return m?(+m[1])+(+m[2])/60:num(v)}
+function turno(h){if(h>=8.5&&h<16.5)return'A';if(h>=16.5&&h<24)return'B';if(h>=0&&h<8.5)return'C';return'SIN TURNO'}
+function turnoLabel(t){return t==='A'?'Turno A 08:30-16:30':t==='B'?'Turno B 16:30-00:00':t==='C'?'Turno C 00:00-08:30':'Todos los turnos'}
+function zoneOf(v){let s=norm(v);if(s.includes('cong'))return'CONG';if(s.includes('frio')||s.includes('frío'))return'FRIO';if(s.includes('seco'))return'SECO';return'OTRA'}
+function zoneLabel(z){return z==='CONG'?'CONGELADO':z}function fmt(n){return Number(n||0).toLocaleString('es-CL',{maximumFractionDigits:1})}function moneyFmt(n){return '$ '+fmt(n)}function pct(n){return Number(n||0).toLocaleString('es-CL',{maximumFractionDigits:0})+'%'}
+function rowsView(){let f=fileFilter.value,op=opFilter.value;return allRows.filter(r=>r.actividadBodega==='PKG VENTA'&&(f==='__ALL__'||r.archivo===f)&&(op==='__ALL__'||r.operador===op)&&(currentTurno==='ALL'||r.turno===currentTurno))}
+function hourForTable(r){return Math.floor(r.horaCuadro)}
+function value(rows,measure=currentMeasure){if(measure==='zonas')return new Set(rows.map(r=>r.zonaPuesta).filter(Boolean)).size;return rows.length}
+const CRANE_OPS=['Rodrigo Antonio Barrera Riquelme','Cristián Fucha Painepe','Caballero Terraza Brayan Nair FSEX','Luis Galaz Farfán','victor cifuentes','Rober Rafael Ventura Boscán','Sebastian Cardenas Nitschke','Felipe Giroz Troncoso','Luis Rodriguez','Yair Vega','Diego Martínez Martin','Roberto Francisco Lorca Meneses','Italo Escudero'];
+const CRANE_OPS_N=new Map(CRANE_OPS.map(n=>[norm(n),n]));
+const CRANE_ACTS={'almacenamiento':'ALMACENAMIENTO','reposicion':'REPOSICIÓN'};
+function tempByLoc(l){let c=String(l??'').trim()[0];return c==='7'?'SECO':c==='8'?'FRIO':c==='9'?'CONG':'OTRA'}
+function craneTemp(act,almO,almD,ubO,ubD){
+  // ALMACENAMIENTO: el origen es zona de entrada, manda el destino. REPOSICIÓN: manda el origen (estantería).
+  let alm=act==='ALMACENAMIENTO'?[almD,almO]:[almO,almD], ub=act==='ALMACENAMIENTO'?[ubD,ubO]:[ubO,ubD];
+  for(let a of alm){let z=zoneOf(a);if(z!=='OTRA')return z}
+  for(let u of ub){let z=tempByLoc(u);if(z!=='OTRA')return z}
+  return 'OTRA';
+}
+function fechaTxt(v){if(typeof v==='number')return new Date(Math.round((v-25569)*864e5)).toISOString().slice(0,10);if(v instanceof Date)return v.toISOString().slice(0,10);return String(v??'')}
+async function parseWorkbook(file){
+  let wb=XLSX.read(await file.arrayBuffer(),{type:'array'});
+  let sheet=wb.SheetNames.includes('Sheet1')?'Sheet1':wb.SheetNames[wb.SheetNames.length-1];
+  let arr=XLSX.utils.sheet_to_json(wb.Sheets[sheet],{header:1,defval:''});
+  if(!arr.length)return{rows:[],usedDerivedHour:false,excluded:0};
+  let h=arr[0],I={};Object.keys(req).forEach(k=>I[k]=findIdx(h,req[k]));
+  I.almDest=findIdx(h,req.almacen,2); I.ubO=findIdx(h,['Ubic.proced.','Ubic.proced']); I.ubD=findIdx(h,['Ubicación de destino','Ubicacion de destino']); I.turnoSap=findIdx(h,['Turno']);
+  let missing=['horaConf','actividad','operador','almacen','material','zonaPuesta'].filter(k=>I[k]<0);
+  if(missing.length)throw new Error(file.name+': faltan columnas '+missing.join(', '));
+  let get=(a,i)=>i>=0?a[i]:'', out=[],used=false,excluded=0;
+  for(let r=1;r<arr.length;r++){
+    let a=arr[r],actN=norm(a[I.actividad]),isCrane=actN in CRANE_ACTS;
+    if(!isCrane&&!['pkg venta','ajuste inventario'].includes(actN))continue;
+    let operador=String(a[I.operador]||'Sin operador').trim();
+    if(isCrane){let canon=CRANE_OPS_N.get(norm(operador));if(!canon){excluded++;continue}operador=canon}
+    let hc=hourDec(a[I.horaConf]),hasManual=I.hora>=0&&String(a[I.hora]).trim()!=='';
+    let hm=hasManual?num(a[I.hora]):Math.floor(hc);if(!hasManual)used=true;
+    let hSource=hourSource.value==='confirmacion'?Math.floor(hc):hm;
+    let actividadBodega=isCrane?CRANE_ACTS[actN]:String(a[I.actividad]||'').trim();
+    let almO=String(a[I.almacen]||''),almD=String(get(a,I.almDest)||''),ubO=String(get(a,I.ubO)||'').trim(),ubD=String(get(a,I.ubD)||'').trim();
+    out.push({archivo:file.name,fecha:I.fecha>=0?fechaTxt(a[I.fecha]):'',horaCuadro:hSource,horaManual:hm,horaDerivada:!hasManual,horaConfRaw:a[I.horaConf],horaConfNum:hc,turno:turno(hc),operador,
+      almacen:almO,almDest:almD,ubOrigen:ubO,ubDestino:ubD,
+      zonaTemp:isCrane?craneTemp(actividadBodega,almO,almD,ubO,ubD):zoneOf(a[I.almacen]),
+      zonaPuesta:String(a[I.zonaPuesta]||'').trim(),material:String(a[I.material]||''),desc:I.desc>=0?String(a[I.desc]||''):'',
+      bultos:I.bultos>=0?num(a[I.bultos]):0,bultosOp:I.bultosOp>=0?num(a[I.bultosOp]):0,
+      actividadBodega,esGrua:isCrane,cantidadPallet:I.pallet>=0?num(a[I.pallet]):0,cantidadOrigen:I.cantOrigen>=0?num(a[I.cantOrigen]):0,cantidadDestino:I.cantDestino>=0?num(a[I.cantDestino]):0});
+  }
+  return{rows:out,usedDerivedHour:used,excluded};
+}
+function scoreFor(rows,zona,measure=currentMeasure){let subset=rows.filter(r=>zona==='ALL'||r.zonaTemp===zona),ops=[...new Set(subset.map(r=>r.operador))];let allOpRows=ops.map(op=>{let rs=subset.filter(r=>r.operador===op),total=value(rs,measure),activeHours=new Set(rs.map(hourForTable)).size||1,avg=total/activeHours;return{op,total,activeHours,avg}}).filter(x=>x.total>0);let evaluated=allOpRows.filter(x=>x.activeHours>=4);let avgZone=evaluated.length?evaluated.reduce((a,x)=>a+x.avg,0)/evaluated.length:0,redThreshold=Number(document.getElementById('redLimit').value)/100;allOpRows.forEach(x=>{x.factor=avgZone?x.avg/avgZone:0;x.estado=x.activeHours<4?'NO EVALUADO':x.factor>=1?'VERDE':x.factor>=redThreshold?'AMARILLO':'ROJO'});return{opRows:allOpRows.sort((a,b)=>b.total-a.total),avgZone}}
+function buildPivot(rows,zona,measure=currentMeasure){let subset=rows.filter(r=>zona==='ALL'||r.zonaTemp===zona),hours=[...new Set(subset.map(hourForTable).filter(h=>!isNaN(h)))].sort((a,b)=>a-b);let score=scoreFor(rows,zona,measure);let matrix=score.opRows.map(s=>{let vals=hours.map(h=>value(subset.filter(r=>r.operador===s.op&&hourForTable(r)===h),measure));return{...s,vals}});let colTotals=hours.map((h,i)=>matrix.reduce((s,row)=>s+row.vals[i],0));return{hours,matrix,colTotals,total:colTotals.reduce((a,b)=>a+b,0),avgZone:score.avgZone}}
+function stateClass(e){return e==='VERDE'?'state-green':e==='AMARILLO'?'state-yellow':e==='NO EVALUADO'?'state-blue':'state-red'}function measureText(){return currentMeasure==='zonas'?'zonas únicas':'líneas'}
+function renderCards(rows){
+  let total=value(rows),hours=[...new Set(rows.map(hourForTable))].length||1,avg=total/hours;
+  cards.innerHTML=`<div class="card"><div class="t">${currentMeasure==='zonas'?'Zonas únicas':'Líneas'} total</div><div class="v">${fmt(total)}</div><div class="s">Al corte actual · ${turnoLabel(currentTurno)}</div></div><div class="card"><div class="t">Ritmo usado</div><div class="v">${fmt(avg)}</div><div class="s">Promedio por hora disponible · ${hours} horas cargadas</div></div><div class="card"><div class="t">Horas cargadas</div><div class="v">${fmt(hours)}</div><div class="s">Horas con actividad en el filtro actual</div></div>`;
+  subtitle.textContent=`${currentMeasure==='zonas'?'Zonas únicas':'Líneas'} · ${turnoLabel(currentTurno)}`;
+}
+function zonesSummary(rows){
+  let html=`<div class="legend"><span class="leg"><span class="sw" style="background:var(--frio)"></span>Frío</span><span class="leg"><span class="sw" style="background:var(--cong)"></span>Congelado</span><span class="leg"><span class="sw" style="background:var(--seco)"></span>Seco</span></div><div class="chartBox"><canvas id="summaryChart" width="1500" height="430"></canvas></div>`;
+  html+=summaryTable(rows);
+  return html;
+}
+function summaryTable(rows){let hours=[...new Set(rows.map(hourForTable).filter(h=>!isNaN(h)))].sort((a,b)=>a-b),zs=['SECO','FRIO','CONG'];let html=`<div class="scroll"><table><thead><tr><th>Hora</th><th>SECO</th><th>FRIO</th><th>CONGELADO</th><th>Total general</th></tr></thead><tbody>`;for(let h of hours){let vals=zs.map(z=>value(rows.filter(r=>r.zonaTemp===z&&hourForTable(r)===h)));html+=`<tr><td>${h}</td>${vals.map(v=>`<td>${v?fmt(v):''}</td>`).join('')}<td class="totalCol">${fmt(vals.reduce((a,b)=>a+b,0))}</td></tr>`}let totals=zs.map(z=>value(rows.filter(r=>r.zonaTemp===z)));html+=`<tr class="totalRow"><td>Total general</td>${totals.map(v=>`<td>${fmt(v)}</td>`).join('')}<td>${fmt(totals.reduce((a,b)=>a+b,0))}</td></tr></tbody></table></div>`;return html}
+function drawSummaryChart(rows){
+  let c=document.getElementById('summaryChart'); if(!c)return;
+  const dpr=window.devicePixelRatio||1;
+  const rect=c.getBoundingClientRect();
+  const W=Math.max(900, rect.width||1500), H=Math.max(420, rect.height||430);
+  c.width=Math.round(W*dpr); c.height=Math.round(H*dpr);
+  let ctx=c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
+
+  let hours=[...new Set(rows.map(hourForTable).filter(h=>!isNaN(h)))].sort((a,b)=>a-b),
+      zones=['FRIO','CONG','SECO'],
+      colors={SECO:'#f2b35b',FRIO:'#4f83bd',CONG:'#7bb6e3'};
+  let series=hours.map(h=>({
+    h,
+    FRIO:value(rows.filter(r=>r.zonaTemp==='FRIO'&&hourForTable(r)===h)),
+    CONG:value(rows.filter(r=>r.zonaTemp==='CONG'&&hourForTable(r)===h)),
+    SECO:value(rows.filter(r=>r.zonaTemp==='SECO'&&hourForTable(r)===h))
+  }));
+  let totals=series.map(s=>s.FRIO+s.CONG+s.SECO);
+  let maxBar=Math.max(1,...totals), padL=92, padR=40, padT=28, padB=52;
+  let plotW=W-padL-padR, plotH=H-padT-padB, step=plotW/Math.max(series.length,1), barW=Math.min(78,step*.62);
+
+  // Grilla y escala izquierda solamente
+  ctx.font='12px Segoe UI'; ctx.strokeStyle='#e5e7eb'; ctx.lineWidth=1; ctx.fillStyle='#6b7280'; ctx.textAlign='right';
+  for(let i=0;i<=6;i++){
+    let y=padT+plotH-(plotH*i/6), v=maxBar*i/6;
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+    ctx.fillText(fmt(v),padL-12,y+4);
+  }
+  ctx.textAlign='left';
+  ctx.fillText(currentMeasure==='zonas'?'Zonas únicas':'Líneas',padL-78,padT-8);
+
+  // Barras apiladas por temperatura
+  series.forEach((s,i)=>{
+    let x=padL+i*step+step*.5-barW/2, yBase=padT+plotH, stack=0;
+    zones.forEach(z=>{
+      let v=s[z], bh=plotH*v/maxBar, y=yBase-stack-bh;
+      ctx.fillStyle=colors[z]; ctx.fillRect(x,y,barW,bh); stack+=bh;
+    });
+    ctx.fillStyle='#6b7280'; ctx.textAlign='center'; ctx.font='12px Segoe UI';
+    ctx.fillText(String(s.h),x+barW/2,padT+plotH+25);
+  });
+}
+
+function pivotTable(rows,zona){
+  let p=buildPivot(rows,zona);
+  let zClass=zona==='SECO'?'seco':zona==='FRIO'?'frio':zona==='CONG'?'cong':'all';
+  let title=(zona==='ALL'?'Resumen operadores x hora':zoneLabel(zona)+' operadores x hora')+' | '+measureText();
+  let html=`<h2><span class="pill ${zClass}">${title}</span> <span class="pill turno">${turnoLabel(currentTurno)}</span></h2><div class="scroll"><table><thead><tr><th>${currentMeasure==='zonas'?'Cuenta de zonas únicas':'Cuenta de Material'}</th><th colspan="${p.hours.length+4}" style="text-align:left">Etiquetas de columna</th></tr><tr class="subhead"><th>Etiquetas de fila</th>${p.hours.map(h=>`<th>${h}</th>`).join('')}<th>Total general</th><th>Horas activas</th><th>Promedio/hora</th><th>Semáforo</th></tr></thead><tbody>`;
+  for(let row of p.matrix){
+    html+=`<tr><td>${row.op}</td>${row.vals.map(v=>`<td class="${v?'':'zero'}">${v?fmt(v):''}</td>`).join('')}<td class="totalCol">${fmt(row.total)}</td><td>${fmt(row.activeHours)}</td><td>${fmt(row.avg)}</td><td class="stateCell ${stateClass(row.estado)}">${row.estado}</td></tr>`;
+  }
+  html+=`<tr class="totalRow"><td>Total general</td>${p.colTotals.map(v=>`<td>${fmt(v)}</td>`).join('')}<td>${fmt(p.total)}</td><td></td><td>${fmt(p.avgZone)}</td><td></td></tr></tbody></table></div>`;
+  return html;
+}
+function calcAllScores(rows){scoreRows=[];let turnos=currentTurno==='ALL'?['A','B','C']:[currentTurno];for(let t of turnos){for(let z of ['SECO','FRIO','CONG']){let subset=rows.filter(r=>r.turno===t&&r.zonaTemp===z);let s=scoreFor(subset,z);s.opRows.forEach(x=>scoreRows.push({turno:t,zona:z,medicion:currentMeasure,...x,avgZona:s.avgZone}))}}return scoreRows}
+function barList(id,pairs,color){let max=pairs[0]?.[1]||1;document.getElementById(id).innerHTML=pairs.slice(0,12).map(([k,v])=>`<div class="barrow"><div title="${k}">${k.slice(0,52)}</div><div class="bar"><span style="width:${Math.max(2,v/max*100)}%;background:${color}"></span></div><b>${fmt(v)}</b></div>`).join('')||'<p class="hint">Sin datos.</p>'}
+function renderBars(rows){let scores=calcAllScores(rows);barList('lowOps',scores.filter(x=>x.estado==='ROJO').map(x=>[`${x.op} | T${x.turno} | ${zoneLabel(x.zona)} | ${pct(x.factor*100)}`,x.avg]).sort((a,b)=>a[1]-b[1]),'var(--red)');barList('rankOps',scores.map(x=>[`${x.op} | T${x.turno} | ${zoneLabel(x.zona)} | ${pct(x.factor*100)}`,x.avg]).sort((a,b)=>b[1]-a[1]),'var(--green)')}
+function renderDetail(rows){detail.innerHTML='<thead><tr><th>Archivo</th><th>Turno</th><th>Hora cuadro</th><th>Hora derivada</th><th>Hora confirmación</th><th>Temp.</th><th>Zona única</th><th>Operador</th><th>Material</th><th>Descripción</th></tr></thead><tbody>'+rows.slice(0,1700).map(r=>`<tr><td>${r.archivo}</td><td>${r.turno}</td><td>${hourForTable(r)}</td><td>${r.horaDerivada?'Sí':'No'}</td><td>${String(r.horaConfRaw)}</td><td>${zoneLabel(r.zonaTemp)}</td><td>${r.zonaPuesta}</td><td>${r.operador}</td><td>${r.material}</td><td style="text-align:left">${r.desc}</td></tr>`).join('')+'</tbody>'}
+
+function craneRows(){
+  let f=fileFilter.value,op=opFilter.value;
+  return allRows.filter(r=>r.esGrua&&(f==='__ALL__'||r.archivo===f)&&(op==='__ALL__'||r.operador===op)&&(currentCraneAct==='ALL'||r.actividadBodega===currentCraneAct)&&(currentTurno==='ALL'||r.turno===currentTurno)&&(currentCraneTemp==='ALL'||r.zonaTemp===currentCraneTemp));
+}
+function craneValue(rows,measure=currentCraneMeasure){
+  if(measure==='pallets')return rows.reduce((s,r)=>s+Math.abs(r.cantidadPallet||0),0);
+  if(measure==='bultos')return rows.reduce((s,r)=>s+Math.max(0,r.bultosOp||0),0);
+  return rows.length;
+}
+function cfmt(n){return Number(n||0).toLocaleString('es-CL',{maximumFractionDigits:currentCraneMeasure==='pallets'?2:1})}
+function craneMeasureText(){return currentCraneMeasure==='pallets'?'Pallets':currentCraneMeasure==='bultos'?'Bultos':'Movimientos'}
+function craneStats(rows){
+  let hours=[...new Set(rows.map(hourForTable).filter(h=>!isNaN(h)))].sort((a,b)=>a-b);
+  let list=[...new Set(rows.map(r=>r.operador))].map(op=>{
+    let rs=rows.filter(r=>r.operador===op),total=craneValue(rs),hs=new Set(rs.map(hourForTable)).size||1;
+    return{op,act:[...new Set(rs.map(r=>r.actividadBodega))].join(' + '),vals:hours.map(h=>craneValue(rs.filter(r=>hourForTable(r)===h))),total,hours:hs,avg:total/hs};
+  });
+  let ev=list.filter(x=>x.hours>=4),avg=ev.length?ev.reduce((s,x)=>s+x.avg,0)/ev.length:0,thr=Number(redLimit.value)/100;
+  list.forEach(x=>{x.factor=avg?x.avg/avg:0;x.estado=x.hours<4?'NO EVALUADO':x.factor>=1?'VERDE':x.factor>=thr?'AMARILLO':'ROJO'});
+  list.sort((a,b)=>b.total-a.total);
+  return{hours,list,avg,evaluated:ev.length,colTotals:hours.map((h,i)=>list.reduce((s,x)=>s+x.vals[i],0))};
+}
+function craneSummary(rows){
+  let st=craneStats(rows),total=craneValue(rows),M=craneMeasureText(),tl=currentCraneTemp==='ALL'?'Todas':zoneLabel(currentCraneTemp);
+  let chartRows=st.hours.map(h=>{let rs=rows.filter(r=>hourForTable(r)===h),o={h,total:craneValue(rs)};['SECO','FRIO','CONG','OTRA'].forEach(z=>o[z]=craneValue(rs.filter(r=>r.zonaTemp===z)));return o});
+  let html=`<div class="cards" style="grid-template-columns:repeat(4,1fr)">
+    <div class="card"><div class="t">Actividad</div><div class="v" style="font-size:18px">${currentCraneAct==='ALL'?'Almacenamiento + Reposición':currentCraneAct}</div><div class="s">${turnoLabel(currentTurno)} · Temperatura: ${tl}</div></div>
+    <div class="card"><div class="t">${M} totales</div><div class="v">${cfmt(total)}</div><div class="s">${fmt(rows.length)} movimientos en el filtro</div></div>
+    <div class="card"><div class="t">Productividad media</div><div class="v">${cfmt(st.hours.length?total/st.hours.length:0)}</div><div class="s">${M} por hora con actividad</div></div>
+    <div class="card"><div class="t">Operadores</div><div class="v">${fmt(st.list.length)}</div><div class="s">${fmt(st.evaluated)} con 4+ horas activas</div></div></div>
+  <div class="legend"><span class="leg"><span class="sw" style="background:var(--seco)"></span>Seco</span><span class="leg"><span class="sw" style="background:var(--frio)"></span>Frío</span><span class="leg"><span class="sw" style="background:var(--cong)"></span>Congelado</span><span class="leg"><span class="sw" style="background:#9ca3af"></span>Sin clasificar</span></div>
+  <div class="chartBox"><canvas id="craneChart" width="1500" height="430"></canvas></div>`;
+  html+=`<div class="scroll"><table><thead><tr><th>Operador de grúa | ${M}</th><th>Actividad</th>${st.hours.map(h=>`<th>${h}</th>`).join('')}<th>Total</th><th>Horas activas</th><th>Promedio/hora</th><th>% vs promedio</th><th>Estado</th></tr></thead><tbody>`;
+  for(let x of st.list)html+=`<tr><td>${x.op}</td><td style="text-align:left">${x.act}</td>${x.vals.map(v=>`<td class="${v?'':'zero'}">${v?cfmt(v):''}</td>`).join('')}<td class="totalCol">${cfmt(x.total)}</td><td>${fmt(x.hours)}</td><td>${cfmt(x.avg)}</td><td>${x.hours<4?'':pct(x.factor*100)}</td><td class="stateCell ${stateClass(x.estado)}">${x.estado}</td></tr>`;
+  html+=`<tr class="totalRow"><td>Total general</td><td></td>${st.colTotals.map(v=>`<td>${cfmt(v)}</td>`).join('')}<td>${cfmt(total)}</td><td></td><td>${cfmt(st.avg)}</td><td></td><td></td></tr></tbody></table></div>`;
+  html+=`<div class="panel" style="margin-top:12px"><h3>Detalle de movimientos de grúas</h3><div class="scroll"><table><thead><tr><th>Operador</th><th>Fecha</th><th>Hora conf.</th><th>Hora cuadro</th><th>Turno</th><th>Actividad</th><th>Temp.</th><th>Tipo almacén origen</th><th>Ubic. origen</th><th>Tipo almacén destino</th><th>Ubic. destino</th><th>Material</th><th>Pallets</th><th>Bultos Op.</th><th>Bultos</th></tr></thead><tbody>`;
+  rows.slice().sort((a,b)=>a.operador.localeCompare(b.operador)||a.horaConfNum-b.horaConfNum).slice(0,1700).forEach(r=>{
+    html+=`<tr><td>${r.operador}</td><td>${r.fecha}</td><td>${hourFmt(r.horaConfNum)}</td><td>${hourForTable(r)}</td><td>${r.turno}</td><td>${r.actividadBodega}</td><td>${r.zonaTemp==='OTRA'?'Sin clasificar':zoneLabel(r.zonaTemp)}</td><td style="text-align:left">${r.almacen}</td><td>${r.ubOrigen}</td><td style="text-align:left">${r.almDest}</td><td>${r.ubDestino}</td><td>${r.material}</td><td>${Math.abs(r.cantidadPallet||0).toLocaleString('es-CL',{maximumFractionDigits:3})}</td><td>${fmt(r.bultosOp)}</td><td>${fmt(r.bultos)}</td></tr>`});
+  html+=`</tbody></table></div></div>`;
+  return{html,chartRows,st};
+}
+function hourFmt(h){let t=Math.round(h*3600),p=n=>String(n).padStart(2,'0');return p(Math.floor(t/3600)%24)+':'+p(Math.floor(t%3600/60))+':'+p(t%60)}
+function drawCraneChart(chartRows){
+  let c=document.getElementById('craneChart');if(!c)return;
+  const dpr=window.devicePixelRatio||1,rect=c.getBoundingClientRect(),W=Math.max(900,rect.width||1500),H=Math.max(420,rect.height||430);
+  c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);
+  let ctx=c.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+  let maxBar=Math.max(1e-9,...chartRows.map(x=>x.total)),padL=92,padR=40,padT=28,padB=52;
+  let plotW=W-padL-padR,plotH=H-padT-padB,step=plotW/Math.max(chartRows.length,1),barW=Math.min(78,step*.62);
+  ctx.font='12px Segoe UI';ctx.strokeStyle='#e5e7eb';ctx.lineWidth=1;ctx.fillStyle='#6b7280';ctx.textAlign='right';
+  for(let i=0;i<=6;i++){let y=padT+plotH-(plotH*i/6);ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(W-padR,y);ctx.stroke();ctx.fillText(cfmt(maxBar*i/6),padL-12,y+4)}
+  ctx.textAlign='left';ctx.fillText(craneMeasureText(),padL-78,padT-8);
+  let zones=['FRIO','CONG','SECO','OTRA'],colors={SECO:'#f2b35b',FRIO:'#4f83bd',CONG:'#7bb6e3',OTRA:'#9ca3af'};
+  chartRows.forEach((s,i)=>{
+    let x=padL+i*step+step*.5-barW/2,yBase=padT+plotH,stack=0;
+    zones.forEach(z=>{let bh=plotH*s[z]/maxBar;ctx.fillStyle=colors[z];ctx.fillRect(x,yBase-stack-bh,barW,bh);stack+=bh});
+    ctx.fillStyle='#374151';ctx.textAlign='center';ctx.fillText(cfmt(s.total),x+barW/2,yBase-stack-6);
+    ctx.fillStyle='#6b7280';ctx.fillText(String(s.h),x+barW/2,padT+plotH+25);
+  });
+}
+function renderCranes(){
+  let rows=craneRows(),result=craneSummary(rows);
+  craneSummaryEl.innerHTML=result.html;drawCraneChart(result.chartRows);
+  let ops=result.st.list.filter(x=>x.hours>=4);
+  barList('lowOps',ops.slice().sort((a,b)=>a.avg-b.avg).slice(0,12).map(x=>[x.op,x.avg]),'var(--red)');
+  barList('rankOps',ops.slice().sort((a,b)=>b.avg-a.avg).slice(0,12).map(x=>[x.op,x.avg]),'var(--green)');
+}
+function fillOps(){
+  let prev=opFilter.value,rows=allRows.filter(r=>currentMain==='gruas'?r.esGrua:r.actividadBodega==='PKG VENTA');
+  let ops=[...new Set(rows.map(r=>r.operador))].sort((a,b)=>a.localeCompare(b));
+  opFilter.innerHTML='<option value="__ALL__">Todos</option>'+ops.map(o=>`<option>${o}</option>`).join('');
+  opFilter.value=ops.includes(prev)?prev:'__ALL__';
+}
+function render(){
+  detailPanel.style.display=currentMain==='pkg'?'':'none';
+  if(currentMain==='pkg'){
+    let rows=rowsView();
+    renderCards(rows);pivotArea.innerHTML=currentZone==='ALL'?zonesSummary(rows):pivotTable(rows,currentZone);
+    if(currentZone==='ALL')drawSummaryChart(rows);renderBars(rows);renderDetail(rows);
+    exportClean.disabled=!rows.length;exportScore.disabled=!rows.length;btnRptPkg.disabled=!rows.length;
+  }else{
+    renderCranes();let n=craneRows().length;exportClean.disabled=!n;exportScore.disabled=!n;btnRptCrane.disabled=!n;
+  }
+}
+const craneSummaryEl=document.getElementById('craneSummary');
+function setActive(sel,btn){document.querySelectorAll(sel).forEach(x=>x.classList.remove('active'));btn.classList.add('active')}
+function syncTurno(t){currentTurno=t;document.querySelectorAll('#pkgModule .tabs:not(.metricTabs) .tab').forEach(x=>x.classList.toggle('active',x.dataset.turno===t));document.querySelectorAll('.craneTurnTabs .tab').forEach(x=>x.classList.toggle('active',x.dataset.craneTurn===t))}
+document.querySelectorAll('.mainTabs .tab').forEach(b=>b.onclick=()=>{
+  setActive('.mainTabs .tab',b);currentMain=b.dataset.main;
+  pkgModule.style.display=currentMain==='pkg'?'block':'none';gruasModule.style.display=currentMain==='gruas'?'block':'none';
+  fillOps();render();
+});
+document.querySelectorAll('#pkgModule .metricTab').forEach(b=>b.onclick=()=>{setActive('#pkgModule .metricTab',b);currentMeasure=b.dataset.measure;render()});
+document.querySelectorAll('#pkgModule .tab[data-turno]').forEach(b=>b.onclick=()=>{syncTurno(b.dataset.turno);render()});
+document.querySelectorAll('#pkgModule .subtab').forEach(b=>b.onclick=()=>{setActive('#pkgModule .subtab',b);currentZone=b.dataset.zone;render()});
+document.querySelectorAll('.craneTurnTabs .tab').forEach(b=>b.onclick=()=>{syncTurno(b.dataset.craneTurn);render()});
+document.querySelectorAll('.craneTabs .subtab').forEach(b=>b.onclick=()=>{setActive('.craneTabs .subtab',b);currentCraneAct=b.dataset.craneAct;render()});
+document.querySelectorAll('.craneTempTabs .subtab').forEach(b=>b.onclick=()=>{setActive('.craneTempTabs .subtab',b);currentCraneTemp=b.dataset.craneTemp;render()});
+document.querySelectorAll('.craneMetrics .metricTab').forEach(b=>b.onclick=()=>{setActive('.craneMetrics .metricTab',b);currentCraneMeasure=b.dataset.craneMeasure;render()});
+process.onclick=async()=>{
+  let files=[...file.files];if(!files.length){msg.innerHTML='<div class="msg err">Carga al menos un archivo Excel.</div>';return}
+  try{
+    allRows=[];let derived=[],excluded=0;
+    for(let f of files){let p=await parseWorkbook(f);allRows.push(...p.rows);excluded+=p.excluded;if(p.usedDerivedHour)derived.push(f.name)}
+    fileFilter.innerHTML='<option value="__ALL__">Todos</option>'+[...new Set(allRows.map(r=>r.archivo))].map(f=>`<option>${f}</option>`).join('');
+    fillOps();
+    let warning=derived.length?`<div class="warn">Se calculó la hora automáticamente desde Hora de confirmación para: <b>${derived.join(', ')}</b>.</div>`:'';
+    let pkgCount=allRows.filter(r=>r.actividadBodega==='PKG VENTA').length,storageCount=allRows.filter(r=>r.actividadBodega==='ALMACENAMIENTO').length,replCount=allRows.filter(r=>r.actividadBodega==='REPOSICIÓN').length;
+    let found=new Set(allRows.filter(r=>r.esGrua).map(r=>r.operador)),sinDatos=CRANE_OPS.filter(n=>!found.has(n));
+    let sinTemp=allRows.filter(r=>r.esGrua&&r.zonaTemp==='OTRA').length;
+    msg.innerHTML=`<div class="msg">Listo: <b>${fmt(pkgCount)}</b> registros PKG VENTA · <b>${fmt(storageCount)}</b> ALMACENAMIENTO · <b>${fmt(replCount)}</b> REPOSICIÓN (sólo operadores de grúa autorizados).</div><div class="hint" style="margin-top:6px">Grúas: <b>${fmt(excluded)}</b> movimientos de ALMACENAMIENTO/REPOSICIÓN descartados por pertenecer a usuarios no autorizados · <b>${found.size}</b> de ${CRANE_OPS.length} operadores con movimientos${sinDatos.length?' (sin datos: '+sinDatos.join(', ')+')':''}${sinTemp?' · '+fmt(sinTemp)+' movimientos sin temperatura identificable':''}.</div>${warning}`;
+    render();
+  }catch(e){msg.innerHTML='<div class="msg err">'+e.message+'</div>'}
+};
+['fileFilter','opFilter','redLimit','hourSource'].forEach(id=>document.getElementById(id).onchange=()=>allRows.length&&render());
+function csvDownload(name,rows){let csv='\ufeff'+rows.map(r=>r.map(x=>'"'+String(x??'').replaceAll('"','""')+'"').join(';')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=name;a.click();URL.revokeObjectURL(a.href)}
+exportClean.onclick=()=>{
+  if(currentMain==='pkg'){let rows=rowsView();csvDownload('detalle_pkg_venta_turnos_zonas_unicas.csv',[['Archivo','Turno','Hora cuadro','Hora derivada','Hora confirmacion','Temperatura','Zona unica','Operador','Material','Descripcion','Bultos Operarios','Bultos']].concat(rows.map(r=>[r.archivo,r.turno,hourForTable(r),r.horaDerivada?'Si':'No',String(r.horaConfRaw),r.zonaTemp,r.zonaPuesta,r.operador,r.material,r.desc,r.bultosOp,r.bultos])))}
+  else{csvDownload('detalle_productividad_gruas.csv',[['Archivo','Fecha','Operador','Actividad','Turno','Hora confirmacion','Hora cuadro','Temperatura','Tipo almacen origen','Ubicacion origen','Tipo almacen destino','Ubicacion destino','Material','Descripcion','Pallets','Bultos Operarios','Bultos']].concat(craneRows().map(r=>[r.archivo,r.fecha,r.operador,r.actividadBodega,r.turno,hourFmt(r.horaConfNum),hourForTable(r),r.zonaTemp,r.almacen,r.ubOrigen,r.almDest,r.ubDestino,r.material,r.desc,Math.abs(r.cantidadPallet),r.bultosOp,r.bultos])))}
+};
+exportScore.onclick=()=>{
+  if(currentMain==='pkg'){let scores=calcAllScores(rowsView());csvDownload('semaforo_'+currentMeasure+'_turnos_temperatura.csv',[['Medicion','Turno','Temperatura','Operador','Total','Horas activas','Promedio operador hora','Promedio turno temperatura','Estado']].concat(scores.map(s=>[s.medicion,s.turno,s.zona,s.op,s.total,s.activeHours,s.avg,s.avgZona,s.estado])))}
+  else{let st=craneStats(craneRows());csvDownload('semaforo_gruas_'+currentCraneMeasure+'.csv',[['Actividad','Turno','Temperatura','Medicion','Operador','Total','Horas activas','Promedio/hora','Promedio general','% vs promedio','Estado']].concat(st.list.map(x=>[currentCraneAct,currentTurno,currentCraneTemp,craneMeasureText(),x.op,x.total,x.hours,x.avg,st.avg,x.hours<4?'':Math.round(x.factor*100),x.estado])))}
+};
+
+/* ===================== REPORTE PDF / IMAGEN ===================== */
+function escH(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function rptCriteria(o){
+  // o: {unit, avg, fmtr, counts, nEval, hasAvg}
+  let thr=Number(redLimit.value)/100,thrP=Math.round(thr*100),f=o.fmtr||fmt,c=o.counts||{};
+  let n=k=>o.hasAvg?` · ${c[k]||0} operador(es)`:'';
+  let li=[
+    `<li><b>Medición:</b> ${escH(o.unit)}.</li>`,
+    `<li><b>Promedio/hora</b> = Total general ÷ Horas activas (horas con al menos un movimiento del operador).</li>`,
+    `<li><b>Operador evaluado:</b> debe tener <b>4 horas activas o más</b> dentro del turno y la temperatura seleccionados; de lo contrario queda como NO EVALUADO.</li>`,
+    `<li><b>Promedio de referencia</b> = promedio simple del Promedio/hora de los operadores evaluados${o.hasAvg?`: <b>${f(o.avg)}</b> (${o.nEval} operador(es) evaluados)`:''}.</li>`,
+    `<li><b>Factor</b> = Promedio/hora del operador ÷ Promedio de referencia.</li>`];
+  let sem=`<div class="rpt-sem">
+    <div class="g"><b>VERDE</b>Factor ≥ 100%${o.hasAvg?` (≥ ${f(o.avg)}/h)`:''}${n('VERDE')}</div>
+    <div class="y"><b>AMARILLO</b>Factor entre ${thrP}% y 99%${o.hasAvg?` (${f(o.avg*thr)} a &lt; ${f(o.avg)}/h)`:''}${n('AMARILLO')}</div>
+    <div class="r"><b>ROJO</b>Factor &lt; ${thrP}%${o.hasAvg?` (&lt; ${f(o.avg*thr)}/h)`:''}${n('ROJO')}</div>
+    <div class="n"><b>NO EVALUADO</b>Menos de 4 horas activas${n('NO EVALUADO')}</div></div>`;
+  return `<div class="rpt-crit"><h3>Criterios de evaluación</h3><ul>${li.join('')}</ul>${sem}</div>`;
+}
+function rptCounts(list,key){let c={};list.forEach(x=>{c[x[key]]=(c[x[key]]||0)+1});return c}
+function rptCtx(){
+  let ctx=[],fOpt=fileFilter.value,oOpt=opFilter.value;
+  if(fOpt!=='__ALL__')ctx.push(['Archivo/día',fOpt]);
+  if(oOpt!=='__ALL__')ctx.push(['Operador',oOpt]);
+  return ctx;
+}
+function specPkg(){
+  let rows=rowsView(),z=currentZone,measTxt=currentMeasure==='zonas'?'Zonas únicas por hora':'Líneas/materiales por hora';
+  let ctx=[['Medición',measTxt],['Turno',turnoLabel(currentTurno)],['Temperatura',z==='ALL'?'Resumen temperaturas':zoneLabel(z)]].concat(rptCtx());
+  let table,crit,hoursN;
+  if(z==='ALL'){
+    hoursN=[...new Set(rows.map(hourForTable))].length;
+    table=summaryTable(rows);
+    crit=rptCriteria({unit:measTxt,hasAvg:false})+`<div class="rpt-foot" style="text-align:left;margin-top:6px">Vista resumen: conteo por hora y temperatura. El semáforo se calcula por operador dentro de cada temperatura (SECO, FRIO, CONGELADO).</div>`;
+  }else{
+    let p=buildPivot(rows,z);hoursN=p.hours.length;
+    let head=`<th>${currentMeasure==='zonas'?'Cuenta de zonas únicas':'Cuenta de Material'}</th><th colspan="${p.hours.length+4}" style="text-align:left">Etiquetas de columna</th>`;
+    let t=`<div class="scroll"><table><thead><tr>${head}</tr><tr class="subhead"><th>Etiquetas de fila</th>${p.hours.map(h=>`<th>${h}</th>`).join('')}<th>Total general</th><th>Horas activas</th><th>Promedio/hora</th><th>Semáforo</th></tr></thead><tbody>`;
+    for(let r of p.matrix)t+=`<tr><td>${escH(r.op)}</td>${r.vals.map(v=>`<td class="${v?'':'zero'}">${v?fmt(v):''}</td>`).join('')}<td class="totalCol">${fmt(r.total)}</td><td>${fmt(r.activeHours)}</td><td>${fmt(r.avg)}</td><td class="stateCell ${stateClass(r.estado)}">${r.estado}</td></tr>`;
+    t+=`<tr class="totalRow"><td>Total general</td>${p.colTotals.map(v=>`<td>${fmt(v)}</td>`).join('')}<td>${fmt(p.total)}</td><td></td><td>${fmt(p.avgZone)}</td><td></td></tr></tbody></table></div>`;
+    table=t;
+    crit=rptCriteria({unit:measTxt,hasAvg:true,avg:p.avgZone,nEval:p.matrix.filter(x=>x.activeHours>=4).length,counts:rptCounts(p.matrix,'estado')});
+  }
+  let cols=(z==='ALL'?5:hoursN+5);
+  return{title:'Productividad PKG VENTA',ctx,table,crit,width:Math.min(1700,Math.max(960,(z==='ALL'?560:380+hoursN*50+450))),
+    base:['Reporte','PKG',z==='ALL'?'Resumen':zoneLabel(z),currentTurno==='ALL'?'TodosTurnos':'Turno'+currentTurno,currentMeasure],
+    shareText:`Reporte productividad PKG VENTA · ${z==='ALL'?'Resumen temperaturas':zoneLabel(z)} · ${turnoLabel(currentTurno)} · ${measTxt}`};
+}
+function specCrane(){
+  let rows=craneRows(),st=craneStats(rows),M=craneMeasureText(),tl=currentCraneTemp==='ALL'?'Todas':zoneLabel(currentCraneTemp);
+  let actTxt=currentCraneAct==='ALL'?'Almacenamiento + Reposición':currentCraneAct;
+  let ctx=[['Actividad',actTxt],['Medición',M+'/hora'],['Turno',turnoLabel(currentTurno)],['Temperatura',tl]].concat(rptCtx());
+  let t=`<div class="scroll"><table><thead><tr><th>Operador de grúa | ${M}</th><th style="text-align:left">Actividad</th>${st.hours.map(h=>`<th>${h}</th>`).join('')}<th>Total</th><th>Horas activas</th><th>Promedio/hora</th><th>% vs promedio</th><th>Estado</th></tr></thead><tbody>`;
+  for(let x of st.list)t+=`<tr><td>${escH(x.op)}</td><td style="text-align:left">${escH(x.act)}</td>${x.vals.map(v=>`<td class="${v?'':'zero'}">${v?cfmt(v):''}</td>`).join('')}<td class="totalCol">${cfmt(x.total)}</td><td>${fmt(x.hours)}</td><td>${cfmt(x.avg)}</td><td>${x.hours<4?'':pct(x.factor*100)}</td><td class="stateCell ${stateClass(x.estado)}">${x.estado}</td></tr>`;
+  t+=`<tr class="totalRow"><td>Total general</td><td></td>${st.colTotals.map(v=>`<td>${cfmt(v)}</td>`).join('')}<td>${cfmt(craneValue(rows))}</td><td></td><td>${cfmt(st.avg)}</td><td></td><td></td></tr></tbody></table></div>`;
+  let crit=rptCriteria({unit:M+' por hora',hasAvg:true,avg:st.avg,fmtr:cfmt,nEval:st.evaluated,counts:rptCounts(st.list,'estado')});
+  return{title:'Productividad Grúas',ctx,table:t,crit,width:Math.min(1800,Math.max(1000,420+st.hours.length*50+620)),
+    base:['Reporte','Gruas',currentCraneAct==='ALL'?'Ambas':currentCraneAct,currentCraneTemp==='ALL'?'TodasTemp':currentCraneTemp,currentTurno==='ALL'?'TodosTurnos':'Turno'+currentTurno,currentCraneMeasure],
+    shareText:`Reporte productividad Grúas · ${actTxt} · ${turnoLabel(currentTurno)} · Temperatura: ${tl} · ${M}/hora`};
+}
+function rptHTML(s){
+  let now=new Date().toLocaleString('es-CL',{dateStyle:'medium',timeStyle:'short'});
+  return `<div class="rpt" style="width:${s.width}px"><div class="rpt-top"><div><div class="b">ICB Food Service</div><h1>${escH(s.title)}</h1></div><div class="d">Generado: ${escH(now)}</div></div>
+  <div class="rpt-chips">${s.ctx.map(([k,v])=>`<span class="rpt-chip">${escH(k)}: <b>${escH(v)}</b></span>`).join('')}</div>${s.table}${s.crit}</div>`;
+}
+let rptState=null;
+const rptEl=id=>document.getElementById(id);
+function rptToast(t){rptEl('rptToast').textContent=t||''}
+function rptButtons(on){['rptPdf','rptPng','rptCopy','rptWa','rptMail'].forEach(id=>rptEl(id).disabled=!on)}
+function rptClose(){rptEl('rptModal').classList.remove('open');if(rptState?.url)URL.revokeObjectURL(rptState.url);rptState=null}
+function rptDownload(blob,name){let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
+async function openReport(){
+  let modal=rptEl('rptModal');modal.classList.add('open');rptButtons(false);rptToast('');
+  rptEl('rptPreview').innerHTML='<div class="loading">Generando reporte…</div>';
+  if(!window.html2canvas||!window.jspdf){rptEl('rptPreview').innerHTML='<div class="loading">No se pudieron cargar las librerías de reporte (html2canvas / jsPDF). Revisa la conexión a internet y recarga la página.</div>';return}
+  let host;
+  try{
+    let spec=currentMain==='pkg'?specPkg():specCrane();
+    rptEl('rptTitleTxt').textContent='Reporte · '+spec.ctx.map(c=>c[1]).slice(0,3).join(' · ');
+    host=document.createElement('div');host.style.cssText='position:fixed;left:0;top:0;z-index:-1;pointer-events:none';host.innerHTML=rptHTML(spec);document.body.appendChild(host);
+    if(document.fonts&&document.fonts.ready)await document.fonts.ready;
+    let node=host.firstElementChild,scale=2;
+    let canvas=await html2canvas(node,{scale,backgroundColor:'#ffffff',useCORS:true,logging:false});
+    host.remove();host=null;
+    let png=await new Promise(r=>canvas.toBlob(r,'image/png'));
+    let w=canvas.width/scale,h=canvas.height/scale;
+    let pdf=new window.jspdf.jsPDF({orientation:w>h?'l':'p',unit:'px',format:[w,h],hotfixes:['px_scaling'],compress:true});
+    pdf.addImage(canvas.toDataURL('image/jpeg',0.95),'JPEG',0,0,w,h);
+    let pdfBlob=pdf.output('blob');
+    let base=spec.base.join('_').replace(/[^\w\-]+/g,'_')+'_'+new Date().toISOString().slice(0,10);
+    if(rptState?.url)URL.revokeObjectURL(rptState.url);
+    rptState={spec,png,pdfBlob,base,url:URL.createObjectURL(png)};
+    rptEl('rptPreview').innerHTML=`<img src="${rptState.url}" alt="Vista previa del reporte">`;
+    rptButtons(true);
+  }catch(e){
+    if(host)host.remove();
+    rptEl('rptPreview').innerHTML='<div class="loading">Error al generar el reporte: '+escH(e.message||e)+'</div>';
+  }
+}
+function rptFile(kind){return kind==='pdf'?new File([rptState.pdfBlob],rptState.base+'.pdf',{type:'application/pdf'}):new File([rptState.png],rptState.base+'.png',{type:'image/png'})}
+async function rptShare(kind,fallbackUrl,label){
+  if(!rptState)return;
+  let file=rptFile(kind),s=rptState.spec;
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:s.title,text:s.shareText});rptToast('');return}
+    catch(e){if(e&&e.name==='AbortError')return}
+  }
+  // Sin compartir nativo (típico en PC): descarga el archivo y abre el destino con el texto listo
+  rptDownload(file,file.name);
+  window.open(fallbackUrl(s.shareText),'_blank','noopener');
+  rptToast(`Se descargó ${file.name}. Adjúntalo manualmente en ${label} (en WhatsApp Web también puedes usar "Copiar imagen" y pegar con Ctrl+V).`);
+}
+rptEl('rptClose').onclick=rptClose;
+rptEl('rptModal').addEventListener('click',e=>{if(e.target.id==='rptModal')rptClose()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&rptEl('rptModal').classList.contains('open'))rptClose()});
+rptEl('rptPdf').onclick=()=>rptState&&rptDownload(rptState.pdfBlob,rptState.base+'.pdf');
+rptEl('rptPng').onclick=()=>rptState&&rptDownload(rptState.png,rptState.base+'.png');
+rptEl('rptCopy').onclick=async()=>{
+  try{await navigator.clipboard.write([new ClipboardItem({'image/png':rptState.png})]);rptToast('Imagen copiada. Pégala (Ctrl+V) en WhatsApp, correo u otra app.')}
+  catch(e){rptToast('Tu navegador no permite copiar imágenes. Usa "Descargar imagen".')}
+};
+rptEl('rptWa').onclick=()=>rptShare('png',t=>'https://wa.me/?text='+encodeURIComponent(t),'WhatsApp');
+rptEl('rptMail').onclick=()=>rptShare('pdf',t=>'mailto:?subject='+encodeURIComponent(t)+'&body='+encodeURIComponent(t+'\n\n(Adjunta el PDF descargado)'),'el correo');
+btnRptPkg.onclick=openReport;btnRptCrane.onclick=openReport;
+</script></body></html>

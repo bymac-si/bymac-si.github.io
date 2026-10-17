@@ -1,0 +1,75 @@
+{
+  "apps": [
+    {
+      "id": "umv2msqzs",
+      "name": "Reporte Fin de Turno",
+      "desc": "Reporte de actividades realizadas durante el turno",
+      "url": "https://script.google.com/macros/s/AKfycbz66VsFIgSwZ4l9YkIBSE4afbrGmov6GOwP-bR333NJ6dLGOR6rvm3U--GlQrjZJdV4Xg/exec",
+      "icon": "📄",
+      "tag": "Reportes",
+      "color": "#ed2750",
+      "newTab": true
+    },
+    {
+      "id": "productividad",
+      "name": "Productividad PKG y Grúas",
+      "desc": "Productividad por operador y hora, semáforo por turno y temperatura, con reporte en PDF o imagen.",
+      "url": "APP_PRODUCTIVIDAD_PKG_GRUAS_v6.html",
+      "icon": "📊",
+      "tag": "Reportes",
+      "color": "#ed2750",
+      "newTab": true
+    },
+    {
+      "id": "umv2lfgpa",
+      "name": "Pre Chequeo Control 0",
+      "desc": "Aplicativo para generar impresión de pre chequeos de Controles 0",
+      "url": "Separación_por_temperatura.html",
+      "icon": "📦",
+      "tag": "Operaciones",
+      "color": "#c27a00",
+      "newTab": true
+    },
+    {
+      "id": "umv2l5iwt",
+      "name": "Generador de Barras",
+      "desc": "Aplicativo para Generar listado de colas de Zona con sus respectivos códigos de barra",
+      "url": "Generador_de_Correlativos.html",
+      "icon": "⏸️",
+      "tag": "Operaciones",
+      "color": "#c27a00",
+      "newTab": true
+    },
+    {
+      "id": "seteo",
+      "name": "Seteo de rampla",
+      "desc": "Planilla de seteo: sellos, pallets y temperatura por zona. Lista para imprimir.",
+      "url": "APP_SETEO_RAMPLA_ICB.html",
+      "icon": "🚛",
+      "tag": "Despacho",
+      "color": "#2f6fdb",
+      "newTab": true
+    },
+    {
+      "id": "umvbtxery",
+      "name": "Tarja 21",
+      "desc": "",
+      "url": "APP_TARJA_CONTROL_ICB.html",
+      "icon": "📦",
+      "tag": "Chequeo",
+      "color": "#ed2750",
+      "newTab": true
+    },
+    {
+      "icon": "🤩",
+      "name": "Solicitud Permisos",
+      "desc": "Formulario de solicitud de permisos",
+      "url": "APP_SOLICITUD_PERMISO_ICB.html",
+      "tag": "RRHH",
+      "color": "#7c4dff",
+      "newTab": true,
+      "id": "umvbw2tbc"
+    }
+  ],
+  "removed": []
+}

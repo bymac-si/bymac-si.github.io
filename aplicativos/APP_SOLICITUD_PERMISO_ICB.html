@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- ICB Food Service 2026 · Solicitud de permiso -->
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Solicitud de permiso · ICB Food Service</title>
+<link rel="icon" href="https://www.icbfs.cl/wp-content/uploads/2022/01/cropped-favicon-32x32.jpg" sizes="32x32">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#f5f5f7;--panel:#fff;--line:#e2e2e8;--ink:#1d1d22;--muted:#6c6c78;--brand:#ed2750;--soft:#fdecef;--green:#15803d;--yellow:#ca8a04;--red:#b42318;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#131316;--panel:#1c1c21;--line:#2c2c34;--ink:#f2f2f5;--muted:#9b9ba7;--soft:#2a1a20}}
+*,*::before,*::after{box-sizing:inherit}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+.app{display:grid;grid-template-columns:200px minmax(0,1fr);min-height:100vh}
+aside{background:var(--brand);color:#fff;padding:20px 14px;display:flex;flex-direction:column;align-items:center;gap:7px}
+aside img{width:140px;height:auto;max-width:100%;object-fit:contain;margin:4px auto 14px}
+.side-title{font-weight:800;text-align:center;font-size:16px}.side-sub{font-size:12px;text-align:center;opacity:.8}.side-divider{height:1px;background:rgba(255,255,255,.3);width:100%;margin:14px 0}.side-note{text-align:center;line-height:1.8;font-size:13px;font-weight:600}
+.side-menu{margin-top:auto;color:#fff;font-weight:700;font-size:13px;text-decoration:none;border:1.5px solid rgba(255,255,255,.7);border-radius:8px;padding:8px 14px}
+.side-menu:hover{background:rgba(255,255,255,.15)}
+.content{min-width:0}
+header.top{padding:20px 24px 0}
+h1{font-size:22px;margin:0 0 2px;font-weight:750}
+.subtle{color:var(--muted);font-size:13px}
+.wrap{padding:16px 24px 28px}
+h2{font-size:16px;margin:0 0 12px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:14px}
+.grid{display:grid;gap:10px 12px}.g2{grid-template-columns:1fr 1fr}.span2{grid-column:span 2}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
+input,select,textarea{width:100%;border:1.5px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--bg);color:var(--ink);font:inherit}
+input:focus,select:focus,textarea:focus{outline:2px solid rgba(237,39,80,.35);border-color:var(--brand)}
+input.bad{border-color:var(--red)}
+.btn{background:var(--brand);border:1.5px solid var(--brand);border-radius:8px;padding:10px 16px;color:#fff;font:inherit;font-weight:700;cursor:pointer}
+.btn.gray{background:transparent;color:var(--brand)}
+.btn.sm{padding:6px 10px;font-size:13px}
+.layout{display:grid;grid-template-columns:minmax(380px,460px) minmax(0,1fr);gap:18px;align-items:start}
+.previewCol{position:sticky;top:12px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.radios{display:grid;gap:8px}
+.radios label{margin:0;display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer;color:var(--ink);font-size:14px}
+.radios label:has(input:checked){border-color:var(--brand);background:var(--soft)}
+.radios input{width:auto;accent-color:var(--brand)}
+.dur{margin-top:10px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:14px}
+.dur b{font-size:17px}
+.warns{margin:0 0 12px;padding:0;list-style:none}
+.warns li{background:#fffbeb;border-left:5px solid var(--yellow);color:#713f12;padding:7px 10px;border-radius:8px;margin-bottom:6px;font-size:13px}
+.warns li.ok{background:rgba(21,128,61,.1);border-left-color:var(--green);color:var(--green)}
+.scroll{overflow:auto;border:1px solid var(--line);border-radius:8px;max-height:420px}
+table.hist{border-collapse:collapse;width:100%;font-size:13px;white-space:nowrap}
+table.hist th,table.hist td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left}
+table.hist thead th{background:var(--bg);color:var(--muted);position:sticky;top:0}
+.tag{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:800}
+.tag.ok{background:#dcfce7;color:#14532d}.tag.bad{background:#fee2e2;color:#7f1d1d}
+.hint{font-size:13px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1d1d22;color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90vw}
+.toast.on{opacity:1}
+
+/* ====== HOJA IMPRIMIBLE ====== */
+#sheetFit{position:relative;width:100%;overflow:hidden;border:1px solid var(--line);border-radius:8px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+#sheet{width:700px;min-height:990px;transform-origin:top left;background:#fff;color:#000;font-family:Arial,Helvetica,sans-serif;font-size:15px;padding:30px 52px 40px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.sh-logo{width:78px;height:auto;display:block;margin-left:-20px}
+.sh-title{text-align:center;font-weight:700;font-size:15px;text-decoration:underline;margin:-32px 0 74px;padding-left:20px}
+.sh-date{text-align:right;margin-bottom:58px;font-size:15px}
+.sh-date u{display:inline-block;min-width:34px;text-align:center;text-decoration:none;border-bottom:1.5px solid #000;padding:0 6px}
+.sh-date u.l{min-width:120px}
+.sh-ln{display:flex;align-items:flex-end;margin-bottom:12px;line-height:1.35}
+.sh-ln .t{white-space:nowrap}
+.sh-ln .f{flex:1;border-bottom:2px dotted #333;min-height:20px;padding:0 6px 1px;margin-left:4px}
+.sh-gap{height:52px}
+.sh-opt{display:flex;align-items:flex-end;margin-bottom:14px}
+.sh-opt .t{width:290px}
+.sh-opt .f{width:80px;border-bottom:1.5px solid #000;text-align:center;font-weight:700;min-height:20px}
+.sh-sign{display:grid;grid-template-columns:1fr 1fr;gap:70px;margin:170px 20px 0}
+.sh-sign div{border-top:1.5px solid #000;text-align:center;padding-top:6px;font-size:14px}
+@media(max-width:1100px){.layout{grid-template-columns:1fr}.previewCol{position:static}}
+@media(max-width:760px){.app{grid-template-columns:1fr}aside{flex-direction:row;flex-wrap:wrap;justify-content:flex-start;align-items:center;padding:10px 12px;gap:8px}aside img{width:42px;margin:0 8px 0 0}.side-title{font-size:14px}.side-sub,.side-divider,.side-note{display:none}.side-menu{margin:0 0 0 auto}header.top{padding:14px 16px 0}.wrap{padding:12px 16px}.g2{grid-template-columns:1fr}.span2{grid-column:auto}}
+@page{size:A4 portrait;margin:8mm}
+@media print{
+  body{background:#fff}.app{display:block}
+  aside,header.top,.formCol,.histPanel,.noprint,.toast{display:none!important}
+  .wrap{padding:0}.layout{display:block}.previewCol{position:static}
+  #sheetFit{border:0;box-shadow:none;border-radius:0;height:auto!important;overflow:visible}
+  #sheet{transform:none!important;min-height:0;margin:0 auto}
+}
+</style>
+</head>
+<body><div class="app">
+<aside class="noprint"><img src="https://www.icbfs.cl/wp-content/uploads/2022/02/logo-icbfs.png" alt="ICB Food Service"><div class="side-title">ICB Food Service</div><div class="side-sub">Personas</div><div class="side-divider"></div><div class="side-note">Solicitud<br>de permiso</div><a class="side-menu" href="MENU_ICB.html">← Menú</a></aside>
+<div class="content">
+<header class="top"><h1>Solicitud de permiso</h1><div class="subtle">Completa los datos, revisa el formulario y envíalo a imprimir para las firmas</div></header>
+<main class="wrap">
+<div class="layout">
+
+<div class="formCol">
+ <section class="panel">
+  <h2>1) Fecha</h2>
+  <div class="grid g2">
+    <div><label for="fecha">Fecha de la solicitud</label><input id="fecha" data-k="fecha" type="date"></div>
+    <div><label for="ciudad">Ciudad (opcional)</label><input id="ciudad" data-k="ciudad" placeholder="Ej: Santiago"></div>
+  </div>
+ </section>
+ <section class="panel">
+  <h2>2) Trabajador</h2>
+  <div class="grid g2">
+    <div class="span2"><label for="nombre">Nombre solicitante</label><input id="nombre" data-k="nombre" list="namesList" autocomplete="off" placeholder="Nombre y apellido"><datalist id="namesList"></datalist></div>
+    <div><label for="rut">RUT</label><input id="rut" data-k="rut" inputmode="text" autocomplete="off" placeholder="12.345.678-9"></div>
+  </div>
+ </section>
+ <section class="panel">
+  <h2>3) Permiso</h2>
+  <div class="grid g2">
+    <div><label for="hIni">Hora inicio</label><input id="hIni" data-k="hIni" type="time"></div>
+    <div><label for="hFin">Hora término</label><input id="hFin" data-k="hFin" type="time"></div>
+    <div class="span2"><label for="motivo">Motivo</label><input id="motivo" data-k="motivo" autocomplete="off" placeholder="Ej: Reunión colegio hijo"></div>
+  </div>
+  <div class="dur" id="dur">Duración: —</div>
+  <div class="radios" style="margin-top:12px" role="radiogroup" aria-label="Tipo de permiso">
+    <label><input type="radio" name="tipo" value="con"> Permiso con goce de remuneración</label>
+    <label><input type="radio" name="tipo" value="sin"> Permiso sin goce de remuneración</label>
+  </div>
+ </section>
+ <section class="panel">
+  <h2>4) Autorización</h2>
+  <label for="sup">Nombre supervisor o quien autoriza</label><input id="sup" data-k="sup" list="supList" autocomplete="off" placeholder="Nombre y apellido"><datalist id="supList"></datalist>
+  <p class="hint" style="margin-bottom:0">Las firmas del trabajador y del empleador se completan a mano en la hoja impresa.</p>
+ </section>
+</div>
+
+<div class="previewCol">
+  <div class="toolbar noprint">
+    <button class="btn" id="btnPrint" type="button">🖨 Imprimir solicitud</button>
+    <button class="btn gray" id="btnSave" type="button">Guardar</button>
+    <button class="btn gray" id="btnNew" type="button">Nueva solicitud</button>
+  </div>
+  <ul class="warns noprint" id="warns"></ul>
+  <div id="sheetFit"><div id="sheet"></div></div>
+  <p class="hint noprint" style="margin-top:8px">Formato A4 vertical. Al imprimir puedes elegir "Guardar como PDF".</p>
+</div>
+</div>
+
+<section class="panel histPanel" style="margin-top:18px">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px"><h2 style="margin:0">Historial de solicitudes</h2><div><button class="btn gray sm" id="btnExpX" type="button">Exportar Excel</button> <button class="btn gray sm" id="btnExpC" type="button">Exportar CSV</button></div></div>
+  <div id="histEmpty" class="hint">Aún no hay solicitudes guardadas en este equipo.</div>
+  <div class="scroll" id="histScroll" style="display:none"><table class="hist"><thead><tr><th>Fecha</th><th>Trabajador</th><th>RUT</th><th>Horario</th><th>Duración</th><th>Tipo</th><th>Autoriza</th><th></th></tr></thead><tbody id="histBody"></tbody></table></div>
+</section>
+</main></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const LOGO='data:image/jpeg;base64,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';
+const $=id=>document.getElementById(id);
+const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const LS_H='icb_permiso_hist_v1',LS_C='icb_permiso_cfg_v1';
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function lsGet(k,d){try{let v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
+function todayISO(){let d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())}
+function parseISO(iso){let m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||'');return m?{y:+m[1],m:+m[2],d:+m[3]}:null}
+function fmtDate(iso){let o=parseISO(iso);return o?`${String(o.d).padStart(2,'0')}-${String(o.m).padStart(2,'0')}-${o.y}`:''}
+function blank(){let c=lsGet(LS_C,{});return{id:null,fecha:todayISO(),ciudad:c.ciudad||'',nombre:'',rut:'',hIni:'',hFin:'',motivo:'',tipo:'',sup:c.sup||''}}
+let S=blank();
+
+/* ---- RUT ---- */
+function cleanRut(v){return String(v||'').replace(/[^0-9kK]/g,'').toUpperCase()}
+function dvRut(body){let s=0,m=2;for(let i=body.length-1;i>=0;i--){s+=+body[i]*m;m=m===7?2:m+1}let r=11-(s%11);return r===11?'0':r===10?'K':String(r)}
+function rutValid(v){let c=cleanRut(v);if(c.length<2)return false;return dvRut(c.slice(0,-1))===c.slice(-1)}
+function fmtRut(v){let c=cleanRut(v);if(c.length<2)return c;let b=c.slice(0,-1).replace(/\B(?=(\d{3})+(?!\d))/g,'.');return b+'-'+c.slice(-1)}
+
+/* ---- duración ---- */
+function minutes(t){let m=/^(\d{2}):(\d{2})$/.exec(t||'');return m?(+m[1]*60+ +m[2]):null}
+function duration(){let a=minutes(S.hIni),b=minutes(S.hFin);if(a==null||b==null)return null;let cross=b<=a;let d=(b-a+1440)%1440;if(d===0&&a===b)return{min:0,cross:false,zero:true};return{min:d,cross}}
+function durText(d){if(!d)return '—';if(d.zero)return '0 min';let h=Math.floor(d.min/60),m=d.min%60;return (h?h+' h ':'')+(m?m+' min':'')}
+
+/* ---- hoja ---- */
+function renderSheet(){
+  let o=parseISO(S.fecha),dd=o?String(o.d):'',mm=o?MESES[o.m-1]:'',yy=o?String(o.y).slice(-2):'';
+  let ln=(t,v)=>`<div class="sh-ln"><span class="t">${t}:</span><span class="f">${esc(v)}</span></div>`;
+  $('sheet').innerHTML=`
+   <img class="sh-logo" src="${LOGO}" alt="ICB Food Service">
+   <div class="sh-title">SOLICITUD DE PERMISO</div>
+   <div class="sh-date"><u>${esc(dd)||'&nbsp;'}</u> de <u class="l">${esc(mm)||'&nbsp;'}</u> de 20<u>${esc(yy)||'&nbsp;'}</u>, <u class="l">${esc(S.ciudad)||'&nbsp;'}</u></div>
+   ${ln('Nombre solicitante',S.nombre)}${ln('Rut',S.rut)}${ln('Hora inicio permiso',S.hIni)}${ln('Hora término permiso',S.hFin)}${ln('Motivo',S.motivo)}
+   <div class="sh-gap"></div>
+   <div class="sh-opt"><span class="t">Permiso con goce de remuneración</span><span class="f">${S.tipo==='con'?'X':'&nbsp;'}</span></div>
+   <div class="sh-opt"><span class="t">Permiso sin goce de remuneración</span><span class="f">${S.tipo==='sin'?'X':'&nbsp;'}</span></div>
+   <div class="sh-gap"></div>
+   ${ln('Nombre Supervisor o quien autoriza',S.sup)}
+   <div class="sh-sign"><div>Firma Trabajador</div><div>Firma Empleador</div></div>`;
+  fitSheet();
+}
+function fitSheet(){let w=$('sheetFit').clientWidth||700,s=Math.min(1,w/700),sh=$('sheet');sh.style.transform=`scale(${s})`;$('sheetFit').style.height=Math.ceil(sh.offsetHeight*s)+'px'}
+new ResizeObserver(fitSheet).observe($('sheetFit'));
+window.addEventListener('beforeprint',()=>{$('sheet').style.transform='none'});window.addEventListener('afterprint',fitSheet);
+
+/* ---- formulario ---- */
+function syncInputs(){document.querySelectorAll('[data-k]').forEach(i=>i.value=S[i.dataset.k]??'');document.querySelectorAll('[name=tipo]').forEach(r=>r.checked=r.value===S.tipo)}
+document.querySelectorAll('[data-k]').forEach(i=>i.addEventListener('input',()=>{
+  S[i.dataset.k]=i.value;
+  if(i.dataset.k==='nombre'){let p=getHist().find(x=>x.nombre.toLowerCase()===i.value.trim().toLowerCase());if(p&&!S.rut){S.rut=p.rut;$('rut').value=p.rut}}
+  refresh();
+}));
+$('rut').addEventListener('blur',()=>{if(S.rut.trim()){S.rut=fmtRut(S.rut);$('rut').value=S.rut;refresh()}});
+document.querySelectorAll('[name=tipo]').forEach(r=>r.addEventListener('change',()=>{S.tipo=r.value;refresh()}));
+
+function refresh(){
+  let d=duration();
+  $('dur').innerHTML=d?`Duración: <b>${durText(d)}</b>${d.cross?' <span class="hint">(el término cae al día siguiente)</span>':''}`:'Duración: —';
+  $('rut').classList.toggle('bad',!!S.rut.trim()&&!rutValid(S.rut));
+  renderSheet();
+  let w=[];
+  if(!S.nombre.trim())w.push('Falta el nombre del solicitante');
+  if(!S.rut.trim())w.push('Falta el RUT');else if(!rutValid(S.rut))w.push('El RUT no es válido (revisa el dígito verificador)');
+  if(!S.hIni)w.push('Falta la hora de inicio');
+  if(!S.hFin)w.push('Falta la hora de término');
+  if(S.hIni&&S.hFin&&S.hIni===S.hFin)w.push('La hora de inicio y término son iguales');
+  if(!S.motivo.trim())w.push('Falta el motivo');
+  if(!S.tipo)w.push('Selecciona si el permiso es con o sin goce de remuneración');
+  if(!S.sup.trim())w.push('Falta el nombre de quien autoriza');
+  $('warns').innerHTML=w.length?w.map(x=>`<li>${x}</li>`).join(''):'<li class="ok">Solicitud lista para imprimir</li>';
+}
+
+/* ---- historial ---- */
+function getHist(){return lsGet(LS_H,[])}
+function saveCurrent(silent){
+  if(S.rut.trim())S.rut=fmtRut(S.rut);
+  let h=getHist();if(!S.id)S.id='p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  let rec={...S,savedAt:new Date().toISOString()},i=h.findIndex(x=>x.id===S.id);if(i>=0)h[i]=rec;else h.unshift(rec);
+  if(!lsSet(LS_H,h.slice(0,1000))){toast('No se pudo guardar en este navegador');return false}
+  lsSet(LS_C,{ciudad:S.ciudad,sup:S.sup});renderHist();if(!silent)toast('Solicitud guardada en el historial');return true;
+}
+function renderHist(){
+  let h=getHist();
+  $('namesList').innerHTML=[...new Set(h.map(x=>x.nombre).filter(Boolean))].map(s=>`<option value="${esc(s)}">`).join('');
+  $('supList').innerHTML=[...new Set(h.map(x=>x.sup).filter(Boolean))].map(s=>`<option value="${esc(s)}">`).join('');
+  $('histEmpty').style.display=h.length?'none':'';$('histScroll').style.display=h.length?'':'none';
+  $('histBody').innerHTML=h.map(r=>{let d=(()=>{let a=minutes(r.hIni),b=minutes(r.hFin);return a==null||b==null?null:{min:(b-a+1440)%1440,zero:a===b}})();
+    return `<tr><td>${esc(fmtDate(r.fecha))}</td><td>${esc(r.nombre)}</td><td>${esc(r.rut)}</td><td>${esc(r.hIni)} – ${esc(r.hFin)}</td><td>${durText(d)}</td><td><span class="tag ${r.tipo==='con'?'ok':'bad'}">${r.tipo==='con'?'CON GOCE':r.tipo==='sin'?'SIN GOCE':'—'}</span></td><td>${esc(r.sup)}</td><td style="text-align:right"><button class="btn gray sm" data-open="${r.id}">Abrir</button> <button class="btn gray sm" data-dup="${r.id}">Duplicar</button> <button class="btn gray sm" data-del="${r.id}">Eliminar</button></td></tr>`}).join('');
+  $('histBody').querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>loadRec(b.dataset.open,false));
+  $('histBody').querySelectorAll('[data-dup]').forEach(b=>b.onclick=()=>loadRec(b.dataset.dup,true));
+  $('histBody').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(confirm('¿Eliminar esta solicitud del historial?')){lsSet(LS_H,getHist().filter(x=>x.id!==b.dataset.del));if(S.id===b.dataset.del)S.id=null;renderHist()}});
+}
+function loadRec(id,dup){let r=getHist().find(x=>x.id===id);if(!r)return;S={...r};delete S.savedAt;if(dup){S.id=null;S.fecha=todayISO()}syncInputs();refresh();window.scrollTo({top:0,behavior:'smooth'});toast(dup?'Duplicada: revisa fecha y horas':'Solicitud cargada')}
+function histRows(){
+  let head=['Fecha','Ciudad','Trabajador','RUT','Hora inicio','Hora término','Duración (min)','Motivo','Tipo de permiso','Autoriza','Guardado'];
+  return [head,...getHist().map(r=>{let a=minutes(r.hIni),b=minutes(r.hFin);return [fmtDate(r.fecha),r.ciudad,r.nombre,r.rut,r.hIni,r.hFin,a==null||b==null?'':(b-a+1440)%1440,r.motivo,r.tipo==='con'?'Con goce de remuneración':r.tipo==='sin'?'Sin goce de remuneración':'',r.sup,(r.savedAt||'').replace('T',' ').slice(0,16)]})];
+}
+function download(name,blob){let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000)}
+$('btnExpC').onclick=()=>{if(!getHist().length)return toast('No hay datos para exportar');download('historial_permisos.csv',new Blob(['\ufeff'+histRows().map(r=>r.map(x=>'"'+String(x??'').replaceAll('"','""')+'"').join(';')).join('\n')],{type:'text/csv;charset=utf-8'}))};
+$('btnExpX').onclick=()=>{if(!getHist().length)return toast('No hay datos para exportar');if(!window.XLSX){toast('Librería Excel no disponible (sin internet). Exportando CSV.');return $('btnExpC').click()}let wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(histRows()),'Permisos');XLSX.writeFile(wb,'historial_permisos.xlsx')};
+
+/* ---- acciones ---- */
+$('btnSave').onclick=()=>saveCurrent(false);
+$('btnNew').onclick=()=>{S=blank();syncInputs();refresh();$('nombre').focus()};
+$('btnPrint').onclick=()=>{
+  let n=$('warns').querySelectorAll('li:not(.ok)').length;
+  if(n&&!confirm('La solicitud tiene '+n+' observación(es) pendiente(s). ¿Imprimir de todos modos?'))return;
+  saveCurrent(true);toast('Guardada en el historial');setTimeout(()=>window.print(),150);
+};
+let tt;function toast(m){let t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2800)}
+syncInputs();renderHist();refresh();
+</script>
+</body></html>

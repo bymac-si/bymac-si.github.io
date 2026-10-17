@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- ICB Food Service 2026 · Seteo de rampla -->
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Seteo de rampla · ICB Food Service</title>
+<link rel="icon" href="https://www.icbfs.cl/wp-content/uploads/2022/01/cropped-favicon-32x32.jpg" sizes="32x32">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#f5f5f7;--panel:#fff;--line:#e2e2e8;--ink:#1d1d22;--muted:#6c6c78;--brand:#ed2750;--soft:#fdecef;--green:#15803d;--yellow:#ca8a04;--red:#b42318;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#131316;--panel:#1c1c21;--line:#2c2c34;--ink:#f2f2f5;--muted:#9b9ba7;--soft:#2a1a20}}
+*,*::before,*::after{box-sizing:inherit}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+.app{display:grid;grid-template-columns:200px minmax(0,1fr);min-height:100vh}
+aside{background:var(--brand);color:#fff;padding:20px 14px;display:flex;flex-direction:column;align-items:center;gap:7px}
+aside img{width:140px;height:auto;max-width:100%;object-fit:contain;margin:4px auto 14px}
+.side-title{font-weight:800;text-align:center;font-size:16px}.side-sub{font-size:12px;text-align:center;opacity:.8}.side-divider{height:1px;background:rgba(255,255,255,.3);width:100%;margin:14px 0}.side-note{text-align:center;line-height:1.8;font-size:13px;font-weight:600}
+.content{min-width:0}
+header.top{padding:20px 24px 0}
+h1{font-size:22px;margin:0 0 2px;font-weight:750}
+.subtle{color:var(--muted);font-size:13px}
+.wrap{padding:16px 24px 28px}
+h2{font-size:16px;margin:0 0 12px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:14px}
+.grid{display:grid;gap:10px 12px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}
+.span2{grid-column:span 2}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
+input,select,textarea{width:100%;border:1.5px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--bg);color:var(--ink);font:inherit}
+input:focus,select:focus,textarea:focus{outline:2px solid rgba(237,39,80,.35);border-color:var(--brand)}
+textarea{resize:vertical;min-height:62px}
+.btn{background:var(--brand);border:1.5px solid var(--brand);border-radius:8px;padding:10px 16px;color:#fff;font:inherit;font-weight:700;cursor:pointer}
+.btn.gray{background:transparent;color:var(--brand)}
+.btn.sm{padding:6px 10px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:default}
+.layout{display:grid;grid-template-columns:minmax(380px,470px) minmax(0,1fr);gap:18px;align-items:start}
+.previewCol{position:sticky;top:12px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:4px 6px 4px 11px;font-size:13px;font-variant-numeric:tabular-nums}
+.chip button{border:0;background:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:0 4px}
+.palTable{width:100%;border-collapse:collapse}
+.palTable th{font-size:12px;color:var(--muted);font-weight:600;text-align:left;padding:0 6px 4px 0}
+.palTable td{padding:3px 6px 3px 0}
+.palTable td:first-child{font-weight:700;white-space:nowrap;padding-right:10px}
+.palTable input{padding:8px 9px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.kpi{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.kpi .t{font-size:12px;color:var(--muted)}.kpi .v{font-size:20px;font-weight:800}
+.warns{margin:0 0 12px;padding:0;list-style:none}
+.warns li{background:#fffbeb;border-left:5px solid var(--yellow);color:#713f12;padding:7px 10px;border-radius:8px;margin-bottom:6px;font-size:13px}
+.warns li.ok{background:rgba(21,128,61,.1);border-left-color:var(--green);color:var(--green)}
+details summary{cursor:pointer;font-weight:650;margin-bottom:8px}
+.scroll{overflow:auto;border:1px solid var(--line);border-radius:8px;max-height:420px}
+table.hist{border-collapse:collapse;width:100%;font-size:13px;white-space:nowrap}
+table.hist th,table.hist td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left}
+table.hist thead th{background:var(--bg);color:var(--muted);position:sticky;top:0}
+.tag{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:800}
+.tag.ok{background:#dcfce7;color:#14532d}.tag.bad{background:#fee2e2;color:#7f1d1d}
+.hint{font-size:13px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1d1d22;color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90vw}
+.toast.on{opacity:1}
+
+/* ====== PLANILLA (hoja imprimible) ====== */
+#sheetFit{position:relative;width:100%;overflow:hidden;border:1px solid var(--line);border-radius:8px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+#sheet{width:700px;transform-origin:top left;background:#fff;color:#000;font-family:Arial,Helvetica,sans-serif;padding:26px 34px 22px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.sh-title{text-align:center;font-size:30px;font-weight:900;letter-spacing:.5px;margin:0 0 16px}
+.sh-row{display:flex;align-items:center;gap:12px;margin-bottom:9px}
+.sh-lab{width:92px;text-align:right;font-size:11.5px;color:#444;line-height:1.15}
+.sh-box{border:2px solid #000;min-height:34px;flex:1;max-width:420px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:17px;padding:3px 8px;text-align:center;word-break:break-word}
+.sh-box.sm{flex:none;width:76px;font-size:21px;min-height:32px}
+.sh-box small{font-size:12px;letter-spacing:.3px}
+.sh-bar{height:12px;background:#222;margin:12px 0 8px}
+.sh-seals{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px}
+.sh-seal{border:2px solid #000;padding:5px 9px;font-size:13px;font-weight:700;min-height:28px;display:flex;align-items:center}
+.sh-seal span{font-weight:400;font-size:10.5px;margin-right:6px;color:#333;white-space:nowrap}
+.sh-obs{margin-top:8px;font-size:13px;min-height:20px;border-bottom:1px solid #000;padding-bottom:2px}
+.sh-obs b{font-size:12px}
+.sh-pal{margin-top:14px;display:grid;grid-template-columns:130px 76px 1fr 76px 1fr 76px;gap:8px 8px;align-items:center}
+.sh-pal .l{font-size:11.5px;color:#333;text-transform:uppercase}
+.sh-pal .m{font-size:11.5px;color:#333;text-align:right}
+.sh-pal .sh-box{max-width:none}
+.sh-tot{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:12px;font-size:12px;color:#222;text-transform:uppercase}
+.sh-estado{text-align:center;font-style:italic;font-weight:900;font-size:20px;margin:2px 0 18px}
+.sh-estado.bad{text-decoration:underline}
+.sh-sign{display:grid;grid-template-columns:1fr 1fr;gap:34px;margin-top:6px}
+.sh-sign .bx{border:2px solid #000;height:74px}
+.sh-sign .cap{text-align:center;font-size:10.5px;color:#222;margin-top:3px}
+.sh-who{text-align:center;margin-top:10px;font-size:12px;line-height:1.3}
+.sh-who b{font-size:14px;display:block}
+.sh-who .e{font-size:10px;font-weight:700}
+
+@media(max-width:1100px){.layout{grid-template-columns:1fr}.previewCol{position:static}}
+@media(max-width:760px){.app{grid-template-columns:1fr}aside{flex-direction:row;flex-wrap:wrap;justify-content:flex-start;align-items:center;padding:10px 12px;gap:8px}aside img{width:42px;margin:0 8px 0 0}.side-title{font-size:14px}.side-sub,.side-divider,.side-note{display:none}header.top{padding:14px 16px 0}.wrap{padding:12px 16px}.g2,.g3{grid-template-columns:1fr}.span2{grid-column:auto}}
+@page{size:letter portrait;margin:10mm}
+@media print{
+  body{background:#fff}
+  .app{display:block}
+  aside,header.top,.formCol,.histPanel,.noprint,.toast{display:none!important}
+  .wrap{padding:0}.layout{display:block}
+  .previewCol{position:static}
+  #sheetFit{border:0;box-shadow:none;border-radius:0;height:auto!important;overflow:visible}
+  #sheet{transform:none!important;margin:0 auto;padding:6mm 8mm}
+}
+</style>
+</head>
+<body><div class="app">
+<aside class="noprint"><img src="https://www.icbfs.cl/wp-content/uploads/2022/02/logo-icbfs.png" alt="ICB Food Service"><div class="side-title">ICB Food Service</div><div class="side-sub">Control de despacho</div><div class="side-divider"></div><div class="side-note">Seteo de rampla<br>Sellos y temperaturas</div></aside>
+<div class="content">
+<header class="top"><h1>Seteo de rampla</h1><div class="subtle">Completa los datos, revisa la planilla y envíala a imprimir</div></header>
+<main class="wrap">
+<div class="layout">
+
+<div class="formCol">
+  <section class="panel">
+    <h2>1) Datos del despacho</h2>
+    <div class="grid g2">
+      <div class="span2"><label for="sucursal">Sucursal o cliente</label><input id="sucursal" data-k="sucursal" list="sucList" autocomplete="off" placeholder="Ej: Coquimbo"><datalist id="sucList"></datalist></div>
+      <div><label for="control">N° de control</label><input id="control" data-k="control" inputmode="numeric" placeholder="Ej: 2371785"></div>
+      <div><label for="fecha">Fecha</label><input id="fecha" data-k="fecha" type="date"></div>
+      <div><label for="chofer">Chofer</label><input id="chofer" data-k="chofer" autocomplete="off" placeholder="Nombre y apellido"></div>
+      <div><label for="celular">Celular</label><input id="celular" data-k="celular" inputmode="tel" placeholder="9 9705 7209"></div>
+      <div><label for="tracto">Patente tracto</label><input id="tracto" data-k="tracto" data-upper placeholder="RL VZ 46"></div>
+      <div><label for="rampla">Patente rampla</label><input id="rampla" data-k="rampla" data-upper placeholder="PWSR 80"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>2) Sellos</h2>
+    <div class="grid g2" style="grid-template-columns:1fr auto">
+      <div><label for="selloIn">N° de sello (Enter para agregar)</label><input id="selloIn" inputmode="numeric" placeholder="011357" autocomplete="off"></div>
+      <div style="align-self:end"><button class="btn gray" id="selloAdd" type="button">Agregar</button></div>
+    </div>
+    <div class="grid" style="grid-template-columns:1fr 1fr auto;margin-top:10px">
+      <div><label for="rgDesde">Rango desde</label><input id="rgDesde" inputmode="numeric" placeholder="011112"></div>
+      <div><label for="rgHasta">Hasta</label><input id="rgHasta" inputmode="numeric" placeholder="011117"></div>
+      <div style="align-self:end"><button class="btn gray" id="rgAdd" type="button">Agregar rango</button></div>
+    </div>
+    <div class="chips" id="selloChips"></div>
+  </section>
+
+  <section class="panel">
+    <h2>3) Pallets y temperatura de seteo</h2>
+    <table class="palTable"><thead><tr><th></th><th>Pallets</th><th>Seteo T° (°C)</th><th>Pendientes</th></tr></thead><tbody id="palBody"></tbody></table>
+    <div class="kpis"><div class="kpi"><div class="t">Total pallets</div><div class="v" id="kTot">0</div></div><div class="kpi"><div class="t">Pendientes</div><div class="v" id="kPend">0</div></div><div class="kpi"><div class="t">Estado</div><div class="v" id="kEst" style="font-size:14px;padding-top:4px">—</div></div></div>
+  </section>
+
+  <section class="panel">
+    <h2>4) Cierre</h2>
+    <div class="grid g2">
+      <div class="span2"><label for="obs">Observaciones</label><textarea id="obs" data-k="obs" placeholder="Opcional"></textarea></div>
+      <div class="span2"><label for="estadoMode">Estado de la carga</label><select id="estadoMode" data-k="estadoMode"><option value="auto">Automático (según pallets pendientes)</option><option value="completa">Forzar: CARGA COMPLETA</option><option value="incompleta">Forzar: CARGA INCOMPLETA</option></select></div>
+    </div>
+    <details style="margin-top:12px"><summary>Responsable ICBFS (firma)</summary>
+      <div class="grid g2">
+        <div><label for="superNombre">Nombre</label><input id="superNombre" data-k="superNombre"></div>
+        <div><label for="superCargo">Cargo</label><input id="superCargo" data-k="superCargo"></div>
+        <div><label for="superEmpresa">Empresa</label><input id="superEmpresa" data-k="superEmpresa"></div>
+        <div><label for="superRut">RUT</label><input id="superRut" data-k="superRut"></div>
+      </div><p class="hint">Estos datos se recuerdan en este equipo para los próximos seteos.</p>
+    </details>
+  </section>
+</div>
+
+<div class="previewCol">
+  <div class="toolbar noprint">
+    <button class="btn" id="btnPrint" type="button">🖨 Imprimir planilla</button>
+    <button class="btn gray" id="btnSave" type="button">Guardar</button>
+    <button class="btn gray" id="btnNew" type="button">Nuevo seteo</button>
+    <button class="btn gray" id="btnImport" type="button">Cargar desde Excel</button>
+    <input type="file" id="fileImport" accept=".xlsx,.xls" style="display:none">
+  </div>
+  <ul class="warns noprint" id="warns"></ul>
+  <div id="sheetFit"><div id="sheet"></div></div>
+  <p class="hint noprint" style="margin-top:8px">Formato carta vertical. Al imprimir, elige "Guardar como PDF" si quieres un archivo.</p>
+</div>
+
+</div>
+
+<section class="panel histPanel" style="margin-top:18px">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px"><h2 style="margin:0">Historial de seteos</h2><div><button class="btn gray sm" id="btnExpX" type="button">Exportar Excel</button> <button class="btn gray sm" id="btnExpC" type="button">Exportar CSV</button></div></div>
+  <div id="histEmpty" class="hint">Aún no hay seteos guardados en este equipo.</div>
+  <div class="scroll" id="histScroll" style="display:none"><table class="hist"><thead><tr><th>Fecha</th><th>Control</th><th>Sucursal</th><th>Chofer</th><th>Patente</th><th>Pallets</th><th>Pend.</th><th>Estado</th><th></th></tr></thead><tbody id="histBody"></tbody></table></div>
+</section>
+</main></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const ZONAS=[['CONG','Congelado','#0e8fa8'],['FRIO','Frío','#2f6fdb'],['SECO','Seco','#c27a00']];
+const LS_H='icb_seteo_hist_v1',LS_C='icb_seteo_cfg_v1';
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function todayISO(){let d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())}
+function fmtDate(iso){let m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||'');return m?`${m[3]}-${m[2]}-${m[1]}`:(iso||'')}
+function lsGet(k,def){try{let v=localStorage.getItem(k);return v?JSON.parse(v):def}catch(e){return def}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
+const SUPER_DEF={superNombre:'Italo Muñoz Morales',superCargo:'Supervisor',superEmpresa:'Importadora y Alimentos ICB Food Service SPA',superRut:'77.965.620-9'};
+function blank(keep){
+  let cfg=lsGet(LS_C,{}),s={id:null,sucursal:keep?.sucursal||'',control:'',fecha:todayISO(),chofer:'',celular:'',tracto:'',rampla:'',sellos:[],obs:'',estadoMode:'auto',
+    pal:{CONG:{n:'',t:'',p:''},FRIO:{n:'',t:'',p:''},SECO:{n:'',t:'',p:''}},...SUPER_DEF,...cfg};
+  return s;
+}
+let S=blank();
+
+/* ---------- helpers ---------- */
+const nz=v=>{let n=parseFloat(String(v).replace(',','.'));return isNaN(n)?0:n};
+function totals(){let t=0,p=0;for(const [z] of ZONAS){t+=nz(S.pal[z].n);p+=nz(S.pal[z].p)}return{t,p}}
+function estado(){let {p}=totals();return S.estadoMode==='completa'?true:S.estadoMode==='incompleta'?false:p===0}
+function sealTokens(list){
+  let it=list.map(s=>({s,m:/^(\D*)(\d+)$/.exec(s)})),out=[],i=0;
+  while(i<it.length){
+    let a=it[i];if(!a.m){out.push(a.s);i++;continue}
+    let j=i;while(j+1<it.length&&it[j+1].m&&it[j+1].m[1]===a.m[1]&&it[j+1].m[2].length===a.m[2].length&&Number(it[j+1].m[2])===Number(it[j].m[2])+1)j++;
+    let run=j-i+1;
+    if(run>=3)out.push(`${a.s} – ${it[j].s} (${run})`);else for(let k=i;k<=j;k++)out.push(it[k].s);
+    i=j+1;
+  }
+  return out;
+}
+function fmtNum(v){return nz(v).toLocaleString('es-CL',{maximumFractionDigits:2})}
+
+/* ---------- planilla ---------- */
+function renderSheet(){
+  let box=(v,cls='')=>`<div class="sh-box ${cls}">${v===''||v==null?'&nbsp;':v}</div>`;
+  let tokens=sealTokens(S.sellos);
+  let seals=tokens.length?tokens.map(t=>`<div class="sh-seal"><span>N° DE SELLO:</span>${esc(t)}</div>`).join(''):`<div class="sh-seal"><span>N° DE SELLO:</span></div><div class="sh-seal"><span>N° DE SELLO:</span></div>`;
+  let pat=[S.tracto,S.rampla].filter(Boolean).join(' / ');
+  let pal=ZONAS.map(([z,lab])=>{let r=S.pal[z],has=r.n!==''||r.t!==''||r.p!=='';
+    return `<div class="l">Pallets ${lab}</div>${box(r.n!==''?fmtNum(r.n):'','sm')}<div class="m">Seteo T°</div>${box(r.t!==''?esc(String(r.t).replace('.',',')):'','sm')}<div class="m">Pallet<br>pendientes</div>${box(has&&r.p!==''?fmtNum(r.p):(has?'0':''),'sm')}`}).join('');
+  let ok=estado(),{p}=totals();
+  $('sheet').innerHTML=`
+  <div class="sh-title">SETEO RAMPLA</div>
+  <div class="sh-row"><div class="sh-lab">Sucursal<br>o Cliente :</div>${box(esc(S.sucursal))}</div>
+  <div class="sh-row"><div class="sh-lab">CONTROL :</div>${box(esc(S.control))}</div>
+  <div class="sh-row"><div class="sh-lab">FECHA :</div>${box(esc(fmtDate(S.fecha)))}</div>
+  <div class="sh-row"><div class="sh-lab">Chofer y<br>Celular :</div><div class="sh-box">${esc(S.chofer)||'&nbsp;'}${S.celular?`<small>${esc(S.celular)}</small>`:''}</div></div>
+  <div class="sh-row"><div class="sh-lab">PATENTE :</div>${box(esc(pat))}</div>
+  <div class="sh-bar"></div>
+  <div class="sh-seals">${seals}</div>
+  <div class="sh-obs"><b>OBS:</b> ${esc(S.obs)}</div>
+  <div class="sh-pal">${pal}</div>
+  <div class="sh-tot">Total pallets pendientes = <div class="sh-box sm" style="min-height:30px;font-size:19px">${(ZONAS.some(([z])=>S.pal[z].n!==''||S.pal[z].p!==''))?fmtNum(p):'&nbsp;'}</div></div>
+  <div class="sh-bar" style="margin-top:14px"></div>
+  <div class="sh-estado ${ok?'':'bad'}">${ok?'CARGA COMPLETA':'CARGA INCOMPLETA'}</div>
+  <div class="sh-sign"><div><div class="bx"></div><div class="cap">FIRMA DE CHOFER</div></div><div><div class="bx"></div><div class="cap">FIRMA Y NOMBRE DE ICBFS</div></div></div>
+  <div class="sh-sign" style="margin-top:0"><div></div><div class="sh-who"><b>${esc(S.superNombre)}</b>${esc(S.superCargo)}<br><span class="e">${esc(S.superEmpresa)}</span><br>${esc(S.superRut)}</div></div>`;
+  fitSheet();
+}
+function fitSheet(){let w=$('sheetFit').clientWidth||700,s=Math.min(1,w/700),sh=$('sheet');sh.style.transform=`scale(${s})`;$('sheetFit').style.height=Math.ceil(sh.offsetHeight*s)+'px'}
+new ResizeObserver(fitSheet).observe($('sheetFit'));
+window.addEventListener('beforeprint',()=>{$('sheet').style.transform='none'});window.addEventListener('afterprint',fitSheet);
+
+/* ---------- formulario ---------- */
+function buildPalRows(){
+  $('palBody').innerHTML=ZONAS.map(([z,lab,c])=>`<tr><td><span class="dot" style="background:${c}"></span>${lab}</td>
+   <td><input data-pal="${z}.n" inputmode="decimal" aria-label="Pallets ${lab}"></td><td><input data-pal="${z}.t" inputmode="decimal" aria-label="Seteo ${lab}" placeholder="°C"></td><td><input data-pal="${z}.p" inputmode="decimal" aria-label="Pendientes ${lab}" placeholder="0"></td></tr>`).join('');
+  document.querySelectorAll('[data-pal]').forEach(i=>i.addEventListener('input',()=>{let [z,k]=i.dataset.pal.split('.');S.pal[z][k]=i.value;refresh()}));
+}
+function syncInputs(){
+  document.querySelectorAll('[data-k]').forEach(i=>{i.value=S[i.dataset.k]??''});
+  document.querySelectorAll('[data-pal]').forEach(i=>{let [z,k]=i.dataset.pal.split('.');i.value=S.pal[z][k]??''});
+}
+document.querySelectorAll('[data-k]').forEach(i=>i.addEventListener('input',()=>{
+  if(i.hasAttribute('data-upper')){let p=i.selectionStart;i.value=i.value.toUpperCase();try{i.setSelectionRange(p,p)}catch(e){}}
+  S[i.dataset.k]=i.value;
+  if(i.dataset.k.startsWith('super'))lsSet(LS_C,{superNombre:S.superNombre,superCargo:S.superCargo,superEmpresa:S.superEmpresa,superRut:S.superRut});
+  refresh();
+}));
+
+/* sellos */
+function addSello(v){v=String(v).trim().toUpperCase();if(!v)return false;if(S.sellos.includes(v)){toast('El sello '+v+' ya está en la lista');return false}S.sellos.push(v);return true}
+$('selloAdd').onclick=()=>{if(addSello($('selloIn').value)){$('selloIn').value='';refresh()}$('selloIn').focus()};
+$('selloIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('selloAdd').click()}});
+function expandRange(a,b){
+  let ma=/^(\D*)(\d+)$/.exec(a.trim()),mb=/^(\D*)(\d+)$/.exec(b.trim());
+  if(!ma||!mb||ma[1]!==mb[1])return null;
+  let x=Number(ma[2]),y=Number(mb[2]);if(y<x||y-x>=100)return null;
+  let out=[];for(let n=x;n<=y;n++)out.push(ma[1]+String(n).padStart(ma[2].length,'0'));return out;
+}
+$('rgAdd').onclick=()=>{
+  let r=expandRange($('rgDesde').value,$('rgHasta').value);
+  if(!r){toast('Rango inválido: usa números del mismo formato (máx. 100 sellos)');return}
+  let n=0;r.forEach(s=>{if(!S.sellos.includes(s)){S.sellos.push(s);n++}});$('rgDesde').value=$('rgHasta').value='';toast(n+' sello(s) agregado(s)');refresh();
+};
+function renderChips(){
+  $('selloChips').innerHTML=S.sellos.map((s,i)=>`<span class="chip">${esc(s)}<button type="button" data-rm="${i}" aria-label="Quitar ${esc(s)}">×</button></span>`).join('')||'<span class="hint">Sin sellos agregados.</span>';
+  $('selloChips').querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{S.sellos.splice(+b.dataset.rm,1);refresh()});
+}
+
+/* validaciones / resumen */
+function refresh(){
+  let {t,p}=totals(),ok=estado();
+  $('kTot').textContent=fmtNum(t);$('kPend').textContent=fmtNum(p);
+  $('kEst').innerHTML=`<span class="tag ${ok?'ok':'bad'}">${ok?'COMPLETA':'INCOMPLETA'}</span>`;
+  renderChips();renderSheet();
+  let w=[];
+  if(!S.sucursal.trim())w.push('Falta sucursal o cliente');
+  if(!String(S.control).trim())w.push('Falta el N° de control');
+  if(!S.chofer.trim())w.push('Falta el chofer');
+  if(!S.tracto.trim()&&!S.rampla.trim())w.push('Falta la patente');
+  if(!S.sellos.length)w.push('No hay sellos registrados');
+  if(t===0)w.push('No hay pallets ingresados');
+  ZONAS.forEach(([z,lab])=>{if(nz(S.pal[z].p)>nz(S.pal[z].n))w.push(`${lab}: los pendientes superan los pallets`)});
+  if(S.estadoMode==='completa'&&p>0)w.push('Estado forzado a COMPLETA pero hay pallets pendientes');
+  if(S.estadoMode==='incompleta'&&p===0)w.push('Estado forzado a INCOMPLETA pero no hay pallets pendientes');
+  $('warns').innerHTML=w.length?w.map(x=>`<li>${x}</li>`).join(''):'<li class="ok">Planilla lista para imprimir</li>';
+}
+
+/* ---------- historial ---------- */
+function getHist(){return lsGet(LS_H,[])}
+function saveCurrent(silent){
+  let h=getHist();
+  if(!S.id)S.id='s'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  let rec=JSON.parse(JSON.stringify(S));rec.savedAt=new Date().toISOString();
+  let i=h.findIndex(x=>x.id===S.id);if(i>=0)h[i]=rec;else h.unshift(rec);
+  if(!lsSet(LS_H,h.slice(0,500))){toast('No se pudo guardar en este navegador');return false}
+  renderHist();if(!silent)toast('Seteo guardado en el historial');return true;
+}
+function recTotals(r){let t=0,p=0;for(const [z] of ZONAS){t+=nz(r.pal[z].n);p+=nz(r.pal[z].p)}return{t,p,ok:r.estadoMode==='completa'?true:r.estadoMode==='incompleta'?false:p===0}}
+function renderHist(){
+  let h=getHist();
+  $('sucList').innerHTML=[...new Set(['Coquimbo','Temuco',...h.map(x=>x.sucursal).filter(Boolean)])].map(s=>`<option value="${esc(s)}">`).join('');
+  $('histEmpty').style.display=h.length?'none':'';$('histScroll').style.display=h.length?'':'none';
+  $('histBody').innerHTML=h.map(r=>{let x=recTotals(r);return `<tr><td>${esc(fmtDate(r.fecha))}</td><td>${esc(r.control)}</td><td>${esc(r.sucursal)}</td><td>${esc(r.chofer)}</td><td>${esc([r.tracto,r.rampla].filter(Boolean).join(' / '))}</td><td>${fmtNum(x.t)}</td><td>${fmtNum(x.p)}</td><td><span class="tag ${x.ok?'ok':'bad'}">${x.ok?'COMPLETA':'INCOMPLETA'}</span></td><td style="text-align:right"><button class="btn gray sm" data-open="${r.id}">Abrir</button> <button class="btn gray sm" data-dup="${r.id}">Duplicar</button> <button class="btn gray sm" data-del="${r.id}">Eliminar</button></td></tr>`}).join('');
+  $('histBody').querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>loadRec(b.dataset.open,false));
+  $('histBody').querySelectorAll('[data-dup]').forEach(b=>b.onclick=()=>loadRec(b.dataset.dup,true));
+  $('histBody').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(confirm('¿Eliminar este seteo del historial?')){lsSet(LS_H,getHist().filter(x=>x.id!==b.dataset.del));if(S.id===b.dataset.del)S.id=null;renderHist()}});
+}
+function loadRec(id,dup){
+  let r=getHist().find(x=>x.id===id);if(!r)return;
+  S=JSON.parse(JSON.stringify(r));delete S.savedAt;
+  if(dup){S.id=null;S.control='';S.sellos=[];S.fecha=todayISO();}
+  syncInputs();refresh();window.scrollTo({top:0,behavior:'smooth'});toast(dup?'Duplicado: completa control y sellos nuevos':'Seteo cargado');
+}
+function histRows(){
+  let head=['Control','Fecha','Sucursal','Chofer','Celular','Patente tracto','Patente rampla','Sellos','Pallets congelado','T° congelado','Pend. congelado','Pallets frío','T° frío','Pend. frío','Pallets seco','T° seco','Pend. seco','Total pallets','Total pendientes','Estado','Observaciones','Responsable ICBFS','Guardado'];
+  let rows=getHist().map(r=>{let x=recTotals(r),P=r.pal;return [r.control,fmtDate(r.fecha),r.sucursal,r.chofer,r.celular,r.tracto,r.rampla,r.sellos.join(', '),P.CONG.n,P.CONG.t,P.CONG.p,P.FRIO.n,P.FRIO.t,P.FRIO.p,P.SECO.n,P.SECO.t,P.SECO.p,x.t,x.p,x.ok?'CARGA COMPLETA':'CARGA INCOMPLETA',r.obs,r.superNombre,(r.savedAt||'').replace('T',' ').slice(0,16)]});
+  return [head,...rows];
+}
+function download(name,blob){let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000)}
+$('btnExpC').onclick=()=>{if(getHist().length<1)return toast('No hay datos para exportar');let csv='\ufeff'+histRows().map(r=>r.map(x=>'"'+String(x??'').replaceAll('"','""')+'"').join(';')).join('\n');download('historial_seteo_rampla.csv',new Blob([csv],{type:'text/csv;charset=utf-8'}))};
+$('btnExpX').onclick=()=>{
+  if(getHist().length<1)return toast('No hay datos para exportar');
+  if(!window.XLSX){toast('Librería Excel no disponible (sin internet). Exportando CSV.');return $('btnExpC').click()}
+  let ws=XLSX.utils.aoa_to_sheet(histRows()),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Historial');XLSX.writeFile(wb,'historial_seteo_rampla.xlsx');
+};
+
+/* ---------- importar desde Excel (misma estructura que Seteo_Control.xlsx) ---------- */
+function parseSellosText(t){
+  t=String(t||'').replace(/N[-\s°º]*\s*(DE\s*)?SELLOS?\s*[:\/\-]*/ig,' ').replace(/\/\//g,' ');
+  let m=/(\d{3,})\s*(?:-|–|a|al|hasta)\s*(\d{3,})/i.exec(t);
+  if(m){let r=expandRange(m[1],m[2]);if(r)return r}
+  return (t.match(/\d{3,}/g)||[]);
+}
+function excelDate(v){
+  if(typeof v==='number'&&window.XLSX){let d=XLSX.SSF.parse_date_code(v);if(d)return `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`}
+  if(v instanceof Date)return v.getFullYear()+'-'+String(v.getMonth()+1).padStart(2,'0')+'-'+String(v.getDate()).padStart(2,'0');
+  let m=/(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})/.exec(String(v||''));if(m)return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(v||''))?String(v):todayISO();
+}
+function importFromGetter(g){
+  let n=blank({});
+  n.sucursal=String(g('C3')??'').trim();n.control=String(g('C6')??'').trim();n.fecha=excelDate(g('C9'));
+  n.chofer=String(g('C12')??'').trim();n.celular=String(g('D14')??'').trim();
+  let pat=String(g('C15')??'').trim().split(/\s+[-–\/]\s+|\s*\/\s*/);n.tracto=(pat[0]||'').trim().toUpperCase();n.rampla=(pat[1]||'').trim().toUpperCase();
+  n.sellos=[...new Set(parseSellosText(g('A19')))];
+  n.obs=String(g('D19')??'').replace(/^\s*OBS\s*:?\s*/i,'').trim();
+  [['CONG',22],['FRIO',26],['SECO',30]].forEach(([z,r])=>{let f=v=>(v===undefined||v===null||v==='')?'':String(v);n.pal[z]={n:f(g('B'+r)),t:f(g('E'+r)),p:f(g('H'+r))}});
+  let est=String(g('A37')??'').toUpperCase();n.estadoMode=/INCOMPLETA/.test(est)?'incompleta':'auto';
+  return n;
+}
+$('btnImport').onclick=()=>$('fileImport').click();
+$('fileImport').onchange=async e=>{
+  let f=e.target.files[0];e.target.value='';if(!f)return;
+  if(!window.XLSX)return toast('Se necesita internet para leer archivos Excel');
+  try{
+    let wb=XLSX.read(await f.arrayBuffer(),{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]];
+    S=importFromGetter(a=>ws[a]?ws[a].v:undefined);syncInputs();refresh();toast('Datos cargados desde '+f.name);
+  }catch(err){toast('No se pudo leer el Excel: '+err.message)}
+};
+
+/* ---------- acciones ---------- */
+$('btnSave').onclick=()=>saveCurrent(false);
+$('btnNew').onclick=()=>{S=blank({sucursal:S.sucursal});syncInputs();refresh();$('control').focus()};
+$('btnPrint').onclick=()=>{
+  let miss=$('warns').querySelectorAll('li:not(.ok)').length;
+  if(miss&&!confirm('La planilla tiene '+miss+' observación(es) pendiente(s). ¿Imprimir de todos modos?'))return;
+  saveCurrent(true);toast('Guardado en el historial');
+  setTimeout(()=>window.print(),150);
+};
+let tt;function toast(m){let t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2800)}
+
+buildPalRows();syncInputs();renderHist();refresh();
+</script>
+</body></html>

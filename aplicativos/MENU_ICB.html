@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- ICB Food Service 2026 · Menú de aplicativos -->
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Menú · ICB Food Service</title>
+<link rel="icon" href="https://www.icbfs.cl/wp-content/uploads/2022/01/cropped-favicon-32x32.jpg" sizes="32x32">
+<style>
+:root{--bg:#f5f5f7;--panel:#fff;--line:#e2e2e8;--ink:#1d1d22;--muted:#6c6c78;--brand:#ed2750;--soft:#fdecef;--green:#15803d;--red:#b42318;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#131316;--panel:#1c1c21;--line:#2c2c34;--ink:#f2f2f5;--muted:#9b9ba7;--soft:#2a1a20}}
+*,*::before,*::after{box-sizing:inherit}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+.app{display:grid;grid-template-columns:200px minmax(0,1fr);min-height:100vh}
+aside{background:var(--brand);color:#fff;padding:20px 14px;display:flex;flex-direction:column;align-items:center;gap:7px}
+aside img{width:140px;height:auto;max-width:100%;object-fit:contain;margin:4px auto 14px}
+.side-title{font-weight:800;text-align:center;font-size:16px}.side-sub{font-size:12px;text-align:center;opacity:.8}.side-divider{height:1px;background:rgba(255,255,255,.3);width:100%;margin:14px 0}.side-note{text-align:center;line-height:1.8;font-size:13px;font-weight:600}
+.content{min-width:0}
+header.top{padding:20px 24px 0}
+h1{font-size:22px;margin:0 0 2px;font-weight:750}
+.subtle{color:var(--muted);font-size:13px}
+.wrap{padding:16px 24px 28px;max-width:1200px}
+h2{font-size:16px;margin:0 0 12px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:14px}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
+input,select,textarea{width:100%;border:1.5px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--bg);color:var(--ink);font:inherit}
+input:focus,select:focus,textarea:focus{outline:2px solid rgba(237,39,80,.35);border-color:var(--brand)}
+textarea{resize:vertical;min-height:64px}
+.btn{background:var(--brand);border:1.5px solid var(--brand);border-radius:8px;padding:10px 16px;color:#fff;font:inherit;font-weight:700;cursor:pointer}
+.btn.gray{background:transparent;color:var(--brand)}
+.btn.sm{padding:6px 10px;font-size:13px}
+.btn.on{background:var(--brand);color:#fff}
+.btn.danger{color:var(--red);border-color:var(--red)}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+.bar .search{flex:1;min-width:200px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.card{position:relative;display:flex;flex-direction:column;gap:6px;background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--ac,var(--brand));border-radius:10px;padding:18px;min-height:176px;color:inherit;text-decoration:none;transition:transform .12s,box-shadow .12s,border-color .12s}
+a.card:hover,a.card:focus-visible{transform:translateY(-3px);box-shadow:0 8px 22px rgba(0,0,0,.09);border-color:var(--ac,var(--brand));outline:none}
+.ico{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;background:color-mix(in srgb,var(--ac,var(--brand)) 14%,transparent)}
+.card h3{margin:6px 0 0;font-size:17px}
+.card p{margin:0;color:var(--muted);font-size:13.5px;flex:1}
+.card .foot{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.tag{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700;background:color-mix(in srgb,var(--ac,var(--brand)) 14%,transparent);color:var(--ac,var(--brand))}
+.go{font-weight:800;color:var(--ac,var(--brand));font-size:14px}
+.card.add{border:2px dashed var(--line);border-top:2px dashed var(--line);background:transparent;align-items:center;justify-content:center;text-align:center;color:var(--muted);cursor:pointer;font:inherit}
+.card.add:hover{border-color:var(--brand);color:var(--brand)}
+.card.add .plus{font-size:34px;line-height:1}
+.editRow{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;border-top:1px solid var(--line);padding-top:10px}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+.modal{position:fixed;inset:0;z-index:100;background:rgba(15,15,20,.6);display:none;align-items:center;justify-content:center;padding:18px}
+.modal.open{display:flex}
+.dialog{background:var(--panel);border-radius:12px;width:min(560px,100%);max-height:100%;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.dialog header{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.dialog header h3{margin:0;font-size:16px}
+.x{background:none;border:0;font-size:24px;line-height:1;cursor:pointer;color:var(--muted);padding:2px 8px}
+.dialog .body{padding:16px 18px;display:grid;grid-template-columns:90px 1fr;gap:10px 12px}
+.dialog .full{grid-column:1/-1}
+.dialog .foot{padding:12px 18px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+.sw{display:flex;gap:8px;flex-wrap:wrap}
+.sw label{margin:0;cursor:pointer}
+.sw input{position:absolute;opacity:0;width:0;height:0}
+.sw span{display:block;width:30px;height:30px;border-radius:50%;background:var(--c);border:3px solid transparent;box-shadow:0 0 0 1px var(--line)}
+.sw input:checked+span{border-color:var(--panel);box-shadow:0 0 0 3px var(--c)}
+.sw input:focus-visible+span{box-shadow:0 0 0 3px var(--ink)}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);margin:0}
+.chk input{width:auto}
+.hint{font-size:13px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1d1d22;color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:200;max-width:90vw}
+.toast.on{opacity:1}
+@media(max-width:760px){.app{grid-template-columns:1fr}aside{flex-direction:row;flex-wrap:wrap;justify-content:flex-start;align-items:center;padding:10px 12px;gap:8px}aside img{width:42px;margin:0 8px 0 0}.side-title{font-size:14px}.side-sub,.side-divider,.side-note{display:none}header.top{padding:14px 16px 0}.wrap{padding:12px 16px}.grid{grid-template-columns:1fr}.dialog .body{grid-template-columns:1fr}}
+</style>
+</head>
+<body><div class="app">
+<aside><img src="https://www.icbfs.cl/wp-content/uploads/2022/02/logo-icbfs.png" alt="ICB Food Service"><div class="side-title">ICB Food Service</div><div class="side-sub">Operaciones</div><div class="side-divider"></div><div class="side-note">Menú principal<br>de aplicativos</div></aside>
+<div class="content">
+<header class="top"><h1>Aplicativos</h1><div class="subtle" id="count">Elige con qué herramienta quieres trabajar</div></header>
+<main class="wrap">
+  <div class="bar">
+    <div class="search"><input id="q" type="search" placeholder="Buscar aplicativo…" aria-label="Buscar aplicativo"></div>
+    <button class="btn gray" id="btnEdit" type="button">✎ Editar</button>
+    <button class="btn" id="btnAdd" type="button">+ Agregar aplicativo</button>
+  </div>
+  <div class="grid" id="grid"></div>
+
+  <section class="panel" id="backup" style="margin-top:22px;display:none">
+    <h2>Respaldo y ajustes</h2>
+    <p class="hint">La lista se guarda en este navegador. Para llevarla a otro equipo, expórtala y luego impórtala allá.</p>
+    <button class="btn gray sm" id="btnExp" type="button">Exportar lista</button>
+    <button class="btn gray sm" id="btnImp" type="button">Importar lista</button>
+    <button class="btn gray sm danger" id="btnReset" type="button">Restablecer originales</button>
+    <input type="file" id="fileImp" accept=".json" style="display:none">
+  </section>
+</main></div></div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+ <div class="dialog">
+  <header><h3 id="mTitle">Agregar aplicativo</h3><button class="x" id="mClose" type="button" aria-label="Cerrar">×</button></header>
+  <div class="body">
+    <div><label for="fIcon">Ícono</label><input id="fIcon" maxlength="4" placeholder="🧩" style="text-align:center;font-size:22px"></div>
+    <div><label for="fName">Nombre</label><input id="fName" maxlength="40" placeholder="Ej: Control de recepción"></div>
+    <div class="full"><label for="fDesc">Descripción corta</label><textarea id="fDesc" maxlength="140" placeholder="Para qué sirve este aplicativo"></textarea></div>
+    <div class="full"><label for="fUrl">Enlace o archivo</label><input id="fUrl" placeholder="NOMBRE_ARCHIVO.html (misma carpeta) o https://…"><div class="hint" style="margin-top:4px">Si es un archivo, debe estar en la misma carpeta que este menú.</div></div>
+    <div><label for="fTag">Etiqueta</label><input id="fTag" maxlength="20" placeholder="Ej: Bodega"></div>
+    <div><label>Color</label><div class="sw" id="fColor"></div></div>
+    <div class="full"><label class="chk"><input type="checkbox" id="fNew"> Abrir en una pestaña nueva</label></div>
+  </div>
+  <div class="foot"><button class="btn gray" id="mCancel" type="button">Cancelar</button><button class="btn" id="mSave" type="button">Guardar</button></div>
+ </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* =====================================================================
+   APLICATIVOS BASE
+   Para agregar uno de forma permanente (visible en todos los equipos que
+   usen este archivo), añade una línea a esta lista. Cada 'id' debe ser único.
+   También puedes agregarlos desde el botón "+ Agregar aplicativo".
+   ===================================================================== */
+const BASE_APPS=[
+  {id:'productividad',name:'Productividad PKG y Grúas',desc:'Productividad por operador y hora, semáforo por turno y temperatura, con reporte en PDF o imagen.',url:'APP_PRODUCTIVIDAD_PKG_GRUAS_v6.html',icon:'📊',tag:'Productividad',color:'#ed2750',newTab:false},
+  {id:'seteo',name:'Seteo de rampla',desc:'Planilla de seteo: sellos, pallets y temperatura por zona. Lista para imprimir.',url:'APP_SETEO_RAMPLA_ICB.html',icon:'🚛',tag:'Despacho',color:'#2f6fdb',newTab:false}
+];
+const COLORS=['#ed2750','#2f6fdb','#0e8fa8','#c27a00','#15803d','#7c4dff','#475569'];
+const LS='icb_menu_v1';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function load(){try{return JSON.parse(localStorage.getItem(LS))||null}catch(e){return null}}
+function persist(){try{localStorage.setItem(LS,JSON.stringify(ST));return true}catch(e){toast('No se pudo guardar en este navegador');return false}}
+let ST=load()||{apps:[],removed:[]};
+function sync(){ // agrega a la lista los base nuevos que el usuario no haya eliminado
+  let ids=new Set(ST.apps.map(a=>a.id));
+  BASE_APPS.forEach(b=>{if(!ids.has(b.id)&&!ST.removed.includes(b.id))ST.apps.push({...b})});
+}
+sync();persist();
+
+let edit=false,editing=null,filter='';
+function href(u){u=String(u||'').trim();if(/^www\./i.test(u))return 'https://'+u;return u}
+function render(){
+  let list=ST.apps.filter(a=>{let t=(a.name+' '+a.desc+' '+a.tag).toLowerCase();return !filter||t.includes(filter)});
+  $('count').textContent=ST.apps.length?`${ST.apps.length} aplicativo${ST.apps.length>1?'s':''} disponible${ST.apps.length>1?'s':''}`:'Aún no hay aplicativos';
+  let h=list.map(a=>{
+    let idx=ST.apps.indexOf(a),inner=`<div class="ico" aria-hidden="true">${esc(a.icon||'🧩')}</div><h3>${esc(a.name)}</h3><p>${esc(a.desc)}</p><div class="foot">${a.tag?`<span class="tag">${esc(a.tag)}</span>`:'<span></span>'}${edit?'':'<span class="go">Abrir →</span>'}</div>`;
+    let style=`--ac:${esc(a.color||'#ed2750')}`;
+    if(edit)return `<div class="card" style="${style}">${inner}<div class="editRow"><button class="btn gray sm" data-up="${idx}" ${idx===0?'disabled':''} aria-label="Mover antes">←</button><button class="btn gray sm" data-dn="${idx}" ${idx===ST.apps.length-1?'disabled':''} aria-label="Mover después">→</button><button class="btn gray sm" data-ed="${idx}">Editar</button><button class="btn gray sm danger" data-rm="${idx}">Quitar</button></div></div>`;
+    return `<a class="card" style="${style}" href="${esc(href(a.url))}" ${a.newTab?'target="_blank" rel="noopener"':''}>${inner}</a>`;
+  }).join('');
+  if(!list.length&&filter)h=`<div class="empty" style="grid-column:1/-1">Ningún aplicativo coincide con "${esc(filter)}".</div>`;
+  if(!filter)h+=`<button class="card add" id="cardAdd" type="button"><span class="plus">+</span><b>Agregar aplicativo</b><span class="hint">Nuevo acceso al menú</span></button>`;
+  $('grid').innerHTML=h;
+  $('cardAdd')&&($('cardAdd').onclick=()=>openModal(null));
+  $('grid').querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>openModal(+b.dataset.ed));
+  $('grid').querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{let a=ST.apps[+b.dataset.rm];if(confirm(`¿Quitar "${a.name}" del menú?\n(El archivo no se borra, solo el acceso.)`)){ST.apps.splice(+b.dataset.rm,1);if(BASE_APPS.some(x=>x.id===a.id)&&!ST.removed.includes(a.id))ST.removed.push(a.id);persist();render()}});
+  $('grid').querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>move(+b.dataset.up,-1));
+  $('grid').querySelectorAll('[data-dn]').forEach(b=>b.onclick=()=>move(+b.dataset.dn,1));
+}
+function move(i,d){let j=i+d;if(j<0||j>=ST.apps.length)return;[ST.apps[i],ST.apps[j]]=[ST.apps[j],ST.apps[i]];persist();render()}
+
+/* ---- modal ---- */
+$('fColor').innerHTML=COLORS.map((c,i)=>`<label><input type="radio" name="col" value="${c}" ${i===0?'checked':''}><span style="--c:${c}" title="${c}"></span></label>`).join('');
+function openModal(i){
+  editing=i;let a=i==null?{icon:'🧩',name:'',desc:'',url:'',tag:'',color:COLORS[0],newTab:false}:ST.apps[i];
+  $('mTitle').textContent=i==null?'Agregar aplicativo':'Editar aplicativo';
+  $('fIcon').value=a.icon||'';$('fName').value=a.name;$('fDesc').value=a.desc;$('fUrl').value=a.url;$('fTag').value=a.tag||'';$('fNew').checked=!!a.newTab;
+  let r=[...document.querySelectorAll('[name=col]')];(r.find(x=>x.value===a.color)||r[0]).checked=true;
+  $('modal').classList.add('open');$('fName').focus();
+}
+function closeModal(){$('modal').classList.remove('open')}
+$('mClose').onclick=$('mCancel').onclick=closeModal;
+$('modal').addEventListener('mousedown',e=>{if(e.target.id==='modal')closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+$('mSave').onclick=()=>{
+  let name=$('fName').value.trim(),url=$('fUrl').value.trim();
+  if(!name)return toast('Escribe un nombre'),$('fName').focus();
+  if(!url)return toast('Indica el enlace o archivo'),$('fUrl').focus();
+  let rec={icon:$('fIcon').value.trim()||'🧩',name,desc:$('fDesc').value.trim(),url,tag:$('fTag').value.trim(),color:document.querySelector('[name=col]:checked').value,newTab:$('fNew').checked};
+  if(editing==null){rec.id='u'+Date.now().toString(36);ST.apps.push(rec)}else ST.apps[editing]={...ST.apps[editing],...rec};
+  if(persist()){closeModal();render();toast(editing==null?'Aplicativo agregado':'Cambios guardados')}
+};
+$('modal').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'&&e.target.type!=='checkbox'&&e.target.type!=='radio')$('mSave').click()});
+
+/* ---- barra / respaldo ---- */
+$('q').oninput=e=>{filter=e.target.value.trim().toLowerCase();render()};
+$('btnAdd').onclick=()=>openModal(null);
+$('btnEdit').onclick=()=>{edit=!edit;$('btnEdit').classList.toggle('on',edit);$('btnEdit').textContent=edit?'✓ Listo':'✎ Editar';$('backup').style.display=edit?'':'none';render()};
+$('btnExp').onclick=()=>{let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(ST,null,2)],{type:'application/json'}));a.download='menu_icb_aplicativos.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000)};
+$('btnImp').onclick=()=>$('fileImp').click();
+$('fileImp').onchange=async e=>{let f=e.target.files[0];e.target.value='';if(!f)return;
+  try{let d=JSON.parse(await f.text());if(!Array.isArray(d.apps))throw new Error('formato no válido');
+    ST={apps:d.apps.filter(a=>a&&a.name&&a.url).map(a=>({id:String(a.id||'u'+Math.random().toString(36).slice(2,8)),name:String(a.name),desc:String(a.desc||''),url:String(a.url),icon:String(a.icon||'🧩'),tag:String(a.tag||''),color:COLORS.includes(a.color)?a.color:COLORS[0],newTab:!!a.newTab})),removed:Array.isArray(d.removed)?d.removed.map(String):[]};
+    sync();persist();render();toast('Lista importada')}catch(err){toast('No se pudo importar: '+err.message)}};
+$('btnReset').onclick=()=>{if(confirm('¿Restablecer el menú a los aplicativos originales? Se perderán los que agregaste.')){ST={apps:[],removed:[]};sync();persist();render();toast('Menú restablecido')}};
+let tt;function toast(m){let t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2600)}
+render();
+</script>
+</body></html>
