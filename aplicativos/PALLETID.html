@@ -364,7 +364,7 @@ const doneToday=z=>H.some(p=>!p.void&&p.zona===String(z)&&p.ts.startsWith(todayS
 /* ===== EXPORTACIÓN SAP (Excel) ===== */
 function sapParse(rows){
   const h=(rows[0]||[]).map(normH),f=t=>h.findIndex(x=>x.includes(t));
-  const iz=f('zona'),im=h.indexOf('material'),it=f('texto'),iu=f('unidad'),iq=h.findIndex(x=>x.includes('ctd')||x.includes('cantidad')),ic=f('cliente'),ie=f('entrega'),ip=f('nombrecompleto');
+  const iz=f('zona'),im=h.indexOf('material'),it=f('texto'),iu=f('unidad'),iq=h.findIndex(x=>x.includes('ctd')||x.includes('cantidad')),ic=f('cliente'),ie=f('entrega'),ip=f('Nombre completo');
   if(iz<0||im<0||iq<0)return null;
   const Z={},mats=[];let n=0,nz=0,bad=0;
   for(let r=1;r<rows.length;r++){
