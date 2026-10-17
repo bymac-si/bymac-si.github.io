@@ -364,7 +364,7 @@ const doneToday=z=>H.some(p=>!p.void&&p.zona===String(z)&&p.ts.startsWith(todayS
 /* ===== EXPORTACIÓN SAP (Excel) ===== */
 function sapParse(rows){
   const h=(rows[0]||[]).map(normH),f=t=>h.findIndex(x=>x.includes(t));
-  const iz=f('zona'),im=h.indexOf('material'),it=f('texto'),iu=f('unidad'),iq=h.findIndex(x=>x.includes('ctd')||x.includes('cantidad')),ic=f('cliente'),ie=f('entrega');
+  const iz=f('zona'),im=h.indexOf('material'),it=f('texto'),iu=f('unidad'),iq=h.findIndex(x=>x.includes('ctd')||x.includes('cantidad')),ic=f('cliente'),ie=f('entrega'),ip=f('nombrecompleto');
   if(iz<0||im<0||iq<0)return null;
   const Z={},mats=[];let n=0,nz=0,bad=0;
   for(let r=1;r<rows.length;r++){
@@ -374,9 +374,9 @@ function sapParse(rows){
     const zm=/\d+/.exec(keyStr(c[iz])),zk=zm?String(parseInt(zm[0],10)):'';
     if(!(zk>=1&&zk<=999)){nz++;continue}
     const txt=it>=0?String(c[it]||'').trim():'',un=iu>=0?String(c[iu]||'').trim().toUpperCase():'';
-    const z=Z[zk]||(Z[zk]={lines:[],cli:'',ent:''}),ex=z.lines.find(l=>l.mat===mat&&l.un===un);
+    const z=Z[zk]||(Z[zk]={lines:[],cli:'',ent:'',picker:''}),ex=z.lines.find(l=>l.mat===mat&&l.un===un);
     if(ex)ex.qty=Math.round((ex.qty+q)*1000)/1000;else z.lines.push({mat,txt,un,qty:Math.round(q*1000)/1000});
-    if(ic>=0&&!z.cli)z.cli=keyStr(c[ic]);if(ie>=0&&!z.ent)z.ent=keyStr(c[ie]);
+    if(ic>=0&&!z.cli)z.cli=keyStr(c[ic]);if(ie>=0&&!z.ent)z.ent=keyStr(c[ie]);if(ip>=0&&!z.picker)z.picker=keyStr(c[ip]);
     if(txt)mats.push([mat,txt]);n++;
   }
   return{zones:Z,mats,n,nz,bad};
@@ -437,13 +437,13 @@ function labelHTML(p,pi,pages){
   let inner;
   if(first){
     const qr=CFG.qr?(p.id?qrSVG(qrData(p),21):`<div style="width:20mm;height:20mm;border:.3mm dashed #000;display:flex;align-items:center;justify-content:center;font-size:6pt">QR</div>`):'';
-    inner=`${head}<div class="lb-top"><div class="lb-l"><div class="lb-zone">ZONA ${up(p.zona)}</div><div class="lb-kv"><small>PICKEADOR</small>${up(p.picker)}</div><div class="lb-kv"><small>CLIENTE</small>${up(p.cliente||'—')}</div></div><div class="lb-r">${qr}</div></div>
+    inner=`${head}<div class="lb-top"><div class="lb-l"><div class="lb-zone">ZONA ${up(p.zona)}</div><div class="lb-kv"><small>PICKEADOR</small>${up(p.picker)}</div><div class="lb-kv"><small>CLIENTE</small>${up(p.cliente||'')}</div></div><div class="lb-r">${qr}</div></div>
     ${p.entrega?`<div class="lb-ent"><small>ENTREGA SAP</small>${esc(p.entrega)}</div>`:''}
     <div class="lb-bc">${idBar}</div>${idTxt}
     ${p.entrega?`<div class="lb-bc" style="margin-top:.5mm">${barSVG(p.entrega,0.375,7)}</div>`:''}
     <div class="lb-sum"><span>CONTENIDO · ${n} PROD.</span><span>CANT. TOTAL ${fmt(sum)}</span></div><div class="lb-list">${rows}${more}</div>`;
   }else{
-    inner=`${head}<div class="lb-zc"><span>ZONA ${up(p.zona)}</span><small>${up(p.cliente)} · ${up(p.picker)}</small></div>
+    inner=`${head}<div class="lb-zc"><span>ZONA ${up(p.zona)}</span><small>${up(p.cliente||'')} · ${up(p.picker)}</small></div>
     <div class="lb-bc">${idBar}</div>${idTxt}
     <div class="lb-sum"><span>CONTENIDO (CONT.) · ${n} PROD.</span><span>CANT. TOTAL ${fmt(sum)}</span></div><div class="lb-list">${rows}${more}</div>`;
   }
@@ -547,7 +547,6 @@ function issues(){
   const i=[],z=parseInt(D.zona,10);
   if(!(z>=1&&z<=999))i.push('Indica el número de zona (1 a 999)');
   if(!D.picker.trim())i.push('Indica el pickeador');
-  if(!D.cliente.trim())i.push('Indica el cliente');
   if(!D.lines.length)i.push('Agrega al menos un producto');
   return i;
 }
