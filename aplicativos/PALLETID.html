@@ -389,26 +389,19 @@ function tempFromCode(code){
   return "OTRA";
 }
 
-/* ===== PARSER EXCEL DE SAP (Guarda Pickeador por Temperatura) ===== */
+/* ===== PARSER EXCEL DE SAP (Asocia explícitamente el pickeador exacto por fila/temperatura) ===== */
 function sapParse(rows){
   const h = (rows[0] || []).map(normH);
-  const im = h.indexOf("material"), it = f => h.findIndex(x => x.includes(normH(f)));
+  const it = f => h.findIndex(x => x.includes(normH(f)));
   
-  // Columnas exactas:
-  // O (índice 14) -> Tipo alm.procedencia
-  // R (índice 17) -> Zona puesta dispos.
-  // Y (índice 24) -> Ctd.real dest.
-  // Z (índice 25) -> Unidad de medida alternativa
-  const iTemp = 14;
-  const iZona = 17;
-  const iCant = 24;
-  const iUnid = 25;
+  // Índices fijos exactos solicitados y respaldos por cabecera
+  const iPick = 13; // Columna N (Nombre completo)
+  const iTemp = 14; // Columna O (Tipo alm.procedencia)
+  const iZona = 17; // Columna R (Zona puesta dispos.)
+  const iCant = 24; // Columna Y (Ctd.real dest.)
+  const iUnid = 25; // Columna Z (Unidad de medida alternativa)
 
-  const itxt = it("texto breve material");
-  const icli = it("cliente");
-  const ient = it("entrega");
-  let ip = it("nombre completo");
-  if(ip < 0) ip = it("pickeador");
+  const im = h.indexOf("material"), itxt = it("texto breve material"), icli = it("cliente"), ient = it("entrega");
 
   if(iZona < 0 || im < 0 || iCant < 0) return null;
   const Z = {}, mats = [], pickersFound = new Set(); let n = 0, nz = 0, bad = 0;
@@ -420,33 +413,28 @@ function sapParse(rows){
     if(!mat && !rawZona) continue;
     if(!mat || !(q > 0)){ bad++; continue; }
     
-    // Obtener Zona (Columna R) y validar que comience con 6
+    // Validar Zona 600
     const zm = /\d+/.exec(rawZona), zk = zm ? String(parseInt(zm[0], 10)) : "";
     if(!zk.startsWith("6")){ nz++; continue; }
     
-    // Obtener Código de Temperatura (Columna O)
+    // Obtener Temperatura y Pickeador de la fila exacta
     let codeAlm = keyStr(c[iTemp]);
     let temp = tempFromCode(codeAlm);
+    let rowPicker = keyStr(c[iPick]);
 
     const txt = itxt >= 0 ? String(c[itxt] || "").trim() : "", un = iUnid >= 0 ? String(c[iUnid] || "").trim().toUpperCase() : "";
-    const z = Z[zk] || (Z[zk] = {lines:[], cli:"", ent:"", pickersByTemp:{}, temps:new Set()});
+    const z = Z[zk] || (Z[zk] = {lines:[], cli:"", ent:"", temps:new Set()});
     z.temps.add(temp);
 
-    const ex = z.lines.find(l => l.mat === mat && l.un === un && l.temp === temp);
+    // Guardar la línea incluyendo el pickeador específico de esa fila
+    const ex = z.lines.find(l => l.mat === mat && l.un === un && l.temp === temp && l.picker === rowPicker);
     if(ex) ex.qty = Math.round((ex.qty + q) * 1000) / 1000; 
-    else z.lines.push({mat, txt, un, qty: Math.round(q * 1000) / 1000, temp: temp});
+    else z.lines.push({mat, txt, un, qty: Math.round(q * 1000) / 1000, temp: temp, picker: rowPicker});
     
     if(icli >= 0 && !z.cli) z.cli = keyStr(c[icli]); 
     if(ient >= 0 && !z.ent) z.ent = keyStr(c[ient]);
     
-    if(ip >= 0){
-      const pVal = keyStr(c[ip]);
-      if(pVal){
-        pickersFound.add(pVal);
-        // Guardar el pickeador específico asociado a esta temperatura
-        if(!z.pickersByTemp[temp]) z.pickersByTemp[temp] = pVal;
-      }
-    }
+    if(rowPicker) pickersFound.add(rowPicker);
     if(txt) mats.push([mat, txt]); n++;
   }
   return {zones: Z, mats, n, nz, bad, pickers: [...pickersFound]};
@@ -481,19 +469,29 @@ function fromSap(k){
   if(D.lines.length && !confirm("Se reemplazarán los productos que ya están en el pallet. ¿Continuar?")) return renderArmar();
   if(doneToday(k) && !confirm("Ya hay un pallet cerrado hoy en la zona " + k + ". ¿Cargarla de nuevo?")) return renderArmar();
   
-  // Filtrar estrictamente los productos de esa zona para la temperatura elegida
+  // BUSCARV exacto: Filtrar los productos de esa zona que coincidan con la temperatura seleccionada
   const targetLines = z.lines.filter(l => l.temp === selectedTemp);
 
-  D.zona = k; D.lines = targetLines.map(l => ({...l}));
+  D.zona = k; 
+  D.lines = targetLines.map(l => ({mat: l.mat, txt: l.txt, un: l.un, qty: l.qty}));
   
-  // Obtener el pickeador asignado específicamente a esta temperatura
-  const targetPicker = (z.pickersByTemp && z.pickersByTemp[selectedTemp]) ? z.pickersByTemp[selectedTemp] : "";
-  if(targetPicker) D.picker = targetPicker;
+  // Extraer exactamente el pickeador de la fila correspondiente a esa temperatura (como un BUSCARV)
+  let targetPicker = "";
+  const matchedLine = targetLines.find(l => l.picker);
+  if(matchedLine) {
+    targetPicker = matchedLine.picker;
+  }
   
-  if(z.cli && !D.cliente) D.cliente = z.cli; 
-  if(z.ent && !D.entrega) D.entrega = z.ent;
+  D.picker = targetPicker;
   
-  saveDraft(); syncArmar(); renderArmar(); toast("Zona " + k + " (" + selectedTemp + "): " + D.lines.length + " producto(s) · Pickeador: " + (targetPicker || "Sin asignar"));
+  if(z.cli) D.cliente = z.cli; 
+  if(z.ent) D.entrega = z.ent;
+  
+  saveDraft(); 
+  syncArmar(); 
+  renderArmar(); 
+  
+  toast("Zona " + k + " (" + selectedTemp + "): " + D.lines.length + " producto(s) · Pickeador: " + (targetPicker || "Sin asignar"));
 }
 
 $("aZsel").onchange = e => e.target.value ? fromSap(e.target.value) : renderArmar();
@@ -788,7 +786,7 @@ async function renderConfig(){
 $("kPickSave").onclick = () => { CFG.pickers = [...new Set($("kPick").value.split("\n").map(x => x.trim()).filter(Boolean))]; saveCfg(); toast("Lista guardada"); };
 $("kSave").onclick = () => {
   const ox = parseFloat($("kOx").value) || 0, oy = parseFloat($("kOy").value) || 0;
-  if(Math.abs(ox) > 10 || Math.abs(oy) > 10) return toast("Los ajustes deben estar entre -10 y 10 mm");
+  if(Math.abs(ox) > 10 || Math.abs(ox) > 10) return toast("Los ajustes deben estar entre -10 y 10 mm");
   CFG.sitio = $("kSite").value.trim(); CFG.dpi = parseInt($("kDpi").value, 10) || 203; CFG.offX = ox; CFG.offY = oy; CFG.baseUrl = $("kUrl").value.trim(); CFG.qr = $("kQr").checked; saveCfg(); toast("Configuración guardada");
 };
 $("kTest").onclick = () => {
