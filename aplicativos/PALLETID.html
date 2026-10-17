@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="es">
 <head>
-<!-- ICB Food Service 2026 · PalletID de término de picking -->
+<!-- ICB Food Service 2026 · PalletID de término de picking (etiqueta 100 x 100 mm) -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PalletID · ICB Food Service</title>
@@ -105,7 +105,7 @@ pre.zpl{background:#111;color:#c9f7c9;padding:10px;border-radius:8px;max-height:
     <button data-tab="cerrados"><span class="ic">🗂</span>Pallets cerrados</button>
     <button data-tab="config"><span class="ic">⚙️</span>Configuración</button>
   </nav>
-  <a class="side-menu" href="MENU_ICB.html">← Menú</a>
+  <a class="side-menu" href="APP_PRODUCTIVIDAD_PKG_GRUAS_v6.html">← Módulo Productividad</a>
 </aside>
 <div class="content">
 <header class="top"><h1 id="pgTitle">Armar pallet</h1><div class="subtle" id="pgSub"></div></header>
@@ -117,13 +117,28 @@ pre.zpl{background:#111;color:#c9f7c9;padding:10px;border-radius:8px;max-height:
    <div class="panel">
     <h2>1) Exportación de SAP</h2>
     <div class="toolbar" style="margin-bottom:8px"><button class="btn gray sm" id="sLoad" type="button">📂 Cargar Excel de SAP (.xlsx)</button><input type="file" id="fSap" accept=".xlsx,.xls" style="display:none"><span class="hint" id="sInfo"></span></div>
-    <label for="aZsel">Zona a armar (trae sus productos)</label><select id="aZsel"></select>
+    
+    <div class="grid g2" style="margin-top:10px">
+      <div>
+        <label for="aTempSel">1.º Seleccionar Temperatura</label>
+        <select id="aTempSel">
+          <option value="">— Seleccionar Temperatura —</option>
+          <option value="SECO">SECO (Cod: 001, 002)</option>
+          <option value="FRIO">FRÍO (Cod: 023, 024)</option>
+          <option value="CONG">CONGELADOS (Cod: 033, 034)</option>
+        </select>
+      </div>
+      <div>
+        <label for="aZsel">2.º Zona a armar (Solo Zonas 600)</label>
+        <select id="aZsel" disabled></select>
+      </div>
+    </div>
    </div>
    <div class="panel">
     <h2>2) Datos del pallet</h2>
     <div class="grid g2">
       <div><label for="aZona">Número de zona</label><input id="aZona" inputmode="numeric" maxlength="3" placeholder="Ej: 609" autocomplete="off"></div>
-      <div><label for="aPick">Pickeador</label><input id="aPick" list="pickList" autocomplete="off" placeholder="Nombre"><datalist id="pickList"></datalist></div>
+      <div><label for="aPick">Pickeador</label><input id="aPick" list="pickList" autocomplete="off" placeholder="Nombre automático"><datalist id="pickList"></datalist></div>
       <div><label for="aCli">Cliente</label><input id="aCli" list="cliList" autocomplete="off" placeholder="Nombre del cliente"><datalist id="cliList"></datalist></div>
       <div><label for="aEnt">Entrega / pedido SAP <span class="hint">(opcional)</span></label><input id="aEnt" inputmode="numeric" placeholder="100974414" autocomplete="off"></div>
     </div>
@@ -210,7 +225,6 @@ pre.zpl{background:#111;color:#c9f7c9;padding:10px;border-radius:8px;max-height:
  <div class="foot"><button class="btn gray" id="zCopy">Copiar</button><button class="btn" id="zDown">Descargar .zpl</button></div></div></div>
 
 <script>
-const MATS_SEED = "";
 const $ = id => document.getElementById(id);
 const esc = s => String(s || "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const p2 = n => String(n).padStart(2, "0");
@@ -226,7 +240,9 @@ function num(v){
   const n = parseFloat(s);
   return isNaN(n) ? null : n;
 }
+const norm = x => String(x??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase().replace(/\s+/g,' ');
 const normH = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+function findIdx(headers,names,occ=1){let n=names.map(norm),k=0;for(let i=0;i<headers.length;i++){if(n.includes(norm(headers[i]))){k++;if(k===occ)return i}}return -1}
 const keyStr = v => { if(v == null) return ""; if(typeof v === "number" && Number.isInteger(v)) return String(v); return String(v).trim(); };
 function nowTS(d = new Date()){ return d.getFullYear() + "-" + p2(d.getMonth() + 1) + "-" + p2(d.getDate()) + "T" + p2(d.getHours()) + ":" + p2(d.getMinutes()) + ":" + p2(d.getSeconds()); }
 function tsDate(ts){ const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/.exec(ts || ""); return m ? new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]) : null; }
@@ -272,7 +288,7 @@ const QR_SPEC = {1:{dc:16,ec:10,nb:1}, 2:{dc:28,ec:16,nb:1}, 3:{dc:44,ec:26,nb:1
 const QR_ALIGN = {2:18, 3:22, 4:26, 5:30, 6:34};
 function gfMul(a, b){ let r = 0; while(b){ if(b & 1) r ^= a; a <<= 1; if(a & 256) a ^= 0x11D; b >>= 1; } return r; }
 function rsDivisor(deg){ const r = new Array(deg).fill(0); r[deg - 1] = 1; let root = 1; for(let i = 0; i < deg; i++){ for(let j = 0; j < deg; j++){ r[j] = gfMul(r[j], root); if(j + 1 < deg) r[j] ^= r[j + 1]; } root = gfMul(root, 2); } return r; }
-function rsRemainder(data, div){ const r = new Array(div.length).fill(0); for(const b of data){ const f = b ^ r.shift(); r.push(0); div.forEach((c, i) => { r[i] ^= gfMul(c, f); }); } return r; }
+function rsRemainder(data, div){ const r = new Array(div.length).fill(0); for(let b of data){ const f = b ^ r.shift(); r.push(0); div.forEach((c, i) => { r[i] ^= gfMul(c, f); }); } return r; }
 function qrMatrix(text){
   const data = [...new TextEncoder().encode(text)];
   let v = 0; for(let k = 1; k <= 6; k++){ if(Math.ceil((12 + 8 * data.length) / 8) <= QR_SPEC[k].dc){ v = k; break; } }
@@ -341,7 +357,7 @@ function qrSVG(text, maxMM){
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + T + ' ' + T + '" width="' + (T * mod).toFixed(3) + 'mm" height="' + (T * mod).toFixed(3) + 'mm" shape-rendering="crispEdges"><path d="' + d + '" fill="#000"/></svg>';
 }
 
-/* ===== DATOS ===== */
+/* ===== DATOS Y CONFIGURACIÓN ===== */
 const CFG = Object.assign({pickers:[], offX:0, offY:0, qr:true, baseUrl:"", dpi:203, sitio:""}, lsGet("icb_pid_cfg_v1", {}));
 const saveCfg = () => lsSet("icb_pid_cfg_v1", CFG);
 let MAT = new Map(), H = [], SAP = null, D = Object.assign({zona:"", picker:"", cliente:"", entrega:"", lines:[]}, lsGet("icb_pid_draft_v1", {}));
@@ -364,73 +380,127 @@ const sumOf = lines => lines.reduce((a, l) => a + (l.qty || 0), 0);
 const todayStr = () => nowTS().slice(0, 10);
 const doneToday = z => H.some(p => !p.void && p.zona === String(z) && p.ts.startsWith(todayStr()));
 
-/* ===== EXPORTACIÓN SAP (Excel) ===== */
-function sapParse(rows){
-  const h = (rows[0] || []).map(normH), f = t => h.findIndex(x => x.includes(normH(t)));
-  const iz = f("zona"), im = h.indexOf("material"), it = f("texto"), iu = f("unidad"), iq = h.findIndex(x => x.includes("ctd") || x.includes("cantidad")), ic = f("cliente"), ie = f("entrega");
-  let ip = f("nombre completo");
-  if(ip < 0) ip = f("nombrecompleto");
-  if(ip < 0) ip = f("pickeador");
-  if(ip < 0) ip = f("picker");
+/* ===== CLASIFICACIÓN EXACTA DE TEMPERATURA POR CÓDIGO ===== */
+function tempFromCode(code){
+  const s = String(code || "").trim();
+  if(s === "001" || s === "002") return "SECO";
+  if(s === "023" || s === "024") return "FRIO";
+  if(s === "033" || s === "034") return "CONG";
+  return "OTRA";
+}
 
-  if(iz < 0 || im < 0 || iq < 0) return null;
+/* ===== PARSER EXCEL DE SAP (Guarda Pickeador por Temperatura) ===== */
+function sapParse(rows){
+  const h = (rows[0] || []).map(normH);
+  const im = h.indexOf("material"), it = f => h.findIndex(x => x.includes(normH(f)));
+  
+  // Columnas exactas:
+  // O (índice 14) -> Tipo alm.procedencia
+  // R (índice 17) -> Zona puesta dispos.
+  // Y (índice 24) -> Ctd.real dest.
+  // Z (índice 25) -> Unidad de medida alternativa
+  const iTemp = 14;
+  const iZona = 17;
+  const iCant = 24;
+  const iUnid = 25;
+
+  const itxt = it("texto breve material");
+  const icli = it("cliente");
+  const ient = it("entrega");
+  let ip = it("nombre completo");
+  if(ip < 0) ip = it("pickeador");
+
+  if(iZona < 0 || im < 0 || iCant < 0) return null;
   const Z = {}, mats = [], pickersFound = new Set(); let n = 0, nz = 0, bad = 0;
+  
   for(let r = 1; r < rows.length; r++){
-    const c = rows[r], mat = normMat(keyStr(c[im])), q = num(c[iq]);
-    if(!mat && !keyStr(c[iz])) continue;
+    let c = rows[r];
+    const mat = normMat(keyStr(c[im])), q = num(c[iCant]);
+    const rawZona = keyStr(c[iZona]);
+    if(!mat && !rawZona) continue;
     if(!mat || !(q > 0)){ bad++; continue; }
-    const zm = /\d+/.exec(keyStr(c[iz])), zk = zm ? String(parseInt(zm[0], 10)) : "";
-    if(!(zk >= 1 && zk <= 999)){ nz++; continue; }
-    const txt = it >= 0 ? String(c[it] || "").trim() : "", un = iu >= 0 ? String(c[iu] || "").trim().toUpperCase() : "";
-    const z = Z[zk] || (Z[zk] = {lines:[], cli:"", ent:"", picker:""}), ex = z.lines.find(l => l.mat === mat && l.un === un);
-    if(ex) ex.qty = Math.round((ex.qty + q) * 1000) / 1000; else z.lines.push({mat, txt, un, qty: Math.round(q * 1000) / 1000});
-    if(ic >= 0 && !z.cli) z.cli = keyStr(c[ic]); if(ie >= 0 && !z.ent) z.ent = keyStr(c[ie]);
+    
+    // Obtener Zona (Columna R) y validar que comience con 6
+    const zm = /\d+/.exec(rawZona), zk = zm ? String(parseInt(zm[0], 10)) : "";
+    if(!zk.startsWith("6")){ nz++; continue; }
+    
+    // Obtener Código de Temperatura (Columna O)
+    let codeAlm = keyStr(c[iTemp]);
+    let temp = tempFromCode(codeAlm);
+
+    const txt = itxt >= 0 ? String(c[itxt] || "").trim() : "", un = iUnid >= 0 ? String(c[iUnid] || "").trim().toUpperCase() : "";
+    const z = Z[zk] || (Z[zk] = {lines:[], cli:"", ent:"", pickersByTemp:{}, temps:new Set()});
+    z.temps.add(temp);
+
+    const ex = z.lines.find(l => l.mat === mat && l.un === un && l.temp === temp);
+    if(ex) ex.qty = Math.round((ex.qty + q) * 1000) / 1000; 
+    else z.lines.push({mat, txt, un, qty: Math.round(q * 1000) / 1000, temp: temp});
+    
+    if(icli >= 0 && !z.cli) z.cli = keyStr(c[icli]); 
+    if(ient >= 0 && !z.ent) z.ent = keyStr(c[ient]);
     
     if(ip >= 0){
       const pVal = keyStr(c[ip]);
       if(pVal){
         pickersFound.add(pVal);
-        if(!z.picker) z.picker = pVal;
+        // Guardar el pickeador específico asociado a esta temperatura
+        if(!z.pickersByTemp[temp]) z.pickersByTemp[temp] = pVal;
       }
     }
     if(txt) mats.push([mat, txt]); n++;
   }
   return {zones: Z, mats, n, nz, bad, pickers: [...pickersFound]};
 }
+
 $("sLoad").onclick = () => window.XLSX ? $("fSap").click() : toast("Para leer Excel se necesita conexión a internet");
 $("fSap").onchange = async e => {
   const f = e.target.files[0]; e.target.value = ""; if(!f) return;
   try{
     const wb = XLSX.read(await f.arrayBuffer(), {type:"array"}), rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, raw:true, defval:""});
-    const r = sapParse(rows); if(!r) return toast("No encuentro las columnas Zona, Material y Cantidad (Ctd.real dest.)");
-    const nzn = Object.keys(r.zones).length; if(!nzn) return toast("El archivo no tiene líneas con zona");
+    const r = sapParse(rows); if(!r) return toast("No encuentro las columnas requeridas en el Excel");
+    const nzn = Object.keys(r.zones).length; if(!nzn) return toast("El archivo no contiene zonas 600 válidas");
     r.mats.forEach(([m, t]) => MAT.set(m, t));
     
     if(r.pickers && r.pickers.length){
       let added = 0;
-      r.pickers.forEach(p => {
-        if(p && !CFG.pickers.includes(p)){
-          CFG.pickers.push(p);
-          added++;
-        }
-      });
+      r.pickers.forEach(p => { if(p && !CFG.pickers.includes(p)){ CFG.pickers.push(p); added++; } });
       if(added > 0) saveCfg();
     }
 
     SAP = {name: f.name, at: nowTS(), zones: r.zones, n: r.n, nz: r.nz, bad: r.bad};
     await IDB.set("sap", SAP); await IDB.set("mats", [...MAT]); renderArmar();
-    toast(nzn + " zonas · " + r.n + " líneas" + (r.nz ? " · " + r.nz + " sin zona omitidas" : "") + (r.bad ? " · " + r.bad + " sin cantidad omitidas" : ""));
+    toast(nzn + " zonas 600 cargadas correctamente (" + r.n + " líneas)");
   }catch(err){ toast("No se pudo leer el archivo: " + err.message); }
 };
+
 function fromSap(k){
   const z = SAP && SAP.zones[k]; if(!z) return renderArmar();
+  const selectedTemp = $("aTempSel").value;
+  if(!selectedTemp) return toast("Primero debes seleccionar una temperatura");
+
   if(D.lines.length && !confirm("Se reemplazarán los productos que ya están en el pallet. ¿Continuar?")) return renderArmar();
   if(doneToday(k) && !confirm("Ya hay un pallet cerrado hoy en la zona " + k + ". ¿Cargarla de nuevo?")) return renderArmar();
-  D.zona = k; D.lines = z.lines.map(l => ({...l}));
-  if(z.cli && !D.cliente) D.cliente = z.cli; if(z.ent && !D.entrega) D.entrega = z.ent; if(z.picker && !D.picker) D.picker = z.picker;
-  saveDraft(); syncArmar(); renderArmar(); toast("Zona " + k + ": " + D.lines.length + " producto(s) cargado(s)");
+  
+  // Filtrar estrictamente los productos de esa zona para la temperatura elegida
+  const targetLines = z.lines.filter(l => l.temp === selectedTemp);
+
+  D.zona = k; D.lines = targetLines.map(l => ({...l}));
+  
+  // Obtener el pickeador asignado específicamente a esta temperatura
+  const targetPicker = (z.pickersByTemp && z.pickersByTemp[selectedTemp]) ? z.pickersByTemp[selectedTemp] : "";
+  if(targetPicker) D.picker = targetPicker;
+  
+  if(z.cli && !D.cliente) D.cliente = z.cli; 
+  if(z.ent && !D.entrega) D.entrega = z.ent;
+  
+  saveDraft(); syncArmar(); renderArmar(); toast("Zona " + k + " (" + selectedTemp + "): " + D.lines.length + " producto(s) · Pickeador: " + (targetPicker || "Sin asignar"));
 }
+
 $("aZsel").onchange = e => e.target.value ? fromSap(e.target.value) : renderArmar();
+$("aTempSel").onchange = () => {
+  D.lines = []; D.zona = ""; D.picker = ""; D.cliente = ""; D.entrega = "";
+  saveDraft(); syncArmar(); renderArmar();
+};
 
 /* ===== PALLET ID ===== */
 function luhn(s){ let sum = 0, alt = true; for(let i = s.length - 1; i >= 0; i--){ let n = +s[i]; if(alt){ n *= 2; if(n > 9) n -= 9; } sum += n; alt = !alt; } return (10 - sum % 10) % 10; }
@@ -453,7 +523,7 @@ function splitPages(p){
 }
 function qrData(p){ const b = (CFG.baseUrl || "").trim(); return b ? b.replace(/#.*$/, "") + "#p=" + p.id : p.id; }
 
-/* ===== ETIQUETA HTML ===== */
+/* ===== ETIQUETA HTML (Formato Unificado Zona 600) ===== */
 function labelHTML(p, pi, pages){
   const tot = pages.length, first = pi === 0, lines = pages[pi], n = p.lines.length, sum = sumOf(p.lines);
   const up = s => esc(String(s || "").toUpperCase());
@@ -581,17 +651,38 @@ function issues(){
 function renderArmar(){
   $("pickList").innerHTML = CFG.pickers.map(x => '<option value="' + esc(x) + '">').join("");
   $("cliList").innerHTML = [...new Set(H.map(p => p.cliente).filter(Boolean))].slice(0, 80).map(x => '<option value="' + esc(x) + '">').join("");
-  const zk = SAP ? Object.keys(SAP.zones).sort((a, b) => a - b) : [], cz = String(parseInt(D.zona, 10));
-  $("aZsel").innerHTML = '<option value="">' + (zk.length ? "— elegir zona —" : "Carga primero el Excel de SAP") + '</option>' + zk.map(k => '<option value="' + k + '"' + (k === cz ? " selected" : "") + '>Zona ' + k + " · " + SAP.zones[k].lines.length + " línea(s)" + (doneToday(k) ? " · ✔ cerrada hoy" : "") + '</option>').join("");
-  $("aZsel").disabled = !zk.length;
-  $("sInfo").textContent = SAP ? SAP.name + " · " + zk.length + " zonas · " + SAP.n + " líneas" + (SAP.nz ? " · " + SAP.nz + " sin zona omitidas" : "") : "Sin archivo cargado";
-  $("aBody").innerHTML = D.lines.length ? D.lines.map((l, i) => '<tr data-i="' + i + '"><td><b>' + esc(l.mat) + '</b></td><td class="txt">' + (esc(l.txt) || '<span class="hint">sin descripción</span>') + '</td><td class="n"><input class="q" data-f="qty" inputmode="decimal" value="' + esc(fmt(l.qty)) + '" aria-label="Cantidad"></td><td><input class="u" data-f="un" value="' + esc(l.un) + '" aria-label="Unidad"></td><td><button class="btn danger sm" data-del aria-label="Quitar">✕</button></td></tr>').join("") : '<tr><td colspan="5" class="hint" style="padding:22px;text-align:center">Elige una zona del Excel de SAP, o escanea / digita un material.</td></tr>';
+  
+  const selectedTemp = $("aTempSel").value;
+  let zk = [];
+
+  if(SAP && selectedTemp){
+    zk = Object.keys(SAP.zones)
+      .filter(k => k.startsWith("6") && SAP.zones[k].lines.some(l => l.temp === selectedTemp))
+      .sort((a, b) => a - b);
+  }
+
+  const cz = String(parseInt(D.zona, 10));
+  
+  if(!selectedTemp){
+    $("aZsel").innerHTML = '<option value="">— Primero selecciona la Temperatura —</option>';
+    $("aZsel").disabled = true;
+  } else {
+    $("aZsel").disabled = zk.length === 0;
+    $("aZsel").innerHTML = '<option value="">' + (zk.length ? "— Elegir Zona 600 (" + selectedTemp + ") —" : "Sin Zonas 600 para " + selectedTemp) + '</option>' + zk.map(k => {
+      const lineCount = SAP.zones[k].lines.filter(l => l.temp === selectedTemp).length;
+      return '<option value="' + k + '"' + (k === cz ? " selected" : "") + '>Zona ' + k + " · " + lineCount + " producto(s)" + (doneToday(k) ? " · ✔ cerrada hoy" : "") + '</option>';
+    }).join("");
+  }
+  
+  $("sInfo").textContent = SAP ? SAP.name + " · " + Object.keys(SAP.zones).length + " zonas en archivo" : "Sin archivo cargado";
+  $("aBody").innerHTML = D.lines.length ? D.lines.map((l, i) => '<tr data-i="' + i + '"><td><b>' + esc(l.mat) + '</b></td><td class="txt">' + (esc(l.txt) || '<span class="hint">sin descripción</span>') + '</td><td class="n"><input class="q" data-f="qty" inputmode="decimal" value="' + esc(fmt(l.qty)) + '" aria-label="Cantidad"></td><td><input class="u" data-f="un" value="' + esc(l.un) + '" aria-label="Unidad"></td><td><button class="btn danger sm" data-del aria-label="Quitar">✕</button></td></tr>').join("") : '<tr><td colspan="5" class="hint" style="padding:22px;text-align:center">Elige Temperatura y Zona 600 de SAP para cargar los productos.</td></tr>';
   const pg = splitPages({lines: D.lines, entrega: D.entrega});
   $("aKpis").innerHTML = [["Productos", D.lines.length], ["Cantidad total", fmt(sumOf(D.lines))], ["Etiquetas", pg.length]].map(([t, v]) => '<div class="kpi"><div class="t">' + t + '</div><div class="v">' + v + '</div></div>').join("");
   $("aPv").innerHTML = labelsHTML({id:"", draft:true, zona: D.zona || "—", picker: D.picker || "—", cliente: D.cliente || "—", entrega: D.entrega, ts: nowTS(), lines: D.lines, reimp: 0});
   const is = issues(); $("aWarn").innerHTML = is.length ? is.map(x => '<div class="bn warn">' + esc(x) + '</div>').join("<br>") : '<div class="bn ok">Listo para cerrar</div>';
   $("aClose").disabled = is.length > 0;
 }
+
 $("aZona").addEventListener("input", e => { e.target.value = e.target.value.replace(/\D/g, "").slice(0, 3); D.zona = e.target.value; saveDraft(); renderArmar(); });
 $("aPick").addEventListener("input", e => { D.picker = e.target.value; saveDraft(); renderArmar(); });
 $("aCli").addEventListener("input", e => { D.cliente = e.target.value; saveDraft(); renderArmar(); });
