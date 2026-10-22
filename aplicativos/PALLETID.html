@@ -423,7 +423,10 @@ async function loadAll(){
   const mats = await IDB.get("mats"); if(mats && mats.length) MAT = new Map(mats); else await loadSeedMats();
 }
 const normMat = s => { s = String(s || "").trim(); return /^\d+$/.test(s) ? s.replace(/^0+(?=\d)/, "") : s; };
-const sumOf = lines => lines.reduce((a, l) => a + (l.qty || 0), 0);
+// Productos de peso variable (kg, g, lb, litros) cuentan como 1 pieza por línea; el resto suma su cantidad
+const VAR_UN = new Set(["KG", "KGM", "G", "GR", "GRM", "LB", "L", "LT"]);
+const isVar = u => VAR_UN.has(String(u || "").trim().toUpperCase());
+const sumOf = lines => lines.reduce((a, l) => a + (isVar(l.un) ? 1 : (l.qty || 0)), 0);
 const todayStr = () => nowTS().slice(0, 10);
 const doneToday = z => H.some(p => !p.void && p.zona === String(z) && p.ts.startsWith(todayStr()));
 
