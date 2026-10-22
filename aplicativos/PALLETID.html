@@ -87,6 +87,9 @@ pre.zpl{background:#111;color:#c9f7c9;padding:10px;border-radius:8px;max-height:
 .lb-more{font-size:6.6pt;font-weight:800;text-align:center;margin-top:.5mm}
 .lb-zc{height:8mm;background:#000;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:2mm;padding:0 2.5mm;font-weight:900;font-size:15pt;white-space:nowrap}
 .lb-zc small{font-size:7pt;font-weight:700;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.lb-tmp{height:5mm;margin-top:.5mm;border:.4mm solid #000;display:flex;justify-content:space-between;align-items:center;padding:0 1.5mm;font-size:9pt;font-weight:900;line-height:1;white-space:nowrap}
+.lb-tmp.CONG{background:#000;color:#fff}
+.lb-tmp.FRIO{border-width:.9mm}
 .lb-wm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18pt;font-weight:900;color:rgba(0,0,0,.12);transform:rotate(-30deg);pointer-events:none}
 @media screen{.pv .lbl{zoom:1.2;box-shadow:0 2px 12px rgba(0,0,0,.25)}}
 @media print{html,body{margin:0!important;padding:0!important;background:#fff}
@@ -141,6 +144,7 @@ pre.zpl{background:#111;color:#c9f7c9;padding:10px;border-radius:8px;max-height:
       <div><label for="aPick">Pickeador</label><input id="aPick" list="pickList" autocomplete="off" placeholder="Nombre automático"><datalist id="pickList"></datalist></div>
       <div><label for="aCli">Cliente</label><input id="aCli" list="cliList" autocomplete="off" placeholder="Nombre del cliente"><datalist id="cliList"></datalist></div>
       <div><label for="aEnt">Entrega / pedido SAP <span class="hint">(opcional)</span></label><input id="aEnt" inputmode="numeric" placeholder="100974414" autocomplete="off"></div>
+      <div><label for="aBul">Cantidad de bultos <span class="hint">(etiquetas a imprimir)</span></label><input id="aBul" inputmode="numeric" maxlength="2" value="1" autocomplete="off"></div>
     </div>
    </div>
    <div class="panel">
@@ -162,7 +166,7 @@ pre.zpl{background:#111;color:#c9f7c9;padding:10px;border-radius:8px;max-height:
    <div class="panel">
     <h2>Vista previa de la etiqueta</h2>
     <div class="pv" id="aPv"></div>
-    <div class="hint" style="margin:8px 0 12px">El PalletID (con fecha y hora de término) se asigna al cerrar el pallet y va en el código de barras.</div>
+    <div class="hint" style="margin:8px 0 12px">El PalletID (con fecha y hora de término) se asigna al cerrar el pallet y va en el código de barras. Se imprimirá una etiqueta por cada bulto.</div>
     <div id="aWarn"></div>
     <button class="btn big" id="aClose" type="button">Cerrar pallet y generar etiqueta</button>
    </div>
@@ -360,7 +364,7 @@ function qrSVG(text, maxMM){
 /* ===== DATOS Y CONFIGURACIÓN ===== */
 const CFG = Object.assign({pickers:[], offX:0, offY:0, qr:true, baseUrl:"", dpi:203, sitio:""}, lsGet("icb_pid_cfg_v1", {}));
 const saveCfg = () => lsSet("icb_pid_cfg_v1", CFG);
-let MAT = new Map(), H = [], SAP = null, D = Object.assign({zona:"", picker:"", cliente:"", entrega:"", lines:[]}, lsGet("icb_pid_draft_v1", {}));
+let MAT = new Map(), H = [], SAP = null, D = Object.assign({zona:"", picker:"", cliente:"", entrega:"", lines:[], temp:"", bultos:1}, lsGet("icb_pid_draft_v1", {}));
 const saveDraft = () => lsSet("icb_pid_draft_v1", D);
 const IDB = {db:null,
   open(){ return new Promise(res => { try{ const r = indexedDB.open("icb_pid_v1", 1); r.onupgradeneeded = () => r.result.createObjectStore("kv"); r.onsuccess = () => { IDB.db = r.result; res(); }; r.onerror = () => res(); } catch(e){ res(); } }); },
@@ -388,6 +392,7 @@ function tempFromCode(code){
   if(s === "033" || s === "034") return "CONG";
   return "OTRA";
 }
+const TN = {SECO:"Seco", FRIO:"Frío", CONG:"Congelado"};
 
 /* ===== PARSER EXCEL DE SAP (Asocia explícitamente el pickeador exacto por fila/temperatura) ===== */
 function sapParse(rows){
@@ -473,6 +478,7 @@ function fromSap(k){
   const targetLines = z.lines.filter(l => l.temp === selectedTemp);
 
   D.zona = k; 
+  D.temp = selectedTemp;
   D.lines = targetLines.map(l => ({mat: l.mat, txt: l.txt, un: l.un, qty: l.qty}));
   
   // Extraer exactamente el pickeador de la fila correspondiente a esa temperatura (como un BUSCARV)
@@ -497,6 +503,7 @@ function fromSap(k){
 $("aZsel").onchange = e => e.target.value ? fromSap(e.target.value) : renderArmar();
 $("aTempSel").onchange = () => {
   D.lines = []; D.zona = ""; D.picker = ""; D.cliente = ""; D.entrega = "";
+  D.temp = $("aTempSel").value; D.bultos = 1;
   saveDraft(); syncArmar(); renderArmar();
 };
 
@@ -513,7 +520,7 @@ function parseScan(t){
 function splitPages(p){
   const e = !!p.entrega, L = p.lines.slice(), pages = []; let first = true;
   for(;;){
-    const full = first ? (e ? 10 : 14) : 18, more = first ? (e ? 9 : 13) : 17;
+    const full = first ? (e ? 8 : 12) : 16, more = first ? (e ? 7 : 11) : 15;
     if(L.length <= full){ pages.push(L.splice(0)); break; }
     pages.push(L.splice(0, more)); first = false;
   }
@@ -525,6 +532,7 @@ function qrData(p){ const b = (CFG.baseUrl || "").trim(); return b ? b.replace(/
 function labelHTML(p, pi, pages){
   const tot = pages.length, first = pi === 0, lines = pages[pi], n = p.lines.length, sum = sumOf(p.lines);
   const up = s => esc(String(s || "").toUpperCase());
+  const tmp = '<div class="lb-tmp ' + esc(p.temp || "") + '"><span>TEMP: ' + up(TN[p.temp] || "S/D") + '</span><span>BULTO ' + (p.bulto || 1) + ' / ' + (p.bultos || 1) + '</span></div>';
   const head = '<div class="lb-h"><span>ICB FOOD SERVICE' + (CFG.sitio ? " · " + up(CFG.sitio) : "") + '</span><span>' + (p.draft ? "VISTA PREVIA" : "FIN DE PICKING") + (tot > 1 ? " · " + (pi + 1) + "/" + tot : "") + (p.reimp ? " · REIMP. " + p.reimp : "") + '</span></div>';
   const rows = lines.map(l => '<div class="lb-row"><span class="c">' + esc(l.mat) + '</span><span class="d">' + up(l.txt) + '</span><span class="q">' + fmt(l.qty) + '</span><span class="u">' + up(l.un) + '</span></div>').join("");
   const more = pi < tot - 1 ? '<div class="lb-more">… CONTINÚA EN ETIQUETA ' + (pi + 2) + "/" + tot + " …" : "";
@@ -533,26 +541,38 @@ function labelHTML(p, pi, pages){
   let inner;
   if(first){
     const qr = CFG.qr ? (p.id ? qrSVG(qrData(p), 21) : '<div style="width:20mm;height:20mm;border:.3mm dashed #000;display:flex;align-items:center;justify-content:center;font-size:6pt">QR</div>') : "";
-    inner = head + '<div class="lb-top"><div class="lb-l"><div class="lb-zone">ZONA ' + up(p.zona) + '</div><div class="lb-kv"><small>PICKEADOR</small>' + up(p.picker) + '</div><div class="lb-kv"><small>CLIENTE</small>' + up(p.cliente || "") + '</div></div><div class="lb-r">' + qr + '</div></div>' +
+    inner = head + '<div class="lb-top"><div class="lb-l"><div class="lb-zone">ZONA ' + up(p.zona) + '</div><div class="lb-kv"><small>PICKEADOR</small>' + up(p.picker) + '</div><div class="lb-kv"><small>CLIENTE</small>' + up(p.cliente || "") + '</div></div><div class="lb-r">' + qr + '</div></div>' + tmp +
     (p.entrega ? '<div class="lb-ent"><small>ENTREGA SAP</small>' + esc(p.entrega) + '</div>' : "") +
     '<div class="lb-bc">' + idBar + '</div>' + idTxt +
     (p.entrega ? '<div class="lb-bc" style="margin-top:.5mm">' + barSVG(p.entrega, 0.375, 7) + '</div>' : "") +
     '<div class="lb-sum"><span>CONTENIDO · ' + n + ' PROD.</span><span>CANT. TOTAL ' + fmt(sum) + '</span></div><div class="lb-list">' + rows + more + '</div>';
   } else {
-    inner = head + '<div class="lb-zc"><span>ZONA ' + up(p.zona) + '</span><small>' + up(p.cliente || "") + " · " + up(p.picker) + '</small></div>' +
+    inner = head + '<div class="lb-zc"><span>ZONA ' + up(p.zona) + '</span><small>' + up(p.cliente || "") + " · " + up(p.picker) + '</small></div>' + tmp +
     '<div class="lb-bc">' + idBar + '</div>' + idTxt +
     '<div class="lb-sum"><span>CONTENIDO (CONT.) · ' + n + ' PROD.</span><span>CANT. TOTAL ' + fmt(sum) + '</span></div><div class="lb-list">' + rows + more + '</div>';
   }
   return '<div class="lbl" style="--ox:' + CFG.offX + 'mm;--oy:' + CFG.offY + 'mm"><div class="lbl-in">' + inner + '</div>' + (p.draft ? '<div class="lb-wm">VISTA PREVIA</div>' : "") + '</div>';
 }
-const labelsHTML = p => { const pg = splitPages(p); return pg.map((_, i) => labelHTML(p, i, pg)).join(""); };
+// one=true: solo el bulto 1 (vistas previas). Sin one: una tanda de etiquetas por cada bulto.
+const labelsHTML = (p, one) => {
+  const pg = splitPages(p), N = one ? 1 : Math.max(1, p.bultos || 1), out = [];
+  for(let b = 1; b <= N; b++){ const q = {...p, bulto: b}; pg.forEach((_, i) => out.push(labelHTML(q, i, pg))); }
+  return out.join("");
+};
 
 /* ===== ZPL (Zebra) ===== */
 const zs = s => String(s == null ? "" : s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\x20-\x7E]/g, " ").replace(/[\^~\\]/g, " ").toUpperCase();
-function zplFor(p){
+function zplOne(p){
   const k = CFG.dpi === 300 ? 11.811 : 8, Dm = mm => Math.round(mm * k), X = mm => Dm(3 + CFG.offX + mm), Y = mm => Dm(3 + CFG.offY + mm);
   const pages = splitPages(p), out = [], n = p.lines.length, sum = sumOf(p.lines);
   const txt = (x, y, h, s, fb) => "^FO" + x + "," + y + "^A0N," + Dm(h) + (fb ? "^FB" + Dm(fb[0]) + ",1,0," + fb[1] : "") + "^FD" + zs(s) + "^FS";
+  const tmpStrip = yy => {
+    const r = [];
+    r.push("^FO" + X(0) + "," + Y(yy) + "^GB" + Dm(94) + "," + Dm(5) + "," + Dm(0.4) + "^FS");
+    r.push(txt(X(1.5), Y(yy + 1), 3.2, "TEMP: " + (TN[p.temp] || "S/D")));
+    r.push(txt(X(0), Y(yy + 1), 3.2, "BULTO " + (p.bulto || 1) + " / " + (p.bultos || 1), [92.5, "R"]));
+    return r.join("\n");
+  };
   pages.forEach((lines, pi) => {
     const z = ["^XA^MMT^PW" + Dm(100) + "^LL" + Dm(100) + "^LS0^LH0,0"];
     const tot = pages.length, first = pi === 0;
@@ -569,6 +589,7 @@ function zplFor(p){
       z.push(txt(X(0), Y(23.8), 3.2, "CLIENTE: " + String(p.cliente || "-").slice(0, 32)));
       if(CFG.qr && p.id){ const q = qrMatrix(qrData(p)); if(q){ const mag = Math.max(2, Math.min(10, Math.floor(Dm(20) / q.n))); z.push("^FO" + X(72) + "," + Y(5) + "^BQN,2," + mag + "^FDMA," + qrData(p) + "^FS"); } }
       y = 28.5;
+      z.push(tmpStrip(y)); y += 5.5;
       if(p.entrega){ z.push(txt(X(0), Y(y), 3.2, "ENTREGA SAP: " + p.entrega)); y += 5; }
       z.push(idBar(Y(y), 11)); y += 11.5;
       z.push(txt(X(0), Y(y), 3.4, fmtId(p.id), [94, "C"])); y += 4.5;
@@ -577,7 +598,8 @@ function zplFor(p){
       z.push("^FO" + X(0) + "," + Y(5) + "^GB" + Dm(94) + "," + Dm(8) + "," + Dm(8) + "^FS");
       z.push("^FO" + X(2.5) + "," + Y(6) + "^A0N," + Dm(6) + "^FR^FDZONA " + zs(p.zona) + "^FS");
       z.push("^FO" + X(0) + "," + Y(7.2) + "^A0N," + Dm(2.6) + "^FB" + Dm(91.5) + ",1,0,R^FR^FD" + zs(String(p.cliente || "").slice(0, 24)) + " " + zs(String(p.picker || "").slice(0, 20)) + "^FS");
-      y = 14; z.push(idBar(Y(y), 8)); y += 8.5;
+      y = 14; z.push(tmpStrip(y)); y += 5.5;
+      z.push(idBar(Y(y), 8)); y += 8.5;
       z.push(txt(X(0), Y(y), 3.4, fmtId(p.id), [94, "C"])); y += 4.5;
     }
     z.push("^FO" + X(0) + "," + Y(y) + "^GB" + Dm(94) + "," + Dm(0.4) + "," + Dm(0.4) + "^FS");
@@ -594,6 +616,12 @@ function zplFor(p){
     if(pi < tot - 1) z.push(txt(X(0), Y(y + lines.length * 3.4 + 0.4), 2.6, "... CONTINUA EN ETIQUETA " + (pi + 2) + "/" + tot + " ...", [94, "C"]));
     z.push("^PQ1,0,1,N^XZ"); out.push(z.join("\n"));
   });
+  return out.join("\n");
+}
+// Una tanda de etiquetas ZPL por cada bulto (mismo PalletID)
+function zplFor(p){
+  const N = Math.max(1, p.bultos || 1), out = [];
+  for(let b = 1; b <= N; b++) out.push(zplOne({...p, bulto: b}));
   return out.join("\n");
 }
 
@@ -638,9 +666,10 @@ function addLine(mat, qty, un, txt){
   if(ex){ ex.qty = Math.round((ex.qty + q) * 1000) / 1000; if(!ex.txt) ex.txt = txt; } else D.lines.push({mat, txt, un, qty: q});
   saveDraft(); return true;
 }
-function syncArmar(){ $("aZona").value = D.zona; $("aPick").value = D.picker; $("aCli").value = D.cliente; $("aEnt").value = D.entrega; }
+function syncArmar(){ $("aTempSel").value = D.temp || ""; $("aZona").value = D.zona; $("aPick").value = D.picker; $("aCli").value = D.cliente; $("aEnt").value = D.entrega; $("aBul").value = D.bultos || 1; }
 function issues(){
   const i = [], z = parseInt(D.zona, 10);
+  if(!D.temp) i.push("Selecciona la temperatura");
   if(!(z >= 1 && z <= 999)) i.push("Indica el número de zona (1 a 999)");
   if(!D.picker.trim()) i.push("Indica el pickeador");
   if(!D.lines.length) i.push("Agrega al menos un producto");
@@ -675,8 +704,8 @@ function renderArmar(){
   $("sInfo").textContent = SAP ? SAP.name + " · " + Object.keys(SAP.zones).length + " zonas en archivo" : "Sin archivo cargado";
   $("aBody").innerHTML = D.lines.length ? D.lines.map((l, i) => '<tr data-i="' + i + '"><td><b>' + esc(l.mat) + '</b></td><td class="txt">' + (esc(l.txt) || '<span class="hint">sin descripción</span>') + '</td><td class="n"><input class="q" data-f="qty" inputmode="decimal" value="' + esc(fmt(l.qty)) + '" aria-label="Cantidad"></td><td><input class="u" data-f="un" value="' + esc(l.un) + '" aria-label="Unidad"></td><td><button class="btn danger sm" data-del aria-label="Quitar">✕</button></td></tr>').join("") : '<tr><td colspan="5" class="hint" style="padding:22px;text-align:center">Elige Temperatura y Zona 600 de SAP para cargar los productos.</td></tr>';
   const pg = splitPages({lines: D.lines, entrega: D.entrega});
-  $("aKpis").innerHTML = [["Productos", D.lines.length], ["Cantidad total", fmt(sumOf(D.lines))], ["Etiquetas", pg.length]].map(([t, v]) => '<div class="kpi"><div class="t">' + t + '</div><div class="v">' + v + '</div></div>').join("");
-  $("aPv").innerHTML = labelsHTML({id:"", draft:true, zona: D.zona || "—", picker: D.picker || "—", cliente: D.cliente || "—", entrega: D.entrega, ts: nowTS(), lines: D.lines, reimp: 0});
+  $("aKpis").innerHTML = [["Productos", D.lines.length], ["Cantidad total", fmt(sumOf(D.lines))], ["Etiquetas", pg.length * (D.bultos || 1)]].map(([t, v]) => '<div class="kpi"><div class="t">' + t + '</div><div class="v">' + v + '</div></div>').join("");
+  $("aPv").innerHTML = labelsHTML({id:"", draft:true, zona: D.zona || "—", picker: D.picker || "—", cliente: D.cliente || "—", entrega: D.entrega, ts: nowTS(), lines: D.lines, reimp: 0, temp: D.temp, bultos: D.bultos || 1}, true);
   const is = issues(); $("aWarn").innerHTML = is.length ? is.map(x => '<div class="bn warn">' + esc(x) + '</div>').join("<br>") : '<div class="bn ok">Listo para cerrar</div>';
   $("aClose").disabled = is.length > 0;
 }
@@ -685,6 +714,10 @@ $("aZona").addEventListener("input", e => { e.target.value = e.target.value.repl
 $("aPick").addEventListener("input", e => { D.picker = e.target.value; saveDraft(); renderArmar(); });
 $("aCli").addEventListener("input", e => { D.cliente = e.target.value; saveDraft(); renderArmar(); });
 $("aEnt").addEventListener("input", e => { e.target.value = e.target.value.replace(/\D/g, "").slice(0, 12); D.entrega = e.target.value; saveDraft(); renderArmar(); });
+$("aBul").addEventListener("input", e => {
+  e.target.value = e.target.value.replace(/\D/g, "").slice(0, 2);
+  D.bultos = Math.max(1, parseInt(e.target.value, 10) || 1); saveDraft(); renderArmar();
+});
 let autoTxt = true;
 function lookup(){
   const m = normMat($("aMat").value), t = MAT.get(m);
@@ -715,19 +748,20 @@ $("aClose").onclick = closePallet;
 
 function closePallet(){
   const is = issues(); if(is.length) return toast(is[0]);
-  const zona = parseInt(D.zona, 10);
-  if(!confirm("¿Cerrar el pallet de la zona " + zona + " (" + D.cliente.trim() + ") con " + D.lines.length + " producto(s)?\nSe asignará el PalletID y la hora de término.")) return;
+  const zona = parseInt(D.zona, 10), bultos = Math.max(1, D.bultos || 1);
+  if(!confirm("¿Cerrar el pallet de la zona " + zona + " (" + D.cliente.trim() + ") con " + D.lines.length + " producto(s) · " + (TN[D.temp] || "") + " · " + bultos + " bulto(s)?\nSe asignará el PalletID y la hora de término.")) return;
   let ts = nowTS(), id = makeId(zona, ts);
   while(H.some(p => p.id === id)){ const d = tsDate(ts); d.setSeconds(d.getSeconds() + 1); ts = nowTS(d); id = makeId(zona, ts); }
-  const p = {id: id, zona: String(zona), picker: D.picker.trim(), cliente: D.cliente.trim(), entrega: D.entrega.trim(), ts: ts, lines: D.lines.map(l => ({...l})), reimp: 0, printed: false, void: false};
+  const p = {id: id, zona: String(zona), picker: D.picker.trim(), cliente: D.cliente.trim(), entrega: D.entrega.trim(), temp: D.temp, bultos: bultos, ts: ts, lines: D.lines.map(l => ({...l})), reimp: 0, printed: false, void: false};
   H.unshift(p); saveHist();
   if(!CFG.pickers.includes(p.picker)){ CFG.pickers.push(p.picker); saveCfg(); }
-  D = {zona:"", picker: D.picker, cliente:"", entrega:"", lines:[]}; saveDraft();
+  D = {zona:"", picker: D.picker, cliente:"", entrega:"", lines:[], temp: D.temp, bultos:1}; saveDraft();
   syncArmar(); renderArmar(); showDone(p);
 }
 function showDone(p){
-  doneId = p.id; $("dPv").innerHTML = labelsHTML(p);
-  $("dMsg").textContent = "PalletID " + fmtId(p.id) + " · " + p.lines.length + " producto(s) · " + splitPages(p).length + " etiqueta(s) de 100 × 100 mm";
+  doneId = p.id; $("dPv").innerHTML = labelsHTML(p, true);
+  const nb = p.bultos || 1;
+  $("dMsg").textContent = "PalletID " + fmtId(p.id) + " · " + p.lines.length + " producto(s) · " + (splitPages(p).length * nb) + " etiqueta(s) de 100 × 100 mm (" + nb + " bulto(s)) · " + (TN[p.temp] || "S/D");
   $("mdDone").classList.add("open");
 }
 $("dPrint").onclick = () => doneId && printPallet(doneId);
@@ -737,7 +771,7 @@ $("dNew").onclick = () => { $("mdDone").classList.remove("open"); if(cur !== "ar
 /* ===== PALLETS CERRADOS ===== */
 function filtered(){
   const q = $("cQ").value.trim().toLowerCase(), d = $("cDate").value;
-  return H.filter(p => (!d || p.ts.startsWith(d)) && (!q || [p.id, fmtId(p.id), p.zona, p.cliente, p.picker, p.entrega, ...p.lines.map(l => l.mat + " " + l.txt)].join(" ").toLowerCase().includes(q)));
+  return H.filter(p => (!d || p.ts.startsWith(d)) && (!q || [p.id, fmtId(p.id), p.zona, p.cliente, p.picker, p.entrega, TN[p.temp] || "", ...p.lines.map(l => l.mat + " " + l.txt)].join(" ").toLowerCase().includes(q)));
 }
 function renderCerrados(){
   const f = filtered();
@@ -750,11 +784,11 @@ function renderDetail(){
   if(!p){ box.innerHTML = '<div class="hint">Selecciona un pallet o escanea su código para ver todos sus productos.</div>'; return; }
   const kp = (t, v, s) => '<div class="kpi"><div class="t">' + t + '</div><div class="v"' + (s ? ' style="font-size:14px"' : "") + '>' + esc(v) + '</div></div>';
   box.innerHTML = '<h2>Pallet ' + esc(fmtId(p.id)) + '</h2>' + (p.void ? '<div class="bn void">ANULADO</div>' : "") +
-   '<div class="kpis">' + kp("Zona", p.zona) + kp("Cliente", p.cliente || "—", 1) + kp("Pickeador", p.picker, 1) + kp("Término", fmtDT(p.ts), 1) + kp("Entrega SAP", p.entrega || "—", 1) + '</div>' +
+   '<div class="kpis">' + kp("Zona", p.zona) + kp("Temperatura", TN[p.temp] || "S/D", 1) + kp("Bultos", p.bultos || 1) + kp("Cliente", p.cliente || "—", 1) + kp("Pickeador", p.picker, 1) + kp("Término", fmtDT(p.ts), 1) + kp("Entrega SAP", p.entrega || "—", 1) + '</div>' +
    '<div class="scroll" style="max-height:260px"><table class="t"><thead><tr><th>Material</th><th>Descripción</th><th class="n">Cant.</th><th>Un.</th></tr></thead><tbody>' + p.lines.map(l => '<tr><td><b>' + esc(l.mat) + '</b></td><td class="txt">' + esc(l.txt) + '</td><td class="n">' + fmt(l.qty) + '</td><td>' + esc(l.un) + '</td></tr>').join("") + '</tbody></table></div>' +
    '<p class="hint">' + p.lines.length + " producto(s) · cantidad total " + fmt(sumOf(p.lines)) + (p.reimp ? " · reimpreso " + p.reimp + " vez/veces" : "") + '</p>' +
    '<div class="toolbar" style="margin:0"><button class="btn" data-act="print">🖨 Reimprimir</button><button class="btn gray" data-act="zpl">ZPL</button><button class="btn danger sm" data-act="void">' + (p.void ? "Reactivar" : "Anular") + '</button></div>' +
-   '<div class="pv" style="margin-top:12px">' + labelsHTML(p) + '</div>';
+   '<div class="pv" style="margin-top:12px">' + labelsHTML(p, true) + '</div>';
 }
 $("cBody").addEventListener("click", e => { const tr = e.target.closest("tr[data-id]"); if(tr){ selId = tr.dataset.id; renderCerrados(); } });
 $("cDetail").addEventListener("click", e => {
@@ -771,8 +805,8 @@ $("cQ").addEventListener("keydown", e => {
 });
 $("cExport").onclick = () => {
   if(!H.length) return toast("No hay pallets para exportar");
-  const m = [["PalletID", "Zona", "Cliente", "Pickeador", "Entrega SAP", "Término", "Estado", "Material", "Descripción", "Unidad", "Cantidad"]];
-  H.forEach(p => p.lines.forEach(l => m.push([p.id, p.zona, p.cliente || "", p.picker, p.entrega, fmtDT(p.ts), p.void ? "ANULADO" : "OK", l.mat, l.txt, l.un, l.qty])));
+  const m = [["PalletID", "Zona", "Temperatura", "Bultos", "Cliente", "Pickeador", "Entrega SAP", "Término", "Estado", "Material", "Descripción", "Unidad", "Cantidad"]];
+  H.forEach(p => p.lines.forEach(l => m.push([p.id, p.zona, TN[p.temp] || "", p.bultos || 1, p.cliente || "", p.picker, p.entrega, fmtDT(p.ts), p.void ? "ANULADO" : "OK", l.mat, l.txt, l.un, l.qty])));
   if(window.XLSX){ const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(m), "Pallets"); XLSX.writeFile(wb, "pallets_cerrados.xlsx"); }
   else download("pallets_cerrados.csv", new Blob(["\ufeff" + m.map(r => r.map(x => '"' + String(x ?? "").replace(/"/g, '""') + '"').join(";")).join("\n")], {type:"text/csv;charset=utf-8"}));
 };
@@ -786,12 +820,12 @@ async function renderConfig(){
 $("kPickSave").onclick = () => { CFG.pickers = [...new Set($("kPick").value.split("\n").map(x => x.trim()).filter(Boolean))]; saveCfg(); toast("Lista guardada"); };
 $("kSave").onclick = () => {
   const ox = parseFloat($("kOx").value) || 0, oy = parseFloat($("kOy").value) || 0;
-  if(Math.abs(ox) > 10 || Math.abs(ox) > 10) return toast("Los ajustes deben estar entre -10 y 10 mm");
+  if(Math.abs(ox) > 10 || Math.abs(oy) > 10) return toast("Los ajustes deben estar entre -10 y 10 mm");
   CFG.sitio = $("kSite").value.trim(); CFG.dpi = parseInt($("kDpi").value, 10) || 203; CFG.offX = ox; CFG.offY = oy; CFG.baseUrl = $("kUrl").value.trim(); CFG.qr = $("kQr").checked; saveCfg(); toast("Configuración guardada");
 };
 $("kTest").onclick = () => {
   $("kSave").click(); const ts = nowTS();
-  printHTML(labelsHTML({id: makeId(12, ts), zona: "12", picker: "Prueba de impresión", cliente: "Cliente de prueba", entrega: "100974414", ts: ts, reimp: 0, lines: [...MAT.entries()].slice(0, 12).map(([m, t], i) => ({mat: m, txt: t, un: "UN", qty: i + 1}))}));
+  printHTML(labelsHTML({id: makeId(12, ts), zona: "12", picker: "Prueba de impresión", cliente: "Cliente de prueba", entrega: "100974414", temp: "CONG", bultos: 2, ts: ts, reimp: 0, lines: [...MAT.entries()].slice(0, 12).map(([m, t], i) => ({mat: m, txt: t, un: "UN", qty: i + 1}))}));
 };
 $("kMatSeed").onclick = async () => { await loadSeedMats(); renderConfig(); toast("Maestro incluido restaurado"); };
 $("kBackup").onclick = () => download("palletid_respaldo_" + nowTS().slice(0, 10) + ".json", new Blob([JSON.stringify({v: 1, H: H})], {type:"application/json"}));
