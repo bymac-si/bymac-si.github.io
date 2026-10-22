@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PalletID · ICB Food Service</title>
 <link rel="icon" href="https://www.icbfs.cl/wp-content/uploads/2022/01/cropped-favicon-32x32.jpg" sizes="32x32">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{--bg:#f5f5f7;--panel:#fff;--line:#e2e2e8;--ink:#1d1d22;--muted:#6c6c78;--brand:#ed2750;--soft:#fdecef;--green:#15803d;--red:#b42318;box-sizing:border-box}
@@ -90,6 +91,13 @@ pre.zpl{background:#111;color:#c9f7c9;padding:10px;border-radius:8px;max-height:
 .lb-tmp{height:5mm;margin-top:.5mm;border:.4mm solid #000;display:flex;justify-content:space-between;align-items:center;padding:0 1.5mm;font-size:9pt;font-weight:900;line-height:1;white-space:nowrap}
 .lb-tmp.CONG{background:#000;color:#fff}
 .lb-tmp.FRIO{border-width:.9mm}
+.lb-hd{height:10mm;display:flex;align-items:center;gap:2mm}
+.lb-logo{height:10mm;width:auto;display:block;flex:none}
+.lb-slg{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;line-height:1}
+.lb-slg b{font-size:7.5pt;font-weight:900;letter-spacing:.2pt;white-space:nowrap}
+.lb-slg i{font-family:"Caveat","Segoe Script","Bradley Hand","Brush Script MT","Comic Sans MS",cursive;font-style:normal;font-weight:700;font-size:15pt;line-height:1.1;white-space:nowrap}
+.lb-st{font-size:6.5pt;font-weight:700;text-align:right;line-height:1.25;white-space:nowrap;flex:none}.lb-st span{display:block}
+.lb-dir{height:4.5mm;font-size:8pt;line-height:4.5mm;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lb-dir small{font-weight:400;font-size:6.5pt;margin-right:1mm}
 .lb-wm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18pt;font-weight:900;color:rgba(0,0,0,.12);transform:rotate(-30deg);pointer-events:none}
 @media screen{.pv .lbl{zoom:1.2;box-shadow:0 2px 12px rgba(0,0,0,.25)}}
 @media print{html,body{margin:0!important;padding:0!important;background:#fff}
@@ -145,6 +153,7 @@ pre.zpl{background:#111;color:#c9f7c9;padding:10px;border-radius:8px;max-height:
       <div><label for="aCli">Cliente</label><input id="aCli" list="cliList" autocomplete="off" placeholder="Nombre del cliente"><datalist id="cliList"></datalist></div>
       <div><label for="aEnt">Entrega / pedido SAP <span class="hint">(opcional)</span></label><input id="aEnt" inputmode="numeric" placeholder="100974414" autocomplete="off"></div>
       <div><label for="aBul">Cantidad de bultos <span class="hint">(etiquetas a imprimir)</span></label><input id="aBul" inputmode="numeric" maxlength="2" value="1" autocomplete="off"></div>
+      <div style="grid-column:1/-1"><label for="aDir">Dirección de envío <span class="hint">(opcional; una línea)</span></label><input id="aDir" maxlength="80" autocomplete="off" placeholder="Calle, número, comuna"></div>
     </div>
    </div>
    <div class="panel">
@@ -361,10 +370,44 @@ function qrSVG(text, maxMM){
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + T + ' ' + T + '" width="' + (T * mod).toFixed(3) + 'mm" height="' + (T * mod).toFixed(3) + 'mm" shape-rendering="crispEdges"><path d="' + d + '" fill="#000"/></svg>';
 }
 
+/* ===== LOGO (blanco/negro para térmica) Y GRÁFICOS ZPL ===== */
+const LOGO = "data:image/png;base64,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";
+const LOGO_AR = 390 / 476;
+const LOGO_IMG = new Image(); LOGO_IMG.src = LOGO;
+const SCRIPT_FONT = '"Caveat","Segoe Script","Bradley Hand","Brush Script MT","Comic Sans MS",cursive';
+function gfaFromCanvas(cv){
+  const w = cv.width, h = cv.height, d = cv.getContext("2d").getImageData(0, 0, w, h).data, bpr = Math.ceil(w / 8);
+  let hex = "";
+  for(let y = 0; y < h; y++) for(let b = 0; b < bpr; b++){
+    let v = 0;
+    for(let i = 0; i < 8; i++){
+      const x = b * 8 + i; let bit = 0;
+      if(x < w){ const o = (y * w + x) * 4; bit = (d[o + 3] > 127 && (0.299 * d[o] + 0.587 * d[o + 1] + 0.114 * d[o + 2]) < 140) ? 1 : 0; }
+      v = (v << 1) | bit;
+    }
+    hex += (v < 16 ? "0" : "") + v.toString(16).toUpperCase();
+  }
+  return "^GFA," + (bpr * h) + "," + (bpr * h) + "," + bpr + "," + hex + "^FS";
+}
+function logoGfa(w, h){
+  if(!(LOGO_IMG.complete && LOGO_IMG.naturalWidth)) return "";
+  const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+  const c = cv.getContext("2d"); c.fillStyle = "#fff"; c.fillRect(0, 0, w, h); c.imageSmoothingQuality = "high"; c.drawImage(LOGO_IMG, 0, 0, w, h);
+  return gfaFromCanvas(cv);
+}
+function textGfa(text, hDots){
+  const px = Math.round(hDots * 0.85), font = "700 " + px + "px " + SCRIPT_FONT;
+  const m = document.createElement("canvas").getContext("2d"); m.font = font;
+  const cv = document.createElement("canvas"); cv.width = Math.ceil(m.measureText(text).width) + 6; cv.height = hDots;
+  const c = cv.getContext("2d"); c.font = font; c.fillStyle = "#000"; c.strokeStyle = "#000"; c.lineWidth = Math.max(1, hDots / 28);
+  c.fillText(text, 3, Math.round(hDots * 0.72)); c.strokeText(text, 3, Math.round(hDots * 0.72));
+  return gfaFromCanvas(cv);
+}
+
 /* ===== DATOS Y CONFIGURACIÓN ===== */
 const CFG = Object.assign({pickers:[], offX:0, offY:0, qr:true, baseUrl:"", dpi:203, sitio:""}, lsGet("icb_pid_cfg_v1", {}));
 const saveCfg = () => lsSet("icb_pid_cfg_v1", CFG);
-let MAT = new Map(), H = [], SAP = null, D = Object.assign({zona:"", picker:"", cliente:"", entrega:"", lines:[], temp:"", bultos:1}, lsGet("icb_pid_draft_v1", {}));
+let MAT = new Map(), H = [], SAP = null, D = Object.assign({zona:"", picker:"", cliente:"", entrega:"", lines:[], temp:"", bultos:1, direccion:""}, lsGet("icb_pid_draft_v1", {}));
 const saveDraft = () => lsSet("icb_pid_draft_v1", D);
 const IDB = {db:null,
   open(){ return new Promise(res => { try{ const r = indexedDB.open("icb_pid_v1", 1); r.onupgradeneeded = () => r.result.createObjectStore("kv"); r.onsuccess = () => { IDB.db = r.result; res(); }; r.onerror = () => res(); } catch(e){ res(); } }); },
@@ -503,7 +546,7 @@ function fromSap(k){
 $("aZsel").onchange = e => e.target.value ? fromSap(e.target.value) : renderArmar();
 $("aTempSel").onchange = () => {
   D.lines = []; D.zona = ""; D.picker = ""; D.cliente = ""; D.entrega = "";
-  D.temp = $("aTempSel").value; D.bultos = 1;
+  D.temp = $("aTempSel").value; D.bultos = 1; D.direccion = "";
   saveDraft(); syncArmar(); renderArmar();
 };
 
@@ -518,9 +561,12 @@ function parseScan(t){
   const d = t.replace(/\D/g, ""); return d.length === 16 ? d : null;
 }
 function splitPages(p){
-  const e = !!p.entrega, L = p.lines.slice(), pages = []; let first = true;
+  const e = !!p.entrega, d = !!String(p.direccion || "").trim(), L = p.lines.slice(), pages = []; let first = true;
+  // alto fijo de la 1.ª etiqueta: cabecera 10 + bloque zona 22 + temp 5.5 + [entrega 12.5] + código 12 + id 4 + resumen 5.5 + [dirección 4.5]
+  const fixed = 10 + 22 + 5.5 + (e ? 12.5 : 0) + 12 + 4 + 5.5 + (d ? 4.5 : 0);
+  const f1 = Math.max(1, Math.floor((94 - fixed) / 3.4)), m1 = Math.max(1, Math.floor((94 - fixed - 4) / 3.4));
   for(;;){
-    const full = first ? (e ? 8 : 12) : 16, more = first ? (e ? 7 : 11) : 15;
+    const full = first ? f1 : 16, more = first ? m1 : 15;
     if(L.length <= full){ pages.push(L.splice(0)); break; }
     pages.push(L.splice(0, more)); first = false;
   }
@@ -533,6 +579,8 @@ function labelHTML(p, pi, pages){
   const tot = pages.length, first = pi === 0, lines = pages[pi], n = p.lines.length, sum = sumOf(p.lines);
   const up = s => esc(String(s || "").toUpperCase());
   const tmp = '<div class="lb-tmp ' + esc(p.temp || "") + '"><span>TEMP: ' + up(TN[p.temp] || "S/D") + '</span><span>BULTO ' + (p.bulto || 1) + ' / ' + (p.bultos || 1) + '</span></div>';
+  const dir = String(p.direccion || "").trim() ? '<div class="lb-dir"><small>ENVIAR A</small>' + up(p.direccion) + '</div>' : "";
+  const hdFirst = '<div class="lb-hd"><img class="lb-logo" src="' + LOGO + '" alt="ICB Food Service"><div class="lb-slg"><b>LA DESPENSA DE LOS CHEFS</b><i>Directo a tu Hogar</i></div><div class="lb-st">' + (CFG.sitio ? '<span>' + up(CFG.sitio) + '</span>' : "") + '<span>' + (p.draft ? "VISTA PREVIA" : "FIN DE PICKING") + (tot > 1 ? " · " + (pi + 1) + "/" + tot : "") + '</span>' + (p.reimp ? '<span>REIMP. ' + p.reimp + '</span>' : "") + '</div></div>';
   const head = '<div class="lb-h"><span>ICB FOOD SERVICE' + (CFG.sitio ? " · " + up(CFG.sitio) : "") + '</span><span>' + (p.draft ? "VISTA PREVIA" : "FIN DE PICKING") + (tot > 1 ? " · " + (pi + 1) + "/" + tot : "") + (p.reimp ? " · REIMP. " + p.reimp : "") + '</span></div>';
   const rows = lines.map(l => '<div class="lb-row"><span class="c">' + esc(l.mat) + '</span><span class="d">' + up(l.txt) + '</span><span class="q">' + fmt(l.qty) + '</span><span class="u">' + up(l.un) + '</span></div>').join("");
   const more = pi < tot - 1 ? '<div class="lb-more">… CONTINÚA EN ETIQUETA ' + (pi + 2) + "/" + tot + " …" : "";
@@ -541,7 +589,7 @@ function labelHTML(p, pi, pages){
   let inner;
   if(first){
     const qr = CFG.qr ? (p.id ? qrSVG(qrData(p), 21) : '<div style="width:20mm;height:20mm;border:.3mm dashed #000;display:flex;align-items:center;justify-content:center;font-size:6pt">QR</div>') : "";
-    inner = head + '<div class="lb-top"><div class="lb-l"><div class="lb-zone">ZONA ' + up(p.zona) + '</div><div class="lb-kv"><small>PICKEADOR</small>' + up(p.picker) + '</div><div class="lb-kv"><small>CLIENTE</small>' + up(p.cliente || "") + '</div></div><div class="lb-r">' + qr + '</div></div>' + tmp +
+    inner = hdFirst + '<div class="lb-top"><div class="lb-l"><div class="lb-zone">ZONA ' + up(p.zona) + '</div><div class="lb-kv"><small>PICKEADOR</small>' + up(p.picker) + '</div><div class="lb-kv"><small>CLIENTE</small>' + up(p.cliente || "") + '</div></div><div class="lb-r">' + qr + '</div></div>' + dir + tmp +
     (p.entrega ? '<div class="lb-ent"><small>ENTREGA SAP</small>' + esc(p.entrega) + '</div>' : "") +
     '<div class="lb-bc">' + idBar + '</div>' + idTxt +
     (p.entrega ? '<div class="lb-bc" style="margin-top:.5mm">' + barSVG(p.entrega, 0.375, 7) + '</div>' : "") +
@@ -564,7 +612,7 @@ const labelsHTML = (p, one) => {
 const zs = s => String(s == null ? "" : s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\x20-\x7E]/g, " ").replace(/[\^~\\]/g, " ").toUpperCase();
 function zplOne(p){
   const k = CFG.dpi === 300 ? 11.811 : 8, Dm = mm => Math.round(mm * k), X = mm => Dm(3 + CFG.offX + mm), Y = mm => Dm(3 + CFG.offY + mm);
-  const pages = splitPages(p), out = [], n = p.lines.length, sum = sumOf(p.lines);
+  const pages = splitPages(p), out = [], n = p.lines.length, sum = sumOf(p.lines), dirZ = String(p.direccion || "").trim();
   const txt = (x, y, h, s, fb) => "^FO" + x + "," + y + "^A0N," + Dm(h) + (fb ? "^FB" + Dm(fb[0]) + ",1,0," + fb[1] : "") + "^FD" + zs(s) + "^FS";
   const tmpStrip = yy => {
     const r = [];
@@ -573,22 +621,35 @@ function zplOne(p){
     r.push(txt(X(0), Y(yy + 1), 3.2, "BULTO " + (p.bulto || 1) + " / " + (p.bultos || 1), [92.5, "R"]));
     return r.join("\n");
   };
+  const hdrZpl = (pi, tot) => {
+    const r = [], lh = Dm(10), lw = Math.round(lh * LOGO_AR), tx = X(0) + lw + Dm(2);
+    const lg = logoGfa(lw, lh); if(lg) r.push("^FO" + X(0) + "," + Y(0) + lg);
+    r.push(txt(tx, Y(1.2), 3, "LA DESPENSA DE LOS CHEFS")); r.push(txt(tx + 1, Y(1.2), 3, "LA DESPENSA DE LOS CHEFS"));
+    r.push("^FO" + tx + "," + Y(4.6) + textGfa("Directo a tu Hogar", Dm(5)));
+    const st = [CFG.sitio || "", (p.draft ? "VISTA PREVIA" : "FIN DE PICKING") + (tot > 1 ? " - " + (pi + 1) + "/" + tot : "")]; if(p.reimp) st.push("REIMP. " + p.reimp);
+    st.forEach((s, i) => { if(s) r.push(txt(X(0), Y(0.8 + i * 2.8), 2.4, s, [94, "R"])); });
+    return r.join("\n");
+  };
   pages.forEach((lines, pi) => {
     const z = ["^XA^MMT^PW" + Dm(100) + "^LL" + Dm(100) + "^LS0^LH0,0"];
     const tot = pages.length, first = pi === 0;
-    z.push(txt(X(0), Y(0.6), 2.6, "ICB FOOD SERVICE" + (CFG.sitio ? " - " + CFG.sitio : "")));
-    z.push(txt(X(0), Y(0.6), 2.6, (p.draft ? "VISTA PREVIA" : "FIN DE PICKING") + (tot > 1 ? " - " + (pi + 1) + "/" + tot : "") + (p.reimp ? " - REIMP. " + p.reimp : ""), [94, "R"]));
+    if(first) z.push(hdrZpl(pi, tot));
+    else {
+      z.push(txt(X(0), Y(0.6), 2.6, "ICB FOOD SERVICE" + (CFG.sitio ? " - " + CFG.sitio : "")));
+      z.push(txt(X(0), Y(0.6), 2.6, (p.draft ? "VISTA PREVIA" : "FIN DE PICKING") + (tot > 1 ? " - " + (pi + 1) + "/" + tot : "") + (p.reimp ? " - REIMP. " + p.reimp : ""), [94, "R"]));
+    }
     let y;
     const bw = Math.max(2, Math.round(0.5 * k));
     const idMod = p.id ? code128Total(p.id) : 0;
     const idBar = (yy, hh) => p.id ? "^BY" + bw + ",3," + Dm(hh) + "^FO" + (X(0) + Math.round((Dm(94) - idMod * bw) / 2)) + "," + yy + "^BCN," + Dm(hh) + ",N,N,N,A^FD" + p.id + "^FS" : "";
     if(first){
-      z.push("^FO" + X(0) + "," + Y(5) + "^GB" + Dm(70) + "," + Dm(13) + "," + Dm(13) + "^FS");
-      z.push("^FO" + X(3) + "," + Y(6.4) + "^A0N," + Dm(10) + "^FR^FDZONA " + zs(p.zona) + "^FS");
-      z.push(txt(X(0), Y(19.3), 3.2, "PICKEADOR: " + String(p.picker || "").slice(0, 28)));
-      z.push(txt(X(0), Y(23.8), 3.2, "CLIENTE: " + String(p.cliente || "-").slice(0, 32)));
-      if(CFG.qr && p.id){ const q = qrMatrix(qrData(p)); if(q){ const mag = Math.max(2, Math.min(10, Math.floor(Dm(20) / q.n))); z.push("^FO" + X(72) + "," + Y(5) + "^BQN,2," + mag + "^FDMA," + qrData(p) + "^FS"); } }
-      y = 28.5;
+      z.push("^FO" + X(0) + "," + Y(11) + "^GB" + Dm(70) + "," + Dm(13) + "," + Dm(13) + "^FS");
+      z.push("^FO" + X(3) + "," + Y(12.4) + "^A0N," + Dm(10) + "^FR^FDZONA " + zs(p.zona) + "^FS");
+      z.push(txt(X(0), Y(25.3), 3.2, "PICKEADOR: " + String(p.picker || "").slice(0, 28)));
+      z.push(txt(X(0), Y(29.8), 3.2, "CLIENTE: " + String(p.cliente || "-").slice(0, 32)));
+      if(CFG.qr && p.id){ const q = qrMatrix(qrData(p)); if(q){ const mag = Math.max(2, Math.min(10, Math.floor(Dm(20) / q.n))); z.push("^FO" + X(72) + "," + Y(11) + "^BQN,2," + mag + "^FDMA," + qrData(p) + "^FS"); } }
+      y = 33.5;
+      if(dirZ){ z.push(txt(X(0), Y(y), 3, "ENVIAR A: " + dirZ.slice(0, 50))); y += 4.5; }
       z.push(tmpStrip(y)); y += 5.5;
       if(p.entrega){ z.push(txt(X(0), Y(y), 3.2, "ENTREGA SAP: " + p.entrega)); y += 5; }
       z.push(idBar(Y(y), 11)); y += 11.5;
@@ -666,7 +727,7 @@ function addLine(mat, qty, un, txt){
   if(ex){ ex.qty = Math.round((ex.qty + q) * 1000) / 1000; if(!ex.txt) ex.txt = txt; } else D.lines.push({mat, txt, un, qty: q});
   saveDraft(); return true;
 }
-function syncArmar(){ $("aTempSel").value = D.temp || ""; $("aZona").value = D.zona; $("aPick").value = D.picker; $("aCli").value = D.cliente; $("aEnt").value = D.entrega; $("aBul").value = D.bultos || 1; }
+function syncArmar(){ $("aTempSel").value = D.temp || ""; $("aZona").value = D.zona; $("aPick").value = D.picker; $("aCli").value = D.cliente; $("aEnt").value = D.entrega; $("aBul").value = D.bultos || 1; $("aDir").value = D.direccion || ""; }
 function issues(){
   const i = [], z = parseInt(D.zona, 10);
   if(!D.temp) i.push("Selecciona la temperatura");
@@ -703,9 +764,9 @@ function renderArmar(){
   
   $("sInfo").textContent = SAP ? SAP.name + " · " + Object.keys(SAP.zones).length + " zonas en archivo" : "Sin archivo cargado";
   $("aBody").innerHTML = D.lines.length ? D.lines.map((l, i) => '<tr data-i="' + i + '"><td><b>' + esc(l.mat) + '</b></td><td class="txt">' + (esc(l.txt) || '<span class="hint">sin descripción</span>') + '</td><td class="n"><input class="q" data-f="qty" inputmode="decimal" value="' + esc(fmt(l.qty)) + '" aria-label="Cantidad"></td><td><input class="u" data-f="un" value="' + esc(l.un) + '" aria-label="Unidad"></td><td><button class="btn danger sm" data-del aria-label="Quitar">✕</button></td></tr>').join("") : '<tr><td colspan="5" class="hint" style="padding:22px;text-align:center">Elige Temperatura y Zona 600 de SAP para cargar los productos.</td></tr>';
-  const pg = splitPages({lines: D.lines, entrega: D.entrega});
+  const pg = splitPages({lines: D.lines, entrega: D.entrega, direccion: D.direccion});
   $("aKpis").innerHTML = [["Productos", D.lines.length], ["Cantidad total", fmt(sumOf(D.lines))], ["Etiquetas", pg.length * (D.bultos || 1)]].map(([t, v]) => '<div class="kpi"><div class="t">' + t + '</div><div class="v">' + v + '</div></div>').join("");
-  $("aPv").innerHTML = labelsHTML({id:"", draft:true, zona: D.zona || "—", picker: D.picker || "—", cliente: D.cliente || "—", entrega: D.entrega, ts: nowTS(), lines: D.lines, reimp: 0, temp: D.temp, bultos: D.bultos || 1}, true);
+  $("aPv").innerHTML = labelsHTML({id:"", draft:true, zona: D.zona || "—", picker: D.picker || "—", cliente: D.cliente || "—", entrega: D.entrega, ts: nowTS(), lines: D.lines, reimp: 0, temp: D.temp, bultos: D.bultos || 1, direccion: D.direccion}, true);
   const is = issues(); $("aWarn").innerHTML = is.length ? is.map(x => '<div class="bn warn">' + esc(x) + '</div>').join("<br>") : '<div class="bn ok">Listo para cerrar</div>';
   $("aClose").disabled = is.length > 0;
 }
@@ -718,6 +779,7 @@ $("aBul").addEventListener("input", e => {
   e.target.value = e.target.value.replace(/\D/g, "").slice(0, 2);
   D.bultos = Math.max(1, parseInt(e.target.value, 10) || 1); saveDraft(); renderArmar();
 });
+$("aDir").addEventListener("input", e => { D.direccion = e.target.value; saveDraft(); renderArmar(); });
 let autoTxt = true;
 function lookup(){
   const m = normMat($("aMat").value), t = MAT.get(m);
@@ -752,10 +814,10 @@ function closePallet(){
   if(!confirm("¿Cerrar el pallet de la zona " + zona + " (" + D.cliente.trim() + ") con " + D.lines.length + " producto(s) · " + (TN[D.temp] || "") + " · " + bultos + " bulto(s)?\nSe asignará el PalletID y la hora de término.")) return;
   let ts = nowTS(), id = makeId(zona, ts);
   while(H.some(p => p.id === id)){ const d = tsDate(ts); d.setSeconds(d.getSeconds() + 1); ts = nowTS(d); id = makeId(zona, ts); }
-  const p = {id: id, zona: String(zona), picker: D.picker.trim(), cliente: D.cliente.trim(), entrega: D.entrega.trim(), temp: D.temp, bultos: bultos, ts: ts, lines: D.lines.map(l => ({...l})), reimp: 0, printed: false, void: false};
+  const p = {id: id, zona: String(zona), picker: D.picker.trim(), cliente: D.cliente.trim(), entrega: D.entrega.trim(), direccion: D.direccion.trim(), temp: D.temp, bultos: bultos, ts: ts, lines: D.lines.map(l => ({...l})), reimp: 0, printed: false, void: false};
   H.unshift(p); saveHist();
   if(!CFG.pickers.includes(p.picker)){ CFG.pickers.push(p.picker); saveCfg(); }
-  D = {zona:"", picker: D.picker, cliente:"", entrega:"", lines:[], temp: D.temp, bultos:1}; saveDraft();
+  D = {zona:"", picker: D.picker, cliente:"", entrega:"", lines:[], temp: D.temp, bultos:1, direccion:""}; saveDraft();
   syncArmar(); renderArmar(); showDone(p);
 }
 function showDone(p){
@@ -771,7 +833,7 @@ $("dNew").onclick = () => { $("mdDone").classList.remove("open"); if(cur !== "ar
 /* ===== PALLETS CERRADOS ===== */
 function filtered(){
   const q = $("cQ").value.trim().toLowerCase(), d = $("cDate").value;
-  return H.filter(p => (!d || p.ts.startsWith(d)) && (!q || [p.id, fmtId(p.id), p.zona, p.cliente, p.picker, p.entrega, TN[p.temp] || "", ...p.lines.map(l => l.mat + " " + l.txt)].join(" ").toLowerCase().includes(q)));
+  return H.filter(p => (!d || p.ts.startsWith(d)) && (!q || [p.id, fmtId(p.id), p.zona, p.cliente, p.picker, p.entrega, p.direccion || "", TN[p.temp] || "", ...p.lines.map(l => l.mat + " " + l.txt)].join(" ").toLowerCase().includes(q)));
 }
 function renderCerrados(){
   const f = filtered();
@@ -784,7 +846,7 @@ function renderDetail(){
   if(!p){ box.innerHTML = '<div class="hint">Selecciona un pallet o escanea su código para ver todos sus productos.</div>'; return; }
   const kp = (t, v, s) => '<div class="kpi"><div class="t">' + t + '</div><div class="v"' + (s ? ' style="font-size:14px"' : "") + '>' + esc(v) + '</div></div>';
   box.innerHTML = '<h2>Pallet ' + esc(fmtId(p.id)) + '</h2>' + (p.void ? '<div class="bn void">ANULADO</div>' : "") +
-   '<div class="kpis">' + kp("Zona", p.zona) + kp("Temperatura", TN[p.temp] || "S/D", 1) + kp("Bultos", p.bultos || 1) + kp("Cliente", p.cliente || "—", 1) + kp("Pickeador", p.picker, 1) + kp("Término", fmtDT(p.ts), 1) + kp("Entrega SAP", p.entrega || "—", 1) + '</div>' +
+   '<div class="kpis">' + kp("Zona", p.zona) + kp("Temperatura", TN[p.temp] || "S/D", 1) + kp("Bultos", p.bultos || 1) + kp("Cliente", p.cliente || "—", 1) + kp("Pickeador", p.picker, 1) + kp("Término", fmtDT(p.ts), 1) + kp("Entrega SAP", p.entrega || "—", 1) + kp("Dirección", p.direccion || "—", 1) + '</div>' +
    '<div class="scroll" style="max-height:260px"><table class="t"><thead><tr><th>Material</th><th>Descripción</th><th class="n">Cant.</th><th>Un.</th></tr></thead><tbody>' + p.lines.map(l => '<tr><td><b>' + esc(l.mat) + '</b></td><td class="txt">' + esc(l.txt) + '</td><td class="n">' + fmt(l.qty) + '</td><td>' + esc(l.un) + '</td></tr>').join("") + '</tbody></table></div>' +
    '<p class="hint">' + p.lines.length + " producto(s) · cantidad total " + fmt(sumOf(p.lines)) + (p.reimp ? " · reimpreso " + p.reimp + " vez/veces" : "") + '</p>' +
    '<div class="toolbar" style="margin:0"><button class="btn" data-act="print">🖨 Reimprimir</button><button class="btn gray" data-act="zpl">ZPL</button><button class="btn danger sm" data-act="void">' + (p.void ? "Reactivar" : "Anular") + '</button></div>' +
@@ -805,8 +867,8 @@ $("cQ").addEventListener("keydown", e => {
 });
 $("cExport").onclick = () => {
   if(!H.length) return toast("No hay pallets para exportar");
-  const m = [["PalletID", "Zona", "Temperatura", "Bultos", "Cliente", "Pickeador", "Entrega SAP", "Término", "Estado", "Material", "Descripción", "Unidad", "Cantidad"]];
-  H.forEach(p => p.lines.forEach(l => m.push([p.id, p.zona, TN[p.temp] || "", p.bultos || 1, p.cliente || "", p.picker, p.entrega, fmtDT(p.ts), p.void ? "ANULADO" : "OK", l.mat, l.txt, l.un, l.qty])));
+  const m = [["PalletID", "Zona", "Temperatura", "Bultos", "Cliente", "Pickeador", "Entrega SAP", "Dirección de envío", "Término", "Estado", "Material", "Descripción", "Unidad", "Cantidad"]];
+  H.forEach(p => p.lines.forEach(l => m.push([p.id, p.zona, TN[p.temp] || "", p.bultos || 1, p.cliente || "", p.picker, p.entrega, p.direccion || "", fmtDT(p.ts), p.void ? "ANULADO" : "OK", l.mat, l.txt, l.un, l.qty])));
   if(window.XLSX){ const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(m), "Pallets"); XLSX.writeFile(wb, "pallets_cerrados.xlsx"); }
   else download("pallets_cerrados.csv", new Blob(["\ufeff" + m.map(r => r.map(x => '"' + String(x ?? "").replace(/"/g, '""') + '"').join(";")).join("\n")], {type:"text/csv;charset=utf-8"}));
 };
@@ -825,7 +887,7 @@ $("kSave").onclick = () => {
 };
 $("kTest").onclick = () => {
   $("kSave").click(); const ts = nowTS();
-  printHTML(labelsHTML({id: makeId(12, ts), zona: "12", picker: "Prueba de impresión", cliente: "Cliente de prueba", entrega: "100974414", temp: "CONG", bultos: 2, ts: ts, reimp: 0, lines: [...MAT.entries()].slice(0, 12).map(([m, t], i) => ({mat: m, txt: t, un: "UN", qty: i + 1}))}));
+  printHTML(labelsHTML({id: makeId(12, ts), zona: "12", picker: "Prueba de impresión", cliente: "Cliente de prueba", entrega: "100974414", direccion: "Av. Ejemplo 1234, Comuna, Ciudad", temp: "CONG", bultos: 2, ts: ts, reimp: 0, lines: [...MAT.entries()].slice(0, 12).map(([m, t], i) => ({mat: m, txt: t, un: "UN", qty: i + 1}))}));
 };
 $("kMatSeed").onclick = async () => { await loadSeedMats(); renderConfig(); toast("Maestro incluido restaurado"); };
 $("kBackup").onclick = () => download("palletid_respaldo_" + nowTS().slice(0, 10) + ".json", new Blob([JSON.stringify({v: 1, H: H})], {type:"application/json"}));
@@ -835,6 +897,7 @@ $("fRest").onchange = async e => { const f = e.target.files[0]; e.target.value =
 /* ===== ARRANQUE ===== */
 (async function init(){
   await loadAll();
+  try{ if(document.fonts) document.fonts.load("700 20px Caveat").catch(() => {}); }catch(e){}
   const hm = /#p=(\d{16})/.exec(location.hash);
   if(hm && H.some(p => p.id === hm[1])){ selId = hm[1]; go("cerrados"); } else go(location.hash.replace("#", "") || "armar");
   window.addEventListener("hashchange", () => { const m = /#p=(\d{16})/.exec(location.hash); if(m && H.some(p => p.id === m[1])){ selId = m[1]; go("cerrados"); } else go(location.hash.replace("#", "")); });
