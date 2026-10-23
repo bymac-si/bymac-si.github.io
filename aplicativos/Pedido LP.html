@@ -108,6 +108,7 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--ac);outlin
     <button class="btn p" id="xl">Descargar planilla Excel (LP)</button>
     <button class="btn" id="cp">Copiar pedido como texto</button>
     <button class="btn" id="cl">Vaciar pedido</button>
+    <a class="btn p" id="dlk" hidden style="text-align:center;text-decoration:none;word-break:break-all"></a>
     <p class="m" id="msg" role="status"></p>
   </div>
 </div>
@@ -205,86 +206,30 @@ function buildSheet(x){
 function fixPkg(w,ct,rels){
   return [w.replace(/<calcPr([^>]*?)\/>/,(m,a)=>'<calcPr'+a.replace(/\sfullCalcOnLoad="[^"]*"/,"")+' fullCalcOnLoad="1"/>'),
     ct.replace(/<Override[^>]*calcChain[^>]*\/>/,""),rels.replace(/<Relationship [^>]*calcChain[^>]*\/>/,"")];}
+let dlUrl=null;
+async function makeXlsx(){
+  if(!window.JSZip)throw new Error("no se cargó la librería JSZip (revisa tu conexión)");
+  const zip=await JSZip.loadAsync(TPL,{base64:true});
+  zip.file("xl/worksheets/sheet1.xml",buildSheet(await zip.file("xl/worksheets/sheet1.xml").async("string")));
+  const [w,ct,rl]=fixPkg(await zip.file("xl/workbook.xml").async("string"),await zip.file("[Content_Types].xml").async("string"),await zip.file("xl/_rels/workbook.xml.rels").async("string"));
+  zip.file("xl/workbook.xml",w);zip.file("[Content_Types].xml",ct);zip.file("xl/_rels/workbook.xml.rels",rl);zip.remove("xl/calcChain.xml");
+  return zip.generateAsync({type:"blob",compression:"DEFLATE",mimeType:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});}
 $("#xl").addEventListener("click",async()=>{
-  try{
-    if(!window.JSZip)throw new Error("jszip");
-    const dl=await claude.use("downloads");
-    if(!dl){msg("La descarga no está disponible aquí. Usa “Copiar pedido”.",1);return;}
-    const zip=await JSZip.loadAsync(TPL,{base64:true});
-    zip.file("xl/worksheets/sheet1.xml",buildSheet(await zip.file("xl/worksheets/sheet1.xml").async("string")));
-    const [w,ct,rl]=fixPkg(await zip.file("xl/workbook.xml").async("string"),await zip.file("[Content_Types].xml").async("string"),await zip.file("xl/_rels/workbook.xml.rels").async("string"));
-    zip.file("xl/workbook.xml",w);zip.file("[Content_Types].xml",ct);zip.file("xl/_rels/workbook.xml.rels",rl);zip.remove("xl/calcChain.xml");
-    const blob=await zip.generateAsync({type:"blob",compression:"DEFLATE"});
-    const nm="LP_"+(cli.nombre.trim().replace(/[^\p{L}\p{N}]+/gu,"_").replace(/^_|_$/g,"")||"pedido")+".xlsx";
-    await dl.save({filename:nm,data:blob});
-    msg("Planilla generada con las "+Object.keys(cart).length+" líneas del pedido.");
-  }catch(e){msg(e&&e.code==="declined"?"Descarga cancelada.":"No se pudo generar el Excel. Prueba con “Copiar pedido”.",1);}});
-
-/* ===== Subir lista de precios nueva (mismo formato LP) ===== */
-const un=s=>s.replace(/&(#x?[0-9a-f]+|amp|lt|gt|quot|apos);/gi,(m,e)=>{e=e.toLowerCase();return e==="amp"?"&":e==="lt"?"<":e==="gt"?">":e==="quot"?'"':e==="apos"?"'":String.fromCodePoint(e[1]==="x"?parseInt(e.slice(2),16):parseInt(e.slice(1),10));});
-const b64=buf=>{let s="";const u=new Uint8Array(buf);for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s);};
-async function parseLP(buf){
-  const z=await JSZip.loadAsync(buf);
-  const rd=async p=>{const f=z.file(p);return f?await f.async("string"):null;};
-  const wb=await rd("xl/workbook.xml"),rl=await rd("xl/_rels/workbook.xml.rels");
-  if(!wb||!rl)throw new Error("fmt");
-  const attr=(t,n)=>{const k=new RegExp('(?:^|\\s)'+n+'="([^"]*)"').exec(t);return k?k[1]:null;};
-  const shs=[...wb.matchAll(/<sheet\s[^>]*>/g)].map(k=>k[0]);
-  const sh=shs.find(s=>attr(s,"name")==="LP")||shs[0];
-  const rel=sh&&[...rl.matchAll(/<Relationship\s[^>]*>/g)].map(k=>k[0]).find(r=>attr(r,"Id")===attr(sh,"r:id"));
-  if(!rel)throw new Error("fmt");
-  let tg=attr(rel,"Target");tg=tg.startsWith("/")?tg.slice(1):"xl/"+tg;
-  const x=await rd(tg);if(!x)throw new Error("fmt");
-  const ssx=await rd("xl/sharedStrings.xml");
-  const ss=ssx?[...ssx.matchAll(/<si(?:\s[^>]*)?(?:\/>|>([\s\S]*?)<\/si>)/g)].map(k=>un([...(k[1]||"").replace(/<rPh[\s\S]*?<\/rPh>/g,"").matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(q=>q[1]).join(""))):[];
-  const val=(a,b)=>{b=b||"";const t=attr(a,"t");
-    if(t==="inlineStr")return un([...b.matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(q=>q[1]).join(""));
-    const v=/<v>([^<]*)<\/v>/.exec(b);if(!v)return "";return t==="s"?(ss[+v[1]]||""):un(v[1]);};
-  const rows={};
-  for(const m of x.matchAll(/<row\s(?:[^>]*?\s)?r="(\d+)"[^>]*?(?:\/>|>([\s\S]*?)<\/row>)/g)){
-    const c={};for(const k of (m[2]||"").matchAll(/<c\s(?:[^>]*?\s)?r="([A-Z]+)\d+"([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g))c[k[1]]=val(k[2],k[3]);
-    rows[+m[1]]=c;}
-  const h=rows[13]||{},up=s=>String(s||"").toUpperCase();
-  if(!/C[ÓO]DIGO/.test(up(h.A))||!/CANTIDAD/.test(up(h.B))||!/DESCRIPCI/.test(up(h.F))||!/PRECIO/.test(up(h.G)))throw new Error("fmt");
-  if(!/SUBTOTAL\(/.test(x))throw new Error("tot");
-  const list=[],seen=new Set();let dup=0;
-  Object.keys(rows).map(Number).filter(r=>r>=14).sort((a,b)=>a-b).forEach(r=>{
-    const c=rows[r],code=String(c.A||"").trim(),price=parseFloat(c.G);
-    if(!code||!c.F||!isFinite(price))return;
-    const cd=/^\d+(\.\d+)?$/.test(code)?String(Number(code)):code;
-    if(seen.has(cd)){dup++;return;}seen.add(cd);
-    list.push([cd,c.C||"",c.D||"",c.E||"",String(c.F).trim(),price,r]);});
-  if(!list.length)throw new Error("fmt");
-  return {list,dup,tpl:b64(buf)};}
-function setList(list,tpl,name,isCustom){
-  P=list;TPL=tpl;lname=name;custom=isCustom;idx=new Map(P.map((p,i)=>[p[0],i]));
-  for(const c of Object.keys(cart))if(!idx.has(c))delete cart[c];
-  save();fillCats();clearSel();$("#dq").value="";hideDD();renderOrd();renderList();}
-function renderList(){$("#ls").innerHTML=(custom?"Lista cargada: ":"Lista incluida: ")+"<b>"+esc(lname)+"</b> · "+P.length.toLocaleString("es-CL")+" materiales";$("#rs").hidden=!custom;}
-$("#up").addEventListener("click",()=>$("#fl").click());
-$("#fl").addEventListener("change",async e=>{
-  const f=e.target.files[0];e.target.value="";if(!f)return;
-  msg("Leyendo "+f.name+"…",0,"#m3");$("#df").hidden=true;
-  try{
-    const r=await parseLP(await f.arrayBuffer());
-    const old=new Map(P.map(p=>[p[0],p])),nw=new Set(r.list.map(p=>p[0]));
-    let ch=0,ad=0;r.list.forEach(p=>{const o=old.get(p[0]);if(!o)ad++;else if(o[5]!==p[5])ch++;});
-    const gone=P.filter(p=>!nw.has(p[0])),quit=gone.filter(p=>cart[p[0]]),hadOrder=Object.keys(cart).length>0;
-    setList(r.list,r.tpl,f.name.replace(/\.xlsx$/i,""),true);
-    let saved=true;try{localStorage.setItem("lp_lista",JSON.stringify({name:lname,P,tpl:TPL}));}catch(_){saved=false;}
-    let t=r.list.length.toLocaleString("es-CL")+" materiales · "+ch+" con precio distinto · "+ad+" nuevos · "+gone.length+" que ya no están en la lista.";
-    if(r.dup)t+="\nSe ignoraron "+r.dup+" códigos repetidos.";
-    if(hadOrder)t+="\nLos precios del pedido se actualizaron a la lista nueva.";
-    if(quit.length)t+="\nSe quitaron del pedido por no existir en la lista nueva: "+quit.map(p=>p[4]).join(", ")+".";
-    if(!saved)t+="\nNo se pudo guardar la lista para la próxima visita; tendrás que subirla de nuevo.";
-    msg("Lista de precios actualizada.",0,"#m3");$("#df").textContent=t;$("#df").hidden=false;
-  }catch(err){
-    msg(err&&err.message==="tot"?"No encuentro la fila TOTAL (con SUBTOTAL) en el archivo. Usa el Excel con el mismo formato de la planilla LP."
-      :err&&err.message==="fmt"?"El archivo no tiene el formato de la planilla LP (encabezado en la fila 13: CÓDIGO, CANTIDAD, UM, … y precios en la columna G)."
-      :"No se pudo leer el archivo. Verifica que sea un .xlsx válido.",1,"#m3");}});
-$("#rs").addEventListener("click",()=>{setList(ORIG_P,ORIG_TPL,ORIG_NAME,false);try{localStorage.removeItem("lp_lista");}catch(e){}
-  msg("Se volvió a la lista incluida.",0,"#m3");$("#df").hidden=true;});
-renderList();
+  const nm="LP_"+(cli.nombre.trim().replace(/[^\p{L}\p{N}]+/gu,"_").replace(/^_|_$/g,"")||"pedido")+".xlsx",n=Object.keys(cart).length;
+  let blob;
+  try{blob=await makeXlsx();}catch(e){msg("No se pudo armar el Excel: "+(e&&e.message||e),1);return;}
+  if(dlUrl)URL.revokeObjectURL(dlUrl);
+  dlUrl=URL.createObjectURL(blob);
+  const a=$("#dlk");a.href=dlUrl;a.download=nm;a.textContent="Descargar "+nm;a.hidden=false;
+  let dl=null;
+  try{dl=window.claude&&typeof claude.use==="function"?await claude.use("downloads"):null;}catch(e){dl=null;}
+  if(dl){
+    try{await dl.save({filename:nm,data:blob});msg("Planilla generada con las "+n+" líneas del pedido.");}
+    catch(e){const c=e&&(e.code||e.message)||"error";
+      msg(c==="declined"?"Descarga cancelada. Puedes volver a intentarlo o usar el botón de abajo.":"El visor no dejó guardar el archivo ("+c+"). Prueba con el botón “Descargar” de abajo.",1);}
+    return;}
+  try{a.click();}catch(e){}
+  msg("Planilla lista con las "+n+" líneas. Si no empezó la descarga, toca el botón “Descargar” de abajo; si tampoco funciona, abre el aplicativo en una pestaña del navegador (fuera del chat) o usa “Copiar pedido”.");});
 renderOrd();
 </script>
 </body>
