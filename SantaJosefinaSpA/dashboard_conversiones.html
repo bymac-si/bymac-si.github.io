@@ -1,442 +1,613 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
+    <title>Dashboard Conversiones | CRM Santa Josefina</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dashboard de Conversiones | Santa Josefina</title>
-    <meta name="theme-color" content="#10233f" />
-    <link rel="manifest" href="manifest.json" />
-    <link rel="apple-touch-icon" href="assets/img/icon-192.png" />
+
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+
     <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="manifest" href="manifest.json" />
+
     <script src="assets/js/api_cliente.js"></script>
     <script src="assets/js/app.js"></script>
-    <style>
-      :root {
-        --sj-ink: #10233f;
-        --sj-ink-2: #1b3557;
-        --sj-accent: #c9402a;
-        --sj-soft: #f4efe9;
-        --sj-surface: #ffffff;
-        --sj-line: #e7e7ea;
-        --sj-muted: #5f6f80;
-        --sj-success: #1f9d55;
-        --sj-warning: #f59e0b;
-        --sj-info: #2563eb;
-        --sj-danger: #dc2626;
+
+    <script>
+      if (typeof requireAuth === "function") {
+        requireAuth();
+      } else {
+        console.warn("Auth no cargado");
       }
+    </script>
 
-      * { box-sizing: border-box; }
-
+    <style>
       body {
-        margin: 0;
-        font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-        background: linear-gradient(180deg, #f7f3ee 0%, #f3f4f6 100%);
-        color: var(--sj-ink);
+        max-width: 1300px;
+        margin: auto;
+        background: #f8f9fa;
+        color: #1a2b48;
       }
 
       main {
-        max-width: 1280px;
-        margin: 0 auto;
-        padding: 30px 20px 60px;
+        padding: 40px;
       }
 
-      .topbar {
-        background: rgba(255,255,255,0.92);
-        border: 1px solid var(--sj-line);
-        border-radius: 22px;
-        box-shadow: 0 18px 40px rgba(16,35,63,0.06);
-        padding: 22px 24px;
-        margin-bottom: 24px;
-      }
-
-      .topbar-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 16px;
-        flex-wrap: wrap;
-      }
-
-      .eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 12px;
-        border-radius: 999px;
-        background: #eef3f7;
-        color: var(--sj-ink-2);
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
+      .dashboard-header {
+        background: #fff;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        margin-bottom: 30px;
       }
 
       .page-title {
-        margin: 14px 0 4px;
-        font-size: clamp(2rem, 3vw, 3rem);
-        line-height: 1.1;
-      }
-
-      .page-subtitle {
-        margin: 0;
-        color: var(--sj-muted);
-        font-size: 0.98rem;
-      }
-
-      .header-actions {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-
-      .btn {
-        border: 0;
-        border-radius: 999px;
-        padding: 11px 18px;
-        cursor: pointer;
-        font-weight: 700;
-        font-size: 0.9rem;
-        transition: transform 0.2s ease, filter 0.2s ease;
-      }
-
-      .btn:hover {
-        transform: translateY(-1px);
-        filter: brightness(0.98);
-      }
-
-      .btn-primary {
-        background: var(--sj-accent);
-        color: #fff;
-        box-shadow: 0 12px 22px rgba(201,64,42,0.22);
-      }
-
-      .btn-secondary {
-        background: #f5f7fa;
-        color: var(--sj-ink);
-        border: 1px solid var(--sj-line);
+        font-size: 28px;
+        font-weight: 800;
       }
 
       .kpi-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-        gap: 18px;
-        margin-bottom: 22px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 24px;
+        margin-bottom: 30px;
       }
 
       .kpi-card {
-        background: var(--sj-surface);
-        border: 1px solid var(--sj-line);
-        border-left: 6px solid var(--sj-accent);
-        border-radius: 18px;
-        padding: 20px 18px 18px;
-        box-shadow: 0 12px 26px rgba(16,35,63,0.04);
+        background: #fff;
+        padding: 24px;
+        border-radius: 10px;
+        border-left: 5px solid #ccc;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
       }
 
-      .kpi-card.success { border-left-color: var(--sj-success); }
-      .kpi-card.warning { border-left-color: var(--sj-warning); }
-      .kpi-card.info { border-left-color: var(--sj-info); }
-      .kpi-card.danger { border-left-color: var(--sj-danger); }
-
-      .kpi-label {
-        display: block;
-        color: var(--sj-muted);
-        font-size: 0.72rem;
+      .kpi-title {
+        font-size: 0.75rem;
         font-weight: 800;
-        letter-spacing: 0.08em;
         text-transform: uppercase;
-        margin-bottom: 10px;
+        color: #6c757d;
       }
 
       .kpi-value {
-        font-size: clamp(1.8rem, 2vw, 2.5rem);
+        font-size: 2.2rem;
         font-weight: 800;
-        letter-spacing: -0.03em;
-        line-height: 1;
-      }
-
-      .kpi-meta {
-        display: block;
-        margin-top: 8px;
-        font-size: 0.8rem;
-        color: var(--sj-muted);
-      }
-
-      .layout-grid {
-        display: grid;
-        grid-template-columns: 1.2fr 0.8fr;
-        gap: 22px;
-        margin-bottom: 22px;
       }
 
       .card {
-        background: var(--sj-surface);
-        border: 1px solid var(--sj-line);
-        border-radius: 20px;
-        padding: 20px;
-        box-shadow: 0 12px 26px rgba(16,35,63,0.04);
+        background: #fff;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
       }
 
-      .card h2 {
-        margin: 0 0 14px;
-        font-size: 1.1rem;
+      .badge.A {
+        background: #2ecc71;
+      }
+      .badge.B {
+        background: #f1c40f;
+        color: #000;
+      }
+      .badge.C {
+        background: #e74c3c;
       }
 
-      .table {
+      .status-fresh {
+        color: #16a34a;
+        font-weight: 700;
+      }
+
+      .status-stale {
+        color: #dc2626;
+        font-weight: 700;
+      }
+
+      .tabla-leads {
         width: 100%;
         border-collapse: collapse;
       }
 
-      .table th,
-      .table td {
-        padding: 11px 10px;
-        text-align: left;
-        border-bottom: 1px solid #edf0f5;
+      .tabla-leads th,
+      .tabla-leads td {
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
       }
 
-      .table th {
-        background: #f9fafb;
-        color: var(--sj-muted);
-        font-size: 0.72rem;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
+      .tabla-leads th {
+        background: #f5f5f5;
       }
 
-      .tag {
-        display: inline-block;
-        padding: 5px 10px;
-        border-radius: 999px;
-        font-size: 0.72rem;
-        font-weight: 700;
-      }
-
-      .tag.ok { background: #eafaf1; color: var(--sj-success); }
-      .tag.warn { background: #fff3db; color: #a16207; }
-      .tag.alt { background: #e7f0ff; color: var(--sj-info); }
-      .tag.danger { background: #fee2e2; color: var(--sj-danger); }
-
-      .warning-banner {
-        display: none;
-        background: linear-gradient(90deg, #fef2f2, #fee2e2);
-        color: #991b1b;
-        border: 1px solid #fecaca;
-        border-radius: 16px;
-        padding: 14px 18px;
-        font-weight: 700;
-        margin-bottom: 20px;
-      }
-
-      .progress-stack {
-        display: grid;
-        gap: 14px;
-      }
-
-      .progress-item {
-        display: grid;
-        gap: 8px;
-      }
-
-      .progress-head {
-        display: flex;
-        justify-content: space-between;
-        gap: 10px;
-        font-size: 0.86rem;
-        color: var(--sj-muted);
-      }
-
-      .bar {
-        width: 100%;
-        height: 10px;
-        border-radius: 999px;
-        background: #edf1f5;
-        overflow: hidden;
-      }
-
-      .bar > span {
-        display: block;
-        height: 100%;
-        border-radius: inherit;
-        background: linear-gradient(90deg, var(--sj-accent), #f0997a);
-      }
-
-      @media (max-width: 900px) {
-        .layout-grid {
-          grid-template-columns: 1fr;
-        }
+      .btn-wa {
+        background: #25d366;
+        color: #fff;
+        padding: 6px 10px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: bold;
       }
     </style>
-    <script>
-      document.addEventListener("DOMContentLoaded", async () => {
-        try {
-          const header = document.getElementById("header");
-          if (header) {
-            header.innerHTML = await (await fetch("header.html")).text();
-            if (typeof initHeader === "function") initHeader();
-          }
-        } catch (e) {
-          console.warn("Header no cargado", e);
-        }
-
-        await cargarDashboardConversiones();
-      });
-
-      function fmtPercent(value) {
-        const n = Number(value || 0);
-        return `${Math.round(n)}%`;
-      }
-
-      async function cargarDashboardConversiones() {
-        try {
-          const data = await accionCRM("getDashboardData");
-          const total = Number(data.total || 0);
-          const a = Number(data.A || 0);
-          const b = Number(data.B || 0);
-          const c = Number(data.C || 0);
-
-          document.getElementById("totalLeads").textContent = total;
-          document.getElementById("leadsA").textContent = a;
-          document.getElementById("leadsB").textContent = b;
-          document.getElementById("leadsC").textContent = c;
-          document.getElementById("conversion").textContent = total ? fmtPercent((a / total) * 100) : "0%";
-          document.getElementById("sla_promedio").textContent = data.sla?.PROMEDIO || "--";
-        } catch (e) {
-          console.error("Error cargando conversiones:", e);
-          document.getElementById("totalLeads").textContent = 0;
-          document.getElementById("leadsA").textContent = 0;
-          document.getElementById("leadsB").textContent = 0;
-          document.getElementById("leadsC").textContent = 0;
-          document.getElementById("conversion").textContent = "0%";
-          document.getElementById("sla_promedio").textContent = "--";
-        }
-
-        try {
-          const vencidos = await accionCRM("leadsAVencidos");
-          const banner = document.getElementById("alertaVencidos");
-          const count = document.getElementById("cantVencidos");
-          const tbody = document.getElementById("tablaLeadsVencidos");
-
-          if (!Array.isArray(vencidos) || !vencidos.length) {
-            banner.style.display = "none";
-            tbody.innerHTML = "<tr><td colspan='4'>No hay leads A vencidos</td></tr>";
-            return;
-          }
-
-          banner.style.display = "block";
-          count.textContent = vencidos.length;
-          tbody.innerHTML = vencidos.slice(0, 8).map((lead) => {
-            const nombre = lead.nombre || lead.Nombre || "Sin nombre";
-            const horas = Number(lead.horas || lead.Horas || 0);
-            const tel = lead.telefono || lead.Telefono || "";
-            const wa = tel.replace(/\D/g, "");
-            const url = `https://wa.me/56${wa.replace(/^56/, "")}?text=${encodeURIComponent("Hola " + nombre + ", te escribo desde Santa Josefina.")}`;
-            return `
-              <tr>
-                <td>${nombre}</td>
-                <td>${horas} h</td>
-                <td>${tel || "—"}</td>
-                <td><a class="btn btn-primary" href="${url}" target="_blank" rel="noopener" style="display:inline-block; font-size:12px; padding:8px 12px; text-decoration:none;">WhatsApp</a></td>
-              </tr>
-            `;
-          }).join("");
-        } catch (e) {
-          console.error("Error leads vencidos:", e);
-        }
-      }
-    </script>
   </head>
+
   <body>
     <div id="header"></div>
 
     <main>
-      <div class="topbar">
-        <div class="topbar-row">
-          <div>
-            <div class="eyebrow"><i class="fa-solid fa-chart-line"></i> CRM • Conversiones</div>
-            <h1 class="page-title">Dashboard de conversiones</h1>
-            <p class="page-subtitle">Leads, calidad de contacto y SLA.</p>
-          </div>
-          <div class="header-actions">
-            <button class="btn btn-secondary" onclick="window.location.reload()"><i class="fa-solid fa-rotate-right"></i> Recargar</button>
-            <button class="btn btn-primary" onclick="window.print()"><i class="fa-solid fa-print"></i> Imprimir</button>
-          </div>
-        </div>
+      <div class="dashboard-header">
+        <h1 class="page-title">
+          <i class="fa-solid fa-chart-line"></i> Dashboard de Conversiones
+        </h1>
+        <div id="estadoDatos" class="status-fresh">● Datos actualizados</div>
       </div>
 
-      <div id="alertaVencidos" class="warning-banner">
-        ⚠️ Hay <span id="cantVencidos">0</span> leads A vencidos sin contactar.
+      <div
+        id="alertaVencidos"
+        style="
+          display: none;
+          background: #dc2626;
+          color: white;
+          padding: 15px;
+          border-radius: 8px;
+          font-weight: 700;
+          text-align: center;
+          margin-bottom: 20px;
+        "
+      >
+        ⚠️ Hay <span id="cantVencidos"></span> Leads A vencidos sin contactar
       </div>
-
+      <br />
       <div class="kpi-grid">
-        <div class="kpi-card">
-          <span class="kpi-label">Total leads</span>
-          <div id="totalLeads" class="kpi-value">0</div>
-          <span class="kpi-meta">Acumulados</span>
+        <div class="kpi-card" style="border-left-color: #0dcaf0">
+          <span class="kpi-title">Total Leads</span>
+          <div id="totalLeads" class="kpi-value">–</div>
         </div>
-        <div class="kpi-card success">
-          <span class="kpi-label">Leads A</span>
-          <div id="leadsA" class="kpi-value">0</div>
-          <span class="kpi-meta">Alta intención</span>
+
+        <div class="kpi-card" style="border-left-color: #2ecc71">
+          <span class="kpi-title">Leads A</span>
+          <div id="leadsA" class="kpi-value">–</div>
+          <span class="badge A">Alta intención</span>
         </div>
-        <div class="kpi-card warning">
-          <span class="kpi-label">Leads B</span>
-          <div id="leadsB" class="kpi-value">0</div>
-          <span class="kpi-meta">Con interés</span>
+
+        <div class="kpi-card" style="border-left-color: #f1c40f">
+          <span class="kpi-title">Leads B</span>
+          <div id="leadsB" class="kpi-value">–</div>
         </div>
-        <div class="kpi-card danger">
-          <span class="kpi-label">Leads C</span>
-          <div id="leadsC" class="kpi-value">0</div>
-          <span class="kpi-meta">Bajo interés</span>
+
+        <div class="kpi-card" style="border-left-color: #e74c3c">
+          <span class="kpi-title">Leads C</span>
+          <div id="leadsC" class="kpi-value">–</div>
         </div>
-        <div class="kpi-card info">
-          <span class="kpi-label">Conversión A</span>
-          <div id="conversion" class="kpi-value">0%</div>
-          <span class="kpi-meta">Sobre total</span>
+
+        <div class="kpi-card" style="border-left-color: #6610f2">
+          <span class="kpi-title">Conversión A</span>
+          <div id="conversion" class="kpi-value">–%</div>
         </div>
-        <div class="kpi-card">
-          <span class="kpi-label">Tiempo de contacto</span>
-          <div id="sla_promedio" class="kpi-value">--</div>
-          <span class="kpi-meta">Promedio</span>
+
+        <div class="kpi-card" style="border-left-color: #0f172a">
+          <span class="kpi-title">⏱ Tiempo Medio Primer Contacto</span>
+          <div id="sla_promedio" class="kpi-value">– min</div>
         </div>
       </div>
 
-      <div class="layout-grid">
-        <div class="card">
-          <h2>Leads A vencidos</h2>
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Atraso</th>
-                <th>Contacto</th>
-                <th>Acción</th>
-              </tr>
-            </thead>
-            <tbody id="tablaLeadsVencidos"></tbody>
-          </table>
-        </div>
+      <h3>⚠️ Leads A vencidos</h3>
 
-        <div class="card">
-          <h2>Rendimiento</h2>
-          <div class="progress-stack">
-            <div class="progress-item">
-              <div class="progress-head"><span>Respuesta inicial</span><strong>76%</strong></div>
-              <div class="bar"><span style="width: 76%"></span></div>
-            </div>
-            <div class="progress-item">
-              <div class="progress-head"><span>Seguimiento</span><strong>68%</strong></div>
-              <div class="bar"><span style="width: 68%; background: linear-gradient(90deg, #2563eb, #60a5fa);"></span></div>
-            </div>
-            <div class="progress-item">
-              <div class="progress-head"><span>Conversión</span><strong>54%</strong></div>
-              <div class="bar"><span style="width: 54%; background: linear-gradient(90deg, #1f9d55, #34d399);"></span></div>
-            </div>
+      <table class="tabla-leads">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Atraso (hrs)</th>
+            <th>Contacto</th>
+          </tr>
+        </thead>
+        <tbody id="tablaLeadsVencidos">
+          <tr>
+            <td colspan="3">Cargando...</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <br />
+
+      <div class="card text-center mb-4">
+        <button
+          id="btnWA"
+          class="btn btn-success btn-lg"
+          onclick="enviarWhatsAppLeadsA()"
+        >
+          <i class="fa-brands fa-whatsapp"></i> Contactar Leads A
+        </button>
+
+        <button class="btn btn-success btn-lg" onclick="forzarAutoAsignacion()">
+          <i class="fa-solid fa-bolt-lightning"></i> Auto-Asignar Leads A
+        </button>
+        <p id="msgWA" class="text-muted mt-2"></p>
+      </div>
+      <div
+        id="modalGestion"
+        style="
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.6);
+          z-index: 10000;
+          align-items: center;
+          justify-content: center;
+        "
+      >
+        <div
+          style="
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+          "
+        >
+          <h2 id="modalNombre" style="margin-top: 0; color: #0f172a">
+            Gestionar Lead
+          </h2>
+          <p id="modalEmail" class="text-muted" style="margin-bottom: 20px"></p>
+
+          <label style="font-weight: bold; display: block; margin-bottom: 5px"
+            >Nueva Nota / Avance:</label
+          >
+          <textarea
+            id="txtNota"
+            style="
+              width: 100%;
+              height: 100px;
+              padding: 10px;
+              border-radius: 8px;
+              border: 1px solid #ccc;
+              margin-bottom: 20px;
+              font-family: inherit;
+            "
+            placeholder="Ej: Llamada realizada, enviará documentos el viernes..."
+          ></textarea>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
+            <button
+              onclick="ejecutarAccionLead('CONVERTIR')"
+              style="
+                background: #2ecc71;
+                color: white;
+                border: none;
+                padding: 12px;
+                border-radius: 8px;
+                font-weight: bold;
+                cursor: pointer;
+              "
+            >
+              <i class="fa-solid fa-trophy"></i> Convertir a Cliente
+            </button>
+            <button
+              onclick="ejecutarAccionLead('DESCARTAR')"
+              style="
+                background: #e74c3c;
+                color: white;
+                border: none;
+                padding: 12px;
+                border-radius: 8px;
+                font-weight: bold;
+                cursor: pointer;
+              "
+            >
+              <i class="fa-solid fa-trash"></i> Descartar Lead
+            </button>
+            <button
+              onclick="ejecutarAccionLead('SOLO_NOTA')"
+              style="
+                grid-column: span 2;
+                background: #3498db;
+                color: white;
+                border: none;
+                padding: 12px;
+                border-radius: 8px;
+                font-weight: bold;
+                cursor: pointer;
+              "
+            >
+              Guardar Nota y Seguir
+            </button>
+            <button
+              onclick="cerrarModalGestion()"
+              style="
+                grid-column: span 2;
+                background: #f8f9fa;
+                color: #666;
+                border: 1px solid #ccc;
+                padding: 8px;
+                border-radius: 8px;
+                cursor: pointer;
+                margin-top: 10px;
+              "
+            >
+              Cancelar
+            </button>
           </div>
         </div>
       </div>
     </main>
+
+    <div id="footer"></div>
+
+    <script>
+      // La URL del backend vive en assets/js/api_cliente.js (API_URL). No la duplique aquí.
+
+      let ultimaCarga = Date.now();
+
+      let agentesCache = [];
+
+      /* ===============================
+   INIT
+================================ */
+
+      document.addEventListener("DOMContentLoaded", initDashboard);
+
+      async function initDashboard() {
+        try {
+          header.innerHTML = await (await fetch("header.html")).text();
+          footer.innerHTML = await (await fetch("footer.html")).text();
+        } catch {
+          console.warn("Header/Footer no cargado");
+        }
+
+        await cargarAgentes();
+
+        await cargarDashboard();
+        await cargarLeadsAVencidos();
+
+        setInterval(cargarDashboard, 300000);
+      }
+
+      /* ===============================
+   AGENTES
+================================ */
+
+      async function cargarAgentes() {
+        try {
+          agentesCache = (await accionCRM("getAgentes")) || [];
+        } catch (e) {
+          console.error("Error agentes:", e);
+        }
+      }
+
+      /* ===============================
+   DASHBOARD
+================================ */
+
+      async function cargarDashboard() {
+        try {
+          const d = await accionCRM("getDashboardData");
+
+          ultimaCarga = Date.now();
+
+          totalLeads.innerText = d.total || 0;
+          leadsA.innerText = d.A || 0;
+          leadsB.innerText = d.B || 0;
+          leadsC.innerText = d.C || 0;
+
+          conversion.innerText = d.total
+            ? Math.round((d.A / d.total) * 100) + "%"
+            : "0%";
+
+          sla_promedio.innerText = d.sla?.PROMEDIO || "--";
+
+          btnWA.disabled = d.A === 0;
+
+          msgWA.innerText =
+            d.A === 0 ? "No hay Leads A listos" : "Leads listos para cierre";
+        } catch (e) {
+          console.error("Error dashboard:", e);
+        }
+      }
+
+      /* ===============================
+   LEADS A VENCIDOS (Corregido)
+================================ */
+      async function cargarLeadsAVencidos() {
+        const banner = document.getElementById("alertaVencidos");
+        const contador = document.getElementById("cantVencidos");
+
+        try {
+          const data = (await accionCRM("leadsAVencidos")) || [];
+          const tbody = document.getElementById("tablaLeadsVencidos");
+          tbody.innerHTML = "";
+
+          if (!data.length) {
+            banner.style.display = "none";
+            tbody.innerHTML =
+              "<tr><td colspan='3'>✅ No hay vencidos</td></tr>";
+            return;
+          }
+
+          banner.style.display = "block";
+          contador.innerText = data.length;
+
+          data.forEach((l) => {
+            const wa = l.telefono.replace(/\D/g, "");
+            const msg = encodeURIComponent(
+              `Hola ${l.nombre}, te escribo de Santa Josefina.`,
+            );
+
+            tbody.innerHTML += `
+        <tr>
+          <td>${l.nombre}</td>
+          <td>${l.horas} hrs</td>
+          <td>
+            <a class="btn-wa" target="_blank" href="https://wa.me/${wa}?text=${msg}">WhatsApp</a>
+            <button 
+  style="margin-left:5px; background:#0f172a; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;"
+  onclick="abrirGestion('${l.email}', '${l.nombre}')">
+  <i class="fa-solid fa-pen-to-square"></i> Gestionar
+</button>
+          </td>
+        </tr>`;
+          });
+        } catch (e) {
+          console.error("Leads vencidos:", e);
+        }
+      }
+
+      /* ===============================
+   CONFIRMAR ASIGNACIÓN (Corregido)
+================================ */
+      async function confirmarAsignacion(email) {
+        const agente = document.getElementById("selectAgente").value;
+        if (!agente) return;
+
+        try {
+          // Usamos el mismo método que el envío de correos para evitar bloqueos
+          await accionCRM("asignarEjecutivo", { email: email, ejecutivo: agente });
+
+          alert("📌 Petición enviada. La hoja se actualizará en segundos.");
+          cerrarModal();
+          setTimeout(cargarLeadsAVencidos, 2000); // Recarga después de 2 seg
+        } catch (e) {
+          alert("❌ Error en la conexión");
+          console.error(e);
+        }
+      }
+
+      /* ===============================
+   ASIGNACION
+================================ */
+
+      function mostrarSelectorAgente(email) {
+        let html = `
+    <div id="modalAgente"
+      style="
+        position:fixed;
+        top:0;left:0;
+        width:100%;
+        height:100%;
+        background:rgba(0,0,0,.5);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        z-index:9999;
+      ">
+      <div style="
+        background:white;
+        padding:25px;
+        border-radius:10px;
+        width:300px;
+        text-align:center;
+      ">
+
+        <h3>Asignar Ejecutivo</h3>
+
+        <select id="selectAgente"
+          style="width:100%;padding:8px;margin:15px 0">
+          ${agentesCache
+            .map(
+              (a) =>
+                `<option value="${a.nombre}">
+              ${a.nombre}
+            </option>`,
+            )
+            .join("")}
+        </select>
+
+        <button onclick="confirmarAsignacion('${email}')">
+          Asignar
+        </button>
+
+        <button
+          style="margin-left:10px"
+          onclick="cerrarModal()">
+          Cancelar
+        </button>
+
+      </div>
+    </div>
+  `;
+
+        document.body.insertAdjacentHTML("beforeend", html);
+      }
+
+      function cerrarModal() {
+        const m = document.getElementById("modalAgente");
+
+        if (m) m.remove();
+      }
+
+      async function confirmarAsignacion(email) {
+        const agente = document.getElementById("selectAgente").value;
+
+        if (!agente) return;
+
+        try {
+          await accionCRM("asignarEjecutivo", { email: email, ejecutivo: agente });
+
+          alert("✅ Asignado correctamente");
+
+          cerrarModal();
+
+          cargarLeadsAVencidos();
+        } catch (e) {
+          alert("❌ Error asignando");
+        }
+      }
+      async function forzarAutoAsignacion() {
+        if (!confirm("Asignar Leads A automáticamente?")) return;
+
+        const d = await accionCRM("autoAsignar");
+
+        alert("Asignados: " + d.asignados);
+
+        cargarDashboard();
+      }
+      let leadActual = null;
+
+      // Función para abrir el modal con los datos del lead
+      function abrirGestion(email, nombre) {
+        leadActual = email;
+        document.getElementById("modalNombre").innerText = nombre;
+        document.getElementById("modalEmail").innerText = email;
+        document.getElementById("txtNota").value = "";
+        document.getElementById("modalGestion").style.display = "flex";
+      }
+
+      function cerrarModalGestion() {
+        document.getElementById("modalGestion").style.display = "none";
+      }
+
+      // Lógica para enviar la gestión al servidor (Apps Script)
+      async function ejecutarAccionLead(accion) {
+        const nota = document.getElementById("txtNota").value;
+
+        if (accion === "SOLO_NOTA" && !nota) {
+          alert("Por favor escribe una nota.");
+          return;
+        }
+
+        // Desactivar botones para evitar doble clic
+        const btn = event.target;
+        btn.disabled = true;
+        btn.innerText = "Procesando...";
+
+        try {
+          await accionCRM("gestionarLead", {
+            email: leadActual,
+            tipoAccion: accion,
+            comentario: nota,
+          });
+
+          alert("✅ Gestión guardada correctamente.");
+          cerrarModalGestion();
+          cargarLeadsAVencidos(); // Recarga la tabla
+          cargarDashboard(); // Recarga los KPIs
+        } catch (e) {
+          alert("❌ Error al guardar la gestión.");
+          console.error(e);
+        }
+      }
+    </script>
   </body>
 </html>
