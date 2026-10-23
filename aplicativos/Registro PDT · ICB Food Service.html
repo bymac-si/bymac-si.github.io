@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Registro PDT · ICB Food Service</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#f5f5f7;--panel:#fff;--line:#d9d9e0;--ink:#1d1d22;--muted:#6c6c78;--brand:#ed2750;--warn:#fde68a;box-sizing:border-box}
+@media(prefers-color-scheme:dark){:root{--bg:#131316;--panel:#1c1c21;--line:#33333c;--ink:#f2f2f5;--muted:#9b9ba7;--warn:#5c4a0a}}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 "Segoe UI",system-ui,Roboto,Arial,sans-serif}
+header.np{background:var(--brand);color:#fff;padding:12px 20px;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
+header h1{font-size:18px;margin:0;flex:1 1 220px}
+main{padding:16px 20px 40px;max-width:1200px;margin:auto}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}.bar .sp{flex:1}
+input,select,textarea{border:1.5px solid var(--line);border-radius:8px;padding:7px 9px;background:var(--panel);color:var(--ink);font:inherit;min-height:38px}
+header input,header select{border-color:transparent}
+textarea{width:100%;min-height:120px}
+.btn{background:var(--brand);border:1.5px solid var(--brand);color:#fff;border-radius:8px;padding:7px 13px;font:inherit;font-weight:700;cursor:pointer;min-height:38px}
+.btn.g{background:transparent;color:var(--brand)}header .btn{background:#fff;color:var(--brand);border-color:#fff}
+.hint{color:var(--muted);font-size:13px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+#sheetHead h2{margin:0;font-size:18px}#info{font-weight:600}
+.wrapt{overflow:auto}
+table{border-collapse:collapse;width:100%}
+th,td{border:1px solid var(--line);padding:0;text-align:center}
+thead th{background:var(--bg);font-size:13px;padding:5px 4px}thead th .dayhead{display:inline-flex;align-items:baseline;gap:.5em;white-space:nowrap}thead th .date{font-size:inherit;font-weight:400;color:var(--brand);white-space:nowrap}
+th.u{font-size:11px;font-weight:600}th.pdt{text-align:left;padding:5px 8px;white-space:nowrap;font-size:14px}
+td input{width:100%;min-width:130px;border:0;border-radius:0;background:transparent;text-align:center;font-size:13px;min-height:36px}
+td input:focus{outline:2px solid var(--brand);outline-offset:-2px;background:var(--panel)}
+td.dup{background:var(--warn)}.pt{display:none}
+table.lg td,table.lg th{padding:4px 8px;font-size:13px;text-align:left}
+details{margin-bottom:10px}summary{cursor:pointer;font-weight:700;padding:6px 0}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1d1d22;color:#fff;padding:10px 16px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9}.toast.on{opacity:1}
+@media print{@page{size:A4 landscape;margin:10mm}.np{display:none!important}body{background:#fff;color:#000}main{padding:0;max-width:none}.card{border:0;padding:0}
+ input{display:none!important}.pt{display:block;font-size:10pt;font-weight:600;padding:2px 3px}
+ table{border:1.5px solid #000}th,td{border:1px solid #000!important;color:#000}td{height:11mm}thead th{background:#fff}td.dup{background:none}}
+</style>
+</head>
+<body>
+<header class="np">
+  <h1>Registro de uso de PDT</h1>
+  <button class="btn" id="pv" type="button" aria-label="Semana anterior">◀</button>
+  <input type="date" id="dt" aria-label="Ir a la fecha">
+  <button class="btn" id="nx" type="button" aria-label="Semana siguiente">▶</button>
+  <select id="tu" aria-label="Turno"></select>
+  <button class="btn" id="bp" type="button">🖨 Imprimir</button>
+  <button class="btn" id="bx" type="button">⬇ Exportar Excel</button>
+</header>
+<main>
+  <div class="card">
+    <div id="sheetHead"><h2>PDT · Registro semanal de usuarios</h2><div id="info"></div></div>
+    <div class="hint np" style="margin:4px 0 10px">Escribe el nombre o el código del colaborador. Se guarda solo al salir de la celda. Amarillo = mismo colaborador en dos PDT el mismo día.</div>
+    <div class="wrapt"><table><tbody id="tb"></tbody></table></div>
+  </div>
+  <datalist id="cl"></datalist>
+
+  <details class="np card"><summary>Historial de cambios (últimos 60)</summary>
+    <div class="wrapt"><table class="lg"><thead><tr><th>Fecha y hora</th><th>Semana · Turno</th><th>Día</th><th>PDT</th><th>Cambio</th></tr></thead><tbody id="lg"></tbody></table></div>
+  </details>
+  <details class="np card"><summary>Colaboradores (<span id="nc">0</span>)</summary>
+    <p class="hint">Uno por línea: <b>nombre</b> o <b>código;nombre</b>. También puedes importar la planilla Excel de producción usando las columnas “Número de personal” (código) y “Nombre completo” (nombre).</p>
+    <textarea id="tc" aria-label="Colaboradores"></textarea>
+    <div class="bar" style="margin:8px 0 0"><button class="btn g" id="sc" type="button">Guardar lista</button><button class="btn g" id="ic" type="button">📂 Importar Excel</button><input type="file" id="fx" accept=".xlsx,.xls" style="display:none"></div>
+  </details>
+  <details class="np card"><summary>Lista de PDT</summary>
+    <p class="hint">Uno por línea, en el orden en que aparecen en la planilla.</p>
+    <textarea id="tp" aria-label="PDT" style="min-height:160px"></textarea>
+    <div class="bar" style="margin:8px 0 0"><button class="btn g" id="sp" type="button">Guardar PDT</button></div>
+  </details>
+  <details class="np card"><summary>Respaldo</summary>
+    <p class="hint">Los datos quedan guardados en este navegador. Descarga un respaldo de vez en cuando o para pasarlos a otro equipo.</p>
+    <div class="bar" style="margin:0"><button class="btn g" id="bk" type="button">Descargar respaldo</button><button class="btn g" id="br" type="button">Cargar respaldo</button><input type="file" id="fr" accept=".json" style="display:none"></div>
+  </details>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+const $=id=>document.getElementById(id),p2=n=>String(n).padStart(2,"0");
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const LS="icb_pdt_v1",DN=["LUNES","MARTES","MIÉRCOLES","JUEVES","VIERNES","SÁBADO"],TU=["Mañana","Tarde","Noche"];
+const DEF=["PDTFMAULEN04","PDTFMAULEN05","PDTFMAULEN10","PDTFMAULEN12","PDTFMAULEN15","PDTFMAULEN33","PDTFMAULEN37","PDTFMAULEN41","PDTFMAULEN45","PDTFMAULEN50","10.32.14.11","10.32.14.13","10.32.14.21","10.32.14.22","10.32.14.24","10.32.14.27","10.32.14.32","10.32.14.34","10.32.14.39","10.32.14.44","10.32.14.46","10.32.14.6"];
+let S={};try{S=JSON.parse(localStorage.getItem(LS))||{}}catch(e){}
+S=Object.assign({collab:[],pdts:DEF,reg:{},log:[],turno:""},S);
+S.pdts=[...new Set([...(Array.isArray(S.pdts)?S.pdts:[]),...DEF].map(x=>String(x).trim()).filter(Boolean))];
+if(!S.turno){const h=new Date().getHours();S.turno=h>=6&&h<14?"Mañana":h>=14&&h<22?"Tarde":"Noche"}
+const save=()=>{try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){toast("No se pudo guardar en este navegador")}};
+let tt;function toast(m){const t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),3500)}
+function download(n,b){const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=n;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000)}
+/* fechas ISO */
+const add=(d,n)=>new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);
+const fd=d=>p2(d.getDate())+"/"+p2(d.getMonth()+1);
+const ymd=d=>d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate());
+function isoWeek(d){const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())),n=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-n);const y=t.getUTCFullYear();return y+"-W"+p2(Math.ceil(((t-Date.UTC(y,0,1))/864e5+1)/7))}
+function monOf(k){const[y,w]=k.split("-W").map(Number),j=new Date(y,0,4);return new Date(y,0,4-(j.getDay()+6)%7+(w-1)*7)}
+let mon=monOf(isoWeek(new Date()));
+const wkKey=()=>isoWeek(mon),days=()=>[0,1,2,3,4,5].map(i=>add(mon,i)),rkey=()=>wkKey()+"|"+S.turno;
+/* colaboradores */
+const parseC=t=>t.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{const m=l.split(/[;\t]/);return m.length>1?{c:m[0].trim(),n:m.slice(1).join(" ").trim()}:{c:"",n:l}}).filter(x=>x.n);
+const fmtC=a=>a.map(x=>x.c?x.c+";"+x.n:x.n).join("\n");
+function resolve(v){v=v.trim();if(!v)return"";const c=S.collab.find(x=>x.c&&x.c===v)||S.collab.find(x=>x.n.toLowerCase()===v.toLowerCase());return c?c.n:v}
+/* render */
+function render(){
+  const ds=days(),r=S.reg[rkey()]||{};
+  $("tu").innerHTML=TU.map(t=>'<option'+(t===S.turno?" selected":"")+'>'+t+'</option>').join("");
+  $("dt").value=ymd(mon);
+  $("info").textContent="Semana "+wkKey().slice(-2)+" · Turno "+S.turno.toLowerCase()+" · del "+fd(ds[0])+" al "+fd(ds[5])+"/"+ds[5].getFullYear();
+  let h='<thead><tr><th rowspan="2" class="pdt">PDT</th>'+ds.map((d,i)=>'<th><span class="dayhead"><span>'+DN[i]+'&#xA0;· </span><span class="date">'+fd(d)+'</span></span></th>').join("")+"</tr><tr>"+ds.map(()=>'<th class="u">USUARIO</th>').join("")+"</tr></thead>";
+  S.pdts.forEach(p=>{h+='<tr><th class="pdt">'+esc(p)+"</th>";for(let i=0;i<6;i++){const v=r[p+"|"+i]||"";h+='<td><input list="cl" data-p="'+esc(p)+'" data-d="'+i+'" value="'+esc(v)+'" autocomplete="off"><span class="pt">'+esc(v)+"</span></td>"}h+="</tr>"});
+  $("tb").innerHTML=h;markDup();renderLog();
+  $("cl").innerHTML=S.collab.map(x=>'<option value="'+esc(x.n)+'"'+(x.c?' label="'+esc(x.c)+'"':"")+">").join("");
+  $("tc").value=fmtC(S.collab);$("tp").value=S.pdts.join("\n");$("nc").textContent=S.collab.length;
+}
+function markDup(){
+  const I=[...document.querySelectorAll("#tb input")],c={};
+  I.forEach(i=>{const v=i.value.trim().toLowerCase();if(v){const k=i.dataset.d+"|"+v;c[k]=(c[k]||0)+1}});
+  I.forEach(i=>{const v=i.value.trim().toLowerCase();i.parentNode.classList.toggle("dup",!!v&&c[i.dataset.d+"|"+v]>1)});
+}
+function renderLog(){
+  const L=S.log.slice(-60).reverse();
+  $("lg").innerHTML=L.length?L.map(x=>"<tr><td>"+new Date(x.t).toLocaleString("es-CL")+"</td><td>S"+x.w.slice(-2)+" · "+esc(x.tu)+"</td><td>"+esc(x.f)+"</td><td>"+esc(x.p)+"</td><td>"+esc(x.a||"—")+" → "+esc(x.b||"(vacío)")+"</td></tr>").join(""):'<tr><td colspan="5" class="hint">Sin cambios todavía.</td></tr>';
+}
+$("tb").addEventListener("change",e=>{
+  const i=e.target;if(!i.dataset.p)return;
+  const v=resolve(i.value),k=i.dataset.p+"|"+i.dataset.d,rk=rkey(),r=S.reg[rk]||(S.reg[rk]={}),old=r[k]||"";
+  i.value=v;i.nextSibling.textContent=v;if(v===old)return;
+  v?r[k]=v:delete r[k];
+  S.log.push({t:new Date().toISOString(),w:wkKey(),tu:S.turno,f:DN[i.dataset.d]+" "+fd(add(mon,+i.dataset.d)),p:i.dataset.p,a:old,b:v});
+  if(S.log.length>3000)S.log=S.log.slice(-3000);
+  save();markDup();renderLog();
+});
+/* navegación */
+$("pv").onclick=()=>{mon=add(mon,-7);render()};$("nx").onclick=()=>{mon=add(mon,7);render()};
+$("dt").onchange=()=>{const d=new Date($("dt").value+"T00:00");if(!isNaN(d)){mon=monOf(isoWeek(d));render()}};
+$("tu").onchange=()=>{S.turno=$("tu").value;save();render()};
+$("bp").onclick=()=>window.print();
+/* configuración */
+$("sc").onclick=()=>{S.collab=parseC($("tc").value);save();render();toast(S.collab.length+" colaborador(es) guardados")};
+$("sp").onclick=()=>{const a=[...new Set($("tp").value.split("\n").map(x=>x.trim()).filter(Boolean))];if(!a.length)return toast("Agrega al menos un PDT");S.pdts=a;save();render();toast("Lista de PDT guardada")};
+$("ic").onclick=()=>window.XLSX?$("fx").click():toast("Para leer Excel se necesita conexión a internet");
+$("fx").onchange=async e=>{
+  const f=e.target.files[0];e.target.value="";if(!f)return;
+  try{
+    const wb=XLSX.read(await f.arrayBuffer(),{type:"array"}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:""}),H=(rows[0]||[]).map(x=>String(x).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim().toLowerCase());
+    const ci=H.findIndex(x=>x==="numero de personal"),ni=H.findIndex(x=>x==="nombre completo"),s=1;
+    if(ni<0||ci<0)return toast('No encontré las columnas “Número de personal” y “Nombre completo”');
+    const seen=new Set(),out=[];
+    for(let r=s;r<rows.length;r++){const n=String(rows[r][ni]||"").trim();if(!n||seen.has(n.toLowerCase()))continue;seen.add(n.toLowerCase());out.push({c:ci>=0?String(rows[r][ci]||"").trim():"",n})}
+    if(!out.length)return toast("No encontré nombres en el archivo");
+    out.sort((a,b)=>a.n.localeCompare(b.n));S.collab=out;save();render();toast(out.length+" colaboradores importados")
+  }catch(err){toast("No se pudo leer el archivo: "+err.message)}
+};
+/* exportar */
+function flat(){
+  const o=[];
+  for(const k in S.reg){const[w,tu]=k.split("|"),m=monOf(w);for(const kk in S.reg[k]){const[p,d]=kk.split("|"),dt=add(m,+d);o.push([ymd(dt),w.slice(-2),tu,DN[d],p,S.reg[k][kk]])}}
+  return o.sort((a,b)=>(a[0]+a[2]+a[4]).localeCompare(b[0]+b[2]+b[4]));
+}
+$("bx").onclick=()=>{
+  const F=[["Fecha","Semana","Turno","Día","PDT","Colaborador"],...flat()];
+  if(!window.XLSX)return download("registro_pdt.csv",new Blob(["\ufeff"+F.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(";")).join("\n")],{type:"text/csv;charset=utf-8"}));
+  const ds=days(),r=S.reg[rkey()]||{},sn="S"+wkKey().slice(-2)+" "+S.turno;
+  const M=[["PDT",...ds.map((d,i)=>DN[i]+" "+fd(d))],["",...ds.map(()=>"USUARIO")],...S.pdts.map(p=>[p,...ds.map((_,i)=>r[p+"|"+i]||"")])];
+  const L=[["Fecha y hora","Semana","Turno","Día","PDT","Antes","Después"],...S.log.map(x=>[new Date(x.t).toLocaleString("es-CL"),x.w.slice(-2),x.tu,x.f,x.p,x.a,x.b])];
+  const wb=XLSX.utils.book_new();
+  [[M,sn],[F,"Registros"],[L,"Historial"]].forEach(([a,n])=>XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(a),n));
+  XLSX.writeFile(wb,"PDT_"+sn.replace(" ","_")+".xlsx");
+};
+/* respaldo */
+$("bk").onclick=()=>download("registro_pdt_respaldo_"+ymd(new Date())+".json",new Blob([JSON.stringify(S)],{type:"application/json"}));
+$("br").onclick=()=>$("fr").click();
+$("fr").onchange=async e=>{
+  const f=e.target.files[0];e.target.value="";if(!f)return;
+  try{const o=JSON.parse(await f.text());if(!o||typeof o.reg!=="object")throw new Error("formato no válido");
+    if(!confirm("Se reemplazarán los datos de este equipo por los del respaldo. ¿Continuar?"))return;
+    S=Object.assign(S,o);save();render();toast("Respaldo cargado")}catch(err){toast("No se pudo cargar: "+err.message)}
+};
+render();
+</script>
+</body>
+</html>
