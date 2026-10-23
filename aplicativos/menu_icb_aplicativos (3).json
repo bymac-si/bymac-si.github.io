@@ -1,0 +1,95 @@
+{
+  "apps": [
+    {
+      "id": "umv2msqzs",
+      "name": "Reporte Fin de Turno",
+      "desc": "Reporte de actividades realizadas durante el turno",
+      "url": "https://script.google.com/macros/s/AKfycbz66VsFIgSwZ4l9YkIBSE4afbrGmov6GOwP-bR333NJ6dLGOR6rvm3U--GlQrjZJdV4Xg/exec",
+      "icon": "📄",
+      "tag": "Reportes",
+      "color": "#ed2750",
+      "newTab": true
+    },
+    {
+      "id": "productividad",
+      "name": "Productividad PKG y Grúas",
+      "desc": "Productividad por operador y hora, semáforo por turno y temperatura, con reporte en PDF o imagen.",
+      "url": "APP_PRODUCTIVIDAD_PKG_GRUAS_v6.html",
+      "icon": "📊",
+      "tag": "Reportes",
+      "color": "#ed2750",
+      "newTab": true
+    },
+    {
+      "id": "umv2lfgpa",
+      "name": "Pre Chequeo Control 0",
+      "desc": "Aplicativo para generar impresión de pre chequeos de Controles 0",
+      "url": "Separación_por_temperatura.html",
+      "icon": "📦",
+      "tag": "Operaciones",
+      "color": "#c27a00",
+      "newTab": true
+    },
+    {
+      "id": "umv9b18td",
+      "name": "Tarja 21",
+      "desc": "Packing List, Chequeo, Carga",
+      "url": "APP_TARJA_CONTROL_ICB.html",
+      "icon": "📦",
+      "tag": "Reportes",
+      "color": "#ed2750",
+      "newTab": true
+    },
+    {
+      "id": "umv2l5iwt",
+      "name": "Generador de Barras",
+      "desc": "Aplicativo para Generar listado de colas de Zona con sus respectivos códigos de barra",
+      "url": "Generador_de_Correlativos.html",
+      "icon": "⏸️",
+      "tag": "Operaciones",
+      "color": "#c27a00",
+      "newTab": true
+    },
+    {
+      "id": "seteo",
+      "name": "Seteo de rampla",
+      "desc": "Planilla de seteo: sellos, pallets y temperatura por zona. Lista para imprimir.",
+      "url": "APP_SETEO_RAMPLA_ICB.html",
+      "icon": "🚛",
+      "tag": "Despacho",
+      "color": "#2f6fdb",
+      "newTab": true
+    },
+    {
+      "id": "umv90820j",
+      "name": "Solicitud Permiso",
+      "desc": "Formulario Solicitud Permisos del Personal",
+      "url": "APP_SOLICITUD_PERMISO_ICB.html",
+      "icon": "🤩",
+      "tag": "Administración",
+      "color": "#7c4dff",
+      "newTab": true
+    },
+    {
+      "icon": "💸",
+      "name": "Pedidos Personales",
+      "desc": "Solicitud de Pedidos de Compras del Personal",
+      "url": "Pedido LP.html",
+      "tag": "compras",
+      "color": "#0e8fa8",
+      "newTab": true,
+      "id": "umvljdtkr"
+    },
+    {
+      "icon": "🧩",
+      "name": "Control PDT",
+      "desc": "",
+      "url": "Registro PDT · ICB Food Service.html",
+      "tag": "Operaciones",
+      "color": "#ed2750",
+      "newTab": true,
+      "id": "umvljsf3m"
+    }
+  ],
+  "removed": []
+}
