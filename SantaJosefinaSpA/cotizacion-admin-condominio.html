@@ -44,31 +44,21 @@
         const { BASE_UTM_MULTIPLIER, UMBRAL_UNIDADES, EXTRA_PCT, IVA } =
           CONFIG_CALCULO;
 
-        // 2. Calcular base monetaria (F1 en Excel)
-        const baseDinero = utm * BASE_UTM_MULTIPLIER;
-        let netoTeorico = 0;
-
-        // 3. Aplicar lógica de negocio
+        // Tarifas en UTM; utm es el valor de enero del año en CLP.
+        // Tarifas en UTM; utm es el valor mensual vigente en CLP.
+        let netoUTM = 0;
         if (unidades < UMBRAL_UNIDADES) {
-          // Caso Pequeño (<20): Base * Factor
-          netoTeorico = baseDinero * factor;
+          netoUTM = BASE_UTM_MULTIPLIER * factor;
         } else {
-          // Caso Estándar (>=20): (Base + Extra) * Factor
           const unidadesExtra = unidades - UMBRAL_UNIDADES;
-          const valorExtra = baseDinero * EXTRA_PCT;
-          const sumaBase = baseDinero + unidadesExtra * valorExtra;
-
-          netoTeorico = sumaBase * factor;
+          netoUTM = (BASE_UTM_MULTIPLIER + unidadesExtra * BASE_UTM_MULTIPLIER * EXTRA_PCT) * factor;
         }
-
-        // 4. Redondeo financiero (al 1.000 más cercano)
-        const neto = Math.round(netoTeorico / 1000) * 1000;
-
-        // 5. Cálculo final con IVA
+        const neto = Math.round((netoUTM * utm) / 1000) * 1000;
         const total = Math.round(neto * IVA);
         const iva = total - neto;
-
-        return { neto, iva, total };
+        const totalUTM = netoUTM * IVA;
+        const ivaUTM = totalUTM - netoUTM;
+        return { neto, iva, total, netoUTM, ivaUTM, totalUTM };
       };
 
       // Función mock por si no existe app.js externo con fetchData
@@ -192,14 +182,17 @@
             />
           </div>
           <div>
-            <label class="label">UTM (CLP)</label>
+            <label class="label">Valor UTM actual (CLP)</label>
             <input
               id="inpUTM"
               class="mono"
-              placeholder="Ej: 67.000"
+              placeholder="Pegue aquí el valor UTM de enero"
+              placeholder="Pegue aquí el valor UTM del mes en curso"
               inputmode="decimal"
               style="font-size: 14px; width: 90%"
             />
+            <small class="muted">Pegue el valor oficial de la UTM de enero para convertir la tarifa a pesos.</small>
+            <small class="muted">Pegue el valor oficial de la UTM del mes en curso para convertir la tarifa a pesos.</small>
           </div>
         </div>
 
@@ -245,21 +238,23 @@
             <span class="badge">Factor: <span id="cxFactor">—</span></span>
           </p>
           <p><b>N° Unidades:</b> <span id="cxUnidades">—</span></p>
-          <p><b>UTM:</b> <span id="cxUTM">—</span></p>
+          <p><b>Valor UTM actual:</b> <span id="cxUTM">—</span></p>
         </div>
 
         <div id="secHonorarios" class="card no-print">
           <h2 class="section-title">Honorarios estimados</h2>
-          <p class="muted">Fórmula corregida (Base 2.15 UTM)</p>
+          <p class="muted">Tarifas expresadas en UTM. Conversión a pesos con la UTM de enero.</p>
+          <p class="muted">Tarifas expresadas en UTM. Conversión a pesos con la UTM del mes en curso.</p>
+          <p class="muted" style="font-size:12px">Los precios se reajustan anualmente según IPC.</p>
           <table>
             <thead>
               <tr>
                 <th>Escenario</th>
                 <th>Fórmula Ref.</th>
-                <th style="text-align: right">Neto</th>
-                <th style="text-align: right">IVA (19%)</th>
-                <th style="text-align: right">Total</th>
-                <th style="text-align: right">x Unidad (Total)</th>
+                <th style="text-align: right">Neto (UTM / CLP)</th>
+                <th style="text-align: right">IVA (UTM / CLP)</th>
+                <th style="text-align: right">Total (UTM / CLP)</th>
+                <th style="text-align: right">x Unidad (UTM / CLP)</th>
               </tr>
             </thead>
             <tbody id="tbodyHonorarios"></tbody>
@@ -400,6 +395,11 @@
           <b>Total con IVA</b> y se ajusta al prorrateo de cada unidad.
         </p>
         <p class="muted" style="font-size: 12px; margin-top: 4px">
+          <b>Valor UTM actual aplicado:</b> <span id="p_valor_utm">—</span> (UTM de enero <span id="p_anio_utm"></span>).
+          <b>Valor UTM actual aplicado:</b> <span id="p_valor_utm">—</span> (UTM de <span id="p_mes_utm"></span> de <span id="p_anio_utm"></span>).
+          Los precios se reajustan anualmente según IPC.
+        </p>
+        <p class="muted" style="font-size: 12px; margin-top: 4px">
           <b>Desglose por unidad:</b>
           Neto: <span id="p_unit_neto" class="mono">—</span> · IVA:
           <span id="p_unit_iva" class="mono">—</span> · Total:
@@ -427,6 +427,10 @@
 
     <script>
       /* ===== Utilidades UI ===== */
+      const FECHA_UTM = new Date();
+      const ANIO_TARIFARIO = new Date().getFullYear();
+      const ANIO_TARIFARIO = FECHA_UTM.getFullYear();
+      const MES_UTM_ACTUAL = new Intl.DateTimeFormat("es-CL", { month: "long" }).format(FECHA_UTM);
       function showSpinner(msg) {
         document.getElementById("pageSpinner").style.display = "flex";
         if (msg) document.getElementById("spinnerText").textContent = msg;
@@ -441,6 +445,12 @@
             Number(v || 0),
           )
         );
+      }
+      function utmFmt(v) {
+        return new Intl.NumberFormat("es-CL", { minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(Number(v || 0)) + " UTM";
+      }
+      function montoDoble(utm, pesos) {
+        return `${utmFmt(utm)}<br><small>${clp(pesos)}</small>`;
       }
       function norm(s) {
         if (!s) return "";
@@ -545,7 +555,8 @@
               .replace(",", ".");
             utmCLP = parseFloat(raw) || 0;
             document.getElementById("cxUTM").textContent =
-              utmCLP > 0 ? clp(utmCLP) : "—";
+              utmCLP > 0 ? `${clp(utmCLP)} (UTM enero ${ANIO_TARIFARIO})` : "—";
+              utmCLP > 0 ? `${clp(utmCLP)} (UTM ${MES_UTM_ACTUAL} ${ANIO_TARIFARIO})` : "—";
             renderHonorarios();
           });
         } catch (e) {
@@ -642,7 +653,8 @@
         }
         if (utmCLP > 0) {
           document.getElementById("inpUTM").value = utmCLP;
-          document.getElementById("cxUTM").textContent = clp(utmCLP);
+          document.getElementById("cxUTM").textContent = `${clp(utmCLP)} (UTM enero ${ANIO_TARIFARIO})`;
+          document.getElementById("cxUTM").textContent = `${clp(utmCLP)} (UTM ${MES_UTM_ACTUAL} ${ANIO_TARIFARIO})`;
         } else {
           document.getElementById("cxUTM").textContent = "—";
         }
@@ -697,11 +709,13 @@
         if (!(factor > 0) || !(utmCLP > 0) || !(nUnidades >= 0)) {
           tb.innerHTML = `<tr><td colspan="6" class="muted">Ingresa UTM...</td></tr>`;
           document.getElementById("cxUTM").textContent =
-            utmCLP > 0 ? clp(utmCLP) : "—";
+            utmCLP > 0 ? `${clp(utmCLP)} (UTM enero ${ANIO_TARIFARIO})` : "—";
+            utmCLP > 0 ? `${clp(utmCLP)} (UTM ${MES_UTM_ACTUAL} ${ANIO_TARIFARIO})` : "—";
           setPrintTable(0, 0, 0, nUnidades || 0);
           return;
         }
-        document.getElementById("cxUTM").textContent = clp(utmCLP);
+        document.getElementById("cxUTM").textContent = `${clp(utmCLP)} (UTM enero ${ANIO_TARIFARIO})`;
+        document.getElementById("cxUTM").textContent = `${clp(utmCLP)} (UTM ${MES_UTM_ACTUAL} ${ANIO_TARIFARIO})`;
 
         const escenarios = [
           { nombre: "Según datos", unidades: nUnidades },
@@ -716,6 +730,7 @@
 
             const unit =
               sc.unidades > 0 ? Math.round(m.total / sc.unidades) : 0;
+            const unitUTM = sc.unidades > 0 ? m.totalUTM / sc.unidades : 0;
 
             let formula = "";
             if (sc.unidades < 20) formula = `(2,6 × UTM) × Factor`;
@@ -724,37 +739,43 @@
             return `<tr>
       <td>${sc.nombre}</td>
       <td class="mono" style="font-size:12px;">${formula}</td>
-      <td class="mono" style="text-align:right;">${clp(m.neto)}</td>
-      <td class="mono" style="text-align:right;">${clp(m.iva)}</td>
-      <td class="mono" style="text-align:right;">${clp(m.total)}</td>
-      <td class="mono" style="text-align:right;">${clp(unit)}</td>
+      <td class="mono" style="text-align:right;">${montoDoble(m.netoUTM, m.neto)}</td>
+      <td class="mono" style="text-align:right;">${montoDoble(m.ivaUTM, m.iva)}</td>
+      <td class="mono" style="text-align:right;">${montoDoble(m.totalUTM, m.total)}</td>
+      <td class="mono" style="text-align:right;">${montoDoble(unitUTM, unit)}</td>
     </tr>`;
           })
           .join("");
 
         // Actualizar tabla de impresión
         const m0 = window.calcularMontos(nUnidades, factor, utmCLP);
-        setPrintTable(m0.neto, m0.iva, m0.total, nUnidades || 0);
+        setPrintTable(m0.neto, m0.iva, m0.total, nUnidades || 0, m0.netoUTM, m0.ivaUTM, m0.totalUTM);
       }
 
-      function setPrintTable(neto, iva, total, unidades) {
+      function setPrintTable(neto, iva, total, unidades, netoUTM = 0, ivaUTM = 0, totalUTM = 0) {
         document.getElementById("p_unidades").textContent =
           unidades > 0 ? unidades : "—";
-        document.getElementById("p_neto").textContent = clp(neto);
-        document.getElementById("p_total").textContent = clp(total);
+        document.getElementById("p_neto").innerHTML = montoDoble(netoUTM, neto);
+        document.getElementById("p_total").innerHTML = montoDoble(totalUTM, total);
+        document.getElementById("p_valor_utm").textContent = utmCLP > 0 ? clp(utmCLP) : "—";
+        document.getElementById("p_mes_utm").textContent = MES_UTM_ACTUAL;
+        document.getElementById("p_anio_utm").textContent = ANIO_TARIFARIO;
 
         const unitTotal = unidades > 0 ? Math.round(total / unidades) : 0;
         const unitNeto = unidades > 0 ? Math.round(neto / unidades) : 0;
         const unitIva = unidades > 0 ? Math.round(iva / unidades) : 0;
+        const unitNetoUTM = unidades > 0 ? netoUTM / unidades : 0;
+        const unitIvaUTM = unidades > 0 ? ivaUTM / unidades : 0;
+        const unitTotalUTM = unidades > 0 ? totalUTM / unidades : 0;
 
-        document.getElementById("p_unit").textContent =
-          unitTotal > 0 ? clp(unitTotal) : "—";
-        document.getElementById("p_unit_neto").textContent =
-          unitNeto > 0 ? clp(unitNeto) : "—";
-        document.getElementById("p_unit_iva").textContent =
-          unitIva > 0 ? clp(unitIva) : "—";
-        document.getElementById("p_unit_total").textContent =
-          unitTotal > 0 ? clp(unitTotal) : "—";
+        document.getElementById("p_unit").innerHTML =
+          unitTotal > 0 ? montoDoble(unitTotalUTM, unitTotal) : "—";
+        document.getElementById("p_unit_neto").innerHTML =
+          unitNeto > 0 ? montoDoble(unitNetoUTM, unitNeto) : "—";
+        document.getElementById("p_unit_iva").innerHTML =
+          unitIva > 0 ? montoDoble(unitIvaUTM, unitIva) : "—";
+        document.getElementById("p_unit_total").innerHTML =
+          unitTotal > 0 ? montoDoble(unitTotalUTM, unitTotal) : "—";
       }
 
       function actualizarUnidadesManual(val) {
