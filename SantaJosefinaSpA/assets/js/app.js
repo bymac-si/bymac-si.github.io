@@ -33,6 +33,29 @@ function esPaginaPublica() {
     return PAGINAS_PUBLICAS.includes(path);
 }
 
+// Protege páginas internas y conserva la cotización solicitada al iniciar sesión.
+if (typeof window.requireAuth !== "function") {
+    window.requireAuth = function requireAuth() {
+        let usuario = null;
+        if (typeof getAuthUser === "function") {
+            usuario = getAuthUser();
+        } else {
+            const raw = localStorage.getItem("auth_user") || localStorage.getItem("sesion_activa");
+            if (raw) {
+                try { usuario = JSON.parse(raw); }
+                catch (e) { usuario = raw; }
+            }
+        }
+        if (usuario) return true;
+
+        const returnTo = window.location.pathname + window.location.search + window.location.hash;
+        const loginUrl = new URL("login.html", window.location.href);
+        loginUrl.searchParams.set("returnTo", returnTo);
+        window.location.replace(loginUrl.href);
+        return false;
+    };
+}
+
 // ==========================================
 // 1. PWA REGISTRATION
 // ✅ CAMBIO: no registrar Service Worker en páginas públicas (landing).
