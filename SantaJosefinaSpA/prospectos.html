@@ -13,6 +13,7 @@
 
     <script src="assets/js/api_cliente.js" defer></script>
     <script src="assets/js/app.js" defer></script>
+    <script src="assets/js/modal_carta.js" defer></script>
     <script defer>
       document.addEventListener("DOMContentLoaded", () => {
         if (typeof requireAuth === "function") requireAuth();
@@ -821,7 +822,10 @@
           const btnCotizar = esAdmin
             ? `<button class="btn-icon btn-cotizar" onclick="abrirCotizacion('${p.ID}')" title="Cotizar Copropiedad"><i class="fa-solid fa-file-invoice-dollar"></i></button>`
             : "";
-
+          // Imprime Carta (Solo Admin)
+const btnCarta = p._tabla === "ProspectosCopro"
+  ? `<button class="btn-icon" onclick="abrirCarta('${p.ID}')" title="Imprimir carta" style="background:#fef3c7;color:#b45309;"><i class="fa-solid fa-envelope-open-text"></i></button>`
+  : "";
           // Convertir a Cliente (Solo Admin)
           const btnCliente = esAdmin
             ? `<button class="btn-icon btn-cliente" onclick="agregarAClientes('${p.ID}')" title="Pasar a Cliente (Copropiedad)"><i class="fa-solid fa-check-double"></i></button>`
@@ -844,6 +848,7 @@
                     <button class="btn-icon btn-mapa" onclick="abrirMapa('${p.ID}')" title="Ver Mapa"><i class="fa-solid fa-map-location-dot"></i></button>
                     <button class="btn-icon" onclick="abrirBitacora('${p.ID}')" title="Bitácora" style="background:#e0f2fe; color:#0369a1;"><i class="fa-solid fa-clock-rotate-left"></i></button>
                     ${btnCotizar}
+                    ${btnCarta}
                     ${btnCliente}
                     <button class="btn-icon btn-eliminar" onclick="eliminarProspecto('${p.ID}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
                 </div>
