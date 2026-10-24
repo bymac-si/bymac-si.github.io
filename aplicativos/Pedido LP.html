@@ -175,8 +175,8 @@ $("#cl").addEventListener("click",()=>{const b=$("#cl");
   armed=0;b.textContent="Vaciar pedido";cart={};save();renderOrd();msg("");});
 $("#cp").addEventListener("click",async()=>{
   const ks=Object.keys(cart).sort((a,b)=>idx.get(a)-idx.get(b));
-  let t="PEDIDO\nNombre: "+cli.nombre+"\nRut: "+cli.rut+"\nForma de pago: "+cli.pago+"\nTeléfono: "+cli.tel+"\nDirección: "+cli.dir+"\n\nCÓDIGO\tCANTIDAD\tUM\tDESCRIPCIÓN\n";
-  ks.forEach(c=>{const p=P[idx.get(c)];t+=c+"\t"+cart[c]+"\t"+p[1]+"\t"+p[4]+"\n";});
+  let t="PEDIDO\nNombre: "+cli.nombre+"\nRut: "+cli.rut+"\nForma de pago: "+cli.pago+"\nTeléfono: "+cli.tel+"\nDirección: "+cli.dir+"\n\nCÓDIGO\tCANTIDAD\tUMV\tDESCRIPCIÓN\n";
+  ks.forEach(c=>{const p=P[idx.get(c)];t+=c+"\t"+cart[c]+"\t"+p[2]+"\t"+p[4]+"\n";});
   try{await navigator.clipboard.writeText(t);msg("Pedido copiado.");}
   catch(e){try{const a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();document.execCommand("copy");a.remove();msg("Pedido copiado.");}catch(_){msg("No se pudo copiar.",1);}}});
 
@@ -264,10 +264,10 @@ async function parseLista(zip){
   /* columnas C..F: se detectan por el encabezado de la fila 13 */
   const h=rows.get(13)||{},cols=["C","D","E","F"],used=new Set(),m={};
   const take=(key,re)=>{for(const c of cols){if(used.has(c))continue;if(re.test(norm(h[c]))){m[key]=c;used.add(c);return;}}};
-  take("cat",/categor|famil|grupo|linea|rubro/);
-  take("ud",/(unidad|medida|\bum\b).*(descrip|nombre)|(descrip|nombre).*(unidad|medida|\bum\b)/);
-  take("um",/^(um|u\.?m\.?|unidad|unidad de medida|medida)$/);
-  take("desc",/descrip|producto|material|articulo|nombre/);
+  take("cat",/categor/);
+  take("ud",/umv|medida de venta|^descripcion (um|unidad)/);
+  take("um",/^(um|u\.?m\.?|unidad de medida)$/);
+  take("desc",/^(descripcion|producto|material|articulo|nombre)$/);
   const dflt={um:"C",ud:"D",cat:"E",desc:"F"},guessed=[];
   for(const k of Object.keys(dflt))if(!m[k]){m[k]=dflt[k];guessed.push(k);}
   const out=[],seen=new Set(),dup=[],bad=[];
@@ -282,6 +282,7 @@ async function parseLista(zip){
     const um=String(o[m.um]||"").trim()||"UN";
     out.push([code,um,String(o[m.ud]||"").trim()||um,String(o[m.cat]||"").trim()||"SIN CATEGORÍA",desc,price,r]);});
   if(!out.length)throw new Error("no encontré productos válidos desde la fila 14 (código en columna A, precio neto en columna G)");
+  if(!/precio/.test(norm(h.G)))guessed.push("precio (columna G: «"+(h.G||"vacía")+"»)");
   const hdrTxt=["A","B",...cols,"G"].map(c=>c+": "+(h[c]||"—")).join(" | ");
   const rep="Lista cargada: "+out.length+" productos.\nEncabezados fila 13 → "+hdrTxt
     +"\nEjemplo: "+out[0][0]+" · "+out[0][4]+" · "+clp(out[0][5])+" neto"
