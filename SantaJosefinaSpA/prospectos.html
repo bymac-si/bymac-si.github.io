@@ -883,7 +883,17 @@
 
         try {
           showSpinner("Pasando a cliente...");
+
           await saveData("copropiedades", payload);
+
+          if (p._tabla && p._tabla !== "contactos") {
+            try {
+              await deleteData(p._tabla, p.ID);
+            } catch (error) {
+              console.warn("No se pudo eliminar el prospecto original:", error);
+            }
+          }
+
           alert("Prospecto convertido a cliente y agregado a copropiedades.");
           await cargarTodo();
         } catch (error) {
