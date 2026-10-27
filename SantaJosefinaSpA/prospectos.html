@@ -196,6 +196,10 @@
         background: #ffedd5;
         color: #c2410c;
       }
+      .st-procesado {
+        background: #e2e8f0;
+        color: #475569;
+      }
 
       .badge-type {
         font-size: 10px;
@@ -226,7 +230,6 @@
         color: #9d174d;
       }
 
-      /* BITÁCORA */
       .timeline {
         position: relative;
         border-left: 2px solid #e2e8f0;
@@ -263,7 +266,6 @@
         color: #334155;
       }
 
-      /* BOTONES ACCION */
       .btn-icon {
         width: 32px;
         height: 32px;
@@ -301,56 +303,24 @@
   <body>
     <div id="header"></div>
     <main>
-      <div
-        style="
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 30px;
-        "
-      >
-        <div class="dashboard-header no-print" style="width: 100%">
-          <div
-            class="header-top"
-            style="
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-            "
-          >
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+        <div class="dashboard-header no-print" style="width:100%">
+          <div class="header-top" style="display:flex; justify-content:space-between; align-items:center;">
             <h1 class="page-title">Gestión de Prospectos</h1>
-            <div class="header-actions" style="display: flex; gap: 10px">
-              <button
-                class="btn-head btn-secundario"
-                id="btnReload"
-                title="Recargar"
-              >
-                <i class="fa-solid fa-rotate-right"></i>
-              </button>
-              <button
-                class="btn-head btn-secundario"
-                onclick="window.print()"
-                title="Imprimir"
-              >
-                <i class="fa-solid fa-print"></i>
-              </button>
-              <button class="btn-head btn-nuevo" id="btnNew">
-                <i class="fa-solid fa-plus"></i> <span>Nuevo Prospecto</span>
-              </button>
+            <div class="header-actions" style="display:flex; gap:10px">
+              <button class="btn-head btn-secundario" id="btnReload" title="Recargar"><i class="fa-solid fa-rotate-right"></i></button>
+              <button class="btn-head btn-secundario" onclick="window.print()" title="Imprimir"><i class="fa-solid fa-print"></i></button>
+              <button class="btn-head btn-nuevo" id="btnNew"><i class="fa-solid fa-plus"></i> <span>Nuevo Prospecto</span></button>
             </div>
           </div>
 
-          <div
-            class="header-filters"
-            style="display: flex; gap: 10px; margin-top: 20px"
-          >
-            <div style="flex-grow: 2">
-              <label class="label">Buscar</label
-              ><input id="inpBuscar" placeholder="..." />
+          <div class="header-filters" style="display:flex; gap:10px; margin-top:20px">
+            <div style="flex-grow:2">
+              <label class="label">Buscar</label><input id="inpBuscar" placeholder="..." />
             </div>
             <div>
-              <label class="label">Tipo</label
-              ><select id="selTipo">
+              <label class="label">Tipo</label>
+              <select id="selTipo">
                 <option value="">(Todos)</option>
                 <option value="Administracion">Admin</option>
                 <option value="Corretaje">Corretaje</option>
@@ -367,13 +337,11 @@
             <th>Tipo</th>
             <th>Dirección</th>
             <th>Contacto</th>
-            <th class="no-print" style="width: 240px">Acciones</th>
+            <th class="no-print" style="width:240px">Acciones</th>
           </tr>
         </thead>
         <tbody id="tablaProspectos">
-          <tr>
-            <td colspan="5" class="muted">Cargando…</td>
-          </tr>
+          <tr><td colspan="5" class="muted">Cargando…</td></tr>
         </tbody>
       </table>
     </main>
@@ -388,51 +356,22 @@
 
           <label class="label">Tipo de Negocio</label>
           <div class="tipo-selector">
-            <div
-              class="tipo-btn active"
-              onclick="setTipo('Administracion')"
-              id="btnTipoAdmin"
-            >
-              <i class="fa-solid fa-building"></i> Administración
-            </div>
-            <div
-              class="tipo-btn"
-              onclick="setTipo('Corretaje')"
-              id="btnTipoCorretaje"
-            >
-              <i class="fa-solid fa-house-user"></i> Corretaje
-            </div>
+            <div class="tipo-btn active" onclick="setTipo('Administracion')" id="btnTipoAdmin"><i class="fa-solid fa-building"></i> Administración</div>
+            <div class="tipo-btn" onclick="setTipo('Corretaje')" id="btnTipoCorretaje"><i class="fa-solid fa-house-user"></i> Corretaje</div>
           </div>
           <input type="hidden" id="prosTipoNegocio" value="Administracion" />
 
-          <div
-            class="row"
-            style="
-              margin-top: 10px;
-              background: #f0f9ff;
-              padding: 10px;
-              border-radius: 6px;
-              border: 1px dashed #0284c7;
-            "
-          >
-            <div style="flex: 2; display: flex; align-items: center; gap: 10px">
-              <label class="label" style="margin: 0; min-width: 120px"
-                >Asignar a:</label
-              >
-              <select
-                id="prosAgente"
-                style="margin: 0; font-weight: bold; color: #0284c7"
-              >
+          <div class="row" style="margin-top:10px; background:#f0f9ff; padding:10px; border-radius:6px; border:1px dashed #0284c7;">
+            <div style="flex:2; display:flex; align-items:center; gap:10px">
+              <label class="label" style="margin:0; min-width:120px">Asignar a:</label>
+              <select id="prosAgente" style="margin:0; font-weight:bold; color:#0284c7">
                 <option value="Sin Asignar">-- Sin Asignar --</option>
               </select>
             </div>
           </div>
 
-          <div class="row" style="margin-top: 10px">
-            <div style="flex: 2">
-              <label class="label">Nombre (Cliente/Condominio)</label
-              ><input id="prosNombre" required />
-            </div>
+          <div class="row" style="margin-top:10px">
+            <div style="flex:2"><label class="label">Nombre (Cliente/Condominio)</label><input id="prosNombre" required /></div>
             <div>
               <label class="label">Estado</label>
               <select id="prosEstado">
@@ -441,94 +380,43 @@
                 <option value="En Negociación">En Negociación</option>
                 <option value="Cerrado Ganado">Cerrado Ganado</option>
                 <option value="Cerrado Perdido">Cerrado Perdido</option>
+                <option value="Procesado">Procesado</option>
               </select>
             </div>
           </div>
 
-          <div class="row" style="margin-top: 10px">
-            <div style="flex: 1">
-              <label class="label">Teléfono</label><input id="prosTelefono" />
-            </div>
-            <div style="flex: 1.5">
-              <label class="label">Email</label
-              ><input id="prosEmail" type="email" />
-            </div>
+          <div class="row" style="margin-top:10px">
+            <div style="flex:1"><label class="label">Teléfono</label><input id="prosTelefono" /></div>
+            <div style="flex:1.5"><label class="label">Email</label><input id="prosEmail" type="email" /></div>
           </div>
 
-          <div class="row" style="margin-top: 10px">
-            <div style="flex: 2">
-              <label class="label">Dirección</label
-              ><input id="prosDireccion" onchange="intentarGeocodificar()" />
-            </div>
-            <div style="flex: 1">
-              <label class="label">Comuna</label
-              ><input
-                id="prosComuna"
-                list="dlComunas"
-                onchange="intentarGeocodificar()"
-              /><datalist id="dlComunas"></datalist>
-            </div>
+          <div class="row" style="margin-top:10px">
+            <div style="flex:2"><label class="label">Dirección</label><input id="prosDireccion" onchange="intentarGeocodificar()" /></div>
+            <div style="flex:1"><label class="label">Comuna</label><input id="prosComuna" list="dlComunas" onchange="intentarGeocodificar()" /><datalist id="dlComunas"></datalist></div>
           </div>
 
-          <div id="camposAdmin" style="margin-top: 10px">
+          <div id="camposAdmin" style="margin-top:10px">
             <div class="row">
-              <div>
-                <label class="label">Cant. Unidades</label
-                ><input
-                  id="prosUnidades"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                />
-              </div>
-              <div>
-                <label class="label">RUT Comunidad</label><input id="prosRUT" />
-              </div>
+              <div><label class="label">Cant. Unidades</label><input id="prosUnidades" type="number" min="0" placeholder="0" /></div>
+              <div><label class="label">RUT Comunidad</label><input id="prosRUT" /></div>
             </div>
           </div>
 
-          <div id="camposCorretaje" class="hidden" style="margin-top: 10px">
+          <div id="camposCorretaje" class="hidden" style="margin-top:10px">
             <div class="row">
-              <div>
-                <label class="label">Operación</label
-                ><select id="prosOperacion">
-                  <option value="Venta">Venta</option>
-                  <option value="Arriendo">Arriendo</option>
-                </select>
-              </div>
-              <div>
-                <label class="label">Tipo Prop.</label
-                ><select id="prosTipoProp">
-                  <option value="Departamento">Departamento</option>
-                  <option value="Casa">Casa</option>
-                </select>
-              </div>
+              <div><label class="label">Operación</label><select id="prosOperacion"><option value="Venta">Venta</option><option value="Arriendo">Arriendo</option></select></div>
+              <div><label class="label">Tipo Prop.</label><select id="prosTipoProp"><option value="Departamento">Departamento</option><option value="Casa">Casa</option></select></div>
             </div>
-            <div class="row" style="margin-top: 10px">
-              <div>
-                <label class="label">Presupuesto</label
-                ><input id="prosPresupuesto" />
-              </div>
+            <div class="row" style="margin-top:10px">
+              <div><label class="label">Presupuesto</label><input id="prosPresupuesto" /></div>
             </div>
           </div>
 
-          <label class="label" style="margin-top: 10px"
-            >Notas / Diagnóstico</label
-          >
+          <label class="label" style="margin-top:10px">Notas / Diagnóstico</label>
           <textarea id="prosNotas" rows="4"></textarea>
 
-          <div style="text-align: right; margin-top: 20px">
-            <button
-              type="button"
-              class="btn-head btn-secundario"
-              onclick="
-                document
-                  .getElementById('modalProspecto')
-                  .classList.remove('active')
-              "
-            >
-              Cancelar
-            </button>
+          <div style="text-align:right; margin-top:20px">
+            <button type="button" class="btn-head btn-secundario" onclick="document.getElementById('modalProspecto').classList.remove('active')">Cancelar</button>
             <button type="submit" class="btn-head btn-nuevo">Guardar</button>
           </div>
         </form>
@@ -539,80 +427,34 @@
       <div class="modal-content">
         <h2>Detalle Prospecto</h2>
         <div id="detalleContenido"></div>
-        <div style="text-align: right; margin-top: 10px">
-          <button
-            class="btn-head btn-secundario"
-            onclick="
-              document.getElementById('modalDetalle').classList.remove('active')
-            "
-          >
-            Cerrar
-          </button>
+        <div style="text-align:right; margin-top:10px">
+          <button class="btn-head btn-secundario" onclick="document.getElementById('modalDetalle').classList.remove('active')">Cerrar</button>
         </div>
       </div>
     </div>
 
     <div id="modalBitacora" class="modal" aria-hidden="true">
-      <div
-        class="modal-content"
-        style="
-          max-width: 500px;
-          max-height: 85vh;
-          display: flex;
-          flex-direction: column;
-        "
-      >
-        <h2 style="margin-top: 0">Bitácora</h2>
-        <p class="muted" id="bitacoraSubtitle" style="font-size: 13px">
-          Prospecto: ...
-        </p>
-        <div
-          id="timelineContainer"
-          style="
-            flex-grow: 1;
-            overflow-y: auto;
-            min-height: 200px;
-            margin-bottom: 15px;
-          "
-        ></div>
-        <div style="background: #f1f5f9; padding: 15px; border-radius: 8px">
-          <div style="display: flex; gap: 10px; margin-bottom: 8px">
-            <select id="bitTipo" style="width: 120px">
+      <div class="modal-content" style="max-width:500px; max-height:85vh; display:flex; flex-direction:column;">
+        <h2 style="margin-top:0">Bitácora</h2>
+        <p class="muted" id="bitacoraSubtitle" style="font-size:13px">Prospecto: ...</p>
+        <div id="timelineContainer" style="flex-grow:1; overflow-y:auto; min-height:200px; margin-bottom:15px;"></div>
+        <div style="background:#f1f5f9; padding:15px; border-radius:8px">
+          <div style="display:flex; gap:10px; margin-bottom:8px">
+            <select id="bitTipo" style="width:120px">
               <option value="Nota">Nota 📝</option>
               <option value="Llamada">Llamada 📞</option>
               <option value="Correo">Correo 📧</option>
               <option value="Reunion">Reunión 🤝</option>
             </select>
-            <input type="date" id="bitFecha" style="margin: 0" />
+            <input type="date" id="bitFecha" style="margin:0" />
           </div>
-          <textarea
-            id="bitNota"
-            rows="2"
-            placeholder="Detalles..."
-            style="width: 100%"
-          ></textarea>
-          <div style="text-align: right; margin-top: 8px">
-            <button
-              class="btn-head btn-nuevo"
-              onclick="guardarBitacora()"
-              style="font-size: 12px"
-            >
-              Agregar
-            </button>
+          <textarea id="bitNota" rows="2" placeholder="Detalles..." style="width:100%"></textarea>
+          <div style="text-align:right; margin-top:8px">
+            <button class="btn-head btn-nuevo" onclick="guardarBitacora()" style="font-size:12px">Agregar</button>
           </div>
         </div>
-        <div style="text-align: right; margin-top: 10px">
-          <button
-            type="button"
-            class="btn-head btn-secundario"
-            onclick="
-              document
-                .getElementById('modalBitacora')
-                .classList.remove('active')
-            "
-          >
-            Cerrar
-          </button>
+        <div style="text-align:right; margin-top:10px">
+          <button type="button" class="btn-head btn-secundario" onclick="document.getElementById('modalBitacora').classList.remove('active')">Cerrar</button>
         </div>
       </div>
     </div>
@@ -627,41 +469,26 @@
     <div id="footer"></div>
 
     <script>
-      /* ===== Utilidades ===== */
       function showSpinner(msg) {
-        document.getElementById("spinnerText").textContent =
-          msg || "Cargando...";
+        document.getElementById("spinnerText").textContent = msg || "Cargando...";
         document.getElementById("pageSpinner").style.display = "grid";
       }
       function hideSpinner() {
         document.getElementById("pageSpinner").style.display = "none";
       }
       function norm(s) {
-        return (s || "")
-          .toString()
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .trim();
+        return (s || "").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
       }
 
-      let PROS = [],
-        VIEW = [],
-        AGENTES_LISTA = [],
-        TARIFAS = [],
-        CURRENT_PROS_ID = null;
+      let PROS = [], VIEW = [], AGENTES_LISTA = [], TARIFAS = [], CURRENT_PROS_ID = null;
 
       document.addEventListener("DOMContentLoaded", async () => {
         try {
           const h = await fetch("header.html");
-          if (h.ok)
-            document.getElementById("header").innerHTML = await h.text();
+          if (h.ok) document.getElementById("header").innerHTML = await h.text();
           const f = await fetch("footer.html");
-          if (f.ok)
-            document.getElementById("footer").innerHTML = await f.text();
-          const scripts = document
-            .getElementById("header")
-            .querySelectorAll("script");
+          if (f.ok) document.getElementById("footer").innerHTML = await f.text();
+          const scripts = document.getElementById("header").querySelectorAll("script");
           scripts.forEach((s) => eval(s.innerHTML));
         } catch (e) {}
 
@@ -681,96 +508,61 @@
       });
 
       function bindUI() {
-        document
-          .getElementById("btnNew")
-          .addEventListener("click", () => abrirFormProspecto());
-        document
-          .getElementById("btnReload")
-          .addEventListener("click", cargarTodo);
-        document
-          .getElementById("inpBuscar")
-          .addEventListener("input", aplicarFiltros);
-        document
-          .getElementById("selTipo")
-          .addEventListener("change", aplicarFiltros);
+        document.getElementById("btnNew").addEventListener("click", () => abrirFormProspecto());
+        document.getElementById("btnReload").addEventListener("click", cargarTodo);
+        document.getElementById("inpBuscar").addEventListener("input", aplicarFiltros);
+        document.getElementById("selTipo").addEventListener("change", aplicarFiltros);
       }
 
       async function cargarTodo() {
         showSpinner("Cargando...");
         try {
-          const [adminData, corretajeData, contactosData, agentes, tarifas] =
-            await Promise.all([
-              fetchData("ProspectosCopro").catch(() => []),
-              fetchData("ProspectosCorretaje").catch(() => []),
-              fetchData("contactos").catch(() => []),
-              fetchData("Agentes").catch(() => []),
-              fetchData("TablaTarifas").catch(() => []),
-            ]);
+          const [adminData, corretajeData, contactosData, agentes, tarifas] = await Promise.all([
+            fetchData("ProspectosCopro").catch(() => []),
+            fetchData("ProspectosCorretaje").catch(() => []),
+            fetchData("contactos").catch(() => []),
+            fetchData("Agentes").catch(() => []),
+            fetchData("TablaTarifas").catch(() => []),
+          ]);
 
           AGENTES_LISTA = agentes || [];
           TARIFAS = tarifas || [];
           const selAgente = document.getElementById("prosAgente");
-          selAgente.innerHTML =
-            '<option value="Sin Asignar">-- Sin Asignar --</option>';
-          AGENTES_LISTA.forEach(
-            (ag) =>
-              (selAgente.innerHTML += `<option value="${ag.Nombre}">${ag.Nombre}</option>`),
-          );
+          selAgente.innerHTML = '<option value="Sin Asignar">-- Sin Asignar --</option>';
+          AGENTES_LISTA.forEach((ag) => {
+            selAgente.innerHTML += `<option value="${ag.Nombre}">${ag.Nombre}</option>`;
+          });
 
-          const listA = adminData.map((p) => ({
-            ...p,
-            _tipo: "Administracion",
-            _tabla: "ProspectosCopro",
-            Contacto: p.Contacto || p.Nombre,
-          }));
-          const listB = corretajeData.map((p) => ({
-            ...p,
-            _tipo: "Corretaje",
-            _tabla: "ProspectosCorretaje",
-            Contacto: p.Nombre,
-          }));
-
-          const listC = contactosData
-            .filter((c) => c.Estado !== "Procesado")
-            .map((c) => {
-              let tipoSugerido = "Lead";
-              if (
-                (c.Notas || "").includes("Diagnóstico") ||
-                String(c.ID).startsWith("LEAD_")
-              )
-                tipoSugerido = "Administracion";
-              else if (String(c.ID).startsWith("WEB_"))
-                tipoSugerido = "Corretaje";
-
-              return {
-                ID: c.ID,
-                Nombre: c.Nombre,
-                Email: c.Email,
-                Telefono: c.Telefono,
-                Observaciones: c.Mensaje + (c.Notas ? `\n\n${c.Notas}` : ""),
-                Estado: "Nuevo",
-                Comuna: "",
-                Direccion: "",
-                _tipo: tipoSugerido,
-                _tabla: "contactos",
-                Canal: "Web/Checklist",
-                "Fecha Registro": c.Fecha,
-              };
-            });
+          const listA = adminData.map((p) => ({ ...p, _tipo: "Administracion", _tabla: "ProspectosCopro", Contacto: p.Contacto || p.Nombre }));
+          const listB = corretajeData.map((p) => ({ ...p, _tipo: "Corretaje", _tabla: "ProspectosCorretaje", Contacto: p.Nombre }));
+          const listC = contactosData.filter((c) => c.Estado !== "Procesado").map((c) => {
+            let tipoSugerido = "Lead";
+            if ((c.Notas || "").includes("Diagnóstico") || String(c.ID).startsWith("LEAD_")) tipoSugerido = "Administracion";
+            else if (String(c.ID).startsWith("WEB_")) tipoSugerido = "Corretaje";
+            return {
+              ID: c.ID,
+              Nombre: c.Nombre,
+              Email: c.Email,
+              Telefono: c.Telefono,
+              Observaciones: c.Mensaje + (c.Notas ? `\n\n${c.Notas}` : ""),
+              Estado: "Nuevo",
+              Comuna: "",
+              Direccion: "",
+              _tipo: tipoSugerido,
+              _tabla: "contactos",
+              Canal: "Web/Checklist",
+              "Fecha Registro": c.Fecha,
+            };
+          });
 
           PROS = [...listA, ...listB, ...listC];
 
-          const comunas = [...new Set(PROS.map((p) => p.Comuna))]
-            .filter(Boolean)
-            .sort();
+          const comunas = [...new Set(PROS.map((p) => p.Comuna))].filter(Boolean).sort();
           const selComuna = document.getElementById("selComuna");
-          if (selComuna)
-            selComuna.innerHTML =
-              '<option value="">(Todas)</option>' +
-              comunas.map((c) => `<option value="${c}">${c}</option>`).join("");
-          document.getElementById("dlComunas").innerHTML = comunas
-            .map((c) => `<option value="${c}">`)
-            .join("");
+          if (selComuna) {
+            selComuna.innerHTML = '<option value="">(Todas)</option>' + comunas.map((c) => `<option value="${c}">${c}</option>`).join("");
+          }
+          document.getElementById("dlComunas").innerHTML = comunas.map((c) => `<option value="${c}">`).join("");
 
           aplicarFiltros();
         } catch (e) {
@@ -786,8 +578,7 @@
 
         VIEW = PROS.filter((p) => {
           if (p.Estado === "Procesado") return false;
-          if (tipoFilter && p._tabla !== "contactos" && p._tipo !== tipoFilter)
-            return false;
+          if (tipoFilter && p._tabla !== "contactos" && p._tipo !== tipoFilter) return false;
           if (!q) return true;
           return [p.Nombre, p.Comuna, p.Email].some((v) => norm(v).includes(q));
         });
@@ -797,31 +588,21 @@
       function renderTabla() {
         const tbody = document.getElementById("tablaProspectos");
         if (VIEW.length === 0) {
-          tbody.innerHTML =
-            '<tr><td colspan="5" class="muted">Sin resultados.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="5" class="muted">Sin resultados.</td></tr>';
           return;
         }
 
         tbody.innerHTML = VIEW.map((p) => {
-          let badgeClass = p.Estado === "Nuevo" ? "st-nuevo" : "st-contactado";
+          let badgeClass = p.Estado === "Nuevo" ? "st-nuevo" : p.Estado === "Procesado" ? "st-procesado" : "st-contactado";
           let tipoBadge = "";
-          if (p._tipo === "Administracion")
-            tipoBadge = '<span class="badge-type type-admin">Admin</span>';
-          else if (p._tipo === "Corretaje")
-            tipoBadge =
-              '<span class="badge-type type-corretaje">Corretaje</span>';
+          if (p._tipo === "Administracion") tipoBadge = '<span class="badge-type type-admin">Admin</span>';
+          else if (p._tipo === "Corretaje") tipoBadge = '<span class="badge-type type-corretaje">Corretaje</span>';
           else tipoBadge = '<span class="badge-source checklist">LEAD</span>';
 
           const esAdmin = p._tipo === "Administracion";
-          const btnCotizar = esAdmin
-            ? `<button class="btn-icon btn-cotizar" onclick="abrirCotizacion('${p.ID}')" title="Cotizar Copropiedad"><i class="fa-solid fa-file-invoice-dollar"></i></button>`
-            : "";
-          const btnCarta = p._tabla === "ProspectosCopro"
-            ? `<button class="btn-icon" onclick="abrirModalCarta('${p.ID}')" title="Imprimir carta" style="background:#fef3c7;color:#b45309;"><i class="fa-solid fa-envelope-open-text"></i></button>`
-            : "";
-          const btnCliente = esAdmin
-            ? `<button class="btn-icon btn-cliente" onclick="agregarAClientes('${p.ID}')" title="Pasar a Cliente (Copropiedad)"><i class="fa-solid fa-check-double"></i></button>`
-            : "";
+          const btnCotizar = esAdmin ? `<button class="btn-icon btn-cotizar" onclick="abrirCotizacion('${p.ID}')" title="Cotizar Copropiedad"><i class="fa-solid fa-file-invoice-dollar"></i></button>` : "";
+          const btnCarta = p._tabla === "ProspectosCopro" ? `<button class="btn-icon" onclick="abrirModalCarta('${p.ID}')" title="Imprimir carta" style="background:#fef3c7;color:#b45309;"><i class="fa-solid fa-envelope-open-text"></i></button>` : "";
+          const btnCliente = esAdmin ? `<button class="btn-icon btn-cliente" onclick="agregarAClientes('${p.ID}')" title="Pasar a Cliente (Copropiedad)"><i class="fa-solid fa-check-double"></i></button>` : "";
 
           return `
             <tr>
@@ -835,14 +616,14 @@
               <td style="font-size:13px;">${p.Email || "-"} <br> ${p.Telefono || "-"}</td>
               <td class="no-print">
                 <div style="display:flex; gap:5px; flex-wrap:wrap;">
-                    <button class="btn-icon btn-ver" onclick="abrirDetalle('${p.ID}')" title="Ver Detalle"><i class="fa-solid fa-eye"></i></button>
-                    <button class="btn-icon btn-editar" onclick="abrirFormProspecto('${p.ID}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
-                    <button class="btn-icon btn-mapa" onclick="abrirMapa('${p.ID}')" title="Ver Mapa"><i class="fa-solid fa-map-location-dot"></i></button>
-                    <button class="btn-icon" onclick="abrirBitacora('${p.ID}')" title="Bitácora" style="background:#e0f2fe; color:#0369a1;"><i class="fa-solid fa-clock-rotate-left"></i></button>
-                    ${btnCotizar}
-                    ${btnCarta}
-                    ${btnCliente}
-                    <button class="btn-icon btn-eliminar" onclick="eliminarProspecto('${p.ID}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+                  <button class="btn-icon btn-ver" onclick="abrirDetalle('${p.ID}')" title="Ver Detalle"><i class="fa-solid fa-eye"></i></button>
+                  <button class="btn-icon btn-editar" onclick="abrirFormProspecto('${p.ID}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                  <button class="btn-icon btn-mapa" onclick="abrirMapa('${p.ID}')" title="Ver Mapa"><i class="fa-solid fa-map-location-dot"></i></button>
+                  <button class="btn-icon" onclick="abrirBitacora('${p.ID}')" title="Bitácora" style="background:#e0f2fe; color:#0369a1;"><i class="fa-solid fa-clock-rotate-left"></i></button>
+                  ${btnCotizar}
+                  ${btnCarta}
+                  ${btnCliente}
+                  <button class="btn-icon btn-eliminar" onclick="eliminarProspecto('${p.ID}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
                 </div>
               </td>
             </tr>`;
@@ -874,7 +655,6 @@
 
         try {
           showSpinner("Pasando a cliente...");
-
           await saveData("copropiedades", payload);
 
           if (p._tabla && p._tabla !== "contactos") {
@@ -901,12 +681,8 @@
 
       function setTipo(tipo) {
         document.getElementById("prosTipoNegocio").value = tipo;
-        document
-          .getElementById("btnTipoAdmin")
-          .classList.toggle("active", tipo === "Administracion");
-        document
-          .getElementById("btnTipoCorretaje")
-          .classList.toggle("active", tipo === "Corretaje");
+        document.getElementById("btnTipoAdmin").classList.toggle("active", tipo === "Administracion");
+        document.getElementById("btnTipoCorretaje").classList.toggle("active", tipo === "Corretaje");
 
         if (tipo === "Administracion") {
           document.getElementById("camposAdmin").classList.remove("hidden");
@@ -966,11 +742,7 @@
         const tablaOriginal = document.getElementById("prosTablaOriginal").value;
         const tipoSeleccionado = document.getElementById("prosTipoNegocio").value;
 
-        let tablaDestino = "";
-        if (tipoSeleccionado === "Administracion")
-          tablaDestino = "ProspectosCopro";
-        else tablaDestino = "ProspectosCorretaje";
-
+        let tablaDestino = tipoSeleccionado === "Administracion" ? "ProspectosCopro" : "ProspectosCorretaje";
         const esMigracion = idActual && tablaOriginal && tablaOriginal !== tablaDestino;
 
         let finalID = idActual;
