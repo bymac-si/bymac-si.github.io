@@ -1,87 +1,127 @@
-<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Registro PDT · ICB Food Service</title>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-:root{--bg:#f5f5f7;--panel:#fff;--line:#d9d9e0;--ink:#1d1d22;--muted:#6c6c78;--brand:#ed2750;--warn:#fde68a;box-sizing:border-box}
-@media(prefers-color-scheme:dark){:root{--bg:#131316;--panel:#1c1c21;--line:#33333c;--ink:#f2f2f5;--muted:#9b9ba7;--warn:#5c4a0a}}
+:root{--bg:#f5f5f7;--card:#fff;--ink:#1d1d22;--mut:#6c6c78;--line:#e2e2e8;--brand:#ed2750;--soft:#fdecef;--warn:#fde68a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#131316;--card:#1c1c21;--ink:#f2f2f5;--mut:#9b9ba7;--line:#2c2c34;--soft:#3a1821;--warn:#5c4a0a}}
+:root[data-theme="dark"]{--bg:#131316;--card:#1c1c21;--ink:#f2f2f5;--mut:#9b9ba7;--line:#2c2c34;--soft:#3a1821;--warn:#5c4a0a}
 *,*::before,*::after{box-sizing:inherit}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 "Segoe UI",system-ui,Roboto,Arial,sans-serif}
-header.np{background:var(--brand);color:#fff;padding:12px 20px;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
-header h1{font-size:18px;margin:0;flex:1 1 220px}
-main{padding:16px 20px 40px;max-width:1200px;margin:auto}
-.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}.bar .sp{flex:1}
-input,select,textarea{border:1.5px solid var(--line);border-radius:8px;padding:7px 9px;background:var(--panel);color:var(--ink);font:inherit;min-height:38px}
-header input,header select{border-color:transparent}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+.app{display:grid;grid-template-columns:200px 1fr;min-height:100vh}
+aside{background:var(--brand);color:#fff;padding:20px 14px;display:flex;flex-direction:column;gap:6px}
+.logo{font-weight:800;font-size:19px;line-height:1.1;text-align:center;margin:4px 0 16px;letter-spacing:.3px}
+.logo small{display:block;font-weight:600;font-size:12px;opacity:.85;letter-spacing:0;margin-top:3px}
+.nt{font-size:12px;opacity:.8;font-weight:600;margin:0 4px 2px;text-transform:uppercase;letter-spacing:.5px}
+.tabs{display:flex;flex-direction:column;gap:6px}
+.tab{all:unset;cursor:pointer;display:flex;justify-content:space-between;gap:8px;padding:11px 12px;border-radius:8px;font-weight:600;color:#fff;opacity:.85}
+.tab:hover{background:rgba(255,255,255,.14)}
+.tab.on{background:#fff;color:var(--brand);opacity:1}
+.tab small{opacity:.75;font-weight:600}
+.tab:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #ffb703;outline-offset:2px}
+main{padding:24px;max-width:1300px;width:100%;min-width:0}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--mut);margin:0 0 18px}
+.form{display:flex;flex-wrap:wrap;gap:10px;align-items:end;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+.form label{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--mut);flex:1;min-width:150px}
+input,select,textarea{padding:9px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
 textarea{width:100%;min-height:120px}
-.btn{background:var(--brand);border:1.5px solid var(--brand);color:#fff;border-radius:8px;padding:7px 13px;font:inherit;font-weight:700;cursor:pointer;min-height:38px}
-.btn.g{background:transparent;color:var(--brand)}header .btn{background:#fff;color:var(--brand);border-color:#fff}
-.hint{color:var(--muted);font-size:13px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
-#sheetHead h2{margin:0;font-size:18px}#info{font-weight:600}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}.bar .sp{flex:1}
+.btn{all:unset;cursor:pointer;display:inline-block;background:transparent;color:var(--brand);border:1.5px solid var(--brand);font-weight:600;padding:9.5px 18.5px;border-radius:8px}
+.btn.pri{background:var(--brand);color:#fff;padding:11px 20px;border:0}
+.btn.sm{padding:9.5px 14px}
+.hint{color:var(--mut);font-size:13px}
+.sheet{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px}
+.sheet h2{margin:0;font-size:17px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.badge{display:inline-block;min-width:48px;text-align:center;font-size:13px;font-weight:700;padding:2px 8px;border-radius:6px;color:#fff;background:var(--brand)}
+.ptitle{display:flex;flex-wrap:wrap;align-items:center;gap:4px 22px;margin:10px 0 4px;padding:8px 0;border-top:2px solid var(--ink);border-bottom:1px solid var(--line)}
+.ptitle b{color:var(--mut);font-weight:600}.ptitle h2{display:inline;font-size:17px;margin:0 4px 0 0}
+.meta{color:var(--mut);font-size:13px;margin:4px 0 10px}
 .wrapt{overflow:auto}
 table{border-collapse:collapse;width:100%}
 th,td{border:1px solid var(--line);padding:0;text-align:center}
-thead th{background:var(--bg);font-size:13px;padding:5px 4px}thead th .dayhead{display:inline-flex;align-items:baseline;gap:.5em;white-space:nowrap}thead th .date{font-size:inherit;font-weight:400;color:var(--brand);white-space:nowrap}
-th.u{font-size:11px;font-weight:600}th.pdt{text-align:left;padding:5px 8px;white-space:nowrap;font-size:14px}
-td input{width:100%;min-width:130px;border:0;border-radius:0;background:transparent;text-align:center;font-size:13px;min-height:36px}
-td input:focus{outline:2px solid var(--brand);outline-offset:-2px;background:var(--panel)}
+thead th{background:var(--bg);font-size:13px;color:var(--mut);padding:6px 4px}
+thead th .dayhead{display:inline-flex;align-items:baseline;gap:.5em;white-space:nowrap}
+thead th .date{font-weight:600;color:var(--brand)}
+th.u{font-size:11px;font-weight:600}
+th.pdt{text-align:left;padding:5px 10px;white-space:nowrap;font-size:13px;background:var(--bg);color:var(--ink)}
+td input{width:100%;min-width:130px;border:0;border-radius:0;background:transparent;text-align:center;font-size:13px;padding:8px 6px}
+td input:focus{outline:2px solid var(--brand);outline-offset:-2px;background:var(--card)}
 td.dup{background:var(--warn)}.pt{display:none}
-table.lg td,table.lg th{padding:4px 8px;font-size:13px;text-align:left}
-details{margin-bottom:10px}summary{cursor:pointer;font-weight:700;padding:6px 0}
+table.lg td,table.lg th{padding:6px 10px;font-size:13px;text-align:left}
+details.sheet{padding:12px 18px}summary{cursor:pointer;font-weight:700;font-size:16px;padding:4px 0}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1d1d22;color:#fff;padding:10px 16px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9}.toast.on{opacity:1}
-@media print{@page{size:A4 landscape;margin:10mm}.np{display:none!important}body{background:#fff;color:#000}main{padding:0;max-width:none}.card{border:0;padding:0}
+@media (max-width:760px){.app{grid-template-columns:1fr}aside{flex-direction:row;flex-wrap:wrap;align-items:center;padding:10px 12px}.logo{margin:0 10px 0 0;text-align:left}.nt{display:none}.tabs{flex-direction:row;flex-wrap:wrap}main{padding:16px}}
+@media print{
+ @page{size:A4 landscape;margin:10mm}
+ body{background:#fff;color:#000;font-size:12px}.app{display:block}
+ aside,.np{display:none!important}
+ main{padding:0;max-width:none}
+ .sheet{border:0;padding:0;margin:0;border-radius:0;background:#fff}
+ .badge{color:#000!important;background:none!important;border:1px solid #000}
+ .ptitle{border-color:#000}.ptitle b,.meta{color:#000}
  input{display:none!important}.pt{display:block;font-size:10pt;font-weight:600;padding:2px 3px}
- table{border:1.5px solid #000}th,td{border:1px solid #000!important;color:#000}td{height:11mm}thead th{background:#fff}td.dup{background:none}}
-</style>
-</head>
+ table{border:1.5px solid #000}th,td{border:1px solid #000!important;color:#000}td{height:11mm}thead th{background:#fff;color:#000}th.pdt{background:#fff}td.dup{background:none}
+ thead th .date{color:#000}
+}
+</style></head>
 <body>
-<header class="np">
-  <h1>Registro de uso de PDT</h1>
-  <button class="btn" id="pv" type="button" aria-label="Semana anterior">◀</button>
-  <input type="date" id="dt" aria-label="Ir a la fecha">
-  <button class="btn" id="nx" type="button" aria-label="Semana siguiente">▶</button>
-  <select id="tu" aria-label="Turno"></select>
-  <button class="btn" id="bp" type="button">🖨 Imprimir</button>
-  <button class="btn" id="bx" type="button">⬇ Exportar Excel</button>
-</header>
+<div class="app">
+<aside class="np">
+ <div class="logo">ICB Food Service<small>Registro PDT</small></div>
+ <div class="nt">Turno</div>
+ <div class="tabs" id="tabs"></div>
+</aside>
 <main>
-  <div class="card">
-    <div id="sheetHead"><h2>PDT · Registro semanal de usuarios</h2><div id="info"></div></div>
-    <div class="hint np" style="margin:4px 0 10px">Escribe el nombre o el código del colaborador. Se guarda solo al salir de la celda. Amarillo = mismo colaborador en dos PDT el mismo día.</div>
-    <div class="wrapt"><table><tbody id="tb"></tbody></table></div>
+ <div class="np">
+  <h1>Registro de uso de PDT</h1>
+  <p class="sub" id="info"></p>
+  <div class="form">
+   <button class="btn sm" id="pv" type="button" aria-label="Semana anterior">◀</button>
+   <label>Ir a la fecha<input type="date" id="dt"></label>
+   <button class="btn sm" id="nx" type="button" aria-label="Semana siguiente">▶</button>
   </div>
-  <datalist id="cl"></datalist>
-
-  <details class="np card"><summary>Historial de cambios (últimos 60)</summary>
-    <div class="wrapt"><table class="lg"><thead><tr><th>Fecha y hora</th><th>Semana · Turno</th><th>Día</th><th>PDT</th><th>Cambio</th></tr></thead><tbody id="lg"></tbody></table></div>
-  </details>
-  <details class="np card"><summary>Colaboradores (<span id="nc">0</span>)</summary>
-    <p class="hint">Uno por línea: <b>nombre</b> o <b>código;nombre</b>. También puedes importar la planilla Excel de producción usando las columnas “Número de personal” (código) y “Nombre completo” (nombre).</p>
-    <textarea id="tc" aria-label="Colaboradores"></textarea>
-    <div class="bar" style="margin:8px 0 0"><button class="btn g" id="sc" type="button">Guardar lista</button><button class="btn g" id="ic" type="button">📂 Importar Excel</button><input type="file" id="fx" accept=".xlsx,.xls" style="display:none"></div>
-  </details>
-  <details class="np card"><summary>Lista de PDT</summary>
-    <p class="hint">Uno por línea, en el orden en que aparecen en la planilla.</p>
-    <textarea id="tp" aria-label="PDT" style="min-height:160px"></textarea>
-    <div class="bar" style="margin:8px 0 0"><button class="btn g" id="sp" type="button">Guardar PDT</button></div>
-  </details>
-  <details class="np card"><summary>Respaldo</summary>
-    <p class="hint">Los datos quedan guardados en este navegador. Descarga un respaldo de vez en cuando o para pasarlos a otro equipo.</p>
-    <div class="bar" style="margin:0"><button class="btn g" id="bk" type="button">Descargar respaldo</button><button class="btn g" id="br" type="button">Cargar respaldo</button><input type="file" id="fr" accept=".json" style="display:none"></div>
-  </details>
-</main>
+  <div class="bar">
+   <button class="btn pri" id="bp" type="button">🖨 Imprimir</button>
+   <button class="btn" id="bx" type="button">⬇ Exportar Excel</button>
+  </div>
+ </div>
+ <section class="sheet">
+  <h2><span class="badge" id="wk"></span>Registro semanal de usuarios</h2>
+  <div class="ptitle"><span><b>Turno:</b> <span id="tn"></span></span><span><h2 id="rg"></h2></span><span><h2>PDT</h2></span></div>
+  <div class="hint np" style="margin:4px 0 10px">Escribe el nombre o el código del colaborador. Se guarda solo al salir de la celda. Amarillo = mismo colaborador en dos PDT el mismo día.</div>
+  <div class="wrapt"><table><tbody id="tb"></tbody></table></div>
+ </section>
+ <datalist id="cl"></datalist>
+ <details class="np sheet"><summary>Historial de cambios (últimos 60)</summary>
+  <div class="wrapt"><table class="lg"><thead><tr><th>Fecha y hora</th><th>Semana · Turno</th><th>Día</th><th>PDT</th><th>Cambio</th></tr></thead><tbody id="lg"></tbody></table></div>
+ </details>
+ <details class="np sheet"><summary>Colaboradores (<span id="nc">0</span>)</summary>
+  <p class="hint">Uno por línea: <b>nombre</b> o <b>código;nombre</b>. También puedes importar la planilla Excel de producción usando las columnas “Número de personal” (código) y “Nombre completo” (nombre).</p>
+  <textarea id="tc" aria-label="Colaboradores"></textarea>
+  <div class="bar" style="margin:8px 0 0"><button class="btn" id="sc" type="button">Guardar lista</button><button class="btn" id="ic" type="button">📂 Importar Excel</button><input type="file" id="fx" accept=".xlsx,.xls" style="display:none"></div>
+ </details>
+ <details class="np sheet"><summary>Lista de PDT</summary>
+  <p class="hint">Uno por línea, en el orden en que aparecen en la planilla.</p>
+  <textarea id="tp" aria-label="PDT" style="min-height:160px"></textarea>
+  <div class="bar" style="margin:8px 0 0"><button class="btn" id="sp" type="button">Guardar PDT</button></div>
+ </details>
+ <details class="np sheet"><summary>Respaldo</summary>
+  <p class="hint">Los datos quedan guardados en este navegador. Descarga un respaldo de vez en cuando o para pasarlos a otro equipo.</p>
+  <div class="bar" style="margin:0"><button class="btn" id="bk" type="button">Descargar respaldo</button><button class="btn" id="br" type="button">Cargar respaldo</button><input type="file" id="fr" accept=".json" style="display:none"></div>
+ </details>
+</main></div>
 <div class="toast" id="toast"></div>
 <script>
 const $=id=>document.getElementById(id),p2=n=>String(n).padStart(2,"0");
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const DEFC=[{"c": "927", "n": "Alexander Ramón Nava Santos"}, {"c": "996", "n": "Alfonso Alberto Ibáñez Rojas"}, {"c": "858", "n": "Álvaro Ignacio Acevedo Flores"}, {"c": "850", "n": "Bastián Alejandro Fritz Navea"}, {"c": "411", "n": "Caballero Terraza Brayan Nair FSEX"}, {"c": "932", "n": "Carlos Alejandro Huinca Huinca"}, {"c": "597", "n": "Carlos Alonso Uzieda Venegas"}, {"c": "556", "n": "Carlos Gallardo"}, {"c": "873", "n": "Cristian Andrés Ampuero Ampuero"}, {"c": "825", "n": "Cristián Fucha Painepe"}, {"c": "877", "n": "Danys Hernández López"}, {"c": "952", "n": "Diego Martínez Martin"}, {"c": "586", "n": "Diego Méndez Díaz"}, {"c": "878", "n": "Fabián Alfonso Arcos Tobar"}, {"c": "514", "n": "Felipe Giroz Troncoso"}, {"c": "859", "n": "Felipe Martínez de la Fuente"}, {"c": "946", "n": "Franco Acuña Pérez"}, {"c": "302", "n": "Fredy Aravena"}, {"c": "856", "n": "Gaidar David Rodríguez Zambrano"}, {"c": "824", "n": "Germán Abarca"}, {"c": "819", "n": "Italo Escudero"}, {"c": "894", "n": "Jack Vela Mazanet"}, {"c": "524", "n": "Jean Pierre Zamora Marín"}, {"c": "898", "n": "Jesús Gómez Muñoz"}, {"c": "816", "n": "Joel Alexis Guerrero Balcarcel"}, {"c": "399", "n": "Jonas Alejandro Cerda Belkerbach"}, {"c": "35", "n": "Jorge García (FS)"}, {"c": "130", "n": "Juan Carlos Rupayan"}, {"c": "976", "n": "Julio Adrián Santis Hidalgo"}, {"c": "895", "n": "Luis Galaz Farfán"}, {"c": "116", "n": "Luis Rodriguez"}, {"c": "451", "n": "Manuel Araneda"}, {"c": "13", "n": "Manuel Salas [FS]"}, {"c": "535", "n": "MARCELO LEVIN BASCUR"}, {"c": "857", "n": "Marcos Jesús Burgos Hurtado"}, {"c": "499", "n": "Mauricio Olivas Fuentes"}, {"c": "971", "n": "Nicolás Werlinger Villagrán"}, {"c": "974", "n": "Paolo Gallardo Pinto"}, {"c": "521", "n": "Patricio Rivera Gómez"}, {"c": "101", "n": "Patricio Vásquez (FS)"}, {"c": "846", "n": "Rafael Galavis Rausseo"}, {"c": "899", "n": "Raúl Urbina"}, {"c": "582", "n": "Rober Rafael Ventura Boscán"}, {"c": "812", "n": "Roberto Esteban Malhue Pavez"}, {"c": "930", "n": "Roberto Francisco Lorca Meneses"}, {"c": "949", "n": "Rodrigo Antonio Barrera Riquelme"}, {"c": "504", "n": "Sebastian Cardenas Nitschke"}, {"c": "835", "n": "Sebastián Dario Verazierta Moreno"}, {"c": "855", "n": "Sebastián Ignacio Flores Rebolledo"}, {"c": "854", "n": "Sebastián Videla Benítez"}, {"c": "240", "n": "SONNIA JEAN LOUIS"}, {"c": "123456", "n": "Termino de turno"}, {"c": "99999999", "n": "Termino turno"}, {"c": "843", "n": "Vicente Olivero Marilao"}, {"c": "172", "n": "victor cifuentes"}, {"c": "983", "n": "Víctor Manuel López Soto"}, {"c": "823", "n": "Yair Vega"}, {"c": "841", "n": "Yolanda Fory Aragón"}, {"c": "123456", "n": "Grúa en Entrenamiento"}];
 const LS="icb_pdt_v1",DN=["LUNES","MARTES","MIÉRCOLES","JUEVES","VIERNES","SÁBADO"],TU=["Mañana","Tarde","Noche"];
 const DEF=["PDTFMAULEN04","PDTFMAULEN05","PDTFMAULEN10","PDTFMAULEN12","PDTFMAULEN15","PDTFMAULEN33","PDTFMAULEN37","PDTFMAULEN41","PDTFMAULEN45","PDTFMAULEN50","10.32.14.11","10.32.14.13","10.32.14.21","10.32.14.22","10.32.14.24","10.32.14.27","10.32.14.32","10.32.14.34","10.32.14.39","10.32.14.44","10.32.14.46","10.32.14.6"];
 let S={};try{S=JSON.parse(localStorage.getItem(LS))||{}}catch(e){}
-S=Object.assign({collab:[],pdts:DEF,reg:{},log:[],turno:""},S);
+S=Object.assign({collab:DEFC,pdts:DEF,reg:{},log:[],turno:""},S);
 S.pdts=[...new Set([...(Array.isArray(S.pdts)?S.pdts:[]),...DEF].map(x=>String(x).trim()).filter(Boolean))];
 if(!S.turno){const h=new Date().getHours();S.turno=h>=6&&h<14?"Mañana":h>=14&&h<22?"Tarde":"Noche"}
 const save=()=>{try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){toast("No se pudo guardar en este navegador")}};
@@ -99,11 +139,12 @@ const wkKey=()=>isoWeek(mon),days=()=>[0,1,2,3,4,5].map(i=>add(mon,i)),rkey=()=>
 const parseC=t=>t.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{const m=l.split(/[;\t]/);return m.length>1?{c:m[0].trim(),n:m.slice(1).join(" ").trim()}:{c:"",n:l}}).filter(x=>x.n);
 const fmtC=a=>a.map(x=>x.c?x.c+";"+x.n:x.n).join("\n");
 function resolve(v){v=v.trim();if(!v)return"";const c=S.collab.find(x=>x.c&&x.c===v)||S.collab.find(x=>x.n.toLowerCase()===v.toLowerCase());return c?c.n:v}
+function drawTabs(){$("tabs").innerHTML=TU.map(t=>{const n=Object.keys(S.reg[wkKey()+"|"+t]||{}).length;return '<button class="tab'+(t===S.turno?" on":"")+'" data-t="'+t+'" type="button">'+t+'<small>'+n+'</small></button>'}).join("")}
 /* render */
 function render(){
   const ds=days(),r=S.reg[rkey()]||{};
-  $("tu").innerHTML=TU.map(t=>'<option'+(t===S.turno?" selected":"")+'>'+t+'</option>').join("");
-  $("dt").value=ymd(mon);
+  drawTabs();
+  $("dt").value=ymd(mon);$("wk").textContent="S"+wkKey().slice(-2);$("tn").textContent=S.turno;$("rg").textContent=fd(ds[0])+" – "+fd(ds[5])+"/"+ds[5].getFullYear();
   $("info").textContent="Semana "+wkKey().slice(-2)+" · Turno "+S.turno.toLowerCase()+" · del "+fd(ds[0])+" al "+fd(ds[5])+"/"+ds[5].getFullYear();
   let h='<thead><tr><th rowspan="2" class="pdt">PDT</th>'+ds.map((d,i)=>'<th><span class="dayhead"><span>'+DN[i]+'&#xA0;· </span><span class="date">'+fd(d)+'</span></span></th>').join("")+"</tr><tr>"+ds.map(()=>'<th class="u">USUARIO</th>').join("")+"</tr></thead>";
   S.pdts.forEach(p=>{h+='<tr><th class="pdt">'+esc(p)+"</th>";for(let i=0;i<6;i++){const v=r[p+"|"+i]||"";h+='<td><input list="cl" data-p="'+esc(p)+'" data-d="'+i+'" value="'+esc(v)+'" autocomplete="off"><span class="pt">'+esc(v)+"</span></td>"}h+="</tr>"});
@@ -127,12 +168,12 @@ $("tb").addEventListener("change",e=>{
   v?r[k]=v:delete r[k];
   S.log.push({t:new Date().toISOString(),w:wkKey(),tu:S.turno,f:DN[i.dataset.d]+" "+fd(add(mon,+i.dataset.d)),p:i.dataset.p,a:old,b:v});
   if(S.log.length>3000)S.log=S.log.slice(-3000);
-  save();markDup();renderLog();
+  save();markDup();renderLog();drawTabs();
 });
 /* navegación */
 $("pv").onclick=()=>{mon=add(mon,-7);render()};$("nx").onclick=()=>{mon=add(mon,7);render()};
 $("dt").onchange=()=>{const d=new Date($("dt").value+"T00:00");if(!isNaN(d)){mon=monOf(isoWeek(d));render()}};
-$("tu").onchange=()=>{S.turno=$("tu").value;save();render()};
+$("tabs").onclick=e=>{const b=e.target.closest(".tab");if(b){S.turno=b.dataset.t;save();render()}};
 $("bp").onclick=()=>window.print();
 /* configuración */
 $("sc").onclick=()=>{S.collab=parseC($("tc").value);save();render();toast(S.collab.length+" colaborador(es) guardados")};
@@ -177,5 +218,4 @@ $("fr").onchange=async e=>{
 };
 render();
 </script>
-</body>
-</html>
+</body></html>

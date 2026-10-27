@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Listado Alturas · WMS Maulen</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+:root{--bg:#f5f5f7;--card:#fff;--ink:#1d1d22;--mut:#6c6c78;--line:#e2e2e8;--brand:#ed2750;--soft:#fdecef;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#131316;--card:#1c1c21;--ink:#f2f2f5;--mut:#9b9ba7;--line:#2c2c34;--soft:#3a1821}}
+:root[data-theme="dark"]{--bg:#131316;--card:#1c1c21;--ink:#f2f2f5;--mut:#9b9ba7;--line:#2c2c34;--soft:#3a1821}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+.app{display:grid;grid-template-columns:200px 1fr;min-height:100vh}
+aside{background:var(--brand);color:#fff;padding:20px 14px;display:flex;flex-direction:column;gap:6px}
+.logo{font-weight:800;font-size:19px;line-height:1.1;text-align:center;margin:4px 0 16px;letter-spacing:.3px}
+.logo small{display:block;font-weight:600;font-size:12px;opacity:.85;letter-spacing:0;margin-top:3px}
+.tabs{display:flex;flex-direction:column;gap:6px}
+.tab{all:unset;cursor:pointer;display:flex;justify-content:space-between;gap:8px;padding:11px 12px;border-radius:8px;font-weight:600;color:#fff;opacity:.85}
+.tab:hover{background:rgba(255,255,255,.14)}
+.tab.on{background:#fff;color:var(--brand);opacity:1}
+.tab small{opacity:.75;font-weight:600}
+.tab:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #ffb703;outline-offset:2px}
+main{padding:24px;max-width:1400px;width:100%;min-width:0}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--mut);margin:0 0 18px}
+.form{display:flex;flex-wrap:wrap;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+.form label{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--mut);flex:1;min-width:140px}
+.form input,.form select,input[type=search]{padding:9px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+input[type=search]{flex:1;min-width:140px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.btn{all:unset;cursor:pointer;display:inline-block;background:transparent;color:var(--brand);border:1.5px solid var(--brand);font-weight:600;padding:9.5px 18.5px;border-radius:8px}
+.btn.pri{background:var(--brand);color:#fff;padding:11px 20px;border:0}
+.btn[disabled]{opacity:.4;cursor:default}
+.sheet{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px}
+.sheet h2{margin:0;font-size:17px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.badge{display:inline-block;min-width:48px;text-align:center;font-size:13px;font-weight:700;padding:2px 8px;border-radius:6px;color:#fff}
+.t024{background:#0e8fa8}.t034{background:#2f6fdb}
+.ptitle{display:flex;flex-wrap:wrap;align-items:center;gap:4px 22px;margin:10px 0 4px;padding:8px 0;border-top:2px solid var(--ink);border-bottom:1px solid var(--line)}
+.ptitle b{color:var(--mut);font-weight:600}
+.ptitle h2{display:inline;font-size:17px;margin:0 4px 0 0}
+.meta{color:var(--mut);font-size:13px;margin:4px 0 10px}
+.wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{font-size:13px;color:var(--mut);font-weight:600;border-bottom:2px solid var(--line);cursor:pointer;user-select:none}
+.n{text-align:right;font-variant-numeric:tabular-nums}td.n{font-weight:700}
+.empty{color:var(--mut);padding:14px 0}
+@media (max-width:760px){.app{grid-template-columns:1fr}aside{flex-direction:row;flex-wrap:wrap;align-items:center;padding:10px 12px}.logo{margin:0 10px 0 0;text-align:left}.tabs{flex-direction:row;flex-wrap:wrap}main{padding:16px}}
+@media print{
+ @page{size:landscape;margin:10mm}
+ body{background:#fff;color:#000;font-size:10px}.app{display:block}
+ aside,.noprint{display:none!important}
+ main{padding:0;max-width:none}
+ .sheet{border:0;padding:0;margin:0;border-radius:0;page-break-after:always;break-after:page;background:#fff}
+ .sheet:last-child{page-break-after:auto;break-after:auto}
+ .badge{color:#000!important;background:none!important;border:1px solid #000}
+ .ptitle{border-color:#000}.ptitle b,.meta{color:#000}
+ th,td{border:1px solid #000;color:#000;padding:3px 5px;white-space:normal}
+ thead{display:table-header-group}tr{break-inside:avoid}
+}
+</style></head>
+<body>
+<div class="app">
+<aside class="noprint">
+ <div class="logo">ICB Food Service<small>WMS Maulen</small></div>
+ <div class="tabs" id="tabs"></div>
+</aside>
+<main>
+ <div class="noprint">
+  <h1>Listado de alturas por temperatura</h1>
+  <p class="sub" id="info">Cargue un PDF del WMS: se descarta la hoja 1 y los totales.</p>
+  <div class="form" id="top">
+   <label>Fecha<input type="date" id="fd"></label>
+   <label style="flex:3">Buscar<input type="search" id="q" placeholder="Buscar en todas las columnas…"></label>
+  </div>
+  <div class="form" id="flt" hidden></div>
+  <div class="bar">
+   <button class="btn pri" id="pr" disabled>🖨 Imprimir</button>
+   <button class="btn" id="clr" disabled>Limpiar filtros</button>
+   <label class="btn">Cargar otro PDF<input type="file" id="f" accept="application/pdf" multiple hidden></label>
+  </div>
+ </div>
+ <div id="out"><div class="empty noprint" id="empty">Arrastre aquí un PDF o use «Cargar otro PDF».</div></div>
+</main></div>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const COLS=[['alm','Alm.'],['ot','Número OT'],['mat','Material'],['txt','Texto breve de material'],['tp','Tp.'],['up','Ubic.proc.'],['ctd','CtdTeórDsd'],['uma','UMA'],['lote','Lote'],['tpd','Tp.'],['ud','UbicDest'],['ua','UA proced.'],['zd','ZDisp'],['hora','Hora']];
+const LBL={tp:'Tp. procedencia',tpd:'Tp. destino'};
+const RE=/^(\S+)\s+(\d{10})\s+(\d+)\s+(.+?)\s+(024|034)\s+(\d{3}-\d{2}-\d+)\s+([\d.,]+)\s+(\S+)\s+(?:(FS\d+|\S+?)\s+)?(\d{3})\s+(\d{10})\s+(\d{10})\s+(ZONA_\d+)\s+(\d{2}:\d{2}:\d{2})$/;
+const TN={'024':'Refrigerado','034':'Congelado'};
+let rows=[],flt={},sort={k:'up',d:1},srcs=[],tab='ALL',SEL={};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const num=s=>parseFloat(String(s).replace(/\./g,'').replace(',','.'))||0;
+function fmtDate(){const v=$('fd').value;if(!v)return '—';const [y,m,d]=v.split('-');return `${d}/${m}/${y}`}
+async function parse(file){
+ const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise,out=[];
+ for(let p=2;p<=pdf.numPages;p++){
+  const items=(await(await pdf.getPage(p)).getTextContent()).items.filter(i=>i.str!=='');
+  const ls=[];
+  items.forEach(i=>{const y=i.transform[5];let l=ls.find(l=>Math.abs(l.y-y)<2);if(!l)ls.push(l={y,it:[]});l.it.push(i)});
+  ls.forEach(l=>{
+   l.it.sort((a,b)=>a.transform[4]-b.transform[4]);
+   let s='',prev=null;
+   l.it.forEach(i=>{if(prev&&i.transform[4]-(prev.transform[4]+prev.width)>1)s+=' ';s+=i.str;prev=i});
+   const m=RE.exec(s.replace(/\s+/g,' ').trim());
+   if(m){const r={};COLS.forEach(([k],j)=>r[k]=m[j+1]||'');out.push(r)}
+  });
+ }
+ return out;
+}
+async function load(files){
+ $('info').textContent='Leyendo…';rows=[];srcs=[];
+ try{for(const f of files){const r=await parse(f);rows=rows.concat(r);srcs.push(f.name)}}
+ catch(e){$('info').textContent='No se pudo leer el PDF: '+e.message;return}
+ flt={};buildFilters();render();
+}
+function buildFilters(){
+ const has=rows.length>0;$('flt').hidden=!has;$('pr').disabled=$('clr').disabled=!has;
+ SEL={};
+ COLS.forEach(([k])=>{const u=[...new Set(rows.map(r=>r[k]))].sort();if(u.length<=25&&!['ot','mat','up','ud','ua','hora'].includes(k))SEL[k]=u});
+ $('flt').innerHTML=COLS.map(([k,t])=>`<label>${LBL[k]||t}${k in SEL?`<select data-f="${k}"><option value="">Todos</option>${SEL[k].map(v=>`<option>${esc(v)}</option>`).join('')}</select>`:`<input data-f="${k}" placeholder="filtrar">`}</label>`).join('');
+}
+function filtered(){
+ const q=$('q').value.trim().toLowerCase();
+ return rows.filter(r=>(!q||Object.values(r).join(' ').toLowerCase().includes(q))&&COLS.every(([k])=>!flt[k]||(k in SEL?r[k]===flt[k]:r[k].toLowerCase().includes(flt[k].toLowerCase()))));
+}
+function sorted(a){const k=sort.k,n=k==='ctd';return a.slice().sort((x,y)=>(n?num(x[k])-num(y[k]):x[k].localeCompare(y[k],'es',{numeric:true}))*sort.d)}
+function cell(r,k){return k==='ctd'?`<td class="n">${esc(r[k])}</td>`:`<td>${esc(r[k])}</td>`}
+function sheet(tp,all){
+ const r=sorted(all.filter(x=>x.tp===tp)),ots=new Set(r.map(x=>x.ot)).size;
+ const body=r.map(x=>'<tr>'+COLS.map(([k])=>cell(x,k)).join('')+'</tr>').join('');
+ const head=COLS.map(([k,t])=>`<th data-k="${k}"${k==='ctd'?' class="n"':''}>${t}${sort.k===k?(sort.d>0?' ▲':' ▼'):''}</th>`).join('');
+ return `<section class="sheet"><h2><span class="badge t${tp}">${tp}</span>${TN[tp]}</h2>
+ <div class="ptitle"><span><b>Fecha:</b> ${esc(fmtDate())}</span><span><h2>WMS Maulen</h2></span><span><h2>Tp. ${tp}</h2></span></div>
+ <div class="meta">${r.length} líneas · ${ots} OT${COLS.some(([k])=>flt[k])||$('q').value?' · con filtros aplicados':''}</div>
+ ${r.length?`<div class="wrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`:'<div class="empty">Sin resultados.</div>'}</section>`;
+}
+function render(){
+ const all=filtered(),c=t=>all.filter(x=>x.tp===t).length;
+ $('tabs').innerHTML=[['ALL','Todos',all.length],['024','024 Refrig.',c('024')],['034','034 Cong.',c('034')]].map(([t,n,v])=>`<button class="tab ${t==tab?'on':''}" data-t="${t}">${n}<small>${v}</small></button>`).join('');
+ if(rows.length){
+  $('info').textContent=`${srcs.join(', ')} · ${rows.length} líneas leídas · se muestran ${all.length}`;
+  $('out').innerHTML=(tab==='ALL'?['024','034']:[tab]).map(t=>sheet(t,all)).join('');
+ }
+}
+$('tabs').onclick=e=>{const b=e.target.closest('.tab');if(b){tab=b.dataset.t;render()}};
+$('out').onclick=e=>{const th=e.target.closest('th[data-k]');if(!th)return;const k=th.dataset.k;sort=sort.k===k?{k,d:-sort.d}:{k,d:1};render()};
+$('flt').addEventListener('input',e=>{const k=e.target.dataset.f;if(k){flt[k]=e.target.value;render()}});
+$('q').oninput=render;
+$('clr').onclick=()=>{flt={};$('q').value='';document.querySelectorAll('[data-f]').forEach(i=>i.value='');render()};
+$('fd').oninput=render;
+{const n=new Date();$('fd').value=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`}
+$('pr').onclick=()=>{document.title='Listado Alturas '+fmtDate();window.print()};
+$('f').onchange=e=>{if(e.target.files.length)load([...e.target.files]);e.target.value=''};
+document.addEventListener('dragover',e=>e.preventDefault());
+document.addEventListener('drop',e=>{e.preventDefault();const fs=[...e.dataTransfer.files].filter(f=>/\.pdf$/i.test(f.name));if(fs.length)load(fs)});
+render();
+</script>
+</body></html>
