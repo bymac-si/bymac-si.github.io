@@ -717,14 +717,12 @@
               (selAgente.innerHTML += `<option value="${ag.Nombre}">${ag.Nombre}</option>`),
           );
 
-          // 1. Mapeo Admin
           const listA = adminData.map((p) => ({
             ...p,
             _tipo: "Administracion",
             _tabla: "ProspectosCopro",
             Contacto: p.Contacto || p.Nombre,
           }));
-          // 2. Mapeo Corretaje
           const listB = corretajeData.map((p) => ({
             ...p,
             _tipo: "Corretaje",
@@ -732,11 +730,9 @@
             Contacto: p.Nombre,
           }));
 
-          // 3. Mapeo LEADS (contactos no procesados)
           const listC = contactosData
             .filter((c) => c.Estado !== "Procesado")
             .map((c) => {
-              // SUGERENCIA DE TIPO SEGÚN ORIGEN
               let tipoSugerido = "Lead";
               if (
                 (c.Notas || "").includes("Diagnóstico") ||
@@ -789,6 +785,7 @@
         const tipoFilter = document.getElementById("selTipo").value;
 
         VIEW = PROS.filter((p) => {
+          if (p.Estado === "Procesado") return false;
           if (tipoFilter && p._tabla !== "contactos" && p._tipo !== tipoFilter)
             return false;
           if (!q) return true;
@@ -797,7 +794,6 @@
         renderTabla();
       }
 
-      /* ===== RENDER TABLA CON BOTONES ===== */
       function renderTabla() {
         const tbody = document.getElementById("tablaProspectos");
         if (VIEW.length === 0) {
@@ -816,18 +812,13 @@
               '<span class="badge-type type-corretaje">Corretaje</span>';
           else tipoBadge = '<span class="badge-source checklist">LEAD</span>';
 
-          // Botones específicos
           const esAdmin = p._tipo === "Administracion";
-
-          // Cotizar (Solo Admin)
           const btnCotizar = esAdmin
             ? `<button class="btn-icon btn-cotizar" onclick="abrirCotizacion('${p.ID}')" title="Cotizar Copropiedad"><i class="fa-solid fa-file-invoice-dollar"></i></button>`
             : "";
-          // Imprime Carta (Solo Admin)
           const btnCarta = p._tabla === "ProspectosCopro"
             ? `<button class="btn-icon" onclick="abrirModalCarta('${p.ID}')" title="Imprimir carta" style="background:#fef3c7;color:#b45309;"><i class="fa-solid fa-envelope-open-text"></i></button>`
             : "";
-          // Convertir a Cliente (Solo Admin)
           const btnCliente = esAdmin
             ? `<button class="btn-icon btn-cliente" onclick="agregarAClientes('${p.ID}')" title="Pasar a Cliente (Copropiedad)"><i class="fa-solid fa-check-double"></i></button>`
             : "";
@@ -888,13 +879,17 @@
 
           if (p._tabla && p._tabla !== "contactos") {
             try {
-              await deleteData(p._tabla, p.ID);
+              await updateData(p._tabla, p.ID, {
+                ...p,
+                Estado: "Procesado",
+                "Fecha Procesado": new Date().toISOString().split("T")[0],
+              });
             } catch (error) {
-              console.warn("No se pudo eliminar el prospecto original:", error);
+              console.warn("No se pudo marcar el prospecto como procesado:", error);
             }
           }
 
-          alert("Prospecto convertido a cliente y agregado a copropiedades.");
+          alert("Prospecto convertido a cliente y marcado como procesado.");
           await cargarTodo();
         } catch (error) {
           console.error("Error al convertir prospecto a cliente:", error);
@@ -935,7 +930,6 @@
           document.getElementById("prospectoID").value = p.ID;
           document.getElementById("prosTablaOriginal").value = p._tabla;
 
-          // Regla: Si es LEAD, sugerir Admin. Si es WEB, sugerir Corretaje.
           let tipoFinal = p._tipo;
           if (String(p.ID).startsWith("LEAD_")) tipoFinal = "Administracion";
           if (String(p.ID).startsWith("WEB_")) tipoFinal = "Corretaje";
@@ -949,20 +943,15 @@
           document.getElementById("prosDireccion").value = p.Direccion || "";
           document.getElementById("prosComuna").value = p.Comuna || "";
           document.getElementById("prosNotas").value = p.Observaciones || "";
-          document.getElementById("prosAgente").value =
-            p.Agente || "Sin Asignar";
+          document.getElementById("prosAgente").value = p.Agente || "Sin Asignar";
 
           if (tipoFinal === "Administracion") {
             document.getElementById("prosUnidades").value = p.Unidades || "";
             document.getElementById("prosRUT").value = p.RUT || "";
           } else {
-            // Cargar datos corretaje si existen
-            document.getElementById("prosOperacion").value =
-              p["Tipo Operacion"] || "Venta";
-            document.getElementById("prosTipoProp").value =
-              p["Tipo Propiedad"] || "";
-            document.getElementById("prosPresupuesto").value =
-              p["Presupuesto"] || "";
+            document.getElementById("prosOperacion").value = p["Tipo Operacion"] || "Venta";
+            document.getElementById("prosTipoProp").value = p["Tipo Propiedad"] || "";
+            document.getElementById("prosPresupuesto").value = p["Presupuesto"] || "";
           }
         } else {
           setTipo("Administracion");
@@ -970,35 +959,26 @@
         document.getElementById("modalProspecto").classList.add("active");
       }
 
-      /* =========================================
-         LÓGICA DE GUARDADO DEFINITIVA Y CORREGIDA
-         ========================================= */
       document.getElementById("formProspecto").onsubmit = async (e) => {
         e.preventDefault();
 
         const idActual = document.getElementById("prospectoID").value;
-        const tablaOriginal =
-          document.getElementById("prosTablaOriginal").value;
-        const tipoSeleccionado =
-          document.getElementById("prosTipoNegocio").value;
+        const tablaOriginal = document.getElementById("prosTablaOriginal").value;
+        const tipoSeleccionado = document.getElementById("prosTipoNegocio").value;
 
         let tablaDestino = "";
         if (tipoSeleccionado === "Administracion")
           tablaDestino = "ProspectosCopro";
         else tablaDestino = "ProspectosCorretaje";
 
-        const esMigracion =
-          idActual && tablaOriginal && tablaOriginal !== tablaDestino;
+        const esMigracion = idActual && tablaOriginal && tablaOriginal !== tablaDestino;
 
-        // Generar ID si es nuevo o migración
         let finalID = idActual;
         if (esMigracion || !idActual) {
-          const prefijo =
-            tipoSeleccionado === "Administracion" ? "PROS_" : "PCOR_";
+          const prefijo = tipoSeleccionado === "Administracion" ? "PROS_" : "PCOR_";
           finalID = prefijo + Date.now();
         }
 
-        // 1. Datos Base (Campos comunes)
         const basePayload = {
           ID: finalID,
           Nombre: document.getElementById("prosNombre").value,
@@ -1012,7 +992,6 @@
           "Fecha Registro": new Date().toISOString().split("T")[0],
         };
 
-        // 2. Payload Específico según Tabla Destino
         let payload = {};
         if (tipoSeleccionado === "Administracion") {
           const u = document.getElementById("prosUnidades").value;
@@ -1041,13 +1020,12 @@
           showSpinner("Guardando...");
 
           if (esMigracion) {
-            console.log(`Promoviendo a ${tablaDestino}...`);
             await saveData(tablaDestino, payload);
             if (tablaOriginal) {
               try {
-                await deleteData(tablaOriginal, idActual);
+                await updateData(tablaOriginal, idActual, { ...payload, Estado: "Procesado" });
               } catch (err) {
-                console.warn("No se pudo eliminar el registro original:", err);
+                console.warn("No se pudo marcar el original como procesado:", err);
               }
             }
           } else if (idActual) {
