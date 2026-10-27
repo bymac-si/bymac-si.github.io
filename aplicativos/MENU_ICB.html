@@ -36,7 +36,9 @@ textarea{resize:vertical;min-height:64px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
 .card{position:relative;display:flex;flex-direction:column;gap:6px;background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--ac,var(--brand));border-radius:10px;padding:18px;min-height:176px;color:inherit;text-decoration:none;transition:transform .12s,box-shadow .12s,border-color .12s}
 a.card:hover,a.card:focus-visible{transform:translateY(-3px);box-shadow:0 8px 22px rgba(0,0,0,.09);border-color:var(--ac,var(--brand));outline:none}
-.ico{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;background:color-mix(in srgb,var(--ac,var(--brand)) 14%,transparent)}
+.ico{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;background:color-mix(in srgb,var(--ac,var(--brand)) 14%,transparent);color:var(--ac,var(--brand));}
+.ico .lucide{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ico .default-emoji{font-size:26px;line-height:1}
 .card h3{margin:6px 0 0;font-size:17px}
 .card p{margin:0;color:var(--muted);font-size:13.5px;flex:1}
 .card .foot{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
@@ -96,7 +98,7 @@ a.card:hover,a.card:focus-visible{transform:translateY(-3px);box-shadow:0 8px 22
  <div class="dialog">
   <header><h3 id="mTitle">Agregar aplicativo</h3><button class="x" id="mClose" type="button" aria-label="Cerrar">×</button></header>
   <div class="body">
-    <div><label for="fIcon">Ícono</label><input id="fIcon" maxlength="4" placeholder="🧩" style="text-align:center;font-size:22px"></div>
+    <div><label for="fIcon">Ícono</label><input id="fIcon" maxlength="4" placeholder="clipboard-check" style="text-align:center;font-size:22px"></div>
     <div><label for="fName">Nombre</label><input id="fName" maxlength="40" placeholder="Ej: Control de recepción"></div>
     <div class="full"><label for="fDesc">Descripción corta</label><textarea id="fDesc" maxlength="140" placeholder="Para qué sirve este aplicativo"></textarea></div>
     <div class="full"><label for="fUrl">Enlace o archivo</label><input id="fUrl" placeholder="NOMBRE_ARCHIVO.html (misma carpeta) o https://…"><div class="hint" style="margin-top:4px">Si es un archivo, debe estar en la misma carpeta que este menú, y se abrirá en una nueva pestaña cuando corresponda.</div></div>
@@ -109,6 +111,7 @@ a.card:hover,a.card:focus-visible{transform:translateY(-3px);box-shadow:0 8px 22
 </div>
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
 <script>
 /* =====================================================================
    APLICATIVOS BASE
@@ -117,21 +120,28 @@ a.card:hover,a.card:focus-visible{transform:translateY(-3px);box-shadow:0 8px 22
    También puedes agregarlos desde el botón "+ Agregar aplicativo".
    ===================================================================== */
 const BASE_APPS=[
-  {id:'reporte-fin-turno',name:'Reporte Fin de Turno',desc:'Reporte de actividades realizadas durante el turno',url:'https://script.google.com/macros/s/AKfycbz66VsFIgSwZ4l9YkIBSE4afbrGmov6GOwP-bR333NJ6dLGOR6rvm3U--GlQrjZJdV4Xg/exec',icon:'📄',tag:'Reportes',color:'#ed2750',newTab:true},
-  {id:'productividad',name:'Productividad PKG y Grúas',desc:'Productividad por operador y hora, semáforo por turno y temperatura, con reporte en PDF o imagen.',url:'APP_PRODUCTIVIDAD_PKG_GRUAS_v6.html',icon:'📊',tag:'Reportes',color:'#ed2750',newTab:true},
-  {id:'pre-chequeo-control-0',name:'Pre Chequeo Control 0',desc:'Aplicativo para generar impresión de pre chequeos de Controles 0',url:'Separación_por_temperatura.html',icon:'📦',tag:'Operaciones',color:'#c27a00',newTab:true},
-  {id:'tarja-21',name:'Tarja 21',desc:'Packing List, Chequeo, Carga',url:'APP_TARJA_CONTROL_ICB.html',icon:'📦',tag:'Reportes',color:'#ed2750',newTab:true},
-  {id:'generador-barras',name:'Generador de Barras',desc:'Aplicativo para Generar listado de colas de Zona con sus respectivos códigos de barra',url:'Generador_de_Correlativos.html',icon:'⏸️',tag:'Operaciones',color:'#c27a00',newTab:true},
-  {id:'seteo',name:'Seteo de rampla',desc:'Planilla de seteo: sellos, pallets y temperatura por zona. Lista para imprimir.',url:'APP_SETEO_RAMPLA_ICB.html',icon:'🚛',tag:'Despacho',color:'#2f6fdb',newTab:true},
-  {id:'solicitud-permiso',name:'Solicitud Permiso',desc:'Formulario Solicitud Permisos del Personal',url:'APP_SOLICITUD_PERMISO_ICB.html',icon:'🤩',tag:'Administración',color:'#7c4dff',newTab:true},
-  {id:'pedidos-personales',name:'Pedidos Personales',desc:'Solicitud de Pedidos de Compras del Personal',url:'Pedido LP.html',icon:'💸',tag:'compras',color:'#0e8fa8',newTab:true},
-  {id:'control-pdt',name:'Control PDT',desc:'Registro de asignación de PDT a los colaboradores',url:'Registro PDT · ICB Food Service.html',icon:'📱',tag:'Operaciones',color:'#c27a00',newTab:true},
-  {id:'imprime-alturas-camara',name:'Imprime Alturas Cámara',desc:'Listado de ubicaciones de altura que se requerirán para el armado de pedidos',url:'Listado Alturas · WMS Maulen.html',icon:'🪜',tag:'Operaciones',color:'#c27a00',newTab:true}
+  {id:'reporte-fin-turno',name:'Reporte Fin de Turno',desc:'Reporte de actividades realizadas durante el turno',url:'https://script.google.com/macros/s/AKfycbz66VsFIgSwZ4l9YkIBSE4afbrGmov6GOwP-bR333NJ6dLGOR6rvm3U--GlQrjZJdV4Xg/exec',icon:'clipboard-check',tag:'Reportes',color:'#ed2750',newTab:true},
+  {id:'productividad',name:'Productividad PKG y Grúas',desc:'Productividad por operador y hora, semáforo por turno y temperatura, con reporte en PDF o imagen.',url:'APP_PRODUCTIVIDAD_PKG_GRUAS_v6.html',icon:'chart-no-axes-combined',tag:'Reportes',color:'#ed2750',newTab:true},
+  {id:'pre-chequeo-control-0',name:'Pre Chequeo Control 0',desc:'Aplicativo para generar impresión de pre chequeos de Controles 0',url:'Separación_por_temperatura.html',icon:'package-check',tag:'Operaciones',color:'#c27a00',newTab:true},
+  {id:'tarja-21',name:'Tarja 21',desc:'Packing List, Chequeo, Carga',url:'APP_TARJA_CONTROL_ICB.html',icon:'clipboard-list',tag:'Reportes',color:'#ed2750',newTab:true},
+  {id:'generador-barras',name:'Generador de Barras',desc:'Aplicativo para Generar listado de colas de Zona con sus respectivos códigos de barra',url:'Generador_de_Correlativos.html',icon:'barcode',tag:'Operaciones',color:'#c27a00',newTab:true},
+  {id:'seteo',name:'Seteo de rampla',desc:'Planilla de seteo: sellos, pallets y temperatura por zona. Lista para imprimir.',url:'APP_SETEO_RAMPLA_ICB.html',icon:'truck',tag:'Despacho',color:'#2f6fdb',newTab:true},
+  {id:'solicitud-permiso',name:'Solicitud Permiso',desc:'Formulario Solicitud Permisos del Personal',url:'APP_SOLICITUD_PERMISO_ICB.html',icon:'file-pen-line',tag:'Administración',color:'#7c4dff',newTab:true},
+  {id:'pedidos-personales',name:'Pedidos Personales',desc:'Solicitud de Pedidos de Compras del Personal',url:'Pedido LP.html',icon:'shopping-cart',tag:'compras',color:'#0e8fa8',newTab:true},
+  {id:'control-pdt',name:'Control PDT',desc:'Registro de asignación de PDT a los colaboradores',url:'Registro PDT · ICB Food Service.html',icon:'scan-barcode',tag:'Operaciones',color:'#c27a00',newTab:true},
+  {id:'imprime-alturas-camara',name:'Imprime Alturas Cámara',desc:'Listado de ubicaciones de altura que se requerirán para el armado de pedidos',url:'Listado Alturas · WMS Maulen.html',icon:'ruler',tag:'Operaciones',color:'#c27a00',newTab:true}
 ];
 const COLORS=['#ed2750','#2f6fdb','#0e8fa8','#c27a00','#15803d','#7c4dff','#475569'];
 const LS='icb_menu_v1';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+function lucideIcon(name){
+  const clean=String(name||'').trim();
+  if(!clean) return '<span class="default-emoji" aria-hidden="true">🧩</span>';
+  const isLucide = /^([a-z0-9]+-)*[a-z0-9]+$/.test(clean);
+  if(!isLucide) return `<span class="default-emoji" aria-hidden="true">${esc(clean)}</span>`;
+  return `<span class="lucide-wrap"><i data-lucide="${esc(clean)}" aria-hidden="true"></i></span>`;
+}
 function load(){try{return JSON.parse(localStorage.getItem(LS))||null}catch(e){return null}}
 function persist(){try{localStorage.setItem(LS,JSON.stringify(ST));return true}catch(e){toast('No se pudo guardar en este navegador');return false}}
 let ST=load()||{apps:[],removed:[]};
@@ -156,20 +166,27 @@ function sync(){
 }
 sync();persist();
 
+function renderLucide(){
+  if (window.lucide && typeof window.lucide.createIcons === 'function') {
+    window.lucide.createIcons();
+  }
+}
+
 let edit=false,editing=null,filter='';
 function href(u){u=String(u||'').trim();if(/^www\./i.test(u))return 'https://'+u;return u}
 function render(){
   let list=ST.apps.filter(a=>{let t=(a.name+' '+a.desc+' '+a.tag).toLowerCase();return !filter||t.includes(filter)});
   $('count').textContent=ST.apps.length?`${ST.apps.length} aplicativo${ST.apps.length>1?'s':''} disponible${ST.apps.length>1?'s':''}`:'Aún no hay aplicativos';
   let h=list.map(a=>{
-    let idx=ST.apps.indexOf(a),inner=`<div class="ico" aria-hidden="true">${esc(a.icon||'🧩')}</div><h3>${esc(a.name)}</h3><p>${esc(a.desc)}</p><div class="foot">${a.tag?`<span class="tag">${esc(a.tag)}</span>`:'<span></span>'}<span class="go">Abrir</span></div>`;
+    let idx=ST.apps.indexOf(a),inner=`${lucideIcon(a.icon)}<h3>${esc(a.name)}</h3><p>${esc(a.desc)}</p><div class="foot">${a.tag?`<span class="tag">${esc(a.tag)}</span>`:'<span></span>'}<span class="go">Abrir</span></div>`;
     let style=`--ac:${esc(a.color||'#ed2750')}`;
     if(edit)return `<div class="card" style="${style}">${inner}<div class="editRow"><button class="btn gray sm" data-up="${idx}" ${idx===0?'disabled':''} aria-label="Mover antes">←</button><button class="btn gray sm" data-dn="${idx}" ${idx===ST.apps.length-1?'disabled':''} aria-label="Mover después">→</button><button class="btn gray sm" data-ed="${idx}">Editar</button><button class="btn gray sm danger" data-rm="${idx}">Quitar</button></div></div>`;
     return `<a class="card" style="${style}" href="${esc(href(a.url))}" ${a.newTab?'target="_blank" rel="noopener"':''}>${inner}</a>`;
   }).join('');
   if(!list.length&&filter)h=`<div class="empty" style="grid-column:1/-1">Ningún aplicativo coincide con "${esc(filter)}".</div>`;
-  if(!filter)h+=`<button class="card add" id="cardAdd" type="button"><span class="plus">+</span><b>Agregar aplicativo</b><span class="hint">Nuevo acceso al menú</span></button>`;
+  if(!filter)h+=`<button class="card add" id="cardAdd" type="button"><span class="ico" aria-hidden="true">${lucideIcon('plus')}</span><b>Agregar aplicativo</b><span class="hint">Nuevo acceso al menú</span></button>`;
   $('grid').innerHTML=h;
+  renderLucide();
   $('cardAdd')&&($('cardAdd').onclick=()=>openModal(null));
   $('grid').querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>openModal(+b.dataset.ed));
   $('grid').querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{let a=ST.apps[+b.dataset.rm];if(confirm(`¿Quitar "${a.name}" del menú?\n(El archivo no se borra, solo el acceso.)`)){ST.apps.splice(+b.dataset.rm,1);if(a.id)ST.removed.push(a.id);persist();render();}});
@@ -181,7 +198,7 @@ function move(i,d){let j=i+d;if(j<0||j>=ST.apps.length)return;[ST.apps[i],ST.app
 /* ---- modal ---- */
 $('fColor').innerHTML=COLORS.map((c,i)=>`<label><input type="radio" name="col" value="${c}" ${i===0?'checked':''}><span style="--c:${c}" title="${c}"></span></label>`).join('');
 function openModal(i){
-  editing=i;let a=i==null?{icon:'🧩',name:'',desc:'',url:'',tag:'',color:COLORS[0],newTab:false}:ST.apps[i];
+  editing=i;let a=i==null?{icon:'clipboard-check',name:'',desc:'',url:'',tag:'',color:COLORS[0],newTab:false}:ST.apps[i];
   $('mTitle').textContent=i==null?'Agregar aplicativo':'Editar aplicativo';
   $('fIcon').value=a.icon||'';$('fName').value=a.name;$('fDesc').value=a.desc;$('fUrl').value=a.url;$('fTag').value=a.tag||'';$('fNew').checked=!!a.newTab;
   let r=[...document.querySelectorAll('[name=col]')];(r.find(x=>x.value===a.color)||r[0]).checked=true;
@@ -195,7 +212,7 @@ $('mSave').onclick=()=>{
   let name=$('fName').value.trim(),url=$('fUrl').value.trim();
   if(!name)return toast('Escribe un nombre'),$('fName').focus();
   if(!url)return toast('Indica el enlace o archivo'),$('fUrl').focus();
-  let rec={icon:$('fIcon').value.trim()||'🧩',name,desc:$('fDesc').value.trim(),url,tag:$('fTag').value.trim(),color:document.querySelector('[name=col]:checked').value,newTab:$('fNew').checked};
+  let rec={icon:($('fIcon').value.trim()||'clipboard-check'),name,desc:$('fDesc').value.trim(),url,tag:$('fTag').value.trim(),color:document.querySelector('[name=col]:checked').value,newTab:$('fNew').checked};
   if(editing==null){rec.id='u'+Date.now().toString(36);ST.apps.push(rec)}else ST.apps[editing]={...ST.apps[editing],...rec};
   if(persist()){closeModal();render();toast(editing==null?'Aplicativo agregado':'Cambios guardados')}
 };
@@ -209,7 +226,7 @@ $('btnExp').onclick=()=>{let a=document.createElement('a');a.href=URL.createObje
 $('btnImp').onclick=()=>$('fileImp').click();
 $('fileImp').onchange=async e=>{let f=e.target.files[0];e.target.value='';if(!f)return;
   try{let d=JSON.parse(await f.text());if(!Array.isArray(d.apps))throw new Error('formato no válido');
-    ST={apps:d.apps.filter(a=>a&&a.name&&a.url).map(a=>({id:String(a.id||'u'+Math.random().toString(36).slice(2,8)),name:String(a.name),desc:String(a.desc||''),url:String(a.url),icon:String(a.icon||'🧩'),tag:String(a.tag||''),color:String(a.color||'#ed2750'),newTab:!!a.newTab})),removed:Array.isArray(d.removed)?d.removed.map(String):[]};
+    ST={apps:d.apps.filter(a=>a&&a.name&&a.url).map(a=>({id:String(a.id||'u'+Math.random().toString(36).slice(2,8)),name:String(a.name),desc:String(a.desc||''),url:String(a.url),icon:String(a.icon||'clipboard-check'),tag:String(a.tag||''),color:String(a.color||'#ed2750'),newTab:!!a.newTab})),removed:Array.isArray(d.removed)?d.removed.map(String):[]};
     sync();persist();render();toast('Lista importada')}catch(err){toast('No se pudo importar: '+err.message)}};
 $('btnReset').onclick=()=>{if(confirm('¿Restablecer el menú a los aplicativos originales? Se perderán los que agregaste.')){ST={apps:[],removed:[]};sync();persist();render();toast('Menú restablecido')}};
 let tt;function toast(m){let t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2600)}
