@@ -304,7 +304,7 @@ function specPdt(){
 }
 function rptHTML(s){
   const now=new Date().toLocaleString("es-CL",{dateStyle:"medium",timeStyle:"short"});
-  return '<div class="rpt" style="width:'+s.width+'px"><div class="rpt-top"><div><div class="b">ICB Food Service</div><h1>'+esc(s.title)+'</h1></div><div class="d">Generado: '+esc(now)+'</div></div><div class="rpt-chips">'+s.ctx.map(([k,v])=>'<span class="rpt-chip">'+esc(k)+": <b>"+esc(v)+"</b></span>").join("")+"</div>"+s.table+s.crit+"</div>";
+  return '<div class="rpt" style="min-width:'+s.width+'px;width:max-content"><div class="rpt-top"><div><div class="b">ICB Food Service</div><h1>'+esc(s.title)+'</h1></div><div class="d">Generado: '+esc(now)+'</div></div><div class="rpt-chips">'+s.ctx.map(([k,v])=>'<span class="rpt-chip">'+esc(k)+": <b>"+esc(v)+"</b></span>").join("")+"</div>"+s.table+s.crit+"</div>";
 }
 let rptState=null;
 const rptToast=t=>{$("rptToast").textContent=t||""};
@@ -318,9 +318,9 @@ async function openReport(){
   try{
     const spec=specPdt();
     $("rptTitleTxt").textContent="Reporte · "+spec.ctx.map(c=>c[1]).slice(0,3).join(" · ");
-    host=document.createElement("div");host.style.cssText="position:fixed;left:0;top:0;z-index:-1;pointer-events:none";host.innerHTML=rptHTML(spec);document.body.appendChild(host);
+    host=document.createElement("div");host.style.cssText="position:fixed;left:0;top:0;z-index:-1;pointer-events:none;width:max-content";host.innerHTML=rptHTML(spec);document.body.appendChild(host);
     if(document.fonts&&document.fonts.ready)await document.fonts.ready;
-    const scale=2,canvas=await html2canvas(host.firstElementChild,{scale,backgroundColor:"#ffffff",useCORS:true,logging:false});
+    const scale=2,node=host.firstElementChild,W=Math.ceil(Math.max(node.scrollWidth,node.offsetWidth)),H=Math.ceil(Math.max(node.scrollHeight,node.offsetHeight)),canvas=await html2canvas(node,{scale,width:W,height:H,windowWidth:W+40,windowHeight:H+40,backgroundColor:"#ffffff",useCORS:true,logging:false});
     host.remove();host=null;
     const png=await new Promise(r=>canvas.toBlob(r,"image/png")),w=canvas.width/scale,h=canvas.height/scale;
     const pdf=new window.jspdf.jsPDF({orientation:w>h?"l":"p",unit:"px",format:[w,h],hotfixes:["px_scaling"],compress:true});
