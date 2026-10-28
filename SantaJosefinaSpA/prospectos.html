@@ -459,6 +459,27 @@
       </div>
     </div>
 
+    <div id="modalCarta" class="modal" aria-hidden="true">
+      <div class="modal-content" style="max-width:620px; max-height:90vh; overflow-y:auto;">
+        <h2 style="margin-top:0">Imprimir carta</h2>
+        <p class="muted" style="font-size:13px">Revisa o edita los datos y el texto antes de imprimir. Formato Carta.</p>
+        <label class="label">Comunidad / destinatario</label>
+        <input id="cartaComunidad" />
+        <label class="label" style="margin-top:10px">Dirección</label>
+        <input id="cartaDireccion" />
+        <div class="row" style="margin-top:10px">
+          <div><label class="label">Fecha</label><input id="cartaFecha" type="date" /></div>
+          <div><label class="label">Firma (nombre)</label><input id="cartaFirma" /></div>
+        </div>
+        <label class="label" style="margin-top:10px">Texto de la carta</label>
+        <textarea id="cartaTexto" rows="12" style="width:100%"></textarea>
+        <div style="text-align:right; margin-top:15px">
+          <button type="button" class="btn-head btn-secundario" onclick="document.getElementById('modalCarta').classList.remove('active')">Cancelar</button>
+          <button type="button" class="btn-head btn-nuevo" onclick="imprimirCarta()"><i class="fa-solid fa-print"></i> Imprimir</button>
+        </div>
+      </div>
+    </div>
+
     <div id="pageSpinner" class="spinner-backdrop" aria-hidden="true">
       <div class="spinner-card">
         <div class="spinner"></div>
@@ -746,11 +767,81 @@
         }
       }
 
-      function abrirCotizacion() {
-        alert("La cotización no está incluida en esta versión de prospectos.html.");
+      function abrirCotizacion(id) {
+        const p = buscarPros(id);
+        if (!p) return;
+        const datos = {
+          prospectoId: String(p.ID),
+          nombre: p.Nombre || "",
+          comuna: p.Comuna || "",
+          unidades: Number(p.Unidades || 0),
+          direccion: p.Direccion || "",
+          rut: p.RUT || "",
+        };
+        try { sessionStorage.setItem("cotizacionProspecto", JSON.stringify(datos)); } catch (_) {}
+        const qs = new URLSearchParams({ ...datos, unidades: String(datos.unidades) });
+        window.location.href = "cotizacion-admin-condominio.html?" + qs.toString();
       }
-      function abrirModalCarta() {
-        alert("La carta no está incluida en esta versión de prospectos.html.");
+      const CARTA_TEXTO = [
+        "Junto con saludar cordialmente, nos dirigimos a ustedes en representación de Santa Josefina SpA, empresa de gestión inmobiliaria integral dedicada a la administración profesional de comunidades y condominios.",
+        "Sabemos que administrar una copropiedad exige orden, transparencia y una respuesta oportuna a las necesidades de los residentes. Por eso ofrecemos un servicio que incluye la gestión de gastos comunes, el seguimiento de la mantención del edificio, la coordinación de proveedores, la atención a residentes y el apoyo al comité en el cumplimiento de la normativa vigente de copropiedad inmobiliaria.",
+        "Nos gustaría presentarles nuestra propuesta de administración y conocer las necesidades de su comunidad. Quedamos a su disposición para coordinar una reunión con el comité en el día y horario que les acomode.",
+        "Pueden conocer más sobre nuestros servicios en www.santajosefinaspa.cl.",
+        "Agradecemos desde ya su tiempo y quedamos atentos a su respuesta.",
+      ].join("\n\n");
+
+      function abrirModalCarta(id) {
+        const p = buscarPros(id);
+        if (!p) return;
+        document.getElementById("cartaComunidad").value = p.Nombre || "";
+        document.getElementById("cartaDireccion").value = [p.Direccion, p.Comuna].filter(Boolean).join(", ");
+        document.getElementById("cartaFecha").value = new Date().toISOString().split("T")[0];
+        document.getElementById("cartaFirma").value = (typeof getAuthUser === "function" && getAuthUser()?.nombre) || "";
+        document.getElementById("cartaTexto").value = CARTA_TEXTO;
+        document.getElementById("modalCarta").classList.add("active");
+      }
+
+      function imprimirCarta() {
+        const comunidad = document.getElementById("cartaComunidad").value.trim();
+        const direccion = document.getElementById("cartaDireccion").value.trim();
+        const firma = document.getElementById("cartaFirma").value.trim();
+        const fechaVal = document.getElementById("cartaFecha").value;
+        const fecha = (fechaVal ? new Date(fechaVal + "T12:00:00") : new Date())
+          .toLocaleDateString("es-CL", { day: "numeric", month: "long", year: "numeric" });
+        const parrafos = document.getElementById("cartaTexto").value
+          .split(/\n\s*\n/).map((t) => t.trim()).filter(Boolean)
+          .map((t) => `<p>${esc(t).replace(/\n/g, "<br>")}</p>`).join("");
+
+        const html = `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>Carta</title>
+          <style>
+            @page { size: letter; margin: 22mm 22mm; }
+            body { font-family: Georgia, "Times New Roman", serif; font-size: 12pt; line-height: 1.55; color: #1a2b48; margin: 0; }
+            .marca { font-size: 18pt; font-weight: bold; letter-spacing: 1px; margin: 0; }
+            .sub { font-size: 9pt; letter-spacing: 2px; text-transform: uppercase; color: #64748b; margin: 0 0 30px; border-bottom: 2px solid #1a2b48; padding-bottom: 8px; }
+            .fecha { text-align: right; margin-bottom: 25px; }
+            .dest { margin-bottom: 25px; }
+            p { text-align: justify; margin: 0 0 14px; }
+            .firma { margin-top: 50px; }
+            .web { margin-top: 40px; font-size: 10pt; color: #64748b; border-top: 1px solid #cbd5e1; padding-top: 8px; }
+          </style></head><body>
+          <p class="marca">SANTA JOSEFINA SpA</p>
+          <p class="sub">Gestión inmobiliaria integral</p>
+          <div class="fecha">Santiago, ${esc(fecha)}</div>
+          <div class="dest"><strong>Señores</strong><br>${esc(comunidad)}${direccion ? "<br>" + esc(direccion) : ""}<br><strong>Presente</strong></div>
+          ${parrafos}
+          <div class="firma">Atentamente,<br><br><br><strong>${esc(firma)}</strong><br>Santa Josefina SpA</div>
+          <div class="web">www.santajosefinaspa.cl</div>
+          </body></html>`;
+
+        const frame = document.createElement("iframe");
+        frame.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;";
+        document.body.appendChild(frame);
+        frame.onload = () => {
+          frame.contentWindow.focus();
+          frame.contentWindow.print();
+          setTimeout(() => frame.remove(), 60000);
+        };
+        frame.srcdoc = html;
       }
 
       async function agregarAClientes(id) {
