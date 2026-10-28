@@ -3,6 +3,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Registro PDT · ICB Food Service</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <style>
 :root{--bg:#f5f5f7;--card:#fff;--ink:#1d1d22;--mut:#6c6c78;--line:#e2e2e8;--brand:#ed2750;--soft:#fdecef;--warn:#fde68a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#131316;--card:#1c1c21;--ink:#f2f2f5;--mut:#9b9ba7;--line:#2c2c34;--soft:#3a1821;--warn:#5c4a0a}}
@@ -67,11 +69,54 @@ details.sheet{padding:12px 18px}summary{cursor:pointer;font-weight:700;font-size
  table{border:1.5px solid #000}th,td{border:1px solid #000!important;color:#000}td{height:11mm}thead th{background:#fff;color:#000}th.pdt{background:#fff}td.dup{background:none}
  thead th .date{color:#000}
 }
+
+.rptModal{position:fixed;inset:0;z-index:1000;background:rgba(15,15,20,.62);display:none;align-items:center;justify-content:center;padding:18px}
+.rptModal.open{display:flex}
+.rptDialog{background:var(--card);color:var(--ink);border-radius:12px;width:min(1100px,100%);max-height:100%;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.rptHead{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+.rptHead h3{margin:0;font-size:16px}
+.rptClose{background:none;border:0;font-size:24px;line-height:1;cursor:pointer;color:var(--mut);padding:2px 8px}
+.rptPreview{flex:1;min-height:180px;overflow:auto;background:var(--bg);padding:14px;text-align:center}
+.rptPreview img{max-width:100%;height:auto;border:1px solid var(--line);background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.rptPreview .loading{padding:50px 0;color:var(--mut)}
+.rptActions{padding:14px 18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.rptActions .sep{flex:1}
+.rptActions .btn{padding:9px 13px;font-size:14px}
+.rptActions .btn.wa{background:#1fa855;border-color:#1fa855;color:#fff}
+.rptActions .btn:disabled{opacity:.5;cursor:default}
+.rptToast{padding:0 18px 12px;font-size:13px;color:var(--mut);min-height:20px}
+.rpt{background:#fff;color:#1d1d22;font:14px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;padding:26px 28px 18px;box-sizing:border-box;text-align:left}
+.rpt *{box-sizing:border-box}
+.rpt-top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #ed2750;padding-bottom:10px;margin-bottom:12px;gap:16px}
+.rpt-top .b{font-size:12px;font-weight:700;color:#ed2750}
+.rpt-top h1{font-size:22px;margin:2px 0 0;font-weight:750;color:#1d1d22}
+.rpt-top .d{font-size:12px;color:#6c6c78;text-align:right}
+.rpt-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.rpt-chip{background:#f5f5f7;border:1px solid #e2e2e8;border-radius:999px;padding:4px 11px;font-size:12px;color:#1d1d22}
+.rpt-chip b{font-weight:700}
+.rpt table{border-collapse:collapse;width:100%;font-size:13px;white-space:nowrap}
+.rpt th,.rpt td{border:1px solid #e2e2e8;padding:8px 10px;text-align:right;background:#fff;color:#1d1d22;height:auto}
+.rpt thead th{background:#f5f5f7;color:#6c6c78;font-weight:700;position:static}
+.rpt th:first-child,.rpt td:first-child{text-align:left}
+.rpt td.totalCol{background:#fdecef;font-weight:700}
+.rpt tr.totalRow td{background:#f5f5f7;font-weight:700}
+.rpt td.state-yellow{background:#fef9c3;color:#713f12;font-weight:700}
+.rpt .scroll{overflow:visible;max-height:none;border:0;border-radius:0;background:#fff}
+.rpt-crit{margin-top:14px;border:1px solid #e2e2e8;border-radius:10px;padding:12px 14px;background:#fafafb}
+.rpt-crit h3{margin:0 0 8px;font-size:14px;color:#1d1d22}
+.rpt-crit ul{margin:0;padding-left:18px;font-size:12.5px;color:#1d1d22}
+.rpt-crit li{margin:2px 0}
+.rpt-sem{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.rpt-sem>div{border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.35}
+.rpt-sem b{display:block;font-size:12.5px;margin-bottom:2px}
+.rpt-sem .g{background:#dcfce7;color:#14532d}.rpt-sem .y{background:#fef9c3;color:#713f12}.rpt-sem .z{background:#f5f5f7;color:#1d1d22}
+@media(max-width:760px){.rptDialog{max-height:100%}}
+@media print{.rptModal{display:none!important}}
 </style></head>
 <body>
 <div class="app">
 <aside class="np">
- <div class="logo"> <img src="https://www.icbfs.cl/wp-content/uploads/2022/02/logo-icbfs.png" alt="ICB Food Service"><small>Registro PDT</small></div>
+ <div class="logo"> <img src="https://www.icbfs.cl/wp-content/uploads/2022/02/logo-icbfs.png" alt="ICB Food Service" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'ICB Food Service'}))"><small>Registro PDT</small></div>
  <div class="nt">Turno</div>
  <div class="tabs" id="tabs"></div>
 </aside>
@@ -87,6 +132,9 @@ details.sheet{padding:12px 18px}summary{cursor:pointer;font-weight:700;font-size
   <div class="bar">
    <button class="btn pri" id="bp" type="button">🖨 Imprimir</button>
    <button class="btn" id="bx" type="button">⬇ Exportar Excel</button>
+   <button class="btn" id="bcd" type="button">⬇ Detalle CSV</button>
+   <button class="btn" id="bcp" type="button">⬇ Planilla CSV</button>
+   <button class="btn pri" id="brp" type="button">📄 Generar reporte (PDF / imagen)</button>
   </div>
  </div>
  <section class="sheet">
@@ -114,6 +162,19 @@ details.sheet{padding:12px 18px}summary{cursor:pointer;font-weight:700;font-size
   <div class="bar" style="margin:0"><button class="btn" id="bk" type="button">Descargar respaldo</button><button class="btn" id="br" type="button">Cargar respaldo</button><input type="file" id="fr" accept=".json" style="display:none"></div>
  </details>
 </main></div>
+<div class="rptModal np" id="rptModal" role="dialog" aria-modal="true" aria-label="Reporte">
+<div class="rptDialog">
+<div class="rptHead"><h3 id="rptTitleTxt">Reporte</h3><button class="rptClose" id="rptClose" type="button" aria-label="Cerrar">×</button></div>
+<div class="rptPreview" id="rptPreview"><div class="loading">Generando reporte…</div></div>
+<div class="rptToast" id="rptToast"></div>
+<div class="rptActions">
+<button class="btn" id="rptPdf" type="button" disabled>⬇ Descargar PDF</button>
+<button class="btn" id="rptPng" type="button" disabled>⬇ Descargar imagen</button>
+<button class="btn" id="rptCopy" type="button" disabled>Copiar imagen</button>
+<span class="sep"></span>
+<button class="btn wa" id="rptWa" type="button" disabled>WhatsApp</button>
+<button class="btn" id="rptMail" type="button" disabled>Email</button>
+</div></div></div>
 <div class="toast" id="toast"></div>
 <script>
 const $=id=>document.getElementById(id),p2=n=>String(n).padStart(2,"0");
@@ -218,5 +279,78 @@ $("fr").onchange=async e=>{
     S=Object.assign(S,o);save();render();toast("Respaldo cargado")}catch(err){toast("No se pudo cargar: "+err.message)}
 };
 render();
+
+/* ===== CSV ===== */
+function csvDown(n,rows){download(n,new Blob(["\ufeff"+rows.map(r=>r.map(x=>'"'+String(x==null?"":x).replace(/"/g,'""')+'"').join(";")).join("\n")],{type:"text/csv;charset=utf-8"}))}
+$("bcd").onclick=()=>csvDown("detalle_registro_pdt.csv",[["Fecha","Semana","Turno","Día","PDT","Colaborador"],...flat()]);
+$("bcp").onclick=()=>{const ds=days(),r=S.reg[rkey()]||{};csvDown("planilla_pdt_S"+wkKey().slice(-2)+"_"+S.turno+".csv",[["PDT",...ds.map((d,i)=>DN[i]+" "+fd(d))],...S.pdts.map(p=>[p,...ds.map((_,i)=>r[p+"|"+i]||"")])])};
+/* ===== REPORTE PDF / IMAGEN ===== */
+function specPdt(){
+  const ds=days(),r=S.reg[rkey()]||{},c={},wk=wkKey().slice(-2);
+  for(const k in r){const[p,d]=k.split("|"),v=String(r[k]).trim().toLowerCase();if(v){const kk=d+"|"+v;c[kk]=(c[kk]||0)+1}}
+  let n=0,nd=0;const tot=ds.map(()=>0),slots=S.pdts.length*6;
+  let t='<div class="scroll"><table><thead><tr><th>PDT</th>'+ds.map((d,i)=>'<th style="text-align:center">'+DN[i]+" "+fd(d)+"</th>").join("")+'<th>Días con registro</th></tr></thead><tbody>';
+  S.pdts.forEach(p=>{let u=0;t+="<tr><td>"+esc(p)+"</td>";
+    ds.forEach((_,i)=>{const v=String(r[p+"|"+i]||"").trim(),dup=v&&c[i+"|"+v.toLowerCase()]>1;
+      if(v){u++;tot[i]++;n++;if(dup)nd++}
+      t+='<td class="'+(dup?"state-yellow":"")+'" style="text-align:center">'+esc(v)+"</td>"});
+    t+='<td class="totalCol">'+u+"</td></tr>"});
+  t+='<tr class="totalRow"><td>Total registros</td>'+tot.map(v=>'<td style="text-align:center">'+v+"</td>").join("")+"<td>"+n+"</td></tr></tbody></table></div>";
+  const per=fd(ds[0])+" – "+fd(ds[5])+"/"+ds[5].getFullYear();
+  const crit='<div class="rpt-crit"><h3>Cómo leer el reporte</h3><ul><li><b>Período:</b> semana '+wk+", "+per+" · turno "+esc(S.turno.toLowerCase())+".</li><li>Cada celda muestra el colaborador que usó ese PDT ese día.</li><li><b>Total registros</b> = celdas con colaborador asignado.</li><li><b>Duplicado:</b> el mismo colaborador figura en dos PDT el mismo día.</li></ul>"
+   +'<div class="rpt-sem"><div class="g"><b>REGISTRADO</b>PDT con colaborador · '+n+'</div><div class="y"><b>DUPLICADO</b>Mismo colaborador en 2 PDT el mismo día · '+nd+' celda(s)</div><div class="z"><b>SIN REGISTRO</b>PDT sin colaborador · '+(slots-n)+"</div></div></div>";
+  return{title:"Registro de uso de PDT",ctx:[["Semana","S"+wk],["Turno",S.turno],["Período",per],["Registros",n+" de "+slots]],table:t,crit,width:Math.max(980,300+6*150),
+    base:["Reporte","PDT","S"+wk,S.turno],shareText:"Reporte registro de uso de PDT · Semana "+wk+" · Turno "+S.turno+" · "+per};
+}
+function rptHTML(s){
+  const now=new Date().toLocaleString("es-CL",{dateStyle:"medium",timeStyle:"short"});
+  return '<div class="rpt" style="width:'+s.width+'px"><div class="rpt-top"><div><div class="b">ICB Food Service</div><h1>'+esc(s.title)+'</h1></div><div class="d">Generado: '+esc(now)+'</div></div><div class="rpt-chips">'+s.ctx.map(([k,v])=>'<span class="rpt-chip">'+esc(k)+": <b>"+esc(v)+"</b></span>").join("")+"</div>"+s.table+s.crit+"</div>";
+}
+let rptState=null;
+const rptToast=t=>{$("rptToast").textContent=t||""};
+const rptButtons=on=>["rptPdf","rptPng","rptCopy","rptWa","rptMail"].forEach(id=>$(id).disabled=!on);
+function rptClose(){$("rptModal").classList.remove("open");if(rptState&&rptState.url)URL.revokeObjectURL(rptState.url);rptState=null}
+async function openReport(){
+  $("rptModal").classList.add("open");rptButtons(false);rptToast("");
+  $("rptPreview").innerHTML='<div class="loading">Generando reporte…</div>';
+  if(!window.html2canvas||!window.jspdf){$("rptPreview").innerHTML='<div class="loading">No se pudieron cargar las librerías de reporte (html2canvas / jsPDF). Revisa la conexión a internet y recarga la página.</div>';return}
+  let host;
+  try{
+    const spec=specPdt();
+    $("rptTitleTxt").textContent="Reporte · "+spec.ctx.map(c=>c[1]).slice(0,3).join(" · ");
+    host=document.createElement("div");host.style.cssText="position:fixed;left:0;top:0;z-index:-1;pointer-events:none";host.innerHTML=rptHTML(spec);document.body.appendChild(host);
+    if(document.fonts&&document.fonts.ready)await document.fonts.ready;
+    const scale=2,canvas=await html2canvas(host.firstElementChild,{scale,backgroundColor:"#ffffff",useCORS:true,logging:false});
+    host.remove();host=null;
+    const png=await new Promise(r=>canvas.toBlob(r,"image/png")),w=canvas.width/scale,h=canvas.height/scale;
+    const pdf=new window.jspdf.jsPDF({orientation:w>h?"l":"p",unit:"px",format:[w,h],hotfixes:["px_scaling"],compress:true});
+    pdf.addImage(canvas.toDataURL("image/jpeg",0.95),"JPEG",0,0,w,h);
+    const base=spec.base.join("_").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\w\-]+/g,"_")+"_"+new Date().toISOString().slice(0,10);
+    if(rptState&&rptState.url)URL.revokeObjectURL(rptState.url);
+    rptState={spec,png,pdfBlob:pdf.output("blob"),base,url:URL.createObjectURL(png)};
+    $("rptPreview").innerHTML='<img src="'+rptState.url+'" alt="Vista previa del reporte">';
+    rptButtons(true);
+  }catch(e){if(host)host.remove();$("rptPreview").innerHTML='<div class="loading">Error al generar el reporte: '+esc(e.message||e)+"</div>"}
+}
+const rptFile=k=>k==="pdf"?new File([rptState.pdfBlob],rptState.base+".pdf",{type:"application/pdf"}):new File([rptState.png],rptState.base+".png",{type:"image/png"});
+async function rptShare(kind,fallbackUrl,label){
+  if(!rptState)return;
+  const file=rptFile(kind),s=rptState.spec;
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:s.title,text:s.shareText});rptToast("");return}
+    catch(e){if(e&&e.name==="AbortError")return}
+  }
+  download(file.name,file);window.open(fallbackUrl(s.shareText),"_blank","noopener");
+  rptToast("Se descargó "+file.name+". Adjúntalo manualmente en "+label+' (en WhatsApp Web también puedes usar "Copiar imagen" y pegar con Ctrl+V).');
+}
+$("brp").onclick=openReport;
+$("rptClose").onclick=rptClose;
+$("rptModal").addEventListener("click",e=>{if(e.target.id==="rptModal")rptClose()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("rptModal").classList.contains("open"))rptClose()});
+$("rptPdf").onclick=()=>rptState&&download(rptState.base+".pdf",rptState.pdfBlob);
+$("rptPng").onclick=()=>rptState&&download(rptState.base+".png",rptState.png);
+$("rptCopy").onclick=async()=>{try{await navigator.clipboard.write([new ClipboardItem({"image/png":rptState.png})]);rptToast("Imagen copiada. Pégala (Ctrl+V) en WhatsApp, correo u otra app.")}catch(e){rptToast('Tu navegador no permite copiar imágenes. Usa "Descargar imagen".')}};
+$("rptWa").onclick=()=>rptShare("png",t=>"https://wa.me/?text="+encodeURIComponent(t),"WhatsApp");
+$("rptMail").onclick=()=>rptShare("pdf",t=>"mailto:?subject="+encodeURIComponent(t)+"&body="+encodeURIComponent(t+"\n\n(Adjunta el PDF descargado)"),"el correo");
 </script>
 </body></html>
