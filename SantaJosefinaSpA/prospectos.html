@@ -673,7 +673,7 @@
           await cargarTodo();
         } catch (error) {
           console.error("Error al convertir prospecto a cliente:", error);
-          alert("No se pudo convertir el prospecto a cliente.");
+          alert("No se pudo convertir el prospecto a cliente.\n\n" + (error?.message || error));
         } finally {
           hideSpinner();
         }
