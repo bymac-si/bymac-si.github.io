@@ -630,6 +630,129 @@
         }).join("");
       }
 
+      // Escritura en el backend (api_cliente.js solo expone apiCRUD)
+      async function saveData(tabla, fila) {
+        return apiCRUD(tabla, "Add", [fila]);
+      }
+      async function updateData(tabla, id, fila) {
+        return apiCRUD(tabla, "Edit", [{ ...fila, ID: id }]);
+      }
+
+      // ---------- Funciones de los botones (reconstruidas) ----------
+      const BITACORA_TABLA = "Bitacora"; // nombre de la hoja/tabla de bitácora en el backend
+
+      function esc(v) {
+        return String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+      }
+      function buscarPros(id) {
+        return PROS.find((item) => String(item.ID) === String(id));
+      }
+
+      function abrirDetalle(id) {
+        const p = buscarPros(id);
+        if (!p) return;
+        const filas = [
+          ["Nombre", p.Nombre], ["Tipo", p._tipo], ["Estado", p.Estado], ["Agente", p.Agente || "Sin Asignar"],
+          ["Dirección", p.Direccion], ["Comuna", p.Comuna], ["Email", p.Email], ["Teléfono", p.Telefono],
+          ["Unidades", p.Unidades], ["RUT", p.RUT], ["Tipo Operación", p["Tipo Operacion"]],
+          ["Tipo Propiedad", p["Tipo Propiedad"]], ["Presupuesto", p.Presupuesto], ["Canal", p.Canal],
+          ["Fecha Registro", p["Fecha Registro"]], ["Observaciones", p.Observaciones],
+        ].filter(([, v]) => v !== undefined && v !== null && v !== "");
+        document.getElementById("detalleContenido").innerHTML = filas
+          .map(([k, v]) => `<div style="margin-bottom:8px"><strong>${esc(k)}:</strong> <span style="white-space:pre-wrap">${esc(v)}</span></div>`)
+          .join("");
+        document.getElementById("modalDetalle").classList.add("active");
+      }
+
+      function abrirMapa(id) {
+        const p = buscarPros(id);
+        if (!p) return;
+        const q = p.LatLong || [p.Direccion, p.Comuna, "Chile"].filter(Boolean).join(", ");
+        if (!q) return alert("Este prospecto no tiene dirección ni coordenadas.");
+        window.open("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q), "_blank");
+      }
+
+      function intentarGeocodificar() {
+        // Sin geocodificación automática en esta versión: la dirección se abre por texto en "Ver Mapa".
+      }
+
+      async function eliminarProspecto(id) {
+        const p = buscarPros(id);
+        if (!p) return;
+        if (!confirm(`¿Eliminar el prospecto "${p.Nombre}"?\nEsta acción no se puede deshacer.`)) return;
+        try {
+          showSpinner("Eliminando...");
+          await apiCRUD(p._tabla, "Delete", [{ ID: p.ID }]);
+          await cargarTodo();
+        } catch (error) {
+          console.error("Error eliminando prospecto:", error);
+          alert("No se pudo eliminar el prospecto.\n\n" + (error?.message || error));
+        } finally {
+          hideSpinner();
+        }
+      }
+
+      async function abrirBitacora(id) {
+        const p = buscarPros(id);
+        if (!p) return;
+        CURRENT_PROS_ID = p.ID;
+        document.getElementById("bitacoraSubtitle").textContent = "Prospecto: " + (p.Nombre || "");
+        document.getElementById("bitFecha").value = new Date().toISOString().split("T")[0];
+        document.getElementById("bitNota").value = "";
+        document.getElementById("modalBitacora").classList.add("active");
+        await cargarBitacora();
+      }
+
+      async function cargarBitacora() {
+        const cont = document.getElementById("timelineContainer");
+        cont.innerHTML = '<p class="muted">Cargando...</p>';
+        try {
+          const filas = await fetchData(BITACORA_TABLA, { column: "ProspectoID", value: String(CURRENT_PROS_ID) });
+          filas.sort((a, b) => String(b.Fecha || "").localeCompare(String(a.Fecha || "")));
+          cont.innerHTML = filas.length
+            ? filas.map((b) => `
+                <div style="border-left:3px solid #0369a1; padding:6px 10px; margin-bottom:10px; background:#f8fafc">
+                  <div style="font-size:12px; color:#64748b">${esc(b.Fecha)} · <strong>${esc(b.Tipo)}</strong>${b.Usuario ? " · " + esc(b.Usuario) : ""}</div>
+                  <div style="white-space:pre-wrap">${esc(b.Nota)}</div>
+                </div>`).join("")
+            : '<p class="muted">Sin registros en la bitácora.</p>';
+        } catch (error) {
+          console.error("Error cargando bitácora:", error);
+          cont.innerHTML = '<p class="muted">No se pudo cargar la bitácora: ' + esc(error?.message || error) + "</p>";
+        }
+      }
+
+      async function guardarBitacora() {
+        const nota = document.getElementById("bitNota").value.trim();
+        if (!nota) return alert("Escribe el detalle de la nota.");
+        const usuario = (typeof getAuthUser === "function" && getAuthUser()?.nombre) || "";
+        try {
+          showSpinner("Guardando...");
+          await saveData(BITACORA_TABLA, {
+            ID: "BIT_" + Date.now(),
+            ProspectoID: String(CURRENT_PROS_ID),
+            Tipo: document.getElementById("bitTipo").value,
+            Fecha: document.getElementById("bitFecha").value || new Date().toISOString().split("T")[0],
+            Nota: nota,
+            Usuario: usuario,
+          });
+          document.getElementById("bitNota").value = "";
+          await cargarBitacora();
+        } catch (error) {
+          console.error("Error guardando bitácora:", error);
+          alert("No se pudo guardar la nota.\n\n" + (error?.message || error));
+        } finally {
+          hideSpinner();
+        }
+      }
+
+      function abrirCotizacion() {
+        alert("La cotización no está incluida en esta versión de prospectos.html.");
+      }
+      function abrirModalCarta() {
+        alert("La carta no está incluida en esta versión de prospectos.html.");
+      }
+
       async function agregarAClientes(id) {
         const p = PROS.find((item) => String(item.ID) === String(id));
         if (!p || p._tipo !== "Administracion") return;
