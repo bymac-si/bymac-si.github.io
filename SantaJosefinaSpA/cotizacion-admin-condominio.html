@@ -5,6 +5,7 @@
   <title>Propuesta Comercial — Administración de Condominios</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="assets/js/api_cliente.js"></script>
   <script src="assets/js/app.js"></script>
   <script>requireAuth();</script>
 </head>
@@ -255,7 +256,12 @@ function updatePrintResumen(neto, iva, total){
 window.updatePrintResume = updatePrintResumen; // alias sin "n"
 
 /* Fallbacks de fetch */
-async function safeFetch(table){ try{ return await fetchData(table); }catch(e){ return []; } }
+async function safeFetch(table){
+  try{ return await fetchData(table); }
+  catch(e){ console.error('No se pudo cargar la tabla '+table+':', e); (window.__fallos=window.__fallos||[]).push(table+': '+(e.message||e)); return []; }
+}
+// Clave de cada registro (ID). Solo se define si app.js no la trae.
+window.getKeyVal = window.getKeyVal || function(x){ return x?.ID ?? x?.Id ?? x?.id ?? x?.RUT ?? x?.Nombre ?? ''; };
 
 /* Boot con failsafe anti-spinning */
 async function boot(){
@@ -266,6 +272,8 @@ async function boot(){
       safeFetch('ProspectosCopro'),
       safeFetch('Copropiedades')
     ]);
+
+    if(window.__fallos?.length) alert('No se pudieron cargar algunos datos:\n\n'+window.__fallos.join('\n'));
 
     const selOrigen = document.getElementById('selOrigen');
     const selEntidad= document.getElementById('selEntidad');
