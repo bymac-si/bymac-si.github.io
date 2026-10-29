@@ -298,35 +298,79 @@ function buscarFactor(comuna){
 }
 function setFactorMsg(t){ const el=document.getElementById('factorMsg'); if(el) el.textContent=t||''; }
 
-/* ===== UTM automática: Banco Central de Chile (vía mindicador.cl) ===== */
-const UTM_FUENTES = ['https://valor-utm.cl/','https://contable.app/herramientas/calculadora_utm','https://www.utmhoy.cl/'];
-function fetchConTimeout(url, ms=7000){
+/* ===== UTM automática: Valor UTM API (datos del SII) + fuentes alternativas =====
+   Fuente principal: valor-utm.cl (API JSON con CORS).
+   Alternativas: indicadores.cl y mindicador.cl.
+*/
+const UTM_FUENTES = [
+  {
+    nombre: 'Valor UTM',
+    url: () => `https://valor-utm.cl/api/v1/utm/${FECHA_UTM.getFullYear()}-${String(FECHA_UTM.getMonth()+1).padStart(2,'0')}.json`,
+    parse: j => {
+      // Endpoint mensual: admite variantes habituales de la respuesta JSON.
+      const periodo = j.periodo || j.mes || j.fecha || '';
+      const valor = Number(j.valor ?? j.utm ?? j.UTM);
+      if (!(valor > 0)) throw new Error('Respuesta sin valor UTM válido');
+      const m = String(periodo).match(/(\d{4})[-/](\d{1,2})/);
+      const anio = m ? Number(m[1]) : FECHA_UTM.getFullYear();
+      const mes = m ? Number(m[2])-1 : FECHA_UTM.getMonth();
+      return {valor: Math.round(valor), anio, mes, esDelMes: anio===FECHA_UTM.getFullYear() && mes===FECHA_UTM.getMonth()};
+    }
+  },
+  {
+    nombre: 'Indicadores.cl',
+    url: () => 'https://indicadores.cl/api/v1/hoy.json',
+    parse: j => {
+      const u = j.utm || {};
+      const valor = Number(u.valor);
+      if (!(valor > 0)) throw new Error('Respuesta sin valor UTM válido');
+      const periodo = String(u.mes || '');
+      const m = periodo.match(/(\d{4})[-/](\d{1,2})/);
+      const anio = m ? Number(m[1]) : FECHA_UTM.getFullYear();
+      const mes = m ? Number(m[2])-1 : FECHA_UTM.getMonth();
+      return {valor: Math.round(valor), anio, mes, esDelMes: anio===FECHA_UTM.getFullYear() && mes===FECHA_UTM.getMonth()};
+    }
+  },
+  {
+    nombre: 'mindicador.cl',
+    url: () => 'https://mindicador.cl/api/utm',
+    parse: j => {
+      const serie = (Array.isArray(j.serie) ? j.serie : []).filter(x=>Number(x.valor)>0)
+        .sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+      if (!serie.length) throw new Error('La respuesta no trae datos');
+      const y=FECHA_UTM.getFullYear(), m=FECHA_UTM.getMonth();
+      const delMes=serie.find(x=>{const d=new Date(x.fecha); return d.getUTCFullYear()===y && d.getUTCMonth()===m;});
+      const e=delMes||serie[0], d=new Date(e.fecha);
+      return {valor:Math.round(Number(e.valor)), anio:d.getUTCFullYear(), mes:d.getUTCMonth(), esDelMes:!!delMes};
+    }
+  }
+];
+function fetchConTimeout(url, ms=9000){
   const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(), ms);
   return fetch(url,{signal:ctl.signal, cache:'no-store'}).finally(()=>clearTimeout(t));
 }
 function nombreMes(anio, mes){ return new Intl.DateTimeFormat('es-CL',{month:'long', timeZone:'UTC'}).format(new Date(Date.UTC(anio,mes,1))); }
 async function obtenerUTM(){
-  let ultimo=null;
-  for(const url of UTM_FUENTES){
+  const errores=[];
+  for(const fuente of UTM_FUENTES){
     try{
-      const r=await fetchConTimeout(url);
+      const r=await fetchConTimeout(fuente.url());
       if(!r.ok) throw new Error('HTTP '+r.status);
       const j=await r.json();
-      const serie=(Array.isArray(j.serie)?j.serie:[]).filter(x=>Number(x.valor)>0)
-        .sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
-      if(!serie.length) throw new Error('La respuesta no trae datos');
-      const y=FECHA_UTM.getFullYear(), m=FECHA_UTM.getMonth();
-      const delMes=serie.find(x=>{const d=new Date(x.fecha); return d.getUTCFullYear()===y && d.getUTCMonth()===m;});
-      const e=delMes||serie[0], d=new Date(e.fecha);
-      return {valor:Math.round(Number(e.valor)), anio:d.getUTCFullYear(), mes:d.getUTCMonth(), esDelMes:!!delMes};
-    }catch(err){ ultimo=err; }
+      const u=fuente.parse(j);
+      if(!(u.valor>0) || u.mes<0 || u.mes>11) throw new Error('Datos UTM inválidos');
+      return {...u, fuente:fuente.nombre};
+    }catch(err){
+      errores.push(fuente.nombre+': '+(err.message||err));
+      console.warn('Falló fuente UTM '+fuente.nombre, err);
+    }
   }
-  throw ultimo||new Error('Sin respuesta de la fuente');
+  throw new Error(errores.join(' | ') || 'Sin respuesta de las fuentes UTM');
 }
 function aplicarUTM(valor, anio, mes){
   utmCLP=valor;
   ANIO_UTM=anio; MES_UTM=nombreMes(anio,mes);
-  document.getElementById('inpUTM').value = new Intl.NumberFormat('es-CL').format(valor);
+  document.getElementById('inpUTM').value = new Intl.NumberFormat('es-CL',{maximumFractionDigits:0}).format(valor);
   document.getElementById('cxUTM').textContent = etiquetaUTM();
   renderHonorarios();
 }
@@ -339,16 +383,16 @@ async function cargarUTMAuto(){
     const u=await obtenerUTM();
     aplicarUTM(u.valor,u.anio,u.mes);
     try{ localStorage.setItem('utm_cache', JSON.stringify({clave, ...u})); }catch(_){}
-    msg.textContent='UTM '+nombreMes(u.anio,u.mes)+' '+u.anio+': '+clp(u.valor)+' · fuente: Banco Central de Chile (vía mindicador.cl).'
-      + (u.esDelMes ? '' : ' ⚠ Aún no está publicado el valor de este mes: se usa el último disponible.');
+    msg.textContent='UTM '+nombreMes(u.anio,u.mes)+' '+u.anio+': '+clp(u.valor)+' · fuente: '+u.fuente+'.'
+      + (u.esDelMes ? '' : ' ⚠ El valor obtenido corresponde al último período disponible.');
   }catch(err){
     console.error('No se pudo obtener la UTM:', err);
     let c=null; try{ c=JSON.parse(localStorage.getItem('utm_cache')||'null'); }catch(_){}
     if(c && c.clave===clave && c.valor>0){
       aplicarUTM(c.valor,c.anio,c.mes);
-      msg.textContent='Sin conexión con la fuente: se usa el último valor guardado ('+nombreMes(c.anio,c.mes)+' '+c.anio+': '+clp(c.valor)+').';
+      msg.textContent='Sin conexión con las fuentes: se usa el último valor guardado ('+nombreMes(c.mes!==undefined?c.anio:ANIO_UTM,c.mes!==undefined?c.mes:FECHA_UTM.getMonth())+' '+c.anio+': '+clp(c.valor)+').';
     }else{
-      msg.textContent='No se pudo obtener la UTM automáticamente. Escríbala a mano (SII: www.sii.cl › Valores y fechas › UTM).';
+      msg.textContent='No se pudo obtener la UTM automáticamente. Ingrese el valor manualmente y verifique el período en el SII.';
     }
   }
 }
@@ -381,7 +425,7 @@ async function boot(){
     onEntidadChange(it);
 
     document.getElementById('inpUTM').addEventListener('input', ()=>{
-      const raw=(inpUTM.value||'').toString().replaceAll('.','').replace(',','.');
+      const raw=(inpUTM.value||'').toString().replace(/\s/g,'').replace(/\./g,'').replace(',','.');
       utmCLP=parseFloat(raw)||0;
       document.getElementById('cxUTM').textContent = utmCLP>0 ? etiquetaUTM() : '—';
       renderHonorarios();
