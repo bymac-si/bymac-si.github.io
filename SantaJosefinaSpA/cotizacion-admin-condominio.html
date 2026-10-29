@@ -43,16 +43,17 @@
       </div>
       <div>
         <label class="label">N° Unidades</label>
-        <input id="inpUnidades" class="mono" readonly style="font-size: 14px; width: 90%;">
+        <input id="inpUnidades" class="mono" inputmode="numeric" style="font-size: 14px; width: 90%;">
       </div>
       <div>
         <label class="label">Factor Comuna (TablaTarifas)</label>
-        <input id="inpFactor" class="mono" readonly style="font-size: 14px; width: 90%;">
+        <input id="inpFactor" class="mono" inputmode="decimal" style="font-size: 14px; width: 90%;">
+        <small id="factorMsg" class="muted" style="display:block;color:#b45309"></small>
       </div>
       <div>
         <label class="label">Valor UTM actual (CLP)</label>
-        <input id="inpUTM" class="mono" placeholder="Pegue aquí el valor UTM del mes en curso" inputmode="decimal" style="font-size: 14px; width: 90%;">
-        <small class="muted">Pegue el valor oficial de la UTM vigente este mes para convertir la tarifa a pesos.</small>
+        <input id="inpUTM" class="mono" placeholder="Se carga automáticamente; también puede escribirla" inputmode="decimal" style="font-size: 14px; width: 90%;">
+        <small id="utmMsg" class="muted" style="display:block">Consultando la UTM del mes…</small>
       </div>
     </div>
     <div class="btns">
@@ -197,8 +198,8 @@
 function showSpinner(msg){ const sp=document.getElementById('pageSpinner'); const txt=document.getElementById('spinnerText'); if(msg) txt.textContent=msg; sp.style.display='flex'; }
 function hideSpinner(){ const sp=document.getElementById('pageSpinner'); sp.style.display='none'; }
 const FECHA_UTM = new Date();
-const ANIO_UTM = FECHA_UTM.getFullYear();
-const MES_UTM = new Intl.DateTimeFormat("es-CL", { month: "long" }).format(FECHA_UTM);
+let ANIO_UTM = FECHA_UTM.getFullYear();
+let MES_UTM = new Intl.DateTimeFormat("es-CL", { month: "long" }).format(FECHA_UTM);
 function clp(v){ return "$" + new Intl.NumberFormat("es-CL",{maximumFractionDigits:0}).format(Number(v||0)); }
 function utmFmt(v){ return new Intl.NumberFormat("es-CL",{minimumFractionDigits:2,maximumFractionDigits:4}).format(Number(v||0)) + " UTM"; }
 function montoDoble(utm, pesos){ return `${utmFmt(utm)}<br><small>${clp(pesos)}</small>`; }
@@ -263,6 +264,95 @@ async function safeFetch(table){
 // Clave de cada registro (ID). Solo se define si app.js no la trae.
 window.getKeyVal = window.getKeyVal || function(x){ return x?.ID ?? x?.Id ?? x?.id ?? x?.RUT ?? x?.Nombre ?? ''; };
 
+/* ===== Factor de comuna: búsqueda tolerante + diagnóstico ===== */
+function parseNum(v){
+  if(v===null||v===undefined) return 0;
+  let t=String(v).trim().replace(/[^\d.,-]/g,'');
+  if(!t) return 0;
+  if(t.includes(',')) t=t.replace(/\./g,'').replace(',','.');
+  return parseFloat(t)||0;
+}
+function buscarFactor(comuna){
+  const res={factor:0, motivo:''};
+  if(!TARIFAS.length){ res.motivo='La tabla TablaTarifas no devolvió filas (¿sin permisos o vacía?). Ingrese el factor manualmente.'; return res; }
+  const claves=Object.keys(TARIFAS[0]);
+  const kComuna = claves.find(k=>norm(k)==='comuna') || claves.find(k=>norm(k).includes('comuna'));
+  if(!kComuna){ res.motivo='TablaTarifas no tiene una columna de comuna. Columnas: '+claves.join(', ')+'. Ingrese el factor manualmente.'; return res; }
+  const limpia = t => norm(String(t||'').replace(/\(.*?\)/g,'')).replace(/\s+/g,' ');
+  const buscada = limpia(comuna);
+  const fila = TARIFAS.find(t => limpia(t[kComuna])===buscada);
+  if(!fila){
+    const lista=[...new Set(TARIFAS.map(t=>t[kComuna]).filter(Boolean))];
+    console.warn('Comuna sin tarifa:', comuna, '| comunas en TablaTarifas:', lista);
+    res.motivo='No hay tarifa para «'+comuna+'» en TablaTarifas ('+lista.length+' comunas cargadas). Ingrese el factor manualmente.';
+    return res;
+  }
+  let kFactor = claves.find(k=>norm(k)==='factor') || claves.find(k=>norm(k).includes('factor'));
+  if(!kFactor) kFactor = claves.find(k=>k!==kComuna && !/^id$|fecha|date|nombre/i.test(norm(k)) && parseNum(fila[k])>0);
+  res.factor = kFactor ? parseNum(fila[kFactor]) : 0;
+  if(!(res.factor>0)){
+    console.warn('Fila de tarifa sin factor numérico:', fila);
+    res.motivo='La fila de «'+comuna+'» no trae un factor numérico (columnas: '+claves.join(', ')+'). Ingrese el factor manualmente.';
+  }
+  return res;
+}
+function setFactorMsg(t){ const el=document.getElementById('factorMsg'); if(el) el.textContent=t||''; }
+
+/* ===== UTM automática: Banco Central de Chile (vía mindicador.cl) ===== */
+const UTM_FUENTES = ['https://mindicador.cl/api/utm','https://www.mindicador.cl/api/utm'];
+function fetchConTimeout(url, ms=7000){
+  const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(), ms);
+  return fetch(url,{signal:ctl.signal, cache:'no-store'}).finally(()=>clearTimeout(t));
+}
+function nombreMes(anio, mes){ return new Intl.DateTimeFormat('es-CL',{month:'long', timeZone:'UTC'}).format(new Date(Date.UTC(anio,mes,1))); }
+async function obtenerUTM(){
+  let ultimo=null;
+  for(const url of UTM_FUENTES){
+    try{
+      const r=await fetchConTimeout(url);
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      const j=await r.json();
+      const serie=(Array.isArray(j.serie)?j.serie:[]).filter(x=>Number(x.valor)>0)
+        .sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+      if(!serie.length) throw new Error('La respuesta no trae datos');
+      const y=FECHA_UTM.getFullYear(), m=FECHA_UTM.getMonth();
+      const delMes=serie.find(x=>{const d=new Date(x.fecha); return d.getUTCFullYear()===y && d.getUTCMonth()===m;});
+      const e=delMes||serie[0], d=new Date(e.fecha);
+      return {valor:Math.round(Number(e.valor)), anio:d.getUTCFullYear(), mes:d.getUTCMonth(), esDelMes:!!delMes};
+    }catch(err){ ultimo=err; }
+  }
+  throw ultimo||new Error('Sin respuesta de la fuente');
+}
+function aplicarUTM(valor, anio, mes){
+  utmCLP=valor;
+  ANIO_UTM=anio; MES_UTM=nombreMes(anio,mes);
+  document.getElementById('inpUTM').value = new Intl.NumberFormat('es-CL').format(valor);
+  document.getElementById('cxUTM').textContent = etiquetaUTM();
+  renderHonorarios();
+}
+async function cargarUTMAuto(){
+  const inp=document.getElementById('inpUTM'), msg=document.getElementById('utmMsg');
+  if((inp.value||'').trim()){ msg.textContent='Valor UTM ingresado manualmente.'; return; }
+  const clave=FECHA_UTM.getFullYear()+'-'+(FECHA_UTM.getMonth()+1);
+  msg.textContent='Consultando la UTM del mes…';
+  try{
+    const u=await obtenerUTM();
+    aplicarUTM(u.valor,u.anio,u.mes);
+    try{ localStorage.setItem('utm_cache', JSON.stringify({clave, ...u})); }catch(_){}
+    msg.textContent='UTM '+nombreMes(u.anio,u.mes)+' '+u.anio+': '+clp(u.valor)+' · fuente: Banco Central de Chile (vía mindicador.cl).'
+      + (u.esDelMes ? '' : ' ⚠ Aún no está publicado el valor de este mes: se usa el último disponible.');
+  }catch(err){
+    console.error('No se pudo obtener la UTM:', err);
+    let c=null; try{ c=JSON.parse(localStorage.getItem('utm_cache')||'null'); }catch(_){}
+    if(c && c.clave===clave && c.valor>0){
+      aplicarUTM(c.valor,c.anio,c.mes);
+      msg.textContent='Sin conexión con la fuente: se usa el último valor guardado ('+nombreMes(c.anio,c.mes)+' '+c.anio+': '+clp(c.valor)+').';
+    }else{
+      msg.textContent='No se pudo obtener la UTM automáticamente. Escríbala a mano (SII: www.sii.cl › Valores y fechas › UTM).';
+    }
+  }
+}
+
 /* Boot con failsafe anti-spinning */
 async function boot(){
   showSpinner('Cargando datos...');
@@ -296,6 +386,21 @@ async function boot(){
       document.getElementById('cxUTM').textContent = utmCLP>0 ? etiquetaUTM() : '—';
       renderHonorarios();
     });
+
+    // Factor y unidades editables (por si la tabla no trae el dato)
+    document.getElementById('inpFactor').addEventListener('input', ()=>{
+      factor = parseNum(document.getElementById('inpFactor').value);
+      document.getElementById('cxFactor').textContent = factor>0 ? factor : '—';
+      setFactorMsg(factor>0 ? 'Factor ingresado manualmente.' : '');
+      renderHonorarios();
+    });
+    document.getElementById('inpUnidades').addEventListener('input', ()=>{
+      nUnidades = Math.max(0, Math.round(parseNum(document.getElementById('inpUnidades').value)));
+      document.getElementById('cxUnidades').textContent = nUnidades || '—';
+      renderHonorarios();
+    });
+
+    cargarUTMAuto(); // sin await: no bloquea la página
   }catch(err){
     console.error('boot error:', err);
     alert('Error al cargar datos: ' + (err.message||err));
@@ -346,11 +451,11 @@ function onEntidadChange(prefill){
   nUnidades    = Number(prefill?.unidades ?? entidadSel?.Unidades ?? entidadSel?.NUnidades ?? entidadSel?.CantidadUnidades ?? 0);
 
   // Factor
-  let f=null;
+  let f=null, motivoFactor='';
   if(prefill?.factor!=null) f = Number(prefill.factor);
-  if(f==null){
-    const t = TARIFAS.find(tt => norm(tt.Comuna)===norm(comuna));
-    f = t ? Number(t.Factor||0) : 0;
+  if(!(f>0)){
+    const r = buscarFactor(comuna);
+    f = r.factor; motivoFactor = r.motivo;
   }
   factor = f;
 
@@ -371,6 +476,7 @@ function onEntidadChange(prefill){
   document.getElementById('cxDir').textContent    = dir;
   document.getElementById('cxComuna').textContent = comuna;
   document.getElementById('cxFactor').textContent = factor || '—';
+  setFactorMsg(motivoFactor);
   document.getElementById('cxUnidades').textContent = nUnidades || '—';
 
   // Título / portada
@@ -392,7 +498,8 @@ function renderHonorarios(){
   if(raw) utmCLP = parseFloat(raw)||0;
 
   if(!(factor>0) || !(utmCLP>0) || !(nUnidades>=0)){
-    tb.innerHTML = `<tr><td colspan="6" class="muted">Ingresa el valor de la UTM para ver los honorarios.</td></tr>`;
+    const faltan=[]; if(!(factor>0)) faltan.push('el factor de la comuna'); if(!(utmCLP>0)) faltan.push('el valor de la UTM');
+    tb.innerHTML = `<tr><td colspan="6" class="muted">Falta ${faltan.join(' y ')} para calcular los honorarios.</td></tr>`;
     document.getElementById('cxUTM').textContent = utmCLP>0 ? etiquetaUTM() : '—';
     updatePrintResumen(0,0,0);
     setPrintTable(0,0,0,nUnidades||0);
