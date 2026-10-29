@@ -14,7 +14,7 @@ Campos: destinatario, edificio (incluya el tipo: "Edificio Armonía"), direccion
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-@page{size:A4;margin:0}
+@page{size:letter;margin:0}
 *{-webkit-print-color-adjust:exact;print-color-adjust:exact;box-sizing:border-box}
 html,body{margin:0}
 body{background:#d9d6cf;font-family:'Inter',Arial,sans-serif;color:#10233f}
@@ -34,14 +34,14 @@ body{background:#d9d6cf;font-family:'Inter',Arial,sans-serif;color:#10233f}
 #panel .acciones{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px}
 #cuenta{color:#d9b25e;font-size:12px}
 #panel .nota{color:#cdd6e4;margin-top:8px}
-.sheet{width:210mm;height:296.8mm;margin:18px auto;background:#fff;overflow:hidden;box-shadow:0 2px 14px rgba(0,0,0,.3);break-after:page;page-break-after:always}
+.sheet{width:215.9mm;height:279.2mm;margin:18px auto;background:#fff;overflow:hidden;box-shadow:0 2px 14px rgba(0,0,0,.3);break-after:page;page-break-after:always}
 @media print{
  #barra{display:none}
  body{background:none}
  .sheet{margin:0;box-shadow:none}
  .sheet:last-child{break-after:auto;page-break-after:auto}
 }
-@media (max-width:900px){.sheet{zoom:.7}#panel .grid{grid-template-columns:1fr 1fr}}
+@media screen and (max-width:900px){.sheet{zoom:.7}#panel .grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -66,7 +66,7 @@ body{background:#d9d6cf;font-family:'Inter',Arial,sans-serif;color:#10233f}
   <label style="margin-top:10px">Varios destinatarios: pegue filas desde Excel o CSV (primera fila con encabezados: destinatario, edificio, direccion, comuna, fecha) o un JSON
    <textarea id="f_lote" placeholder="edificio&#9;direccion&#9;comuna&#10;Edificio Armonía&#9;Villaseca 123&#9;Ñuñoa&#10;Condominio Los Aromos&#9;Av. Grecia 456&#9;Peñalolén"></textarea></label>
   <div class="acciones"><button class="sec" id="btnLote" type="button">Generar una carta por fila</button></div>
-  <div class="nota">Para imprimir en la Epson L4160: papel A4, escala 100 %, márgenes “Ninguno”, activar “Gráficos de fondo” y en el controlador de Epson calidad Alta (o Foto) con papel mate de 90 g o más. Si el controlador ofrece “Sin márgenes”, actívelo para que las franjas azules lleguen al borde; si no, quedará un borde blanco de unos 3 mm.</div>
+  <div class="nota">Para imprimir en la Epson L4160: papel Carta (US Letter, 8,5 × 11 in), escala 100 %, márgenes “Ninguno”, activar “Gráficos de fondo” y en el controlador de Epson calidad Alta (o Foto) con papel mate de 90 g o más. Si el controlador ofrece “Sin márgenes”, actívelo para que las franjas azules lleguen al borde; si no, quedará un borde blanco de unos 3 mm.</div>
  </details>
 </div>
 <main id="hojas">
@@ -202,6 +202,7 @@ else{
  if(hay) ini=[norm(o)];
 }
 poner(ini.length?ini:[norm(BASE)]);
+if(new URLSearchParams(location.search).get("folleto")==="0"){$("chkFolleto").checked=false;render();}
 })();
 </script>
 </body>
