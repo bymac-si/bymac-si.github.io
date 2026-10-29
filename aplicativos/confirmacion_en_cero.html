@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Control de líneas con cantidad destino cero</title>
+<style>
+  :root {
+    --navy:#1A2B48; --accent:#E74E35; --bg:#f4f6fa; --line:#dce2eb;
+    --text:#202938; --muted:#657186; --white:#fff; --green:#16845b;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+  header { background:var(--navy); color:#fff; padding:25px clamp(18px,4vw,48px); border-bottom:4px solid var(--accent); }
+  header h1 { margin:0 0 5px; font-size:clamp(1.35rem,3vw,2rem); letter-spacing:-.02em; }
+  header p { margin:0; color:#d9e1ee; }
+  main { max-width:1500px; margin:24px auto; padding:0 18px 36px; }
+  .panel { background:var(--white); border:1px solid var(--line); border-radius:14px; padding:20px; margin-bottom:18px; box-shadow:0 3px 12px rgba(26,43,72,.045); }
+  .panel h2 { font-size:1.05rem; color:var(--navy); margin:0 0 14px; }
+  .upload-grid { display:grid; grid-template-columns:1fr auto; gap:14px; align-items:end; }
+  label { display:block; font-weight:650; margin-bottom:7px; }
+  input[type=file], input[type=search], select { width:100%; border:1px solid #cbd3df; border-radius:9px; padding:11px 12px; background:#fff; color:var(--text); font:inherit; }
+  input[type=file] { padding:9px; }
+  button { border:0; border-radius:9px; padding:11px 16px; font:inherit; font-weight:700; cursor:pointer; }
+  button:disabled { opacity:.45; cursor:not-allowed; }
+  .primary { background:var(--accent); color:#fff; }
+  .secondary { background:#e8edf5; color:var(--navy); }
+  .actions { display:flex; gap:9px; flex-wrap:wrap; }
+  .note { font-size:.9rem; color:var(--muted); margin:12px 0 0; }
+  .status { margin-top:12px; padding:10px 12px; border-radius:8px; display:none; white-space:pre-line; }
+  .status.info { display:block; background:#edf4ff; color:#214a7c; }
+  .status.error { display:block; background:#fff0ed; color:#9d2c1c; }
+  .status.success { display:block; background:#e9f8f0; color:#126644; }
+  .stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-bottom:18px; }
+  .stat { background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px; }
+  .stat .label { font-size:.83rem; color:var(--muted); margin-bottom:7px; font-weight:650; }
+  .stat .value { font-size:1.8rem; line-height:1.1; font-weight:800; color:var(--navy); }
+  .stat.total .value { color:var(--accent); }
+  .filters { display:grid; grid-template-columns:1fr 1fr 1.5fr; gap:12px; margin-bottom:15px; }
+  .table-wrap { overflow:auto; border:1px solid var(--line); border-radius:10px; }
+  table { width:100%; border-collapse:collapse; background:#fff; min-width:850px; }
+  th,td { text-align:left; padding:11px 12px; border-bottom:1px solid #e8ecf2; vertical-align:top; }
+  th { background:#eef2f8; color:var(--navy); font-size:.82rem; text-transform:uppercase; letter-spacing:.035em; position:sticky; top:0; }
+  tbody tr:hover { background:#f8faff; }
+  tbody tr:last-child td { border-bottom:0; }
+  .pill { display:inline-block; padding:3px 9px; border-radius:20px; font-size:.78rem; font-weight:800; background:#e8edf5; color:var(--navy); white-space:nowrap; }
+  .pill.a { background:#e5f1ff; color:#1d5794; }
+  .pill.b { background:#fff0df; color:#8d4c00; }
+  .pill.c { background:#e6f7ed; color:#17683f; }
+  .zero { color:#b52e20; font-weight:800; }
+  .empty { text-align:center; color:var(--muted); padding:30px 12px; }
+  footer { text-align:center; color:var(--muted); font-size:.83rem; padding:0 16px 25px; }
+  @media(max-width:760px) {
+    .upload-grid { grid-template-columns:1fr; }
+    .stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .filters { grid-template-columns:1fr; }
+  }
+</style>
+
+<style>
+:root {
+  --bg:#f5f5f7; --panel:#fff; --line:#e2e2e8; --ink:#1d1d22;
+  --muted:#6c6c78; --brand:#ed2750; --soft:#fdecef;
+  --green:#15803d; --yellow:#ca8a04; --red:#b42318;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:#131316; --panel:#1c1c21; --line:#2c2c34;
+    --ink:#f2f2f5; --muted:#9b9ba7; --soft:#321c24;
+  }
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif; }
+.app { display:grid; grid-template-columns:200px minmax(0,1fr); min-height:100vh; }
+aside { background:var(--brand); color:#fff; padding:20px 14px; display:flex; flex-direction:column; align-items:center; }
+aside img { display:block; width:155px; max-width:100%; height:auto; margin:5px 0 18px;}
+.side-title { font-size:17px; font-weight:800; text-align:center; }
+.side-sub { font-size:12px; opacity:.9; text-align:center; margin-top:5px; }
+.side-divider { width:80%; height:1px; background:rgba(255,255,255,.45); margin:22px 0 16px; }
+.side-note { font-size:12px; line-height:1.6; text-align:center; }
+.content { min-width:0; }
+header { background:var(--panel); border-bottom:1px solid var(--line); padding:20px clamp(18px,3vw,38px); }
+header h1 { color:var(--ink); margin:0 0 5px; font-size:clamp(1.35rem,2.5vw,1.9rem); letter-spacing:-.025em; }
+header p { color:var(--muted); margin:0; }
+main { max-width:none; margin:0 auto; padding:22px clamp(14px,2.5vw,34px) 28px; }
+.panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:20px; margin-bottom:16px; box-shadow:0 2px 8px rgba(0,0,0,.035); }
+.panel h2 { color:var(--ink); font-size:1.03rem; margin:0 0 15px; }
+input[type=file], input[type=search], select { border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--ink); }
+button { border-radius:8px; transition:filter .15s ease, transform .15s ease; }
+button:hover:not(:disabled) { filter:brightness(.96); }
+.primary { background:var(--brand); color:#fff; }
+.secondary { background:transparent; color:var(--brand); border:1.5px solid var(--brand); }
+.note, footer { color:var(--muted); }
+.stat { background:var(--panel); border-color:var(--line); border-radius:10px; }
+.stat .label { color:var(--muted); }
+.stat .value { color:var(--ink); }
+.stat.total .value { color:var(--brand); }
+.table-wrap { border-color:var(--line); border-radius:8px; background:var(--panel); }
+table { background:var(--panel); font-size:13px; }
+th, td { border-color:var(--line); }
+th { background:var(--soft); color:var(--ink); }
+tbody tr:hover { background:var(--bg); }
+.pill { background:var(--soft); color:var(--brand); }
+.pill.a { background:#e5f1ff; color:#1d5794; }
+.pill.b { background:#fff0df; color:#8d4c00; }
+.pill.c { background:#e6f7ed; color:#17683f; }
+.zero { color:var(--red); }
+.status.info { background:rgba(237,39,80,.08); color:var(--ink); border-left:4px solid var(--brand); }
+.status.error { background:#fff0ed; color:#9d2c1c; }
+.status.success { background:#e9f8f0; color:#126644; }
+footer { padding:0 16px 20px; }
+@media(max-width:760px) {
+  .app { grid-template-columns:1fr; }
+  aside { flex-direction:row; flex-wrap:wrap; justify-content:flex-start; align-items:center; padding:10px 12px; gap:8px; }
+  aside img { width:42px; margin:0 8px 0 0; }
+  .side-title { font-size:14px; }
+  .side-sub,.side-divider,.side-note { display:none; }
+  header { padding:14px 16px; }
+  main { padding:12px 12px 20px; }
+  .panel { padding:15px; }
+}
+@media print {
+  .app { display:block; }
+  aside { display:none!important; }
+  header { padding:0 0 8px; }
+  main { padding:0; }
+  .panel { border:0; box-shadow:none; background:#fff; }
+  body { background:#fff; color:#000; }
+}
+</style>
+
+
+<style>
+/* ===== Reporte (PDF / imagen) — mismo formato que Productividad PKG/Grúas ===== */
+.btn{background:var(--brand);border:1.5px solid var(--brand);border-radius:8px;padding:10px 16px;color:#fff;font-weight:700}
+.btn.gray{background:transparent;color:var(--brand);border:1.5px solid var(--brand)}
+.reportBar{display:flex;justify-content:flex-end;margin:0 0 12px}
+.reportBar .btn{display:inline-flex;align-items:center;gap:8px}
+.rptModal{position:fixed;inset:0;z-index:1000;background:rgba(15,15,20,.62);display:none;align-items:center;justify-content:center;padding:18px}
+.rptModal.open{display:flex}
+.rptDialog{background:var(--panel);color:var(--ink);border-radius:12px;width:min(1100px,100%);max-height:100%;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.rptHead{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+.rptHead h3{margin:0;font-size:16px}
+.rptClose{background:none;border:0;font-size:24px;line-height:1;cursor:pointer;color:var(--muted);padding:2px 8px}
+.rptPreview{flex:1;min-height:180px;overflow:auto;background:var(--bg);padding:14px;text-align:center}
+.rptPreview img{max-width:100%;height:auto;border:1px solid var(--line);background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.rptPreview .loading{padding:50px 0;color:var(--muted)}
+.rptActions{padding:14px 18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.rptActions .sep{flex:1}
+.rptActions .btn{padding:9px 13px;font-size:14px}
+.rptActions .btn.wa{background:#1fa855;border-color:#1fa855;color:#fff}
+.rptToast{padding:0 18px 12px;font-size:13px;color:var(--muted);min-height:20px}
+.rpt{background:#fff;color:#1d1d22;font:14px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;padding:26px 28px 18px;box-sizing:border-box;text-align:left}
+.rpt *{box-sizing:border-box}
+.rpt-top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #ed2750;padding-bottom:10px;margin-bottom:12px;gap:16px}
+.rpt-top .b{font-size:12px;font-weight:700;color:#ed2750}
+.rpt-top h1{font-size:22px;margin:2px 0 0;font-weight:750;color:#1d1d22}
+.rpt-top .d{font-size:12px;color:#6c6c78;text-align:right}
+.rpt-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.rpt-chip{background:#f5f5f7;border:1px solid #e2e2e8;border-radius:999px;padding:4px 11px;font-size:12px;color:#1d1d22}
+.rpt-chip b{font-weight:700}
+.rpt h2{font-size:14px;margin:14px 0 8px;color:#1d1d22}
+.rpt table{border-collapse:collapse;width:100%;min-width:0;font-size:13px;white-space:nowrap;background:#fff}
+.rpt th,.rpt td{border:1px solid #e2e2e8;padding:8px 10px;text-align:right;background:#fff;color:#1d1d22;vertical-align:middle}
+.rpt thead th{background:#f5f5f7;color:#6c6c78;font-weight:700;position:static;text-transform:none;letter-spacing:0;font-size:13px}
+.rpt th:first-child,.rpt td:first-child{text-align:left}
+.rpt td.totalCol{background:#fdecef;font-weight:700}
+.rpt tr.totalRow td{background:#f5f5f7;font-weight:700}
+.rpt td.zero{color:#cbd5e1}
+.rpt td.neg{color:#b52e20;font-weight:800}
+.rpt table.detail td,.rpt table.detail th{text-align:left;white-space:normal}
+.rpt table.detail td.c{text-align:center;white-space:nowrap}
+.rpt table.detail td.neg{text-align:center}
+.rpt .tp{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:800;background:#e8edf5;color:#1d1d22;white-space:nowrap}
+.rpt .tp.a{background:#e5f1ff;color:#1d5794}.rpt .tp.b{background:#fff0df;color:#8d4c00}.rpt .tp.c{background:#e6f7ed;color:#17683f}
+.rpt .scroll{overflow:visible;max-height:none;border:0}
+.rpt-crit{margin-top:14px;border:1px solid #e2e2e8;border-radius:10px;padding:12px 14px;background:#fafafb}
+.rpt-crit h3{margin:0 0 8px;font-size:14px;color:#1d1d22}
+.rpt-crit ul{margin:0;padding-left:18px;font-size:12.5px;color:#1d1d22}
+.rpt-crit li{margin:2px 0}
+.rpt-foot{margin-top:10px;font-size:11px;color:#6c6c78;text-align:right}
+@media(max-width:760px){.rptDialog{max-height:100%}.reportBar{justify-content:stretch}.reportBar .btn{width:100%;justify-content:center}}
+@media print{.noprint,.reportBar,.rptModal{display:none!important}}
+</style>
+
+</head>
+<body><div class="app"><aside class="noprint"><img src="https://www.icbfs.cl/wp-content/uploads/2022/02/logo-icbfs.png" alt="ICB Food Service"><div class="side-title">ICB Food Service</div><div class="side-sub">Productividad operacional</div><div class="side-divider"></div><div class="side-note">Control de líneas<br>PKG VENTA</div></aside><div class="content"><header>
+  <h1>Control de líneas con Ctd.real dest. = 0</h1>
+  <p>Detección de líneas con cantidad real de destino igual a cero, agrupadas por pickeador y turno.</p>
+</header>
+<main>
+  <section class="panel">
+    <h2>1. Cargar archivo(s) Excel</h2>
+    <div class="upload-grid">
+      <div>
+        <label for="files">Selecciona uno o varios archivos (.xlsx, .xls)</label>
+        <input id="files" type="file" accept=".xlsx,.xls,.xlsm" multiple>
+      </div>
+      <div class="actions">
+        <button class="primary" id="processBtn">Procesar Excel</button>
+        <button class="secondary" id="clearBtn" type="button">Limpiar</button>
+      </div>
+    </div>
+    <p class="note">Procesamiento local en este navegador: los archivos no se envían a ningún servidor. Se busca el valor numérico cero explícito; las celdas vacías no se consideran cero. La lectura de Excel requiere conexión a internet para cargar la biblioteca SheetJS.</p>
+    <div id="status" class="status" role="status"></div>
+  </section>
+
+  <section class="stats" aria-label="Resumen">
+    <div class="stat total"><div class="label">Líneas con cantidad cero</div><div class="value" id="totalStat">0</div></div>
+    <div class="stat"><div class="label">Turno A · 08:30–16:30</div><div class="value" id="aStat">0</div></div>
+    <div class="stat"><div class="label">Turno B · 16:30–00:00</div><div class="value" id="bStat">0</div></div>
+    <div class="stat"><div class="label">Turno C · 00:00–08:30</div><div class="value" id="cStat">0</div></div>
+  </section>
+
+  <section class="panel">
+    <h2>2. Resultados</h2>
+    <div class="filters">
+      <div><label for="turnoFilter">Filtrar por turno</label><select id="turnoFilter"><option value="">Todos los turnos</option><option value="A">Turno A</option><option value="B">Turno B</option><option value="C">Turno C</option><option value="SIN TURNO">Sin turno / hora no disponible</option></select></div>
+      <div><label for="pickerFilter">Filtrar por pickeador</label><select id="pickerFilter"><option value="">Todos los pickeadores</option></select></div>
+      <div><label for="searchFilter">Buscar en resultados</label><input id="searchFilter" type="search" placeholder="Nombre, material, actividad, archivo…"></div>
+    </div>
+    <div class="actions" style="margin-bottom:14px">
+      <button class="secondary" id="exportBtn" disabled>Exportar resultados visibles a CSV</button>
+      <span class="note" id="resultCount" style="margin:9px 0 0">Sin datos procesados.</span>
+    </div>
+    <div class="reportBar noprint"><button class="btn" id="btnRpt" disabled>📄 Generar reporte (PDF / imagen)</button></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Pickeador</th><th>Turno</th><th>Fecha</th><th>Hora confirmación</th>
+          <th>Actividad</th><th>Material</th><th>Descripción</th><th>Ctd.real dest.</th><th>Archivo</th>
+        </tr></thead>
+        <tbody id="resultsBody"><tr><td colspan="9" class="empty">Carga un archivo Excel y pulsa “Procesar Excel”.</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<footer>Aplicación autónoma · Los datos se procesan en memoria dentro del navegador.</footer>
+
+<div class="rptModal noprint" id="rptModal" role="dialog" aria-modal="true" aria-label="Reporte">
+<div class="rptDialog">
+<div class="rptHead"><h3 id="rptTitleTxt">Reporte</h3><button class="rptClose" id="rptClose" aria-label="Cerrar">×</button></div>
+<div class="rptPreview" id="rptPreview"><div class="loading">Generando reporte…</div></div>
+<div class="rptToast" id="rptToast"></div>
+<div class="rptActions">
+<button class="btn" id="rptPdf" disabled>⬇ Descargar PDF</button>
+<button class="btn gray" id="rptPng" disabled>⬇ Descargar imagen</button>
+<button class="btn gray" id="rptCopy" disabled>Copiar imagen</button>
+<span class="sep"></span>
+<button class="btn wa" id="rptWa" disabled>WhatsApp</button>
+<button class="btn gray" id="rptMail" disabled>Email</button>
+</div></div></div>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  let allRows = [];
+  const norm = value => String(value ?? '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .trim().toLowerCase().replace(/\s+/g, ' ');
+  const headerAliases = {
+    picker: ['Nombre completo', 'Pickeador', 'Nombre del pickeador', 'Operador'],
+    qty: ['Ctd.real dest.', 'Ctd. real dest.', 'Ctd real dest', 'Cantidad real destino'],
+    date: ['Fecha confirmación', 'Fecha de confirmación', 'Fecha'],
+    time: ['Hora de confirmación', 'Hora confirmación', 'Hora', 'HORA'],
+    activity: ['Nombre Tipo Actividad Bodega', 'Tipo Actividad Bodega', 'Actividad'],
+    material: ['Material', 'Código material', 'Codigo material'],
+    description: ['Texto breve material', 'Descripción material', 'Descripcion material', 'Descripción', 'Texto breve']
+  };
+  function findHeader(headers, aliases) {
+    const normalized = headers.map(norm);
+    for (const alias of aliases) {
+      const idx = normalized.indexOf(norm(alias));
+      if (idx >= 0) return idx;
+    }
+    return -1;
+  }
+  function cellText(v) {
+    if (v === null || v === undefined) return '';
+    if (v instanceof Date && !isNaN(v)) return v.toLocaleString('es-CL');
+    return String(v).trim();
+  }
+  function isExplicitZero(value) {
+    if (value === null || value === undefined || value === '') return false;
+    if (typeof value === 'number') return Number.isFinite(value) && value === 0;
+    if (typeof value === 'string') {
+      const s = value.trim().replace(/\s/g, '');
+      if (!s) return false;
+      // Acepta cero expresado como 0, 0,0, 0.00, etc.; no acepta texto vacío.
+      if (/^[+-]?0+(?:[.,]0+)?$/.test(s)) return true;
+      const parsed = Number(s.replace(',', '.'));
+      return Number.isFinite(parsed) && parsed === 0;
+    }
+    return false;
+  }
+  function parseHour(value) {
+    if (value === null || value === undefined || value === '') return null;
+    if (value instanceof Date && !isNaN(value)) return value.getHours() + value.getMinutes()/60 + value.getSeconds()/3600;
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      if (value >= 0 && value < 1) return value * 24; // hora Excel como fracción del día
+      if (value > 1 && value < 2) return (value % 1) * 24; // serial Excel con fracción horaria
+      if (value >= 0 && value <= 24) return value; // hora decimal
+      return null;
+    }
+    const s = String(value).trim();
+    const m = s.match(/^(\d{1,2})[:.](\d{2})(?:[:.](\d{2}))?$/);
+    if (m) {
+      const h = Number(m[1]), min = Number(m[2]), sec = Number(m[3] || 0);
+      if (h <= 24 && min < 60 && sec < 60) return h + min/60 + sec/3600;
+    }
+    const n = Number(s.replace(',', '.'));
+    if (Number.isFinite(n) && n >= 0 && n <= 24) return n;
+    return null;
+  }
+  function shiftFor(value) {
+    const h = parseHour(value);
+    if (h === null || h < 0 || h >= 24) return 'SIN TURNO';
+    if (h >= 8.5 && h < 16.5) return 'A';
+    if (h >= 16.5) return 'B';
+    return 'C';
+  }
+  function formatDate(v) {
+    if (v === null || v === undefined || v === '') return '';
+    if (v instanceof Date && !isNaN(v)) return v.toLocaleDateString('es-CL');
+    if (typeof v === 'number' && window.XLSX) {
+      const d = XLSX.SSF.parse_date_code(v);
+      if (d && d.y && d.m && d.d) return `${String(d.d).padStart(2,'0')}/${String(d.m).padStart(2,'0')}/${d.y}`;
+    }
+    return cellText(v);
+  }
+  function formatTime(v) {
+    if (v === null || v === undefined || v === '') return '';
+    if (v instanceof Date && !isNaN(v)) return `${String(v.getHours()).padStart(2,'0')}:${String(v.getMinutes()).padStart(2,'0')}`;
+    const h = parseHour(v);
+    if (h !== null) {
+      const totalMinutes = Math.round(h * 60) % (24*60);
+      return `${String(Math.floor(totalMinutes/60)).padStart(2,'0')}:${String(totalMinutes%60).padStart(2,'0')}`;
+    }
+    return cellText(v);
+  }
+  function setStatus(message, type='info') {
+    const el = $('status'); el.textContent = message; el.className = `status ${type}`;
+  }
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function shiftPill(shift) {
+    const cls = shift === 'A' ? 'a' : shift === 'B' ? 'b' : shift === 'C' ? 'c' : '';
+    return `<span class="pill ${cls}">${shift === 'SIN TURNO' ? 'Sin turno' : 'Turno ' + shift}</span>`;
+  }
+  async function processFiles() {
+    const files = Array.from($('files').files || []);
+    if (!files.length) { setStatus('Selecciona al menos un archivo Excel.', 'error'); return; }
+    if (!window.XLSX) { setStatus('No se pudo cargar la biblioteca Excel. Verifica la conexión a internet y vuelve a abrir el archivo.', 'error'); return; }
+    $('processBtn').disabled = true;
+    allRows = [];
+    let totalRead = 0, skipped = [];
+    setStatus('Procesando archivos localmente…', 'info');
+    try {
+      for (const file of files) {
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data, {type:'array', cellDates:true});
+        let fileHadRequiredColumn = false;
+        for (const sheetName of workbook.SheetNames) {
+          const sheet = workbook.Sheets[sheetName];
+          const matrix = XLSX.utils.sheet_to_json(sheet, {header:1, defval:null, raw:true, blankrows:false});
+          if (!matrix.length) continue;
+          // Busca la fila de encabezados entre las primeras 15 filas para tolerar títulos previos.
+          let headerRow = -1, headers = [];
+          const scanLimit = Math.min(matrix.length, 15);
+          for (let r=0; r<scanLimit; r++) {
+            const candidate = (matrix[r] || []).map(v => String(v ?? '').trim());
+            if (findHeader(candidate, headerAliases.qty) >= 0) { headerRow = r; headers = candidate; break; }
+          }
+          if (headerRow < 0) continue;
+          const idx = {};
+          for (const [key, aliases] of Object.entries(headerAliases)) idx[key] = findHeader(headers, aliases);
+          if (idx.qty < 0) continue;
+          fileHadRequiredColumn = true;
+          for (let r=headerRow+1; r<matrix.length; r++) {
+            const row = matrix[r] || [];
+            if (!row.some(v => v !== null && v !== undefined && String(v).trim() !== '')) continue;
+            totalRead++;
+            const rawQty = row[idx.qty];
+            if (!isExplicitZero(rawQty)) continue;
+            const picker = idx.picker >= 0 ? cellText(row[idx.picker]) : '';
+            const timeRaw = idx.time >= 0 ? row[idx.time] : null;
+            const shift = shiftFor(timeRaw);
+            allRows.push({
+              picker: picker || 'Sin nombre',
+              shift,
+              date: idx.date >= 0 ? formatDate(row[idx.date]) : '',
+              time: formatTime(timeRaw),
+              activity: idx.activity >= 0 ? cellText(row[idx.activity]) : '',
+              material: idx.material >= 0 ? cellText(row[idx.material]) : '',
+              description: idx.description >= 0 ? cellText(row[idx.description]) : '',
+              qty: cellText(rawQty),
+              file: file.name,
+              sheet: sheetName,
+              sourceRow: r + 1
+            });
+          }
+        }
+        if (!fileHadRequiredColumn) skipped.push(`${file.name}: no se encontró la columna “Ctd.real dest.”`);
+      }
+      updatePickerOptions();
+      render();
+      const suffix = skipped.length ? '\nArchivos omitidos:\n' + skipped.join('\n') : '';
+      setStatus(`Proceso terminado. Se revisaron ${totalRead} filas con datos y se encontraron ${allRows.length} líneas con cantidad destino igual a cero.${suffix}`, skipped.length ? 'info' : 'success');
+    } catch (err) {
+      console.error(err);
+      setStatus('No fue posible procesar uno de los archivos. Comprueba que sea un Excel válido y que no esté dañado. Detalle: ' + (err?.message || err), 'error');
+    } finally {
+      $('processBtn').disabled = false;
+    }
+  }
+  function updatePickerOptions() {
+    const select = $('pickerFilter'), previous = select.value;
+    const names = [...new Set(allRows.map(r => r.picker))].sort((a,b) => a.localeCompare(b, 'es'));
+    select.innerHTML = '<option value="">Todos los pickeadores</option>' + names.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
+    if (names.includes(previous)) select.value = previous;
+  }
+  function visibleRows() {
+    const shift = $('turnoFilter').value;
+    const picker = $('pickerFilter').value;
+    const query = norm($('searchFilter').value);
+    return allRows.filter(r => {
+      if (shift && r.shift !== shift) return false;
+      if (picker && r.picker !== picker) return false;
+      if (query && !norm([r.picker,r.shift,r.date,r.time,r.activity,r.material,r.description,r.file,r.sheet,r.sourceRow].join(' ')).includes(query)) return false;
+      return true;
+    });
+  }
+  function render() {
+    const rows = visibleRows();
+    $('totalStat').textContent = allRows.length.toLocaleString('es-CL');
+    $('aStat').textContent = allRows.filter(r=>r.shift==='A').length.toLocaleString('es-CL');
+    $('bStat').textContent = allRows.filter(r=>r.shift==='B').length.toLocaleString('es-CL');
+    $('cStat').textContent = allRows.filter(r=>r.shift==='C').length.toLocaleString('es-CL');
+    $('resultCount').textContent = `${rows.length.toLocaleString('es-CL')} de ${allRows.length.toLocaleString('es-CL')} líneas visibles`;
+    $('exportBtn').disabled = rows.length === 0;
+    $('btnRpt').disabled = rows.length === 0;
+    const body = $('resultsBody');
+    if (!rows.length) {
+      body.innerHTML = `<tr><td colspan="9" class="empty">${allRows.length ? 'No hay resultados para los filtros seleccionados.' : 'No se encontraron líneas con Ctd.real dest. igual a cero.'}</td></tr>`;
+      return;
+    }
+    body.innerHTML = rows.map(r => `<tr>
+      <td>${escapeHtml(r.picker)}</td>
+      <td>${shiftPill(r.shift)}</td>
+      <td>${escapeHtml(r.date)}</td>
+      <td>${escapeHtml(r.time)}</td>
+      <td>${escapeHtml(r.activity)}</td>
+      <td>${escapeHtml(r.material)}</td>
+      <td>${escapeHtml(r.description)}</td>
+      <td class="zero">${escapeHtml(r.qty)}</td>
+      <td title="${escapeHtml(r.sheet)} · fila ${r.sourceRow}">${escapeHtml(r.file)}</td>
+    </tr>`).join('');
+  }
+  function exportCsv() {
+    const rows = visibleRows();
+    if (!rows.length) return;
+    const cols = [
+      ['Pickeador','picker'], ['Turno','shift'], ['Fecha','date'], ['Hora confirmación','time'],
+      ['Actividad','activity'], ['Material','material'], ['Descripción','description'],
+      ['Ctd.real dest.','qty'], ['Archivo','file'], ['Hoja','sheet'], ['Fila Excel','sourceRow']
+    ];
+    const quote = v => '"' + String(v ?? '').replace(/"/g,'""') + '"';
+    const csv = '\uFEFF' + [cols.map(c=>quote(c[0])).join(';'), ...rows.map(r=>cols.map(c=>quote(r[c[1]])).join(';'))].join('\r\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'lineas_ctd_real_dest_cero.csv';
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  }
+  function clearAll() {
+    allRows = [];
+    $('files').value = '';
+    $('turnoFilter').value = '';
+    $('pickerFilter').innerHTML = '<option value="">Todos los pickeadores</option>';
+    $('searchFilter').value = '';
+    $('totalStat').textContent = $('aStat').textContent = $('bStat').textContent = $('cStat').textContent = '0';
+    $('resultCount').textContent = 'Sin datos procesados.';
+    $('resultsBody').innerHTML = '<tr><td colspan="9" class="empty">Carga un archivo Excel y pulsa “Procesar Excel”.</td></tr>';
+    $('exportBtn').disabled = true;
+    $('btnRpt').disabled = true;
+    $('status').textContent = ''; $('status').className = 'status';
+  }
+
+  /* ===================== REPORTE PDF / IMAGEN ===================== */
+  const RPT_DETAIL_MAX = 150;
+  const shiftText = v => v === 'A' ? 'Turno A 08:30-16:30' : v === 'B' ? 'Turno B 16:30-00:00' : v === 'C' ? 'Turno C 00:00-08:30' : v === 'SIN TURNO' ? 'Sin turno / hora no disponible' : 'Todos los turnos';
+  const nf = n => Number(n).toLocaleString('es-CL');
+  function specReport() {
+    const rows = visibleRows();
+    const shiftSel = $('turnoFilter').value, pickSel = $('pickerFilter').value, q = $('searchFilter').value.trim();
+    const files = new Set(rows.map(r => r.file));
+    const ctx = [['Turno', shiftText(shiftSel)], ['Pickeador', pickSel || 'Todos']];
+    if (q) ctx.push(['Búsqueda', q]);
+    ctx.push(['Archivos', String(files.size)], ['Líneas con cantidad cero', nf(rows.length)]);
+    // Resumen por pickeador x turno
+    const cols = ['A', 'B', 'C'];
+    if (rows.some(r => r.shift === 'SIN TURNO')) cols.push('SIN TURNO');
+    const map = new Map();
+    rows.forEach(r => { if (!map.has(r.picker)) map.set(r.picker, {A:0,B:0,C:0,'SIN TURNO':0,total:0}); const o = map.get(r.picker); o[r.shift]++; o.total++; });
+    const list = [...map.entries()].sort((a, b) => b[1].total - a[1].total || a[0].localeCompare(b[0], 'es'));
+    const colTot = cols.map(c => rows.filter(r => r.shift === c).length);
+    const head = c => c === 'SIN TURNO' ? 'Sin turno' : 'Turno ' + c;
+    let t = `<h2>Resumen por pickeador y turno</h2><div class="scroll"><table><thead><tr><th>Pickeador</th>${cols.map(c => `<th>${head(c)}</th>`).join('')}<th>Total general</th></tr></thead><tbody>`;
+    for (const [name, o] of list) t += `<tr><td>${escapeHtml(name)}</td>${cols.map(c => `<td class="${o[c] ? '' : 'zero'}">${o[c] ? nf(o[c]) : ''}</td>`).join('')}<td class="totalCol">${nf(o.total)}</td></tr>`;
+    t += `<tr class="totalRow"><td>Total general</td>${colTot.map(v => `<td>${nf(v)}</td>`).join('')}<td>${nf(rows.length)}</td></tr></tbody></table></div>`;
+    // Detalle
+    const shown = rows.slice(0, RPT_DETAIL_MAX);
+    const pill = sh => `<span class="tp ${sh === 'A' ? 'a' : sh === 'B' ? 'b' : sh === 'C' ? 'c' : ''}">${sh === 'SIN TURNO' ? 'Sin turno' : 'Turno ' + sh}</span>`;
+    t += `<h2>Detalle de líneas${rows.length > shown.length ? ` (primeras ${nf(shown.length)} de ${nf(rows.length)})` : ''}</h2><div class="scroll"><table class="detail"><thead><tr><th>Pickeador</th><th>Turno</th><th>Fecha</th><th>Hora confirmación</th><th>Actividad</th><th>Material</th><th>Descripción</th><th>Ctd.real dest.</th><th>Archivo</th></tr></thead><tbody>`;
+    for (const r of shown) t += `<tr><td>${escapeHtml(r.picker)}</td><td class="c">${pill(r.shift)}</td><td class="c">${escapeHtml(r.date)}</td><td class="c">${escapeHtml(r.time)}</td><td>${escapeHtml(r.activity)}</td><td>${escapeHtml(r.material)}</td><td>${escapeHtml(r.description)}</td><td class="neg">${escapeHtml(r.qty)}</td><td>${escapeHtml(r.file)}</td></tr>`;
+    t += `</tbody></table></div>`;
+    if (rows.length > shown.length) t += `<div class="rpt-foot" style="text-align:left">El detalle se limita a ${nf(RPT_DETAIL_MAX)} líneas para que el reporte sea legible. El resumen incluye todas las líneas visibles; usa “Exportar resultados visibles a CSV” para el listado completo.</div>`;
+    const crit = `<div class="rpt-crit"><h3>Criterios del control</h3><ul>
+      <li><b>Detección:</b> se listan las líneas cuya <b>Ctd.real dest.</b> es el valor numérico cero explícito; las celdas vacías no se consideran cero.</li>
+      <li><b>Turno</b> según la hora de confirmación: <b>A</b> 08:30–16:30 · <b>B</b> 16:30–00:00 · <b>C</b> 00:00–08:30. Sin hora válida queda como “Sin turno”.</li>
+      <li><b>Agrupación:</b> por pickeador (columna Nombre completo) y turno, sobre las líneas visibles con los filtros aplicados (${nf(rows.length)} de ${nf(allRows.length)} líneas, ${nf(list.length)} pickeador(es)).</li></ul></div>`;
+    const base = ['Reporte', 'CantidadCero', shiftSel ? (shiftSel === 'SIN TURNO' ? 'SinTurno' : 'Turno' + shiftSel) : 'TodosTurnos'];
+    if (pickSel) base.push(pickSel);
+    return {title: 'Control de líneas con Ctd.real dest. = 0', ctx, table: t, crit,
+      width: cols.length > 3 ? 1450 : 1400, base,
+      shareText: `Reporte control de líneas con Ctd.real dest. = 0 · ${shiftText(shiftSel)} · ${pickSel || 'Todos los pickeadores'} · ${nf(rows.length)} línea(s)`};
+  }
+  function rptHTML(s) {
+    const now = new Date().toLocaleString('es-CL', {dateStyle: 'medium', timeStyle: 'short'});
+    return `<div class="rpt" style="width:${s.width}px"><div class="rpt-top"><div><div class="b">ICB Food Service</div><h1>${escapeHtml(s.title)}</h1></div><div class="d">Generado: ${escapeHtml(now)}</div></div>
+    <div class="rpt-chips">${s.ctx.map(([k, v]) => `<span class="rpt-chip">${escapeHtml(k)}: <b>${escapeHtml(v)}</b></span>`).join('')}</div>${s.table}${s.crit}</div>`;
+  }
+  let rptState = null;
+  const rptToast = t => { $('rptToast').textContent = t || ''; };
+  const rptButtons = on => ['rptPdf', 'rptPng', 'rptCopy', 'rptWa', 'rptMail'].forEach(id => { $(id).disabled = !on; });
+  function rptClose() { $('rptModal').classList.remove('open'); if (rptState?.url) URL.revokeObjectURL(rptState.url); rptState = null; }
+  function rptDownload(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+  async function openReport() {
+    $('rptModal').classList.add('open'); rptButtons(false); rptToast('');
+    $('rptPreview').innerHTML = '<div class="loading">Generando reporte…</div>';
+    if (!window.html2canvas || !window.jspdf) { $('rptPreview').innerHTML = '<div class="loading">No se pudieron cargar las librerías de reporte (html2canvas / jsPDF). Revisa la conexión a internet y recarga la página.</div>'; return; }
+    let host;
+    try {
+      const spec = specReport();
+      $('rptTitleTxt').textContent = 'Reporte · ' + spec.ctx.map(c => c[1]).slice(0, 3).join(' · ');
+      host = document.createElement('div'); host.style.cssText = 'position:fixed;left:0;top:0;z-index:-1;pointer-events:none'; host.innerHTML = rptHTML(spec); document.body.appendChild(host);
+      if (document.fonts && document.fonts.ready) await document.fonts.ready;
+      const node = host.firstElementChild, scale = node.offsetHeight > 5000 ? 1.5 : 2;
+      const canvas = await html2canvas(node, {scale, backgroundColor: '#ffffff', useCORS: true, logging: false});
+      host.remove(); host = null;
+      const png = await new Promise(r => canvas.toBlob(r, 'image/png'));
+      const w = canvas.width / scale, h = canvas.height / scale;
+      const pdf = new window.jspdf.jsPDF({orientation: w > h ? 'l' : 'p', unit: 'px', format: [w, h], hotfixes: ['px_scaling'], compress: true});
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, w, h);
+      const pdfBlob = pdf.output('blob');
+      const base = spec.base.join('_').replace(/[^\w\-]+/g, '_') + '_' + new Date().toISOString().slice(0, 10);
+      if (rptState?.url) URL.revokeObjectURL(rptState.url);
+      rptState = {spec, png, pdfBlob, base, url: URL.createObjectURL(png)};
+      $('rptPreview').innerHTML = `<img src="${rptState.url}" alt="Vista previa del reporte">`;
+      rptButtons(true);
+    } catch (e) {
+      if (host) host.remove();
+      $('rptPreview').innerHTML = '<div class="loading">Error al generar el reporte: ' + escapeHtml(e.message || e) + '</div>';
+    }
+  }
+  const rptFile = kind => kind === 'pdf' ? new File([rptState.pdfBlob], rptState.base + '.pdf', {type: 'application/pdf'}) : new File([rptState.png], rptState.base + '.png', {type: 'image/png'});
+  async function rptShare(kind, fallbackUrl, label) {
+    if (!rptState) return;
+    const file = rptFile(kind), s = rptState.spec;
+    if (navigator.canShare && navigator.canShare({files: [file]})) {
+      try { await navigator.share({files: [file], title: s.title, text: s.shareText}); rptToast(''); return; }
+      catch (e) { if (e && e.name === 'AbortError') return; }
+    }
+    // Sin compartir nativo (típico en PC): descarga el archivo y abre el destino con el texto listo
+    rptDownload(file, file.name);
+    window.open(fallbackUrl(s.shareText), '_blank', 'noopener');
+    rptToast(`Se descargó ${file.name}. Adjúntalo manualmente en ${label} (en WhatsApp Web también puedes usar "Copiar imagen" y pegar con Ctrl+V).`);
+  }
+  $('btnRpt').addEventListener('click', openReport);
+  $('rptClose').onclick = rptClose;
+  $('rptModal').addEventListener('click', e => { if (e.target.id === 'rptModal') rptClose(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('rptModal').classList.contains('open')) rptClose(); });
+  $('rptPdf').onclick = () => rptState && rptDownload(rptState.pdfBlob, rptState.base + '.pdf');
+  $('rptPng').onclick = () => rptState && rptDownload(rptState.png, rptState.base + '.png');
+  $('rptCopy').onclick = async () => {
+    try { await navigator.clipboard.write([new ClipboardItem({'image/png': rptState.png})]); rptToast('Imagen copiada. Pégala (Ctrl+V) en WhatsApp, correo u otra app.'); }
+    catch (e) { rptToast('Tu navegador no permite copiar imágenes. Usa "Descargar imagen".'); }
+  };
+  $('rptWa').onclick = () => rptShare('png', t => 'https://wa.me/?text=' + encodeURIComponent(t), 'WhatsApp');
+  $('rptMail').onclick = () => rptShare('pdf', t => 'mailto:?subject=' + encodeURIComponent(t) + '&body=' + encodeURIComponent(t + '\n\n(Adjunta el PDF descargado)'), 'el correo');
+
+  $('processBtn').addEventListener('click', processFiles);
+  $('clearBtn').addEventListener('click', clearAll);
+  $('exportBtn').addEventListener('click', exportCsv);
+  ['turnoFilter','pickerFilter','searchFilter'].forEach(id => $(id).addEventListener('input', render));
+})();
+</script>
+</body>
+</html>
