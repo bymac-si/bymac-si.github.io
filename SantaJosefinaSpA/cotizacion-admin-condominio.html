@@ -299,7 +299,7 @@ function buscarFactor(comuna){
 function setFactorMsg(t){ const el=document.getElementById('factorMsg'); if(el) el.textContent=t||''; }
 
 /* ===== UTM automática: Banco Central de Chile (vía mindicador.cl) ===== */
-const UTM_FUENTES = ['https://mindicador.cl/api/utm','https://www.mindicador.cl/api/utm'];
+const UTM_FUENTES = ['https://valor-utm.cl/','https://contable.app/herramientas/calculadora_utm','https://www.utmhoy.cl/'];
 function fetchConTimeout(url, ms=7000){
   const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(), ms);
   return fetch(url,{signal:ctl.signal, cache:'no-store'}).finally(()=>clearTimeout(t));
