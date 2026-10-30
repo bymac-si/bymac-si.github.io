@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rotación de cámaras · ICB Food Service</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+:root{--bg:#f5f5f7;--panel:#fff;--line:#e2e2e8;--ink:#1d1d22;--muted:#6c6c78;--brand:#ed2750;--soft:#fdecef;box-sizing:border-box}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#131316;--panel:#1c1c21;--line:#2c2c34;--ink:#f2f2f5;--muted:#9b9ba7;--soft:#321c24}}
+:root[data-theme="dark"]{--bg:#131316;--panel:#1c1c21;--line:#2c2c34;--ink:#f2f2f5;--muted:#9b9ba7;--soft:#321c24}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.app{display:grid;grid-template-columns:200px minmax(0,1fr);min-height:100vh}
+aside{background:var(--brand);color:#fff;padding:20px 14px;display:flex;flex-direction:column;align-items:center}
+aside img{display:block;width:155px;max-width:100%;height:auto;margin:5px 0 18px}
+.side-title{font-size:17px;font-weight:800;text-align:center}.side-sub{font-size:12px;opacity:.9;text-align:center;margin-top:5px}
+.side-divider{width:80%;height:1px;background:rgba(255,255,255,.45);margin:22px 0 16px}.side-note{font-size:12px;line-height:1.6;text-align:center}
+.content{min-width:0}
+header{background:var(--panel);border-bottom:1px solid var(--line);padding:20px clamp(18px,3vw,38px)}
+header h1{margin:0 0 5px;font-size:clamp(1.35rem,2.5vw,1.9rem);letter-spacing:-.025em}header p{margin:0;color:var(--muted)}
+main{padding:22px clamp(14px,2.5vw,34px) 18px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.035)}
+h2{font-size:1.03rem;margin:0 0 15px}
+label{margin-right:16px;display:inline-block;margin-bottom:8px;font-weight:600}
+input,select,textarea{font:inherit;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);padding:8px 10px}
+input[type=number]{width:58px}
+button{font:inherit;border:0;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer;background:var(--brand);color:#fff;transition:filter .15s}button:hover{filter:brightness(.96)}
+button.s{background:transparent;color:var(--brand);border:1.5px solid var(--brand);padding:3px 9px;font-weight:600}
+.secondary{background:transparent;color:var(--brand);border:1.5px solid var(--brand)}
+.pr{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--line)}.pr b{flex:1 1 260px;font-weight:600}
+.ch{background:transparent;color:var(--ink);border:1px solid var(--line);padding:3px 9px;border-radius:6px;font-weight:600}.ch.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.ws{overflow-x:auto;padding-bottom:10px}
+.letter{position:relative;width:816px;height:1056px;margin:0 auto;background:#fff;border:1px solid var(--line);box-shadow:0 2px 10px rgba(0,0,0,.12);overflow:hidden;flex:none}
+.sheet{position:absolute;top:0;left:0;width:1020px;transform-origin:top left;background:#fff;color:#002d82;font-family:"DejaVu Sans Condensed",Arial Narrow,Arial,sans-serif;padding:10px}
+
+
+.hd{background:#002878;border-radius:14px;color:#fff;display:flex;align-items:center;gap:14px;padding:14px 20px;text-align:center}
+.hd img{height:132px;border-radius:4px}.hd div{flex:1}.hd h1{font-size:42px;margin:0}.hd h3{font-size:25px;margin:4px 0}.hd p{margin:3px 0;font-size:15px;color:#c8e1ff}
+.sp{background:#e1f1fc;border-radius:10px;text-align:center;font-weight:bold;font-size:18px;padding:9px;margin:10px 0}
+.g3{display:grid;grid-template-columns:120px 340px 1fr}
+.th>div{color:#fff;padding:8px 12px;font-weight:bold;font-size:20px}.th small{display:block;font-weight:normal;font-size:12px}
+.r>div{padding:10px 12px;border-bottom:1px solid #78beeb;border-left:1px solid #78beeb;font-size:13.5px;font-weight:bold;line-height:1.55}
+.r:nth-child(odd)>div{background:#e1f1fc}.r:nth-child(even)>div{background:#cee6f8}
+.r>div:first-child{text-align:center;border-left:0;font-size:19px;display:flex;flex-direction:column;justify-content:center}.r small{font-size:11px;font-weight:normal}
+i{font-style:normal;font-size:10.5px;color:#0078c8;display:inline-block;width:56px}
+.cl{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.bx{background:#e1f1fc;border-radius:12px;margin-top:10px;overflow:hidden;font-size:13.5px;font-weight:bold}.bx>h4{margin:0;background:#002878;color:#fff;padding:8px 14px;font-size:15px}
+.bx .in{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;padding:10px 14px}.bx h5{margin:0 0 3px;color:#0078c8;font-size:15px}
+.bt{display:grid;grid-template-columns:120px 1fr 1fr;font-size:12.5px}.bt>div{padding:4px 12px}.bt .h{background:#006ec8;color:#fff}
+.nt{font-size:12px;font-weight:normal;padding:8px 14px}
+footer{text-align:center;color:var(--muted);font-size:13px;padding:0 16px 20px}
+@media(max-width:760px){.app{grid-template-columns:1fr}aside{flex-direction:row;flex-wrap:wrap;justify-content:flex-start;padding:10px 12px;gap:8px}aside img{width:42px;margin:0 8px 0 0}.side-title{font-size:14px}.side-sub,.side-divider,.side-note{display:none}header{padding:14px 16px}main{padding:12px}.panel{padding:15px}}
+@media print{@page{size:letter portrait;margin:0}body{background:#fff}aside,header,.panel,footer{display:none!important}.app{display:block}main{padding:0}.ws{overflow:visible;padding:0}.letter{border:0;box-shadow:none;margin:0}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body><div class="app"><aside><img id="lg" alt="ICB Food Service"><div class="side-title">ICB Food Service</div><div class="side-sub">Productividad operacional</div><div class="side-divider"></div><div class="side-note">Rotación de cámaras<br>Turnos mañana · tarde · noche</div></aside><div class="content"><header><h1>Rotación de cámaras</h1><p>Sube el PDF de equipos, elige el turno y genera la infografía lista para imprimir en tamaño carta.</p></header><main>
+
+<div class="panel"><h2>1. Subir PDF original (Equipo Semana … CAMARA)</h2>
+<input type="file" id="f" accept="application/pdf"> <span id="st"></span>
+<details style="margin-top:8px"><summary>¿No lee el PDF? Pegar su texto</summary><textarea id="tx" rows="4" style="width:100%"></textarea><button class="s" id="bp">Usar texto</button></details></div>
+<div class="panel" id="c2" hidden><h2>2. Turno y criterios</h2>
+<label>Turno <select id="sh"><option>Mañana</option><option>Tarde</option><option>Noche</option></select></label>
+<label>Pickers en frío (L–V) <input type="number" id="pf" min="0"></label>
+<label>Pickers en frío (sáb) <input type="number" id="ps" min="0"></label>
+<label>Grueros en frío <input type="number" id="gf" min="0"></label>
+<label><input type="checkbox" id="br"> Break y almuerzo (2 grupos)</label>
+<label><input type="checkbox" id="sb"> Sábado en cuadro aparte</label>
+<p style="margin:4px 0;font-size:13px">El resto del personal queda en congelados. Si hay 2 o más disponibles, siempre queda al menos 1 en congelados.</p>
+<h2 style="margin-top:10px">Personal (activa o quita días, elimina o agrega)</h2><div id="pl"></div>
+<div style="margin-top:8px"><input id="an" placeholder="Nombre completo"> <select id="ar"><option value="G">Gruero</option><option value="P">Picker</option></select> <button class="s" id="aa">Agregar</button></div>
+<p style="margin-top:12px"><button class="primary" id="go">Generar infografía</button> <button class="secondary" id="pt">Imprimir / guardar PDF</button></p></div>
+<div class="ws"><div class="letter" id="letter" hidden><div class="sheet" id="sheet"></div></div></div></main><footer>ICB Food Service · Rotación de cámaras</footer></div></div>
+<script>
+function parsePdfText(raw){
+ const DI={lunes:1,martes:2,miércoles:3,jueves:4,viernes:5,sábado:6},out={};
+ let t=raw.replace(/ICBFS Producción[^]*?Generado:\s*[\d-]+/g,' ').replace(/\d{1,2}\/\d{1,2}\/\d{2,4},\s*[\d:]+\s*[ap]\.\s?m\.\s*Equipo Semana \d+\s*—\s*CAMARA/g,' ').replace(/blob:\S+\s+\d+\/\d+/g,' ').replace(/NOMBRE\s+TURNO/g,' ').replace(/\s+/g,' ');
+ t.split(/(?=CAMARA\s+Jornada\s+(?:Mañana|Tarde|Noche))/).forEach(sec=>{
+  const h=sec.match(/Jornada\s+(Mañana|Tarde|Noche)/); if(!h)return;
+  const w=sec.match(/Semana\s+(\d+)\s*·\s*(\d\d)\/(\d\d)\/(\d{4})/);
+  const o=out[h[1]]||(out[h[1]]={week:w?w[1]:'',start:w?[+w[4],+w[3],+w[2]]:null,sup:[],ppl:[]});
+  const rs=[...sec.matchAll(/(Supervisor|Gruero|Operario)\s+\d+\s/g)];
+  rs.forEach((m,i)=>{
+   const seg=sec.slice(m.index+m[0].length,i+1<rs.length?rs[i+1].index:undefined);
+   for(const e of seg.matchAll(/([^.]*?)\s*Turno (?:Mañana|Tarde|Noche) de (\S+) a (\S+?)\.\s*[^.]{0,120}\./g)){
+    const n=e[1].trim(),a=DI[e[2].toLowerCase()],b=DI[e[3].toLowerCase()]; if(!n||!a||!b)continue;
+    if(m[1]=='Supervisor')o.sup.push(n); else {const d=[];for(let x=a;x<=b;x++)d.push(x);o.ppl.push({n,r:m[1]=='Gruero'?'G':'P',d})}
+   }});
+ });
+ return out;
+}
+
+const $=s=>document.querySelector(s),DN=['LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO'],MS=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'],CF={Mañana:[3,1,2,1,1],Tarde:[1,1,1,0,0],Noche:[2,1,1,0,0]},LG='data:image/png;base64,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';
+let D={},P=[];$('#lg').src=LG;
+try{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'}catch(e){}
+async function readPdf(file){const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;let t='';for(let i=1;i<=pdf.numPages;i++){const c=await(await pdf.getPage(i)).getTextContent();t+=c.items.map(x=>x.str+(x.hasEOL?'\n':' ')).join('')+'\n'}return t}
+function load(t){D=parsePdfText(t);const k=Object.keys(D);if(!k.length){$('#st').textContent='No se encontraron turnos en el texto.';return}$('#st').textContent='Turnos detectados: '+k.join(', ');$('#c2').hidden=false;if(!D[$('#sh').value])$('#sh').value=k[0];setSh()}
+$('#f').onchange=async e=>{const f=e.target.files[0];if(!f)return;$('#st').textContent='Leyendo…';try{load(await readPdf(f))}catch(x){$('#st').textContent='No se pudo leer el PDF. Pega su texto abajo.';$('details').open=true}};
+$('#bp').onclick=()=>load($('#tx').value);
+function setSh(){const s=$('#sh').value,c=CF[s];$('#pf').value=c[0];$('#ps').value=c[1];$('#gf').value=c[2];$('#br').checked=!!c[3];$('#sb').checked=!!c[4];P=(D[s]?D[s].ppl:[]).map(p=>({...p,d:[...p.d]}));pl();$('#letter').hidden=true}
+$('#sh').onchange=setSh;
+function pl(){$('#pl').innerHTML=P.map((p,i)=>`<div class="pr"><b>${p.n} · ${p.r=='G'?'Gruero':'Picker'}</b>${[1,2,3,4,5,6].map(d=>`<button class="ch ${p.d.includes(d)?'on':''}" data-i="${i}" data-d="${d}">${'LMXJVS'[d-1]}</button>`).join('')}<button class="s" data-x="${i}">✕</button></div>`).join('')}
+$('#pl').onclick=e=>{const b=e.target;if(b.dataset.d){const p=P[b.dataset.i],d=+b.dataset.d;p.d=p.d.includes(d)?p.d.filter(x=>x!=d):[...p.d,d];pl()}else if(b.dataset.x){P.splice(b.dataset.x,1);pl()}};
+$('#aa').onclick=()=>{const n=$('#an').value.trim();if(!n)return;P.push({n,r:$('#ar').value,d:[1,2,3,4,5]});$('#an').value='';pl()};
+$('#pt').onclick=()=>window.print();
+function build(){const pf=+$('#pf').value,ps=+$('#ps').value,gf=+$('#gf').value,cnt={},last={},res=[];P.forEach(p=>{cnt[p.n]=0;last[p.n]=-9});
+ for(let d=1;d<=6;d++){const av=P.filter(p=>p.d.includes(d));if(!av.length)continue;const pk=av.filter(p=>p.r=='P'),gr=av.filter(p=>p.r=='G');
+  const pick=(a,k)=>{const s=[...a].sort((x,y)=>cnt[x.n]-cnt[y.n]||last[x.n]-last[y.n]||P.indexOf(x)-P.indexOf(y)).slice(0,k);s.forEach(p=>{cnt[p.n]++;last[p.n]=d});return s};
+  const kp=pk.length<2?pk.length:Math.min(d==6?ps:pf,pk.length-1),kg=gr.length<2?gr.length:Math.min(gf,gr.length-1),fg=pick(gr,kg),fp=pick(pk,kp);
+  res.push({d,fg,fp,cg:gr.filter(x=>!fg.includes(x)),cp:pk.filter(x=>!fp.includes(x))})}
+ return{res,cnt}}
+function groups(res){const L=P.filter(p=>[1,2,3,4,5].filter(x=>p.d.includes(x)).length>=4);let best=null,bs=1e9,s=7;const rn=()=>(s=s*16807%2147483647)/2147483647;
+ for(let t=0;t<4000;t++){const g={};['G','P'].forEach(r=>L.filter(p=>p.r==r).map(p=>[rn(),p]).sort((a,b)=>a[0]-b[0]).forEach((x,i)=>g[x[1].n]=i%2));let sc=0;
+  res.forEach(r=>{if(r.d>5)return;[[...r.fg,...r.fp],[...r.cg,...r.cp]].forEach(M=>{if(new Set(M.filter(p=>g[p.n]!==undefined).map(p=>g[p.n])).size<2)sc+=10})});
+  if(sc<bs){bs=sc;best=g}}
+ return[L.filter(p=>best[p.n]==0),L.filter(p=>best[p.n]==1)]}
+const cell=(g,p,two)=>g.map(x=>`<div><i>GRUERO</i>${x.n}</div>`).join('')+(two?`<div class="cl">${p.map(x=>`<div>• ${x.n}</div>`).join('')}</div>`:p.map(x=>`<div><i>PICKER</i>${x.n}</div>`).join(''));
+$('#go').onclick=()=>{const s=$('#sh').value,o=D[s]||{},{res,cnt}=build(),sb=$('#sb').checked,st=o.start?new Date(o.start[0],o.start[1]-1,o.start[2]):null,
+ dt=d=>{if(!st)return'';const x=new Date(st);x.setDate(x.getDate()+d-1);return x.getDate()+' '+MS[x.getMonth()]},
+ rng=st?`DEL ${dt(1)} AL ${dt(6)}`:'',rows=res.filter(r=>!(sb&&r.d==6)).map(r=>`<div class="g3 r"><div>${DN[r.d-1]}<small>${dt(r.d)}</small></div><div>${cell(r.fg,r.fp)}</div><div>${cell(r.cg,r.cp,1)}</div></div>`).join('');
+ let h=`<div class="hd"><img src="${LG}" alt="ICB Food Service"><div><h1>ROTACIÓN DE CÁMARAS</h1><h3>TURNO ${s.toUpperCase()}${o.week?' · SEMANA '+o.week:''}</h3><p>${rng}${rng?' · ':''}${$('#pf').value} PICKEADORES Y ${$('#gf').value} GRUERO(S) EN FRÍO · RESTO EN CONGELADOS</p></div></div>`;
+ if(o.sup&&o.sup.length)h+=`<div class="sp">SUPERVISOR: ${o.sup.join(' / ')}</div>`;
+ h+=`<div class="g3 th"><div style="background:#002878">DÍA</div><div style="background:#0096e6">CÁMARA DE FRÍO</div><div style="background:#006ec8">CÁMARA DE CONGELADOS</div></div>${rows}`;
+ const sr=res.find(r=>r.d==6);
+ if(sb&&sr)h+=`<div class="bx"><h4>SÁBADO ${dt(6)} · SOLO PERSONAL ASIGNADO</h4><div class="in"><div><h5>CÁMARA DE FRÍO</h5>${cell(sr.fg,sr.fp)}</div><div><h5>CÁMARA DE CONGELADOS</h5>${cell(sr.cg,sr.cp)}</div></div></div>`;
+ if($('#br').checked){const[a,b]=groups(res),E='Break 9:30 a 10:00 · Almuerzo 12:00 a 13:00',T='Break 10:00 a 10:30 · Almuerzo 13:00 a 14:00',nm=g=>g.map(p=>`<div>${p.n}${p.r=='G'?' (gruero)':''}</div>`).join('');
+  h+=`<div class="bx"><h4>BREAK Y ALMUERZO · LUNES A VIERNES · GRUPOS FIJOS, HORARIO ALTERNADO CADA DÍA</h4><div class="in"><div><h5>GRUPO 1</h5>${nm(a)}</div><div><h5>GRUPO 2</h5>${nm(b)}</div></div><div class="bt"><div class="h">DÍA</div><div class="h">GRUPO 1</div><div class="h">GRUPO 2</div>${res.filter(r=>r.d<6).map((r,i)=>`<div>${DN[r.d-1]} ${dt(r.d)}</div><div>${i%2?T:E}</div><div>${i%2?E:T}</div>`).join('')}</div></div>`}
+ const np=P.filter(p=>p.r=='P'&&!cnt[p.n]).map(p=>p.n);
+ h+=`<div class="bx"><div class="nt">${np.length?'Pickeadores sin pasada por frío esta semana (prioridad la próxima): '+np.join(', ')+'.':'Todos los pickeadores pasan por cámara de frío durante la semana.'} Los grueros rotan entre frío y congelados.</div></div>`;
+ const e=$('#sheet');e.innerHTML=h;$('#letter').hidden=false;e.style.transform='none';const H=e.offsetHeight,k=Math.min(780/1020,1020/H);e.style.transform=`scale(${k})`;e.style.left=(816-1020*k)/2+'px';e.style.top='18px';$('#letter').scrollIntoView({behavior:'smooth'})};
+</script></body></html>
