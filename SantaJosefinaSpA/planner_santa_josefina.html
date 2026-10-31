@@ -114,7 +114,7 @@ dialog::backdrop{background:#10233f99}
 <script>
 const TIPOS={visita:['Visita inspectiva','#2f7d6d'],comite:['Reunión de comité','#2d5f9a'],asamblea_o:['Asamblea ordinaria','#10233f'],asamblea_e:['Asamblea extraordinaria','#a4472f'],mant:['Mantención / proveedor','#b7791f'],gc:['Gastos comunes / cobranza','#6b4c9a'],otro:['Otro','#667085']};
 const $=id=>document.getElementById(id),TABLA='Planner',CK='sj_planner_cache',LEGACY='sj_planner_v1';
-let items=[];
+let items=[],view='cal',cur=new Date(),editId=null;cur.setDate(1);
 const pad=n=>String(n).padStart(2,'0'),ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 const today=()=>ymd(new Date()),esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const tipoKey=v=>Object.keys(TIPOS).find(k=>k==v||TIPOS[k][0]==v)||'otro';
