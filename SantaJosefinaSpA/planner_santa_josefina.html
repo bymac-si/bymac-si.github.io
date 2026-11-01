@@ -10,7 +10,9 @@
     <!-- Si style.css no está en assets/css/, prueba rutas habituales. Cuando sepas la ruta real, deja solo el href correcto y borra el onerror. -->
     <link rel="stylesheet" href="assets/css/style.css"
         onerror="var a=['css/style.css','assets/style.css','style.css','assets/css/styles.css'],n=(+this.dataset.n||0);if(n<a.length){this.dataset.n=n+1;this.href=a[n]}">
-</head>
+    <script src="assets/js/api_cliente.js"></script>
+    <script src="assets/js/app.js"></script>
+    </head>
 
 <body class="planner">
     <div id="header"></div>
@@ -84,11 +86,10 @@
         </div>
     </dialog>
     <div id="ficha"></div>
-    
+
     <div id="footer"></div>
 
-    <script src="assets/js/api_cliente.js"></script>
-    <script src="assets/js/app.js"></script>
+
     <script>
         const TIPOS = { visita: ['Visita inspectiva', '#2f7d6d'], comite: ['Reunión de comité', '#2d5f9a'], asamblea_o: ['Asamblea ordinaria', '#10233f'], asamblea_e: ['Asamblea extraordinaria', '#a4472f'], mant: ['Mantención / proveedor', '#b7791f'], gc: ['Gastos comunes / cobranza', '#6b4c9a'], otro: ['Otro', '#667085'] };
         const $ = id => document.getElementById(id), TABLA = 'Planner', CK = 'sj_planner_cache', LEGACY = 'sj_planner_v1';
