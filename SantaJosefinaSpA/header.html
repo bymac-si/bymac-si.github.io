@@ -32,7 +32,10 @@
     transition: transform 0.2s;
     display: block;
   }
-  .logo-img:hover { transform: scale(1.04); }
+
+  .logo-img:hover {
+    transform: scale(1.04);
+  }
 
   .nav-container {
     display: flex;
@@ -56,9 +59,20 @@
     white-space: nowrap;
     cursor: pointer;
   }
-  .nav-link:hover { color: #ffffff; background-color: rgba(255, 255, 255, 0.12); }
-  .nav-link i { font-size: 14px; }
-  .nav-link.active { color: var(--sj-navy); background-color: var(--sj-gold); }
+
+  .nav-link:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.12);
+  }
+
+  .nav-link i {
+    font-size: 14px;
+  }
+
+  .nav-link.active {
+    color: var(--sj-navy);
+    background-color: var(--sj-gold);
+  }
 
   .nav-dropdown {
     position: relative;
@@ -86,11 +100,16 @@
   }
 
   @media (min-width: 1101px) {
+
     .nav-dropdown:hover .dropdown-menu,
-    .nav-dropdown:focus-within .dropdown-menu { display: block; }
+    .nav-dropdown:focus-within .dropdown-menu {
+      display: block;
+    }
   }
 
-  .dropdown-menu.active { display: block; }
+  .dropdown-menu.active {
+    display: block;
+  }
 
   .dropdown-menu li a {
     display: flex;
@@ -103,25 +122,31 @@
     border-left: 3px solid transparent;
     transition: background 0.2s, padding-left 0.2s;
   }
+
   .dropdown-menu li a:hover {
     background-color: var(--sj-bg);
     color: var(--sj-navy);
     border-left-color: var(--sj-gold);
     padding-left: 20px;
   }
+
   .dropdown-menu li a.active {
     color: var(--sj-navy) !important;
     font-weight: 700 !important;
     border-left-color: var(--sj-gold);
     background-color: #fbf6e8;
   }
+
   .dropdown-menu li a i {
     width: 18px;
     text-align: center;
     color: #b8923a;
   }
 
-  .dropdown-submenu { position: relative; }
+  .dropdown-submenu {
+    position: relative;
+  }
+
   .dropdown-submenu .submenu {
     display: none;
     position: absolute;
@@ -139,10 +164,16 @@
   }
 
   @media (min-width: 1101px) {
-    .dropdown-submenu:hover > .submenu,
-    .dropdown-submenu:focus-within > .submenu { display: block; }
+
+    .dropdown-submenu:hover>.submenu,
+    .dropdown-submenu:focus-within>.submenu {
+      display: block;
+    }
   }
-  .dropdown-submenu .submenu.active { display: block; }
+
+  .dropdown-submenu .submenu.active {
+    display: block;
+  }
 
   .user-actions {
     display: flex;
@@ -153,7 +184,12 @@
     border-left: 1px solid rgba(255, 255, 255, 0.22);
     height: 40px;
   }
-  .user-info { text-align: right; line-height: 1.2; }
+
+  .user-info {
+    text-align: right;
+    line-height: 1.2;
+  }
+
   .user-name {
     font-family: Georgia, "Times New Roman", serif;
     font-weight: 700;
@@ -161,12 +197,14 @@
     color: #ffffff;
     display: block;
   }
+
   .user-role {
     font-size: 11px;
     color: var(--sj-gold);
     text-transform: uppercase;
     letter-spacing: 0.06em;
   }
+
   .btn-logout {
     color: #ffffff;
     border: 1px solid rgba(255, 255, 255, 0.35);
@@ -181,6 +219,7 @@
     cursor: pointer;
     text-decoration: none;
   }
+
   .btn-logout:hover {
     background: var(--sj-gold);
     border-color: var(--sj-gold);
@@ -199,14 +238,30 @@
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-5px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   @media (max-width: 1100px) {
-    .main-header { padding: 0 16px; height: 76px; }
-    .logo-img { height: 48px; }
-    .mobile-toggle { display: block; }
+    .main-header {
+      padding: 0 16px;
+      height: 76px;
+    }
+
+    .logo-img {
+      height: 48px;
+    }
+
+    .mobile-toggle {
+      display: block;
+    }
 
     .nav-container {
       display: none;
@@ -224,10 +279,22 @@
       border-top: 3px solid var(--sj-gold);
       z-index: 999;
     }
-    .nav-container.active { display: flex; }
-    .nav-container:not(.active) { display: none !important; }
 
-    .nav-link, .nav-dropdown { width: 100%; height: auto; flex-wrap: wrap; }
+    .nav-container.active {
+      display: flex;
+    }
+
+    .nav-container:not(.active) {
+      display: none !important;
+    }
+
+    .nav-link,
+    .nav-dropdown {
+      width: 100%;
+      height: auto;
+      flex-wrap: wrap;
+    }
+
     .nav-link {
       padding: 15px 20px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -253,15 +320,26 @@
       color: #d3dbe8;
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
+
     .dropdown-menu li a:hover,
     .dropdown-menu li a.active {
       background-color: rgba(255, 255, 255, 0.1);
       color: #ffffff;
       padding-left: 44px;
     }
-    .dropdown-menu li a i { color: var(--sj-gold); }
-    .dropdown-menu li a.active { color: #ffffff !important; }
-    .nav-container > .nav-link { justify-content: flex-start; gap: 8px; }
+
+    .dropdown-menu li a i {
+      color: var(--sj-gold);
+    }
+
+    .dropdown-menu li a.active {
+      color: #ffffff !important;
+    }
+
+    .nav-container>.nav-link {
+      justify-content: flex-start;
+      gap: 8px;
+    }
 
     .dropdown-submenu .submenu {
       position: static;
@@ -288,17 +366,21 @@
       margin-top: auto;
       box-sizing: border-box;
     }
-    .user-info { text-align: left; }
+
+    .user-info {
+      text-align: left;
+    }
   }
 </style>
 
 <header class="main-header">
   <a href="index.html" style="text-decoration: none">
     <img src="assets/img/logo_santajosefina_blanco.png" alt="Santa Josefina SpA" class="logo-img"
-         onerror="this.onerror=null;this.src='assets/img/logo_santajosefina.png';this.style.background='#fff';this.style.borderRadius='8px';this.style.padding='3px';this.style.height='52px';" />
+      onerror="this.onerror=null;this.src='assets/img/logo_santajosefina.png';this.style.background='#fff';this.style.borderRadius='8px';this.style.padding='3px';this.style.height='52px';" />
   </a>
 
-  <button class="mobile-toggle" id="btnMenu" onclick="toggleMenu()" aria-label="Abrir menú" aria-expanded="false" aria-controls="navMenu">
+  <button class="mobile-toggle" id="btnMenu" onclick="toggleMenu()" aria-label="Abrir menú" aria-expanded="false"
+    aria-controls="navMenu">
     <i class="fa-solid fa-bars"></i>
   </button>
 
@@ -313,7 +395,8 @@
       </a>
       <ul class="dropdown-menu">
         <li><a href="dashboard.html"><i class="fa-solid fa-chart-line"></i> Dashboard General</a></li>
-        <li><a href="dashboard_conversiones.html"><i class="fa-regular fa-chart-bar"></i> Dashboard Conversiones</a></li>
+        <li><a href="dashboard_conversiones.html"><i class="fa-regular fa-chart-bar"></i> Dashboard Conversiones</a>
+        </li>
         <li><a href="contactos.html"><i class="fa-solid fa-inbox"></i> Buzón Web</a></li>
         <li><a href="clientes.html"><i class="fa-solid fa-users"></i> Clientes</a></li>
         <li><a href="arrendatarios.html"><i class="fa-solid fa-key"></i> Arrendatarios</a></li>
@@ -334,7 +417,8 @@
         <li><a href="copropiedades.html"><i class="fa-solid fa-city"></i> Comunidades</a></li>
         <li><a href="unidades.html"><i class="fa-solid fa-door-closed"></i> Unidades</a></li>
         <li><a href="copropietarios.html"><i class="fa-solid fa-user-group"></i> Residentes</a></li>
-        <li><a href="admin-condominios.html"><i class="fa-solid fa-building-circle-check"></i> Administrar Comunidades</a></li>
+        <li><a href="admin-condominios.html"><i class="fa-solid fa-building-circle-check"></i> Administrar
+            Comunidades</a></li>
         <li><a href="admin-arrendamiento.html"><i class="fa-solid fa-file-contract"></i> Administración</a></li>
         <li><a href="admin-espacios.html"><i class="fa-solid fa-pen-ruler"></i> Configurar Espacios</a></li>
         <li><a href="checklist_seguridad.html"><i class="fa-solid fa-shield-heart"></i> Checklist Seguridad</a></li>
@@ -392,11 +476,13 @@
         <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i>
       </a>
       <ul class="dropdown-menu">
-        <li><a href="dashboard_conversiones.html"><i class="fa-regular fa-chart-bar"></i> Dashboard Conversiones</a></li>
+        <li><a href="dashboard_conversiones.html"><i class="fa-regular fa-chart-bar"></i> Dashboard Conversiones</a>
+        </li>
         <li><a href="marketing.html"><i class="fa-solid fa-bullhorn"></i> Campañas</a></li>
         <li><a href="envia_campaigns.html"><i class="fa-solid fa-paper-plane"></i> Envíos de Campañas</a></li>
         <li><a href="analitica.html"><i class="fa-solid fa-magnifying-glass-dollar"></i> Análisis de Campañas</a></li>
-        <li><a href="gestion_leads.html"><i class="fa-solid fa-person-walking-arrow-right"></i> Gestión de Leads</a></li>
+        <li><a href="gestion_leads.html"><i class="fa-solid fa-person-walking-arrow-right"></i> Gestión de Leads</a>
+        </li>
       </ul>
     </div>
 
