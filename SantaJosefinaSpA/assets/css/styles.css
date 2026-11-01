@@ -1350,6 +1350,30 @@ th {
   max-height: none;
 }
 
+/* ---- Header CRM a ancho completo: sale del marco body { max-width: 1200px } en todas las páginas ---- */
+body {
+  overflow-x: hidden;
+}
+
+@supports (overflow: clip) {
+  body {
+    overflow-x: clip;
+  }
+}
+
+#header {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.planner #header {
+  width: 100%;
+  margin-left: 0;
+}
+
 /* ---- Planner: base de página ---- */
 .planner *,
 .planner *::before,
