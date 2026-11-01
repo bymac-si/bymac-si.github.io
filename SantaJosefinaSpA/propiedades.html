@@ -7,7 +7,10 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-    <link rel="stylesheet" href="assets/css/styles.css" />
+    <!-- Si style.css no está en assets/css/, prueba rutas habituales. Cuando sepas la ruta real, deja solo el href correcto y borra el onerror. -->
+    <link rel="stylesheet" href="assets/css/style.css"
+        onerror="var a=['css/style.css','assets/style.css','style.css','assets/css/styles.css'],n=(+this.dataset.n||0);if(n<a.length){this.dataset.n=n+1;this.href=a[n]}">
+
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1a2b48">
 <link rel="apple-touch-icon" href="assets/img/icon-192.png">
