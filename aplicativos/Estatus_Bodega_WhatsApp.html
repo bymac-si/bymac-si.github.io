@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <!-- ICB Food Service 2026 · Estatus Bodega por WhatsApp -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link rel="icon" href="https://www.icbfs.cl/wp-content/uploads/2022/01/cropped-favicon-32x32.jpg" sizes="32x32" />
+  <title>Estatus Bodega · WhatsApp</title>
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --panel: #fff;
+      --line: #e2e2e8;
+      --ink: #1d1d22;
+      --muted: #6c6c78;
+      --brand: #ed2750;
+      --seco: #c27a00;
+      --frio: #2f6fdb;
+      --cong: #0e8fa8;
+      --wa: #1fa855;
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px)
+    }
+
+    @media(prefers-color-scheme:dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #131316;
+        --panel: #1c1c21;
+        --line: #2c2c34;
+        --ink: #f2f2f5;
+        --muted: #9b9ba7
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #131316;
+      --panel: #1c1c21;
+      --line: #2c2c34;
+      --ink: #f2f2f5;
+      --muted: #9b9ba7
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: inherit
+    }
+
+    html,
+    body {
+      margin: 0
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font: 15px/1.45 "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 200px minmax(0, 1fr);
+      min-height: 100vh
+    }
+
+    aside {
+      background: var(--brand);
+      color: #fff;
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px
+    }
+
+    .logo {
+      font-weight: 900;
+      font-size: 22px;
+      letter-spacing: .5px;
+      margin: 6px 0 10px
+    }
+
+    .side-title {
+      font-weight: 800;
+      text-align: center;
+      font-size: 16px
+    }
+
+    .side-sub {
+      font-size: 12px;
+      text-align: center;
+      opacity: .85
+    }
+
+    .side-divider {
+      height: 1px;
+      background: rgba(255, 255, 255, .3);
+      width: 100%;
+      margin: 14px 0
+    }
+
+    .side-note {
+      text-align: center;
+      line-height: 1.8;
+      font-size: 13px;
+      font-weight: 600
+    }
+
+    .content {
+      min-width: 0
+    }
+
+    header {
+      padding: 20px 24px 4px
+    }
+
+    h1 {
+      font-size: 22px;
+      margin: 0 0 4px;
+      font-weight: 750
+    }
+
+    .subtle {
+      color: var(--muted);
+      font-size: 13px
+    }
+
+    .wrap {
+      max-width: 1200px;
+      padding: 16px 24px
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 18px;
+      margin-bottom: 16px
+    }
+
+    h2 {
+      font-size: 17px;
+      margin: 0 0 12px
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 5px
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1.5px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 12px;
+      background: var(--bg);
+      color: var(--ink);
+      font: inherit
+    }
+
+    input[type=checkbox] {
+      width: auto;
+      accent-color: var(--brand)
+    }
+
+    .btn {
+      background: var(--brand);
+      border: 1.5px solid var(--brand);
+      border-radius: 8px;
+      padding: 10px 16px;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700
+    }
+
+    .btn.gray {
+      background: transparent;
+      color: var(--brand)
+    }
+
+    .btn.wa {
+      background: var(--wa);
+      border-color: var(--wa)
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap
+    }
+
+    .tab {
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-weight: 650;
+      background: var(--bg);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      cursor: pointer;
+      font: inherit;
+      font-weight: 650
+    }
+
+    .tab.active {
+      background: var(--brand);
+      color: #fff;
+      border-color: var(--brand)
+    }
+
+    .temps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 12px
+    }
+
+    .tcard {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-top: 5px solid var(--c);
+      border-radius: 10px;
+      padding: 14px;
+      opacity: .55
+    }
+
+    .tcard.on {
+      opacity: 1
+    }
+
+    .thead {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 16px;
+      margin-bottom: 10px;
+      color: var(--c)
+    }
+
+    .thead label {
+      margin: 0;
+      font-size: 16px;
+      color: inherit;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      cursor: pointer
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 76px 1fr;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px
+    }
+
+    .row .n {
+      font-weight: 700;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      font-size: 14px
+    }
+
+    .row .f {
+      display: flex;
+      gap: 6px
+    }
+
+    .row .f>* {
+      min-width: 0
+    }
+
+    .row input[type=number] {
+      max-width: 92px
+    }
+
+    .tcard:not(.on) input,
+    .tcard:not(.on) select {
+      pointer-events: none
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    textarea {
+      min-height: 190px;
+      font-family: Consolas, "Segoe UI", monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      resize: vertical
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      align-items: center
+    }
+
+    .toast {
+      font-size: 13px;
+      color: var(--muted)
+    }
+
+    @media(max-width:760px) {
+      .app {
+        grid-template-columns: 1fr
+      }
+
+      aside {
+        flex-direction: row;
+        padding: 10px 12px
+      }
+
+      .side-sub,
+      .side-divider,
+      .side-note {
+        display: none
+      }
+
+      .logo {
+        margin: 0 8px 0 0
+      }
+
+      header {
+        padding: 14px 16px 0
+      }
+
+      .wrap {
+        padding: 12px 16px
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+      <aside class="noprint"><img src="https://www.icbfs.cl/wp-content/uploads/2022/02/logo-icbfs.png"
+        alt="ICB Food Service" width="140px">
+      <div class="side-title">ICB Food Service</div>
+      <div class="side-sub">Operación bodega</div>
+      <div class="side-divider"></div>
+      <div class="side-note">Estatus por<br>temperatura<br>vía WhatsApp</div>
+    </aside>
+    <div class="content">
+      <header>
+        <h1>Estatus Bodega · WhatsApp</h1>
+        <div class="subtle">OT, zonas y B2C por preparar en el turno, por temperatura</div>
+      </header>
+      <main class="wrap">
+        <section class="panel">
+          <h2>1) Formato del mensaje</h2>
+          <div class="tabs" id="fmtTabs"><button class="tab active" data-f="det">Detallado (por líneas)</button><button
+              class="tab" data-f="cmp">Compacto (una línea)</button></div>
+          <div class="controls" style="margin-top:12px">
+            <div><label>Turno (opcional)</label><select id="turno">
+                <option value="">Sin turno</option>
+                <option value="Día">Día 08:30-16:30</option>
+                <option value="Tarde">Tarde 16:30-00:00</option>
+                <option value="Noche">Noche 00:00-08:30</option>
+              </select></div>
+            <div><label>WhatsApp destino (opcional)</label><input id="phone" inputmode="tel"
+                placeholder="9 1234 5678 · vacío = elegir chat"></div>
+            <div><label>&nbsp;</label><label
+                style="display:flex;gap:8px;align-items:center;color:var(--ink);cursor:pointer"><input type="checkbox"
+                  id="greet" checked> Incluir saludo según la hora</label></div>
+          </div>
+        </section>
+        <section class="panel">
+          <h2>2) Temperaturas y datos</h2>
+          <div class="hint" style="margin-bottom:10px">Activa 1, 2 o 3 temperaturas. OT siempre va; Zonas y B2C son
+            opcionales. Cantidad 0 = todo confirmado.</div>
+          <div class="temps" id="temps"></div>
+        </section>
+        <section class="panel">
+          <h2>3) Mensaje</h2><textarea id="out" spellcheck="false"></textarea>
+          <div class="actions"><button class="btn wa" id="bWa">Enviar por WhatsApp</button><button class="btn gray"
+              id="bCopy">Copiar</button><button class="btn gray" id="bReset">Limpiar datos</button><span class="toast"
+              id="toast"></span></div>
+          <div class="hint" style="margin-top:8px">El texto se actualiza solo al cambiar datos; puedes editarlo a mano
+            antes de enviar.</div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script>
+    const T = [{k: 'seco', c: 'var(--seco)', cmp: 'Seco', det: 'Seco'}, {k: 'cong', c: 'var(--cong)', cmp: 'Congelado', det: 'Congelados'}, {k: 'frio', c: 'var(--frio)', cmp: 'Frío', det: 'Frío'}];
+    const blank = () => ({on: false, ot: 0, agr: 'no', zon: false, zm: 'n', zn: 0, b2c: false, bn: 0});
+    let S = {fmt: 'det', turno: '', phone: '', greet: true, t: {seco: blank(), cong: blank(), frio: blank()}};
+    const $ = id => document.getElementById(id);
+    try {let r = localStorage.getItem('estatusBodegaWA'); if (r) {let o = JSON.parse(r); if (o && o.t) S = Object.assign(S, o)} } catch (e) { }
+    function save() {try {localStorage.setItem('estatusBodegaWA', JSON.stringify(S))} catch (e) { } }
+    const num = v => Math.max(0, parseInt(v, 10) || 0);
+    function build() {
+      $('temps').innerHTML = T.map(t => `<div class="tcard${S.t[t.k].on ? ' on' : ''}" style="--c:${t.c}" data-k="${t.k}">
+  <div class="thead"><label><input type="checkbox" data-p="on"> ${t.det}</label></div>
+  <div class="row"><div class="n">OT</div><div class="f"><input type="number" min="0" data-p="ot" placeholder="N° OT"><select data-p="agr"><option value="no">Sin agregados</option><option value="con">Con agregados</option><option value="solo">Solo agregados</option></select></div></div>
+  <div class="row"><div class="n"><input type="checkbox" data-p="zon"> Zonas</div><div class="f"><select data-p="zm"><option value="n">Por tomar</option><option value="prep">Todas en preparación</option><option value="ok">Confirmadas</option></select><input type="number" min="0" data-p="zn" placeholder="N°"></div></div>
+  <div class="row"><div class="n"><input type="checkbox" data-p="b2c"> B2C</div><div class="f"><input type="number" min="0" data-p="bn" placeholder="OT B2C"></div></div></div>`).join('');
+      document.querySelectorAll('.tcard').forEach(card => {
+        let s = S.t[card.dataset.k];
+        card.querySelectorAll('[data-p]').forEach(el => {
+          let p = el.dataset.p;
+          if (el.type === 'checkbox') el.checked = !!s[p]; else el.value = s[p] === 0 && el.type === 'number' ? '' : s[p];
+          el.addEventListener('input', () => {s[p] = el.type === 'checkbox' ? el.checked : el.type === 'number' ? num(el.value) : el.value; if (p === 'on') card.classList.toggle('on', s.on); update()})
+        })
+      });
+    }
+    function greeting() {let h = new Date().getHours(); return h < 12 ? 'Buenos Días' : h < 20 ? 'Buenas Tardes' : 'Buenas Noches'}
+    function zonTxt(s, long) {if (!s.zon || s.zm === 'ok') return ''; if (s.zm === 'prep') return long ? 'todas las zonas en preparación' : 'zonas en preparación'; return s.zn + ' zonas por tomar'}
+    function line(t, fmt) {
+      let s = S.t[t.k], z = zonTxt(s, fmt === 'cmp'), zPend = s.zon && s.zm !== 'ok', otOk = s.ot === 0 && !zPend;
+      let b = s.b2c ? (s.bn > 0 ? s.bn + ' OT B2C' : 'ok') : '';
+      if (fmt === 'cmp') {
+        if (otOk && (b === '' || b === 'ok')) return t.cmp + ' TODO CONFIRMADO.';
+        let p = []; if (otOk) p.push('OT confirmadas'); else {p.push(s.ot + ' ot´s'); if (z && s.agr !== 'solo') p.push(z)}
+        if (s.agr === 'solo') p.push('solo agregados'); else if (s.agr === 'con') p.push('con agregados');
+        if (b === 'ok') p.push('B2C Todo Confirmado'); else if (b) p.push(b);
+        return t.cmp + ' ' + p.join(', ');
+      }
+      let o; if (otOk) o = 'OT Todo Confirmado'; else {
+        let n = []; if (s.agr === 'solo') n.push('solo agregados'); else {if (z) n.push(z); if (s.agr === 'con') n.push('agregados')}
+        o = s.ot + ' OT' + (n.length ? ' (' + n.join(' y ') + ')' : '')
+      }
+      return t.det + ' ' + o + (b === 'ok' ? ' B2C Todo Confirmado' : b ? ' // ' + b : '');
+    }
+    function compose() {
+      let act = T.filter(t => S.t[t.k].on); if (!act.length) return '';
+      let tn = S.turno ? ' *Turno ' + S.turno + '*' : '', g = S.greet ? greeting() + (S.fmt === 'det' ? ', ' : '\n') : '';
+      if (S.fmt === 'cmp') return (S.greet ? g : '') + 'Status' + tn + ' ' + act.map(t => line(t, 'cmp')).join('  //  ');
+      return g + (S.t.seco.on ? 'Estatus Bodega' : 'Estatus Cámara') + tn + '\n' + act.map(t => line(t, 'det')).join('\n');
+    }
+    function update() {S.turno = $('turno').value; S.phone = $('phone').value; S.greet = $('greet').checked; $('out').value = compose(); save()}
+    function toast(m) {$('toast').textContent = m; setTimeout(() => {$('toast').textContent = ''}, 2500)}
+    document.querySelectorAll('#fmtTabs .tab').forEach(b => b.onclick = () => {S.fmt = b.dataset.f; S.greet = S.fmt === 'det'; $('greet').checked = S.greet; tabs(); update()});
+    function tabs() {document.querySelectorAll('#fmtTabs .tab').forEach(b => b.classList.toggle('active', b.dataset.f === S.fmt))}
+    ['turno', 'phone', 'greet'].forEach(id => $(id).addEventListener('input', update));
+    $('bWa').onclick = () => {
+      let txt = $('out').value.trim(); if (!txt) {toast('Activa al menos una temperatura'); return }
+      let d = S.phone.replace(/\D/g, ''); if (d.length === 9) d = '56' + d;
+      window.open('https://wa.me/' + d + '?text=' + encodeURIComponent(txt), '_blank', 'noopener')
+    };
+    $('bCopy').onclick = async () => {let el = $('out'); try {await navigator.clipboard.writeText(el.value)} catch (e) {el.select(); document.execCommand('copy')} toast('Mensaje copiado')};
+    $('bReset').onclick = () => {S.t = {seco: blank(), cong: blank(), frio: blank()}; build(); update()};
+    $('turno').value = S.turno; $('phone').value = S.phone; $('greet').checked = S.greet; tabs(); build(); update();
+  </script>
+</body>
+
+</html>
