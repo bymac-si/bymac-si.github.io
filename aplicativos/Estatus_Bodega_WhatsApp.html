@@ -425,7 +425,7 @@
       });
     }
     function greeting() {let h = new Date().getHours(); return h < 12 ? 'Buenos Días' : h < 20 ? 'Buenas Tardes' : 'Buenas Noches'}
-    function zonTxt(s, long) {if (!s.zon || s.zm === 'ok') return ''; if (s.zm === 'prep') return long ? 'todas las zonas en preparación' : 'zonas en preparación'; return s.zn + ' zonas por tomar'}
+    function zonTxt(s, long) {if (!s.zon || s.zm === 'ok') return ''; if (s.zm === 'prep') return long ? 'todas las zonas en preparación' : 'todas las zonas en preparación'; return s.zn + ' zonas por tomar'}
     function line(t, fmt) {
       let s = S.t[t.k], z = zonTxt(s, fmt === 'cmp'), zPend = s.zon && s.zm !== 'ok', otOk = s.ot === 0 && !zPend;
       let b = s.b2c ? (s.bn > 0 ? s.bn + ' OT B2C' : 'ok') : '';
