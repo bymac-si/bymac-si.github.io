@@ -8,6 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
 <style>
+ import Icon from '@f5-sales-demo/icons-lucide/Icon.astro';
 :root{--bg:#f5f5f7;--sf:#fff;--tx:#1d1d22;--mu:#6c6c78;--bd:#e2e2e8;--ac:#ed2750;--on:#fff;--ok:#0a7a4b;--er:#c4143c;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#131316;--sf:#1c1c21;--tx:#f2f2f5;--mu:#9b9ba7;--bd:#2c2c34;--ok:#4cd694;--er:#ff7a93;color-scheme:dark}}
@@ -83,7 +84,7 @@ input:focus,select:focus,button:focus-visible{outline:3px solid #ffb703;outline-
  </div>
 </aside>
 <main class="w">
-  <h1><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXNob3BwaW5nLWNhcnQgcHJldmlldy1pY29uIj48cGF0aCBkPSJtMi4wNSAyLjA1IDEuMDk5LS4wMjhhMSAxIDAgMCAxIDEuMDA4LjgxNWwyLjY5IDE0LjM0N0ExIDEgMCAwIDAgNy44MyAxOEgxOCIvPjxwYXRoIGQ9Ik00LjU2MyA1aDE2LjQzNWExIDEgMCAwIDEgLjk4MSAxLjIwNGwtMS4wMjYgNi4yMjZBMiAyIDAgMCAxIDE4Ljk2MiAxNEg2LjI1Ii8+PGNpcmNsZSBjeD0iMTgiIGN5PSIyMCIgcj0iMiIvPjxjaXJjbGUgY3g9IjgiIGN5PSIyMCIgcj0iMiIvPjwvc3ZnPg==Pedido"> <i>·</i> Lista de Precios</h1>
+  <h1><Icon name="shopping-cart"> <i>·</i> Lista de Precios</h1>
   <p class="sub">Sube tu lista de precios (.xlsx), elige categoría y descripción, indica la cantidad y confirma. El Excel saldrá solo con las líneas que agregues.</p>
 
 <div class="cols"><div class="col">
