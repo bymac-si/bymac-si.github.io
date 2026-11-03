@@ -1,357 +1,1139 @@
 <!DOCTYPE html>
-<html lang="es"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Registro PDT · ICB Food Service</title>
- <link rel="icon" href="https://www.icbfs.cl/wp-content/uploads/2022/01/cropped-favicon-32x32.jpg" sizes="32x32">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-<style>
-:root{--bg:#f5f5f7;--card:#fff;--ink:#1d1d22;--mut:#6c6c78;--line:#e2e2e8;--brand:#ed2750;--soft:#fdecef;--warn:#fde68a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#131316;--card:#1c1c21;--ink:#f2f2f5;--mut:#9b9ba7;--line:#2c2c34;--soft:#3a1821;--warn:#5c4a0a}}
-:root[data-theme="dark"]{--bg:#131316;--card:#1c1c21;--ink:#f2f2f5;--mut:#9b9ba7;--line:#2c2c34;--soft:#3a1821;--warn:#5c4a0a}
-*,*::before,*::after{box-sizing:inherit}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
-.app{display:grid;grid-template-columns:200px 1fr;min-height:100vh}
-aside{background:var(--brand);color:#fff;padding:20px 14px;display:flex;flex-direction:column;gap:6px}
-aside img{width:140px;height:auto;display:block;margin:0 auto 14px}
-.logo{font-weight:800;font-size:19px;line-height:1.1;text-align:center;margin:4px 0 16px;letter-spacing:.3px}
-.logo small{display:block;font-weight:600;font-size:12px;opacity:.85;letter-spacing:0;margin-top:3px}
-.nt{font-size:12px;opacity:.8;font-weight:600;margin:0 4px 2px;text-transform:uppercase;letter-spacing:.5px}
-.tabs{display:flex;flex-direction:column;gap:6px}
-.tab{all:unset;cursor:pointer;display:flex;justify-content:space-between;gap:8px;padding:11px 12px;border-radius:8px;font-weight:600;color:#fff;opacity:.85}
-.tab:hover{background:rgba(255,255,255,.14)}
-.tab.on{background:#fff;color:var(--brand);opacity:1}
-.tab small{opacity:.75;font-weight:600}
-.tab:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #ffb703;outline-offset:2px}
-main{padding:24px;max-width:1300px;width:100%;min-width:0}
-h1{font-size:22px;margin:0 0 4px}
-.sub{color:var(--mut);margin:0 0 18px}
-.form{display:flex;flex-wrap:wrap;gap:10px;align-items:end;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
-.form label{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--mut);flex:1;min-width:150px}
-input,select,textarea{padding:9px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
-textarea{width:100%;min-height:120px}
-.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}.bar .sp{flex:1}
-.btn{all:unset;cursor:pointer;display:inline-block;background:transparent;color:var(--brand);border:1.5px solid var(--brand);font-weight:600;padding:9.5px 18.5px;border-radius:8px}
-.btn.pri{background:var(--brand);color:#fff;padding:11px 20px;border:0}
-.btn.sm{padding:9.5px 14px}
-.hint{color:var(--mut);font-size:13px}
-.sheet{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px}
-.sheet h2{margin:0;font-size:17px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.badge{display:inline-block;min-width:48px;text-align:center;font-size:13px;font-weight:700;padding:2px 8px;border-radius:6px;color:#fff;background:var(--brand)}
-.ptitle{display:flex;flex-wrap:wrap;align-items:center;gap:4px 22px;margin:10px 0 4px;padding:8px 0;border-top:2px solid var(--ink);border-bottom:1px solid var(--line)}
-.ptitle b{color:var(--mut);font-weight:600}.ptitle h2{display:inline;font-size:17px;margin:0 4px 0 0}
-.meta{color:var(--mut);font-size:13px;margin:4px 0 10px}
-.wrapt{overflow:auto}
-table{border-collapse:collapse;width:100%}
-th,td{border:1px solid var(--line);padding:0;text-align:center}
-thead th{background:var(--bg);font-size:13px;color:var(--mut);padding:6px 4px}
-thead th .dayhead{display:inline-flex;align-items:baseline;gap:.5em;white-space:nowrap}
-thead th .date{font-weight:600;color:var(--brand)}
-th.u{font-size:11px;font-weight:600}
-th.pdt{text-align:left;padding:5px 10px;white-space:nowrap;font-size:13px;background:var(--bg);color:var(--ink)}
-td input{width:100%;min-width:130px;border:0;border-radius:0;background:transparent;text-align:center;font-size:13px;padding:8px 6px}
-td input:focus{outline:2px solid var(--brand);outline-offset:-2px;background:var(--card)}
-td.dup{background:var(--warn)}.pt{display:none}
-table.lg td,table.lg th{padding:6px 10px;font-size:13px;text-align:left}
-details.sheet{padding:12px 18px}summary{cursor:pointer;font-weight:700;font-size:16px;padding:4px 0}
-.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1d1d22;color:#fff;padding:10px 16px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9}.toast.on{opacity:1}
-@media (max-width:760px){.app{grid-template-columns:1fr}aside{flex-direction:row;flex-wrap:wrap;align-items:center;padding:10px 12px}.logo{margin:0 10px 0 0;text-align:left}.nt{display:none}.tabs{flex-direction:row;flex-wrap:wrap}main{padding:16px}}
-@media print{
- @page{size:A4 landscape;margin:10mm}
- body{background:#fff;color:#000;font-size:12px}.app{display:block}
- aside,.np{display:none!important}
- main{padding:0;max-width:none}
- .sheet{border:0;padding:0;margin:0;border-radius:0;background:#fff}
- .badge{color:#000!important;background:none!important;border:1px solid #000}
- .ptitle{border-color:#000}.ptitle b,.meta{color:#000}
- input{display:none!important}.pt{display:block;font-size:10pt;font-weight:600;padding:2px 3px}
- table{border:1.5px solid #000}th,td{border:1px solid #000!important;color:#000}td{height:11mm}thead th{background:#fff;color:#000}th.pdt{background:#fff}td.dup{background:none}
- thead th .date{color:#000}
-}
+<html lang="es">
 
-.rptModal{position:fixed;inset:0;z-index:1000;background:rgba(15,15,20,.62);display:none;align-items:center;justify-content:center;padding:18px}
-.rptModal.open{display:flex}
-.rptDialog{background:var(--card);color:var(--ink);border-radius:12px;width:min(1100px,100%);max-height:100%;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35)}
-.rptHead{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
-.rptHead h3{margin:0;font-size:16px}
-.rptClose{background:none;border:0;font-size:24px;line-height:1;cursor:pointer;color:var(--mut);padding:2px 8px}
-.rptPreview{flex:1;min-height:180px;overflow:auto;background:var(--bg);padding:14px;text-align:center}
-.rptPreview img{display:block;margin:0 auto;max-width:100%;height:auto;border:1px solid var(--line);background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.08)}
-.rptPreview .loading{padding:50px 0;color:var(--mut)}
-.rptActions{padding:14px 18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.rptActions .sep{flex:1}
-.rptActions .btn{padding:9px 13px;font-size:14px}
-.rptActions .btn.wa{background:#1fa855;border-color:#1fa855;color:#fff}
-.rptActions .btn:disabled{opacity:.5;cursor:default}
-.rptToast{padding:0 18px 12px;font-size:13px;color:var(--mut);min-height:20px}
-.rpt{background:#fff;color:#1d1d22;font:14px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;padding:30px 32px 28px;box-sizing:border-box;text-align:left}
-.rpt *{box-sizing:border-box}
-.rpt-top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #ed2750;padding-bottom:10px;margin-bottom:12px;gap:16px}
-.rpt-top .b{font-size:12px;font-weight:700;color:#ed2750}
-.rpt-top h1{font-size:22px;margin:2px 0 0;font-weight:750;color:#1d1d22}
-.rpt-top .d{font-size:12px;color:#6c6c78;text-align:right}
-.rpt-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
-.rpt-chip{background:#f5f5f7;border:1px solid #e2e2e8;border-radius:999px;padding:4px 11px;font-size:12px;color:#1d1d22}
-.rpt-chip b{font-weight:700}
-.rpt table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:13px;white-space:normal;overflow-wrap:anywhere}
-.rpt th,.rpt td{border:1px solid #e2e2e8;padding:7px 8px;vertical-align:middle;text-align:right;background:#fff;color:#1d1d22;height:auto}
-.rpt thead th{background:#f5f5f7;color:#6c6c78;font-weight:700;position:static}
-.rpt th:first-child,.rpt td:first-child{text-align:left}
-.rpt td.totalCol{background:#fdecef;font-weight:700}
-.rpt tr.totalRow td{background:#f5f5f7;font-weight:700}
-.rpt td.state-yellow{background:#fef9c3;color:#713f12;font-weight:700}
-.rpt .scroll{overflow:visible;max-height:none;border:0;border-radius:0;background:#fff}
-.rpt-crit{margin-top:14px;border:1px solid #e2e2e8;border-radius:10px;padding:12px 14px;background:#fafafb}
-.rpt-crit h3{margin:0 0 8px;font-size:14px;color:#1d1d22}
-.rpt-crit ul{margin:0;padding-left:18px;font-size:12.5px;color:#1d1d22}
-.rpt-crit li{margin:2px 0}
-.rpt-sem{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
-.rpt-sem>div{border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.35}
-.rpt-sem b{display:block;font-size:12.5px;margin-bottom:2px}
-.rpt-sem .g{background:#dcfce7;color:#14532d}.rpt-sem .y{background:#fef9c3;color:#713f12}.rpt-sem .z{background:#f5f5f7;color:#1d1d22}
-@media(max-width:760px){.rptDialog{max-height:100%}}
-@media print{.rptModal{display:none!important}}
-</style></head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Registro PDT · ICB Food Service</title>
+  <link rel="icon" href="https://www.icbfs.cl/wp-content/uploads/2022/01/cropped-favicon-32x32.jpg" sizes="32x32">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --card: #fff;
+      --ink: #1d1d22;
+      --mut: #6c6c78;
+      --line: #e2e2e8;
+      --brand: #ed2750;
+      --soft: #fdecef;
+      --warn: #fde68a;
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px)
+    }
+
+    @media (prefers-color-scheme:dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #131316;
+        --card: #1c1c21;
+        --ink: #f2f2f5;
+        --mut: #9b9ba7;
+        --line: #2c2c34;
+        --soft: #3a1821;
+        --warn: #5c4a0a
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #131316;
+      --card: #1c1c21;
+      --ink: #f2f2f5;
+      --mut: #9b9ba7;
+      --line: #2c2c34;
+      --soft: #3a1821;
+      --warn: #5c4a0a
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: inherit
+    }
+
+    html {
+      scroll-padding-top: env(safe-area-inset-top, 0px)
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 15px/1.45 "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      min-height: 100vh
+    }
+
+    aside {
+      background: var(--brand);
+      color: #fff;
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px
+    }
+
+    aside img {
+      width: 140px;
+      height: auto;
+      display: block;
+      margin: 0 auto 14px
+    }
+
+    .logo {
+      font-weight: 800;
+      font-size: 19px;
+      line-height: 1.1;
+      text-align: center;
+      margin: 4px 0 16px;
+      letter-spacing: .3px
+    }
+
+    .logo small {
+      display: block;
+      font-weight: 600;
+      font-size: 12px;
+      opacity: .85;
+      letter-spacing: 0;
+      margin-top: 3px
+    }
+
+    .nt {
+      font-size: 12px;
+      opacity: .8;
+      font-weight: 600;
+      margin: 0 4px 2px;
+      text-transform: uppercase;
+      letter-spacing: .5px
+    }
+
+    .tabs {
+      display: flex;
+      flex-direction: column;
+      gap: 6px
+    }
+
+    .tab {
+      all: unset;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 11px 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      color: #fff;
+      opacity: .85
+    }
+
+    .tab:hover {
+      background: rgba(255, 255, 255, .14)
+    }
+
+    .tab.on {
+      background: #fff;
+      color: var(--brand);
+      opacity: 1
+    }
+
+    .tab small {
+      opacity: .75;
+      font-weight: 600
+    }
+
+    .tab:focus-visible,
+    .btn:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 3px solid #ffb703;
+      outline-offset: 2px
+    }
+
+    main {
+      padding: 24px;
+      max-width: 1300px;
+      width: 100%;
+      min-width: 0
+    }
+
+    h1 {
+      font-size: 22px;
+      margin: 0 0 4px
+    }
+
+    .sub {
+      color: var(--mut);
+      margin: 0 0 18px
+    }
+
+    .form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: end;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 14px
+    }
+
+    .form label {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-size: 13px;
+      color: var(--mut);
+      flex: 1;
+      min-width: 150px
+    }
+
+    input,
+    select,
+    textarea {
+      padding: 9px 12px;
+      border: 1.5px solid var(--line);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--ink);
+      font: inherit
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 120px
+    }
+
+    .bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 14px
+    }
+
+    .bar .sp {
+      flex: 1
+    }
+
+    .btn {
+      all: unset;
+      cursor: pointer;
+      display: inline-block;
+      background: transparent;
+      color: var(--brand);
+      border: 1.5px solid var(--brand);
+      font-weight: 600;
+      padding: 9.5px 18.5px;
+      border-radius: 8px
+    }
+
+    .btn.pri {
+      background: var(--brand);
+      color: #fff;
+      padding: 11px 20px;
+      border: 0
+    }
+
+    .btn.sm {
+      padding: 9.5px 14px
+    }
+
+    .hint {
+      color: var(--mut);
+      font-size: 13px
+    }
+
+    .sheet {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 18px;
+      margin-bottom: 16px
+    }
+
+    .sheet h2 {
+      margin: 0;
+      font-size: 17px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap
+    }
+
+    .badge {
+      display: inline-block;
+      min-width: 48px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      color: #fff;
+      background: var(--brand)
+    }
+
+    .ptitle {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px 22px;
+      margin: 10px 0 4px;
+      padding: 8px 0;
+      border-top: 2px solid var(--ink);
+      border-bottom: 1px solid var(--line)
+    }
+
+    .ptitle b {
+      color: var(--mut);
+      font-weight: 600
+    }
+
+    .ptitle h2 {
+      display: inline;
+      font-size: 17px;
+      margin: 0 4px 0 0
+    }
+
+    .meta {
+      color: var(--mut);
+      font-size: 13px;
+      margin: 4px 0 10px
+    }
+
+    .wrapt {
+      overflow: auto
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%
+    }
+
+    th,
+    td {
+      border: 1px solid var(--line);
+      padding: 0;
+      text-align: center
+    }
+
+    thead th {
+      background: var(--bg);
+      font-size: 13px;
+      color: var(--mut);
+      padding: 6px 4px
+    }
+
+    thead th .dayhead {
+      display: inline-flex;
+      align-items: baseline;
+      gap: .5em;
+      white-space: nowrap
+    }
+
+    thead th .date {
+      font-weight: 600;
+      color: var(--brand)
+    }
+
+    th.u {
+      font-size: 11px;
+      font-weight: 600
+    }
+
+    th.pdt {
+      text-align: left;
+      padding: 5px 10px;
+      white-space: nowrap;
+      font-size: 13px;
+      background: var(--bg);
+      color: var(--ink)
+    }
+
+    td input {
+      width: 100%;
+      min-width: 130px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      text-align: center;
+      font-size: 13px;
+      padding: 8px 6px
+    }
+
+    td input:focus {
+      outline: 2px solid var(--brand);
+      outline-offset: -2px;
+      background: var(--card)
+    }
+
+    td.dup {
+      background: var(--warn)
+    }
+
+    .pt {
+      display: none
+    }
+
+    table.lg td,
+    table.lg th {
+      padding: 6px 10px;
+      font-size: 13px;
+      text-align: left
+    }
+
+    details.sheet {
+      padding: 12px 18px
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 16px;
+      padding: 4px 0
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%);
+      background: #1d1d22;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s;
+      z-index: 9
+    }
+
+    .toast.on {
+      opacity: 1
+    }
+
+    @media (max-width:760px) {
+      .app {
+        grid-template-columns: 1fr
+      }
+
+      aside {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        padding: 10px 12px
+      }
+
+      .logo {
+        margin: 0 10px 0 0;
+        text-align: left
+      }
+
+      .nt {
+        display: none
+      }
+
+      .tabs {
+        flex-direction: row;
+        flex-wrap: wrap
+      }
+
+      main {
+        padding: 16px
+      }
+    }
+
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 10mm
+      }
+
+      body {
+        background: #fff;
+        color: #000;
+        font-size: 12px
+      }
+
+      .app {
+        display: block
+      }
+
+      aside,
+      .np {
+        display: none !important
+      }
+
+      main {
+        padding: 0;
+        max-width: none
+      }
+
+      .sheet {
+        border: 0;
+        padding: 0;
+        margin: 0;
+        border-radius: 0;
+        background: #fff
+      }
+
+      .badge {
+        color: #000 !important;
+        background: none !important;
+        border: 1px solid #000
+      }
+
+      .ptitle {
+        border-color: #000
+      }
+
+      .ptitle b,
+      .meta {
+        color: #000
+      }
+
+      input {
+        display: none !important
+      }
+
+      .pt {
+        display: block;
+        font-size: 10pt;
+        font-weight: 600;
+        padding: 2px 3px
+      }
+
+      table {
+        border: 1.5px solid #000
+      }
+
+      th,
+      td {
+        border: 1px solid #000 !important;
+        color: #000
+      }
+
+      td {
+        height: 11mm
+      }
+
+      thead th {
+        background: #fff;
+        color: #000
+      }
+
+      th.pdt {
+        background: #fff
+      }
+
+      td.dup {
+        background: none
+      }
+
+      thead th .date {
+        color: #000
+      }
+    }
+
+    .rptModal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(15, 15, 20, .62);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px
+    }
+
+    .rptModal.open {
+      display: flex
+    }
+
+    .rptDialog {
+      background: var(--card);
+      color: var(--ink);
+      border-radius: 12px;
+      width: min(1100px, 100%);
+      max-height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .35)
+    }
+
+    .rptHead {
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .rptHead h3 {
+      margin: 0;
+      font-size: 16px
+    }
+
+    .rptClose {
+      background: none;
+      border: 0;
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+      color: var(--mut);
+      padding: 2px 8px
+    }
+
+    .rptPreview {
+      flex: 1;
+      min-height: 180px;
+      overflow: auto;
+      background: var(--bg);
+      padding: 14px;
+      text-align: center
+    }
+
+    .rptPreview img {
+      display: block;
+      margin: 0 auto;
+      max-width: 100%;
+      height: auto;
+      border: 1px solid var(--line);
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .08)
+    }
+
+    .rptPreview .loading {
+      padding: 50px 0;
+      color: var(--mut)
+    }
+
+    .rptActions {
+      padding: 14px 18px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center
+    }
+
+    .rptActions .sep {
+      flex: 1
+    }
+
+    .rptActions .btn {
+      padding: 9px 13px;
+      font-size: 14px
+    }
+
+    .rptActions .btn.wa {
+      background: #1fa855;
+      border-color: #1fa855;
+      color: #fff
+    }
+
+    .rptActions .btn:disabled {
+      opacity: .5;
+      cursor: default
+    }
+
+    .rptToast {
+      padding: 0 18px 12px;
+      font-size: 13px;
+      color: var(--mut);
+      min-height: 20px
+    }
+
+    .rpt {
+      background: #fff;
+      color: #1d1d22;
+      font: 14px/1.45 "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+      padding: 30px 32px 28px;
+      box-sizing: border-box;
+      text-align: left
+    }
+
+    .rpt * {
+      box-sizing: border-box
+    }
+
+    .rpt-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 3px solid #ed2750;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+      gap: 16px
+    }
+
+    .rpt-top .b {
+      font-size: 12px;
+      font-weight: 700;
+      color: #ed2750
+    }
+
+    .rpt-top h1 {
+      font-size: 22px;
+      margin: 2px 0 0;
+      font-weight: 750;
+      color: #1d1d22
+    }
+
+    .rpt-top .d {
+      font-size: 12px;
+      color: #6c6c78;
+      text-align: right
+    }
+
+    .rpt-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px
+    }
+
+    .rpt-chip {
+      background: #f5f5f7;
+      border: 1px solid #e2e2e8;
+      border-radius: 999px;
+      padding: 4px 11px;
+      font-size: 12px;
+      color: #1d1d22
+    }
+
+    .rpt-chip b {
+      font-weight: 700
+    }
+
+    .rpt table {
+      border-collapse: collapse;
+      width: 100%;
+      table-layout: fixed;
+      font-size: 13px;
+      white-space: normal;
+      overflow-wrap: anywhere
+    }
+
+    .rpt th,
+    .rpt td {
+      border: 1px solid #e2e2e8;
+      padding: 7px 8px;
+      vertical-align: middle;
+      text-align: right;
+      background: #fff;
+      color: #1d1d22;
+      height: auto
+    }
+
+    .rpt thead th {
+      background: #f5f5f7;
+      color: #6c6c78;
+      font-weight: 700;
+      position: static
+    }
+
+    .rpt th:first-child,
+    .rpt td:first-child {
+      text-align: left
+    }
+
+    .rpt td.totalCol {
+      background: #fdecef;
+      font-weight: 700
+    }
+
+    .rpt tr.totalRow td {
+      background: #f5f5f7;
+      font-weight: 700
+    }
+
+    .rpt td.state-yellow {
+      background: #fef9c3;
+      color: #713f12;
+      font-weight: 700
+    }
+
+    .rpt .scroll {
+      overflow: visible;
+      max-height: none;
+      border: 0;
+      border-radius: 0;
+      background: #fff
+    }
+
+    .rpt-crit {
+      margin-top: 14px;
+      border: 1px solid #e2e2e8;
+      border-radius: 10px;
+      padding: 12px 14px;
+      background: #fafafb
+    }
+
+    .rpt-crit h3 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: #1d1d22
+    }
+
+    .rpt-crit ul {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 12.5px;
+      color: #1d1d22
+    }
+
+    .rpt-crit li {
+      margin: 2px 0
+    }
+
+    .rpt-sem {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 10px
+    }
+
+    .rpt-sem>div {
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      line-height: 1.35
+    }
+
+    .rpt-sem b {
+      display: block;
+      font-size: 12.5px;
+      margin-bottom: 2px
+    }
+
+    .rpt-sem .g {
+      background: #dcfce7;
+      color: #14532d
+    }
+
+    .rpt-sem .y {
+      background: #fef9c3;
+      color: #713f12
+    }
+
+    .rpt-sem .z {
+      background: #f5f5f7;
+      color: #1d1d22
+    }
+
+    @media(max-width:760px) {
+      .rptDialog {
+        max-height: 100%
+      }
+    }
+
+    @media print {
+      .rptModal {
+        display: none !important
+      }
+    }
+  </style>
+</head>
+
 <body>
-<div class="app">
-<aside class="np">
- <div class="logo"> <img src="https://www.icbfs.cl/wp-content/uploads/2022/02/logo-icbfs.png" alt="ICB Food Service" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'ICB Food Service'}))"><small>Registro PDT</small></div>
- <div class="nt">Turno</div>
- <div class="tabs" id="tabs"></div>
-</aside>
-<main>
- <div class="np">
-  <h1>Registro de uso de PDT</h1>
-  <p class="sub" id="info"></p>
-  <div class="form">
-   <button class="btn sm" id="pv" type="button" aria-label="Semana anterior">◀</button>
-   <label>Ir a la fecha<input type="date" id="dt"></label>
-   <button class="btn sm" id="nx" type="button" aria-label="Semana siguiente">▶</button>
+  <div class="app">
+    <aside class="np">
+      <div class="logo"> <img src="https://www.icbfs.cl/wp-content/uploads/2022/02/logo-icbfs.png"
+          alt="ICB Food Service"
+          onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'ICB Food Service'}))"><small>Registro
+          PDT</small></div>
+      <div class="nt">Turno</div>
+      <div class="tabs" id="tabs"></div>
+    </aside>
+    <main>
+      <div class="np">
+        <h1>Registro de uso de PDT</h1>
+        <p class="sub" id="info"></p>
+        <div class="form">
+          <button class="btn sm" id="pv" type="button" aria-label="Semana anterior">◀</button>
+          <label>Ir a la fecha<input type="date" id="dt"></label>
+          <button class="btn sm" id="nx" type="button" aria-label="Semana siguiente">▶</button>
+        </div>
+        <div class="bar">
+          <button class="btn pri" id="bp" type="button">🖨 Imprimir</button>
+          <button class="btn" id="bx" type="button">⬇ Exportar Excel</button>
+          <button class="btn" id="bcd" type="button">⬇ Detalle CSV</button>
+          <button class="btn" id="bcp" type="button">⬇ Planilla CSV</button>
+          <button class="btn pri" id="brp" type="button">📄 Generar reporte (PDF / imagen)</button>
+        </div>
+      </div>
+      <section class="sheet">
+        <h2><span class="badge" id="wk"></span>Registro semanal de usuarios</h2>
+        <div class="ptitle"><span><b>Turno:</b> <span id="tn"></span></span><span>
+            <h2 id="rg"></h2>
+          </span><span>
+            <h2>PDT</h2>
+          </span></div>
+        <div class="hint np" style="margin:4px 0 10px">Escribe el nombre o el código del colaborador. Se guarda solo al
+          salir de la celda. Amarillo = mismo colaborador en dos PDT el mismo día.</div>
+        <div class="wrapt">
+          <table>
+            <tbody id="tb"></tbody>
+          </table>
+        </div>
+      </section>
+      <datalist id="cl"></datalist>
+      <details class="np sheet">
+        <summary>Historial de cambios (últimos 60)</summary>
+        <div class="wrapt">
+          <table class="lg">
+            <thead>
+              <tr>
+                <th>Fecha y hora</th>
+                <th>Semana · Turno</th>
+                <th>Día</th>
+                <th>PDT</th>
+                <th>Cambio</th>
+              </tr>
+            </thead>
+            <tbody id="lg"></tbody>
+          </table>
+        </div>
+      </details>
+      <details class="np sheet">
+        <summary>Colaboradores (<span id="nc">0</span>)</summary>
+        <p class="hint">Uno por línea: <b>nombre</b> o <b>código;nombre</b>. También puedes importar la planilla Excel
+          de producción usando las columnas “Número de personal” (código) y “Nombre completo” (nombre).</p>
+        <textarea id="tc" aria-label="Colaboradores"></textarea>
+        <div class="bar" style="margin:8px 0 0"><button class="btn" id="sc" type="button">Guardar lista</button><button
+            class="btn" id="ic" type="button">📂 Importar Excel</button><input type="file" id="fx" accept=".xlsx,.xls"
+            style="display:none"></div>
+      </details>
+      <details class="np sheet">
+        <summary>Lista de PDT</summary>
+        <p class="hint">Uno por línea, en el orden en que aparecen en la planilla.</p>
+        <textarea id="tp" aria-label="PDT" style="min-height:160px"></textarea>
+        <div class="bar" style="margin:8px 0 0"><button class="btn" id="sp" type="button">Guardar PDT</button></div>
+      </details>
+      <details class="np sheet">
+        <summary>Respaldo</summary>
+        <p class="hint">Los datos quedan guardados en este navegador. Descarga un respaldo de vez en cuando o para
+          pasarlos a otro equipo.</p>
+        <div class="bar" style="margin:0"><button class="btn" id="bk" type="button">Descargar respaldo</button><button
+            class="btn" id="br" type="button">Cargar respaldo</button><input type="file" id="fr" accept=".json"
+            style="display:none"></div>
+      </details>
+    </main>
   </div>
-  <div class="bar">
-   <button class="btn pri" id="bp" type="button">🖨 Imprimir</button>
-   <button class="btn" id="bx" type="button">⬇ Exportar Excel</button>
-   <button class="btn" id="bcd" type="button">⬇ Detalle CSV</button>
-   <button class="btn" id="bcp" type="button">⬇ Planilla CSV</button>
-   <button class="btn pri" id="brp" type="button">📄 Generar reporte (PDF / imagen)</button>
+  <div class="rptModal np" id="rptModal" role="dialog" aria-modal="true" aria-label="Reporte">
+    <div class="rptDialog">
+      <div class="rptHead">
+        <h3 id="rptTitleTxt">Reporte</h3><button class="rptClose" id="rptClose" type="button"
+          aria-label="Cerrar">×</button>
+      </div>
+      <div class="rptPreview" id="rptPreview">
+        <div class="loading">Generando reporte…</div>
+      </div>
+      <div class="rptToast" id="rptToast"></div>
+      <div class="rptActions">
+        <button class="btn" id="rptPdf" type="button" disabled>⬇ Descargar PDF</button>
+        <button class="btn" id="rptPng" type="button" disabled>⬇ Descargar imagen</button>
+        <button class="btn" id="rptCopy" type="button" disabled>Copiar imagen</button>
+        <span class="sep"></span>
+        <button class="btn wa" id="rptWa" type="button" disabled>WhatsApp</button>
+        <button class="btn" id="rptMail" type="button" disabled>Email</button>
+      </div>
+    </div>
   </div>
- </div>
- <section class="sheet">
-  <h2><span class="badge" id="wk"></span>Registro semanal de usuarios</h2>
-  <div class="ptitle"><span><b>Turno:</b> <span id="tn"></span></span><span><h2 id="rg"></h2></span><span><h2>PDT</h2></span></div>
-  <div class="hint np" style="margin:4px 0 10px">Escribe el nombre o el código del colaborador. Se guarda solo al salir de la celda. Amarillo = mismo colaborador en dos PDT el mismo día.</div>
-  <div class="wrapt"><table><tbody id="tb"></tbody></table></div>
- </section>
- <datalist id="cl"></datalist>
- <details class="np sheet"><summary>Historial de cambios (últimos 60)</summary>
-  <div class="wrapt"><table class="lg"><thead><tr><th>Fecha y hora</th><th>Semana · Turno</th><th>Día</th><th>PDT</th><th>Cambio</th></tr></thead><tbody id="lg"></tbody></table></div>
- </details>
- <details class="np sheet"><summary>Colaboradores (<span id="nc">0</span>)</summary>
-  <p class="hint">Uno por línea: <b>nombre</b> o <b>código;nombre</b>. También puedes importar la planilla Excel de producción usando las columnas “Número de personal” (código) y “Nombre completo” (nombre).</p>
-  <textarea id="tc" aria-label="Colaboradores"></textarea>
-  <div class="bar" style="margin:8px 0 0"><button class="btn" id="sc" type="button">Guardar lista</button><button class="btn" id="ic" type="button">📂 Importar Excel</button><input type="file" id="fx" accept=".xlsx,.xls" style="display:none"></div>
- </details>
- <details class="np sheet"><summary>Lista de PDT</summary>
-  <p class="hint">Uno por línea, en el orden en que aparecen en la planilla.</p>
-  <textarea id="tp" aria-label="PDT" style="min-height:160px"></textarea>
-  <div class="bar" style="margin:8px 0 0"><button class="btn" id="sp" type="button">Guardar PDT</button></div>
- </details>
- <details class="np sheet"><summary>Respaldo</summary>
-  <p class="hint">Los datos quedan guardados en este navegador. Descarga un respaldo de vez en cuando o para pasarlos a otro equipo.</p>
-  <div class="bar" style="margin:0"><button class="btn" id="bk" type="button">Descargar respaldo</button><button class="btn" id="br" type="button">Cargar respaldo</button><input type="file" id="fr" accept=".json" style="display:none"></div>
- </details>
-</main></div>
-<div class="rptModal np" id="rptModal" role="dialog" aria-modal="true" aria-label="Reporte">
-<div class="rptDialog">
-<div class="rptHead"><h3 id="rptTitleTxt">Reporte</h3><button class="rptClose" id="rptClose" type="button" aria-label="Cerrar">×</button></div>
-<div class="rptPreview" id="rptPreview"><div class="loading">Generando reporte…</div></div>
-<div class="rptToast" id="rptToast"></div>
-<div class="rptActions">
-<button class="btn" id="rptPdf" type="button" disabled>⬇ Descargar PDF</button>
-<button class="btn" id="rptPng" type="button" disabled>⬇ Descargar imagen</button>
-<button class="btn" id="rptCopy" type="button" disabled>Copiar imagen</button>
-<span class="sep"></span>
-<button class="btn wa" id="rptWa" type="button" disabled>WhatsApp</button>
-<button class="btn" id="rptMail" type="button" disabled>Email</button>
-</div></div></div>
-<div class="toast" id="toast"></div>
-<script>
-const $=id=>document.getElementById(id),p2=n=>String(n).padStart(2,"0");
-const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const DEFC=[{"c": "927", "n": "Alexander Ramón Nava Santos"}, {"c": "996", "n": "Alfonso Alberto Ibáñez Rojas"}, {"c": "858", "n": "Álvaro Ignacio Acevedo Flores"}, {"c": "850", "n": "Bastián Alejandro Fritz Navea"}, {"c": "411", "n": "Caballero Terraza Brayan Nair FSEX"}, {"c": "932", "n": "Carlos Alejandro Huinca Huinca"}, {"c": "597", "n": "Carlos Alonso Uzieda Venegas"}, {"c": "556", "n": "Carlos Gallardo"}, {"c": "873", "n": "Cristian Andrés Ampuero Ampuero"}, {"c": "825", "n": "Cristián Fucha Painepe"}, {"c": "877", "n": "Danys Hernández López"}, {"c": "952", "n": "Diego Martínez Martin"}, {"c": "586", "n": "Diego Méndez Díaz"}, {"c": "878", "n": "Fabián Alfonso Arcos Tobar"}, {"c": "514", "n": "Felipe Giroz Troncoso"}, {"c": "859", "n": "Felipe Martínez de la Fuente"}, {"c": "946", "n": "Franco Acuña Pérez"}, {"c": "302", "n": "Fredy Aravena"}, {"c": "856", "n": "Gaidar David Rodríguez Zambrano"}, {"c": "824", "n": "Germán Abarca"}, {"c": "819", "n": "Italo Escudero"}, {"c": "894", "n": "Jack Vela Mazanet"}, {"c": "524", "n": "Jean Pierre Zamora Marín"}, {"c": "898", "n": "Jesús Gómez Muñoz"}, {"c": "816", "n": "Joel Alexis Guerrero Balcarcel"}, {"c": "399", "n": "Jonas Alejandro Cerda Belkerbach"}, {"c": "35", "n": "Jorge García (FS)"}, {"c": "130", "n": "Juan Carlos Rupayan"}, {"c": "976", "n": "Julio Adrián Santis Hidalgo"}, {"c": "895", "n": "Luis Galaz Farfán"}, {"c": "116", "n": "Luis Rodriguez"}, {"c": "451", "n": "Manuel Araneda"}, {"c": "13", "n": "Manuel Salas [FS]"}, {"c": "535", "n": "MARCELO LEVIN BASCUR"}, {"c": "857", "n": "Marcos Jesús Burgos Hurtado"}, {"c": "499", "n": "Mauricio Olivas Fuentes"}, {"c": "971", "n": "Nicolás Werlinger Villagrán"}, {"c": "974", "n": "Paolo Gallardo Pinto"}, {"c": "521", "n": "Patricio Rivera Gómez"}, {"c": "101", "n": "Patricio Vásquez (FS)"}, {"c": "846", "n": "Rafael Galavis Rausseo"}, {"c": "899", "n": "Raúl Urbina"}, {"c": "582", "n": "Rober Rafael Ventura Boscán"}, {"c": "812", "n": "Roberto Esteban Malhue Pavez"}, {"c": "930", "n": "Roberto Francisco Lorca Meneses"}, {"c": "949", "n": "Rodrigo Antonio Barrera Riquelme"}, {"c": "504", "n": "Sebastian Cardenas Nitschke"}, {"c": "835", "n": "Sebastián Dario Verazierta Moreno"}, {"c": "855", "n": "Sebastián Ignacio Flores Rebolledo"}, {"c": "854", "n": "Sebastián Videla Benítez"}, {"c": "240", "n": "SONNIA JEAN LOUIS"}, {"c": "123456", "n": "Termino de turno"}, {"c": "99999999", "n": "Termino turno"}, {"c": "843", "n": "Vicente Olivero Marilao"}, {"c": "172", "n": "victor cifuentes"}, {"c": "983", "n": "Víctor Manuel López Soto"}, {"c": "823", "n": "Yair Vega"}, {"c": "841", "n": "Yolanda Fory Aragón"}, {"c": "123456", "n": "Grúa en Entrenamiento"}];
-const LS="icb_pdt_v1",DN=["LUNES","MARTES","MIÉRCOLES","JUEVES","VIERNES","SÁBADO"],TU=["Mañana","Tarde","Noche"];
-const DEF=["PDTFMAULEN04","PDTFMAULEN05","PDTFMAULEN10","PDTFMAULEN12","PDTFMAULEN15","PDTFMAULEN33","PDTFMAULEN37","PDTFMAULEN41","PDTFMAULEN45","PDTFMAULEN50","10.32.14.11","10.32.14.13","10.32.14.21","10.32.14.22","10.32.14.24","10.32.14.27","10.32.14.32","10.32.14.34","10.32.14.39","10.32.14.44","10.32.14.46","10.32.14.6"];
-let S={};try{S=JSON.parse(localStorage.getItem(LS))||{}}catch(e){}
-S=Object.assign({collab:DEFC,pdts:DEF,reg:{},log:[],turno:""},S);
-S.pdts=[...new Set([...(Array.isArray(S.pdts)?S.pdts:[]),...DEF].map(x=>String(x).trim()).filter(Boolean))];
-if(!S.turno){const h=new Date().getHours();S.turno=h>=6&&h<14?"Mañana":h>=14&&h<22?"Tarde":"Noche"}
-const save=()=>{try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){toast("No se pudo guardar en este navegador")}};
-let tt;function toast(m){const t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),3500)}
-function download(n,b){const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=n;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000)}
-/* fechas ISO */
-const add=(d,n)=>new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);
-const fd=d=>p2(d.getDate())+"/"+p2(d.getMonth()+1);
-const ymd=d=>d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate());
-function isoWeek(d){const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())),n=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-n);const y=t.getUTCFullYear();return y+"-W"+p2(Math.ceil(((t-Date.UTC(y,0,1))/864e5+1)/7))}
-function monOf(k){const[y,w]=k.split("-W").map(Number),j=new Date(y,0,4);return new Date(y,0,4-(j.getDay()+6)%7+(w-1)*7)}
-let mon=monOf(isoWeek(new Date()));
-const wkKey=()=>isoWeek(mon),days=()=>[0,1,2,3,4,5].map(i=>add(mon,i)),rkey=()=>wkKey()+"|"+S.turno;
-/* colaboradores */
-const parseC=t=>t.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{const m=l.split(/[;\t]/);return m.length>1?{c:m[0].trim(),n:m.slice(1).join(" ").trim()}:{c:"",n:l}}).filter(x=>x.n);
-const fmtC=a=>a.map(x=>x.c?x.c+";"+x.n:x.n).join("\n");
-function resolve(v){v=v.trim();if(!v)return"";const c=S.collab.find(x=>x.c&&x.c===v)||S.collab.find(x=>x.n.toLowerCase()===v.toLowerCase());return c?c.n:v}
-function drawTabs(){$("tabs").innerHTML=TU.map(t=>{const n=Object.keys(S.reg[wkKey()+"|"+t]||{}).length;return '<button class="tab'+(t===S.turno?" on":"")+'" data-t="'+t+'" type="button">'+t+'<small>'+n+'</small></button>'}).join("")}
-/* render */
-function render(){
-  const ds=days(),r=S.reg[rkey()]||{};
-  drawTabs();
-  $("dt").value=ymd(mon);$("wk").textContent="S"+wkKey().slice(-2);$("tn").textContent=S.turno;$("rg").textContent=fd(ds[0])+" – "+fd(ds[5])+"/"+ds[5].getFullYear();
-  $("info").textContent="Semana "+wkKey().slice(-2)+" · Turno "+S.turno.toLowerCase()+" · del "+fd(ds[0])+" al "+fd(ds[5])+"/"+ds[5].getFullYear();
-  let h='<thead><tr><th rowspan="2" class="pdt">PDT</th>'+ds.map((d,i)=>'<th><span class="dayhead"><span>'+DN[i]+'&#xA0;· </span><span class="date">'+fd(d)+'</span></span></th>').join("")+"</tr><tr>"+ds.map(()=>'<th class="u">USUARIO</th>').join("")+"</tr></thead>";
-  S.pdts.forEach(p=>{h+='<tr><th class="pdt">'+esc(p)+"</th>";for(let i=0;i<6;i++){const v=r[p+"|"+i]||"";h+='<td><input list="cl" data-p="'+esc(p)+'" data-d="'+i+'" value="'+esc(v)+'" autocomplete="off"><span class="pt">'+esc(v)+"</span></td>"}h+="</tr>"});
-  $("tb").innerHTML=h;markDup();renderLog();
-  $("cl").innerHTML=S.collab.map(x=>'<option value="'+esc(x.n)+'"'+(x.c?' label="'+esc(x.c)+'"':"")+">").join("");
-  $("tc").value=fmtC(S.collab);$("tp").value=S.pdts.join("\n");$("nc").textContent=S.collab.length;
-}
-function markDup(){
-  const I=[...document.querySelectorAll("#tb input")],c={};
-  I.forEach(i=>{const v=i.value.trim().toLowerCase();if(v){const k=i.dataset.d+"|"+v;c[k]=(c[k]||0)+1}});
-  I.forEach(i=>{const v=i.value.trim().toLowerCase();i.parentNode.classList.toggle("dup",!!v&&c[i.dataset.d+"|"+v]>1)});
-}
-function renderLog(){
-  const L=S.log.slice(-60).reverse();
-  $("lg").innerHTML=L.length?L.map(x=>"<tr><td>"+new Date(x.t).toLocaleString("es-CL")+"</td><td>S"+x.w.slice(-2)+" · "+esc(x.tu)+"</td><td>"+esc(x.f)+"</td><td>"+esc(x.p)+"</td><td>"+esc(x.a||"—")+" → "+esc(x.b||"(vacío)")+"</td></tr>").join(""):'<tr><td colspan="5" class="hint">Sin cambios todavía.</td></tr>';
-}
-$("tb").addEventListener("change",e=>{
-  const i=e.target;if(!i.dataset.p)return;
-  const v=resolve(i.value),k=i.dataset.p+"|"+i.dataset.d,rk=rkey(),r=S.reg[rk]||(S.reg[rk]={}),old=r[k]||"";
-  i.value=v;i.nextSibling.textContent=v;if(v===old)return;
-  v?r[k]=v:delete r[k];
-  S.log.push({t:new Date().toISOString(),w:wkKey(),tu:S.turno,f:DN[i.dataset.d]+" "+fd(add(mon,+i.dataset.d)),p:i.dataset.p,a:old,b:v});
-  if(S.log.length>3000)S.log=S.log.slice(-3000);
-  save();markDup();renderLog();drawTabs();
-});
-/* navegación */
-$("pv").onclick=()=>{mon=add(mon,-7);render()};$("nx").onclick=()=>{mon=add(mon,7);render()};
-$("dt").onchange=()=>{const d=new Date($("dt").value+"T00:00");if(!isNaN(d)){mon=monOf(isoWeek(d));render()}};
-$("tabs").onclick=e=>{const b=e.target.closest(".tab");if(b){S.turno=b.dataset.t;save();render()}};
-$("bp").onclick=()=>window.print();
-/* configuración */
-$("sc").onclick=()=>{S.collab=parseC($("tc").value);save();render();toast(S.collab.length+" colaborador(es) guardados")};
-$("sp").onclick=()=>{const a=[...new Set($("tp").value.split("\n").map(x=>x.trim()).filter(Boolean))];if(!a.length)return toast("Agrega al menos un PDT");S.pdts=a;save();render();toast("Lista de PDT guardada")};
-$("ic").onclick=()=>window.XLSX?$("fx").click():toast("Para leer Excel se necesita conexión a internet");
-$("fx").onchange=async e=>{
-  const f=e.target.files[0];e.target.value="";if(!f)return;
-  try{
-    const wb=XLSX.read(await f.arrayBuffer(),{type:"array"}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:""}),H=(rows[0]||[]).map(x=>String(x).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim().toLowerCase());
-    const ci=H.findIndex(x=>x==="numero de personal"),ni=H.findIndex(x=>x==="nombre completo"),s=1;
-    if(ni<0||ci<0)return toast('No encontré las columnas “Número de personal” y “Nombre completo”');
-    const seen=new Set(),out=[];
-    for(let r=s;r<rows.length;r++){const n=String(rows[r][ni]||"").trim();if(!n||seen.has(n.toLowerCase()))continue;seen.add(n.toLowerCase());out.push({c:ci>=0?String(rows[r][ci]||"").trim():"",n})}
-    if(!out.length)return toast("No encontré nombres en el archivo");
-    out.sort((a,b)=>a.n.localeCompare(b.n));S.collab=out;save();render();toast(out.length+" colaboradores importados")
-  }catch(err){toast("No se pudo leer el archivo: "+err.message)}
-};
-/* exportar */
-function flat(){
-  const o=[];
-  for(const k in S.reg){const[w,tu]=k.split("|"),m=monOf(w);for(const kk in S.reg[k]){const[p,d]=kk.split("|"),dt=add(m,+d);o.push([ymd(dt),w.slice(-2),tu,DN[d],p,S.reg[k][kk]])}}
-  return o.sort((a,b)=>(a[0]+a[2]+a[4]).localeCompare(b[0]+b[2]+b[4]));
-}
-$("bx").onclick=()=>{
-  const F=[["Fecha","Semana","Turno","Día","PDT","Colaborador"],...flat()];
-  if(!window.XLSX)return download("registro_pdt.csv",new Blob(["\ufeff"+F.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(";")).join("\n")],{type:"text/csv;charset=utf-8"}));
-  const ds=days(),r=S.reg[rkey()]||{},sn="S"+wkKey().slice(-2)+" "+S.turno;
-  const M=[["PDT",...ds.map((d,i)=>DN[i]+" "+fd(d))],["",...ds.map(()=>"USUARIO")],...S.pdts.map(p=>[p,...ds.map((_,i)=>r[p+"|"+i]||"")])];
-  const L=[["Fecha y hora","Semana","Turno","Día","PDT","Antes","Después"],...S.log.map(x=>[new Date(x.t).toLocaleString("es-CL"),x.w.slice(-2),x.tu,x.f,x.p,x.a,x.b])];
-  const wb=XLSX.utils.book_new();
-  [[M,sn],[F,"Registros"],[L,"Historial"]].forEach(([a,n])=>XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(a),n));
-  XLSX.writeFile(wb,"PDT_"+sn.replace(" ","_")+".xlsx");
-};
-/* respaldo */
-$("bk").onclick=()=>download("registro_pdt_respaldo_"+ymd(new Date())+".json",new Blob([JSON.stringify(S)],{type:"application/json"}));
-$("br").onclick=()=>$("fr").click();
-$("fr").onchange=async e=>{
-  const f=e.target.files[0];e.target.value="";if(!f)return;
-  try{const o=JSON.parse(await f.text());if(!o||typeof o.reg!=="object")throw new Error("formato no válido");
-    if(!confirm("Se reemplazarán los datos de este equipo por los del respaldo. ¿Continuar?"))return;
-    S=Object.assign(S,o);save();render();toast("Respaldo cargado")}catch(err){toast("No se pudo cargar: "+err.message)}
-};
-render();
+  <div class="toast" id="toast"></div>
+  <script>
+    const $ = id => document.getElementById(id), p2 = n => String(n).padStart(2, "0");
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+    const DEFC = [{"c": "927", "n": "Alexander Ramón Nava Santos"}, {"c": "996", "n": "Alfonso Alberto Ibáñez Rojas"}, {"c": "858", "n": "Álvaro Ignacio Acevedo Flores"}, {"c": "850", "n": "Bastián Alejandro Fritz Navea"}, {"c": "411", "n": "Caballero Terraza Brayan Nair FSEX"}, {"c": "932", "n": "Carlos Alejandro Huinca Huinca"}, {"c": "597", "n": "Carlos Alonso Uzieda Venegas"}, {"c": "556", "n": "Carlos Gallardo"}, {"c": "873", "n": "Cristian Andrés Ampuero Ampuero"}, {"c": "825", "n": "Cristián Fucha Painepe"}, {"c": "877", "n": "Danys Hernández López"}, {"c": "952", "n": "Diego Martínez Martin"}, {"c": "586", "n": "Diego Méndez Díaz"}, {"c": "878", "n": "Fabián Alfonso Arcos Tobar"}, {"c": "514", "n": "Felipe Giroz Troncoso"}, {"c": "859", "n": "Felipe Martínez de la Fuente"}, {"c": "946", "n": "Franco Acuña Pérez"}, {"c": "302", "n": "Fredy Aravena"}, {"c": "856", "n": "Gaidar David Rodríguez Zambrano"}, {"c": "824", "n": "Germán Abarca"}, {"c": "819", "n": "Italo Escudero"}, {"c": "894", "n": "Jack Vela Mazanet"}, {"c": "524", "n": "Jean Pierre Zamora Marín"}, {"c": "898", "n": "Jesús Gómez Muñoz"}, {"c": "816", "n": "Joel Alexis Guerrero Balcarcel"}, {"c": "399", "n": "Jonas Alejandro Cerda Belkerbach"}, {"c": "35", "n": "Jorge García (FS)"}, {"c": "130", "n": "Juan Carlos Rupayan"}, {"c": "976", "n": "Julio Adrián Santis Hidalgo"}, {"c": "895", "n": "Luis Galaz Farfán"}, {"c": "116", "n": "Luis Rodriguez"}, {"c": "451", "n": "Manuel Araneda"}, {"c": "13", "n": "Manuel Salas [FS]"}, {"c": "535", "n": "MARCELO LEVIN BASCUR"}, {"c": "857", "n": "Marcos Jesús Burgos Hurtado"}, {"c": "499", "n": "Mauricio Olivas Fuentes"}, {"c": "971", "n": "Nicolás Werlinger Villagrán"}, {"c": "974", "n": "Paolo Gallardo Pinto"}, {"c": "521", "n": "Patricio Rivera Gómez"}, {"c": "101", "n": "Patricio Vásquez (FS)"}, {"c": "846", "n": "Rafael Galavis Rausseo"}, {"c": "899", "n": "Raúl Urbina"}, {"c": "582", "n": "Rober Rafael Ventura Boscán"}, {"c": "812", "n": "Roberto Esteban Malhue Pavez"}, {"c": "930", "n": "Roberto Francisco Lorca Meneses"}, {"c": "949", "n": "Rodrigo Antonio Barrera Riquelme"}, {"c": "504", "n": "Sebastian Cardenas Nitschke"}, {"c": "835", "n": "Sebastián Dario Verazierta Moreno"}, {"c": "855", "n": "Sebastián Ignacio Flores Rebolledo"}, {"c": "854", "n": "Sebastián Videla Benítez"}, {"c": "240", "n": "SONNIA JEAN LOUIS"}, {"c": "123456", "n": "Termino de turno"}, {"c": "99999999", "n": "Termino turno"}, {"c": "843", "n": "Vicente Olivero Marilao"}, {"c": "172", "n": "victor cifuentes"}, {"c": "983", "n": "Víctor Manuel López Soto"}, {"c": "823", "n": "Yair Vega"}, {"c": "841", "n": "Yolanda Fory Aragón"}, {"c": "123456", "n": "Grúa en Entrenamiento"}];
+    const LS = "icb_pdt_v1", DN = ["LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO"], TU = ["Mañana", "Tarde", "Noche"];
+    const DEF = ["PDTFMAULEN04", "PDTFMAULEN05", "PDTFMAULEN10", "PDTFMAULEN12", "PDTFMAULEN15", "PDTFMAULEN33", "PDTFMAULEN37", "PDTFMAULEN41", "PDTFMAULEN45", "PDTFMAULEN50", "10.32.14.11", "10.32.14.13", "10.32.14.21", "10.32.14.22", "10.32.14.24", "10.32.14.27", "10.32.14.32", "10.32.14.34", "10.32.14.39", "10.32.14.44", "10.32.14.46", "10.32.14.6"];
+    let S = {}; try {S = JSON.parse(localStorage.getItem(LS)) || {}} catch (e) { }
+    S = Object.assign({collab: DEFC, pdts: DEF, reg: {}, log: [], turno: ""}, S);
+    S.pdts = [...new Set([...(Array.isArray(S.pdts) ? S.pdts : []), ...DEF].map(x => String(x).trim()).filter(Boolean))];
+    if (!S.turno) {const h = new Date().getHours(); S.turno = h >= 6 && h < 14 ? "Mañana" : h >= 14 && h < 22 ? "Tarde" : "Noche"}
+    const save = () => {try {localStorage.setItem(LS, JSON.stringify(S))} catch (e) {toast("No se pudo guardar en este navegador")} };
+    let tt; function toast(m) {const t = $("toast"); t.textContent = m; t.classList.add("on"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("on"), 3500)}
+    function download(n, b) {const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = n; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 3000)}
+    /* fechas ISO */
+    const add = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+    const fd = d => p2(d.getDate()) + "/" + p2(d.getMonth() + 1);
+    const ymd = d => d.getFullYear() + "-" + p2(d.getMonth() + 1) + "-" + p2(d.getDate());
+    function isoWeek(d) {const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())), n = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - n); const y = t.getUTCFullYear(); return y + "-W" + p2(Math.ceil(((t - Date.UTC(y, 0, 1)) / 864e5 + 1) / 7))}
+    function monOf(k) {const [y, w] = k.split("-W").map(Number), j = new Date(y, 0, 4); return new Date(y, 0, 4 - (j.getDay() + 6) % 7 + (w - 1) * 7)}
+    let mon = monOf(isoWeek(new Date()));
+    const wkKey = () => isoWeek(mon), days = () => [0, 1, 2, 3, 4, 5].map(i => add(mon, i)), rkey = () => wkKey() + "|" + S.turno;
+    /* colaboradores */
+    const parseC = t => t.split("\n").map(l => l.trim()).filter(Boolean).map(l => {const m = l.split(/[;\t]/); return m.length > 1 ? {c: m[0].trim(), n: m.slice(1).join(" ").trim()} : {c: "", n: l}}).filter(x => x.n);
+    const fmtC = a => a.map(x => x.c ? x.c + ";" + x.n : x.n).join("\n");
+    function resolve(v) {v = v.trim(); if (!v) return ""; const c = S.collab.find(x => x.c && x.c === v) || S.collab.find(x => x.n.toLowerCase() === v.toLowerCase()); return c ? c.n : v}
+    function drawTabs() {$("tabs").innerHTML = TU.map(t => {const n = Object.keys(S.reg[wkKey() + "|" + t] || {}).length; return '<button class="tab' + (t === S.turno ? " on" : "") + '" data-t="' + t + '" type="button">' + t + '<small>' + n + '</small></button>'}).join("")}
+    /* render */
+    function render() {
+      const ds = days(), r = S.reg[rkey()] || {};
+      drawTabs();
+      $("dt").value = ymd(mon); $("wk").textContent = "S" + wkKey().slice(-2); $("tn").textContent = S.turno; $("rg").textContent = fd(ds[0]) + " – " + fd(ds[5]) + "/" + ds[5].getFullYear();
+      $("info").textContent = "Semana " + wkKey().slice(-2) + " · Turno " + S.turno.toLowerCase() + " · del " + fd(ds[0]) + " al " + fd(ds[5]) + "/" + ds[5].getFullYear();
+      let h = '<thead><tr><th rowspan="2" class="pdt">PDT</th>' + ds.map((d, i) => '<th><span class="dayhead"><span>' + DN[i] + '&#xA0;· </span><span class="date">' + fd(d) + '</span></span></th>').join("") + "</tr><tr>" + ds.map(() => '<th class="u">USUARIO</th>').join("") + "</tr></thead>";
+      S.pdts.forEach(p => {h += '<tr><th class="pdt">' + esc(p) + "</th>"; for (let i = 0; i < 6; i++) {const v = r[p + "|" + i] || ""; h += '<td><input list="cl" data-p="' + esc(p) + '" data-d="' + i + '" value="' + esc(v) + '" autocomplete="off"><span class="pt">' + esc(v) + "</span></td>"} h += "</tr>"});
+      $("tb").innerHTML = h; markDup(); renderLog();
+      $("cl").innerHTML = S.collab.map(x => '<option value="' + esc(x.n) + '"' + (x.c ? ' label="' + esc(x.c) + '"' : "") + ">").join("");
+      $("tc").value = fmtC(S.collab); $("tp").value = S.pdts.join("\n"); $("nc").textContent = S.collab.length;
+    }
+    function markDup() {
+      const I = [...document.querySelectorAll("#tb input")], c = {};
+      I.forEach(i => {const v = i.value.trim().toLowerCase(); if (v) {const k = i.dataset.d + "|" + v; c[k] = (c[k] || 0) + 1} });
+      I.forEach(i => {const v = i.value.trim().toLowerCase(); i.parentNode.classList.toggle("dup", !!v && c[i.dataset.d + "|" + v] > 1)});
+    }
+    function renderLog() {
+      const L = S.log.slice(-60).reverse();
+      $("lg").innerHTML = L.length ? L.map(x => "<tr><td>" + new Date(x.t).toLocaleString("es-CL") + "</td><td>S" + x.w.slice(-2) + " · " + esc(x.tu) + "</td><td>" + esc(x.f) + "</td><td>" + esc(x.p) + "</td><td>" + esc(x.a || "—") + " → " + esc(x.b || "(vacío)") + "</td></tr>").join("") : '<tr><td colspan="5" class="hint">Sin cambios todavía.</td></tr>';
+    }
+    $("tb").addEventListener("change", e => {
+      const i = e.target; if (!i.dataset.p) return;
+      const v = resolve(i.value), k = i.dataset.p + "|" + i.dataset.d, rk = rkey(), r = S.reg[rk] || (S.reg[rk] = {}), old = r[k] || "";
+      i.value = v; i.nextSibling.textContent = v; if (v === old) return;
+      v ? r[k] = v : delete r[k];
+      S.log.push({t: new Date().toISOString(), w: wkKey(), tu: S.turno, f: DN[i.dataset.d] + " " + fd(add(mon, +i.dataset.d)), p: i.dataset.p, a: old, b: v});
+      if (S.log.length > 3000) S.log = S.log.slice(-3000);
+      save(); markDup(); renderLog(); drawTabs();
+    });
+    /* navegación */
+    $("pv").onclick = () => {mon = add(mon, -7); render()}; $("nx").onclick = () => {mon = add(mon, 7); render()};
+    $("dt").onchange = () => {const d = new Date($("dt").value + "T00:00"); if (!isNaN(d)) {mon = monOf(isoWeek(d)); render()} };
+    $("tabs").onclick = e => {const b = e.target.closest(".tab"); if (b) {S.turno = b.dataset.t; save(); render()} };
+    $("bp").onclick = () => window.print();
+    /* configuración */
+    $("sc").onclick = () => {S.collab = parseC($("tc").value); save(); render(); toast(S.collab.length + " colaborador(es) guardados")};
+    $("sp").onclick = () => {const a = [...new Set($("tp").value.split("\n").map(x => x.trim()).filter(Boolean))]; if (!a.length) return toast("Agrega al menos un PDT"); S.pdts = a; save(); render(); toast("Lista de PDT guardada")};
+    $("ic").onclick = () => window.XLSX ? $("fx").click() : toast("Para leer Excel se necesita conexión a internet");
+    $("fx").onchange = async e => {
+      const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+      try {
+        const wb = XLSX.read(await f.arrayBuffer(), {type: "array"}), rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1, defval: ""}), H = (rows[0] || []).map(x => String(x).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim().toLowerCase());
+        const ci = H.findIndex(x => x === "numero de personal"), ni = H.findIndex(x => x === "nombre completo"), s = 1;
+        if (ni < 0 || ci < 0) return toast('No encontré las columnas “Número de personal” y “Nombre completo”');
+        const seen = new Set(), out = [];
+        for (let r = s; r < rows.length; r++) {const n = String(rows[r][ni] || "").trim(); if (!n || seen.has(n.toLowerCase())) continue; seen.add(n.toLowerCase()); out.push({c: ci >= 0 ? String(rows[r][ci] || "").trim() : "", n})}
+        if (!out.length) return toast("No encontré nombres en el archivo");
+        out.sort((a, b) => a.n.localeCompare(b.n)); S.collab = out; save(); render(); toast(out.length + " colaboradores importados")
+      } catch (err) {toast("No se pudo leer el archivo: " + err.message)}
+    };
+    /* exportar */
+    function flat() {
+      const o = [];
+      for (const k in S.reg) {const [w, tu] = k.split("|"), m = monOf(w); for (const kk in S.reg[k]) {const [p, d] = kk.split("|"), dt = add(m, +d); o.push([ymd(dt), w.slice(-2), tu, DN[d], p, S.reg[k][kk]])} }
+      return o.sort((a, b) => (a[0] + a[2] + a[4]).localeCompare(b[0] + b[2] + b[4]));
+    }
+    $("bx").onclick = () => {
+      const F = [["Fecha", "Semana", "Turno", "Día", "PDT", "Colaborador"], ...flat()];
+      if (!window.XLSX) return download("registro_pdt.csv", new Blob(["\ufeff" + F.map(r => r.map(x => '"' + String(x).replace(/"/g, '""') + '"').join(";")).join("\n")], {type: "text/csv;charset=utf-8"}));
+      const ds = days(), r = S.reg[rkey()] || {}, sn = "S" + wkKey().slice(-2) + " " + S.turno;
+      const M = [["PDT", ...ds.map((d, i) => DN[i] + " " + fd(d))], ["", ...ds.map(() => "USUARIO")], ...S.pdts.map(p => [p, ...ds.map((_, i) => r[p + "|" + i] || "")])];
+      const L = [["Fecha y hora", "Semana", "Turno", "Día", "PDT", "Antes", "Después"], ...S.log.map(x => [new Date(x.t).toLocaleString("es-CL"), x.w.slice(-2), x.tu, x.f, x.p, x.a, x.b])];
+      const wb = XLSX.utils.book_new();
+      [[M, sn], [F, "Registros"], [L, "Historial"]].forEach(([a, n]) => XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(a), n));
+      XLSX.writeFile(wb, "PDT_" + sn.replace(" ", "_") + ".xlsx");
+    };
+    /* respaldo */
+    $("bk").onclick = () => download("registro_pdt_respaldo_" + ymd(new Date()) + ".json", new Blob([JSON.stringify(S)], {type: "application/json"}));
+    $("br").onclick = () => $("fr").click();
+    $("fr").onchange = async e => {
+      const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+      try {
+        const o = JSON.parse(await f.text()); if (!o || typeof o.reg !== "object") throw new Error("formato no válido");
+        if (!confirm("Se reemplazarán los datos de este equipo por los del respaldo. ¿Continuar?")) return;
+        S = Object.assign(S, o); save(); render(); toast("Respaldo cargado")
+      } catch (err) {toast("No se pudo cargar: " + err.message)}
+    };
+    render();
 
-/* ===== CSV ===== */
-function csvDown(n,rows){download(n,new Blob(["\ufeff"+rows.map(r=>r.map(x=>'"'+String(x==null?"":x).replace(/"/g,'""')+'"').join(";")).join("\n")],{type:"text/csv;charset=utf-8"}))}
-$("bcd").onclick=()=>csvDown("detalle_registro_pdt.csv",[["Fecha","Semana","Turno","Día","PDT","Colaborador"],...flat()]);
-$("bcp").onclick=()=>{const ds=days(),r=S.reg[rkey()]||{};csvDown("planilla_pdt_S"+wkKey().slice(-2)+"_"+S.turno+".csv",[["PDT",...ds.map((d,i)=>DN[i]+" "+fd(d))],...S.pdts.map(p=>[p,...ds.map((_,i)=>r[p+"|"+i]||"")])])};
-/* ===== REPORTE PDF / IMAGEN ===== */
-function specPdt(){
-  const ds=days(),r=S.reg[rkey()]||{},c={},wk=wkKey().slice(-2);
-  for(const k in r){const[p,d]=k.split("|"),v=String(r[k]).trim().toLowerCase();if(v){const kk=d+"|"+v;c[kk]=(c[kk]||0)+1}}
-  let n=0,nd=0;const tot=ds.map(()=>0),slots=S.pdts.length*6;
-  let t='<div class="scroll"><table><colgroup><col style="width:150px">'+ds.map(()=>"<col>").join("")+'<col style="width:90px"></colgroup><thead><tr><th>PDT</th>'+ds.map((d,i)=>'<th style="text-align:center">'+DN[i]+" "+fd(d)+"</th>").join("")+'<th>Días con registro</th></tr></thead><tbody>';
-  S.pdts.forEach(p=>{let u=0;t+="<tr><td>"+esc(p)+"</td>";
-    ds.forEach((_,i)=>{const v=String(r[p+"|"+i]||"").trim(),dup=v&&c[i+"|"+v.toLowerCase()]>1;
-      if(v){u++;tot[i]++;n++;if(dup)nd++}
-      t+='<td class="'+(dup?"state-yellow":"")+'" style="text-align:center">'+esc(v)+"</td>"});
-    t+='<td class="totalCol">'+u+"</td></tr>"});
-  t+='<tr class="totalRow"><td>Total registros</td>'+tot.map(v=>'<td style="text-align:center">'+v+"</td>").join("")+"<td>"+n+"</td></tr></tbody></table></div>";
-  const per=fd(ds[0])+" – "+fd(ds[5])+"/"+ds[5].getFullYear();
-  const crit='<div class="rpt-crit"><h3>Cómo leer el reporte</h3><ul><li><b>Período:</b> semana '+wk+", "+per+" · turno "+esc(S.turno.toLowerCase())+".</li><li>Cada celda muestra el colaborador que usó ese PDT ese día.</li><li><b>Total registros</b> = celdas con colaborador asignado.</li><li><b>Duplicado:</b> el mismo colaborador figura en dos PDT el mismo día.</li></ul>"
-   +'<div class="rpt-sem"><div class="g"><b>REGISTRADO</b>PDT con colaborador · '+n+'</div><div class="y"><b>DUPLICADO</b>Mismo colaborador en 2 PDT el mismo día · '+nd+' celda(s)</div><div class="z"><b>SIN REGISTRO</b>PDT sin colaborador · '+(slots-n)+"</div></div></div>";
-  return{title:"Registro de uso de PDT",ctx:[["Semana","S"+wk],["Turno",S.turno],["Período",per],["Registros",n+" de "+slots]],table:t,crit,width:1360,
-    base:["Reporte","PDT","S"+wk,S.turno],shareText:"Reporte registro de uso de PDT · Semana "+wk+" · Turno "+S.turno+" · "+per};
-}
-function rptHTML(s){
-  const now=new Date().toLocaleString("es-CL",{dateStyle:"medium",timeStyle:"short"});
-  return '<div class="rpt" style="width:'+s.width+'px"><div class="rpt-top"><div><div class="b">ICB Food Service</div><h1>'+esc(s.title)+'</h1></div><div class="d">Generado: '+esc(now)+'</div></div><div class="rpt-chips">'+s.ctx.map(([k,v])=>'<span class="rpt-chip">'+esc(k)+": <b>"+esc(v)+"</b></span>").join("")+"</div>"+s.table+s.crit+"</div>";
-}
-let rptState=null;
-const rptToast=t=>{$("rptToast").textContent=t||""};
-const rptButtons=on=>["rptPdf","rptPng","rptCopy","rptWa","rptMail"].forEach(id=>$(id).disabled=!on);
-function rptClose(){$("rptModal").classList.remove("open");if(rptState&&rptState.url)URL.revokeObjectURL(rptState.url);rptState=null}
-async function openReport(){
-  $("rptModal").classList.add("open");rptButtons(false);rptToast("");
-  $("rptPreview").innerHTML='<div class="loading">Generando reporte…</div>';
-  if(!window.html2canvas||!window.jspdf){$("rptPreview").innerHTML='<div class="loading">No se pudieron cargar las librerías de reporte (html2canvas / jsPDF). Revisa la conexión a internet y recarga la página.</div>';return}
-  let host;
-  try{
-    const spec=specPdt();
-    $("rptTitleTxt").textContent="Reporte · "+spec.ctx.map(c=>c[1]).slice(0,3).join(" · ");
-    host=document.createElement("div");host.style.cssText="position:fixed;left:0;top:0;z-index:-1;pointer-events:none;width:"+spec.width+"px";host.innerHTML=rptHTML(spec);document.body.appendChild(host);
-    if(document.fonts&&document.fonts.ready)await document.fonts.ready;
-    const scale=2,node=host.firstElementChild,W=Math.ceil(Math.max(node.scrollWidth,node.offsetWidth)),H=Math.ceil(Math.max(node.scrollHeight,node.offsetHeight)),canvas=await html2canvas(node,{scale,width:W,height:H,x:0,y:0,scrollX:0,scrollY:0,windowWidth:W+40,windowHeight:H+40,backgroundColor:"#ffffff",useCORS:true,logging:false});
-    host.remove();host=null;
-    const png=await new Promise(r=>canvas.toBlob(r,"image/png")),w=canvas.width/scale,h=canvas.height/scale;
-    const pdf=new window.jspdf.jsPDF({orientation:w>h?"l":"p",unit:"px",format:[w,h],hotfixes:["px_scaling"],compress:true});
-    pdf.addImage(canvas.toDataURL("image/jpeg",0.95),"JPEG",0,0,w,h);
-    const base=spec.base.join("_").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\w\-]+/g,"_")+"_"+new Date().toISOString().slice(0,10);
-    if(rptState&&rptState.url)URL.revokeObjectURL(rptState.url);
-    rptState={spec,png,pdfBlob:pdf.output("blob"),base,url:URL.createObjectURL(png)};
-    $("rptPreview").innerHTML='<img src="'+rptState.url+'" alt="Vista previa del reporte">';
-    rptButtons(true);
-  }catch(e){if(host)host.remove();$("rptPreview").innerHTML='<div class="loading">Error al generar el reporte: '+esc(e.message||e)+"</div>"}
-}
-const rptFile=k=>k==="pdf"?new File([rptState.pdfBlob],rptState.base+".pdf",{type:"application/pdf"}):new File([rptState.png],rptState.base+".png",{type:"image/png"});
-async function rptShare(kind,fallbackUrl,label){
-  if(!rptState)return;
-  const file=rptFile(kind),s=rptState.spec;
-  if(navigator.canShare&&navigator.canShare({files:[file]})){
-    try{await navigator.share({files:[file],title:s.title,text:s.shareText});rptToast("");return}
-    catch(e){if(e&&e.name==="AbortError")return}
-  }
-  download(file.name,file);window.open(fallbackUrl(s.shareText),"_blank","noopener");
-  rptToast("Se descargó "+file.name+". Adjúntalo manualmente en "+label+' (en WhatsApp Web también puedes usar "Copiar imagen" y pegar con Ctrl+V).');
-}
-$("brp").onclick=openReport;
-$("rptClose").onclick=rptClose;
-$("rptModal").addEventListener("click",e=>{if(e.target.id==="rptModal")rptClose()});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("rptModal").classList.contains("open"))rptClose()});
-$("rptPdf").onclick=()=>rptState&&download(rptState.base+".pdf",rptState.pdfBlob);
-$("rptPng").onclick=()=>rptState&&download(rptState.base+".png",rptState.png);
-$("rptCopy").onclick=async()=>{try{await navigator.clipboard.write([new ClipboardItem({"image/png":rptState.png})]);rptToast("Imagen copiada. Pégala (Ctrl+V) en WhatsApp, correo u otra app.")}catch(e){rptToast('Tu navegador no permite copiar imágenes. Usa "Descargar imagen".')}};
-$("rptWa").onclick=()=>rptShare("png",t=>"https://wa.me/?text="+encodeURIComponent(t),"WhatsApp");
-$("rptMail").onclick=()=>rptShare("pdf",t=>"mailto:?subject="+encodeURIComponent(t)+"&body="+encodeURIComponent(t+"\n\n(Adjunta el PDF descargado)"),"el correo");
-</script>
-</body></html>
+    /* ===== CSV ===== */
+    function csvDown(n, rows) {download(n, new Blob(["\ufeff" + rows.map(r => r.map(x => '"' + String(x == null ? "" : x).replace(/"/g, '""') + '"').join(";")).join("\n")], {type: "text/csv;charset=utf-8"}))}
+    $("bcd").onclick = () => csvDown("detalle_registro_pdt.csv", [["Fecha", "Semana", "Turno", "Día", "PDT", "Colaborador"], ...flat()]);
+    $("bcp").onclick = () => {const ds = days(), r = S.reg[rkey()] || {}; csvDown("planilla_pdt_S" + wkKey().slice(-2) + "_" + S.turno + ".csv", [["PDT", ...ds.map((d, i) => DN[i] + " " + fd(d))], ...S.pdts.map(p => [p, ...ds.map((_, i) => r[p + "|" + i] || "")])])};
+    /* ===== REPORTE PDF / IMAGEN ===== */
+    function specPdt() {
+      const ds = days(), r = S.reg[rkey()] || {}, c = {}, wk = wkKey().slice(-2);
+      for (const k in r) {const [p, d] = k.split("|"), v = String(r[k]).trim().toLowerCase(); if (v) {const kk = d + "|" + v; c[kk] = (c[kk] || 0) + 1} }
+      let n = 0, nd = 0; const tot = ds.map(() => 0), slots = S.pdts.length * 6;
+      let t = '<div class="scroll"><table><colgroup><col style="width:150px">' + ds.map(() => "<col>").join("") + '<col style="width:90px"></colgroup><thead><tr><th>PDT</th>' + ds.map((d, i) => '<th style="text-align:center">' + DN[i] + " " + fd(d) + "</th>").join("") + '<th>Días con registro</th></tr></thead><tbody>';
+      S.pdts.forEach(p => {
+        let u = 0; t += "<tr><td>" + esc(p) + "</td>";
+        ds.forEach((_, i) => {
+          const v = String(r[p + "|" + i] || "").trim(), dup = v && c[i + "|" + v.toLowerCase()] > 1;
+          if (v) {u++; tot[i]++; n++; if (dup) nd++}
+          t += '<td class="' + (dup ? "state-yellow" : "") + '" style="text-align:center">' + esc(v) + "</td>"
+        });
+        t += '<td class="totalCol">' + u + "</td></tr>"
+      });
+      t += '<tr class="totalRow"><td>Total registros</td>' + tot.map(v => '<td style="text-align:center">' + v + "</td>").join("") + "<td>" + n + "</td></tr></tbody></table></div>";
+      const per = fd(ds[0]) + " – " + fd(ds[5]) + "/" + ds[5].getFullYear();
+      const crit = '<div class="rpt-crit"><h3>Cómo leer el reporte</h3><ul><li><b>Período:</b> semana ' + wk + ", " + per + " · turno " + esc(S.turno.toLowerCase()) + ".</li><li>Cada celda muestra el colaborador que usó ese PDT ese día.</li><li><b>Total registros</b> = celdas con colaborador asignado.</li><li><b>Duplicado:</b> el mismo colaborador figura en dos PDT el mismo día.</li></ul>"
+        + '<div class="rpt-sem"><div class="g"><b>REGISTRADO</b>PDT con colaborador · ' + n + '</div><div class="y"><b>DUPLICADO</b>Mismo colaborador en 2 PDT el mismo día · ' + nd + ' celda(s)</div><div class="z"><b>SIN REGISTRO</b>PDT sin colaborador · ' + (slots - n) + "</div></div></div>";
+      return {
+        title: "Registro de uso de PDT", ctx: [["Semana", "S" + wk], ["Turno", S.turno], ["Período", per], ["Registros", n + " de " + slots]], table: t, crit, width: 1360,
+        base: ["Reporte", "PDT", "S" + wk, S.turno], shareText: "Reporte registro de uso de PDT · Semana " + wk + " · Turno " + S.turno + " · " + per
+      };
+    }
+    function rptHTML(s) {
+      const now = new Date().toLocaleString("es-CL", {dateStyle: "medium", timeStyle: "short"});
+      return '<div class="rpt" style="width:' + s.width + 'px"><div class="rpt-top"><div><div class="b">ICB Food Service</div><h1>' + esc(s.title) + '</h1></div><div class="d">Generado: ' + esc(now) + '</div></div><div class="rpt-chips">' + s.ctx.map(([k, v]) => '<span class="rpt-chip">' + esc(k) + ": <b>" + esc(v) + "</b></span>").join("") + "</div>" + s.table + s.crit + "</div>";
+    }
+    let rptState = null;
+    const rptToast = t => {$("rptToast").textContent = t || ""};
+    const rptButtons = on => ["rptPdf", "rptPng", "rptCopy", "rptWa", "rptMail"].forEach(id => $(id).disabled = !on);
+    function rptClose() {$("rptModal").classList.remove("open"); if (rptState && rptState.url) URL.revokeObjectURL(rptState.url); rptState = null}
+    async function openReport() {
+      $("rptModal").classList.add("open"); rptButtons(false); rptToast("");
+      $("rptPreview").innerHTML = '<div class="loading">Generando reporte…</div>';
+      if (!window.html2canvas || !window.jspdf) {$("rptPreview").innerHTML = '<div class="loading">No se pudieron cargar las librerías de reporte (html2canvas / jsPDF). Revisa la conexión a internet y recarga la página.</div>'; return }
+      let host;
+      try {
+        const spec = specPdt();
+        $("rptTitleTxt").textContent = "Reporte · " + spec.ctx.map(c => c[1]).slice(0, 3).join(" · ");
+        host = document.createElement("div"); host.style.cssText = "position:fixed;left:0;top:0;z-index:-1;pointer-events:none;width:" + spec.width + "px"; host.innerHTML = rptHTML(spec); document.body.appendChild(host);
+        if (document.fonts && document.fonts.ready) await document.fonts.ready;
+        const scale = 2, node = host.firstElementChild, W = Math.ceil(Math.max(node.scrollWidth, node.offsetWidth)), H = Math.ceil(Math.max(node.scrollHeight, node.offsetHeight)), canvas = await html2canvas(node, {scale, x: 0, y: 0, scrollX: 0, scrollY: 0, windowWidth: W + 40, windowHeight: H + 400, backgroundColor: "#ffffff", useCORS: true, logging: false});
+        host.remove(); host = null;
+        const png = await new Promise(r => canvas.toBlob(r, "image/png")), w = canvas.width / scale, h = canvas.height / scale;
+        const pdf = new window.jspdf.jsPDF({orientation: w > h ? "l" : "p", unit: "px", format: [w, h], hotfixes: ["px_scaling"], compress: true});
+        pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", 0, 0, w, h);
+        const base = spec.base.join("_").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\-]+/g, "_") + "_" + new Date().toISOString().slice(0, 10);
+        if (rptState && rptState.url) URL.revokeObjectURL(rptState.url);
+        rptState = {spec, png, pdfBlob: pdf.output("blob"), base, url: URL.createObjectURL(png)};
+        $("rptPreview").innerHTML = '<img src="' + rptState.url + '" alt="Vista previa del reporte">';
+        rptButtons(true);
+      } catch (e) {if (host) host.remove(); $("rptPreview").innerHTML = '<div class="loading">Error al generar el reporte: ' + esc(e.message || e) + "</div>"}
+    }
+    const rptFile = k => k === "pdf" ? new File([rptState.pdfBlob], rptState.base + ".pdf", {type: "application/pdf"}) : new File([rptState.png], rptState.base + ".png", {type: "image/png"});
+    async function rptShare(kind, fallbackUrl, label) {
+      if (!rptState) return;
+      const file = rptFile(kind), s = rptState.spec;
+      if (navigator.canShare && navigator.canShare({files: [file]})) {
+        try {await navigator.share({files: [file], title: s.title, text: s.shareText}); rptToast(""); return }
+        catch (e) {if (e && e.name === "AbortError") return }
+      }
+      download(file.name, file); window.open(fallbackUrl(s.shareText), "_blank", "noopener");
+      rptToast("Se descargó " + file.name + ". Adjúntalo manualmente en " + label + ' (en WhatsApp Web también puedes usar "Copiar imagen" y pegar con Ctrl+V).');
+    }
+    $("brp").onclick = openReport;
+    $("rptClose").onclick = rptClose;
+    $("rptModal").addEventListener("click", e => {if (e.target.id === "rptModal") rptClose()});
+    document.addEventListener("keydown", e => {if (e.key === "Escape" && $("rptModal").classList.contains("open")) rptClose()});
+    $("rptPdf").onclick = () => rptState && download(rptState.base + ".pdf", rptState.pdfBlob);
+    $("rptPng").onclick = () => rptState && download(rptState.base + ".png", rptState.png);
+    $("rptCopy").onclick = async () => {try {await navigator.clipboard.write([new ClipboardItem({"image/png": rptState.png})]); rptToast("Imagen copiada. Pégala (Ctrl+V) en WhatsApp, correo u otra app.")} catch (e) {rptToast('Tu navegador no permite copiar imágenes. Usa "Descargar imagen".')} };
+    $("rptWa").onclick = () => rptShare("png", t => "https://wa.me/?text=" + encodeURIComponent(t), "WhatsApp");
+    $("rptMail").onclick = () => rptShare("pdf", t => "mailto:?subject=" + encodeURIComponent(t) + "&body=" + encodeURIComponent(t + "\n\n(Adjunta el PDF descargado)"), "el correo");
+  </script>
+</body>
+
+</html>
