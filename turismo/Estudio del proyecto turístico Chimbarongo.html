@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Estudio del proyecto turístico Chimbarongo</title>
+<style>
+:root{--bg:#f6f7f4;--fg:#1d2a24;--card:#fff;--bd:#d8ddd5;--ac:#2f6b4f;--ac2:#e8f1ec;--mut:#5d6b63;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141a17;--fg:#e6ece8;--card:#1d2621;--bd:#34423a;--ac:#6fcf9f;--ac2:#25352d;--mut:#9fb0a6;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141a17;--fg:#e6ece8;--card:#1d2621;--bd:#34423a;--ac:#6fcf9f;--ac2:#25352d;--mut:#9fb0a6;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+header{padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+header h1{font-size:18px;margin:0;flex:1;min-width:220px}
+nav{display:flex;gap:6px;padding:10px 20px;flex-wrap:wrap}
+button,.btn{font:inherit;border:1px solid var(--bd);background:var(--card);color:var(--fg);padding:7px 12px;border-radius:8px;cursor:pointer}
+button.on,button.pri{background:var(--ac);color:#fff;border-color:var(--ac)}
+button:disabled{opacity:.5}
+main{padding:0 20px 40px;max-width:1100px;margin:auto}
+.note{background:var(--ac2);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;margin:10px 0;font-size:13px}
+fieldset{border:1px solid var(--bd);border-radius:10px;background:var(--card);margin:14px 0;padding:10px 14px 14px}
+legend{font-weight:600;padding:0 6px;color:var(--ac)}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+label{display:flex;flex-direction:column;font-size:12px;color:var(--mut);gap:3px}
+input,textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:6px 8px;width:100%}
+textarea{min-height:90px;resize:vertical}
+.wide{grid-column:1/-1}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kpi div{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px}
+.kpi b{display:block;font-size:18px;color:var(--ac)}
+.kpi span{font-size:12px;color:var(--mut)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
+.pv{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:8px 22px 18px;overflow-x:auto}
+.pv table{border-collapse:collapse;margin:8px 0;width:100%}
+.pv td,.pv th{border:1px solid var(--bd);padding:5px 8px;text-align:left;font-size:14px}
+.pv th{background:var(--ac2)}
+iframe{width:100%;height:560px;border:1px solid var(--bd);border-radius:10px;background:#fff}
+.hid{display:none}
+#ed{min-height:420px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+#st{font-size:13px;color:var(--mut)}
+</style></head><body>
+<header><h1>🚐 Estudio del proyecto turístico: Chimbarongo</h1>
+<button id="bx">Exportar datos</button><label class="btn" style="flex-direction:row;color:var(--fg);font-size:15px">Importar<input id="bi" type="file" accept=".json" class="hid"></label><button id="br">Restablecer</button><span id="hs" style="font-size:13px;color:var(--mut)"></span></header>
+<nav><button data-t="datos" class="on">1. Datos del proyecto</button><button data-t="docs">2. Generar documentos</button></nav>
+<main>
+<section id="datos"><div class="note">Los valores iniciales son ejemplos referenciales, no cotizaciones. Reemplázalos con tus datos reales: todo se guarda automáticamente en este navegador. Usa Exportar datos para respaldarlos.</div>
+<div id="form"></div>
+<fieldset><legend>Resultado financiero (en vivo)</legend><div class="kpi" id="kpi"></div></fieldset></section>
+<section id="docs" class="hid">
+<div class="bar" id="dl"></div>
+<div class="bar"><button id="b-gen">Regenerar desde datos</button><button id="b-ai" class="hid">Redactar con Claude</button><button id="b-ed">Editar texto</button><button id="b-cp">Copiar</button><button id="b-dw" class="pri hid">Descargar</button><span id="st"></span></div>
+<textarea id="ed" class="hid"></textarea>
+<div id="pv" class="pv"></div><iframe id="fr" class="hid" sandbox title="Vista previa del sitio"></iframe>
+</section></main>
+<script>
+const KEY="chimba_proyecto_v1";
+const D={nombre:"Circuito Valle de Colchagua y Región de O’Higgins",base:"Chimbarongo",origen:"Aeropuerto de Santiago",tel:"",email:"",
+dias:6,noches:5,cap:12,ocup:70,salidas:12,
+valor:"Un solo operador resuelve traslado desde el aeropuerto, alojamiento, comidas y una excursión diaria. El pasajero aterriza y no se preocupa de nada más.",
+segmentos:"- Turistas extranjeros de vino, naturaleza y cultura\n- Turismo corporativo y de incentivos\n- Familias y grupos de amigos\n- Adultos mayores y clubes",
+inclu:"- Traslado privado aeropuerto–Chimbarongo–aeropuerto en van\n- Alojamiento y alimentación\n- Excursión diaria con guía\n- Entradas básicas",
+aloj:35000,des:4000,alm:9000,cen:10000,ent:60000,guiaDia:50000,km:900,rend:9,pcomb:1200,peajes:40000,mantkm:150,otros:50000,margen:30,
+van:21990000,hab:3000000,kt:3000000,presMkt:1500000,
+riesgos:"- Baja ocupación y estacionalidad: ofertas de temporada baja y alianzas con agencias\n- Falla mecánica: mantención preventiva, seguros y vehículo de respaldo\n- Alza de combustible o alojamiento: convenios y cláusula de reajuste\n- Cambios normativos: revisión periódica con la SEREMI de Transportes\n- Clima y emergencias: itinerarios alternativos",
+fin:"- Capital propio\n- Crédito o leasing para la van\n- Programas Corfo, Sercotec, FOSIS o Indap, según el perfil (verificar convocatorias vigentes)",
+condiciones:"- Reserva con anticipación y anticipo para confirmar (por definir)\n- Política de cambios por clima (por definir)",
+it:[["Llegada y bienvenida","Recepción en el aeropuerto, traslado a Chimbarongo (unas 2 horas), check-in y cena de bienvenida."],["Chimbarongo y su mimbre","Taller de mimbre, feria artesanal, Cuesta de Chimbarongo y almuerzo campesino."],["Ruta del vino en Colchagua","Dos viñas con degustación y almuerzo maridaje."],["Santa Cruz y Lolol","Museo, pueblo patrimonial, termas o actividades rurales."],["Costa de Pichilemu","Playa, surf, mirador y gastronomía de mar."],["Despedida","Mañana libre y regreso al aeropuerto según el horario de vuelos."]]};
+const S=[["Proyecto",[["nombre","Nombre del circuito","t"],["base","Base de operaciones","t"],["origen","Punto de recogida","t"],["tel","Teléfono o WhatsApp (solo números)","t"],["email","Correo","t"],["dias","Días","n"],["noches","Noches","n"],["cap","Pasajeros por van","n"],["ocup","Ocupación esperada (%)","n"],["salidas","Salidas por año","n"],["valor","Propuesta de valor","a"],["segmentos","Mercado objetivo (una línea por segmento, con “- ”)","a"],["inclu","Qué incluye (una línea con “- ”)","a"]]],
+["Costos por pasajero (CLP)",[["aloj","Alojamiento por noche","n"],["des","Desayuno por día","n"],["alm","Almuerzo por día","n"],["cen","Cena por día","n"],["ent","Entradas y degustaciones (total)","n"]]],
+["Costos por salida (CLP)",[["guiaDia","Guía por día","n"],["km","Kilómetros por salida","n"],["rend","Rendimiento (km por litro)","n"],["pcomb","Precio combustible por litro","n"],["peajes","Peajes y estacionamientos","n"],["mantkm","Mantención y depreciación por km","n"],["otros","Otros (seguros, imprevistos)","n"]]],
+["Precio e inversión (CLP)",[["margen","Margen sobre el costo (%)","n"],["van","Precio de la van","n"],["hab","Habilitación, trámites y marketing","n"],["kt","Capital de trabajo","n"],["presMkt","Presupuesto de marketing","n"]]],
+["Riesgos, financiamiento y condiciones",[["riesgos","Riesgos y mitigación","a"],["fin","Fuentes de financiamiento","a"],["condiciones","Condiciones comerciales","a"]]]];
+let d,cur={},edited={},tab="proyecto",dlr=null,smp=null;
+try{d=Object.assign(structuredClone(D),JSON.parse(localStorage.getItem(KEY)||"{}"))}catch(e){d=structuredClone(D)}
+const $=s=>document.querySelector(s),fm=new Intl.NumberFormat("es-CL",{style:"currency",currency:"CLP",maximumFractionDigits:0});
+const $$=n=>fm.format(Math.round(n||0)),esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function save(){try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){}}
+function calc(){const p=Math.round(d.cap*d.ocup/100),vp=d.aloj*d.noches+(d.des+d.alm+d.cen)*d.dias+d.ent,fx=d.guiaDia*d.dias+(d.rend?d.km/d.rend*d.pcomb:0)+d.peajes+d.km*d.mantkm+d.otros,cs=vp*p+fx,cp=p?cs/p:0,pr=cp*(1+d.margen/100),ut=pr*p-cs,inv=d.van+d.hab+d.kt,n=ut>0?Math.ceil(inv/ut):null;return{p,cp,pr,ut,cs,inv,n,anios:n&&d.salidas?n/d.salidas:null}}
+function kpi(){const c=calc();$("#kpi").innerHTML=[["Pasajeros por salida",c.p],["Costo por pasajero",$$(c.cp)],["Precio sugerido por pasajero",$$(c.pr)],["Costo por salida",$$(c.cs)],["Utilidad por salida",$$(c.ut)],["Inversión total",$$(c.inv)],["Salidas para recuperar",c.n??"Sin utilidad"],["Años para recuperar",c.anios?c.anios.toFixed(1):"-"]].map(x=>`<div><b>${x[1]}</b><span>${x[0]}</span></div>`).join("")}
+function build(){$("#form").innerHTML=S.map(([t,f])=>`<fieldset><legend>${t}</legend><div class="g">${f.map(([k,l,y])=>y=="a"?`<label class="wide">${l}<textarea data-k="${k}">${esc(d[k])}</textarea></label>`:`<label>${l}<input data-k="${k}" type="${y=="n"?"number":"text"}" value="${esc(d[k])}"></label>`).join("")}${t=="Proyecto"?d.it.map((x,i)=>`<label>Día ${i+1}: título<input data-i="${i}" data-j="0" value="${esc(x[0])}"></label><label class="wide" style="grid-column:span 2">Día ${i+1}: detalle<input data-i="${i}" data-j="1" value="${esc(x[1])}"></label>`).join(""):""}</div></fieldset>`).join("");kpi()}
+$("#form").addEventListener("input",e=>{const t=e.target;if(t.dataset.k){d[t.dataset.k]=t.type=="number"?+t.value:t.value}else if(t.dataset.i){d.it[t.dataset.i][t.dataset.j]=t.value}else return;edited={};save();kpi()});
+/* markdown */
+const inl=s=>esc(s).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\*(.+?)\*/g,"<i>$1</i>");
+function md(t){let o="",L=t.split("\n"),i=0,li=/^(- |\d+\. )/;while(i<L.length){let l=L[i];if(/^#{1,3} /.test(l)){let n=l.match(/^#+/)[0].length;o+=`<h${n}>${inl(l.slice(n+1))}</h${n}>`;i++}else if(/^\|/.test(l)){let r=[];while(i<L.length&&/^\|/.test(L[i]))r.push(L[i++]);r=r.filter(x=>!/^\|[\s\-|:]+$/.test(x));o+="<table>"+r.map((x,k)=>"<tr>"+x.replace(/^\||\|$/g,"").split("|").map(c=>`<${k?"td":"th"}>${inl(c.trim())}</${k?"td":"th"}>`).join("")+"</tr>").join("")+"</table>"}else if(li.test(l)){let g=/^-/.test(l)?"ul":"ol",it=[];while(i<L.length&&li.test(L[i]))it.push(L[i++].replace(li,""));o+=`<${g}>`+it.map(x=>`<li>${inl(x)}</li>`).join("")+`</${g}>`}else{if(l.trim())o+=`<p>${inl(l)}</p>`;i++}}return o}
+/* generators */
+const itn=()=>d.it.map((x,i)=>`- **Día ${i+1}: ${x[0]}.** ${x[1]}`).join("\n");
+const head=()=>`# ${d.nombre}\n*Base: ${d.base} · ${d.dias} días y ${d.noches} noches · Van ${d.cap}+1 desde ${d.origen}*\n\n`;
+const fin=c=>`| Concepto | Valor |\n|---|---|\n| Pasajeros por salida (ocupación ${d.ocup}%) | ${c.p} |\n| Costo por pasajero | ${$$(c.cp)} |\n| Precio sugerido por pasajero (margen ${d.margen}%) | ${$$(c.pr)} |\n| Utilidad por salida | ${$$(c.ut)} |\n| Inversión total | ${$$(c.inv)} |\n| Salidas para recuperar la inversión | ${c.n??"Sin utilidad"} |\n`;
+const G={
+proyecto:{t:"Proyecto completo",x:"md",f(){const c=calc();return head()+`## 1. Resumen ejecutivo\n${d.valor}\n\n## 2. Mercado objetivo\n${d.segmentos}\n\n## 3. Qué incluye\n${d.inclu}\n\n## 4. Itinerario\n${itn()}\n\n## 5. Inversión\n| Ítem | Monto |\n|---|---|\n| Van ${d.cap}+1 | ${$$(d.van)} |\n| Habilitación, trámites y marketing | ${$$(d.hab)} |\n| Capital de trabajo | ${$$(d.kt)} |\n| **Total** | **${$$(c.inv)}** |\n\n## 6. Costos y precio\n${fin(c)}\n## 7. Riesgos\n${d.riesgos}\n\n## 8. Financiamiento\n${d.fin}\n`}},
+negocio:{t:"Plan de negocio",x:"md",f(){const c=calc();return head()+`## 1. Resumen\nPaquete turístico cerrado que parte en el ${d.origen}, tiene base en ${d.base} y recorre cada día un atractivo regional. ${d.valor}\n\n## 2. Propuesta de valor\n${d.inclu}\n\n## 3. Mercado\n${d.segmentos}\n\n## 4. Operación\n- Vehículo: van de ${d.cap} pasajeros más conductor\n- Alojamiento y alimentación con proveedores locales de ${d.base}\n- Programa de ${d.dias} días y ${d.noches} noches con excursión diaria\n- Salidas previstas por año: ${d.salidas}\n\n## 5. Itinerario\n${itn()}\n\n## 6. Plan financiero\n${fin(c)}\n${c.anios?`Con ${d.salidas} salidas al año, la inversión se recupera en unos ${c.anios.toFixed(1)} años.\n`:""}\n## 7. Riesgos y mitigación\n${d.riesgos}\n\n## 8. Financiamiento\n${d.fin}\n\n## 9. Cronograma\n| Mes | Hito |\n|---|---|\n| 1 | Formalización y cotizaciones |\n| 2 | Compra y habilitación de la van, permisos |\n| 3 | Itinerario final, piloto, web y marketing |\n| 4 | Lanzamiento comercial |\n| 5-12 | Operación y ajuste del producto |\n`}},
+marketing:{t:"Plan de marketing",x:"md",f(){const c=calc(),m=d.presMkt,r=(p,l)=>`| ${l} | ${p}% | ${$$(m*p/100)} |`;return head()+`## 1. Objetivo\nLlenar las salidas de ${d.dias} días de ${d.nombre} con una ocupación mínima de ${d.ocup}%.\n\n## 2. Público objetivo\n${d.segmentos}\n\n## 3. Mensaje clave\n${d.valor}\n\n## 4. Oferta\nPrecio sugerido por pasajero: **${$$(c.pr)}**. Incluye:\n${d.inclu}\n\n## 5. Canales\n- Sitio web con consultas y WhatsApp\n- Instagram y Facebook con fotos y videos del recorrido\n- Agencias receptivas y hoteles de Santiago\n- Plataformas de experiencias\n- Convenios con empresas y clubes\n\n## 6. Plan de 90 días\n| Semanas | Acción |\n|---|---|\n| 1-2 | Marca, sitio web y sesión de fotos |\n| 3-4 | Contacto con agencias y hoteles |\n| 5-8 | Contenido semanal y piloto con grupo pequeño |\n| 9-12 | Testimonios, ajuste de precio y lanzamiento |\n\n## 7. Presupuesto (${$$(m)})\n| Ítem | % | Monto |\n|---|---|---|\n${r(40,"Publicidad digital")}\n${r(25,"Foto y video")}\n${r(20,"Sitio web")}\n${r(15,"Alianzas y ferias")}\n\n## 8. Indicadores\n- Consultas por semana\n- Reservas sobre consultas\n- Ocupación por salida\n- Satisfacción del pasajero\n`}},
+propuesta:{t:"Propuesta comercial",x:"md",f(){const c=calc();return head()+`${d.valor}\n\n## Qué incluye\n${d.inclu}\n\n## Itinerario\n${itn()}\n\n## Precio\n**${$$(c.pr)} por pasajero**, grupos de hasta ${d.cap} personas.\n\n## Condiciones\n${d.condiciones}\n\n## Contacto\n${[d.tel&&"WhatsApp: "+d.tel,d.email&&"Correo: "+d.email].filter(Boolean).join(" · ")||"Por completar"}\n`}},
+web:{t:"Sitio web",x:"html",f(){const c=calc(),li=s=>s.split("\n").map(x=>x.replace(/^- /,"")).filter(Boolean).map(x=>`<li>${esc(x)}</li>`).join(""),w=d.tel?`https://wa.me/${d.tel.replace(/\D/g,"")}`:"#";return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(d.nombre)}</title><style>body{margin:0;font:16px/1.6 system-ui,Arial,sans-serif;color:#1d2a24}header{background:#2f6b4f;color:#fff;padding:60px 20px;text-align:center}h1{margin:0 0 8px;font-size:34px}section{max-width:860px;margin:auto;padding:28px 20px}h2{color:#2f6b4f}.d{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}.d div{border:1px solid #d8ddd5;border-radius:10px;padding:12px}a.b{display:inline-block;background:#fff;color:#2f6b4f;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:700;margin-top:14px}footer{text-align:center;padding:24px;color:#5d6b63}</style></head><body><header><h1>${esc(d.nombre)}</h1><p>${d.dias} días con base en ${esc(d.base)}, traslado desde el ${esc(d.origen)}</p><a class="b" href="${w}">Consultar por WhatsApp</a></header><section><h2>Todo resuelto</h2><p>${esc(d.valor)}</p><ul>${li(d.inclu)}</ul></section><section><h2>Itinerario</h2><div class="d">${d.it.map((x,i)=>`<div><b>Día ${i+1}</b><br><b>${esc(x[0])}</b><p>${esc(x[1])}</p></div>`).join("")}</div></section><section><h2>Precio</h2><p><b>${$$(c.pr)}</b> por pasajero, grupos de hasta ${d.cap} personas.</p></section><footer>${esc(d.email)}</footer></body></html>`}}};
+/* docs UI */
+$("#dl").innerHTML=Object.entries(G).map(([k,g])=>`<button data-d="${k}">${g.t}</button>`).join("");
+function show(){const g=G[tab];if(!(tab in cur)||!edited[tab])cur[tab]=g.f();document.querySelectorAll("#dl button").forEach(b=>b.classList.toggle("on",b.dataset.d==tab));const ed=!$("#ed").classList.contains("hid");$("#ed").value=cur[tab];$("#pv").classList.toggle("hid",g.x=="html"||ed);$("#fr").classList.toggle("hid",g.x!="html"||ed);if(g.x=="html")$("#fr").srcdoc=cur[tab];else $("#pv").innerHTML=md(cur[tab])}
+const st=t=>$("#st").textContent=t;
+$("#dl").onclick=e=>{if(e.target.dataset.d){tab=e.target.dataset.d;st("");show()}};
+$("#b-gen").onclick=()=>{edited[tab]=false;show();st("Regenerado desde los datos.")};
+$("#b-ed").onclick=()=>{const h=$("#ed").classList.toggle("hid");$("#b-ed").textContent=h?"Editar texto":"Ver resultado";show()};
+$("#ed").oninput=e=>{cur[tab]=e.target.value;edited[tab]=true};
+$("#b-cp").onclick=async()=>{try{await navigator.clipboard.writeText(cur[tab]);st("Copiado.")}catch(e){$("#ed").classList.remove("hid");$("#ed").select();st("Selecciona y copia el texto del editor.")}};
+$("#b-dw").onclick=async()=>{const x=G[tab].x;try{await dlr.save({filename:`${tab}_chimbarongo.${x=="html"?"html":"md"}`,data:cur[tab]});st("Archivo guardado.")}catch(e){st(e&&e.code=="declined"?"Descarga cancelada.":"No se pudo descargar.")}};
+$("#b-ai").onclick=async()=>{const g=G[tab],b=$("#b-ai");b.disabled=true;st("Claude está redactando…");try{const ask=`Eres consultor de turismo en Chile. Redacta en español de Chile el documento “${g.t}” de este proyecto, ${g.x=="html"?"como un documento HTML completo con CSS embebido y sin recursos externos":"en Markdown"}. Usa solo los datos entregados, no inventes cifras ni permisos. Datos: ${JSON.stringify(d)}. Cálculos: ${JSON.stringify(calc())}. Borrador base: ${cur[tab]}. Devuelve solo el documento.`;const r=await smp(ask,{onText:({text})=>{cur[tab]=text;$("#ed").value=text}});cur[tab]=r.text.replace(/^```\w*\n|\n```\s*$/g,"");edited[tab]=true;show();st("Listo. Puedes editarlo o descargarlo.")}catch(e){st(e&&e.code=="not_granted"?"Permiso denegado.":"No se pudo redactar ahora.")}b.disabled=false};
+/* tabs, backup */
+document.querySelector("nav").onclick=e=>{const t=e.target.dataset.t;if(!t)return;document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b==e.target));$("#datos").classList.toggle("hid",t!="datos");$("#docs").classList.toggle("hid",t!="docs");if(t=="docs")show()};
+$("#bx").onclick=async()=>{const s=JSON.stringify(d,null,1);if(dlr){try{await dlr.save({filename:"proyecto_chimbarongo.json",data:s})}catch(e){}}else{navigator.clipboard&&navigator.clipboard.writeText(s)}};
+$("#bi").onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{d=Object.assign(structuredClone(D),JSON.parse(t));save();edited={};build()}catch(x){$("#hs").textContent="Archivo no válido."}})};
+let rc=0;$("#br").onclick=()=>{if(!rc){rc=1;$("#hs").textContent="Pulsa Restablecer otra vez para confirmar.";setTimeout(()=>{rc=0;$("#hs").textContent=""},4000);return}rc=0;d=structuredClone(D);save();edited={};build();$("#hs").textContent="Datos restablecidos."};
+build();
+if(window.claude&&claude.use){claude.use("downloads").then(x=>{dlr=x;if(x)$("#b-dw").classList.remove("hid")});claude.use("sample").then(x=>{smp=x;if(x)$("#b-ai").classList.remove("hid")})}
+</script></body></html>
