@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vive Colchagua - Entrelaźando Historias, Tejiendo Experiencias</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            gold: '#b88933',
+                            'gold-hover': '#9f7326',
+                            green: '#486847',
+                            'green-dark': '#344e33',
+                            cream: '#f8f6f0',
+                            'cream-dark': '#eae4d5',
+                            charcoal: '#222222',
+                            terracotta: '#a65132'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        /* Style adjustments for smooth transitions */
+        .btn-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .hero-overlay {
+            background: linear-gradient(180deg, rgba(20, 20, 20, 0.65) 0%, rgba(20, 20, 20, 0.45) 50%, rgba(20, 20, 20, 0.75) 100%);
+        }
+        /* Custom scrollbar for better appearance */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f8f6f0;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #b88933;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9f7326;
+        }
+    </style>
+</head>
+<body class="bg-brand-cream text-brand-charcoal font-sans antialiased selection:bg-brand-gold selection:text-white">
+
+    <!-- Top Alert Banner / Announcement -->
+    <div class="bg-brand-green text-white text-xs md:text-sm py-2 px-4 text-center font-medium flex items-center justify-center gap-2">
+        <span class="inline-block w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
+        <span>¡Reserva tus tours esta semana y recibe una degustación especial gratuita!</span>
+    </div>
+
+    <!-- Navigation Bar Header -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-sm transition-all duration-300" id="main-header">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                
+                <!-- Logo -->
+                <a href="#" class="flex items-center gap-3 group"> 
+                    <img src="assets/vive_colchagua.png" alt="" style="height: 75px;">
+                    <!--<div class="w-10 h-10 rounded-full bg-brand-cream border border-brand-gold/30 flex items-center justify-center text-brand-green group-hover:scale-105 transition-transform">
+                        <i class="fa-solid font-bold text-xl fa-leaf"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-lg leading-tight tracking-wider text-brand-green-dark">VIVE</span>
+                        <span class="font-serif text-sm tracking-widest text-brand-gold font-bold">COLCHAGUA</span>
+                    </div>-->
+                </a>
+
+                <!-- Desktop Navigation Menu -->
+                <nav class="hidden md:flex items-center space-x-8 font-semibold text-sm text-stone-700">
+                    <a href="#experiencias" class="hover:text-brand-gold transition-colors py-2">Experiencias</a>
+                    <a href="#historia" class="hover:text-brand-gold transition-colors py-2">Nuestra Historia</a>
+                    <a href="#pilares" class="hover:text-brand-gold transition-colors py-2">Pilares</a>
+                    <a href="#reservas" class="hover:text-brand-gold transition-colors py-2">Reservas</a>
+                    <a href="#contacto" class="hover:text-brand-gold transition-colors py-2">Contacto</a>
+                </nav>
+
+                <!-- CTA Button & Mobile Menu Toggle -->
+                <div class="flex items-center space-x-4">
+                    <a href="#reservas" class="hidden sm:inline-flex items-center justify-center px-5 py-2.5 rounded-md text-sm font-bold text-white bg-brand-gold hover:bg-brand-gold-hover shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all">
+                        RESERVA AHORA
+                    </a>
+
+                    <!-- Mobile menu button -->
+                    <button type="button" id="mobile-menu-btn" class="md:hidden p-2 rounded-md text-stone-700 hover:text-brand-green hover:bg-stone-100 focus:outline-none" aria-label="Toggle Menu">
+                        <i class="fa-solid fa-bars text-xl" id="menu-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div class="hidden md:hidden bg-white border-b border-stone-200 px-4 pt-2 pb-6 space-y-3" id="mobile-menu">
+            <a href="#experiencias" class="block py-2 text-stone-700 font-medium hover:text-brand-gold">Experiencias</a>
+            <a href="#historia" class="block py-2 text-stone-700 font-medium hover:text-brand-gold">Nuestra Historia</a>
+            <a href="#pilares" class="block py-2 text-stone-700 font-medium hover:text-brand-gold">Pilares</a>
+            <a href="#reservas" class="block py-2 text-stone-700 font-medium hover:text-brand-gold">Reservas</a>
+            <a href="#contacto" class="block py-2 text-stone-700 font-medium hover:text-brand-gold">Contacto</a>
+            <div class="pt-2">
+                <a href="#reservas" class="w-full text-center block px-5 py-3 rounded-md text-sm font-bold text-white bg-brand-gold hover:bg-brand-gold-hover shadow">
+                    RESERVA AHORA
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- HERO SECTION -->
+        <section class="relative bg-stone-900 text-white min-h-[580px] lg:min-h-[660px] flex items-center justify-center overflow-hidden">
+            <!-- Background Image with Fallback & Overlay -->
+            <div class="absolute inset-0 z-0">
+                <img src="https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?q=80&w=1920&auto=format&fit=crop" 
+                     alt="Viñedos y artesanos de Colchagua" 
+                     class="w-full h-full object-cover object-center"
+                     onerror="this.onerror=null; this.src='https://placehold.co/1920x1080/344e33/ffffff?text=Vive+Colchagua';">
+                <div class="hero-overlay absolute inset-0"></div>
+            </div>
+
+            <!-- Hero Content -->
+            <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-16 flex flex-col items-center">
+                
+                <span class="inline-block uppercase tracking-widest text-xs md:text-sm font-semibold bg-brand-gold/90 text-white px-4 py-1.5 rounded-full mb-6 backdrop-blur-sm">
+                    Turismo Cultural y Enológico
+                </span>
+
+                <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6 leading-tight max-w-4xl drop-shadow-md">
+                    ENTRELAZANDO HISTORIAS,<br class="hidden sm:inline"> TEJIENDO EXPERIENCIAS EN COLCHAGUA.
+                </h1>
+
+                <p class="text-lg sm:text-xl lg:text-2xl text-stone-200 font-light max-w-3xl mb-10 leading-relaxed drop-shadow">
+                    <strong class="font-semibold text-white">El Colchagua Auténtico:</strong> Donde el arte del mimbre y la pasión por el vino se encuentran.
+                </p>
+
+                <!-- Hero CTA Banner Box -->
+                <a href="#guia-gratis" class="group relative inline-flex items-center justify-between gap-4 bg-brand-gold/90 hover:bg-brand-gold text-white font-bold py-4 px-6 sm:px-8 rounded-xl shadow-2xl border border-yellow-200/30 transition-all duration-300 transform hover:-translate-y-1 max-w-2xl w-full">
+                    <div class="flex items-center gap-3 text-left">
+                        <div class="p-2 bg-white/20 rounded-lg group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-basket-shopping text-2xl text-yellow-100"></i>
+                        </div>
+                        <div>
+                            <span class="block text-xs uppercase tracking-wider text-yellow-100 font-semibold">Regalo Exclusivo</span>
+                            <span class="text-sm sm:text-base md:text-lg font-extrabold leading-snug">DESCARGA TU GUÍA GRATUITA DEL COLCHAGUA AUTÉNTICO</span>
+                        </div>
+                    </div>
+                    <div class="hidden sm:flex items-center gap-2 bg-white/20 p-2 rounded-full group-hover:translate-x-1 transition-transform">
+                        <i class="fa-solid fa-wine-glass text-xl text-yellow-100"></i>
+                        <i class="fa-solid fa-arrow-right text-sm"></i>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- PILARES / CARACTERÍSTICAS (4 COLUMNAS) -->
+        <section id="pilares" class="py-16 md:py-24 bg-brand-cream border-b border-stone-200/80">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <h2 class="font-serif text-3xl sm:text-4xl font-bold text-brand-green-dark mb-4">Nuestros Pilares de Experiencia</h2>
+                    <div class="w-16 h-1 bg-brand-gold mx-auto rounded-full mb-4"></div>
+                    <p class="text-stone-600 text-base sm:text-lg">Descubre las raíces profundas y tradiciones vivas que hacen de la Valle de Colchagua un destino inolvidable.</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    
+                    <!-- Pilar 1: Artesanía Viva -->
+                    <div class="bg-white rounded-2xl p-8 border border-stone-200/70 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center group hover:-translate-y-1">
+                        <div class="w-20 h-20 rounded-2xl bg-amber-50 text-brand-gold flex items-center justify-center text-3xl mb-6 group-hover:bg-brand-gold group-hover:text-white transition-colors duration-300 shadow-inner">
+                            <i class="fa-solid fa-basket-shopping"></i>
+                        </div>
+                        <h3 class="font-serif text-xl font-bold text-stone-800 mb-3">ARTESANÍA VIVA</h3>
+                        <p class="text-stone-600 text-sm leading-relaxed mb-6 flex-grow">
+                            Glacial Indifference talleres artesanas, rutas del vino y experiencias locales únicas.
+                        </p>
+                        <a href="#experiencias" class="inline-flex items-center text-sm font-bold text-brand-green hover:text-brand-gold group-hover:translate-x-1 transition-all">
+                            Ver más <i class="fa-solid fa-chevron-right ml-1.5 text-xs"></i>
+                        </a>
+                    </div>
+
+                    <!-- Pilar 2: Vinos Premiados -->
+                    <div class="bg-white rounded-2xl p-8 border border-stone-200/70 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center group hover:-translate-y-1">
+                        <div class="w-20 h-20 rounded-2xl bg-red-50 text-brand-terracotta flex items-center justify-center text-3xl mb-6 group-hover:bg-brand-terracotta group-hover:text-white transition-colors duration-300 shadow-inner">
+                            <i class="fa-solid fa-wine-glass"></i>
+                        </div>
+                        <h3 class="font-serif text-xl font-bold text-stone-800 mb-3">VINOS PREMIADOS</h3>
+                        <p class="text-stone-600 text-sm leading-relaxed mb-6 flex-grow">
+                            Glacial Indifference y la pasión por el vino de autor se encuentran en cada bodega.
+                        </p>
+                        <a href="#experiencias" class="inline-flex items-center text-sm font-bold text-brand-green hover:text-brand-gold group-hover:translate-x-1 transition-all">
+                            Ver más <i class="fa-solid fa-chevron-right ml-1.5 text-xs"></i>
+                        </a>
+                    </div>
+
+                    <!-- Pilar 3: Paisajes Únicos -->
+                    <div class="bg-white rounded-2xl p-8 border border-stone-200/70 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center group hover:-translate-y-1">
+                        <div class="w-20 h-20 rounded-2xl bg-emerald-50 text-brand-green flex items-center justify-center text-3xl mb-6 group-hover:bg-brand-green group-hover:text-white transition-colors duration-300 shadow-inner">
+                            <i class="fa-solid fa-mountain-sun"></i>
+                        </div>
+                        <h3 class="font-serif text-xl font-bold text-stone-800 mb-3">PAISAJES ÚNICOS</h3>
+                        <p class="text-stone-600 text-sm leading-relaxed mb-6 flex-grow">
+                            Glacial Indifference entre paisajes únicos serenos y vino de la cordillera.
+                        </p>
+                        <a href="#experiencias" class="inline-flex items-center text-sm font-bold text-brand-green hover:text-brand-gold group-hover:translate-x-1 transition-all">
+                            Ver más <i class="fa-solid fa-chevron-right ml-1.5 text-xs"></i>
+                        </a>
+                    </div>
+
+                    <!-- Pilar 4: Historia y Cultura -->
+                    <div class="bg-white rounded-2xl p-8 border border-stone-200/70 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center group hover:-translate-y-1">
+                        <div class="w-20 h-20 rounded-2xl bg-stone-100 text-stone-700 flex items-center justify-center text-3xl mb-6 group-hover:bg-stone-700 group-hover:text-white transition-colors duration-300 shadow-inner">
+                            <i class="fa-solid fa-church"></i>
+                        </div>
+                        <h3 class="font-serif text-xl font-bold text-stone-800 mb-3">HISTORIA Y CULTURA</h3>
+                        <p class="text-stone-600 text-sm leading-relaxed mb-6 flex-grow">
+                            Glacial Indifference historia, museos, restauraciones de vino y adobe bellos únicos.
+                        </p>
+                        <a href="#experiencias" class="inline-flex items-center text-sm font-bold text-brand-green hover:text-brand-gold group-hover:translate-x-1 transition-all">
+                            Ver más <i class="fa-solid fa-chevron-right ml-1.5 text-xs"></i>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN CAPTURA DE GUÍA / FORMULARIO -->
+        <section id="guia-gratis" class="py-16 bg-gradient-to-br from-brand-cream-dark via-stone-200 to-brand-cream border-b border-stone-300 relative overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="bg-white rounded-3xl p-8 sm:p-12 shadow-xl border border-stone-200/80 flex flex-col lg:flex-row items-center justify-between gap-8">
+                    
+                    <div class="lg:w-1/2 text-left">
+                        <span class="text-brand-gold font-bold text-sm tracking-wider uppercase mb-2 block">Descubre sin costo</span>
+                        <h2 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-green-dark mb-4">
+                            Descubre nuestros secretos:
+                        </h2>
+                        <p class="text-stone-700 text-base sm:text-lg leading-relaxed mb-2">
+                            Mapas exclusivos de talleres artesanos, rutas del vino y experiencias locales únicas. 
+                        </p>
+                        <p class="text-brand-terracotta font-extrabold text-lg sm:text-xl">
+                            ¡Gratis por tiempo limitado!
+                        </p>
+                    </div>
+
+                    <div class="lg:w-1/2 w-full max-w-md">
+                        <form id="guide-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                            <div>
+                                <label for="name" class="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1">Tu Nombre Completo</label>
+                                <input type="text" id="name" required placeholder="Nombre" 
+                                    class="w-full px-4 py-3.5 rounded-xl border border-stone-300 focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none transition bg-stone-50 text-stone-800">
+                            </div>
+                            <div>
+                                <label for="email" class="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1">Tu Correo Electrónico</label>
+                                <input type="email" id="email" required placeholder="Correo Electrónico" 
+                                    class="w-full px-4 py-3.5 rounded-xl border border-stone-300 focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none transition bg-stone-50 text-stone-800">
+                            </div>
+                            <button type="submit" 
+                                class="w-full py-4 px-6 bg-brand-green hover:bg-brand-green-dark text-white font-extrabold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 uppercase tracking-wider text-sm flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-download"></i> ENVIAR GUÍA GRATIS
+                            </button>
+                        </form>
+                        <!-- Form Success Feedback Message -->
+                        <div id="form-success" class="hidden mt-4 p-4 bg-emerald-100 border border-emerald-300 text-emerald-800 rounded-xl text-center text-sm font-medium">
+                            <i class="fa-solid fa-circle-check text-xl mb-1 block text-emerald-600"></i>
+                            ¡Gracias! Revisa tu correo, hemos enviado tu guía del Colchagua Auténtico.
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN DE TOURS Y EXPERIENCIAS DESTACADAS -->
+        <section id="experiencias" class="py-16 md:py-24 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <span class="text-brand-gold font-bold text-sm tracking-widest uppercase mb-2 block">Experiencias Populares</span>
+                    <h2 class="font-serif text-3xl sm:text-4xl font-bold text-brand-green-dark mb-4">Tours & Actividades Destacadas</h2>
+                    <p class="text-stone-600">Sumérgete en la cultura colchagüina a través de nuestras actividades cuidadosamente diseñadas.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    
+                    <!-- Tour Card 1 -->
+                    <div class="bg-brand-cream rounded-3xl overflow-hidden border border-stone-200 shadow-md hover:shadow-2xl transition-all duration-300 flex flex-col group">
+                        <div class="relative h-64 sm:h-72 overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?q=80&w=800&auto=format&fit=crop" 
+                                 alt="Tour Mimbre y Vino" 
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                 onerror="this.onerror=null; this.src='https://placehold.co/800x600/b88933/ffffff?text=Tour+Mimbre+y+Vino';">
+                            <span class="absolute top-4 left-4 bg-brand-green/90 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full">
+                                FEATURED / DESTACADO
+                            </span>
+                        </div>
+                        <div class="p-8 flex flex-col flex-grow">
+                            <h3 class="font-serif text-2xl font-bold text-stone-800 mb-3">TOUR MIMBRE Y VINO</h3>
+                            <p class="text-stone-600 text-sm leading-relaxed mb-6 flex-grow">
+                                Descubre el arte del tejido de mimbre local junto a la cata de vinos finos de la zona. Recorre talleres tradicionales y viñedos históricos.
+                            </p>
+                            <div class="pt-4 border-t border-stone-200/80 flex items-center justify-between">
+                                <div>
+                                    <span class="text-xs text-stone-500 uppercase font-semibold">Duración</span>
+                                    <p class="text-sm font-bold text-stone-800">Half Day (4 hrs)</p>
+                                </div>
+                                <a href="#reservas" class="px-6 py-3 bg-brand-gold hover:bg-brand-gold-hover text-white text-sm font-bold rounded-xl shadow hover:shadow-md transition-all">
+                                    RESERVA AHORA
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tour Card 2 -->
+                    <div class="bg-brand-cream rounded-3xl overflow-hidden border border-stone-200 shadow-md hover:shadow-2xl transition-all duration-300 flex flex-col group">
+                        <div class="relative h-64 sm:h-72 overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1528823872057-9c018a7a70b3?q=80&w=800&auto=format&fit=crop" 
+                                 alt="Taller de Arte y Degustación" 
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                 onerror="this.onerror=null; this.src='https://placehold.co/800x600/486847/ffffff?text=Taller+Arte+y+Degustacion';">
+                            <span class="absolute top-4 left-4 bg-brand-gold/90 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full">
+                                POPULAR
+                            </span>
+                        </div>
+                        <div class="p-8 flex flex-col flex-grow">
+                            <h3 class="font-serif text-2xl font-bold text-stone-800 mb-3">TALLER DE ARTE Y DEGUSTACIÓN</h3>
+                            <p class="text-stone-600 text-sm leading-relaxed mb-6 flex-grow">
+                                Talleres interactivos con artesanos del mimbre y sommeliers expertos. Crea tu propia pieza artesanal mientras disfrutas de maridajes exclusivos.
+                            </p>
+                            <div class="pt-4 border-t border-stone-200/80 flex items-center justify-between">
+                                <div>
+                                    <span class="text-xs text-stone-500 uppercase font-semibold">Duración</span>
+                                    <p class="text-sm font-bold text-stone-800">3 Horas</p>
+                                </div>
+                                <a href="#reservas" class="px-6 py-3 bg-brand-gold hover:bg-brand-gold-hover text-white text-sm font-bold rounded-xl shadow hover:shadow-md transition-all">
+                                    RESERVA AHORA
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN DE TESTIMONIOS -->
+        <section class="py-16 md:py-24 bg-brand-cream border-t border-stone-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="text-center max-w-2xl mx-auto mb-12">
+                    <h2 class="font-serif text-3xl font-bold text-brand-green-dark mb-2">Testimonios</h2>
+                    <p class="text-stone-600 text-sm">Lo que opinan nuestros visitantes sobre la experiencia Colchagua</p>
+                </div>
+
+                <!-- Carousel / Testimonial Cards Slider Simulation -->
+                <div class="max-w-4xl mx-auto bg-white rounded-3xl p-8 sm:p-12 border border-stone-200/80 shadow-lg relative">
+                    <div class="flex flex-col sm:flex-row items-center gap-8">
+                        
+                        <!-- Avatar 1 -->
+                        <div class="flex-shrink-0">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop" 
+                                 alt="María D." 
+                                 class="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-brand-cream shadow-md"
+                                 onerror="this.onerror=null; this.src='https://placehold.co/150x150/b88933/ffffff?text=María';">
+                        </div>
+
+                        <!-- Content -->
+                        <div class="flex-grow text-center sm:text-left">
+                            <div class="text-amber-400 mb-3 text-sm">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                            <blockquote class="font-serif italic text-stone-700 text-lg sm:text-xl mb-4 leading-relaxed">
+                                "El recorrido entre los talleres de mimbre y las bodegas antiguas fue inolvidable. El maridaje y el cariño de la gente de Colchagua te hacen sentir como en casa."
+                            </blockquote>
+                            <div>
+                                <h4 class="font-bold text-stone-900">María D. Flia.</h4>
+                                <span class="text-xs text-stone-500">Visitante de Santiago</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Testimonial Slider Dots Navigation -->
+                    <div class="flex justify-center items-center gap-2 mt-8 pt-4 border-t border-stone-100">
+                        <button class="w-3 h-3 rounded-full bg-brand-gold" aria-label="Slide 1"></button>
+                        <button class="w-2.5 h-2.5 rounded-full bg-stone-300 hover:bg-stone-400" aria-label="Slide 2"></button>
+                        <button class="w-2.5 h-2.5 rounded-full bg-stone-300 hover:bg-stone-400" aria-label="Slide 3"></button>
+                        <button class="w-2.5 h-2.5 rounded-full bg-stone-300 hover:bg-stone-400" aria-label="Slide 4"></button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECCIÓN DE SELLOS DE CALIDAD / PARTNERS -->
+        <section class="py-12 bg-white border-y border-stone-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 items-center justify-items-center opacity-85 hover:opacity-100 transition-opacity">
+                    
+                    <!-- Sello 1 -->
+                    <div class="flex items-center gap-3 text-stone-700 font-bold text-xs sm:text-sm uppercase tracking-wider">
+                        <div class="w-10 h-10 rounded-full bg-brand-green/10 text-brand-green flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-award"></i>
+                        </div>
+                        <span>LOCAL TURISMO LOCAL</span>
+                    </div>
+
+                    <!-- Sello 2 -->
+                    <div class="flex items-center gap-3 text-stone-700 font-bold text-xs sm:text-sm uppercase tracking-wider">
+                        <div class="w-10 h-10 rounded-full bg-brand-gold/10 text-brand-gold flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <span>TURISMO NACIONAL</span>
+                    </div>
+
+                    <!-- Sello 3 -->
+                    <div class="flex items-center gap-3 text-stone-700 font-bold text-xs sm:text-sm uppercase tracking-wider">
+                        <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-leaf"></i>
+                        </div>
+                        <span>SUSTENTABILIDAD</span>
+                    </div>
+
+                    <!-- Sello 4 -->
+                    <div class="flex items-center gap-3 text-stone-700 font-bold text-xs sm:text-sm uppercase tracking-wider">
+                        <div class="w-10 h-10 rounded-full bg-stone-100 text-stone-700 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-wine-glass-empty"></i>
+                        </div>
+                        <span>RUTAS DEL VINO</span>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER / PIE DE PÁGINA -->
+    <footer id="contacto" class="bg-stone-900 text-stone-300 pt-16 pb-8 border-t border-stone-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 pb-12 border-b border-stone-800">
+                
+                <!-- Columna 1: Brand Info -->
+                <div>
+                    <a href="#" class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-full bg-brand-green flex items-center justify-center text-white">
+                            <i class="fa-solid fa-leaf"></i>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="font-bold text-lg leading-tight tracking-wider text-white">VIVE</span>
+                            <span class="font-serif text-sm tracking-widest text-brand-gold">COLCHAGUA</span>
+                        </div>
+                    </a>
+                    <p class="text-stone-400 text-sm leading-relaxed mb-6">
+                        Promoviendo la cultura, la artesanía en mimbre y la excelencia enológica de la hermosa Región del Valle de Colchagua.
+                    </p>
+                </div>
+
+                <!-- Columna 2: Contacto -->
+                <div>
+                    <h4 class="text-white font-bold text-base mb-4 tracking-wider uppercase">Contacto</h4>
+                    <ul class="space-y-3 text-sm text-stone-400">
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-phone text-brand-gold"></i>
+                            <span>+56 9 591 3778</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-envelope text-brand-gold"></i>
+                            <span>contacto@vivecolchagua.cl</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-location-dot text-brand-gold"></i>
+                            <span>Valle de Colchagua, Región de O'Higgins, Chile</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Columna 3: Redes Sociales -->
+                <div>
+                    <h4 class="text-white font-bold text-base mb-4 tracking-wider uppercase">Sociales Posts</h4>
+                    <p class="text-xs text-stone-400 mb-4">Síguenos en nuestras redes para ver fotos y historias diarias del valle.</p>
+                    <div class="flex items-center space-x-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-stone-800 hover:bg-brand-gold text-white flex items-center justify-center transition-colors" aria-label="Instagram">
+                            <i class="fa-brands fa-instagram text-lg"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-stone-800 hover:bg-brand-gold text-white flex items-center justify-center transition-colors" aria-label="Facebook">
+                            <i class="fa-brands fa-facebook-f text-lg"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-stone-800 hover:bg-brand-gold text-white flex items-center justify-center transition-colors" aria-label="YouTube">
+                            <i class="fa-brands fa-youtube text-lg"></i>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer Bottom Bar -->
+            <div class="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-stone-500 gap-4">
+                <div class="flex space-x-6">
+                    <a href="#" class="hover:text-stone-300 transition-colors">Legal</a>
+                    <a href="#" class="hover:text-stone-300 transition-colors">Términos</a>
+                    <a href="#" class="hover:text-stone-300 transition-colors">Privacidad</a>
+                    <a href="#" class="hover:text-stone-300 transition-colors">Comunicaciones</a>
+                </div>
+                <div>
+                    <span>© VIVE COLCHAGUA. Todos los derechos reservados.</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- INTERACTIVE JAVASCRIPT -->
+    <script>
+        // Mobile Menu Toggle Logic
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            if (mobileMenu.classList.contains('hidden')) {
+                menuIcon.classList.remove('fa-xmark');
+                menuIcon.classList.add('fa-bars');
+            } else {
+                menuIcon.classList.remove('fa-bars');
+                menuIcon.classList.add('fa-xmark');
+            }
+        });
+
+        // Close mobile menu when a link is clicked
+        const mobileLinks = mobileMenu.querySelectorAll('a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+                menuIcon.classList.remove('fa-xmark');
+                menuIcon.classList.add('fa-bars');
+            });
+        });
+
+        // Guide Form Handler
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const form = document.getElementById('guide-form');
+            const successMsg = document.getElementById('form-success');
+            
+            // Hide form and show success banner with smooth animation
+            form.style.display = 'none';
+            successMsg.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
