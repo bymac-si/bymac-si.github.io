@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Picking por Zona · WMS Maulen</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+:root{--bg:#f5f5f7;--card:#fff;--ink:#1d1d22;--mut:#6c6c78;--line:#e2e2e8;--brand:#ed2750;--soft:#fdecef;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#131316;--card:#1c1c21;--ink:#f2f2f5;--mut:#9b9ba7;--line:#2c2c34;--soft:#3a1821}}
+:root[data-theme="dark"]{--bg:#131316;--card:#1c1c21;--ink:#f2f2f5;--mut:#9b9ba7;--line:#2c2c34;--soft:#3a1821}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+header{background:var(--brand);color:#fff;padding:14px 24px}
+header b{font-size:19px;letter-spacing:.3px}header span{opacity:.85;margin-left:10px;font-size:13px}
+main{padding:20px 24px;max-width:1100px;margin:0 auto}
+h1{font-size:21px;margin:0 0 2px}.sub{color:var(--mut);margin:0 0 14px}
+.form{display:flex;flex-wrap:wrap;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
+.form label.f{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--mut);flex:1;min-width:150px}
+input[type=date],input[type=search],select{padding:9px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+.chk{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--ink)}
+.zones{display:flex;flex-wrap:wrap;gap:6px;width:100%}
+.zones label{cursor:pointer;border:1.5px solid var(--line);border-radius:999px;padding:4px 11px;font-size:13px;font-weight:600;user-select:none}
+.zones label:has(input:checked){background:var(--brand);border-color:var(--brand);color:#fff}
+.zones input{position:absolute;opacity:0;pointer-events:none}
+.zones label:has(input:focus-visible){outline:3px solid #ffb703;outline-offset:2px}
+.zones small{opacity:.75;font-weight:500;margin-left:3px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.btn{all:unset;cursor:pointer;display:inline-block;background:transparent;color:var(--brand);border:1.5px solid var(--brand);font-weight:600;padding:8px 16px;border-radius:8px;font-size:14px}
+.btn.pri{background:var(--brand);color:#fff;padding:10px 20px;border:0;font-size:15px}
+.btn[disabled]{opacity:.4;cursor:default}
+.btn:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #ffb703;outline-offset:2px}
+.sheet{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px}
+.ptitle{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 22px;padding:6px 0;border-top:2px solid var(--ink);border-bottom:1px solid var(--line)}
+.ptitle h2{margin:0;font-size:20px}.ptitle b{color:var(--mut);font-weight:600}
+.meta{color:var(--mut);font-size:13px;margin:6px 0 10px}
+.wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+td.t{white-space:normal}
+th{font-size:13px;color:var(--mut);font-weight:600;border-bottom:2px solid var(--line);cursor:pointer;user-select:none}
+.n{text-align:right;font-variant-numeric:tabular-nums}td.n{font-weight:700}td.u{font-weight:700;font-variant-numeric:tabular-nums}
+.empty{color:var(--mut);padding:14px 0}
+@media (max-width:760px){header,main{padding-left:14px;padding-right:14px}}
+@media print{
+ @page{size:portrait;margin:10mm}
+ body{background:#fff;color:#000;font-size:11px}
+ header,.noprint{display:none!important}
+ main{padding:0;max-width:none}
+ .sheet{border:0;padding:0;margin:0;border-radius:0;background:#fff;page-break-after:always;break-after:page}
+ .sheet:last-child{page-break-after:auto;break-after:auto}
+ .ptitle{border-color:#000}.ptitle b,.meta{color:#000}
+ th,td{border:1px solid #000;color:#000;padding:3px 5px}
+ td.t{white-space:normal}
+ thead{display:table-header-group}tr{break-inside:avoid}
+}
+</style></head>
+<body>
+<header class="noprint"><b>ICB Food Service</b><span>WMS Maulen · Picking por zona</span></header>
+<main>
+ <div class="noprint">
+  <h1>Listado de picking por zona</h1>
+  <p class="sub" id="info">Cargue el PDF del WMS (ZonaPtaDis · Número OT · Material · Ubic.proc.…). Arrastre el archivo aquí o use «Cargar PDF».</p>
+  <div class="form">
+   <label class="f">Fecha<input type="date" id="fd"></label>
+   <label class="f">Orden<select id="ord"><option value="ub">Ubic.proc.</option><option value="mat">Material</option><option value="txt">Texto breve</option><option value="c">Cantidad</option></select></label>
+   <label class="f">Dirección<select id="dir"><option value="1">Ascendente</option><option value="-1">Descendente</option></select></label>
+   <label class="f">Presentación<select id="mode"><option value="z">Una hoja por zona</option><option value="f">Lista continua</option></select></label>
+   <label class="f">Temperatura<select id="te"><option value="">Todas</option><option value="7">Seco (7 y otras)</option><option value="8">Refrigerado (8)</option><option value="9">Congelado (9)</option></select></label>
+   <label class="f">Tp.<select id="tp"><option value="">Todos</option></select></label>
+   <label class="f" style="flex:2">Buscar<input type="search" id="q" placeholder="Material, texto o ubicación…"></label>
+   <label class="chk"><input type="checkbox" id="cons"> Sumar cantidades de igual zona, material y ubicación</label>
+  </div>
+  <div class="form" id="zbox" hidden>
+   <div class="bar" style="margin:0;width:100%"><b>Zonas</b>
+    <button class="btn" id="zall">Todas</button><button class="btn" id="znone">Ninguna</button></div>
+   <div class="zones" id="zones"></div>
+  </div>
+  <div class="bar">
+   <button class="btn pri" id="pr" disabled>🖨 Imprimir</button>
+   <label class="btn">Cargar PDF<input type="file" id="f" accept="application/pdf" multiple hidden></label>
+  </div>
+ </div>
+ <div id="out"><div class="empty noprint">Sin datos todavía.</div></div>
+</main>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const RE=/^(ZONA_\d+)\s+(\d{10})\s+(\d+)\s+(.+?)\s+(\d{3})\s+(\d{3}-\d{2}-\d+[A-Z]?)\s+([\d.,]+)\s+(\S+)\s+(\d{3})\s+(\d{10})$/;
+const RE2=/(\d{10})\s+(\d+)\s+(\d{3})\s+(\S+)\s+([\d.,]+)\s+(\S+)\s+(\S+)\s+(.+?)\s+(ZONA_\d+)$/;
+let dbg=[];let rows=[],sel=new Set(),sort={k:'ub',d:1},srcs=[];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const num=s=>parseFloat(String(s).replace(/\./g,'').replace(',','.'))||0;
+const fmt=n=>n.toLocaleString('es-CL',{maximumFractionDigits:3});
+const zn=z=>z.replace('ZONA_','');
+function fmtDate(){const v=$('fd').value;if(!v)return '—';const [y,m,d]=v.split('-');return `${d}/${m}/${y}`}
+async function parse(file){
+ const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise,out=[];
+ for(let p=1;p<=pdf.numPages;p++){
+  const items=(await(await pdf.getPage(p)).getTextContent()).items.filter(i=>i.str!=='');
+  const ls=[];
+  items.forEach(i=>{const y=i.transform[5];let l=ls.find(l=>Math.abs(l.y-y)<2);if(!l)ls.push(l={y,it:[]});l.it.push(i)});
+  ls.forEach(l=>{
+   l.it.sort((a,b)=>a.transform[4]-b.transform[4]);
+   let s='',prev=null;
+   l.it.forEach(i=>{if(prev&&i.transform[4]-(prev.transform[4]+prev.width)>1)s+=' ';s+=i.str;prev=i});
+   const m=RE.exec(s.replace(/\s+/g,' ').trim());
+   if(m)out.push({z:m[1],ot:m[2],mat:m[3],txt:m[4],tp:m[5],ub:m[6],c:num(m[7]),uma:m[8]});
+   else{const n=RE2.exec(s.replace(/\s+/g,' ').trim());if(n)out.push({z:n[9],ot:n[1],mat:n[2],txt:n[8],tp:n[3],ub:n[4],c:num(n[5]),uma:n[6]});else if(/ZONA_/.test(s)&&dbg.length<3)dbg.push(s.replace(/\s+/g,' ').trim())}
+  });
+ }
+ return out;
+}
+async function load(files){
+ $('info').textContent='Leyendo…';dbg=[];rows=[];srcs=[];
+ try{for(const f of files){rows=rows.concat(await parse(f));srcs.push(f.name)}}
+ catch(e){$('info').textContent='No se pudo leer el PDF: '+e.message;return}
+ if(!rows.length){$('info').textContent='No se encontraron líneas con el formato esperado.'+(dbg.length?' Ejemplo leído: '+dbg.join(' | '):'');$('out').innerHTML='';return}
+ sel=new Set(rows.map(r=>r.z));
+ const tps=[...new Set(rows.map(r=>r.tp))].sort();
+ $('tp').innerHTML='<option value="">Todos</option>'+tps.map(t=>`<option>${t}</option>`).join('');
+ $('zbox').hidden=false;$('pr').disabled=false;
+ buildZones();render();
+}
+function buildZones(){
+ const zs=[...new Set(rows.map(r=>r.z))].sort((a,b)=>a.localeCompare(b,'es',{numeric:true}));
+ $('zones').innerHTML=zs.map(z=>`<label><input type="checkbox" data-z="${z}"${sel.has(z)?' checked':''}>${zn(z)}<small>${rows.filter(r=>r.z===z).length}</small></label>`).join('');
+}
+function view(){
+ const q=$('q').value.trim().toLowerCase(),tp=$('tp').value,te=$('te').value;
+ let a=rows.filter(r=>sel.has(r.z)&&(!tp||r.tp===tp)&&(!te||(/^[89]/.test(r.ub)?r.ub[0]:'7')===te)&&(!q||(r.mat+' '+r.txt+' '+r.ub).toLowerCase().includes(q)));
+ if($('cons').checked){const m=new Map();a.forEach(r=>{const k=[r.z,r.mat,r.ub,r.uma].join('|'),e=m.get(k);if(e){e.c+=r.c;e.ots.add(r.ot)}else m.set(k,{...r,ots:new Set([r.ot])})});return [...m.values()]}
+ return a.map(r=>({...r,ots:new Set([r.ot])}));
+}
+function srt(a){const {k,d}=sort,cmp=(x,y,f)=>x[f].localeCompare(y[f],'es',{numeric:true});
+ return a.slice().sort((x,y)=>(k==='c'?x.c-y.c:cmp(x,y,k))*d||cmp(x,y,'ub')||cmp(x,y,'mat'))}
+function table(a,showZ){
+ const cols=[...(showZ?[['z','Zona']]:[]),['mat','Material'],['txt','Texto breve de material'],['c','CtdTeóricaDesde'],['uma','UMA'],['ub','Ubic.Proc.']];
+ const head=cols.map(([k,t])=>`<th data-k="${k}"${k==='c'?' class="n"':''}>${t}${sort.k===k?(sort.d>0?' ▲':' ▼'):''}</th>`).join('');
+ const body=a.map(r=>`<tr>${showZ?`<td>${zn(r.z)}</td>`:''}<td>${r.mat}</td><td class="t">${esc(r.txt)}</td><td class="n">${fmt(r.c)}</td><td>${esc(r.uma)}</td><td class="u">${r.ub}</td></tr>`).join('');
+ return `<div class="wrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+}
+function sheet(title,a,showZ){
+ const ots=new Set(a.flatMap(r=>[...r.ots])).size;
+ return `<section class="sheet"><div class="ptitle"><span><b>Fecha:</b> ${esc(fmtDate())}</span><h2>Picking · ${esc(title)}</h2><span><b>WMS Maulen</b></span></div>
+ <div class="meta">${a.length} líneas · ${ots} OT</div>${table(srt(a),showZ)}</section>`;
+}
+function render(){
+ if(!rows.length)return;
+ const a=view();
+ $('info').textContent=`${srcs.join(', ')} · ${rows.length} líneas leídas · se muestran ${a.length}`;
+ if(!a.length){$('out').innerHTML='<div class="empty noprint">Sin resultados: seleccione al menos una zona.</div>';return}
+ if($('mode').value==='z'){
+  const zs=[...new Set(a.map(r=>r.z))].sort((x,y)=>x.localeCompare(y,'es',{numeric:true}));
+  $('out').innerHTML=zs.map(z=>sheet('Zona '+zn(z),a.filter(r=>r.z===z),false)).join('');
+ }else $('out').innerHTML=sheetFlat(a);
+}
+function sheetFlat(a){
+ const ots=new Set(a.flatMap(r=>[...r.ots])).size;
+ const zs=[...new Set(a.map(r=>r.z))].length;
+ const base=sort.k==='z'?a.slice().sort((x,y)=>x.z.localeCompare(y.z,'es',{numeric:true})*sort.d||x.ub.localeCompare(y.ub,'es',{numeric:true})):srt(a);
+ return `<section class="sheet"><div class="ptitle"><span><b>Fecha:</b> ${esc(fmtDate())}</span><h2>Picking · ${zs} zona${zs>1?'s':''}</h2><span><b>WMS Maulen</b></span></div>
+ <div class="meta">${a.length} líneas · ${ots} OT</div>${table(base,true)}</section>`;
+}
+$('out').onclick=e=>{const th=e.target.closest('th[data-k]');if(!th)return;const k=th.dataset.k;
+ sort=sort.k===k?{k,d:-sort.d}:{k,d:1};
+ if(k!=='z'){$('ord').value=k}$('dir').value=sort.d;render()};
+$('ord').onchange=()=>{sort.k=$('ord').value;render()};
+$('dir').onchange=()=>{sort.d=+$('dir').value;render()};
+$('mode').onchange=$('tp').onchange=$('te').onchange=$('cons').onchange=render;
+$('q').oninput=render;$('fd').oninput=render;
+$('zones').addEventListener('change',e=>{const z=e.target.dataset.z;if(!z)return;e.target.checked?sel.add(z):sel.delete(z);render()});
+$('zall').onclick=()=>{sel=new Set(rows.map(r=>r.z));buildZones();render()};
+$('znone').onclick=()=>{sel=new Set();buildZones();render()};
+{const n=new Date();$('fd').value=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`}
+$('pr').onclick=()=>{document.title='Picking por zona '+fmtDate();window.print()};
+$('f').onchange=e=>{if(e.target.files.length)load([...e.target.files]);e.target.value=''};
+document.addEventListener('dragover',e=>e.preventDefault());
+document.addEventListener('drop',e=>{e.preventDefault();const fs=[...e.dataTransfer.files].filter(f=>/\.pdf$/i.test(f.name));if(fs.length)load(fs)});
+</script>
+</body></html>
