@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Pedido a preparar · WMS Maulen</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+    :root {
+        --bg: #f5f5f7;
+        --card: #fff;
+        --ink: #1d1d22;
+        --mut: #6c6c78;
+        --line: #e2e2e8;
+        --brand: #ed2750;
+        --soft: #fdecef;
+        box-sizing: border-box;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px)
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+            --bg: #131316;
+            --card: #1c1c21;
+            --ink: #f2f2f5;
+            --mut: #9b9ba7;
+            --line: #2c2c34;
+            --soft: #3a1821
+        }
+    }
+
+    :root[data-theme="dark"] {
+        --bg: #131316;
+        --card: #1c1c21;
+        --ink: #f2f2f5;
+        --mut: #9b9ba7;
+        --line: #2c2c34;
+        --soft: #3a1821
+    }
+
+    *, *::before, *::after {
+        box-sizing: inherit
+    }
+
+    html {
+        scroll-padding-top: env(safe-area-inset-top, 0px)
+    }
+
+    body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font: 15px/1.45 "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif
+    }
+
+    .app {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        min-height: 100vh
+    }
+
+    aside {
+        background: var(--brand);
+        color: #fff;
+        padding: 20px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow: auto
+    }
+
+    .logo {
+        font-weight: 800;
+        font-size: 19px;
+        line-height: 1.1;
+        text-align: center;
+        margin: 4px 0 16px;
+        letter-spacing: .3px
+    }
+
+    .logo small {
+        display: block;
+        font-weight: 600;
+        font-size: 12px;
+        opacity: .85;
+        letter-spacing: 0;
+        margin-top: 3px
+    }
+
+    .tabs {
+        display: flex;
+        flex-direction: column;
+        gap: 6px
+    }
+
+    .tab {
+        all: unset;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 11px 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        color: #fff;
+        opacity: .85
+    }
+
+    .tab:hover {
+        background: rgba(255, 255, 255, .14)
+    }
+
+    .tab.on {
+        background: #fff;
+        color: var(--brand);
+        opacity: 1
+    }
+
+    .tab small {
+        opacity: .75;
+        font-weight: 600
+    }
+
+    .tab:focus-visible, .btn:focus-visible, input:focus-visible, select:focus-visible {
+        outline: 3px solid #ffb703;
+        outline-offset: 2px
+    }
+
+    main {
+        padding: 24px;
+        max-width: 1200px;
+        width: 100%;
+        min-width: 0
+    }
+
+    h1 {
+        font-size: 22px;
+        margin: 0 0 4px
+    }
+
+    .sub {
+        color: var(--mut);
+        margin: 0 0 18px
+    }
+
+    .form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 14px;
+        margin-bottom: 14px
+    }
+
+    .form label {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        font-size: 13px;
+        color: var(--mut);
+        flex: 1;
+        min-width: 150px
+    }
+
+    .form input, .form select, input[type=search] {
+        padding: 9px 12px;
+        border: 1.5px solid var(--line);
+        border-radius: 8px;
+        background: var(--bg);
+        color: var(--ink);
+        font: inherit
+    }
+
+    input[type=search] {
+        flex: 1;
+        min-width: 140px
+    }
+
+    .bar {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 14px
+    }
+
+    .btn {
+        all: unset;
+        cursor: pointer;
+        display: inline-block;
+        background: transparent;
+        color: var(--brand);
+        border: 1.5px solid var(--brand);
+        font-weight: 600;
+        padding: 9.5px 18.5px;
+        border-radius: 8px
+    }
+
+    .btn.pri {
+        background: var(--brand);
+        color: #fff;
+        padding: 11px 20px;
+        border: 0
+    }
+
+    .btn[disabled] {
+        opacity: .4;
+        cursor: default
+    }
+
+    .sheet {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 16px
+    }
+
+    .zbig {
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+        margin: 0 0 6px
+    }
+
+    .zbig span {
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--mut);
+        letter-spacing: 2px
+    }
+
+    .zbig b {
+        font-size: 84px;
+        line-height: 1;
+        font-weight: 800;
+        color: var(--brand);
+        letter-spacing: 1px
+    }
+
+    .ptitle {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px 22px;
+        margin: 10px 0 4px;
+        padding: 8px 0;
+        border-top: 2px solid var(--ink);
+        border-bottom: 1px solid var(--line)
+    }
+
+    .ptitle b {
+        color: var(--mut);
+        font-weight: 600
+    }
+
+    .ptitle h2 {
+        display: inline;
+        font-size: 17px;
+        margin: 0 4px 0 0
+    }
+
+    .ptitle em {
+        font-style: normal;
+        font-weight: 800;
+        font-size: 17px
+    }
+
+    .meta {
+        color: var(--mut);
+        font-size: 13px;
+        margin: 4px 0 10px
+    }
+
+    .wrap {
+        overflow-x: auto
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%
+    }
+
+    th, td {
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        white-space: nowrap
+    }
+
+    td.t {
+        white-space: normal;
+        min-width: 180px
+    }
+
+    th {
+        font-size: 13px;
+        color: var(--mut);
+        font-weight: 600;
+        border-bottom: 2px solid var(--line);
+        cursor: pointer;
+        user-select: none
+    }
+
+    .n {
+        text-align: right;
+        font-variant-numeric:tabular-nums
+    }
+
+    td.n {
+        font-weight:700
+    }
+
+    td.u {
+        font-weight: 700;
+        font-variant-numeric: tabular-nums
+    }
+
+    tfoot td {
+        font-weight: 800;
+        border-top: 2px solid var(--ink);
+        border-bottom: 0;
+        font-size: 16px
+    }
+
+    .empty {
+        color: var(--mut);
+        padding: 14px 0
+    }
+
+    @media (max-width: 760px) {
+        .app {
+            grid-template-columns:1fr
+        }
+
+        aside {
+            position: static;
+            height: auto;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+            padding:10px 12px
+        }
+
+        .logo {
+            margin: 0 10px 0 0;
+            text-align:left
+        }
+
+        .tabs {
+            flex-direction: row;
+            flex-wrap:wrap
+        }
+
+        main {
+            padding:16px
+        }
+
+        .zbig b {
+            font-size: 60px
+        }
+    }
+
+    @media print {
+        @page {
+            size: landscape;
+            margin: 10mm
+        }
+
+        body {
+            background: #fff;
+            color: #000;
+            font-size:11px
+        }
+
+        .app {
+            display: block
+        }
+
+        aside, .noprint {
+            display: none !important
+        }
+
+        main {
+            padding: 0;
+            max-width: none
+        }
+
+        .sheet {
+            border: 0;
+            padding: 0;
+            margin: 0;
+            border-radius: 0;
+            background: #fff;
+            page-break-after: always;
+            break-after: page
+        }
+
+        .sheet:last-child {
+            page-break-after: auto;
+            break-after: auto
+        }
+
+        .zbig span {
+            color: #000;
+            font-size:22px
+        }
+
+        .zbig b {
+            color: #000;
+            font-size: 72px
+        }
+
+        .ptitle {
+            border-color:#000
+        }
+
+        .ptitle b, .meta {
+            color: #000
+        }
+
+        th, td {
+            border: 1px solid #000;
+            color: #000;
+            padding: 3px 5px
+        }
+
+        td.t {
+            white-space: normal
+        }
+
+        tfoot td {
+            border-top: 2px solid #000;
+            font-size: 12px
+        }
+
+        thead {
+            display:table-header-group
+        }
+
+        tfoot {
+            display:table-footer-group
+        }
+
+        tr {
+            break-inside: avoid
+        }
+    }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <aside class="noprint">
+            <div class="logo">
+                ICB Food Service
+                <small>WMS Maulen</small>
+            </div>
+            <div class="tabs" id="tabs"></div>
+        </aside>
+        <main>
+            <div class="noprint">
+                <img src="https://www.icbfs.cl/wp-content/uploads/2022/02/logo-icbfs.png" alt="ICB Food Service">
+                <h1>Pedido a preparar</h1>
+                <p class="sub" id="info">Cargue uno o más PDF del WMS (uno por OT). Arrastre los archivos aquí o use «Agregar PDF»: se suman y las zonas repetidas se juntan en una sola hoja.</p>
+                <div class="form">
+                    <label>
+                        Fecha
+                        <input type="date" id="fd">
+                    </label>
+                    <label>
+                        Lugar de destino
+                        <input type="text" id="fl" placeholder="Ej: Sucursal Providencia">
+                    </label>
+                    <label>
+                        Orden
+                        <select id="ord">
+                            <option value="otub">OT + Ubic.proc.</option>
+                            <option value="ub">Ubic.proc.</option>
+                            <option value="mat">Material</option>
+                            <option value="txt">Texto breve</option>
+                            <option value="c">Cantidad</option>
+                            <option value="ot">Número OT</option>
+                        </select>
+                    </label>
+                    <label>
+                        Dirección
+                        <select id="dir">
+                            <option value="1">Ascendente</option>
+                            <option value="-1">Descendente</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="bar">
+                    <input type="search" id="q" placeholder="Buscar material, texto, ubicación u OT…">
+                    <button class="btn pri" id="pr" disabled>🖨 Imprimir</button>
+                    <label class="btn">
+                        Agregar PDF
+                        <input type="file" id="f" accept="application/pdf" multiple hidden>
+                    </label>
+                    <button class="btn" id="clr" disabled>Limpiar todo</button>
+                </div>
+            </div>
+            <div id="out">
+                <div class="empty noprint">Sin datos todavía.</div>
+            </div>
+        </main>
+    </div>
+    <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const RE = /(ZONA_\d+)\s+(\d{10})\s+(\d+)\s+(.+?)\s+(\d{3})\s+(\S+)\s+([\d.,]+)\s+(\S+)\s+(\d{3})\s+(\d{10})$/;
+    let rows = [],
+        sort = {
+            k: 'otub',
+            d: 1
+        },
+        srcs = [],
+        dbg = [],
+        tab = 'ALL';
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;'
+    }[c]));
+    const num = s => parseFloat(String(s).replace(/\./g, '').replace(',', '.')) || 0;
+    const fmt = n => n.toLocaleString('de-DE', {
+        maximumFractionDigits: 3
+    });
+    const zn = z => z.replace('ZONA_', '');
+    const cmp = (x, y, f) => String(x[f]).localeCompare(String(y[f]), 'es', {
+        numeric: true
+    });
+    function fmtDate() {
+        const v = $('fd').value;
+        if (!v)
+            return '—';
+        const [y, m, d] = v.split('-');
+        return `${d}/${m}/${y}`
+    }
+    function saveForm() {
+        document.title = `Pedido a preparar ${$('fl').value.trim()} ${fmtDate()}`.replace(/\s+/g, ' ').trim();
+        try {
+            localStorage.setItem('pp_form', JSON.stringify([$('fd').value, $('fl').value]))
+        } catch (e) {}
+    }
+    async function parse(file) {
+        const pdf = await pdfjsLib.getDocument({
+                data: await file.arrayBuffer()
+            }).promise,
+            out = [];
+        for (let p = 1; p <= pdf.numPages; p++) {
+            const items = (await (await pdf.getPage(p)).getTextContent()).items.filter(i => i.str !== '');
+            const ls = [];
+            items.forEach(i => {
+                const y = i.transform[5];
+                let l = ls.find(l => Math.abs(l.y - y) < 2);
+                if (!l)
+                    ls.push(l = {
+                        y,
+                        it: []
+                    });
+                l.it.push(i)
+            });
+            ls.forEach(l => {
+                l.it.sort((a, b) => a.transform[4] - b.transform[4]);
+                let s = '',
+                    prev = null;
+                l.it.forEach(i => {
+                    if (prev && i.transform[4] - (prev.transform[4] + prev.width) > 1)
+                        s += ' ';
+                    s += i.str;
+                    prev = i
+                });
+                s = s.replace(/\s+/g, ' ').trim();
+                const m = RE.exec(s);
+                if (m)
+                    out.push({
+                        z: m[1],
+                        ot: m[2],
+                        mat: m[3],
+                        txt: m[4],
+                        tp: m[5],
+                        ub: m[6],
+                        cs: m[7],
+                        c: num(m[7]),
+                        uma: m[8],
+                        td: m[9],
+                        ud: m[10]
+                    });
+                else if (/ZONA_/.test(s) && dbg.length < 3)
+                    dbg.push(s);
+            });
+        }
+        return out;
+    }
+    async function load(files) {
+        $('info').textContent = 'Leyendo…';
+        dbg = [];
+        try {
+            for (const f of files) {
+                if (srcs.includes(f.name))
+                    continue;
+                rows = rows.concat(await parse(f));
+                srcs.push(f.name)
+            }
+        }
+        catch (e) {
+            $('info').textContent = 'No se pudo leer el PDF: ' + e.message;
+            return
+        }
+        if (!rows.length) {
+            $('info').textContent = 'No se encontraron líneas con el formato esperado.' + (dbg.length ? ' Ejemplo leído: ' + dbg.join(' | ') : '');
+            $('out').innerHTML = '';
+            return
+        }
+        $('pr').disabled = false;
+        $('clr').disabled = false;
+        render();
+    }
+    function view() {
+        const q = $('q').value.trim().toLowerCase();
+        return rows.filter(r => !q || (r.mat + ' ' + r.txt + ' ' + r.ub + ' ' + r.ot).toLowerCase().includes(q));
+    }
+    function srt(a) {
+        const {k, d} = sort;
+        const f = k === 'otub' ? 'ot' : k;
+        return a.slice().sort((x, y) => (k === 'c' ? x.c - y.c : cmp(x, y, f)) * d || cmp(x, y, 'ub'))
+    }
+    function sheet(z, a) {
+        const ots = [...new Set(a.map(r => r.ot))].sort();
+        const cols = [['z', 'ZonaPtaDis'], ['ot', 'Número OT'], ['mat', 'Material'], ['txt', 'Texto breve de material'], ['tp', 'Tp.'], ['ub', 'Ubic.proc.'], ['c', 'CtdTeóricaDesde'], ['uma', 'UMA'], ['td', 'Tp.'], ['ud', 'UbicDest']];
+        const head = cols.map(([k, t]) => `<th data-k="${k}"${k === 'c' ? ' class="n"' : ''}>${t}${sort.k === k ? (sort.d > 0 ? ' ▲' : ' ▼') : ''}</th>`).join('');
+        const body = srt(a).map(r => `<tr><td>${r.z}</td><td>${r.ot}</td><td>${r.mat}</td><td class="t">${esc(r.txt)}</td><td>${r.tp}</td><td class="u">${esc(r.ub)}</td><td class="n">${esc(r.cs)}</td><td>${esc(r.uma)}</td><td>${r.td}</td><td>${r.ud}</td></tr>`).join('');
+        const tot = new Map();
+        a.forEach(r => tot.set(r.uma, (tot.get(r.uma) || 0) + r.c));
+        const foot = [...tot].map(([u, v], i) => `<tr><td colspan="6">${i ? '' : `Total · ${a.length} líneas`}</td><td class="n">${fmt(v)}</td><td>${esc(u)}</td><td colspan="2"></td></tr>`).join('');
+        return `<section class="sheet"><div class="zbig"><span>ZONA</span><b>${zn(z)}</b></div>
+         <div class="ptitle"><span><b>Fecha:</b> ${esc(fmtDate())}</span><span><h2>Destino: ${esc($('fl').value.trim() || '—')}</h2></span><span><b>Almacén:</b> F00 · WMS Maulen</span><span><b>OT:</b> <em>${ots.join(' · ')}</em></span></div>
+         <div class="meta">${a.length} líneas · ${ots.length} OT (${ots.map(o => o + ': ' + a.filter(r => r.ot === o).length).join(' · ')})</div>
+         <div class="wrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div></section>`;
+    }
+    function render() {
+        if (!rows.length)
+            return;
+        const all = view(),
+            zs = [...new Set(rows.map(r => r.z))].sort((x, y) => x.localeCompare(y, 'es', {
+                numeric: true
+            }));
+        if (tab !== 'ALL' && !zs.includes(tab))
+            tab = 'ALL';
+        $('tabs').innerHTML = [['ALL', 'Todas', all.length], ...zs.map(z => [z, 'Zona ' + zn(z), all.filter(r => r.z === z).length])]
+        .map(([t, n, v]) => `<button class="tab ${t == tab ? 'on' : ''}" data-t="${t}">${n}<small>${v}</small></button>`).join('');
+        const show = (tab === 'ALL' ? zs : [tab]).filter(z => all.some(r => r.z === z));
+        $('info').textContent = `${srcs.join(', ')} · ${rows.length} líneas leídas · ${zs.length} zona${zs.length > 1 ? 's' : ''} · se muestran ${tab === 'ALL' ? all.length : all.filter(r => r.z === tab).length}`;
+        $('out').innerHTML = show.length ? show.map(z => sheet(z, all.filter(r => r.z === z))).join('') : '<div class="empty noprint">Sin resultados.</div>';
+    }
+    $('tabs').onclick = e => {
+        const b = e.target.closest('.tab');
+        if (b) {
+            tab = b.dataset.t;
+            render()
+        }
+    };
+    $('out').onclick = e => {
+        const th = e.target.closest('th[data-k]');
+        if (!th)
+            return;
+        const k = th.dataset.k;
+        if (['z', 'tp', 'td', 'ud', 'uma'].includes(k))
+            return;
+        sort = sort.k === k ? {
+            k,
+            d: -sort.d
+        } : {
+            k,
+            d: 1
+        };
+        $('ord').value = k;
+        $('dir').value = sort.d;
+        render()
+    };
+    $('ord').onchange = () => {
+        sort.k = $('ord').value;
+        render()
+    };
+    $('dir').onchange = () => {
+        sort.d = +$('dir').value;
+        render()
+    };
+    $('q').oninput = render;
+    ['fd', 'fl'].forEach(i => $(i).oninput = () => {
+        saveForm();
+        render()
+    });
+    try {
+        const s = JSON.parse(localStorage.getItem('pp_form'));
+        if (s) {
+            $('fd').value = s[0];
+            $('fl').value = s[1]
+        }
+    } catch (e) {}
+    if (!$('fd').value) {
+        const n = new Date();
+        $('fd').value = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`
+    }
+    saveForm();
+    $('clr').onclick = () => {
+        rows = [];
+        srcs = [];
+        tab = 'ALL';
+        $('tabs').innerHTML = '';
+        $('pr').disabled = true;
+        $('clr').disabled = true;
+        $('out').innerHTML = '<div class="empty noprint">Sin datos todavía.</div>';
+        $('info').textContent = 'Cargue uno o más PDF del WMS (uno por OT).'
+    };
+    $('pr').onclick = () => {
+        saveForm();
+        window.print()
+    };
+    $('f').onchange = e => {
+        if (e.target.files.length)
+            load([...e.target.files]);
+        e.target.value = ''
+    };
+    document.addEventListener('dragover', e => e.preventDefault());
+    document.addEventListener('drop', e => {
+        e.preventDefault();
+        const fs = [...e.dataTransfer.files].filter(f => /\.pdf$/i.test(f.name));
+        if (fs.length)
+            load(fs)
+    });
+    </script>
+</body>
+</html>
