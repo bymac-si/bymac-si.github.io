@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="es">
+<head>
+<!-- ICB Food Service 2026 · Pedido Personal (tarja US Letter apaisada) -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pedido Personal · ICB Food Service</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#f5f5f7;--panel:#fff;--line:#e2e2e8;--ink:#1d1d22;--muted:#6c6c78;--brand:#ed2750}
+@media (prefers-color-scheme:dark){:root{--bg:#131316;--panel:#1c1c21;--line:#2c2c34;--ink:#f2f2f5;--muted:#9b9ba7}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,Roboto,Arial,sans-serif}
+.app{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:18px;padding:18px;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+h1{font-size:20px;margin:0 0 2px}h2{font-size:15px;margin:0 0 10px}
+.hint{color:var(--muted);font-size:13px}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+input,select,textarea{width:100%;border:1.5px solid var(--line);border-radius:8px;padding:9px 11px;background:var(--bg);color:var(--ink);font:inherit;min-height:40px}
+textarea{min-height:110px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid rgba(237,39,80,.35);border-color:var(--brand)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{background:var(--brand);border:1.5px solid var(--brand);color:#fff;border-radius:8px;padding:9px 14px;font:inherit;font-weight:700;cursor:pointer;min-height:40px}
+.btn.gray{background:transparent;color:var(--brand)}
+.btn.big{width:100%;padding:13px;font-size:16px;margin-top:14px}
+.pv{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;overflow:auto}
+/* ===== TARJA US LETTER APAISADA 279.4 x 215.9 mm ===== */
+.sheet{width:279.4mm;height:215.8mm;background:#fff;color:#111;position:relative;padding:9mm;font-family:"Segoe UI",Arial,sans-serif;overflow:hidden}
+.frame{height:100%;border:2.2mm solid #000;border-radius:6mm;display:grid;grid-template-rows:30mm 1fr 62mm;overflow:hidden}
+.hd{background:#000;color:#fff;display:flex;align-items:center;gap:8mm;padding:0 8mm}
+.hd img{height:24mm;display:block}
+.hd .ttl{flex:1;font-size:17mm;font-weight:800;letter-spacing:.3mm;line-height:1}
+.hd .dt{font-size:6mm;font-weight:700;text-align:right;line-height:1.3}
+.zn{position:relative;display:flex;border-bottom:.8mm solid #000;min-height:0}
+.zn small{position:absolute;top:4mm;left:8mm;font-size:9mm;font-weight:800;color:#000;letter-spacing:.5mm}
+.zv{flex:1;display:flex;align-items:center;justify-content:center;font-weight:900;line-height:1;color:#000;min-height:0;overflow:hidden;padding:0 8mm}
+.pd{padding:4mm 8mm;display:flex;flex-direction:column;border-bottom:.8mm solid #000;min-height:0}
+.pd small{font-size:6.5mm;font-weight:800;color:#000;text-transform:uppercase;letter-spacing:.4mm}
+.pd .chips{flex:1;display:flex;flex-wrap:wrap;gap:3mm;align-content:flex-start;align-items:center;font-weight:800;min-height:0;overflow:hidden}
+.chips span{border:.7mm solid #111;border-radius:2.5mm;padding:.6mm 3mm}
+.en{background:#fff;display:flex;flex-direction:column;justify-content:center;padding:3mm 8mm;min-height:0;overflow:hidden}
+.en small{font-size:9mm;font-weight:800;color:#000}
+.en .cl{flex:1;display:flex;align-items:center;font-weight:900;line-height:1.05;text-transform:uppercase;min-height:0;overflow:hidden}
+#printArea{display:none}
+body.printing #printArea{display:block}
+body.printing .app{display:none}
+@page{size:letter landscape;margin:0}
+@media print{html,body{background:#fff}.app{display:none}#printArea{display:block}.sheet{page-break-after:always;break-after:page}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+@media (max-width:900px){.app{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div>
+    <div class="panel">
+      <h1>Pedido Personal</h1>
+      <div class="hint">Tarja US Letter apaisada · ICB Food Service</div>
+    </div>
+    <div class="panel">
+      <h2>1) Excel de SAP (opcional)</h2>
+      <button class="btn gray" id="bLoad" type="button">📂 Cargar Excel de SAP</button>
+      <input type="file" id="fSap" accept=".xlsx,.xls" style="display:none">
+      <div class="hint" id="sInfo" style="margin-top:6px"></div>
+      <label for="zSel">Zona</label>
+      <select id="zSel" disabled><option value="">— Carga un Excel o escribe los datos —</option></select>
+    </div>
+    <div class="panel">
+      <h2>2) Datos de la tarja</h2>
+      <div class="row">
+        <div><label for="iZona">Zona</label><input id="iZona" placeholder="Ej: 609" autocomplete="off"></div>
+        <div><label for="iCop">Copias</label><input id="iCop" type="number" min="1" max="50" value="1"></div>
+      </div>
+      <label for="iCli">Cliente</label>
+      <input id="iCli" placeholder="Nombre del cliente" autocomplete="off">
+      <label for="iFec">Fecha</label>
+      <input id="iFec" type="date">
+      <button class="btn big" id="bPrint" type="button">🖨 Imprimir tarja</button>
+    </div>
+  </div>
+  <div class="pv"><h2>Vista previa</h2><div id="pv"></div></div>
+</div>
+<div id="printArea"></div>
+<script>
+const $=id=>document.getElementById(id);
+const LOGO="data:image/png;base64,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";
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const normH=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]/g,"");
+const keyStr=v=>v==null?"":(typeof v==="number"&&Number.isInteger(v)?String(v):String(v).trim());
+let ZONES={};
+
+function fmtDate(v){if(!v)return"";const[y,m,d]=v.split("-");return d+"-"+m+"-"+y}
+
+function sheetHTML(){
+  return `<div class="sheet"><div class="frame">
+    <div class="hd"><img src="${LOGO}" alt="ICB"><div class="ttl">Pedido Personal</div><div class="dt">${esc(fmtDate($("iFec").value))}</div></div>
+    <div class="zn"><small>ZONA</small><div class="zv fit" data-max="95">${esc($("iZona").value.trim()||"—")}</div></div>
+    <div class="en"><small>Entregar a : </small><div class="cl fit" data-max="34">${esc($("iCli").value.trim()||"—")}</div></div>
+  </div></div>`;
+}
+function fit(root){
+  root.querySelectorAll(".fit").forEach(el=>{
+    let s=+el.dataset.max;el.style.fontSize=s+"mm";
+    while(s>4&&(el.scrollHeight>el.clientHeight+1||el.scrollWidth>el.clientWidth+1)){s-=.5;el.style.fontSize=s+"mm"}
+  });
+}
+function renderPv(){
+  const box=$("pv"),w=box.clientWidth||600,sc=Math.min(1,(w-4)/1056);
+  box.innerHTML=`<div style="zoom:${sc}">${sheetHTML()}</div>`;
+  fit(box);
+}
+["iZona","iCli","iFec"].forEach(id=>$(id).addEventListener("input",renderPv));
+window.addEventListener("resize",renderPv);
+
+/* ===== Excel SAP: zona -> cliente + pedidos ===== */
+function sapParse(rows){
+  let hr=0,h=[];
+  for(let r=0;r<Math.min(rows.length,30);r++){
+    const hh=(rows[r]||[]).map(normH);
+    if(hh.includes("material")&&hh.some(x=>x.startsWith("zona")||x.includes("zonapuesta"))){hr=r;h=hh;break}
+  }
+  if(!h.length)h=(rows[0]||[]).map(normH);
+  const col=(ex,co,fb)=>{
+    for(const n of ex){const i=h.indexOf(normH(n));if(i>=0)return i}
+    for(const n of co){const i=h.findIndex(x=>x.includes(normH(n)));if(i>=0)return i}
+    return fb;
+  };
+  const iZ=col(["zona puesta dispos.","zona puesta disposicion","zona"],["zonapuesta"],17);
+  const iC=col(["cliente","nombre cliente"],["cliente"],-1);
+  const iE=col(["entrega","numero entrega","entrega sap","pedido"],["entrega","pedido"],-1);
+  const Z={};let n=0;
+  for(let r=hr+1;r<rows.length;r++){
+    const c=rows[r],m=/\d+/.exec(keyStr(c[iZ]));
+    if(!m)continue;
+    const k=String(parseInt(m[0],10));
+    const z=Z[k]||(Z[k]={cli:"",ped:new Set()});
+    if(iC>=0&&!z.cli)z.cli=keyStr(c[iC]);
+    if(iE>=0&&keyStr(c[iE]))z.ped.add(keyStr(c[iE]));
+    n++;
+  }
+  return{Z,n,hasCli:iC>=0,hasEnt:iE>=0};
+}
+$("bLoad").onclick=()=>window.XLSX?$("fSap").click():alert("Para leer Excel se necesita conexión a internet");
+$("fSap").onchange=async e=>{
+  const f=e.target.files[0];e.target.value="";if(!f)return;
+  try{
+    const wb=XLSX.read(new Uint8Array(await f.arrayBuffer()),{type:"array"});
+    let best=null;
+    for(const name of wb.SheetNames){
+      const x=sapParse(XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,raw:true,defval:""}));
+      if(x&&(!best||x.n>best.n))best=x;
+    }
+    if(!best||!best.n)return($("sInfo").textContent="No encuentro columnas de zona en el Excel");
+    ZONES=best.Z;
+    const keys=Object.keys(ZONES).sort((a,b)=>a-b);
+    $("zSel").innerHTML='<option value="">— Elegir zona —</option>'+keys.map(k=>`<option value="${k}">${k} · ${esc(ZONES[k].cli||"sin cliente")} </option>`).join("");
+    $("zSel").disabled=false;
+    $("sInfo").textContent=f.name+" · "+keys.length+" zonas"+(best.hasCli?"":" · ⚠ sin columna Cliente");
+  }catch(err){$("sInfo").textContent="No se pudo leer el archivo: "+err.message}
+};
+$("zSel").onchange=e=>{
+  const z=ZONES[e.target.value];if(!z)return;
+  $("iZona").value=e.target.value;$("iCli").value=z.cli;
+  renderPv();
+};
+
+/* ===== Impresión ===== */
+$("bPrint").onclick=()=>{
+  const n=Math.max(1,Math.min(50,parseInt($("iCop").value)||1)),pa=$("printArea");
+  pa.innerHTML=Array(n).fill(sheetHTML()).join("");
+  document.body.classList.add("printing");
+  fit(pa);
+  setTimeout(()=>{window.print();setTimeout(()=>document.body.classList.remove("printing"),300)},50);
+};
+window.addEventListener("afterprint",()=>document.body.classList.remove("printing"));
+$("iFec").value=new Date().toISOString().slice(0,10);
+renderPv();
+</script>
+</body>
+</html>

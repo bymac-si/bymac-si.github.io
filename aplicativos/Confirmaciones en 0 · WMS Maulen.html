@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Confirmaciones en 0 · WMS Maulen</title>
+<style>
+:root{--bg:#f5f5f7;--card:#fff;--ink:#1d1d22;--mut:#6c6c78;--line:#e2e2e8;--brand:#ed2750;--soft:#fdecef;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#131316;--card:#1c1c21;--ink:#f2f2f5;--mut:#9b9ba7;--line:#2c2c34;--soft:#3a1821}}
+:root[data-theme="dark"]{--bg:#131316;--card:#1c1c21;--ink:#f2f2f5;--mut:#9b9ba7;--line:#2c2c34;--soft:#3a1821}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+.app{display:grid;grid-template-columns:200px 1fr;min-height:100vh}
+aside{background:var(--brand);color:#fff;padding:20px 14px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh;overflow:auto}
+.logo{font-weight:800;font-size:19px;line-height:1.1;text-align:center;margin:4px 0 16px;letter-spacing:.3px}
+.logo small{display:block;font-weight:600;font-size:12px;opacity:.85;letter-spacing:0;margin-top:3px}
+.tabs{display:flex;flex-direction:column;gap:6px}
+.tab{all:unset;cursor:pointer;display:flex;justify-content:space-between;gap:8px;padding:11px 12px;border-radius:8px;font-weight:600;color:#fff;opacity:.85}
+.tab:hover{background:rgba(255,255,255,.14)}
+.tab.on{background:#fff;color:var(--brand);opacity:1}
+.tab small{opacity:.75;font-weight:600}
+.tab:focus-visible,.btn:focus-visible,input:focus-visible{outline:3px solid #ffb703;outline-offset:2px}
+main{padding:24px;max-width:1100px;width:100%;min-width:0}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--mut);margin:0 0 18px}
+.form{display:flex;flex-wrap:wrap;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+.form label{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--mut);flex:1;min-width:130px}
+.form input,input[type=search]{padding:9px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+.form label.w2{flex:2;min-width:200px}
+input[type=search]{flex:1;min-width:140px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.bar label{display:flex;gap:6px;align-items:center;color:var(--mut);font-size:14px}
+.btn{all:unset;cursor:pointer;display:inline-block;background:transparent;color:var(--brand);border:1.5px solid var(--brand);font-weight:600;padding:9.5px 18.5px;border-radius:8px}
+.btn.pri{background:var(--brand);color:#fff;padding:11px 20px;border:0}
+.btn[disabled]{opacity:.4;cursor:default}
+.btn.sm{padding:3px 10px;font-size:13px}
+.msg{min-height:20px;font-size:14px;margin:-6px 0 10px;color:var(--brand);font-weight:600}
+.st{font-size:12px;color:var(--mut);margin:0 0 12px}
+.sheet{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px}
+.sheet h2{margin:0;font-size:17px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.badge{display:inline-block;min-width:48px;text-align:center;font-size:13px;font-weight:700;padding:2px 8px;border-radius:6px;color:#fff;background:var(--brand)}
+.ptitle{display:flex;flex-wrap:wrap;align-items:center;gap:4px 22px;margin:10px 0 4px;padding:8px 0;border-top:2px solid var(--ink);border-bottom:1px solid var(--line)}
+.ptitle b{color:var(--mut);font-weight:600}
+.ptitle h2{display:inline;font-size:17px;margin:0 4px 0 0}
+.meta{color:var(--mut);font-size:13px;margin:4px 0 10px}
+.wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+td.t{white-space:normal;min-width:160px}
+th{font-size:13px;color:var(--mut);font-weight:600;border-bottom:2px solid var(--line)}
+td.z{font-weight:800;font-variant-numeric:tabular-nums}
+.empty{color:var(--mut);padding:14px 0}
+@media (max-width:760px){.app{grid-template-columns:1fr}aside{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;padding:10px 12px}.logo{margin:0 10px 0 0;text-align:left}.tabs{flex-direction:row;flex-wrap:wrap}main{padding:16px}}
+@media print{
+ @page{size:landscape;margin:10mm}
+ body{background:#fff;color:#000;font-size:12px}.app{display:block}
+ aside,.noprint,.x{display:none!important}
+ main{padding:0;max-width:none}
+ .sheet{border:0;padding:0;margin:0;border-radius:0;background:#fff}
+ .badge{color:#000!important;background:none!important;border:1px solid #000}
+ .ptitle{border-color:#000}.ptitle b,.meta{color:#000}
+ th,td{border:1px solid #000;color:#000;padding:5px 7px}
+ td.t{white-space:normal}
+ thead{display:table-header-group}tr{break-inside:avoid}
+}
+</style></head>
+<body>
+<div class="app">
+<aside class="noprint">
+ <div class="logo">ICB Food Service<small>WMS Maulen</small></div>
+ <div class="tabs" id="tabs"></div>
+</aside>
+<main>
+ <div class="noprint">
+  <h1>Confirmaciones en 0</h1>
+  <p class="sub">Registre cada confirmación en cero: fecha, hora, zona, material, picker y motivo.</p>
+  <div class="form">
+   <label>Fecha<input type="date" id="fd"></label>
+   <label>Hora<input type="time" id="hr"></label>
+   <label>Zona<input type="text" id="fz" list="lz" placeholder="Ej: 104" inputmode="numeric" autocomplete="off"></label>
+   <label>Material<input type="text" id="fm" placeholder="Código o descripción" autocomplete="off"></label>
+   <label>Picker<input type="text" id="fp" list="lp" placeholder="Nombre" autocomplete="off"></label>
+   <label class="w2">Motivo<input type="text" id="fmo" list="lm" placeholder="Ej: Ubicación vacía" autocomplete="off"></label>
+   <datalist id="lz"></datalist><datalist id="lp"></datalist>
+   <datalist id="lm"><option value="Ubicación vacía"><option value="Sin stock en ubicación"><option value="Producto dañado"><option value="Error de ubicación"><option value="Material no corresponde"><option value="Cantidad insuficiente"></datalist>
+  </div>
+  <div class="bar">
+   <button class="btn pri" id="add">＋ Registrar</button>
+   <button class="btn" id="now">Fecha y hora actual</button>
+  </div>
+  <div class="msg" id="msg"></div>
+  <div class="bar">
+   <input type="search" id="q" placeholder="Buscar zona, material, picker o motivo…">
+   <label>Fecha <input type="date" id="ff" style="padding:7px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit"></label>
+   <button class="btn sm" id="cf">Quitar fecha</button>
+   <button class="btn pri" id="pr">🖨 Imprimir</button>
+   <button class="btn" id="csv" hidden>Exportar CSV</button>
+  </div>
+  <p class="st" id="st"></p>
+ </div>
+ <div id="out"></div>
+</main></div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const todayStr=()=>{const n=new Date();return `${n.getFullYear()}-${pad(n.getMonth()+1)}-${pad(n.getDate())}`};
+const nowTime=()=>{const n=new Date();return `${pad(n.getHours())}:${pad(n.getMinutes())}`};
+const fmtD=v=>{if(!v)return '—';const [y,m,d]=v.split('-');return `${d}/${m}/${y}`};
+const KEY='cc_recs';
+let recs=[],col=null,dl=null,tab='HOY',touched=false,cloud=false,armed=null;
+function loadLocal(){try{recs=JSON.parse(localStorage.getItem(KEY))||[]}catch(e){recs=[]}}
+function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(recs))}catch(e){}}
+function setNow(){$('fd').value=todayStr();$('hr').value=nowTime();touched=false}
+function msg(t,ok){const m=$('msg');m.textContent=t;m.style.color=ok?'#0e8f4a':'var(--brand)';clearTimeout(msg.t);msg.t=setTimeout(()=>m.textContent='',4000)}
+function list(){
+ const q=$('q').value.trim().toLowerCase(),df=$('ff').value,t=todayStr();
+ return recs.filter(r=>(df?r.fecha===df:tab==='HOY'?r.fecha===t:true)&&(!q||[r.zona,r.material,r.picker,r.motivo].join(' ').toLowerCase().includes(q)))
+  .sort((a,b)=>(b.fecha+b.hora).localeCompare(a.fecha+a.hora));
+}
+function render(){
+ const t=todayStr();
+ $('tabs').innerHTML=[['HOY','Hoy',recs.filter(r=>r.fecha===t).length],['TODOS','Todos',recs.length]]
+  .map(([k,n,v])=>`<button class="tab ${k==tab&&!$('ff').value?'on':''}" data-t="${k}">${n}<small>${v}</small></button>`).join('');
+ const uniq=f=>[...new Set(recs.map(r=>r[f]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es',{numeric:true}));
+ $('lz').innerHTML=uniq('zona').map(v=>`<option value="${esc(v)}">`).join('');
+ $('lp').innerHTML=uniq('picker').map(v=>`<option value="${esc(v)}">`).join('');
+ $('st').textContent=cloud?'Registros guardados en la base compartida de la página: se ven desde cualquier equipo.':'Registros guardados solo en este navegador (la base compartida no está disponible).';
+ const a=list(),df=$('ff').value;
+ const lbl=df?fmtD(df):tab==='HOY'?fmtD(t):'Todas las fechas';
+ document.title=`Confirmaciones en 0 ${lbl}`;
+ const mot={};a.forEach(r=>mot[r.motivo]=(mot[r.motivo]||0)+1);
+ const body=a.map(r=>`<tr><td>${fmtD(r.fecha)}</td><td>${esc(r.hora)}</td><td class="z">${esc(r.zona)}</td><td>${esc(r.material)}</td><td>${esc(r.picker)}</td><td class="t">${esc(r.motivo)}</td><td class="x"><button class="btn sm" data-del="${esc(r.id)}">${armed===r.id?'¿Borrar?':'Borrar'}</button></td></tr>`).join('');
+ $('out').innerHTML=`<section class="sheet"><h2><span class="badge">0</span>Confirmaciones en 0</h2>
+ <div class="ptitle"><span><b>Fecha:</b> ${esc(lbl)}</span><span><h2>Registros: ${a.length}</h2></span><span><b>Almacén:</b> WMS Maulen</span></div>
+ <div class="meta">${a.length?Object.entries(mot).map(([k,v])=>esc(k)+': '+v).join(' · '):'Sin registros'}</div>
+ ${a.length?`<div class="wrap"><table><thead><tr><th>Fecha</th><th>Hora</th><th>Zona</th><th>Material</th><th>Picker</th><th>Motivo</th><th class="x"></th></tr></thead><tbody>${body}</tbody></table></div>`:'<div class="empty">Sin resultados.</div>'}</section>`;
+}
+async function add(){
+ const r={fecha:$('fd').value,hora:$('hr').value,zona:$('fz').value.trim(),material:$('fm').value.trim(),picker:$('fp').value.trim(),motivo:$('fmo').value.trim(),ts:Date.now()};
+ const falta=[['fecha','Fecha'],['hora','Hora'],['zona','Zona'],['material','Material'],['picker','Picker'],['motivo','Motivo']].filter(([k])=>!r[k]).map(([,n])=>n);
+ if(falta.length){msg('Falta completar: '+falta.join(', '));return}
+ if(col){try{await col.add(r)}catch(e){msg('No se pudo guardar: '+(e.message||e.code||'error'));return}}
+ else{r.id='l'+Date.now();recs.unshift(r);saveLocal();render()}
+ $('fm').value='';$('fmo').value='';setNow();
+ msg('Registrado: zona '+r.zona+' · '+r.material,true);$('fm').focus();
+}
+async function del(id){
+ if(armed!==id){armed=id;render();clearTimeout(del.t);del.t=setTimeout(()=>{armed=null;render()},3000);return}
+ armed=null;
+ if(col){try{await col.doc(id).delete()}catch(e){msg('No se pudo borrar: '+(e.message||e.code||'error'))}}
+ else{recs=recs.filter(r=>r.id!==id);saveLocal();render()}
+}
+function csv(){
+ const a=list(),q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+ const t=['Fecha','Hora','Zona','Material','Picker','Motivo'].join(';')+'\n'+a.map(r=>[fmtD(r.fecha),r.hora,r.zona,r.material,r.picker,r.motivo].map(q).join(';')).join('\n');
+ dl.save({filename:'confirmaciones_en_0_'+(($('ff').value)||todayStr())+'.csv',data:'\uFEFF'+t}).catch(()=>{});
+}
+$('tabs').onclick=e=>{const b=e.target.closest('.tab');if(b){tab=b.dataset.t;$('ff').value='';render()}};
+$('out').onclick=e=>{const b=e.target.closest('[data-del]');if(b)del(b.dataset.del)};
+$('add').onclick=add;
+$('now').onclick=setNow;
+['fd','hr'].forEach(i=>$(i).addEventListener('input',()=>touched=true));
+['fz','fm','fp','fmo','fd','hr'].forEach(i=>$(i).addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();add()}}));
+$('q').oninput=render;$('ff').oninput=render;
+$('cf').onclick=()=>{$('ff').value='';render()};
+$('pr').onclick=()=>window.print();
+$('csv').onclick=csv;
+setInterval(()=>{if(!touched){$('fd').value=todayStr();$('hr').value=nowTime()}},30000);
+setNow();loadLocal();render();
+(async()=>{
+ if(typeof claude==='undefined')return;
+ try{dl=await claude.use('downloads');if(dl)$('csv').hidden=false}catch(e){}
+ try{
+  const db=await claude.use('db');
+  if(db){
+   col=db.collection('confirmaciones');
+   col.orderBy('ts','desc').limit(1000).onSnapshot(s=>{cloud=true;recs=s.docs.map(d=>({...d.data(),id:d.id}));render()},()=>{col=null;cloud=false;loadLocal();render()});
+  }
+ }catch(e){}
+})();
+</script>
+</body></html>
