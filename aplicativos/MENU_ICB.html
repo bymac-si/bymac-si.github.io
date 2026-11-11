@@ -190,7 +190,7 @@ function render(){
     return `<a class="card" style="${style}" href="${esc(href(a.url))}" ${a.newTab?'target="_blank" rel="noopener"':''}>${inner}</a>`;
   }).join('');
   if(!list.length&&filter)h=`<div class="empty" style="grid-column:1/-1">Ningún aplicativo coincide con "${esc(filter)}".</div>`;
- // if(!filter)h+=`<button class="card add" id="cardAdd" type="button"><span class="ico" aria-hidden="true">${lucideIcon('plus')}</span><b>Agregar aplicativo</b><span class="hint">Nuevo acceso al menú</span></button>`;
+  if(!filter)h+=`<button class="card add" id="cardAdd" type="button"><span class="ico" aria-hidden="true">${lucideIcon('plus')}</span><b>Agregar aplicativo</b><span class="hint">Nuevo acceso al menú</span></button>`;
   $('grid').innerHTML=h;
   renderLucide();
   $('cardAdd')&&($('cardAdd').onclick=()=>openModal(null));
@@ -205,7 +205,7 @@ function move(i,d){let j=i+d;if(j<0||j>=ST.apps.length)return;[ST.apps[i],ST.app
 $('fColor').innerHTML=COLORS.map((c,i)=>`<label><input type="radio" name="col" value="${c}" ${i===0?'checked':''}><span style="--c:${c}" title="${c}"></span></label>`).join('');
 function openModal(i){
   editing=i;let a=i==null?{icon:'clipboard-check',name:'',desc:'',url:'',tag:'',color:COLORS[0],newTab:false}:ST.apps[i];
-  //$('mTitle').textContent=i==null?'Agregar aplicativo':'Editar aplicativo';
+ $('mTitle').textContent=i==null?'Agregar aplicativo':'Editar aplicativo';
   $('fIcon').value=a.icon||'';$('fName').value=a.name;$('fDesc').value=a.desc;$('fUrl').value=a.url;$('fTag').value=a.tag||'';$('fNew').checked=!!a.newTab;
   let r=[...document.querySelectorAll('[name=col]')];(r.find(x=>x.value===a.color)||r[0]).checked=true;
   $('modal').classList.add('open');$('fName').focus();
