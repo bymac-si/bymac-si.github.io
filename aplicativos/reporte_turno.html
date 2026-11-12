@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reporte de turno</title>
+<link rel="icon" href="https://www.icbfs.cl/wp-content/uploads/2022/01/cropped-favicon-32x32.jpg" sizes="32x32">
+<style>
+:root{--bg:#f5f5f7;--card:#fff;--ink:#1d1d22;--mut:#6c6c78;--mu:#6c6c78;--line:#e2e2e8;--brand:#ed2750;--soft:#fdecef;--ok:#1a8f4d;--er:#c62828;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root{--bg:#131316;--card:#1c1c21;--ink:#f2f2f5;--mut:#9b9ba7;--mu:#9b9ba7;--line:#2c2c34;--soft:#3a1821;--ok:#3ccf7a;--er:#ff6b6b}}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+.app{display:grid;grid-template-columns:200px 1fr;min-height:100vh}
+aside{background:var(--brand);color:#fff;padding:20px 14px;display:flex;flex-direction:column;gap:6px}
+aside img{width:140px;height:auto;display:block;margin:0 auto 14px}
+.nv{all:unset;cursor:pointer;padding:11px 12px;border-radius:8px;font-weight:600;color:#fff;opacity:.85}
+.nv:hover{background:rgba(255,255,255,.14)}
+.nv[aria-current=true]{background:#fff;color:var(--brand);opacity:1}
+.nv:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #ffb703;outline-offset:2px}
+main{padding:24px;max-width:760px;width:100%}
+h1{font-size:22px;margin:0 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.f{grid-column:span 2}.h{grid-column:span 1}
+label{display:block;font-size:13px;color:var(--mut);margin-bottom:4px}
+input,select,textarea{width:100%;padding:9px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+textarea{min-height:90px;resize:vertical}
+.b{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+button{padding:9.5px 18.5px;border:1.5px solid var(--brand);border-radius:8px;background:transparent;color:var(--brand);font:inherit;font-weight:600;cursor:pointer}
+button:disabled{opacity:.6;cursor:wait}
+button.p{background:var(--brand);border-color:var(--brand);color:#fff}
+button.w{background:#25d366;border-color:#25d366;color:#04210f}
+pre{white-space:pre-wrap;word-break:break-word;margin:0;font:13.5px/1.5 ui-monospace,Menlo,Consolas,monospace}
+.msg{font-size:14px;min-height:1.3em;margin-top:8px;color:var(--ok);font-weight:600}
+.msg.e{color:var(--er)}
+.it{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+.it:first-child{border-top:0}
+.sm{padding:4px 10px;font-size:13px}
+@media (max-width:760px){.app{grid-template-columns:1fr}aside{flex-direction:row;flex-wrap:wrap;align-items:center;padding:10px 12px}aside img{width:40px;margin:0 8px 0 0}main{padding:16px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside>
+<img src="https://www.icbfs.cl/wp-content/uploads/2022/02/logo-icbfs.png" alt="ICB Food Service">
+<button class="nv" data-go="rep" aria-current="true">Reporte</button>
+<button class="nv" data-go="his">Historial</button>
+</aside>
+<main>
+<h1>📋 Reporte de turno</h1>
+
+<div class="card" id="rep"><div class="g">
+<div class="h"><label>Fecha</label><input type="date" id="fecha"></div>
+<div class="h"><label>Turno</label><select id="turno"><option>Mañana</option><option>Tarde</option><option>Noche</option></select></div>
+<div class="f"><label>Responsable</label><input id="resp" placeholder="Nombre del responsable"></div>
+<div class="f"><label>Tareas realizadas</label><textarea id="tareas" placeholder="Una tarea por línea"></textarea></div>
+<div class="h"><label>Camiones cargados</label><input type="number" min="0" id="camiones"></div>
+<div class="h"><label>&nbsp;</label></div>
+<div class="h"><label>Zonas congelado</label><input id="zcong" placeholder="Ej: 1, 2, 3"></div>
+<div class="h"><label>Zonas frío</label><input id="zfrio" placeholder="Ej: 4, 5"></div>
+<div class="f"><label>B2C Congelado confirmadas (desde qué zona hasta qué zona)</label><input id="b2cc" placeholder="Ej: Desde zona 1 hasta zona 12"></div>
+<div class="f"><label>B2C Frío confirmadas (desde qué zona hasta qué zona)</label><input id="b2cf" placeholder="Ej: Desde zona 3 hasta zona 8"></div>
+<div class="f"><label>Observaciones para turno entrante</label><textarea id="obs"></textarea></div>
+</div></div>
+
+<div class="card">
+<label>Vista previa del mensaje</label>
+<pre id="prev"></pre>
+<div class="b">
+<button class="p" id="bsave">💾 Solo guardar</button>
+<button class="w" id="bwa">WhatsApp</button>
+<button id="bmail">Email</button>
+<button id="bcopy">Copiar texto</button>
+<button id="bnew">Nuevo</button>
+</div>
+<div class="b"><input id="mail" type="email" placeholder="Email(s) destino, separados por coma"></div>
+<div class="b"><input id="tel" type="tel" placeholder="WhatsApp destino con código país (opcional) ej: 56912345678"></div>
+<div class="msg" id="msg"></div>
+</div>
+
+<div class="card" id="his">
+<label>Últimos reportes en Google Sheets</label>
+<div id="hist"></div>
+<div class="b"><button id="bref">↻ Actualizar</button></div>
+</div>
+</main>
+</div>
+
+<script>
+var $ = function(id){ return document.getElementById(id); };
+var ids = ['fecha','turno','resp','tareas','camiones','zcong','zfrio','b2cc','b2cf','obs'];
+
+function data(){
+  var o = {};
+  ids.forEach(function(i){ o[i] = $(i).value.trim(); });
+  return o;
+}
+
+function fmtDate(s){
+  if (!s || !/^\d{4}-\d\d-\d\d$/.test(s)) return s || '-';
+  var p = s.split('-');
+  return p[2] + '/' + p[1] + '/' + p[0];
+}
+
+function text(d){
+  var t = '-';
+  if (d.tareas) {
+    t = d.tareas.split('\n')
+      .filter(function(x){ return x.trim(); })
+      .map(function(x){ return '• ' + x.replace(/^[-•]\s*/, ''); })
+      .join('\n');
+  }
+  return [
+    '*REPORTE DE TURNO*',
+    '📅 Fecha: ' + fmtDate(d.fecha),
+    '🕒 Turno: ' + d.turno,
+    '👤 Responsable: ' + (d.resp || '-'),
+    '',
+    '*Tareas realizadas:*',
+    t,
+    '',
+    '🚛 Camiones cargados: ' + (d.camiones || 0),
+    '❄️ Zonas congelado: ' + (d.zcong || '-'),
+    '🧊 Zonas frío: ' + (d.zfrio || '-'),
+    '📦 B2C Congelado confirmadas: ' + (d.b2cc || '-'),
+    '📦 B2C Frío confirmadas: ' + (d.b2cf || '-'),
+    '',
+    '*Observaciones para turno entrante:*',
+    d.obs || 'Sin observaciones'
+  ].join('\n');
+}
+
+function msg(t, err){
+  var m = $('msg');
+  m.textContent = t;
+  m.className = 'msg' + (err ? ' e' : '');
+}
+
+function upd(){ $('prev').textContent = text(data()); }
+
+function copy(t){
+  var a = document.createElement('textarea');
+  a.value = t;
+  document.body.appendChild(a);
+  a.select();
+  try { document.execCommand('copy'); msg('Texto copiado'); }
+  catch (e) { msg('No se pudo copiar', 1); }
+  document.body.removeChild(a);
+}
+
+function renderHist(list){
+  var h = $('hist');
+  h.innerHTML = '';
+  if (!list || !list.length) {
+    h.innerHTML = '<div class="it" style="color:var(--mu)">Sin reportes aún</div>';
+    return;
+  }
+  list.forEach(function(d){
+    var el = document.createElement('div');
+    el.className = 'it';
+    var s = document.createElement('span');
+    s.textContent = fmtDate(d.fecha) + ' · ' + d.turno + ' · ' + (d.resp || '-');
+    var b = document.createElement('button');
+    b.className = 'sm';
+    b.textContent = 'Cargar';
+    b.onclick = function(){
+      ids.forEach(function(i){ $(i).value = d[i] || ''; });
+      upd();
+      window.scrollTo(0, 0);
+    };
+    el.appendChild(s);
+    el.appendChild(b);
+    h.appendChild(el);
+  });
+}
+
+function loadHist(){
+  $('hist').innerHTML = '<div class="it" style="color:var(--mu)">Cargando…</div>';
+  google.script.run
+    .withSuccessHandler(renderHist)
+    .withFailureHandler(function(e){
+      $('hist').innerHTML = '';
+      msg('No se pudo cargar el historial: ' + e.message, 1);
+    })
+    .obtenerHistorial(15);
+}
+
+function saveC(){
+  try {
+    localStorage.setItem('rt_c', JSON.stringify({ m: $('mail').value, t: $('tel').value, r: $('resp').value }));
+  } catch (e) {}
+}
+
+ids.forEach(function(i){ $(i).addEventListener('input', upd); });
+['mail','tel','resp'].forEach(function(i){ $(i).addEventListener('change', saveC); });
+
+$('fecha').value = new Date().toLocaleDateString('en-CA');
+var hr = new Date().getHours();
+$('turno').value = hr < 14 ? 'Mañana' : (hr < 22 ? 'Tarde' : 'Noche');
+try {
+  var sv = JSON.parse(localStorage.getItem('rt_c') || '{}');
+  $('mail').value = sv.m || '';
+  $('tel').value = sv.t || '';
+  $('resp').value = sv.r || '';
+} catch (e) {}
+
+var lastSaved = '';
+
+function validar(){
+  if (!data().resp) { msg('Indica el responsable', 1); return false; }
+  return true;
+}
+
+function guardar(){
+  var d = data();
+  var key = JSON.stringify(d);
+  if (key === lastSaved) { msg('Este reporte ya estaba guardado en Google Sheets'); return; }
+  lastSaved = key;
+  var b = $('bsave');
+  b.disabled = true;
+  msg('Guardando…');
+  google.script.run
+    .withSuccessHandler(function(r){
+      b.disabled = false;
+      msg('✔ Guardado en Google Sheets (fila ' + r.fila + ')');
+      saveC();
+      loadHist();
+    })
+    .withFailureHandler(function(e){
+      b.disabled = false;
+      lastSaved = '';
+      msg('Error al guardar: ' + e.message, 1);
+    })
+    .guardarReporte(d);
+}
+
+$('bsave').onclick = function(){
+  if (validar()) guardar();
+};
+
+$('bwa').onclick = function(){
+  if (!validar()) return;
+  saveC();
+  var n = $('tel').value.replace(/\D/g, '');
+  var base = n ? 'https://wa.me/' + n : 'https://wa.me/';
+  window.open(base + '?text=' + encodeURIComponent(text(data())), '_blank');
+  guardar();
+};
+
+$('bmail').onclick = function(){
+  if (!validar()) return;
+  saveC();
+  var d = data();
+  var subj = 'Reporte de turno ' + d.turno + ' - ' + fmtDate(d.fecha) + ' - ' + d.resp;
+  var body = text(d).split('*').join('');
+  var to = $('mail').value.split(/[,;\s]+/).filter(function(x){ return x; }).join(';');
+  window.open('https://outlook.office.com/mail/deeplink/compose?to=' + encodeURIComponent(to) + '&subject=' + encodeURIComponent(subj) + '&body=' + encodeURIComponent(body), '_blank');
+  guardar();
+};
+
+$('bcopy').onclick = function(){
+  if (!validar()) return;
+  copy(text(data()));
+  guardar();
+};
+
+$('bnew').onclick = function(){
+  ['tareas','camiones','zcong','zfrio','b2cc','b2cf','obs'].forEach(function(i){ $(i).value = ''; });
+  upd();
+  msg('');
+};
+
+$('bref').onclick = loadHist;
+
+document.querySelectorAll('.nv').forEach(function(b){
+  b.onclick = function(){
+    document.querySelectorAll('.nv').forEach(function(x){ x.removeAttribute('aria-current'); });
+    b.setAttribute('aria-current', 'true');
+    $(b.dataset.go).scrollIntoView({ behavior: 'smooth' });
+  };
+});
+
+upd();
+loadHist();
+</script>
+</body>
+</html>
