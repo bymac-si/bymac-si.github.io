@@ -92,6 +92,30 @@ pre{white-space:pre-wrap;word-break:break-word;margin:0;font:13.5px/1.5 ui-monos
 var $ = function(id){ return document.getElementById(id); };
 var ids = ['fecha','turno','resp','tareas','camiones','zcong','zfrio','b2cc','b2cf','obs'];
 
+// Implementación de Apps Script (web app) que lee y escribe en la hoja "Reportes de Turno"
+var API = 'https://script.google.com/macros/s/AKfycbz66VsFIgSwZ4l9YkIBSE4afbrGmov6GOwP-bR333NJ6dLGOR6rvm3U--GlQrjZJdV4Xg/exec';
+
+// Puente: dentro de Apps Script usa google.script.run; fuera (GitHub Pages, local) usa fetch al /exec
+function call(fn, arg, ok, fail){
+  if (window.google && google.script && google.script.run) {
+    google.script.run.withSuccessHandler(ok).withFailureHandler(fail)[fn](arg);
+    return;
+  }
+  var req = (fn === 'obtenerHistorial')
+    ? fetch(API + '?n=' + encodeURIComponent(arg))
+    : fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // evita preflight CORS
+        body: JSON.stringify(arg)
+      });
+  req.then(function(r){ return r.json(); })
+     .then(function(r){
+       if (r && r.error) throw new Error(r.error);
+       ok(r);
+     })
+     .catch(function(e){ fail(e); });
+}
+
 function data(){
   var o = {};
   ids.forEach(function(i){ o[i] = $(i).value.trim(); });
@@ -178,13 +202,10 @@ function renderHist(list){
 
 function loadHist(){
   $('hist').innerHTML = '<div class="it" style="color:var(--mu)">Cargando…</div>';
-  google.script.run
-    .withSuccessHandler(renderHist)
-    .withFailureHandler(function(e){
-      $('hist').innerHTML = '';
-      msg('No se pudo cargar el historial: ' + e.message, 1);
-    })
-    .obtenerHistorial(15);
+  call('obtenerHistorial', 15, renderHist, function(e){
+    $('hist').innerHTML = '';
+    msg('No se pudo cargar el historial: ' + (e && e.message ? e.message : e), 1);
+  });
 }
 
 function saveC(){
@@ -221,19 +242,16 @@ function guardar(){
   var b = $('bsave');
   b.disabled = true;
   msg('Guardando…');
-  google.script.run
-    .withSuccessHandler(function(r){
-      b.disabled = false;
-      msg('✔ Guardado en Google Sheets (fila ' + r.fila + ')');
-      saveC();
-      loadHist();
-    })
-    .withFailureHandler(function(e){
-      b.disabled = false;
-      lastSaved = '';
-      msg('Error al guardar: ' + e.message, 1);
-    })
-    .guardarReporte(d);
+  call('guardarReporte', d, function(r){
+    b.disabled = false;
+    msg('✔ Guardado en Google Sheets (fila ' + r.fila + ')');
+    saveC();
+    loadHist();
+  }, function(e){
+    b.disabled = false;
+    lastSaved = '';
+    msg('Error al guardar: ' + (e && e.message ? e.message : e), 1);
+  });
 }
 
 $('bsave').onclick = function(){
