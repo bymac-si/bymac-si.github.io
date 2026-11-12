@@ -2491,13 +2491,13 @@
         let inner;
         if (first) {
             const qr = CFG.qr ? (p.id ? qrSVG(qrData(p), 21) : '<div style="width:20mm;height:20mm;border:.3mm dashed #000;display:flex;align-items:center;justify-content:center;font-size:6pt">QR</div>') : "";
-            inner = hdFirst + '<div class="lb-top"><div class="lb-l"><div class="lb-zone">ZONA ' + up(p.zona) + '</div><div class="lb-kv"><small>PICKEADOR</small>' + up(p.picker) + '</div><div class="lb-kv"><small>CLIENTE</small>' + up(p.cliente || "") + '</div></div><div class="lb-r">' + qr + '</div></div>' + dir + tmp +
+            inner = hdFirst + '<div class="lb-top"><div class="lb-l"><div class="lb-zone">ZONA ' + up(p.zona) + '</div><div class="lb-kv"><small>CLIENTE</small>' + up(p.cliente || "") + '</div></div><div class="lb-r">' + qr + '</div></div>' + dir + tmp +
             (p.entrega ? '<div class="lb-ent"><small>ENTREGA SAP</small>' + esc(p.entrega) + '</div>' : "") +
             '<div class="lb-bc">' + idBar + '</div>' + idTxt +
             (p.entrega ? '<div class="lb-bc" style="margin-top:.5mm">' + barSVG(p.entrega, 0.375, 7) + '</div>' : "") +
             '<div class="lb-sum"><span>CONTENIDO · ' + n + ' PROD.</span><span>CANT. TOTAL ' + fmt(sum) + '</span></div><div class="lb-list">' + rows + more + '</div>';
         } else {
-            inner = head + '<div class="lb-zc"><span>ZONA ' + up(p.zona) + '</span><small>' + up(p.cliente || "") + " · " + up(p.picker) + '</small></div>' + tmp +
+            inner = head + '<div class="lb-zc"><span>ZONA ' + up(p.zona) + '</span><small>' + up(p.cliente || "") + '</small></div>' + tmp +
             '<div class="lb-bc">' + idBar + '</div>' + idTxt +
             '<div class="lb-sum"><span>CONTENIDO (CONT.) · ' + n + ' PROD.</span><span>CANT. TOTAL ' + fmt(sum) + '</span></div><div class="lb-list">' + rows + more + '</div>';
         }
@@ -2534,7 +2534,7 @@
         const inner = head +
         '<div class="lp-top"><div class="lp-l"><div class="lp-mat"><small>MATERIAL</small><b>' + esc(mat) + '</b></div>' +
         '<div class="lp-kv"><small>CLIENTE</small>' + up(p.cliente || "—") + '</div>' +
-        '<div class="lp-kv"><small>PICKEADOR</small>' + up(p.picker || "—") + '</div></div>' +
+        '</div>' +
         '<div class="lp-qr">' + qr + '</div></div>' +
         '<div class="lp-desc"><small>DESCRIPCIÓN</small><div>' + up(desc) + '</div></div>' +
         '<div class="lp-qty"><small>CANTIDAD</small><div class="v" style="font-size:' + qf + '">' + esc(qty) + (un ? '<span>' + esc(un) + '</span>' : '') + '</div></div>' +
@@ -2610,8 +2610,7 @@
             if (first) {
                 z.push("^FO" + X(0) + "," + Y(11) + "^GB" + Dm(70) + "," + Dm(13) + "," + Dm(13) + "^FS");
                 z.push("^FO" + X(3) + "," + Y(12.4) + "^A0N," + Dm(10) + "^FR^FDZONA " + zs(p.zona) + "^FS");
-                z.push(txt(X(0), Y(25.3), 3.2, "PICKEADOR: " + String(p.picker || "").slice(0, 28)));
-                z.push(txt(X(0), Y(29.8), 3.2, "CLIENTE: " + String(p.cliente || "-").slice(0, 32)));
+                        z.push(txt(X(0), Y(25.3), 3.2, "CLIENTE: " + String(p.cliente || "-").slice(0, 32)));
                 if (CFG.qr && p.id) {
                     const q = qrMatrix(qrData(p));
                     if (q) {
@@ -2643,7 +2642,7 @@
             } else {
                 z.push("^FO" + X(0) + "," + Y(5) + "^GB" + Dm(94) + "," + Dm(8) + "," + Dm(8) + "^FS");
                 z.push("^FO" + X(2.5) + "," + Y(6) + "^A0N," + Dm(6) + "^FR^FDZONA " + zs(p.zona) + "^FS");
-                z.push("^FO" + X(0) + "," + Y(7.2) + "^A0N," + Dm(2.6) + "^FB" + Dm(91.5) + ",1,0,R^FR^FD" + zs(String(p.cliente || "").slice(0, 24)) + " " + zs(String(p.picker || "").slice(0, 20)) + "^FS");
+                z.push("^FO" + X(0) + "," + Y(7.2) + "^A0N," + Dm(2.6) + "^FB" + Dm(91.5) + ",1,0,R^FR^FD" + zs(String(p.cliente || "").slice(0, 24)) + "^FS");
                 y = 14;
                 z.push(tmpStrip(y));
                 y += 5.5;
@@ -2691,7 +2690,6 @@
             }
         }
         z.push(txt(X(0), Y(18.2), 3, "CLIENTE: " + String(p.cliente || "-").slice(0, 38)));
-        z.push(txt(X(0), Y(21.7), 3, "PICKEADOR: " + String(p.picker || "-").slice(0, 34)));
         z.push(txt(X(0), Y(26), 2.4, "DESCRIPCION"));
         z.push("^FO" + X(0) + "," + Y(28.8) + "^A0N," + Dm(3.2) + "^FB" + Dm(94) + ",2,0,L^FD" + zs(String(line.txt || "SIN DESCRIPCION").slice(0, 70)) + "^FS");
         z.push("^FO" + X(0) + "," + Y(36) + "^GB" + Dm(94) + "," + Dm(19) + "," + Dm(0.8) + "^FS");
