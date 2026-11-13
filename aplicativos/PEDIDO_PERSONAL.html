@@ -94,8 +94,8 @@ function fmtDate(v){if(!v)return"";const[y,m,d]=v.split("-");return d+"-"+m+"-"+
 function sheetHTML(){
   return `<div class="sheet"><div class="frame">
     <div class="hd"><img src="${LOGO}" alt="ICB"><div class="ttl">Pedido Especial</div><div class="dt">${esc(fmtDate($("iFec").value))}</div></div>
-    <div class="zn"><small>ZONA</small><div class="zv fit" data-max="95">${esc($("iZona").value.trim()||"—")}</div></div>
-    <div class="en"><small>Entregar a : </small><div class="cl fit" data-max="34">${esc($("iCli").value.trim()||"—")}</div></div>
+    <div class="zn"><small>ZONA</small><div class="zv fit" data-max="55">${esc($("iZona").value.trim()||"—")}</div></div>
+    <div class="en"><small>Entregar a : </small><div class="cl fit" data-max="55">${esc($("iCli").value.trim()||"—")}</div></div>
   </div></div>`;
 }
 function fit(root){
