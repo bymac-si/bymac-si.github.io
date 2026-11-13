@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
     <style>
     :root {
@@ -1179,8 +1180,22 @@
                                 <h2>1) Exportación de SAP</h2>
                                 <div class="toolbar" style="margin-bottom:8px">
                                     <button class="btn gray sm" id="sLoad" type="button">📂 Cargar Excel de SAP (.xlsx)</button>
-                                    <input type="file" id="fSap" accept=".xlsx,.xls" style="display:none">
+                                    <input type="file" id="fSap" accept=".xlsx,.xls,.XLSX,.XLS,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" style="display:none">
                                     <span class="hint" id="sInfo"></span>
+                                </div>
+                                <div class="toolbar" style="margin-bottom:8px">
+                                    <button class="btn gray sm" id="pLoad" type="button">📂 Cargar Excel Panel (.xlsx)</button>
+                                    <input type="file" id="fPanel" accept=".xlsx,.xls,.XLSX,.XLS,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" style="display:none">
+                                    <span class="hint" id="pInfo"></span>
+                                </div>
+                                <div class="toolbar" style="margin-bottom:8px">
+                                    <button class="btn gray sm" id="cLoad" type="button">📄 Cargar PDF B2C (.pdf)</button>
+                                    <input type="file" id="fClis" accept=".pdf,.PDF,application/pdf" style="display:none">
+                                    <span class="hint" id="clisInfo"></span>
+                                </div>
+                                <div class="toolbar" style="margin-bottom:6px">
+                                    <button class="btn danger sm" id="clrFiles" type="button">🗑 Limpiar archivos cargados</button>
+                                    <span class="hint" id="reqInfo"></span>
                                 </div>
 
                                 <div class="grid g2" style="margin-top:10px">
@@ -1215,7 +1230,7 @@
                                         <datalist id="pickList"></datalist>
                                     </div>
                                     <div>
-                                        <label for="aCli">Cliente</label>
+                                        <label for="aCli">Cliente <span class="hint" id="aSolInfo"></span></label>
                                         <input id="aCli" list="cliList" autocomplete="off" placeholder="Nombre del cliente">
                                         <datalist id="cliList"></datalist>
                                     </div>
@@ -1992,6 +2007,8 @@
     let MAT = new Map(),
         H = [],
         SAP = null,
+        PANEL = null,
+        CLIS = null,
         D = Object.assign({
             zona: "",
             picker: "",
@@ -2067,6 +2084,8 @@
         await IDB.open();
         H = (await IDB.get("hist")) || [];
         SAP = (await IDB.get("sap")) || null;
+        PANEL = (await IDB.get("panel")) || null;
+        CLIS = (await IDB.get("clis")) || null;
         const mats = await IDB.get("mats");
         if (mats && mats.length)
             MAT = new Map(mats);
@@ -2348,16 +2367,199 @@
             await IDB.set("mats", [...MAT]);
             renderArmar();
             const pickInfo = r.pickN ? r.pickN + " con pickeador (" + (r.pickCol || "columna detectada") + ")" : "⚠ sin pickeador en el Excel";
-            toast(nzn + " zonas 600 cargadas (" + r.n + " líneas) · " + pickInfo);
+            toast(nzn + " zonas 600 cargadas (" + r.n + " líneas) · " + pickInfo + (allLoaded() ? "" : " · Faltan: " + missingFiles().join(", ")));
         } catch (err) {
             toast("No se pudo leer el archivo: " + err.message);
         }
     };
 
+    /* ===== CRUCE ZONA -> SOLICITANTE (Panel) -> CLIENTE (PDF B2C) ===== */
+    const PDFJS_VER = "3.11.174";
+    const nSol = v => String(v == null ? "" : v).trim().toUpperCase();
+    const allLoaded = () => !!(SAP && PANEL && PANEL.n && CLIS && CLIS.n);
+    function missingFiles() {
+        const m = [];
+        if (!SAP) m.push("Excel de SAP (picking)");
+        if (!PANEL || !PANEL.n) m.push("Excel Panel");
+        if (!CLIS || !CLIS.n) m.push("PDF B2C");
+        return m;
+    }
+    // zona -> solicitante BC* (Panel) -> "Nom. Solicitante" (PDF)
+    function resolveCliente(zk) {
+        const k = String(parseInt(zk, 10));
+        const pz = PANEL && PANEL.zones && PANEL.zones[k];
+        if (!pz) return { sol: "", name: "", why: "zona sin dato en el Panel" };
+        const sol = nSol(pz.sol);
+        if (!/^BC/.test(sol)) return { sol, name: "", why: "solicitante " + (sol || "vacío") + " no es tipo BC" };
+        const name = CLIS && CLIS.map ? CLIS.map[sol] : "";
+        return name ? { sol, name } : { sol, name: "", why: "solicitante " + sol + " no está en el PDF" };
+    }
+    function panelParse(rows) {
+        let hr = -1, iz = -1, is = -1, it = -1;
+        for (let r = 0; r < Math.min(rows.length, 30); r++) {
+            const hh = (rows[r] || []).map(normH);
+            const z = hh.findIndex(x => x === "zonaots" || x === "zona");
+            const so = hh.findIndex(x => x === "solicitante");
+            if (z >= 0 && so >= 0) {
+                hr = r; iz = z; is = so;
+                it = hh.findIndex(x => x.startsWith("ndetransporte") || x === "transporte");
+                break;
+            }
+        }
+        if (hr < 0) return null;
+        const zones = {};
+        let n = 0;
+        for (let r = hr + 1; r < rows.length; r++) {
+            const c = rows[r] || [];
+            const zm = /\d+/.exec(keyStr(c[iz]));
+            const sol = nSol(keyStr(c[is]));
+            if (!zm || !sol) continue;
+            const zk = String(parseInt(zm[0], 10));
+            if (!zones[zk]) {
+                zones[zk] = { sol, transp: it >= 0 ? keyStr(c[it]) : "" };
+                n++;
+            }
+        }
+        return { zones, n };
+    }
+    async function pdfText(buf) {
+        if (!window.pdfjsLib) throw new Error("Para leer PDF se necesita conexión a internet");
+        const G = pdfjsLib.GlobalWorkerOptions;
+        if (!G.workerSrc) {
+            const url = "https://cdn.jsdelivr.net/npm/pdfjs-dist@" + PDFJS_VER + "/build/pdf.worker.min.js";
+            try {
+                const t = await (await fetch(url)).text();
+                G.workerSrc = URL.createObjectURL(new Blob([t], { type: "text/javascript" }));
+            } catch (e) {
+                G.workerSrc = url;
+            }
+        }
+        const doc = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
+        const lines = [];
+        for (let pn = 1; pn <= doc.numPages; pn++) {
+            const tc = await (await doc.getPage(pn)).getTextContent();
+            const rowsY = [];
+            tc.items.forEach(it => {
+                if (!String(it.str).trim()) return;
+                const y = it.transform[5], x = it.transform[4];
+                let row = rowsY.find(r => Math.abs(r.y - y) < 3);
+                if (!row) rowsY.push(row = { y, it: [] });
+                row.it.push({ x, s: String(it.str).trim() });
+            });
+            rowsY.sort((a, b) => b.y - a.y).forEach(r => lines.push(r.it.sort((a, b) => a.x - b.x).map(i => i.s).join(" ")));
+        }
+        return lines;
+    }
+    function clisParse(lines) {
+        const map = {};
+        let n = 0;
+        const add = (code, name) => {
+            code = nSol(code);
+            name = String(name).replace(/\s+/g, " ").trim();
+            if (code && name && !map[code]) {
+                map[code] = name;
+                n++;
+            }
+        };
+        lines.forEach(l => {
+            const m = /^\s*(BC\d+-\d+)\s+(.+?)\s*$/i.exec(l);
+            if (m) add(m[1], m[2]);
+        });
+        if (!n) { // respaldo: texto continuo
+            const all = lines.join(" ");
+            const re = /(BC\d+-\d+)\s+(.+?)(?=\s+BC\d+-\d+\s|$)/gi;
+            let m;
+            while ((m = re.exec(all))) add(m[1], m[2]);
+        }
+        return { map, n };
+    }
+    function reqStatus() {
+        const m = missingFiles();
+        $("reqInfo").innerHTML = m.length ? "⚠ Faltan archivos para armar pallets: <b>" + esc(m.join(", ")) + "</b>" : "✔ Archivos completos (SAP + Panel + PDF B2C)";
+        $("pInfo").textContent = PANEL && PANEL.n ? (PANEL.name || "") + " · " + PANEL.n + " zonas con solicitante" : "Sin archivo cargado";
+        $("clisInfo").textContent = CLIS && CLIS.n ? (CLIS.name || "") + " · " + CLIS.n + " clientes BC" : "Sin archivo cargado";
+    }
+    $("clrFiles").onclick = async () => {
+        if (!SAP && !PANEL && !CLIS)
+            return toast("No hay archivos cargados");
+        if (!confirm("Se quitarán el Excel de SAP, el Excel Panel y el PDF B2C cargados, y se limpiará el pallet en armado (el historial de pallets cerrados no se toca). ¿Continuar?"))
+            return;
+        SAP = null;
+        PANEL = null;
+        CLIS = null;
+        await IDB.set("sap", null);
+        await IDB.set("panel", null);
+        await IDB.set("clis", null);
+        D.zona = "";
+        D.picker = "";
+        D.cliente = "";
+        D.entrega = "";
+        D.lines = [];
+        D.bultos = 1;
+        D.direccion = "";
+        saveDraft();
+        syncArmar();
+        renderArmar();
+        toast("Archivos limpiados. Carga los nuevos (SAP, Panel y PDF B2C)");
+    };
+    $("pLoad").onclick = () => window.XLSX ? $("fPanel").click() : toast("Para leer Excel se necesita conexión a internet");
+    $("fPanel").onchange = async e => {
+        const f = e.target.files[0];
+        e.target.value = "";
+        if (!f) return;
+        try {
+            const wb = XLSX.read(new Uint8Array(await f.arrayBuffer()), { type: "array" });
+            let r = null;
+            for (const name of wb.SheetNames) {
+                const x = panelParse(XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, raw: true, defval: "" }));
+                if (x && (!r || x.n > r.n)) r = x;
+            }
+            if (!r || !r.n) return toast("No encuentro las columnas «Zona OTs» y «Solicitante» en el Excel Panel");
+            PANEL = { name: f.name, at: nowTS(), zones: r.zones, n: r.n };
+            await IDB.set("panel", PANEL);
+            refreshClienteFromZone();
+            renderArmar();
+            toast("Panel cargado: " + r.n + " zonas con solicitante");
+        } catch (err) {
+            toast("No se pudo leer el Panel: " + err.message);
+        }
+    };
+    $("cLoad").onclick = () => $("fClis").click();
+    $("fClis").onchange = async e => {
+        const f = e.target.files[0];
+        e.target.value = "";
+        if (!f) return;
+        try {
+            const r = clisParse(await pdfText(await f.arrayBuffer()));
+            if (!r.n) return toast("No encuentro solicitantes BC* en el PDF");
+            CLIS = { name: f.name, at: nowTS(), map: r.map, n: r.n };
+            await IDB.set("clis", CLIS);
+            refreshClienteFromZone();
+            renderArmar();
+            toast("PDF cargado: " + r.n + " clientes BC");
+        } catch (err) {
+            toast("No se pudo leer el PDF: " + err.message);
+        }
+    };
+    // Recalcula el cliente del borrador si ya hay zona y los archivos llegaron después.
+    function refreshClienteFromZone() {
+        if (!D.zona || !PANEL || !CLIS) return;
+        const r = resolveCliente(D.zona);
+        if (r.name && D.cliente !== r.name) {
+            D.cliente = r.name;
+            saveDraft();
+            syncArmar();
+        }
+    }
+
     function fromSap(k) {
         const z = SAP && SAP.zones[k];
         if (!z)
             return renderArmar();
+        if (!allLoaded()) {
+            renderArmar();
+            return toast("Faltan archivos: " + missingFiles().join(", "));
+        }
         const selectedTemp = $("aTempSel").value;
         if (!selectedTemp)
             return toast("Primero debes seleccionar una temperatura");
@@ -2383,8 +2585,9 @@
         const targetPicker = pickerFromZone(z, selectedTemp);
         D.picker = targetPicker;
 
-        if (z.cli)
-            D.cliente = z.cli;
+        // Zona -> Solicitante BC* (Panel) -> Nom. Solicitante (PDF)
+        const rc = resolveCliente(k);
+        D.cliente = rc.name || z.cli || "";
         if (z.ent)
             D.entrega = z.ent;
 
@@ -2392,7 +2595,7 @@
         syncArmar();
         renderArmar();
 
-        toast("Zona " + k + " (" + selectedTemp + "): " + D.lines.length + " producto(s) · Pickeador: " + (targetPicker || "no viene en el Excel"));
+        toast("Zona " + k + " (" + selectedTemp + "): " + D.lines.length + " producto(s) · Pickeador: " + (targetPicker || "no viene en el Excel") + " · " + (rc.name ? "Cliente: " + rc.name : "⚠ Cliente no encontrado (" + rc.why + ")"));
     }
 
     $("aZsel").onchange = e => e.target.value ? fromSap(e.target.value) : renderArmar();
@@ -2880,6 +3083,8 @@
     function issues() {
         const i = [],
             z = parseInt(D.zona, 10);
+        if (!allLoaded())
+            i.push("Carga todos los archivos: " + missingFiles().join(", "));
         if (!D.temp)
             i.push("Selecciona la temperatura");
         if (!(z >= 1 && z <= 999))
@@ -2897,7 +3102,7 @@
         const selectedTemp = $("aTempSel").value;
         let zk = [];
 
-        if (SAP && selectedTemp) {
+        if (SAP && selectedTemp && allLoaded()) {
             zk = Object.keys(SAP.zones)
             .filter(k => k.startsWith("6") && SAP.zones[k].lines.some(l => l.temp === selectedTemp))
             .sort((a, b) => a - b);
@@ -2910,12 +3115,17 @@
             $("aZsel").disabled = true;
         } else {
             $("aZsel").disabled = zk.length === 0;
-            $("aZsel").innerHTML = '<option value="">' + (zk.length ? "— Elegir Zona 600 (" + selectedTemp + ") —" : "Sin Zonas 600 para " + selectedTemp) + '</option>' + zk.map(k => {
+            $("aZsel").innerHTML = '<option value="">' + (!allLoaded() ? "Carga los 3 archivos (SAP, Panel y PDF B2C)" : zk.length ? "— Elegir Zona 600 (" + selectedTemp + ") —" : "Sin Zonas 600 para " + selectedTemp) + '</option>' + zk.map(k => {
                 const lineCount = SAP.zones[k].lines.filter(l => l.temp === selectedTemp).length;
                 return '<option value="' + k + '"' + (k === cz ? " selected" : "") + '>Zona ' + k + " · " + lineCount + " producto(s)" + (doneToday(k) ? " · ✔ cerrada hoy" : "") + '</option>';
             }).join("");
         }
 
+        reqStatus();
+        {
+            const rs = D.zona ? resolveCliente(D.zona) : null;
+            $("aSolInfo").textContent = rs && rs.sol ? "(solicitante " + rs.sol + (rs.name ? "" : " · sin cliente en PDF") + ")" : "";
+        }
         $("sInfo").textContent = SAP
         ? SAP.name + (SAP.sheet ? " [" + SAP.sheet + "]" : "") + " · " + Object.keys(SAP.zones).length + " zonas 600" + (SAP.pickN ? " · pickeador: " + (SAP.pickCol || "detectado") : " · ⚠ sin columna de pickeador")
         : "Sin archivo cargado";
@@ -2960,7 +3170,10 @@
             if (z && z.lines.some(l => l.temp === D.temp)) {
                 const p = pickerFromZone(z, D.temp);
                 D.picker = p;
-                if (z.cli && !D.cliente)
+                const rc = resolveCliente(D.zona);
+                if (rc.name)
+                    D.cliente = rc.name;
+                else if (z.cli && !D.cliente)
                     D.cliente = z.cli;
                 if (z.ent && !D.entrega)
                     D.entrega = z.ent;
