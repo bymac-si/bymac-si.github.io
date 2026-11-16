@@ -180,8 +180,8 @@ table.hist thead th{background:var(--bg);color:var(--muted);position:sticky;top:
 </div>
 
 <section class="panel histPanel" style="margin-top:18px">
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px"><h2 style="margin:0">Historial de seteos</h2><div><button class="btn gray sm" id="btnExpX" type="button">Exportar Excel</button> <button class="btn gray sm" id="btnExpC" type="button">Exportar CSV</button></div></div>
-  <div id="histEmpty" class="hint">Aún no hay seteos guardados en este equipo.</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px"><h2 style="margin:0">Historial de seteos</h2><div><button class="btn gray sm" id="btnRef" type="button">↻ Actualizar</button> <button class="btn gray sm" id="btnExpX" type="button">Exportar Excel</button> <button class="btn gray sm" id="btnExpC" type="button">Exportar CSV</button></div></div>
+  <div id="histEmpty" class="hint">Aún no hay seteos guardados.</div>
   <div class="scroll" id="histScroll" style="display:none"><table class="hist"><thead><tr><th>Fecha</th><th>Control</th><th>Sucursal</th><th>Chofer</th><th>Patente</th><th>Pallets</th><th>Pend.</th><th>Estado</th><th></th></tr></thead><tbody id="histBody"></tbody></table></div>
 </section>
 </main></div></div>
@@ -191,6 +191,16 @@ table.hist thead th{background:var(--bg);color:var(--muted);position:sticky;top:
 const $=id=>document.getElementById(id);
 const ZONAS=[['CONG','Congelado','#0e8fa8'],['FRIO','Frío','#2f6fdb'],['SECO','Seco','#c27a00']];
 const LS_H='icb_seteo_hist_v1',LS_C='icb_seteo_cfg_v1';
+/* Web app de Apps Script (misma implementación del Reporte de turno) -> hoja "Seteos Rampla" de la misma planilla */
+const API='https://script.google.com/macros/s/AKfycbz66VsFIgSwZ4l9YkIBSE4afbrGmov6GOwP-bR333NJ6dLGOR6rvm3U--GlQrjZJdV4Xg/exec';
+/* Puente: dentro de Apps Script usa google.script.run; fuera (GitHub Pages, local) usa fetch al /exec */
+function call(fn,arg,ok,fail){
+  if(window.google&&google.script&&google.script.run){google.script.run.withSuccessHandler(ok).withFailureHandler(fail)[fn](arg);return}
+  let req=fn==='obtenerHistorialSeteos'?fetch(API+'?accion=seteos&n='+encodeURIComponent(arg))
+    :fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(fn==='guardarSeteo'?{accion:'seteo',data:arg}:{accion:'seteo_del',id:arg})});
+  req.then(r=>r.json()).then(r=>{if(r&&r.error)throw new Error(r.error);ok(r)}).catch(fail);
+}
+const errMsg=e=>e&&e.message?e.message:e;
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function todayISO(){let d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())}
 function fmtDate(iso){let m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||'');return m?`${m[3]}-${m[2]}-${m[1]}`:(iso||'')}
@@ -313,24 +323,24 @@ function getHist(){return lsGet(LS_H,[])}
 function saveCurrent(silent){
   let h=getHist();
   if(!S.id)S.id='s'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-  let rec=JSON.parse(JSON.stringify(S));rec.savedAt=new Date().toISOString();
+  let rec=JSON.parse(JSON.stringify(S));rec.savedAt=new Date().toISOString();rec.sync=false;
   let i=h.findIndex(x=>x.id===S.id);if(i>=0)h[i]=rec;else h.unshift(rec);
   if(!lsSet(LS_H,h.slice(0,500))){toast('No se pudo guardar en este navegador');return false}
-  renderHist();if(!silent)toast('Seteo guardado en el historial');return true;
+  renderHist();pushRemote(rec);return true;
 }
 function recTotals(r){let t=0,p=0;for(const [z] of ZONAS){t+=nz(r.pal[z].n);p+=nz(r.pal[z].p)}return{t,p,ok:r.estadoMode==='completa'?true:r.estadoMode==='incompleta'?false:p===0}}
 function renderHist(){
   let h=getHist();
   $('sucList').innerHTML=[...new Set(['Coquimbo','Temuco',...h.map(x=>x.sucursal).filter(Boolean)])].map(s=>`<option value="${esc(s)}">`).join('');
   $('histEmpty').style.display=h.length?'none':'';$('histScroll').style.display=h.length?'':'none';
-  $('histBody').innerHTML=h.map(r=>{let x=recTotals(r);return `<tr><td>${esc(fmtDate(r.fecha))}</td><td>${esc(r.control)}</td><td>${esc(r.sucursal)}</td><td>${esc(r.chofer)}</td><td>${esc([r.tracto,r.rampla].filter(Boolean).join(' / '))}</td><td>${fmtNum(x.t)}</td><td>${fmtNum(x.p)}</td><td><span class="tag ${x.ok?'ok':'bad'}">${x.ok?'COMPLETA':'INCOMPLETA'}</span></td><td style="text-align:right"><button class="btn gray sm" data-open="${r.id}">Abrir</button> <button class="btn gray sm" data-dup="${r.id}">Duplicar</button> <button class="btn gray sm" data-del="${r.id}">Eliminar</button></td></tr>`}).join('');
+  $('histBody').innerHTML=h.map(r=>{let x=recTotals(r);return `<tr><td>${esc(fmtDate(r.fecha))}${r.sync===true?'':' <span title="Pendiente de subir a Google Sheets">⏳</span>'}</td><td>${esc(r.control)}</td><td>${esc(r.sucursal)}</td><td>${esc(r.chofer)}</td><td>${esc([r.tracto,r.rampla].filter(Boolean).join(' / '))}</td><td>${fmtNum(x.t)}</td><td>${fmtNum(x.p)}</td><td><span class="tag ${x.ok?'ok':'bad'}">${x.ok?'COMPLETA':'INCOMPLETA'}</span></td><td style="text-align:right"><button class="btn gray sm" data-open="${r.id}">Abrir</button> <button class="btn gray sm" data-dup="${r.id}">Duplicar</button> <button class="btn gray sm" data-del="${r.id}">Eliminar</button></td></tr>`}).join('');
   $('histBody').querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>loadRec(b.dataset.open,false));
   $('histBody').querySelectorAll('[data-dup]').forEach(b=>b.onclick=()=>loadRec(b.dataset.dup,true));
-  $('histBody').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(confirm('¿Eliminar este seteo del historial?')){lsSet(LS_H,getHist().filter(x=>x.id!==b.dataset.del));if(S.id===b.dataset.del)S.id=null;renderHist()}});
+  $('histBody').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(confirm('¿Eliminar este seteo del historial y de Google Sheets?')){let id=b.dataset.del;lsSet(LS_H,getHist().filter(x=>x.id!==id));if(S.id===id)S.id=null;renderHist();call('eliminarSeteo',id,()=>toast('Eliminado también de Google Sheets'),e=>toast('Eliminado solo en este equipo: '+errMsg(e)))}});
 }
 function loadRec(id,dup){
   let r=getHist().find(x=>x.id===id);if(!r)return;
-  S=JSON.parse(JSON.stringify(r));delete S.savedAt;
+  S=JSON.parse(JSON.stringify(r));delete S.savedAt;delete S.sync;
   if(dup){S.id=null;S.control='';S.sellos=[];S.fecha=todayISO();}
   syncInputs();refresh();window.scrollTo({top:0,behavior:'smooth'});toast(dup?'Duplicado: completa control y sellos nuevos':'Seteo cargado');
 }
@@ -346,6 +356,29 @@ $('btnExpX').onclick=()=>{
   if(!window.XLSX){toast('Librería Excel no disponible (sin internet). Exportando CSV.');return $('btnExpC').click()}
   let ws=XLSX.utils.aoa_to_sheet(histRows()),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Historial');XLSX.writeFile(wb,'historial_seteo_rampla.xlsx');
 };
+
+/* ---------- sincronización con Google Sheets ---------- */
+function markSynced(id){let h=getHist(),i=h.findIndex(x=>x.id===id);if(i>=0){h[i].sync=true;lsSet(LS_H,h)}renderHist()}
+function pushRemote(rec){
+  let {sync,...clean}=rec;
+  call('guardarSeteo',clean,r=>{markSynced(rec.id);toast('✔ Guardado en Google Sheets (fila '+r.fila+')')},e=>toast('Guardado solo en este equipo: '+errMsg(e)));
+}
+function uploadPend(arr,i=0){
+  if(i>=arr.length){if(arr.length)toast(arr.length+' seteo(s) pendiente(s) subido(s) a Google Sheets');return}
+  let {sync,...clean}=arr[i];
+  call('guardarSeteo',clean,()=>{markSynced(arr[i].id);uploadPend(arr,i+1)},e=>toast('No se pudo subir a Google Sheets: '+errMsg(e)));
+}
+function loadRemote(){
+  const N=200;
+  call('obtenerHistorialSeteos',N,list=>{
+    let loc=getHist(),ids=new Set(list.map(x=>x.id));
+    let pend=loc.filter(x=>!ids.has(x.id)&&x.sync!==true);            /* locales aún no subidos (incluye los previos a la integración) */
+    let keep=list.length>=N?loc.filter(x=>!ids.has(x.id)&&x.sync===true):[]; /* más antiguos que el tope remoto */
+    let merged=[...list.map(x=>({...x,sync:true})),...keep,...pend].sort((a,b)=>String(b.savedAt||'').localeCompare(String(a.savedAt||'')));
+    lsSet(LS_H,merged.slice(0,500));renderHist();uploadPend(pend);
+  },e=>toast('No se pudo leer Google Sheets: '+errMsg(e)));
+}
+$('btnRef').onclick=loadRemote;
 
 /* ---------- importar desde Excel (misma estructura que Seteo_Control.xlsx) ---------- */
 function parseSellosText(t){
@@ -392,6 +425,6 @@ $('btnPrint').onclick=()=>{
 };
 let tt;function toast(m){let t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2800)}
 
-buildPalRows();syncInputs();renderHist();refresh();
+buildPalRows();syncInputs();renderHist();refresh();loadRemote();
 </script>
 </body></html>
