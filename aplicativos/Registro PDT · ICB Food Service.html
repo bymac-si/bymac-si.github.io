@@ -868,6 +868,7 @@
           <button class="btn" id="bcd" type="button">⬇ Detalle CSV</button>
           <button class="btn" id="bcp" type="button">⬇ Planilla CSV</button>
           <button class="btn pri" id="brp" type="button">📄 Generar reporte (PDF / imagen)</button>
+          <button class="btn" id="bsync" type="button">↻ Sincronizar</button><span class="hint" id="syncst"></span>
         </div>
       </div>
       <section class="sheet">
@@ -920,7 +921,7 @@
       </details>
       <details class="np sheet">
         <summary>Respaldo</summary>
-        <p class="hint">Los datos quedan guardados en este navegador. Descarga un respaldo de vez en cuando o para
+        <p class="hint">Los datos se guardan en este navegador y en Google Sheets. Descarga un respaldo de vez en cuando o para
           pasarlos a otro equipo.</p>
         <div class="bar" style="margin:0"><button class="btn" id="bk" type="button">Descargar respaldo</button><button
             class="btn" id="br" type="button">Cargar respaldo</button><input type="file" id="fr" accept=".json"
@@ -956,7 +957,7 @@
     const LS = "icb_pdt_v1", DN = ["LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO"], TU = ["Mañana", "Tarde", "Noche"];
     const DEF = [];
     let S = {}; try {S = JSON.parse(localStorage.getItem(LS)) || {}} catch (e) { }
-    S = Object.assign({collab: DEFC, pdts: DEF, reg: {}, log: [], turno: ""}, S);
+    S = Object.assign({collab: DEFC, pdts: DEF, reg: {}, log: [], turno: "", pend: [], migrated: false, cfgPend: false}, S);
     S.pdts = [...new Set([...(Array.isArray(S.pdts) ? S.pdts : []), ...DEF].map(x => String(x).trim()).filter(Boolean))];
     if (!S.turno) {const h = new Date().getHours(); S.turno = h >= 6 && h < 14 ? "Mañana" : h >= 14 && h < 22 ? "Tarde" : "Noche"}
     const save = () => {try {localStorage.setItem(LS, JSON.stringify(S))} catch (e) {toast("No se pudo guardar en este navegador")} };
@@ -1003,7 +1004,9 @@
       v ? r[k] = v : delete r[k];
       S.log.push({t: new Date().toISOString(), w: wkKey(), tu: S.turno, f: DN[i.dataset.d] + " " + fd(add(mon, +i.dataset.d)), p: i.dataset.p, a: old, b: v});
       if (S.log.length > 3000) S.log = S.log.slice(-3000);
-      save(); markDup(); renderLog(); drawTabs();
+      const lg = S.log[S.log.length - 1];
+      enqueue({w: wkKey(), tu: S.turno, p: i.dataset.p, d: +i.dataset.d, f: ymd(add(mon, +i.dataset.d)), dn: DN[i.dataset.d], v, a: old, t: lg.t, fl: lg.f});
+      save(); markDup(); renderLog(); drawTabs(); flushQueue();
     });
     /* navegación */
     $("pv").onclick = () => {mon = add(mon, -7); render()}; $("nx").onclick = () => {mon = add(mon, 7); render()};
@@ -1011,8 +1014,8 @@
     $("tabs").onclick = e => {const b = e.target.closest(".tab"); if (b) {S.turno = b.dataset.t; save(); render()} };
     $("bp").onclick = () => window.print();
     /* configuración */
-    $("sc").onclick = () => {S.collab = parseC($("tc").value); save(); render(); toast(S.collab.length + " colaborador(es) guardados")};
-    $("sp").onclick = () => {const a = [...new Set($("tp").value.split("\n").map(x => x.trim()).filter(Boolean))]; if (!a.length) return toast("Agrega al menos un PDT"); S.pdts = a; save(); render(); toast("Lista de PDT guardada")};
+    $("sc").onclick = () => {S.collab = parseC($("tc").value); save(); pushCfg(); render(); toast(S.collab.length + " colaborador(es) guardados")};
+    $("sp").onclick = () => {const a = [...new Set($("tp").value.split("\n").map(x => x.trim()).filter(Boolean))]; if (!a.length) return toast("Agrega al menos un PDT"); S.pdts = a; save(); pushCfg(); render(); toast("Lista de PDT guardada")};
     $("ic").onclick = () => window.XLSX ? $("fx").click() : toast("Para leer Excel se necesita conexión a internet");
     $("fx").onchange = async e => {
       const f = e.target.files[0]; e.target.value = ""; if (!f) return;
@@ -1023,7 +1026,7 @@
         const seen = new Set(), out = [];
         for (let r = s; r < rows.length; r++) {const n = String(rows[r][ni] || "").trim(); if (!n || seen.has(n.toLowerCase())) continue; seen.add(n.toLowerCase()); out.push({c: ci >= 0 ? String(rows[r][ci] || "").trim() : "", n})}
         if (!out.length) return toast("No encontré nombres en el archivo");
-        out.sort((a, b) => a.n.localeCompare(b.n)); S.collab = out; save(); render(); toast(out.length + " colaboradores importados")
+        out.sort((a, b) => a.n.localeCompare(b.n)); S.collab = out; save(); pushCfg(); render(); toast(out.length + " colaboradores importados")
       } catch (err) {toast("No se pudo leer el archivo: " + err.message)}
     };
     /* exportar */
@@ -1049,11 +1052,70 @@
       const f = e.target.files[0]; e.target.value = ""; if (!f) return;
       try {
         const o = JSON.parse(await f.text()); if (!o || typeof o.reg !== "object") throw new Error("formato no válido");
-        if (!confirm("Se reemplazarán los datos de este equipo por los del respaldo. ¿Continuar?")) return;
-        S = Object.assign(S, o); save(); render(); toast("Respaldo cargado")
+        if (!confirm("Se reemplazarán los datos de este equipo por los del respaldo y se subirán a Google Sheets (sobrescribe las celdas coincidentes). ¿Continuar?")) return;
+        S = Object.assign(S, o); S.pend = S.pend || []; save(); render(); toast("Respaldo cargado"); pushAll(); pushCfg()
       } catch (err) {toast("No se pudo cargar: " + err.message)}
     };
     render();
+
+    /* ===== Sincronización con Google Sheets (misma implementación del Reporte de turno) ===== */
+    const API = "https://script.google.com/macros/s/AKfycbz66VsFIgSwZ4l9YkIBSE4afbrGmov6GOwP-bR333NJ6dLGOR6rvm3U--GlQrjZJdV4Xg/exec";
+    /* Puente: dentro de Apps Script usa google.script.run; fuera (GitHub Pages, local) usa fetch al /exec */
+    function call(fn, arg, ok, fail) {
+      if (window.google && google.script && google.script.run) {google.script.run.withSuccessHandler(ok).withFailureHandler(fail)[fn](arg); return}
+      const POST = {guardarPdt: "pdt", guardarPdtLote: "pdt_lote", guardarPdtConfig: "pdt_cfg"};
+      const req = fn === "obtenerEstadoPdt" ? fetch(API + "?accion=pdt&desde=" + encodeURIComponent(arg))
+        : fetch(API, {method: "POST", headers: {"Content-Type": "text/plain;charset=utf-8"}, body: JSON.stringify({accion: POST[fn], data: arg})});
+      req.then(r => r.json()).then(r => {if (r && r.error) throw new Error(r.error); ok(r)}).catch(fail);
+    }
+    const errMsg = e => e && e.message ? e.message : e;
+    const syncSt = t => {$("syncst").textContent = t || ""};
+    const enqueue = op => {S.pend.push(op)};
+    let flushing = false, waiters = [];
+    function flushQueue(done) {
+      if (done) waiters.push(done);
+      if (flushing) return;
+      if (!S.pend.length) {syncSt("✔ Sincronizado"); const w = waiters; waiters = []; w.forEach(f => f()); return}
+      flushing = true;
+      call("guardarPdt", S.pend[0], () => {S.pend.shift(); save(); flushing = false; flushQueue()},
+        e => {flushing = false; waiters = []; syncSt("⏳ " + S.pend.length + " cambio(s) pendiente(s): " + errMsg(e))});
+    }
+    function allRows() {
+      const o = [];
+      for (const k in S.reg) {const [w, tu] = k.split("|"), m = monOf(w); for (const kk in S.reg[k]) {const [p, d] = kk.split("|"); o.push({w, tu, p, d: +d, f: ymd(add(m, +d)), dn: DN[d], v: S.reg[k][kk]})} }
+      return o;
+    }
+    function pushCfg() {
+      S.cfgPend = true; save();
+      call("guardarPdtConfig", {pdts: S.pdts, collab: S.collab}, () => {S.cfgPend = false; save(); toast("Lista guardada en Google Sheets")}, e => toast("Guardado solo en este equipo: " + errMsg(e)));
+    }
+    function pushAll() {
+      call("guardarPdtLote", {rows: allRows(), log: [], soloNuevos: false}, r => toast("Respaldo subido a Google Sheets (" + (r.nuevos + r.actualizados) + " registros)"), e => toast("No se pudo subir el respaldo: " + errMsg(e)));
+    }
+    function loadRemote() {
+      const desde = isoWeek(add(new Date(), -182));
+      syncSt("Sincronizando…");
+      flushQueue(() => {
+        call("obtenerEstadoPdt", desde, st => {
+          if (!S.migrated) { /* primera sincronización: sube lo que ya estaba solo en este equipo (sin pisar lo del servidor) */
+            call("guardarPdtLote", {rows: allRows(), log: S.log, soloNuevos: true}, () => {S.migrated = true; save(); loadRemote()}, e => syncSt("No se pudo subir lo existente: " + errMsg(e)));
+            return;
+          }
+          if (S.cfgPend) pushCfg();
+          else if (st.cfg && Array.isArray(st.cfg.collab) && st.cfg.collab.length) {S.collab = st.cfg.collab; if (Array.isArray(st.cfg.pdts) && st.cfg.pdts.length) S.pdts = st.cfg.pdts}
+          else pushCfg(); /* el servidor aún no tiene configuración: sube la local */
+          const srv = {};
+          st.reg.forEach(([w, tu, p, d, v]) => {const k = w + "|" + tu; (srv[k] = srv[k] || {})[p + "|" + d] = v});
+          Object.keys(S.reg).forEach(k => {if (k.split("|")[0] >= desde) delete S.reg[k]});
+          Object.keys(srv).forEach(k => {S.reg[k] = srv[k]});
+          S.pend.forEach(op => {const k = op.w + "|" + op.tu, r = S.reg[k] || (S.reg[k] = {}), kk = op.p + "|" + op.d; op.v ? r[kk] = op.v : delete r[kk]});
+          S.log = st.log.map(x => ({...x, t: String(x.t).length === 19 ? x.t : x.t})).concat(S.pend.map(op => ({t: op.t, w: op.w, tu: op.tu, f: op.fl, p: op.p, a: op.a, b: op.v})));
+          save(); render(); syncSt("✔ Sincronizado " + new Date().toLocaleTimeString("es-CL", {hour: "2-digit", minute: "2-digit"}));
+        }, e => syncSt("Sin conexión con Google Sheets: " + errMsg(e)));
+      });
+    }
+    $("bsync").onclick = loadRemote;
+    loadRemote();
 
     /* ===== CSV ===== */
     function csvDown(n, rows) {download(n, new Blob(["\ufeff" + rows.map(r => r.map(x => '"' + String(x == null ? "" : x).replace(/"/g, '""') + '"').join(";")).join("\n")], {type: "text/csv;charset=utf-8"}))}
