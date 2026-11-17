@@ -139,8 +139,8 @@ table.hist thead th{background:var(--bg);color:var(--muted);position:sticky;top:
 </div>
 
 <section class="panel histPanel" style="margin-top:18px">
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px"><h2 style="margin:0">Historial de solicitudes</h2><div><button class="btn gray sm" id="btnExpX" type="button">Exportar Excel</button> <button class="btn gray sm" id="btnExpC" type="button">Exportar CSV</button></div></div>
-  <div id="histEmpty" class="hint">Aún no hay solicitudes guardadas en este equipo.</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px"><h2 style="margin:0">Historial de solicitudes</h2><div><button class="btn gray sm" id="btnRef" type="button">↻ Actualizar</button> <button class="btn gray sm" id="btnExpX" type="button">Exportar Excel</button> <button class="btn gray sm" id="btnExpC" type="button">Exportar CSV</button></div></div>
+  <div id="histEmpty" class="hint">Aún no hay solicitudes guardadas.</div>
   <div class="scroll" id="histScroll" style="display:none"><table class="hist"><thead><tr><th>Fecha</th><th>Trabajador</th><th>RUT</th><th>Horario</th><th>Duración</th><th>Tipo</th><th>Autoriza</th><th></th></tr></thead><tbody id="histBody"></tbody></table></div>
 </section>
 </main></div></div>
@@ -151,6 +151,16 @@ const LOGO='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAkACQAAD/2wBDAAgGBgcGBQgHB
 const $=id=>document.getElementById(id);
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const LS_H='icb_permiso_hist_v1',LS_C='icb_permiso_cfg_v1';
+/* Web app de Apps Script (misma implementación del Reporte de turno) -> hoja "Permisos" de la misma planilla */
+const API='https://script.google.com/macros/s/AKfycbz66VsFIgSwZ4l9YkIBSE4afbrGmov6GOwP-bR333NJ6dLGOR6rvm3U--GlQrjZJdV4Xg/exec';
+/* Puente: dentro de Apps Script usa google.script.run; fuera (GitHub Pages, local) usa fetch al /exec */
+function call(fn,arg,ok,fail){
+  if(window.google&&google.script&&google.script.run){google.script.run.withSuccessHandler(ok).withFailureHandler(fail)[fn](arg);return}
+  let req=fn==='obtenerHistorialPermisos'?fetch(API+'?accion=permisos&n='+encodeURIComponent(arg))
+    :fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(fn==='guardarPermiso'?{accion:'permiso',data:arg}:{accion:'permiso_del',id:arg})});
+  req.then(r=>r.json()).then(r=>{if(r&&r.error)throw new Error(r.error);ok(r)}).catch(fail);
+}
+const errMsg=e=>e&&e.message?e.message:e;
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function lsGet(k,d){try{let v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
@@ -224,9 +234,9 @@ function getHist(){return lsGet(LS_H,[])}
 function saveCurrent(silent){
   if(S.rut.trim())S.rut=fmtRut(S.rut);
   let h=getHist();if(!S.id)S.id='p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-  let rec={...S,savedAt:new Date().toISOString()},i=h.findIndex(x=>x.id===S.id);if(i>=0)h[i]=rec;else h.unshift(rec);
+  let rec={...S,savedAt:new Date().toISOString(),sync:false},i=h.findIndex(x=>x.id===S.id);if(i>=0)h[i]=rec;else h.unshift(rec);
   if(!lsSet(LS_H,h.slice(0,1000))){toast('No se pudo guardar en este navegador');return false}
-  lsSet(LS_C,{ciudad:S.ciudad,sup:S.sup});renderHist();if(!silent)toast('Solicitud guardada en el historial');return true;
+  lsSet(LS_C,{ciudad:S.ciudad,sup:S.sup});renderHist();pushRemote(rec);return true;
 }
 function renderHist(){
   let h=getHist();
@@ -234,12 +244,12 @@ function renderHist(){
   $('supList').innerHTML=[...new Set(h.map(x=>x.sup).filter(Boolean))].map(s=>`<option value="${esc(s)}">`).join('');
   $('histEmpty').style.display=h.length?'none':'';$('histScroll').style.display=h.length?'':'none';
   $('histBody').innerHTML=h.map(r=>{let d=(()=>{let a=minutes(r.hIni),b=minutes(r.hFin);return a==null||b==null?null:{min:(b-a+1440)%1440,zero:a===b}})();
-    return `<tr><td>${esc(fmtDate(r.fecha))}</td><td>${esc(r.nombre)}</td><td>${esc(r.rut)}</td><td>${esc(r.hIni)} – ${esc(r.hFin)}</td><td>${durText(d)}</td><td><span class="tag ${r.tipo==='con'?'ok':'bad'}">${r.tipo==='con'?'CON GOCE':r.tipo==='sin'?'SIN GOCE':'—'}</span></td><td>${esc(r.sup)}</td><td style="text-align:right"><button class="btn gray sm" data-open="${r.id}">Abrir</button> <button class="btn gray sm" data-dup="${r.id}">Duplicar</button> <button class="btn gray sm" data-del="${r.id}">Eliminar</button></td></tr>`}).join('');
+    return `<tr><td>${esc(fmtDate(r.fecha))}${r.sync===true?'':' <span title="Pendiente de subir a Google Sheets">⏳</span>'}</td><td>${esc(r.nombre)}</td><td>${esc(r.rut)}</td><td>${esc(r.hIni)} – ${esc(r.hFin)}</td><td>${durText(d)}</td><td><span class="tag ${r.tipo==='con'?'ok':'bad'}">${r.tipo==='con'?'CON GOCE':r.tipo==='sin'?'SIN GOCE':'—'}</span></td><td>${esc(r.sup)}</td><td style="text-align:right"><button class="btn gray sm" data-open="${r.id}">Abrir</button> <button class="btn gray sm" data-dup="${r.id}">Duplicar</button> <button class="btn gray sm" data-del="${r.id}">Eliminar</button></td></tr>`}).join('');
   $('histBody').querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>loadRec(b.dataset.open,false));
   $('histBody').querySelectorAll('[data-dup]').forEach(b=>b.onclick=()=>loadRec(b.dataset.dup,true));
-  $('histBody').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(confirm('¿Eliminar esta solicitud del historial?')){lsSet(LS_H,getHist().filter(x=>x.id!==b.dataset.del));if(S.id===b.dataset.del)S.id=null;renderHist()}});
+  $('histBody').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(confirm('¿Eliminar esta solicitud del historial y de Google Sheets?')){let id=b.dataset.del;lsSet(LS_H,getHist().filter(x=>x.id!==id));if(S.id===id)S.id=null;renderHist();call('eliminarPermiso',id,()=>toast('Eliminada también de Google Sheets'),e=>toast('Eliminada solo en este equipo: '+errMsg(e)))}});
 }
-function loadRec(id,dup){let r=getHist().find(x=>x.id===id);if(!r)return;S={...r};delete S.savedAt;if(dup){S.id=null;S.fecha=todayISO()}syncInputs();refresh();window.scrollTo({top:0,behavior:'smooth'});toast(dup?'Duplicada: revisa fecha y horas':'Solicitud cargada')}
+function loadRec(id,dup){let r=getHist().find(x=>x.id===id);if(!r)return;S={...r};delete S.savedAt;delete S.sync;if(dup){S.id=null;S.fecha=todayISO()}syncInputs();refresh();window.scrollTo({top:0,behavior:'smooth'});toast(dup?'Duplicada: revisa fecha y horas':'Solicitud cargada')}
 function histRows(){
   let head=['Fecha','Ciudad','Trabajador','RUT','Hora inicio','Hora término','Duración (min)','Motivo','Tipo de permiso','Autoriza','Guardado'];
   return [head,...getHist().map(r=>{let a=minutes(r.hIni),b=minutes(r.hFin);return [fmtDate(r.fecha),r.ciudad,r.nombre,r.rut,r.hIni,r.hFin,a==null||b==null?'':(b-a+1440)%1440,r.motivo,r.tipo==='con'?'Con goce de remuneración':r.tipo==='sin'?'Sin goce de remuneración':'',r.sup,(r.savedAt||'').replace('T',' ').slice(0,16)]})];
@@ -247,6 +257,29 @@ function histRows(){
 function download(name,blob){let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000)}
 $('btnExpC').onclick=()=>{if(!getHist().length)return toast('No hay datos para exportar');download('historial_permisos.csv',new Blob(['\ufeff'+histRows().map(r=>r.map(x=>'"'+String(x??'').replaceAll('"','""')+'"').join(';')).join('\n')],{type:'text/csv;charset=utf-8'}))};
 $('btnExpX').onclick=()=>{if(!getHist().length)return toast('No hay datos para exportar');if(!window.XLSX){toast('Librería Excel no disponible (sin internet). Exportando CSV.');return $('btnExpC').click()}let wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(histRows()),'Permisos');XLSX.writeFile(wb,'historial_permisos.xlsx')};
+
+/* ---- sincronización con Google Sheets ---- */
+function markSynced(id){let h=getHist(),i=h.findIndex(x=>x.id===id);if(i>=0){h[i].sync=true;lsSet(LS_H,h)}renderHist()}
+function pushRemote(rec){
+  let {sync,...clean}=rec;
+  call('guardarPermiso',clean,r=>{markSynced(rec.id);toast('✔ Guardada en Google Sheets (fila '+r.fila+')')},e=>toast('Guardada solo en este equipo: '+errMsg(e)));
+}
+function uploadPend(arr,i=0){
+  if(i>=arr.length){if(arr.length)toast(arr.length+' solicitud(es) pendiente(s) subida(s) a Google Sheets');return}
+  let {sync,...clean}=arr[i];
+  call('guardarPermiso',clean,()=>{markSynced(arr[i].id);uploadPend(arr,i+1)},e=>toast('No se pudo subir a Google Sheets: '+errMsg(e)));
+}
+function loadRemote(){
+  const N=300;
+  call('obtenerHistorialPermisos',N,list=>{
+    let loc=getHist(),ids=new Set(list.map(x=>x.id));
+    let pend=loc.filter(x=>!ids.has(x.id)&&x.sync!==true);            /* locales aún no subidos (incluye los previos a la integración) */
+    let keep=list.length>=N?loc.filter(x=>!ids.has(x.id)&&x.sync===true):[]; /* más antiguos que el tope remoto */
+    let merged=[...list.map(x=>({...x,sync:true})),...keep,...pend].sort((a,b)=>String(b.savedAt||'').localeCompare(String(a.savedAt||'')));
+    lsSet(LS_H,merged.slice(0,1000));renderHist();uploadPend(pend);
+  },e=>toast('No se pudo leer Google Sheets: '+errMsg(e)));
+}
+$('btnRef').onclick=loadRemote;
 
 /* ---- acciones ---- */
 $('btnSave').onclick=()=>saveCurrent(false);
@@ -257,6 +290,6 @@ $('btnPrint').onclick=()=>{
   saveCurrent(true);toast('Guardada en el historial');setTimeout(()=>window.print(),150);
 };
 let tt;function toast(m){let t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2800)}
-syncInputs();renderHist();refresh();
+syncInputs();renderHist();refresh();loadRemote();
 </script>
 </body></html>
