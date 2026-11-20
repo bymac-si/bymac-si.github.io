@@ -43,7 +43,7 @@ td.gv{background:var(--brand);color:#fff;font-weight:700}
 td.ok{background:var(--okb);color:var(--ok);font-weight:700}td.er{background:var(--erb);color:var(--er);font-weight:700}
 tr.sep td{background:var(--bg);font-weight:700;text-align:left}
 td input{min-width:56px;text-align:center;padding:4px}
-.neg{color:var(--er);font-weight:700}
+.neg{color:var(--er);font-weight:700}.wrn{color:#b26a00;font-weight:700}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1d1d22;color:#fff;padding:10px 16px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9;max-width:90vw}
 .toast.on{opacity:1}
 @media (max-width:760px){.app{grid-template-columns:1fr}aside{flex-direction:row;flex-wrap:wrap;align-items:center;padding:10px 12px}aside img{width:40px;margin:0 8px 0 0}.st{margin:0}main{padding:16px}}
@@ -101,11 +101,12 @@ td input{min-width:56px;text-align:center;padding:4px}
 
 <section class="v" id="v-sal">
 <div class="card">
+<div class="bar"><span id="corte" class="chk"></span><button class="btn sm" id="bcorte" type="button">Cambiar fecha de corte</button></div>
 <div class="bar"><button class="btn" id="bis" type="button">📂 Importar saldos (Excel)</button><input type="file" id="fis" accept=".xlsx,.xls" style="display:none"><span class="hint">Columnas: Rut del Trabajador, Nombre, Apellido Paterno/Materno, Cargo, Fecha de Ingreso, Vacaciones Totales (y opcional Turno).</span></div>
-<div class="w"><table><thead><tr><th class="l">Colaborador</th><th>RUT</th><th class="l">Cargo</th><th>Ingreso</th><th>Saldo base</th><th>Tomados</th><th>Disponible</th><th>Turno</th></tr></thead><tbody id="tsal"></tbody></table></div>
+<div class="w"><table><thead><tr><th class="l">Colaborador</th><th>RUT</th><th class="l">Cargo</th><th>Ingreso</th><th>Saldo inicial (fijo)</th><th>Devengado</th><th>Descontado</th><th>Saldo a hoy</th><th>Años previos acreditados</th><th>Días/año</th><th>Turno</th></tr></thead><tbody id="tsal"></tbody></table></div>
 </div>
 <div class="card"><b>Parámetros de cálculo</b>
-<div class="bar"><label style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="psab" style="width:auto"> El sábado cuenta como día hábil (feriado legal)</label></div>
+<div class="bar"><label style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="psab" style="width:auto"> Contar el sábado como hábil (la ley lo considera siempre inhábil, art. 69; solo para feriado convencional)</label></div>
 <label>Feriados (uno por línea, dd/mm se repite cada año; dd/mm/aaaa es solo ese año)<textarea id="pfer"></textarea></label>
 <p class="hint">Los feriados que cambian de fecha cada año (Viernes y Sábado Santo, 29/06, 21/06, 12/10, 31/10) agrégalos con año.</p>
 <div class="bar"><button class="btn" id="bpar" type="button">Guardar parámetros</button></div></div>
@@ -117,7 +118,7 @@ td input{min-width:56px;text-align:center;padding:4px}
 const $=id=>document.getElementById(id),p2=n=>String(n).padStart(2,"0");
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const TU=["Mañana","Tarde","Noche"],nrm=s=>String(s??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim().toLowerCase();
-const D={colab:[],sol:[],cfg:{dot:{},sab:true,fer:["01-01","05-01","05-21","07-16","08-15","09-18","09-19","11-01","12-08","12-25"]}};
+const D={colab:[],sol:[],cfg:{dot:{},sab:false,corte:"",v:2,fer:["01-01","05-01","05-21","07-16","08-15","09-18","09-19","11-01","12-08","12-25"]}};
 let tt;function toast(m){const t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),4500)}
 const fmtN=n=>String(Math.round(n*100)/100).replace(".",",");
 
@@ -137,7 +138,7 @@ const saveColab=(reset,done)=>call("guardarVacColab",{rows:D.colab,reset:!!reset
 let ct;const saveCfg=()=>{clearTimeout(ct);ct=setTimeout(()=>call("guardarVacConfig",D.cfg,()=>syncSt("✔ Configuración guardada"),e=>toast("No se pudo guardar la configuración: "+errMsg(e))),500)};
 function load(){
   syncSt("Sincronizando…");
-  call("obtenerEstadoVac",null,st=>{D.colab=st.colab||[];D.sol=(st.sol||[]).map(s=>({...s,desc:s.desc!=="NO"}));if(st.cfg)D.cfg=Object.assign(D.cfg,st.cfg);syncSt("✔ Sincronizado "+new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"}));renderAll()},e=>syncSt("Sin conexión: "+errMsg(e)));
+  call("obtenerEstadoVac",null,st=>{D.colab=st.colab||[];D.sol=(st.sol||[]).map(s=>({...s,desc:s.desc!=="NO"}));if(st.cfg)D.cfg=Object.assign(D.cfg,st.cfg);if(!st.cfg||st.cfg.v!==2){D.cfg.sab=false;D.cfg.v=2;saveCfg()} /* art. 69: el sábado es siempre inhábil para el feriado */syncSt("✔ Sincronizado "+new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"}));renderAll()},e=>syncSt("Sin conexión: "+errMsg(e)));
 }
 
 /* ---------- fechas ---------- */
@@ -152,13 +153,21 @@ const wkCnt=s=>s._w||(s._w=(()=>{const m={};habDays(s.desde,s.hasta).forEach(d=>
 
 /* ---------- saldos y dotación ---------- */
 const vig=s=>s.estado==="Vigente";
-const tomados=rut=>D.sol.filter(s=>s.rut===rut&&vig(s)&&s.desc!==false).reduce((a,s)=>a+(+s.dias||0),0);
-const saldo=c=>(+c.base||0)-tomados(c.rut);
+/* Punto de inicio fijo = saldo del Excel a la fecha de corte. Desde ahí: + devengo legal − días hábiles tomados (solo posteriores al corte). */
+const ingD=c=>{const m=/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(String(c.ingreso||"").trim());return m?new Date(+m[3],m[2]-1,+m[1]):null},YR=365.25*864e5;
+/* Feriado progresivo (art. 68): +1 día por cada 3 años trabajados para el empleador actual, una vez completados 10 años de trabajo (hasta 10 acreditados con empleadores anteriores) */
+const prog=(c,t)=>{const g=ingD(c);if(!g)return 0;const n=(t-g)/YR-Math.max(0,10-Math.min(+c.prev||0,10));return n>=3?Math.floor(n/3):0};
+/* Feriado básico (art. 67): 15 días hábiles al año (+ progresivos), devengados día a día: (15+prog)/365 (≈1,25 por mes, criterio DT) */
+const devengo=(c,hasta)=>{if(!D.cfg.corte)return 0;const e=typeof hasta==="string"?pd(hasta):hasta;let s=0;for(let t=add(pd(D.cfg.corte),1);t<=e;t=add(t,1))s+=(15+prog(c,t))/365;return s};
+const dEf=s=>habDays(s.desde,s.hasta).filter(d=>ymd(d)>(D.cfg.corte||"")).length;
+const tomados=(rut,antes,ign)=>D.sol.filter(s=>s.rut===rut&&vig(s)&&s.id!==ign&&(!antes||s.desde<antes)).reduce((a,s)=>a+dEf(s),0);
+const saldoA=(c,f,ign)=>(+c.base||0)+devengo(c,f)-tomados(c.rut,typeof f==="string"?f:"",ign);
+const saldo=c=>saldoA(c,new Date());
 const plantilla=t=>D.colab.filter(c=>c.turno===t).length;
 const absent=(w,t,except)=>new Set(D.sol.filter(s=>vig(s)&&s.turno===t&&s.rut!==except&&wkCnt(s)[w]).map(s=>s.rut)).size;
 function chk(c,turno,d1,d2,ign){
-  const A=[],H=habDays(d1,d2),dias=H.length,sd=saldo(c);
-  if(dias>sd+1e-9)A.push(`Solicita ${dias} día(s) y solo tiene ${fmtN(sd)} disponible(s): faltan ${fmtN(dias-sd)}.`);
+  const A=[],H=habDays(d1,d2),dias=H.length,sd=saldoA(c,d1,ign);
+  if(dias>sd+1e-9)A.push(`Solicita ${dias} día(s) y a la fecha de inicio solo tiene ${fmtN(sd)} disponible(s) (saldo + devengado − otras solicitudes anteriores): faltan ${fmtN(dias-sd)}.`);
   if(D.sol.some(s=>s.rut===c.rut&&vig(s)&&s.id!==ign&&s.desde<=d2&&s.hasta>=d1))A.push("Se cruza con otra solicitud vigente del mismo colaborador.");
   if(!turno)A.push("Sin turno asignado: no se puede cruzar con la dotación.");
   else{const pl=plantilla(turno);[...new Set(H.map(isoWeek))].forEach(w=>{const rq=D.cfg.dot[w+"|"+turno];if(rq==null)return;const disp=pl-absent(w,turno,c.rut)-1;if(disp<rq)A.push(`Semana ${w.slice(-2)} · ${turno}: quedarían ${disp} disponibles y se requieren ${rq}.`)})}
@@ -174,7 +183,7 @@ function showChk(){
   if(c)$("ft").dataset.rut=c.rut;
   if(!c||!d1||!d2||d2<d1){$("chk").innerHTML=c?`<span class="o">Saldo disponible: ${fmtN(saldo(c))} día(s)</span>`:"";return null}
   const r=chk(c,$("ft").value,d1,d2);
-  $("chk").innerHTML=`Días hábiles solicitados: <b>${r.dias}</b> · Saldo disponible: <b>${fmtN(r.sd)}</b> · Saldo después: <b class="${r.sd-r.dias<0?"a":"o"}">${fmtN(r.sd-r.dias)}</b>`+(r.A.length?`<div class="a">⚠ ${r.A.map(esc).join("<br>⚠ ")}</div>`:`<div class="o">✔ Sin alertas de saldo ni de dotación</div>`);
+  $("chk").innerHTML=`Días hábiles solicitados: <b>${r.dias}</b> · Saldo a la fecha de inicio: <b>${fmtN(r.sd)}</b> · Saldo después: <b class="${r.sd-r.dias<0?"a":"o"}">${fmtN(r.sd-r.dias)}</b>`+(r.A.length?`<div class="a">⚠ ${r.A.map(esc).join("<br>⚠ ")}</div>`:`<div class="o">✔ Sin alertas de saldo ni de dotación</div>`);
   return{c,r};
 }
 ["fc","fd1","fd2","ft"].forEach(i=>$(i).addEventListener("input",showChk));
@@ -247,21 +256,27 @@ $("fdi").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f)re
 
 /* ---------- Saldos ---------- */
 function renderSal(){
-  $("tsal").innerHTML=D.colab.length?D.colab.map((c,i)=>{const t=tomados(c.rut),s=(+c.base||0)-t;return`<tr><td class="l">${esc(c.nombre)}</td><td>${esc(c.rut)}</td><td class="l">${esc(c.cargo)}</td><td>${esc(c.ingreso)}</td><td>${fmtN(+c.base||0)}</td><td>${fmtN(t)}</td><td class="${s<0?"neg":""}">${fmtN(s)}</td><td><select data-i="${i}"><option value="">—</option>${TU.map(x=>`<option${c.turno===x?" selected":""}>${x}</option>`).join("")}</select></td></tr>`}).join(""):'<tr><td colspan="8" class="hint">Importa el Excel de saldos para comenzar</td></tr>';
+  const hoy=new Date();
+  $("corte").innerHTML=D.cfg.corte?`Punto de inicio fijo: saldos del Excel al <b>${fmtD(D.cfg.corte)}</b>. Desde esa fecha se suma el feriado devengado y se descuentan las solicitudes.`:"⚠ Aún no hay punto de inicio: importa el Excel de saldos.";
+  $("tsal").innerHTML=D.colab.length?D.colab.map((c,i)=>{const dv=devengo(c,hoy),t=tomados(c.rut),sd=(+c.base||0)+dv-t;return`<tr><td class="l">${esc(c.nombre)}</td><td>${esc(c.rut)}</td><td class="l">${esc(c.cargo)}</td><td>${esc(c.ingreso)}</td><td>${fmtN(+c.base||0)}</td><td>+${fmtN(dv)}</td><td>−${fmtN(t)}</td><td class="${sd<0?"neg":sd>30?"wrn":""}" title="${sd>30?"Supera 2 períodos de feriado básico (30 días): art. 70":""}">${fmtN(sd)}${sd>30?" ⚠":""}</td><td><input type="number" min="0" step="0.5" data-p="${i}" value="${+c.prev||0}"></td><td>${15+prog(c,hoy)}</td><td><select data-i="${i}"><option value="">—</option>${TU.map(x=>`<option${c.turno===x?" selected":""}>${x}</option>`).join("")}</select></td></tr>`}).join(""):'<tr><td colspan="11" class="hint">Importa el Excel de saldos para comenzar</td></tr>';
   $("psab").checked=!!D.cfg.sab;$("pfer").value=D.cfg.fer.map(f=>f.length===5?f.slice(3)+"/"+f.slice(0,2):f.split("-").reverse().join("/")).join("\n");
 }
-$("tsal").addEventListener("change",e=>{const i=e.target.dataset.i;if(i==null)return;D.colab[i].turno=e.target.value;saveColab(false,()=>renderAll())});
+$("tsal").addEventListener("change",e=>{const t=e.target,i=t.dataset.i??t.dataset.p;if(i==null)return;if(t.dataset.p!=null)D.colab[i].prev=Math.max(0,+t.value||0);else D.colab[i].turno=t.value;saveColab(false,()=>renderAll())});
+$("bcorte").onclick=()=>{const c=prompt("Fecha de corte de los saldos (aaaa-mm-dd)",D.cfg.corte||"");if(c&&/^\d{4}-\d{2}-\d{2}$/.test(c.trim())){D.cfg.corte=c.trim();saveCfg();renderAll()}};
 $("bpar").onclick=()=>{D.cfg.sab=$("psab").checked;D.cfg.fer=$("pfer").value.split(/[\n,;]+/).map(x=>x.trim()).filter(Boolean).map(x=>{const m=/^(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?$/.exec(x);return m?(m[3]?m[3]+"-":"")+p2(m[2])+"-"+p2(m[1]):null}).filter(Boolean);D.sol.forEach(s=>delete s._w);saveCfg();renderAll();toast("Parámetros guardados")};
 $("bis").onclick=()=>$("fis").click();
 $("fis").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;
   try{const wb=XLSX.read(await f.arrayBuffer(),{type:"array"}),R=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:""}),H=R[0].map(nrm),ix=n=>H.findIndex(h=>h.startsWith(n));
-    const ri=ix("rut"),ni=ix("nombre"),pi=ix("apellido p"),mi=ix("apellido m"),ci=ix("cargo"),fi=ix("fecha"),vi=ix("vacaciones"),ti=ix("turno");
+    const ri=ix("rut"),ni=ix("nombre"),pi=ix("apellido p"),mi=ix("apellido m"),ci=ix("cargo"),fi=ix("fecha"),vi=ix("vacaciones"),ti=ix("turno"),ai=ix("antig");
     if(ri<0||ni<0||vi<0)return toast("No encontré las columnas Rut, Nombre y Vacaciones Totales");
-    const old=Object.fromEntries(D.colab.map(c=>[c.rut,c.turno])),rows=R.slice(1).filter(r=>String(r[ri]).trim()).map(r=>({rut:String(r[ri]).trim(),nombre:[r[ni],r[pi],r[mi]].map(x=>String(x??"").trim()).filter(x=>x&&x!==".").join(" "),cargo:String(r[ci]??"").trim(),ingreso:String(r[fi]??"").trim(),base:num(r[vi])||0,turno:(ti>=0&&tn(r[ti]))||old[String(r[ri]).trim()]||""}));
+    const old=Object.fromEntries(D.colab.map(c=>[c.rut,c])),rows=R.slice(1).filter(r=>String(r[ri]).trim()).map(r=>{const rut=String(r[ri]).trim(),o=old[rut]||{};return{rut,nombre:[r[ni],r[pi],r[mi]].map(x=>String(x??"").trim()).filter(x=>x&&x!==".").join(" "),cargo:String(r[ci]??"").trim(),ingreso:String(r[fi]??"").trim(),base:num(r[vi])||0,turno:(ti>=0&&tn(r[ti]))||o.turno||"",prev:o.prev||0}});
     if(!rows.length)return toast("El archivo no tiene filas");
-    if(!confirm(`Se importarán ${rows.length} colaboradores y sus saldos. ¿Continuar?`))return;
-    const reset=D.sol.some(vig)&&confirm("Hay solicitudes registradas.\n\nAceptar = el nuevo reporte YA descuenta esas vacaciones (no se vuelven a descontar).\nCancelar = mantener el descuento de las solicitudes sobre este saldo.");
-    D.colab=rows;if(reset)D.sol.forEach(s=>s.desc=false);saveColab(reset,()=>renderAll())}
+    let inf=new Date();const r0=R.slice(1).find(r=>ai>=0&&num(r[ai])&&/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(String(r[fi]).trim()));
+    if(r0){const m=String(r0[fi]).trim().split("/").map(Number);inf=add(new Date(m[2],m[1]-1,m[0]),Math.round(num(r0[ai])*365))}
+    const c=prompt(`Se importarán ${rows.length} colaboradores.\n\nFecha de corte del reporte (aaaa-mm-dd). Estos saldos quedan como punto de inicio FIJO: desde esa fecha se suma el feriado devengado y se descuentan las solicitudes.`,ymd(inf));
+    if(!c)return;if(!/^\d{4}-\d{2}-\d{2}$/.test(c.trim()))return toast("Fecha no válida (usa aaaa-mm-dd)");
+    if(D.cfg.corte&&D.sol.some(vig)&&!confirm("Ya había un punto de inicio. Con el nuevo, las solicitudes anteriores a la nueva fecha de corte ya no se descontarán (se asumen incluidas en el reporte). ¿Continuar?"))return;
+    D.colab=rows;D.cfg.corte=c.trim();saveCfg();saveColab(false,()=>renderAll())}
   catch(err){toast("No se pudo leer el archivo: "+errMsg(err))}};
 
 /* ---------- navegación ---------- */
