@@ -67,6 +67,7 @@ td input{min-width:56px;text-align:center;padding:4px}
 <div class="g">
 <label>Colaborador (nombre o RUT)<input id="fc" list="dl" autocomplete="off" placeholder="Escribe para buscar"></label>
 <label>Cargo<input id="fcargo" readonly></label>
+<label>Área<input id="farea" readonly></label>
 <label>Turno<select id="ft"><option value="">— sin turno —</option><option>Mañana</option><option>Tarde</option><option>Noche</option></select></label>
 <label>Desde<input type="date" id="fd1"></label>
 <label>Hasta<input type="date" id="fd2"></label>
@@ -83,16 +84,19 @@ td input{min-width:56px;text-align:center;padding:4px}
 <div class="card bar" id="rng">
 <label>Desde la semana de<input type="date" id="gs"></label>
 <label>Semanas<select id="gn"><option>8</option><option selected>12</option><option>16</option><option>26</option></select></label>
+<label>Área<select id="ga"><option value="">Todas</option></select></label>
 <label>Turno<select id="gt"><option value="">Todos</option><option>Mañana</option><option>Tarde</option><option>Noche</option></select></label>
 </div>
 <div class="card"><div class="w" id="gantt"></div>
-<p class="hint">Cada celda = días hábiles de vacaciones en la semana. Abajo: dotación requerida vs. disponible (plantilla − colaboradores con algún día de vacaciones esa semana). Verde = cubre, rojo = déficit.</p></div>
+<p class="hint">Cada celda = días hábiles de vacaciones en la semana. Abajo, por turno y por cargo · área: disponibles / requeridos (plantilla − colaboradores con algún día de vacaciones esa semana). Verde = cubre, rojo = déficit.</p></div>
 </section>
 
 <section class="v" id="v-dot">
 <div class="card">
-<b>Necesidad de personal por semana y turno</b>
-<p class="hint">Importa un Excel/CSV o PDF con columnas Semana · Mañana · Tarde · Noche (o Semana · Turno · Requerido). El rango de semanas es el del Gantt.</p>
+<b>Necesidad de personal por semana, turno, cargo y área</b>
+<p class="hint">Cada fila es una combinación cargo · área (vacío = cualquiera); "Total del turno" no distingue cargo ni área. Importa un Excel/CSV o PDF con columnas Semana · Turno · Cargo · Área · Requerido (o Semana · Cargo · Área · Mañana · Tarde · Noche; Cargo y Área son opcionales). El rango de semanas es el del Gantt.</p>
+<div class="bar"><label>Turno<select id="dt"><option>Mañana</option><option>Tarde</option><option>Noche</option></select></label>
+<label>Cargo<select id="dc"></select></label><label>Área<select id="da"></select></label><button class="btn" id="bdc" type="button">+ Agregar fila</button></div>
 <div class="bar"><label style="flex-direction:row;align-items:center;gap:6px">Año (si solo hay N° de semana)<input type="number" id="dy" style="width:90px"></label>
 <button class="btn" id="bdi" type="button">📂 Importar Excel / PDF</button><input type="file" id="fdi" accept=".xlsx,.xls,.csv,.pdf" style="display:none"></div>
 <div class="w" id="dgrid"></div>
@@ -102,8 +106,10 @@ td input{min-width:56px;text-align:center;padding:4px}
 <section class="v" id="v-sal">
 <div class="card">
 <div class="bar"><span id="corte" class="chk"></span><button class="btn sm" id="bcorte" type="button">Cambiar fecha de corte</button></div>
-<div class="bar"><button class="btn" id="bis" type="button">📂 Importar saldos (Excel)</button><input type="file" id="fis" accept=".xlsx,.xls" style="display:none"><span class="hint">Columnas: Rut del Trabajador, Nombre, Apellido Paterno/Materno, Cargo, Fecha de Ingreso, Vacaciones Totales (y opcional Turno).</span></div>
-<div class="w"><table><thead><tr><th class="l">Colaborador</th><th>RUT</th><th class="l">Cargo</th><th>Ingreso</th><th>Saldo inicial (fijo)</th><th>Devengado</th><th>Descontado</th><th>Saldo a hoy</th><th>Años previos acreditados</th><th>Días/año</th><th>Turno</th></tr></thead><tbody id="tsal"></tbody></table></div>
+<div class="bar"><button class="btn" id="bis" type="button">📂 Importar saldos (Excel)</button><input type="file" id="fis" accept=".xlsx,.xls" style="display:none"><span class="hint">Columnas: Rut del Trabajador, Nombre, Apellido Paterno/Materno, Cargo, Fecha de Ingreso, Vacaciones Totales (y opcional Turno y Área).</span></div>
+<datalist id="dla"></datalist>
+<div class="bar"><span class="hint">Asignar área a todos los del cargo:</span><select id="bc" style="width:auto"></select><input id="ba" list="dla" placeholder="Área" style="width:200px"><button class="btn sm" id="bap" type="button">Aplicar</button></div>
+<div class="w"><table><thead><tr><th class="l">Colaborador</th><th>RUT</th><th class="l">Cargo</th><th>Área</th><th>Ingreso</th><th>Saldo inicial (fijo)</th><th>Devengado</th><th>Descontado</th><th>Saldo a hoy</th><th>Años previos acreditados</th><th>Días/año</th><th>Turno</th></tr></thead><tbody id="tsal"></tbody></table></div>
 </div>
 <div class="card"><b>Parámetros de cálculo</b>
 <div class="bar"><label style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="psab" style="width:auto"> Contar el sábado como hábil (la ley lo considera siempre inhábil, art. 69; solo para feriado convencional)</label></div>
@@ -138,7 +144,8 @@ const saveColab=(reset,done)=>call("guardarVacColab",{rows:D.colab,reset:!!reset
 let ct;const saveCfg=()=>{clearTimeout(ct);ct=setTimeout(()=>call("guardarVacConfig",D.cfg,()=>syncSt("✔ Configuración guardada"),e=>toast("No se pudo guardar la configuración: "+errMsg(e))),500)};
 function load(){
   syncSt("Sincronizando…");
-  call("obtenerEstadoVac",null,st=>{D.colab=st.colab||[];D.sol=(st.sol||[]).map(s=>({...s,desc:s.desc!=="NO"}));if(st.cfg)D.cfg=Object.assign(D.cfg,st.cfg);if(!st.cfg||st.cfg.v!==2){D.cfg.sab=false;D.cfg.v=2;saveCfg()} /* art. 69: el sábado es siempre inhábil para el feriado */syncSt("✔ Sincronizado "+new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"}));renderAll()},e=>syncSt("Sin conexión: "+errMsg(e)));
+  call("obtenerEstadoVac",null,st=>{D.colab=st.colab||[];D.sol=(st.sol||[]).map(s=>({...s,desc:s.desc!=="NO"}));if(st.cfg)D.cfg=Object.assign(D.cfg,st.cfg);let mig=0;Object.keys(D.cfg.dot).forEach(k=>{if(k.split("|").length===2){D.cfg.dot[k+"||"]=D.cfg.dot[k];delete D.cfg.dot[k];mig=1}});if(mig)saveCfg();
+  if(!st.cfg||st.cfg.v!==2){D.cfg.sab=false;D.cfg.v=2;saveCfg()} /* art. 69: el sábado es siempre inhábil para el feriado */syncSt("✔ Sincronizado "+new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"}));renderAll()},e=>syncSt("Sin conexión: "+errMsg(e)));
 }
 
 /* ---------- fechas ---------- */
@@ -163,14 +170,19 @@ const dEf=s=>habDays(s.desde,s.hasta).filter(d=>ymd(d)>(D.cfg.corte||"")).length
 const tomados=(rut,antes,ign)=>D.sol.filter(s=>s.rut===rut&&vig(s)&&s.id!==ign&&(!antes||s.desde<antes)).reduce((a,s)=>a+dEf(s),0);
 const saldoA=(c,f,ign)=>(+c.base||0)+devengo(c,f)-tomados(c.rut,typeof f==="string"?f:"",ign);
 const saldo=c=>saldoA(c,new Date());
-const plantilla=t=>D.colab.filter(c=>c.turno===t).length;
-const absent=(w,t,except)=>new Set(D.sol.filter(s=>vig(s)&&s.turno===t&&s.rut!==except&&wkCnt(s)[w]).map(s=>s.rut)).size;
+const cb=rut=>D.colab.find(c=>c.rut===rut)||{};
+const mt=(c,rc,ra)=>(!rc||c.cargo===rc)&&(!ra||c.area===ra);
+const plantilla=(t,rc="",ra="")=>D.colab.filter(c=>c.turno===t&&mt(c,rc,ra)).length;
+const dk=k=>{const a=k.split("|");return{w:a[0],t:a[1],rc:a[2]||"",ra:a[3]||""}};
+const lab=(rc,ra)=>rc||ra?[rc||"Todos los cargos",ra||"Todas las áreas"].join(" · "):"Total del turno";
+const srt=(a,b)=>a==="|"?-1:b==="|"?1:a.localeCompare(b);
+const absent=(w,t,rc="",ra="",except)=>new Set(D.sol.filter(s=>vig(s)&&s.turno===t&&s.rut!==except&&wkCnt(s)[w]&&mt(cb(s.rut),rc,ra)).map(s=>s.rut)).size;
 function chk(c,turno,d1,d2,ign){
   const A=[],H=habDays(d1,d2),dias=H.length,sd=saldoA(c,d1,ign);
   if(dias>sd+1e-9)A.push(`Solicita ${dias} día(s) y a la fecha de inicio solo tiene ${fmtN(sd)} disponible(s) (saldo + devengado − otras solicitudes anteriores): faltan ${fmtN(dias-sd)}.`);
   if(D.sol.some(s=>s.rut===c.rut&&vig(s)&&s.id!==ign&&s.desde<=d2&&s.hasta>=d1))A.push("Se cruza con otra solicitud vigente del mismo colaborador.");
   if(!turno)A.push("Sin turno asignado: no se puede cruzar con la dotación.");
-  else{const pl=plantilla(turno);[...new Set(H.map(isoWeek))].forEach(w=>{const rq=D.cfg.dot[w+"|"+turno];if(rq==null)return;const disp=pl-absent(w,turno,c.rut)-1;if(disp<rq)A.push(`Semana ${w.slice(-2)} · ${turno}: quedarían ${disp} disponibles y se requieren ${rq}.`)})}
+  else{const W=new Set(H.map(isoWeek));Object.keys(D.cfg.dot).forEach(k=>{const q=dk(k);if(q.t!==turno||!W.has(q.w)||!mt(c,q.rc,q.ra))return;const rq=D.cfg.dot[k],disp=plantilla(turno,q.rc,q.ra)-absent(q.w,turno,q.rc,q.ra,c.rut)-1;if(disp<rq)A.push(`Semana ${q.w.slice(-2)} · ${turno} · ${lab(q.rc,q.ra)}: quedarían ${disp} disponibles y se requieren ${rq}.`)})}
   return{dias,sd,A};
 }
 const findC=v=>{v=nrm(v).replace(/[.\s]/g,"");return D.colab.find(c=>nrm(c.rut).replace(/[.\s]/g,"")===v)||D.colab.find(c=>nrm(c.nombre).replace(/\s/g,"")===v)};
@@ -178,7 +190,7 @@ const findC=v=>{v=nrm(v).replace(/[.\s]/g,"");return D.colab.find(c=>nrm(c.rut).
 /* ---------- Solicitud ---------- */
 function showChk(){
   const c=findC($("fc").value),d1=$("fd1").value,d2=$("fd2").value;
-  $("fcargo").value=c?c.cargo:"";
+  $("fcargo").value=c?c.cargo:"";$("farea").value=c?c.area||"":"";
   if(c&&document.activeElement===$("fc")&&c.turno&&$("ft").dataset.rut!==c.rut){$("ft").value=c.turno}
   if(c)$("ft").dataset.rut=c.rut;
   if(!c||!d1||!d2||d2<d1){$("chk").innerHTML=c?`<span class="o">Saldo disponible: ${fmtN(saldo(c))} día(s)</span>`:"";return null}
@@ -204,22 +216,31 @@ $("tsol").onclick=e=>{const b=e.target.closest("[data-an]");if(!b)return;const s
 /* ---------- Gantt ---------- */
 const weeks=()=>{const m=pd($("gs").value||ymd(new Date())),k=monOf(isoWeek(m));return Array.from({length:+$("gn").value},(_,i)=>isoWeek(add(k,7*i)))};
 function renderGantt(){
+  const ar=[...new Set(D.colab.map(c=>c.area).filter(Boolean))].sort(),ga0=$("ga").value;$("ga").innerHTML='<option value="">Todas</option>'+ar.map(a=>`<option${a===ga0?" selected":""}>${esc(a)}</option>`).join("");const ga=$("ga").value;
   const W=weeks(),tf=$("gt").value,T=tf?[tf]:TU,w0=monOf(W[0]),w1=add(monOf(W[W.length-1]),6);
-  const ppl=D.colab.filter(c=>(!tf||c.turno===tf)&&D.sol.some(s=>s.rut===c.rut&&vig(s)&&W.some(w=>wkCnt(s)[w]))).sort((a,b)=>(a.turno||"~").localeCompare(b.turno||"~")||a.nombre.localeCompare(b.nombre));
+  const ppl=D.colab.filter(c=>(!tf||c.turno===tf)&&(!ga||c.area===ga)&&D.sol.some(s=>s.rut===c.rut&&vig(s)&&W.some(w=>wkCnt(s)[w]))).sort((a,b)=>(a.turno||"~").localeCompare(b.turno||"~")||a.nombre.localeCompare(b.nombre));
   let h=`<table><thead><tr><th class="f">Colaborador</th><th>Turno</th>${W.map(w=>`<th>S${w.slice(-2)}<br><small>${fd(monOf(w))}</small></th>`).join("")}</tr></thead><tbody>`;
-  ppl.forEach(c=>{const S=D.sol.filter(s=>s.rut===c.rut&&vig(s));h+=`<tr><td class="f">${esc(c.nombre)}</td><td>${esc(c.turno||"—")}</td>${W.map(w=>{const n=S.reduce((a,s)=>a+(wkCnt(s)[w]||0),0);return n?`<td class="gv" title="${S.filter(s=>wkCnt(s)[w]).map(s=>fmtD(s.desde)+" - "+fmtD(s.hasta)).join(", ")}">${n}</td>`:"<td></td>"}).join("")}</tr>`});
+  ppl.forEach(c=>{const S=D.sol.filter(s=>s.rut===c.rut&&vig(s));h+=`<tr><td class="f">${esc(c.nombre)}<br><small>${esc([c.cargo,c.area].filter(Boolean).join(" · "))}</small></td><td>${esc(c.turno||"—")}</td>${W.map(w=>{const n=S.reduce((a,s)=>a+(wkCnt(s)[w]||0),0);return n?`<td class="gv" title="${S.filter(s=>wkCnt(s)[w]).map(s=>fmtD(s.desde)+" - "+fmtD(s.hasta)).join(", ")}">${n}</td>`:"<td></td>"}).join("")}</tr>`});
   if(!ppl.length)h+=`<tr><td class="f hint" colspan="${W.length+2}">Sin vacaciones en este rango</td></tr>`;
-  T.forEach(t=>{const pl=plantilla(t);h+=`<tr class="sep"><td class="f" colspan="${W.length+2}">${t} · plantilla ${pl}</td></tr><tr><td class="f">Requerido</td><td></td>${W.map(w=>`<td>${D.cfg.dot[w+"|"+t]??"–"}</td>`).join("")}</tr><tr><td class="f">De vacaciones</td><td></td>${W.map(w=>`<td>${absent(w,t)}</td>`).join("")}</tr><tr><td class="f">Disponibles</td><td></td>${W.map(w=>{const dp=pl-absent(w,t),rq=D.cfg.dot[w+"|"+t];return`<td class="${rq==null?"":dp<rq?"er":"ok"}">${dp}</td>`}).join("")}</tr>`});
+  T.forEach(t=>{const ks=new Set(["|"]);Object.keys(D.cfg.dot).forEach(k=>{const q=dk(k);if(q.t===t&&W.includes(q.w)&&(!ga||!q.ra||q.ra===ga))ks.add(q.rc+"|"+q.ra)});
+    h+=`<tr class="sep"><td class="f" colspan="${W.length+2}">${t} · plantilla ${plantilla(t)} · cada celda = disponibles / requeridos</td></tr>`;
+    [...ks].sort(srt).forEach(x=>{const[rc,ra]=x.split("|"),pl=plantilla(t,rc,ra);h+=`<tr><td class="f">${esc(lab(rc,ra))}</td><td>${pl}</td>${W.map(w=>{const rq=D.cfg.dot[[w,t,rc,ra].join("|")],au=absent(w,t,rc,ra),dp=pl-au;return`<td class="${rq==null?"":dp<rq?"er":"ok"}" title="${au} de vacaciones">${dp}/${rq==null?"–":rq}</td>`}).join("")}</tr>`})});
   $("gantt").innerHTML=h+"</tbody></table>";
 }
 
 /* ---------- Dotación + importación Excel / PDF ---------- */
+const extra={};
+function fillSel(id,list,first){const el=$(id),v=el.value;el.innerHTML=(first?`<option value="">${first}</option>`:"")+list.map(x=>`<option${x===v?" selected":""}>${esc(x)}</option>`).join("")}
 function renderDot(){
-  const W=weeks();
-  $("dgrid").innerHTML=`<table><thead><tr><th>Semana</th>${TU.map(t=>`<th>${t}<br><small>plantilla ${plantilla(t)}</small></th>`).join("")}</tr></thead><tbody>
-  <tr><td>Todas</td>${TU.map(t=>`<td><input type="number" min="0" data-all="${t}" placeholder="aplicar a todas"></td>`).join("")}</tr>`+
-  W.map(w=>`<tr><td>S${w.slice(-2)} <small>${fd(monOf(w))}</small></td>${TU.map(t=>`<td><input type="number" min="0" data-k="${w}|${t}" value="${D.cfg.dot[w+"|"+t]??""}"></td>`).join("")}</tr>`).join("")+"</tbody></table>";
+  const W=weeks(),t=$("dt").value||TU[0],ks=new Set(["|"]);
+  fillSel("dc",[...new Set(D.colab.map(c=>c.cargo).filter(Boolean))].sort(),"(cualquiera)");fillSel("da",[...new Set(D.colab.map(c=>c.area).filter(Boolean))].sort(),"(cualquiera)");
+  D.colab.forEach(c=>{if(c.turno===t&&(c.cargo||c.area))ks.add((c.cargo||"")+"|"+(c.area||""))});
+  Object.keys(D.cfg.dot).forEach(k=>{const q=dk(k);if(q.t===t)ks.add(q.rc+"|"+q.ra)});(extra[t]||[]).forEach(x=>ks.add(x));
+  $("dgrid").innerHTML=`<table><thead><tr><th class="f">Cargo · Área</th><th>Plantilla</th><th>Todas las semanas</th>${W.map(w=>`<th>S${w.slice(-2)}<br><small>${fd(monOf(w))}</small></th>`).join("")}</tr></thead><tbody>`+
+  [...ks].sort(srt).map(x=>{const[rc,ra]=x.split("|");return`<tr><td class="f">${esc(lab(rc,ra))}</td><td>${plantilla(t,rc,ra)}</td><td><input type="number" min="0" data-all="${esc([t,rc,ra].join("|"))}" placeholder="aplicar"></td>${W.map(w=>`<td><input type="number" min="0" data-k="${esc([w,t,rc,ra].join("|"))}" value="${D.cfg.dot[[w,t,rc,ra].join("|")]??""}"></td>`).join("")}</tr>`}).join("")+"</tbody></table>";
 }
+$("dt").onchange=renderDot;
+$("bdc").onclick=()=>{const t=$("dt").value;(extra[t]=extra[t]||[]).push($("dc").value+"|"+$("da").value);renderDot()};
 $("dgrid").addEventListener("change",e=>{const i=e.target;
   if(i.dataset.all){if(i.value==="")return;weeks().forEach(w=>D.cfg.dot[w+"|"+i.dataset.all]=+i.value)}
   else if(i.dataset.k){i.value===""?delete D.cfg.dot[i.dataset.k]:D.cfg.dot[i.dataset.k]=+i.value}
@@ -230,13 +251,14 @@ const wk=(v,y)=>{if(v instanceof Date&&!isNaN(v))return isoWeek(v);const s=Strin
   if(m=/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/.exec(s)){let yy=+m[3];if(yy<100)yy+=2000;return isoWeek(new Date(yy,m[2]-1,m[1]))}
   return null};
 const tn=s=>{s=nrm(s);return/^manana/.test(s)?"Mañana":/^tarde/.test(s)?"Tarde":/^noche/.test(s)?"Noche":null},num=v=>parseFloat(String(v).replace(",","."));
-function parseDot(R,y){const out={};
+const cn=v=>{v=String(v??"").trim();if(!v)return"";const m=D.colab.find(c=>nrm(c.cargo)===nrm(v));return m?m.cargo:v},an=v=>{v=String(v??"").trim();if(!v)return"";const m=D.colab.find(c=>nrm(c.area)===nrm(v));return m?m.area:v};
+function parseDot(R,y){const out={},ci=H=>H.findIndex(c=>/^cargo/.test(nrm(c))),ai=H=>H.findIndex(c=>/^area/.test(nrm(c)));
   let hi=R.findIndex(r=>r.filter(c=>tn(c)).length>=2);
-  if(hi>=0){const H=R[hi],tc=H.map((c,i)=>tn(c)?i:-1).filter(i=>i>=0),wc=Math.max(0,H.findIndex(c=>/^(sem|fec)/.test(nrm(c))));
-    R.slice(hi+1).forEach(r=>{const k=wk(r[wc],y);if(!k)return;tc.forEach(i=>{const n=num(r[i]);if(!isNaN(n))out[k+"|"+tn(H[i])]=n})});return out}
+  if(hi>=0){const H=R[hi],tc=H.map((c,i)=>tn(c)?i:-1).filter(i=>i>=0),wc=Math.max(0,H.findIndex(c=>/^(sem|fec)/.test(nrm(c)))),cc=ci(H),ac=ai(H);
+    R.slice(hi+1).forEach(r=>{const k=wk(r[wc],y);if(!k)return;const sf="|"+(cc>=0?cn(r[cc]):"")+"|"+(ac>=0?an(r[ac]):"");tc.forEach(i=>{const n=num(r[i]);if(!isNaN(n))out[k+"|"+tn(H[i])+sf]=n})});return out}
   hi=R.findIndex(r=>r.some(c=>nrm(c)==="turno"));
-  if(hi>=0){const H=R[hi].map(nrm),ti=H.indexOf("turno"),wc=Math.max(0,H.findIndex(c=>/^(sem|fec)/.test(c))),q=H.findIndex(c=>/requer|necesid|dotac|person|cant/.test(c)),qi=q>=0?q:H.length-1;
-    R.slice(hi+1).forEach(r=>{const k=wk(r[wc],y),t=tn(r[ti]),n=num(r[qi]);if(k&&t&&!isNaN(n))out[k+"|"+t]=n})}
+  if(hi>=0){const H=R[hi].map(nrm),ti=H.indexOf("turno"),wc=Math.max(0,H.findIndex(c=>/^(sem|fec)/.test(c))),cc=ci(H),ac=ai(H),q=H.findIndex(c=>/requer|necesid|dotac|person|cant/.test(c)),qi=q>=0?q:H.length-1;
+    R.slice(hi+1).forEach(r=>{const k=wk(r[wc],y),t=tn(r[ti]),n=num(r[qi]);if(k&&t&&!isNaN(n))out[k+"|"+t+"|"+(cc>=0?cn(r[cc]):"")+"|"+(ac>=0?an(r[ac]):"")]=n})}
   return out}
 async function pdfRows(buf){pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
   const pdf=await pdfjsLib.getDocument({data:buf}).promise,R=[];
@@ -250,7 +272,7 @@ $("fdi").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f)re
     const o=parseDot(R,$("dy").value||new Date().getFullYear()),ks=Object.keys(o);
     if(!ks.length)return toast("No reconocí el formato. Usa columnas Semana · Mañana · Tarde · Noche (o Semana · Turno · Requerido).");
     const ws=[...new Set(ks.map(k=>k.split("|")[0]))].sort();
-    if(!confirm(`Se leyeron ${ks.length} valores de ${ws.length} semana(s): S${ws[0].slice(-2)} (${ws[0].slice(0,4)}) a S${ws[ws.length-1].slice(-2)} (${ws[ws.length-1].slice(0,4)}).\n¿Importar? Reemplaza los valores de esas semanas.`))return;
+    if(!confirm(`Se leyeron ${ks.length} valores de ${ws.length} semana(s): S${ws[0].slice(-2)} (${ws[0].slice(0,4)}) a S${ws[ws.length-1].slice(-2)} (${ws[ws.length-1].slice(0,4)}).\n¿Importar? Reemplaza los valores coincidentes.`))return;
     Object.assign(D.cfg.dot,o);saveCfg();renderAll();toast("Dotación importada")}
   catch(err){toast("No se pudo leer el archivo: "+errMsg(err))}};
 
@@ -258,18 +280,20 @@ $("fdi").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f)re
 function renderSal(){
   const hoy=new Date();
   $("corte").innerHTML=D.cfg.corte?`Punto de inicio fijo: saldos del Excel al <b>${fmtD(D.cfg.corte)}</b>. Desde esa fecha se suma el feriado devengado y se descuentan las solicitudes.`:"⚠ Aún no hay punto de inicio: importa el Excel de saldos.";
-  $("tsal").innerHTML=D.colab.length?D.colab.map((c,i)=>{const dv=devengo(c,hoy),t=tomados(c.rut),sd=(+c.base||0)+dv-t;return`<tr><td class="l">${esc(c.nombre)}</td><td>${esc(c.rut)}</td><td class="l">${esc(c.cargo)}</td><td>${esc(c.ingreso)}</td><td>${fmtN(+c.base||0)}</td><td>+${fmtN(dv)}</td><td>−${fmtN(t)}</td><td class="${sd<0?"neg":sd>30?"wrn":""}" title="${sd>30?"Supera 2 períodos de feriado básico (30 días): art. 70":""}">${fmtN(sd)}${sd>30?" ⚠":""}</td><td><input type="number" min="0" step="0.5" data-p="${i}" value="${+c.prev||0}"></td><td>${15+prog(c,hoy)}</td><td><select data-i="${i}"><option value="">—</option>${TU.map(x=>`<option${c.turno===x?" selected":""}>${x}</option>`).join("")}</select></td></tr>`}).join(""):'<tr><td colspan="11" class="hint">Importa el Excel de saldos para comenzar</td></tr>';
+  $("tsal").innerHTML=D.colab.length?D.colab.map((c,i)=>{const dv=devengo(c,hoy),t=tomados(c.rut),sd=(+c.base||0)+dv-t;return`<tr><td class="l">${esc(c.nombre)}</td><td>${esc(c.rut)}</td><td class="l">${esc(c.cargo)}</td><td><input data-a="${i}" list="dla" value="${esc(c.area||"")}" style="min-width:130px"></td><td>${esc(c.ingreso)}</td><td>${fmtN(+c.base||0)}</td><td>+${fmtN(dv)}</td><td>−${fmtN(t)}</td><td class="${sd<0?"neg":sd>30?"wrn":""}" title="${sd>30?"Supera 2 períodos de feriado básico (30 días): art. 70":""}">${fmtN(sd)}${sd>30?" ⚠":""}</td><td><input type="number" min="0" step="0.5" data-p="${i}" value="${+c.prev||0}"></td><td>${15+prog(c,hoy)}</td><td><select data-i="${i}"><option value="">—</option>${TU.map(x=>`<option${c.turno===x?" selected":""}>${x}</option>`).join("")}</select></td></tr>`}).join(""):'<tr><td colspan="12" class="hint">Importa el Excel de saldos para comenzar</td></tr>';
+  $("dla").innerHTML=[...new Set(D.colab.map(c=>c.area).filter(Boolean))].sort().map(a=>`<option value="${esc(a)}">`).join("");fillSel("bc",[...new Set(D.colab.map(c=>c.cargo).filter(Boolean))].sort());
   $("psab").checked=!!D.cfg.sab;$("pfer").value=D.cfg.fer.map(f=>f.length===5?f.slice(3)+"/"+f.slice(0,2):f.split("-").reverse().join("/")).join("\n");
 }
-$("tsal").addEventListener("change",e=>{const t=e.target,i=t.dataset.i??t.dataset.p;if(i==null)return;if(t.dataset.p!=null)D.colab[i].prev=Math.max(0,+t.value||0);else D.colab[i].turno=t.value;saveColab(false,()=>renderAll())});
+$("tsal").addEventListener("change",e=>{const t=e.target,i=t.dataset.i??t.dataset.p??t.dataset.a;if(i==null)return;if(t.dataset.p!=null)D.colab[i].prev=Math.max(0,+t.value||0);else if(t.dataset.a!=null)D.colab[i].area=t.value.trim();else D.colab[i].turno=t.value;saveColab(false,()=>renderAll())});
+$("bap").onclick=()=>{const c=$("bc").value,a=$("ba").value.trim();if(!c||!a)return toast("Elige un cargo y escribe el área");const L=D.colab.filter(x=>x.cargo===c);if(!confirm(`Asignar el área "${a}" a ${L.length} colaborador(es) con cargo ${c}?`))return;L.forEach(x=>x.area=a);saveColab(false,()=>renderAll())};
 $("bcorte").onclick=()=>{const c=prompt("Fecha de corte de los saldos (aaaa-mm-dd)",D.cfg.corte||"");if(c&&/^\d{4}-\d{2}-\d{2}$/.test(c.trim())){D.cfg.corte=c.trim();saveCfg();renderAll()}};
 $("bpar").onclick=()=>{D.cfg.sab=$("psab").checked;D.cfg.fer=$("pfer").value.split(/[\n,;]+/).map(x=>x.trim()).filter(Boolean).map(x=>{const m=/^(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?$/.exec(x);return m?(m[3]?m[3]+"-":"")+p2(m[2])+"-"+p2(m[1]):null}).filter(Boolean);D.sol.forEach(s=>delete s._w);saveCfg();renderAll();toast("Parámetros guardados")};
 $("bis").onclick=()=>$("fis").click();
 $("fis").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;
   try{const wb=XLSX.read(await f.arrayBuffer(),{type:"array"}),R=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:""}),H=R[0].map(nrm),ix=n=>H.findIndex(h=>h.startsWith(n));
-    const ri=ix("rut"),ni=ix("nombre"),pi=ix("apellido p"),mi=ix("apellido m"),ci=ix("cargo"),fi=ix("fecha"),vi=ix("vacaciones"),ti=ix("turno"),ai=ix("antig");
+    const ri=ix("rut"),ni=ix("nombre"),pi=ix("apellido p"),mi=ix("apellido m"),ci=ix("cargo"),fi=ix("fecha"),vi=ix("vacaciones"),ti=ix("turno"),ai=ix("antig"),aa=ix("area");
     if(ri<0||ni<0||vi<0)return toast("No encontré las columnas Rut, Nombre y Vacaciones Totales");
-    const old=Object.fromEntries(D.colab.map(c=>[c.rut,c])),rows=R.slice(1).filter(r=>String(r[ri]).trim()).map(r=>{const rut=String(r[ri]).trim(),o=old[rut]||{};return{rut,nombre:[r[ni],r[pi],r[mi]].map(x=>String(x??"").trim()).filter(x=>x&&x!==".").join(" "),cargo:String(r[ci]??"").trim(),ingreso:String(r[fi]??"").trim(),base:num(r[vi])||0,turno:(ti>=0&&tn(r[ti]))||o.turno||"",prev:o.prev||0}});
+    const old=Object.fromEntries(D.colab.map(c=>[c.rut,c])),rows=R.slice(1).filter(r=>String(r[ri]).trim()).map(r=>{const rut=String(r[ri]).trim(),o=old[rut]||{};return{rut,nombre:[r[ni],r[pi],r[mi]].map(x=>String(x??"").trim()).filter(x=>x&&x!==".").join(" "),cargo:String(r[ci]??"").trim(),ingreso:String(r[fi]??"").trim(),base:num(r[vi])||0,turno:(ti>=0&&tn(r[ti]))||o.turno||"",prev:o.prev||0,area:(aa>=0&&String(r[aa]).trim())||o.area||""}});
     if(!rows.length)return toast("El archivo no tiene filas");
     let inf=new Date();const r0=R.slice(1).find(r=>ai>=0&&num(r[ai])&&/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(String(r[fi]).trim()));
     if(r0){const m=String(r0[fi]).trim().split("/").map(Number);inf=add(new Date(m[2],m[1]-1,m[0]),Math.round(num(r0[ai])*365))}
@@ -282,7 +306,7 @@ $("fis").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f)re
 /* ---------- navegación ---------- */
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x===b));document.querySelectorAll(".v").forEach(v=>v.classList.toggle("on",v.id==="v-"+b.dataset.v));$("rng").parentNode===$("v-gan")&&0;
   if(b.dataset.v==="dot"){$("v-dot").prepend($("rng"))}else if(b.dataset.v==="gan"){$("v-gan").prepend($("rng"))}renderAll()});
-["gs","gn","gt"].forEach(i=>$(i).addEventListener("change",()=>{renderGantt();renderDot()}));
+["gs","gn","gt","ga"].forEach(i=>$(i).addEventListener("change",()=>{renderGantt();renderDot()}));
 function renderAll(){renderSol();renderGantt();renderDot();renderSal()}
 const hoy=new Date();$("gs").value=ymd(monOf(isoWeek(hoy)));$("fd1").value=$("fd2").value=ymd(hoy);$("dy").value=hoy.getFullYear();
 renderAll();load();
