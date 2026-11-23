@@ -2,6 +2,7 @@
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Picking por Zona · WMS Maulen</title>
+<link rel="icon" href="https://www.icbfs.cl/wp-content/uploads/2022/01/cropped-favicon-32x32.jpg" sizes="32x32">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 :root{--bg:#f5f5f7;--card:#fff;--ink:#1d1d22;--mut:#6c6c78;--line:#e2e2e8;--brand:#ed2750;--soft:#fdecef;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -10,11 +11,16 @@
 *,*::before,*::after{box-sizing:inherit}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
-header{background:var(--brand);color:#fff;padding:14px 24px}
-header b{font-size:19px;letter-spacing:.3px}header span{opacity:.85;margin-left:10px;font-size:13px}
-main{padding:20px 24px;max-width:1100px;margin:0 auto}
-h1{font-size:21px;margin:0 0 2px}.sub{color:var(--mut);margin:0 0 14px}
-.form{display:flex;flex-wrap:wrap;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
+.app{display:grid;grid-template-columns:200px 1fr;min-height:100vh}
+aside{background:var(--brand);color:#fff;padding:20px 14px;display:flex;flex-direction:column;gap:6px}
+aside img{width:140px;height:auto;display:block;margin:0 auto 14px}
+.nv{all:unset;display:block;cursor:pointer;padding:11px 12px;border-radius:8px;font-weight:600;color:#fff;opacity:.85}
+.nv:hover{background:rgba(255,255,255,.14)}
+.nv[aria-current=true]{background:#fff;color:var(--brand);opacity:1;cursor:default}
+.nv:focus-visible{outline:3px solid #ffb703;outline-offset:2px}
+main{padding:24px;max-width:1200px;width:100%;min-width:0}
+h1{font-size:22px;margin:0 0 6px}.sub{color:var(--mut);margin:0 0 14px}
+.form{display:flex;flex-wrap:wrap;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px}
 .form label.f{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--mut);flex:1;min-width:150px}
 input[type=date],input[type=search],select{padding:9px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
 .chk{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--ink)}
@@ -40,11 +46,12 @@ td.t{white-space:normal}
 th{font-size:13px;color:var(--mut);font-weight:600;border-bottom:2px solid var(--line);cursor:pointer;user-select:none}
 .n{text-align:right;font-variant-numeric:tabular-nums}td.n{font-weight:700}td.u{font-weight:700;font-variant-numeric:tabular-nums}
 .empty{color:var(--mut);padding:14px 0}
-@media (max-width:760px){header,main{padding-left:14px;padding-right:14px}}
+@media (max-width:760px){.app{grid-template-columns:1fr}aside{flex-direction:row;flex-wrap:wrap;align-items:center;padding:10px 12px}aside img{width:40px;margin:0 8px 0 0}main{padding:16px}}
 @media print{
  @page{size:portrait;margin:10mm}
  body{background:#fff;color:#000;font-size:11px}
- header,.noprint{display:none!important}
+ aside,.noprint{display:none!important}
+ .app{display:block}
  main{padding:0;max-width:none}
  .sheet{border:0;padding:0;margin:0;border-radius:0;background:#fff;page-break-after:always;break-after:page}
  .sheet:last-child{page-break-after:auto;break-after:auto}
@@ -55,10 +62,15 @@ th{font-size:13px;color:var(--mut);font-weight:600;border-bottom:2px solid var(-
 }
 </style></head>
 <body>
-<header class="noprint"><b>ICB Food Service</b><span>WMS Maulen · Picking por zona</span></header>
+<div class="app">
+<aside class="noprint">
+<img src="https://www.icbfs.cl/wp-content/uploads/2022/02/logo-icbfs.png" alt="ICB Food Service">
+<span class="nv" aria-current="true">Picking por zona</span>
+<a class="nv" href="MENU_ICB.html">← Menú</a>
+</aside>
 <main>
  <div class="noprint">
-  <h1>Listado de picking por zona</h1>
+  <h1>📦 Picking por zona</h1>
   <p class="sub" id="info">Cargue el PDF del WMS (ZonaPtaDis · Número OT · Material · Ubic.proc.…). Arrastre el archivo aquí o use «Cargar PDF».</p>
   <div class="form">
    <label class="f">Fecha<input type="date" id="fd"></label>
@@ -82,6 +94,7 @@ th{font-size:13px;color:var(--mut);font-weight:600;border-bottom:2px solid var(-
  </div>
  <div id="out"><div class="empty noprint">Sin datos todavía.</div></div>
 </main>
+</div>
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 const RE=/^(ZONA_\d+)\s+(\d{10})\s+(\d+)\s+(.+?)\s+(\d{3})\s+(\d{3}-\d{2}-\d+[A-Z]?)\s+([\d.,]+)\s+(\S+)\s+(\d{3})\s+(\d{10})$/;
