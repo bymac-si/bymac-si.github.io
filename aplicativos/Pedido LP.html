@@ -731,7 +731,7 @@ function corr(fecha, commit) {
       return zip.generateAsync({type: "blob", compression: "DEFLATE", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
     }
     $("#xl").addEventListener("click", async () => {
-  const base = "LP_" + (cli.nombre.trim().replace(/[^\p{L}\p{N}]+/gu, "_").replace(/^_|_$/g, "") || "pedido"),
+  const base = "PP_" + (cli.nombre.trim().replace(/[^\p{L}\p{N}]+/gu, "_").replace(/^_|_$/g, "") || "pedido"),
         n = Object.keys(cart).length;
   let blob;
   try {blob = await makeXlsx();} catch (e) {msg("No se pudo armar el Excel: " + (e && e.message || e), 1); return;}
