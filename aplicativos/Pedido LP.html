@@ -706,6 +706,20 @@
       return [w.replace(/<calcPr([^>]*?)\/>/, (m, a) => '<calcPr' + a.replace(/\sfullCalcOnLoad="[^"]*"/, "") + ' fullCalcOnLoad="1"/>'),
       ct.replace(/<Override[^>]*calcChain[^>]*\/>/, ""), rels.replace(/<Relationship [^>]*calcChain[^>]*\/>/, "")];
     }
+    // Fecha local en formato yyyymmdd
+function ymd() {
+  const d = new Date();
+  return d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0");
+}
+// Correlativo del día (2 dígitos). peek = true no lo consume.
+function corr(fecha, commit) {
+  const k = "lp_corr_" + fecha;
+  let n = 0;
+  try { n = parseInt(localStorage.getItem(k), 10) || 0; } catch (e) { n = 0; }
+  n++;
+  if (commit) { try { localStorage.setItem(k, String(n)); } catch (e) { } }
+  return String(n).padStart(2, "0");
+}
     let dlUrl = null;
     async function makeXlsx() {
       if (!window.JSZip) throw new Error("no se cargó la librería JSZip (revisa tu conexión)");
@@ -717,25 +731,28 @@
       return zip.generateAsync({type: "blob", compression: "DEFLATE", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
     }
     $("#xl").addEventListener("click", async () => {
-      const nm = "LP_" + (cli.nombre.trim().replace(/[^\p{L}\p{N}]+/gu, "_").replace(/^_|_$/g, "") || "pedido") + ".xlsx", n = Object.keys(cart).length;
-      let blob;
-      try {blob = await makeXlsx();} catch (e) {msg("No se pudo armar el Excel: " + (e && e.message || e), 1); return;}
-      if (dlUrl) URL.revokeObjectURL(dlUrl);
-      dlUrl = URL.createObjectURL(blob);
-      const a = $("#dlk"); a.href = dlUrl; a.download = nm; a.textContent = "Descargar " + nm; a.hidden = false;
-      let dl = null;
-      try {dl = window.claude && typeof claude.use === "function" ? await claude.use("downloads") : null;} catch (e) {dl = null;}
-      if (dl) {
-        try {await dl.save({filename: nm, data: blob}); msg("Planilla generada con las " + n + " líneas del pedido.");}
-        catch (e) {
-          const c = e && (e.code || e.message) || "error";
-          msg(c === "declined" ? "Descarga cancelada. Puedes volver a intentarlo o usar el botón de abajo." : "El visor no dejó guardar el archivo (" + c + "). Prueba con el botón “Descargar” de abajo.", 1);
-        }
-        return;
-      }
-      try {a.click();} catch (e) { }
-      msg("Planilla lista con las " + n + " líneas. Si no empezó la descarga, toca el botón “Descargar” de abajo; si tampoco funciona, abre el aplicativo en una pestaña del navegador (fuera del chat) o usa “Copiar pedido”.");
-    });
+  const base = "LP_" + (cli.nombre.trim().replace(/[^\p{L}\p{N}]+/gu, "_").replace(/^_|_$/g, "") || "pedido"),
+        n = Object.keys(cart).length;
+  let blob;
+  try {blob = await makeXlsx();} catch (e) {msg("No se pudo armar el Excel: " + (e && e.message || e), 1); return;}
+  const f = ymd();                                   // <-- nuevo
+  const nm = base + "_" + f + corr(f, true) + ".xlsx"; // <-- nuevo (consume el correlativo)
+  if (dlUrl) URL.revokeObjectURL(dlUrl);
+  dlUrl = URL.createObjectURL(blob);
+  const a = $("#dlk"); a.href = dlUrl; a.download = nm; a.textContent = "Descargar " + nm; a.hidden = false;
+  let dl = null;
+  try {dl = window.claude && typeof claude.use === "function" ? await claude.use("downloads") : null;} catch (e) {dl = null;}
+  if (dl) {
+    try {await dl.save({filename: nm, data: blob}); msg("Planilla generada con las " + n + " líneas del pedido.");}
+    catch (e) {
+      const c = e && (e.code || e.message) || "error";
+      msg(c === "declined" ? "Descarga cancelada. Puedes volver a intentarlo o usar el botón de abajo." : "El visor no dejó guardar el archivo (" + c + "). Prueba con el botón “Descargar” de abajo.", 1);
+    }
+    return;
+  }
+  try {a.click();} catch (e) { }
+  msg("Planilla lista con las " + n + " líneas. Si no empezó la descarga, toca el botón “Descargar” de abajo; si tampoco funciona, abre el aplicativo en una pestaña del navegador (fuera del chat) o usa “Copiar pedido”.");
+});
 
     /* ===== Cargar lista de precios desde Excel (.xlsx) ===== */
     const colLetters = s => s.replace(/\d+/g, "");
