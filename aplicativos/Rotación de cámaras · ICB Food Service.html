@@ -639,7 +639,7 @@
       dt = d => {if (!st) return ''; const x = new Date(st); x.setDate(x.getDate() + d - 1); return x.getDate() + ' ' + MS[x.getMonth()]},
       rng = st ? `DEL ${dt(1)} AL ${dt(6)}` : '', rows = res.filter(r => !(sb && r.d == 6)).map(r => `<div class="g3 r"><div>${DN[r.d - 1]}<small>${dt(r.d)}</small></div><div>${cell(r.fg, r.fp, 0, r.dp, DH)}</div><div>${cell(r.cg, r.cp, 1, r.dp, DH)}</div></div>`).join('');
       let h = `<div class="hd"><img src="${LG}" alt="ICB Food Service"><div><h1>ROTACIÓN DE CÁMARAS</h1><h3 style="font-size:3REM;">TURNO ${s.toUpperCase()}${o.week ? ' · SEMANA ' + o.week : ''}</h3><p>${rng}${rng ? ' · ' : ''}${$('#pf').value} PICKEADORES Y ${$('#gf').value} GRUERO(S) EN FRÍO · RESTO EN CONGELADOS</p></div></div>`;
-      if (o.sup && o.sup.length) h += `<div class="sp">SUPERVISOR: ${o.sup.join(' / ')}</div>`;
+      if (o.sup && o.sup.length) h += `<div class="sp" style="font-size:3REM")>SUPERVISOR: ${o.sup.join(' / ')}</div>`;
       h += `<div class="g3 th"><div style="background:#002878">DÍA</div><div style="background:#0096e6">CÁMARA DE FRÍO</div><div style="background:#006ec8">CÁMARA DE CONGELADOS</div></div>${rows}`;
       const sr = res.find(r => r.d == 6);
       if (sb && sr) h += `<div class="bx"><h4>SÁBADO ${dt(6)} · SOLO PERSONAL ASIGNADO</h4><div class="in"><div><h5>CÁMARA DE FRÍO</h5>${cell(sr.fg, sr.fp, 0, sr.dp, DH)}</div><div><h5>CÁMARA DE CONGELADOS</h5>${cell(sr.cg, sr.cp, 0, sr.dp, DH)}</div></div></div>`;
