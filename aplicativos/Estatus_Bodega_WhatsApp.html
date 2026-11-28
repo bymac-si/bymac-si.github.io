@@ -492,24 +492,21 @@
       }
       return t.det + ' ' + o + (b === 'ok' ? ' B2C Todo Confirmado' : b ? ' // ' + b : '');
     }
-    /* Formato detallado con Sábado / Lunes: un bloque por temperatura, una línea por día y los B2C aparte */
-    function blockSplit(t) {
+    /* Formato detallado: un bloque por temperatura; con Sábado / Lunes una línea por día; B2C en líneas aparte */
+    function blockDet(t) {
       let s = S.t[t.k], ag = s.agr === 'solo' ? ' (solo agregados)' : s.agr === 'con' ? ' (con agregados)' : '';
-      let day = (d, ot, zm, zn) => {
-        let p = []; if (ot > 0) p.push(ot + ' OT' + ag);
-        if (s.zon) p.push(zm === 'ok' || (zm === 'n' && !zn) ? 'Todas las zonas confirmadas' : zm === 'prep' ? 'Todas las zonas en preparación' : zn + ' zonas ' + d + ' por tomar');
-        return d + ': ' + (p.length ? p.join(' // ') : 'Todo confirmado');
-      };
-      let o = ['*' + t.det + '*', day('SÁBADO', s.os, s.zs, s.zsn), day('LUNES', s.ol, s.zl, s.zln)];
-      if (s.b2c) o.push('', ...[['SÁBADO', s.bs], ['LUNES', s.bl]].map(([d, n]) => 'B2C ' + d + ': ' + (n > 0 ? n + ' OT' : 'Todo confirmado')));
+      let z = (m, n) => m === 'ok' || (m === 'n' && !n) ? 'Todas las zonas confirmadas' : m === 'prep' ? 'Todas las zonas en preparación' : n + ' zonas por tomar';
+      let ln = (ot, zm, zn) => {let p = []; if (ot > 0) p.push(ot + ' OT' + ag); if (s.zon) p.push(z(zm, zn)); return p.length ? p.join(' // ') : 'Todo confirmado'};
+      let b = n => n > 0 ? n + ' OT' : 'Todo confirmado', o = ['*' + t.det + '*'];
+      if (S.split) {o.push('SÁBADO: ' + ln(s.os, s.zs, s.zsn), 'LUNES: ' + ln(s.ol, s.zl, s.zln)); if (s.b2c) o.push('', 'B2C SÁBADO: ' + b(s.bs), 'B2C LUNES: ' + b(s.bl))}
+      else {o.push(ln(s.ot, s.zm, s.zn)); if (s.b2c) o.push('', 'B2C: ' + b(s.bn))}
       return o.join('\n');
     }
     function compose() {
       let act = T.filter(t => S.t[t.k].on); if (!act.length) return '';
       let tn = S.turno ? ' *Turno ' + S.turno + '*' : '', g = S.greet ? greeting() + (S.fmt === 'det' ? ', ' : '\n') : '';
       if (S.fmt === 'cmp') return (S.greet ? g : '') + 'Status' + tn + ' ' + act.map(t => line(t, 'cmp')).join('  //  ');
-      if (S.split) return g + (S.t.seco.on ? 'Estatus Bodega' : 'Estatus Cámara') + (S.turno ? ' *turno ' + S.turno + '*' : '') + '\n' + act.map(blockSplit).join('\n\n');
-      return g + (S.t.seco.on ? 'Estatus Bodega' : 'Estatus Cámara') + tn + '\n' + act.map(t => line(t, 'det')).join('\n');
+      return g + (S.t.seco.on ? 'Estatus Bodega' : 'Estatus Cámara') + tn + '\n\n' + act.map(blockDet).join('\n\n');
     }
     function update() {S.turno = $('turno').value; S.phone = $('phone').value; S.greet = $('greet').checked; S.split = $('split').checked; document.body.classList.toggle('split', S.split); $('out').value = compose(); save()}
     function toast(m) {$('toast').textContent = m; setTimeout(() => {$('toast').textContent = ''}, 2500)}
