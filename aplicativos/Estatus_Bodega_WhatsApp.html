@@ -320,6 +320,19 @@
       color: var(--muted)
     }
 
+    /* Zonas diferenciadas Sábado / Lunes (viernes tarde y madrugada del sábado): solo se ven con la opción activa */
+    .row.zsp {
+      display: none
+    }
+
+    body.split .row.zsp {
+      display: grid
+    }
+
+    body.split .zf {
+      display: none
+    }
+
     @media(max-width:760px) {
       .app {
         grid-template-columns: 1fr
@@ -382,7 +395,13 @@
             <div><label>&nbsp;</label><label
                 style="display:flex;gap:8px;align-items:center;color:var(--ink);cursor:pointer"><input type="checkbox"
                   id="greet" checked> Incluir saludo según la hora</label></div>
+            <div><label>&nbsp;</label><label
+                style="display:flex;gap:8px;align-items:center;color:var(--ink);cursor:pointer"><input type="checkbox"
+                  id="split"> Zonas Sábado y Lunes</label></div>
           </div>
+          <div class="hint" style="margin-top:8px">Viernes por la tarde y madrugada del sábado (turno noche) se
+            preparan zonas del sábado y del lunes: con «Zonas Sábado y Lunes» activo, cada temperatura informa las
+            zonas de cada día por separado. Se activa sola en ese horario y se puede cambiar a mano.</div>
         </section>
         <section class="panel">
           <h2>2) Temperaturas y datos</h2>
@@ -403,17 +422,21 @@
   </div>
   <script>
     const T = [{k: 'seco', c: 'var(--seco)', cmp: 'Seco', det: 'Seco'}, {k: 'cong', c: 'var(--cong)', cmp: 'Congelado', det: 'Congelados'}, {k: 'frio', c: 'var(--frio)', cmp: 'Frío', det: 'Frío'}];
-    const blank = () => ({on: false, ot: 0, agr: 'no', zon: false, zm: 'n', zn: 0, b2c: false, bn: 0});
+    const blank = () => ({on: false, ot: 0, agr: 'no', zon: false, zm: 'n', zn: 0, b2c: false, bn: 0, zs: 'n', zsn: 0, zl: 'n', zln: 0});
     let S = {fmt: 'det', turno: '', phone: '', greet: true, t: {seco: blank(), cong: blank(), frio: blank()}};
     const $ = id => document.getElementById(id);
     try {let r = localStorage.getItem('estatusBodegaWA'); if (r) {let o = JSON.parse(r); if (o && o.t) S = Object.assign(S, o)} } catch (e) { }
+    Object.keys(S.t).forEach(k => {S.t[k] = Object.assign(blank(), S.t[k])}); S.split = !!S.split;
     function save() {try {localStorage.setItem('estatusBodegaWA', JSON.stringify(S))} catch (e) { } }
     const num = v => Math.max(0, parseInt(v, 10) || 0);
+    const ZOPT = '<option value="n">Por tomar</option><option value="prep">Todas en preparación</option><option value="ok">Confirmadas</option>';
     function build() {
       $('temps').innerHTML = T.map(t => `<div class="tcard${S.t[t.k].on ? ' on' : ''}" style="--c:${t.c}" data-k="${t.k}">
   <div class="thead"><label><input type="checkbox" data-p="on"> ${t.det}</label></div>
   <div class="row"><div class="n">OT</div><div class="f"><input type="number" min="0" data-p="ot" placeholder="N° OT"><select data-p="agr"><option value="no">Sin agregados</option><option value="con">Con agregados</option><option value="solo">Solo agregados</option></select></div></div>
-  <div class="row"><div class="n"><input type="checkbox" data-p="zon"> Zonas</div><div class="f"><select data-p="zm"><option value="n">Por tomar</option><option value="prep">Todas en preparación</option><option value="ok">Confirmadas</option></select><input type="number" min="0" data-p="zn" placeholder="N°"></div></div>
+  <div class="row zrow"><div class="n"><input type="checkbox" data-p="zon"> Zonas</div><div class="f zf"><select data-p="zm"><option value="n">Por tomar</option><option value="prep">Todas en preparación</option><option value="ok">Confirmadas</option></select><input type="number" min="0" data-p="zn" placeholder="N°"></div></div>
+  <div class="row zsp"><div class="n">Zonas Sáb</div><div class="f"><select data-p="zs">${ZOPT}</select><input type="number" min="0" data-p="zsn" placeholder="N°"></div></div>
+  <div class="row zsp"><div class="n">Zonas Lun</div><div class="f"><select data-p="zl">${ZOPT}</select><input type="number" min="0" data-p="zln" placeholder="N°"></div></div>
   <div class="row"><div class="n"><input type="checkbox" data-p="b2c"> B2C</div><div class="f"><input type="number" min="0" data-p="bn" placeholder="OT B2C"></div></div></div>`).join('');
       document.querySelectorAll('.tcard').forEach(card => {
         let s = S.t[card.dataset.k];
@@ -425,9 +448,16 @@
       });
     }
     function greeting() {let h = new Date().getHours(); return h < 12 ? 'Buenos Días' : h < 20 ? 'Buenas Tardes' : 'Buenas Noches'}
-    function zonTxt(s, long) {if (!s.zon || s.zm === 'ok') return ''; if (s.zm === 'prep') return long ? 'todas las zonas en preparación' : 'todas las zonas en preparación'; return s.zn + ' zonas por tomar'}
+    /* Zonas por día de entrega (Sábado / Lunes). Un día con "Confirmadas" o con 0 por tomar cuenta como confirmado. */
+    const dayZ = s => [['SÁBADO', s.zs, s.zsn], ['LUNES', s.zl, s.zln]].map(([d, m, n]) => ({d, n, st: (m === 'ok' || (m === 'n' && !n)) ? 'ok' : m}));
+    const zPendSplit = s => dayZ(s).some(x => x.st !== 'ok');
+    function splitTxt(s) {
+      let D = dayZ(s); if (D.every(x => x.st === 'ok')) return '';
+      return D.map(x => x.st === 'ok' ? 'zonas ' + x.d + ' confirmadas' : x.st === 'prep' ? 'zonas ' + x.d + ' en preparación' : x.n + ' zonas ' + x.d + ' por tomar').join(', ');
+    }
+    function zonTxt(s, long) {if (S.split && s.zon) return splitTxt(s); if (!s.zon || s.zm === 'ok') return ''; if (s.zm === 'prep') return long ? 'todas las zonas en preparación' : 'todas las zonas en preparación'; return s.zn + ' zonas por tomar'}
     function line(t, fmt) {
-      let s = S.t[t.k], z = zonTxt(s, fmt === 'cmp'), zPend = s.zon && s.zm !== 'ok', otOk = s.ot === 0 && !zPend;
+      let s = S.t[t.k], z = zonTxt(s, fmt === 'cmp'), zPend = s.zon && (S.split ? zPendSplit(s) : s.zm !== 'ok'), otOk = s.ot === 0 && !zPend;
       let b = s.b2c ? (s.bn > 0 ? s.bn + ' OT B2C' : 'ok') : '';
       if (fmt === 'cmp') {
         if (otOk && (b === '' || b === 'ok')) return t.cmp + ' TODO CONFIRMADO.';
@@ -448,11 +478,12 @@
       if (S.fmt === 'cmp') return (S.greet ? g : '') + 'Status' + tn + ' ' + act.map(t => line(t, 'cmp')).join('  //  ');
       return g + (S.t.seco.on ? 'Estatus Bodega' : 'Estatus Cámara') + tn + '\n' + act.map(t => line(t, 'det')).join('\n');
     }
-    function update() {S.turno = $('turno').value; S.phone = $('phone').value; S.greet = $('greet').checked; $('out').value = compose(); save()}
+    function update() {S.turno = $('turno').value; S.phone = $('phone').value; S.greet = $('greet').checked; S.split = $('split').checked; document.body.classList.toggle('split', S.split); $('out').value = compose(); save()}
     function toast(m) {$('toast').textContent = m; setTimeout(() => {$('toast').textContent = ''}, 2500)}
     document.querySelectorAll('#fmtTabs .tab').forEach(b => b.onclick = () => {S.fmt = b.dataset.f; S.greet = S.fmt === 'det'; $('greet').checked = S.greet; tabs(); update()});
     function tabs() {document.querySelectorAll('#fmtTabs .tab').forEach(b => b.classList.toggle('active', b.dataset.f === S.fmt))}
-    ['turno', 'phone', 'greet'].forEach(id => $(id).addEventListener('input', update));
+    $('split').addEventListener('input', () => {S.splitAuto = false});
+    ['turno', 'phone', 'greet', 'split'].forEach(id => $(id).addEventListener('input', update));
     $('bWa').onclick = () => {
       let txt = $('out').value.trim(); if (!txt) {toast('Activa al menos una temperatura'); return }
       let d = S.phone.replace(/\D/g, ''); if (d.length === 9) d = '56' + d;
@@ -460,7 +491,13 @@
     };
     $('bCopy').onclick = async () => {let el = $('out'); try {await navigator.clipboard.writeText(el.value)} catch (e) {el.select(); document.execCommand('copy')} toast('Mensaje copiado')};
     $('bReset').onclick = () => {S.t = {seco: blank(), cong: blank(), frio: blank()}; build(); update()};
-    $('turno').value = S.turno; $('phone').value = S.phone; $('greet').checked = S.greet; tabs(); build(); update();
+    /* Viernes desde las 16:30 (turno tarde) y sábado hasta las 08:30 (madrugada, turno noche): se activa solo la distinción Sábado / Lunes */
+    (() => {
+      let n = new Date(), d = n.getDay(), h = n.getHours() + n.getMinutes() / 60, key = n.toDateString(), win = (d === 5 && h >= 16.5) || (d === 6 && h < 8.5);
+      if (win && !S.split && S.splitDay !== key) {S.split = true; S.splitAuto = true; S.splitDay = key; toast('Zonas Sábado y Lunes activadas (viernes tarde / madrugada sábado)')}
+      else if (!win && S.split && S.splitAuto) {S.split = false; S.splitAuto = false}
+    })();
+    $('turno').value = S.turno; $('phone').value = S.phone; $('greet').checked = S.greet; $('split').checked = S.split; tabs(); build(); update();
   </script>
 </body>
 
