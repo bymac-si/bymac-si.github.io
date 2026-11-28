@@ -329,7 +329,9 @@
       display: grid
     }
 
-    body.split .zf {
+    body.split .zf,
+    body.split .onum,
+    body.split .bnum {
       display: none
     }
 
@@ -397,11 +399,11 @@
                   id="greet" checked> Incluir saludo según la hora</label></div>
             <div><label>&nbsp;</label><label
                 style="display:flex;gap:8px;align-items:center;color:var(--ink);cursor:pointer"><input type="checkbox"
-                  id="split"> Zonas Sábado y Lunes</label></div>
+                  id="split"> Sábado y Lunes</label></div>
           </div>
           <div class="hint" style="margin-top:8px">Viernes por la tarde y madrugada del sábado (turno noche) se
-            preparan zonas del sábado y del lunes: con «Zonas Sábado y Lunes» activo, cada temperatura informa las
-            zonas de cada día por separado. Se activa sola en ese horario y se puede cambiar a mano.</div>
+            preparan zonas del sábado y del lunes: con «Sábado y Lunes» activo, cada temperatura informa las OT,
+            las zonas y los B2C de cada día por separado (los agregados valen para ambos días). Se activa sola en ese horario y se puede cambiar a mano.</div>
         </section>
         <section class="panel">
           <h2>2) Temperaturas y datos</h2>
@@ -422,7 +424,7 @@
   </div>
   <script>
     const T = [{k: 'seco', c: 'var(--seco)', cmp: 'Seco', det: 'Seco'}, {k: 'cong', c: 'var(--cong)', cmp: 'Congelado', det: 'Congelados'}, {k: 'frio', c: 'var(--frio)', cmp: 'Frío', det: 'Frío'}];
-    const blank = () => ({on: false, ot: 0, agr: 'no', zon: false, zm: 'n', zn: 0, b2c: false, bn: 0, zs: 'n', zsn: 0, zl: 'n', zln: 0});
+    const blank = () => ({on: false, ot: 0, agr: 'no', zon: false, zm: 'n', zn: 0, b2c: false, bn: 0, zs: 'n', zsn: 0, zl: 'n', zln: 0, os: 0, ol: 0, bs: 0, bl: 0});
     let S = {fmt: 'det', turno: '', phone: '', greet: true, t: {seco: blank(), cong: blank(), frio: blank()}};
     const $ = id => document.getElementById(id);
     try {let r = localStorage.getItem('estatusBodegaWA'); if (r) {let o = JSON.parse(r); if (o && o.t) S = Object.assign(S, o)} } catch (e) { }
@@ -433,11 +435,15 @@
     function build() {
       $('temps').innerHTML = T.map(t => `<div class="tcard${S.t[t.k].on ? ' on' : ''}" style="--c:${t.c}" data-k="${t.k}">
   <div class="thead"><label><input type="checkbox" data-p="on"> ${t.det}</label></div>
-  <div class="row"><div class="n">OT</div><div class="f"><input type="number" min="0" data-p="ot" placeholder="N° OT"><select data-p="agr"><option value="no">Sin agregados</option><option value="con">Con agregados</option><option value="solo">Solo agregados</option></select></div></div>
+  <div class="row"><div class="n">OT</div><div class="f"><input class="onum" type="number" min="0" data-p="ot" placeholder="N° OT"><select data-p="agr"><option value="no">Sin agregados</option><option value="con">Con agregados</option><option value="solo">Solo agregados</option></select></div></div>
+  <div class="row zsp"><div class="n">OT Sáb</div><div class="f"><input type="number" min="0" data-p="os" placeholder="N° OT"></div></div>
+  <div class="row zsp"><div class="n">OT Lun</div><div class="f"><input type="number" min="0" data-p="ol" placeholder="N° OT"></div></div>
   <div class="row zrow"><div class="n"><input type="checkbox" data-p="zon"> Zonas</div><div class="f zf"><select data-p="zm"><option value="n">Por tomar</option><option value="prep">Todas en preparación</option><option value="ok">Confirmadas</option></select><input type="number" min="0" data-p="zn" placeholder="N°"></div></div>
   <div class="row zsp"><div class="n">Zonas Sáb</div><div class="f"><select data-p="zs">${ZOPT}</select><input type="number" min="0" data-p="zsn" placeholder="N°"></div></div>
   <div class="row zsp"><div class="n">Zonas Lun</div><div class="f"><select data-p="zl">${ZOPT}</select><input type="number" min="0" data-p="zln" placeholder="N°"></div></div>
-  <div class="row"><div class="n"><input type="checkbox" data-p="b2c"> B2C</div><div class="f"><input type="number" min="0" data-p="bn" placeholder="OT B2C"></div></div></div>`).join('');
+  <div class="row"><div class="n"><input type="checkbox" data-p="b2c"> B2C</div><div class="f"><input class="bnum" type="number" min="0" data-p="bn" placeholder="OT B2C"></div></div>
+  <div class="row zsp"><div class="n">B2C Sáb</div><div class="f"><input type="number" min="0" data-p="bs" placeholder="OT B2C"></div></div>
+  <div class="row zsp"><div class="n">B2C Lun</div><div class="f"><input type="number" min="0" data-p="bl" placeholder="OT B2C"></div></div></div>`).join('');
       document.querySelectorAll('.tcard').forEach(card => {
         let s = S.t[card.dataset.k];
         card.querySelectorAll('[data-p]').forEach(el => {
@@ -455,20 +461,34 @@
       let D = dayZ(s); if (D.every(x => x.st === 'ok')) return '';
       return D.map(x => x.st === 'ok' ? 'zonas ' + x.d + ' confirmadas' : x.st === 'prep' ? 'zonas ' + x.d + ' en preparación' : x.n + ' zonas ' + x.d + ' por tomar').join(', ');
     }
+    /* OT y B2C por día de entrega (Sábado / Lunes). Un día en 0 cuenta como confirmado. */
+    const otPendSplit = s => s.os > 0 || s.ol > 0;
+    function otTxt(s, f) {
+      let u = f === 'det' ? ' OT' : ' ot´s';
+      if (!S.split) return s.ot + u;
+      if (!otPendSplit(s)) return '0' + u;
+      return [['SÁBADO', s.os], ['LUNES', s.ol]].map(([d, n]) => n > 0 ? n + u + ' ' + d : 'OT ' + d + ' confirmadas').join(', ');
+    }
+    function b2cTxt(s) {
+      if (!s.b2c) return '';
+      if (!S.split) return s.bn > 0 ? s.bn + ' OT B2C' : 'ok';
+      let D = [['SÁBADO', s.bs], ['LUNES', s.bl]]; if (D.every(([, n]) => !n)) return 'ok';
+      return D.map(([d, n]) => n > 0 ? n + ' OT B2C ' + d : 'B2C ' + d + ' confirmado').join(', ');
+    }
     function zonTxt(s, long) {if (S.split && s.zon) return splitTxt(s); if (!s.zon || s.zm === 'ok') return ''; if (s.zm === 'prep') return long ? 'todas las zonas en preparación' : 'todas las zonas en preparación'; return s.zn + ' zonas por tomar'}
     function line(t, fmt) {
-      let s = S.t[t.k], z = zonTxt(s, fmt === 'cmp'), zPend = s.zon && (S.split ? zPendSplit(s) : s.zm !== 'ok'), otOk = s.ot === 0 && !zPend;
-      let b = s.b2c ? (s.bn > 0 ? s.bn + ' OT B2C' : 'ok') : '';
+      let s = S.t[t.k], z = zonTxt(s, fmt === 'cmp'), zPend = s.zon && (S.split ? zPendSplit(s) : s.zm !== 'ok'), otOk = (S.split ? !otPendSplit(s) : s.ot === 0) && !zPend;
+      let b = b2cTxt(s);
       if (fmt === 'cmp') {
         if (otOk && (b === '' || b === 'ok')) return t.cmp + ' TODO CONFIRMADO.';
-        let p = []; if (otOk) p.push('OT confirmadas'); else {p.push(s.ot + ' ot´s'); if (z && s.agr !== 'solo') p.push(z)}
+        let p = []; if (otOk) p.push('OT confirmadas'); else {p.push(otTxt(s, 'cmp')); if (z && s.agr !== 'solo') p.push(z)}
         if (s.agr === 'solo') p.push('solo agregados'); else if (s.agr === 'con') p.push('con agregados');
         if (b === 'ok') p.push('B2C Todo Confirmado'); else if (b) p.push(b);
         return t.cmp + ' ' + p.join(', ');
       }
       let o; if (otOk) o = 'OT Todo Confirmado'; else {
         let n = []; if (s.agr === 'solo') n.push('solo agregados'); else {if (z) n.push(z); if (s.agr === 'con') n.push('agregados')}
-        o = s.ot + ' OT' + (n.length ? ' (' + n.join(' y ') + ')' : '')
+        o = otTxt(s, 'det') + (n.length ? ' (' + n.join(' y ') + ')' : '')
       }
       return t.det + ' ' + o + (b === 'ok' ? ' B2C Todo Confirmado' : b ? ' // ' + b : '');
     }
@@ -494,7 +514,7 @@
     /* Viernes desde las 16:30 (turno tarde) y sábado hasta las 08:30 (madrugada, turno noche): se activa solo la distinción Sábado / Lunes */
     (() => {
       let n = new Date(), d = n.getDay(), h = n.getHours() + n.getMinutes() / 60, key = n.toDateString(), win = (d === 5 && h >= 16.5) || (d === 6 && h < 8.5);
-      if (win && !S.split && S.splitDay !== key) {S.split = true; S.splitAuto = true; S.splitDay = key; toast('Zonas Sábado y Lunes activadas (viernes tarde / madrugada sábado)')}
+      if (win && !S.split && S.splitDay !== key) {S.split = true; S.splitAuto = true; S.splitDay = key; toast('Sábado y Lunes activado (viernes tarde / madrugada sábado)')}
       else if (!win && S.split && S.splitAuto) {S.split = false; S.splitAuto = false}
     })();
     $('turno').value = S.turno; $('phone').value = S.phone; $('greet').checked = S.greet; $('split').checked = S.split; tabs(); build(); update();
